@@ -23,6 +23,8 @@
    - ✅ Chargement progressif
    - ✅ Indicateurs visuels
    - ✅ Support responsive
+   - ✅ Bouton de retour fonctionnel
+   - ✅ Gestion de la pile de navigation
 
 4. **Performance**
    - ✅ Cache de 5 minutes
@@ -33,9 +35,12 @@
 ### Problèmes Résolus
 
 1. **Localisation**
-   - ⚠️ Données de localisation incomplètes
-   - ⚠️ Besoin d'améliorer les requêtes de localisation
-   - ⚠️ Validation des données de localisation
+   - ✅ Erreur 400 sur les requêtes SPARQL
+   - ✅ Problèmes d'agrégation dans les requêtes
+   - ✅ Gestion des sous-périodes
+   - ✅ Performance des requêtes
+   - ✅ Navigation hiérarchique
+   - ✅ Affichage du bouton de retour
 
 2. **Performance**
    - ⚠️ Optimisation du chargement initial

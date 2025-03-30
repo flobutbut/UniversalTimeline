@@ -59,6 +59,8 @@ const error = ref<string | null>(null);
 const selectedLanguage = ref('fr');
 const currentParent = ref<string | null>(null);
 const selectedPeriod = ref<Period | null>(null);
+const loadingChildren = ref(false);
+const navigationStack = ref<{ periods: Period[]; parentId: string; parentLabel: string }[]>([]);
 
 const fetchPeriods = async () => {
   loading.value = true;
@@ -95,34 +97,79 @@ const fetchPeriods = async () => {
 };
 
 const selectPeriod = async (period: Period) => {
-  selectedPeriod.value = period;
-  
   if (!period.childrenPreloaded) {
-    period.loading = true;
-    error.value = null;
     try {
+      error.value = null;
+      loadingChildren.value = true;
+      console.log('Chargement des sous-périodes pour:', period);
+      
       const children = await service.getChildren(period.id, {
-        language: selectedLanguage.value
+        language: selectedLanguage.value,
+        categoryId: currentParent.value || undefined
       });
-      period.children = children;
-      period.childrenPreloaded = true;
+      
+      console.log('Sous-périodes chargées:', children);
+      
+      // Mettre à jour la pile de navigation
+      navigationStack.value.push({
+        periods: periods.value,
+        parentId: period.id,
+        parentLabel: period.label
+      });
+      
+      // Mettre à jour les périodes affichées avec les sous-périodes
+      periods.value = children.map(child => ({
+        ...child,
+        categoryLabels: child.categoryIds.map(id => id), // Conversion simple pour le moment
+        childrenPreloaded: false,
+        children: [],
+        loading: false,
+        isMainEon: false,
+        description: undefined
+      }));
+      selectedPeriod.value = period;
+      currentParent.value = period.id; // Mise à jour du parent courant
+      
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
-      error.value = `Erreur lors du chargement des sous-périodes de "${period.label}": ${errorMessage}`;
-      console.error(`Erreur lors du chargement des enfants de ${period.id}:`, err);
+      console.error('Erreur lors du chargement des sous-périodes:', err);
+      error.value = 'Erreur lors du chargement des sous-périodes';
     } finally {
-      period.loading = false;
+      loadingChildren.value = false;
     }
+  } else {
+    // Si les enfants sont déjà chargés, on navigue directement
+    navigationStack.value.push({
+      periods: periods.value,
+      parentId: period.id,
+      parentLabel: period.label
+    });
+    periods.value = period.children.map(child => ({
+      ...child,
+      categoryLabels: child.categoryIds.map(id => id),
+      childrenPreloaded: false,
+      children: [],
+      loading: false,
+      isMainEon: false,
+      description: undefined
+    }));
+    selectedPeriod.value = period;
+    currentParent.value = period.id; // Mise à jour du parent courant
   }
-  
-  currentParent.value = period.id;
-  await fetchPeriods();
 };
 
 const goBack = () => {
-  currentParent.value = null;
-  selectedPeriod.value = null;
-  fetchPeriods();
+  if (navigationStack.value.length > 0) {
+    const previousState = navigationStack.value.pop();
+    if (previousState) {
+      periods.value = previousState.periods;
+      selectedPeriod.value = null;
+      currentParent.value = previousState.parentId; // Mise à jour du parent courant
+    }
+  } else {
+    // Si on est au début de la navigation, on réinitialise
+    currentParent.value = null;
+    fetchPeriods();
+  }
 };
 
 onMounted(fetchPeriods);

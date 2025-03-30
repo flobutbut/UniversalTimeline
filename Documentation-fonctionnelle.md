@@ -164,4 +164,43 @@ interface GeologicalPeriod {
 6. Export des données
 7. Mode sombre
 8. Historique de navigation
-9. Breadcrumb pour la navigation 
+9. Breadcrumb pour la navigation
+
+## Navigation Hiérarchique
+
+### Description
+La navigation se fait de manière hiérarchique, permettant aux utilisateurs d'explorer les périodes géologiques de manière intuitive.
+
+### Fonctionnalités
+1. **Navigation Vers l'Avant**
+   - Affichage initial des éons principaux
+   - Possibilité de cliquer sur une période pour voir ses sous-périodes
+   - Chargement progressif des sous-périodes
+   - Indication visuelle du nombre de sous-périodes disponibles
+
+2. **Navigation Vers l'Arrière**
+   - Bouton "Retour" apparaissant dès qu'une sous-période est affichée
+   - Retour à la période parente précédente
+   - Retour aux éons principaux si on est au début de la navigation
+
+3. **États de Navigation**
+   - Affichage du niveau de navigation actuel
+   - Indication visuelle de la période sélectionnée
+   - Gestion des états de chargement
+   - Gestion des erreurs avec option de réessai
+
+### Scénarios d'Utilisation
+1. **Navigation Simple**
+   - L'utilisateur voit les éons principaux
+   - Il clique sur un éon pour voir ses sous-périodes
+   - Il peut revenir aux éons principaux avec le bouton "Retour"
+
+2. **Navigation Profonde**
+   - L'utilisateur peut naviguer dans plusieurs niveaux de sous-périodes
+   - Le bouton "Retour" permet de remonter la hiérarchie
+   - L'historique de navigation est conservé
+
+3. **Gestion des Erreurs**
+   - En cas d'erreur de chargement, un message explicite est affiché
+   - Un bouton "Réessayer" permet de relancer le chargement
+   - La navigation reste cohérente même en cas d'erreur 

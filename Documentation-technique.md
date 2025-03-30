@@ -535,3 +535,31 @@ Optimisations mises en place :
 - Suivi des erreurs
 - Métriques de performance
 - État du cache 
+
+## Navigation
+
+### Structure de Navigation
+- Pile de navigation (`navigationStack`) pour gérer l'historique
+- État du parent courant (`currentParent`)
+- Sélection de période (`selectedPeriod`)
+
+### Flux de Navigation
+1. **Chargement Initial**
+   - Affichage des éons principaux
+   - `currentParent` initialisé à `null`
+
+2. **Navigation Vers une Sous-période**
+   - Mise à jour de `currentParent` avec l'ID de la période sélectionnée
+   - Ajout de l'état précédent dans la pile de navigation
+   - Chargement des sous-périodes si nécessaire
+
+3. **Retour**
+   - Restauration de l'état précédent depuis la pile
+   - Mise à jour de `currentParent` avec l'ID du parent précédent
+   - Réinitialisation si retour aux éons principaux
+
+### Gestion des États
+- **Chargement** : Indicateur visuel pendant le chargement des données
+- **Erreur** : Affichage des messages d'erreur avec option de réessai
+- **Sélection** : Mise en évidence de la période sélectionnée
+- **Navigation** : Bouton de retour conditionnel 
