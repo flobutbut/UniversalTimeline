@@ -25,6 +25,9 @@ src/
 - Gestion des requêtes SPARQL vers l'API Wikidata
 - Transformation des données brutes en objets typés
 - Gestion des erreurs et des timeouts
+- Système de cache en mémoire
+- Logging détaillé pour le débogage
+- Gestion avancée des dates avec différents formats
 
 #### Formatage des Dates (`dateFormatter.ts`)
 - Classe utilitaire pour le formatage des dates
@@ -45,6 +48,7 @@ Service singleton qui gère les requêtes vers l'API SPARQL de Wikidata.
 - **Cache**: 5 minutes
 - **Timeout**: 30 secondes
 - **Retry**: 3 tentatives avec 1 seconde de délai
+- **Logging**: Système de logging détaillé pour le débogage des requêtes et des transformations
 
 #### Requêtes SPARQL
 
@@ -63,24 +67,31 @@ La navigation hiérarchique utilise la propriété P361 (partie de) pour récup�
 - Coordination des sous-composants
 - Gestion des données et des erreurs
 - Affichage conditionnel des états (chargement, erreur)
+- Styles CSS modulaires avec scoped
+- Gestion de la navigation hiérarchique
+- Support multilingue (FR/EN)
 
 #### GeologicalPeriodCard
 - Affichage d'une période géologique individuelle
 - Gestion des interactions utilisateur
 - Styles isolés pour la carte
 - Émission d'événements de clic
+- Affichage des dates formatées
+- Gestion des états de survol
 
 #### BackButton
 - Bouton de navigation retour
 - Affichage conditionnel basé sur la profondeur de navigation
 - Styles isolés pour le bouton
 - Émission d'événements de clic
+- Positionnement dans la barre de contrôle
 
 #### LanguageSelector
-- Sélection de la langue d'affichage
+- Sélection de la langue d'affichage (FR/EN)
 - Support du v-model pour la liaison bidirectionnelle
 - Styles isolés pour le sélecteur
 - Gestion des événements de changement
+- Intégration dans la barre de contrôle
 
 ### Types
 
@@ -213,6 +224,13 @@ Le projet utilise Vite comme bundler avec la configuration suivante :
 - Gestion des événements
 
 ### Tests
+
+#### Structure des Tests
+- Tests unitaires dans le dossier `__tests__/`
+- Tests des composants Vue avec Vue Test Utils
+- Tests du service Wikidata
+- Tests des utilitaires de formatage
+
 #### Tests Unitaires du Service
 - Test du pattern Singleton
 - Test des requêtes avec options par défaut
@@ -234,7 +252,7 @@ Le projet utilise Vite comme bundler avec la configuration suivante :
   - États d'erreur spécifiques
   - Transitions d'état
 - Test du changement de langue
-- Test de la pagination
+- Test de la navigation hiérarchique
 - Utilisation de Vue Test Utils pour le montage et les interactions
 
 ### Points d'Attention

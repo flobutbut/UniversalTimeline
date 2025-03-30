@@ -6,7 +6,7 @@
 - Affichage hiérarchique des périodes géologiques
 - Navigation entre les différentes époques
 - Affichage des dates de début et de fin de chaque période
-- Support multilingue (français, anglais, espagnol)
+- Support multilingue (français, anglais)
 
 ### Affichage des Dates
 - Format adapté à la géologie :
@@ -21,7 +21,7 @@
   - "66.0 Ma" pour 66 000 000 ans
 
 ### Sélection de la Langue
-- Changement dynamique de la langue d'affichage
+- Changement dynamique de la langue d'affichage (FR/EN uniquement)
 - Persistance de la sélection de langue
 - Support des caractères spéciaux et accents
 
@@ -92,10 +92,12 @@ Pour chaque période :
 - Label dans la langue sélectionnée
 - Date de début (optionnelle)
 - Date de fin (optionnelle)
+- Localisation : "Toute la Terre" par défaut (limitation technique actuelle)
 
 ### Source des données
 
 Les données sont récupérées en temps réel depuis Wikidata via des requêtes SPARQL.
+Note : La localisation des périodes n'est pas disponible dans la version actuelle en raison des limitations de l'API Wikidata et de la stratégie de récupération des données.
 
 ## Spécifications Techniques
 

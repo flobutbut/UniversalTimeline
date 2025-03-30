@@ -47,10 +47,10 @@
 ## Problèmes en cours
 
 ### Localisation des périodes
-- Status : 🔴 Non fonctionnel
-- Description : La récupération des localisations via les propriétés Wikidata (P276, P706) ne fonctionne pas comme prévu
-- Impact : Les périodes affichent "Location: undefined" ou "Toute la Terre" par défaut
-- Prochaine étape : Identifier la bonne propriété Wikidata pour la localisation
+- Status : 🔴 Limitation technique
+- Description : La récupération des localisations via les propriétés Wikidata (P276, P706) n'est pas possible avec la stratégie actuelle de récupération des données
+- Impact : Les périodes affichent "Toute la Terre" par défaut
+- Note : Cette limitation est liée à la structure de l'API Wikidata et nécessiterait une refonte de la stratégie de récupération des données pour être résolue
 
 ## Bugs Connus 🐛
 
