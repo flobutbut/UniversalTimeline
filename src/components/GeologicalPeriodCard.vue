@@ -1,51 +1,59 @@
 <template>
   <div 
     class="period-card"
+    :class="{ 'selected': isSelected }"
     @click="$emit('click')"
   >
-    <div class="period-info">
-      <h4>{{ period.label }}</h4>
-      <p v-if="period.startDate || period.endDate" class="period-dates">
-        {{ period.startDate ? `Début: ${period.startDate}` : '' }}
-        {{ period.endDate ? ` - Fin: ${period.endDate}` : '' }}
-      </p>
-      <p v-if="period.description" class="period-description">
-        {{ period.description }}
-      </p>
+    <div class="period-header">
+      <h3 class="period-title">{{ period.label }}</h3>
+      <div class="period-categories">
+        <span 
+          v-for="(category, index) in period.categoryLabels" 
+          :key="index"
+          class="category-tag"
+        >
+          {{ category }}
+        </span>
+      </div>
     </div>
-    <div class="period-arrow">→</div>
+    
+    <div class="period-dates">
+      <div class="date-range">
+        <span class="date-label">Début:</span>
+        <span class="date-value">{{ period.startDate || 'Non spécifié' }}</span>
+      </div>
+      <div class="date-range">
+        <span class="date-label">Fin:</span>
+        <span class="date-value">{{ period.endDate || 'Non spécifié' }}</span>
+      </div>
+    </div>
+    
+    <div v-if="period.location" class="period-location">
+      <span class="location-label">Localisation:</span>
+      <span class="location-value">{{ period.location }}</span>
+    </div>
+    
+    <div class="period-footer">
+      <div v-if="period.loading" class="loading-indicator">
+        Chargement...
+      </div>
+      <div v-else-if="period.children.length > 0" class="children-count">
+        {{ period.children.length }} sous-période(s)
+      </div>
+      <div v-else class="children-hint">
+        Sous-périodes disponibles
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { GeologicalPeriod } from '../types/geological';
-import { onMounted, watch } from 'vue';
+import type { Period } from '../types/geological';
 
-const props = defineProps<{
-  period: GeologicalPeriod;
+defineProps<{
+  period: Period;
+  isSelected?: boolean;
 }>();
-
-// Log des données reçues
-onMounted(() => {
-  console.log('GeologicalPeriodCard - Données reçues:', {
-    id: props.period.id,
-    label: props.period.label,
-    description: props.period.description,
-    startDate: props.period.startDate,
-    endDate: props.period.endDate
-  });
-});
-
-// Surveiller les changements de période
-watch(() => props.period, (newPeriod) => {
-  console.log('GeologicalPeriodCard - Mise à jour des données:', {
-    id: newPeriod.id,
-    label: newPeriod.label,
-    description: newPeriod.description,
-    startDate: newPeriod.startDate,
-    endDate: newPeriod.endDate
-  });
-}, { deep: true });
 
 defineEmits<{
   (e: 'click'): void;
@@ -54,52 +62,93 @@ defineEmits<{
 
 <style scoped>
 .period-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  border: 1px solid #ddd;
-  margin-bottom: 10px;
-  border-radius: 4px;
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: all 0.2s ease;
-  background-color: white;
+  transition: all 0.3s ease;
+  border: 1px solid #e0e0e0;
 }
 
 .period-card:hover {
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  border-color: #4CAF50;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.period-info {
-  flex: 1;
-  text-align: left;
+.period-card.selected {
+  border-color: #2196f3;
+  background-color: #f5f9ff;
 }
 
-.period-info h4 {
+.period-header {
+  margin-bottom: 12px;
+}
+
+.period-title {
   margin: 0;
+  font-size: 1.2em;
   color: #333;
-  font-size: 0.9em;
-  font-weight: bold;
+}
+
+.period-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.category-tag {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
 }
 
 .period-dates {
-  margin: 0;
-  color: #666;
+  margin: 12px 0;
   font-size: 0.9em;
 }
 
-.period-arrow {
-  color: #4CAF50;
-  font-size: 1.2em;
-  margin-left: 15px;
-  padding: 0 5px;
+.date-range {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
 }
 
-.period-description {
-  margin: 0;
+.date-label {
   color: #666;
+}
+
+.date-value {
+  color: #333;
+  font-weight: 500;
+}
+
+.period-location {
+  margin: 12px 0;
   font-size: 0.9em;
-  font-style: italic;
+  color: #666;
+}
+
+.location-label {
+  font-weight: 500;
+}
+
+.period-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.loading-indicator {
+  color: #2196f3;
+}
+
+.children-count, .children-hint {
+  color: #666;
 }
 </style> 

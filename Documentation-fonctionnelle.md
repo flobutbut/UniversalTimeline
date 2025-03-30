@@ -1,103 +1,126 @@
 # Documentation Fonctionnelle
 
+## Vue d'ensemble
+
+L'application permet de naviguer dans une timeline des périodes géologiques, en commençant par les quatre éons principaux :
+- Hadéen
+- Archéen
+- Protérozoïque
+- Phanérozoïque
+
 ## Fonctionnalités
 
-### Navigation des Périodes Géologiques
-- Affichage hiérarchique des périodes géologiques
-- Navigation entre les différentes époques
-- Affichage des dates de début et de fin de chaque période
-- Support multilingue (français, anglais)
+### Navigation
 
-### Affichage des Dates
-- Format adapté à la géologie :
-  - Dates en années avant le présent
-  - Unités adaptées à l'échelle :
-    - Ga (Giga-années) pour les dates ≥ 1 000 000 000 ans
-    - Ma (Méga-années) pour les dates ≥ 1 000 000 ans
-    - ans pour les dates < 1 000 000 ans
-- Exemple d'affichage :
-  - "2.50 Ga" pour 2 500 000 000 ans
-  - "538.80 Ma" pour 538 800 000 ans
-  - "66.0 Ma" pour 66 000 000 ans
+1. **Vue Initiale**
+   - Affichage des quatre éons principaux
+   - Chaque éon est présenté dans une carte avec :
+     - Nom de l'éon
+     - Dates de début et de fin
+     - Catégories associées
+     - Localisation géographique
+     - Indication du nombre de sous-périodes
 
-### Sélection de la Langue
-- Changement dynamique de la langue d'affichage (FR/EN uniquement)
-- Persistance de la sélection de langue
-- Support des caractères spéciaux et accents
+2. **Navigation Hiérarchique**
+   - Clic sur une période pour accéder à ses sous-périodes
+   - Bouton retour pour remonter dans la hiérarchie
+   - Indication visuelle de la période sélectionnée
+   - Chargement progressif des sous-périodes
 
-## Interface Utilisateur
+3. **Affichage des Périodes**
+   - Carte pour chaque période avec :
+     - Titre de la période
+     - Tags de catégories
+     - Dates de début et de fin
+     - Localisation (si disponible)
+     - État de chargement
+     - Indication des sous-périodes
 
-### Composants
-1. GeologicalPeriods
-   - Liste principale des périodes
-   - Navigation hiérarchique
-   - Gestion des états de chargement
+### Interface Utilisateur
 
-2. GeologicalPeriodCard
-   - Affichage d'une période individuelle
-   - Nom de la période
-   - Dates de début et de fin
-   - Indicateur de navigation
+1. **Contrôles**
+   - Sélecteur de langue (FR/EN)
+   - Bouton retour pour la navigation
+   - Indicateurs de chargement
 
-3. LanguageSelector
-   - Sélection de la langue
-   - Affichage des drapeaux
-   - Changement dynamique
+2. **États Visuels**
+   - Carte sélectionnée : bordure bleue et fond légèrement bleuté
+   - État de chargement : indicateur de progression
+   - Présence de sous-périodes : compteur ou indication
+   - Erreurs : messages explicites
 
-### États de l'Interface
-- État de chargement initial
-- État de chargement des sous-périodes
-- État d'erreur
-- État de navigation
+3. **Responsive Design**
+   - Grille adaptative pour les cartes
+   - Espacement optimisé
+   - Légendes et textes lisibles
 
-## Navigation des Périodes Géologiques
+### Gestion des Données
 
-### Vue d'ensemble
+1. **Chargement**
+   - Chargement initial des éons principaux
+   - Chargement à la demande des sous-périodes
+   - Mise en cache des résultats
+   - Gestion des erreurs de chargement
 
-L'application permet de naviguer dans la hiérarchie des périodes géologiques, en commençant par les éons jusqu'aux sous-périodes.
+2. **Performance**
+   - Limitation à 100 sous-périodes par requête
+   - Cache de 5 minutes
+   - Retry automatique en cas d'erreur
+   - Timeout de 30 secondes
 
-### Fonctionnalités
+3. **Internationalisation**
+   - Support multilingue
+   - Format de dates localisé
+   - Labels et descriptions traduits
 
-#### 1. Navigation Hiérarchique
+## Scénarios d'Utilisation
 
-- **Premier niveau** : Affichage des quatre éons principaux
-  - Hadéen
-  - Archéen
-  - Protérozoïque
-  - Phanérozoïque
+### Navigation Simple
 
-- **Niveaux suivants** : Affichage des sous-périodes pour chaque période sélectionnée
+1. L'utilisateur arrive sur la page
+2. Les quatre éons principaux sont affichés
+3. L'utilisateur peut :
+   - Voir les informations de base de chaque éon
+   - Changer la langue
+   - Sélectionner un éon pour voir ses sous-périodes
 
-#### 2. Interface Utilisateur
+### Navigation Approfondie
 
-- **Sélection de la langue** : 
-  - Français (par défaut)
-  - Anglais
+1. L'utilisateur sélectionne un éon
+2. Les sous-périodes sont chargées progressivement
+3. L'utilisateur peut :
+   - Voir les détails de chaque sous-période
+   - Naviguer plus profondément dans la hiérarchie
+   - Revenir en arrière à tout moment
 
-- **Navigation** :
-  - Cliquer sur une période pour voir ses sous-périodes
-  - Bouton "Retour" visible uniquement en navigation profonde
-  - Transitions fluides entre les niveaux
+### Gestion des Erreurs
 
-- **Affichage des périodes** :
-  - Nom de la période avec typographie hiérarchique
-  - Dates de début et de fin (si disponibles)
-  - Indicateur visuel pour la navigation (flèche)
-  - Effets de survol subtils
-  - Alignement et espacement optimisés
+1. En cas d'erreur de chargement :
+   - Message d'erreur explicite
+   - Possibilité de réessayer
+   - Retry automatique après délai
 
-### Données affichées
+2. En cas de timeout :
+   - Message d'erreur approprié
+   - Option de réessayer manuellement
+   - Timeout de 30 secondes
 
-Pour chaque période :
-- Label dans la langue sélectionnée
-- Date de début (optionnelle)
-- Date de fin (optionnelle)
-- Localisation : "Toute la Terre" par défaut (limitation technique actuelle)
+## Limitations
 
-### Source des données
+1. **Données**
+   - Maximum 100 sous-périodes par requête
+   - Certaines périodes peuvent manquer de données
+   - Localisation géographique parfois incomplète
 
-Les données sont récupérées en temps réel depuis Wikidata via des requêtes SPARQL.
-Note : La localisation des périodes n'est pas disponible dans la version actuelle en raison des limitations de l'API Wikidata et de la stratégie de récupération des données.
+2. **Performance**
+   - Temps de chargement dépendant de la connexion
+   - Latence possible avec l'API Wikidata
+   - Cache limité à 5 minutes
+
+3. **Interface**
+   - Navigation uniquement verticale
+   - Pas de recherche directe
+   - Pas de filtrage par catégorie
 
 ## Spécifications Techniques
 
@@ -131,12 +154,6 @@ interface GeologicalPeriod {
 - 20 éléments par page
 - Navigation Précédent/Suivant
 - Désactivation des boutons aux limites
-
-## Limitations
-- Pas de recherche en temps réel
-- Données limitées aux informations de base
-- Pas de filtrage avancé
-- Pas de tri personnalisé
 
 ## Améliorations Futures
 1. Ajout d'une barre de recherche

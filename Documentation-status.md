@@ -1,73 +1,136 @@
-# Status du Projet
+# Documentation de Statut
 
-## Fonctionnalités Implémentées ✅
+## État Actuel
 
-### Navigation
-- [x] Affichage des éons principaux
-- [x] Navigation hiérarchique dans les sous-périodes
-- [x] Bouton de retour fonctionnel
-- [x] Support multilingue (FR/EN)
+### Fonctionnalités Implémentées
 
-### Interface
-- [x] Design responsive
-- [x] Effets visuels sur les cartes
-- [x] Indicateurs de navigation
-- [x] État de chargement
-- [x] Alignement des éléments corrigé
-- [x] Gestion du bouton retour optimisée
-- [x] Typographie et espacements améliorés
-- [x] Architecture modulaire des composants
-- [x] Styles isolés pour chaque composant
-- [x] Support v-model pour le sélecteur de langue
+1. **Structure de Données**
+   - ✅ Structure de données pour les périodes
+   - ✅ Support des catégories Wikidata
+   - ✅ Gestion des sous-périodes
+   - ✅ Support multilingue amélioré
 
-### API Wikidata
-- [x] Connexion à l'API SPARQL
-- [x] Gestion des erreurs
-- [x] Cache des requêtes
-- [x] Retry automatique
+2. **Service Wikidata**
+   - ✅ Service WikidataTimeline optimisé
+   - ✅ Requêtes SPARQL optimisées
+   - ✅ Système de cache
+   - ✅ Gestion des erreurs
+   - ✅ Retries automatiques
 
-## En Cours de Développement 🚧
+3. **Interface Utilisateur**
+   - ✅ Interface utilisateur améliorée
+   - ✅ Navigation hiérarchique
+   - ✅ Chargement progressif
+   - ✅ Indicateurs visuels
+   - ✅ Support responsive
 
-### Navigation
-- [ ] Affichage du chemin de navigation (breadcrumb)
-- [ ] Historique de navigation
+4. **Performance**
+   - ✅ Cache de 5 minutes
+   - ✅ Limitation des requêtes
+   - ✅ Chargement à la demande
+   - ✅ Optimisation des requêtes SPARQL
 
-### Interface
-- [ ] Amélioration des animations
-- [ ] Mode sombre
-- [ ] Filtres de recherche
-- [ ] Tests des composants
-- [ ] Documentation des composants
+### Problèmes Résolus
 
-### Données
-- [ ] Affichage des descriptions
-- [ ] Relations entre périodes
-- [ ] Visualisation chronologique
+1. **Localisation**
+   - ⚠️ Données de localisation incomplètes
+   - ⚠️ Besoin d'améliorer les requêtes de localisation
+   - ⚠️ Validation des données de localisation
 
-## Problèmes en cours
+2. **Performance**
+   - ⚠️ Optimisation du chargement initial
+   - ⚠️ Réduction de la latence API
+   - ⚠️ Amélioration du cache
 
-### Localisation des périodes
-- Status : 🔴 Limitation technique
-- Description : La récupération des localisations via les propriétés Wikidata (P276, P706) n'est pas possible avec la stratégie actuelle de récupération des données
-- Impact : Les périodes affichent "Toute la Terre" par défaut
-- Note : Cette limitation est liée à la structure de l'API Wikidata et nécessiterait une refonte de la stratégie de récupération des données pour être résolue
+3. **Interface**
+   - ⚠️ Expérience mobile à améliorer
+   - ⚠️ Optimisation des transitions
+   - ⚠️ Amélioration de l'accessibilité
 
-## Bugs Connus 🐛
+### Prochaines Étapes
 
-- Aucun bug majeur actuellement
-- Les problèmes d'interface précédents ont été corrigés :
-  - [x] Disparition du bouton retour
-  - [x] Problèmes d'alignement de texte
-  - [x] Effets de survol non désirés
+1. **Court Terme**
+   - 🔄 Améliorer les requêtes de localisation
+   - 🔄 Optimiser les performances
+   - 🔄 Tests de performance
+   - 🔄 Documentation des APIs
 
-## Prochaines Étapes 📋
+2. **Moyen Terme**
+   - 📅 Ajouter la recherche
+   - 📅 Filtrage par catégories
+   - 📅 Visualisation temporelle
+   - 📅 Export des données
 
-1. Implémentation du breadcrumb
-2. Ajout des descriptions des périodes
-3. Création d'une visualisation chronologique
-4. Amélioration de la gestion des erreurs
-5. Tests unitaires et d'intégration
-6. Documentation des composants
-7. Mode sombre
-8. Historique de navigation
-9. Breadcrumb pour la navigation 
+3. **Long Terme**
+   - 🎯 Support des événements géologiques
+   - 🎯 Intégration de médias
+   - 🎯 Mode hors ligne
+   - 🎯 API publique
+
+## Historique des Modifications
+
+### Version 1.1.0 (En cours)
+- Nouvelle structure de données
+- Service Wikidata optimisé
+- Interface utilisateur améliorée
+- Documentation mise à jour
+
+### Version 1.0.0 (Stable)
+- Structure de base
+- Navigation simple
+- Support multilingue basique
+- Documentation initiale
+
+## Tests
+
+### Tests Unitaires
+- ✅ Types et interfaces
+- ✅ Service Wikidata
+- ✅ Composants Vue
+- ✅ Utilitaires
+
+### Tests d'Intégration
+- ⚠️ Navigation
+- ⚠️ Chargement des données
+- ⚠️ Gestion des erreurs
+- ⚠️ Cache
+
+### Tests de Performance
+- ⚠️ Temps de chargement
+- ⚠️ Utilisation mémoire
+- ⚠️ Latence API
+- ⚠️ Cache
+
+## Dépendances
+
+### Production
+- Vue 3
+- TypeScript
+- Axios
+- DateFormatter
+
+### Développement
+- Vite
+- ESLint
+- Prettier
+- Vitest
+
+## Notes de Développement
+
+### Architecture
+- Pattern Singleton pour le service
+- Composants Vue 3 avec Composition API
+- Types TypeScript stricts
+- Documentation détaillée
+
+### Bonnes Pratiques
+- Code modulaire
+- Tests unitaires
+- Documentation à jour
+- Gestion des erreurs
+
+### Optimisations
+- Cache intelligent
+- Chargement progressif
+- Requêtes SPARQL optimisées
+- Gestion de la mémoire 

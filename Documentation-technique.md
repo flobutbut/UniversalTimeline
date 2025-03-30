@@ -19,6 +19,37 @@ src/
     └── dateFormatter.ts
 ```
 
+### Structure des Données
+
+#### Types Principaux
+
+```typescript
+interface Period {
+  id: string;                    // Identifiant Wikidata unique
+  label: string;                 // Nom de la période
+  startDate?: string;           // Date de début formatée
+  endDate?: string;             // Date de fin formatée
+  categoryIds: string[];        // IDs des catégories Wikidata
+  categoryLabels: string[];     // Labels des catégories
+  location?: string;            // Localisation géographique
+  childrenPreloaded: boolean;   // Indique si les enfants sont chargés
+  children: SimplePeriod[];     // Sous-périodes
+  loading: boolean;             // État de chargement
+  isMainEon: boolean;          // Indique si c'est un éon principal
+}
+
+interface SimplePeriod {
+  id: string;                   // Identifiant Wikidata unique
+  label: string;                // Nom de la période
+  startDate?: string;          // Date de début formatée
+  endDate?: string;            // Date de fin formatée
+  categoryIds: string[];       // IDs des catégories Wikidata
+  location?: string;           // Localisation géographique
+  hasChildren: boolean;        // Indique si la période a des sous-périodes
+  isMainEon: boolean;         // Indique si c'est un éon principal
+}
+```
+
 ### Services
 
 #### Service Wikidata (`wikidata.ts`)
@@ -40,44 +71,43 @@ src/
   - Ma (Méga-années) pour les dates ≥ 1 000 000 ans
   - ans pour les dates < 1 000 000 ans
 
-#### WikidataService
+#### WikidataTimelineService
 
-Service singleton qui gère les requêtes vers l'API SPARQL de Wikidata.
+Service singleton pour gérer les interactions avec l'API Wikidata.
 
-- **Endpoint**: `/api/wikidata/sparql`
-- **Cache**: 5 minutes
-- **Timeout**: 30 secondes
-- **Retry**: 3 tentatives avec 1 seconde de délai
-- **Logging**: Système de logging détaillé pour le débogage des requêtes et des transformations
+- **Méthodes principales**:
+  - `getMainEons(options: QueryOptions): Promise<Period[]>`
+  - `getChildren(parentId: string, options: QueryOptions): Promise<SimplePeriod[]>`
 
-#### Requêtes SPARQL
-
-La requête principale utilise les IDs Wikidata suivants pour les éons :
-- Hadéen (Q104460)
-- Archéen (Q104168)
-- Protérozoïque (Q104162)
-- Phanérozoïque (Q101313)
-
-La navigation hiérarchique utilise la propriété P361 (partie de) pour récupérer les sous-périodes.
+- **Fonctionnalités**:
+  - Gestion du cache avec expiration
+  - Retry automatique en cas d'erreur
+  - Support multilingue
+  - Requêtes SPARQL optimisées
 
 ### Composants
 
-#### GeologicalPeriods (Composant Principal)
-- Gestion de l'état global de l'application
-- Coordination des sous-composants
-- Gestion des données et des erreurs
-- Affichage conditionnel des états (chargement, erreur)
-- Styles CSS modulaires avec scoped
-- Gestion de la navigation hiérarchique
-- Support multilingue (FR/EN)
+#### GeologicalPeriods.vue
 
-#### GeologicalPeriodCard
-- Affichage d'une période géologique individuelle
-- Gestion des interactions utilisateur
-- Styles isolés pour la carte
-- Émission d'événements de clic
-- Affichage des dates formatées
-- Gestion des états de survol
+Composant principal qui gère l'affichage et la navigation dans la timeline.
+
+- **Fonctionnalités**:
+  - Affichage des éons principaux
+  - Navigation dans la hiérarchie des périodes
+  - Gestion du chargement progressif
+  - Support multilingue
+  - Gestion des erreurs
+
+#### GeologicalPeriodCard.vue
+
+Composant de présentation pour chaque période.
+
+- **Fonctionnalités**:
+  - Affichage des informations de base
+  - Indication visuelle de la sélection
+  - Affichage des catégories
+  - Gestion des états de chargement
+  - Indication de la présence de sous-périodes
 
 #### BackButton
 - Bouton de navigation retour
@@ -318,3 +348,190 @@ Le projet utilise Vite comme bundler avec la configuration suivante :
 - P706 (situé sur le territoire géographique) : Deuxième tentative, résultats non concluants
 
 La gestion de la localisation des périodes géologiques et archéologiques reste un défi à résoudre. Les propriétés testées ne donnent pas les résultats escomptés. 
+
+## Requêtes SPARQL
+
+### Requête pour les éons principaux
+```sparql
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?item ?itemLabel 
+    (SAMPLE(?startDate) AS ?debut) 
+    (SAMPLE(?endDate) AS ?fin) 
+    ?categoryId ?categoryLabel
+    (GROUP_CONCAT(DISTINCT ?locationLabel; separator=", ") AS ?locations)
+    (COUNT(DISTINCT ?child) AS ?childCount)
+WHERE {
+  VALUES ?item { 
+    wd:Q104460  # Hadéen
+    wd:Q104168  # Archéen
+    wd:Q104162  # Protérozoïque
+    wd:Q101313  # Phanérozoïque
+  }
+  
+  # Dates
+  OPTIONAL { ?item wdt:P580 ?startDate. }
+  OPTIONAL { ?item wdt:P582 ?endDate. }
+  
+  # Catégories
+  OPTIONAL { 
+    ?item wdt:P31 ?categoryId.
+  }
+  
+  # Localisation
+  OPTIONAL { 
+    {?item wdt:P17 ?locationEntity}
+    UNION {?item wdt:P276 ?locationEntity}
+    UNION {?item wdt:P131 ?locationEntity}
+  }
+  
+  # Vérifie s'il y a des enfants
+  OPTIONAL {
+    { ?child wdt:P361 ?item } 
+    UNION { ?item wdt:P527 ?child }
+  }
+  
+  # Labels
+  SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "fr".
+    ?item rdfs:label ?itemLabel.
+    ?categoryId rdfs:label ?categoryLabel.
+    ?locationEntity rdfs:label ?locationLabel.
+  }
+}
+GROUP BY ?item ?itemLabel ?categoryId ?categoryLabel
+ORDER BY ?debut
+```
+
+### Requête pour les sous-périodes
+```sparql
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX bd: <http://www.bigdata.com/rdf#>
+
+SELECT DISTINCT ?child ?childLabel 
+  ?startDate ?endDate 
+  ?categoryId ?categoryLabel
+  (GROUP_CONCAT(DISTINCT ?locationLabel; separator=", ") AS ?locations)
+WHERE {
+  # Relation parent-enfant
+  { ?child wdt:P361 wd:PARENT_ID }
+  UNION { wd:PARENT_ID wdt:P527 ?child }
+  
+  # FILTRE: S'assurer que c'est une période temporelle
+  {
+    ?child wdt:P31 ?periodType.
+    VALUES ?periodType {
+      wd:Q23387    # Éon
+      wd:Q3253162  # Ère
+      wd:Q186081   # Période
+      wd:Q11514315 # Époque
+      wd:Q47018901 # Âge
+    }
+  }
+  UNION {
+    ?child wdt:P31 ?childType.
+    ?childType wdt:P279+ wd:Q186081.  # Sous-classe de Période
+  }
+  
+  # Dates
+  OPTIONAL { ?child wdt:P580 ?startDate. }
+  OPTIONAL { ?child wdt:P582 ?endDate. }
+  
+  # Catégories
+  OPTIONAL { ?child wdt:P31 ?categoryId. }
+  
+  # Localisation
+  OPTIONAL { 
+    {?child wdt:P17 ?locationEntity}
+    UNION {?child wdt:P276 ?locationEntity}
+    UNION {?child wdt:P131 ?locationEntity}
+  }
+  
+  # Labels
+  SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "fr".
+    ?child rdfs:label ?childLabel.
+    ?categoryId rdfs:label ?categoryLabel.
+    ?locationEntity rdfs:label ?locationLabel.
+  }
+}
+GROUP BY ?child ?childLabel ?startDate ?endDate ?categoryId ?categoryLabel
+ORDER BY ?startDate
+LIMIT 100
+```
+
+### Requête pour vérifier les sous-périodes
+```sparql
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+
+ASK {
+  {
+    { ?grandchild wdt:P361 wd:CHILD_ID }
+    UNION { wd:CHILD_ID wdt:P527 ?grandchild }
+  }
+  FILTER(?grandchild != wd:CHILD_ID)
+}
+```
+
+## Gestion des erreurs
+
+Le service gère plusieurs types d'erreurs :
+
+1. **Erreurs de requête (400)**
+   - Requête mal formée
+   - Paramètres invalides
+   - Problèmes de syntaxe SPARQL
+
+2. **Limite de requêtes (429)**
+   - Trop de requêtes simultanées
+   - Délai d'attente entre les requêtes
+
+3. **Erreurs de service (503)**
+   - Service temporairement indisponible
+   - Problèmes de maintenance
+
+4. **Erreurs de connexion**
+   - Timeouts
+   - Problèmes réseau
+   - Erreurs de proxy
+
+## Cache
+
+Le système utilise un cache en mémoire avec les caractéristiques suivantes :
+
+- Durée de vie : 5 minutes
+- Clé de cache : `{language}-{parentId}-{categoryId}`
+- Invalidation automatique après la durée de vie
+- Stockage des résultats en mémoire
+
+## Performance
+
+Optimisations mises en place :
+
+1. **Requêtes**
+   - Utilisation de DISTINCT pour éviter les doublons
+   - Limitation du nombre de résultats (100 par requête)
+   - Agrégation optimisée des données
+
+2. **Cache**
+   - Mise en cache des résultats fréquents
+   - Réduction des appels à l'API
+   - Invalidation intelligente
+
+3. **Chargement progressif**
+   - Chargement initial des éons principaux
+   - Chargement à la demande des sous-périodes
+   - Vérification asynchrone des enfants
+
+### Monitoring
+
+- Logs des requêtes SPARQL
+- Suivi des erreurs
+- Métriques de performance
+- État du cache 
