@@ -22,46 +22,47 @@
 - Amélioration de l'accessibilité
 - Tests utilisateurs
 
-## État Actuel
+## État des Fonctionnalités
 
-### Version 1.2.0 (En cours)
-- Simplification de la structure de données
-- Optimisation des requêtes SPARQL
-- Amélioration de la navigation
-- Meilleure gestion des erreurs
+### Structure de Données
+- ✅ Structure de données pour les périodes
+- ✅ Support des catégories Wikidata
+- ✅ Gestion des sous-périodes
+- ✅ Support multilingue amélioré
+- ⚠️ Base de données Docker pour la persistance
+- ⚠️ Système de sauvegarde des périodes utilisateur
 
-### Fonctionnalités Implémentées
+### Service Wikidata
+- ✅ Service WikidataTimeline optimisé
+- ✅ Requêtes SPARQL optimisées
+- ✅ Système de cache
+- ✅ Gestion des erreurs
+- ✅ Retries automatiques
+- ⚠️ Script de vérification de présence en base
+- ⚠️ Système de persistance des données
 
-1. **Structure de Données**
-   - ✅ Structure de données pour les périodes
-   - ✅ Support des catégories Wikidata
-   - ✅ Gestion des sous-périodes
-   - ✅ Support multilingue amélioré
+### Interface Utilisateur
+- ✅ Interface utilisateur améliorée
+- ✅ Navigation hiérarchique
+- ✅ Chargement progressif
+- ✅ Indicateurs visuels
+- ✅ Support responsive
+- ✅ Bouton de retour fonctionnel
+- ✅ Gestion de la pile de navigation
+- ⚠️ Visualisation chronologique
+- ⚠️ Design system
+- ⚠️ Affichage des événements
 
-2. **Service Wikidata**
-   - ✅ Service WikidataTimeline optimisé
-   - ✅ Requêtes SPARQL optimisées
-   - ✅ Système de cache
-   - ✅ Gestion des erreurs
-   - ✅ Retries automatiques
+### Performance
+- ✅ Cache de 5 minutes
+- ✅ Limitation des requêtes
+- ✅ Chargement à la demande
+- ✅ Optimisation des requêtes SPARQL
+- ⚠️ Optimisation du stockage local
 
-3. **Interface Utilisateur**
-   - ✅ Interface utilisateur améliorée
-   - ✅ Navigation hiérarchique
-   - ✅ Chargement progressif
-   - ✅ Indicateurs visuels
-   - ✅ Support responsive
-   - ✅ Bouton de retour fonctionnel
-   - ✅ Gestion de la pile de navigation
-
-4. **Performance**
-   - ✅ Cache de 5 minutes
-   - ✅ Limitation des requêtes
-   - ✅ Chargement à la demande
-   - ✅ Optimisation des requêtes SPARQL
+## Problèmes et Solutions
 
 ### Problèmes Résolus
-
 1. **Localisation**
    - ✅ Erreur 400 sur les requêtes SPARQL
    - ✅ Problèmes d'agrégation dans les requêtes
@@ -74,45 +75,39 @@
    - ⚠️ Optimisation du chargement initial
    - ⚠️ Réduction de la latence API
    - ⚠️ Amélioration du cache
+   - ⚠️ Optimisation du stockage local
 
 3. **Interface**
    - ⚠️ Expérience mobile à améliorer
    - ⚠️ Optimisation des transitions
    - ⚠️ Amélioration de l'accessibilité
+   - ⚠️ Mise en place du design system
 
-### Prochaines Étapes
+## Plan de Développement
 
-1. **Court Terme**
-   - 🔄 Améliorer les requêtes de localisation
-   - 🔄 Optimiser les performances
-   - 🔄 Tests de performance
-   - 🔄 Documentation des APIs
+### Court Terme
+- 🔄 Améliorer les requêtes de localisation
+- 🔄 Optimiser les performances
+- 🔄 Tests de performance
+- 🔄 Documentation des APIs
+- 🔄 Mise en place de la base de données Docker
+- 🔄 Développement du système de sauvegarde
+- 🔄 Création du design system
 
-2. **Moyen Terme**
-   - 📅 Ajouter la recherche
-   - 📅 Filtrage par catégories
-   - 📅 Visualisation temporelle
-   - 📅 Export des données
+### Moyen Terme
+- 📅 Ajouter la recherche
+- 📅 Filtrage par catégories
+- 📅 Visualisation temporelle
+- 📅 Export des données
+- 📅 Implémentation de la visualisation chronologique
+- 📅 Intégration des événements géologiques
 
-3. **Long Terme**
-   - 🎯 Support des événements géologiques
-   - 🎯 Intégration de médias
-   - 🎯 Mode hors ligne
-   - 🎯 API publique
-
-## Historique des Modifications
-
-### Version 1.1.0 (En cours)
-- Nouvelle structure de données
-- Service Wikidata optimisé
-- Interface utilisateur améliorée
-- Documentation mise à jour
-
-### Version 1.0.0 (Stable)
-- Structure de base
-- Navigation simple
-- Support multilingue basique
-- Documentation initiale
+### Long Terme
+- 🎯 Support des événements géologiques
+- 🎯 Intégration de médias
+- 🎯 Mode hors ligne
+- 🎯 API publique
+- 🎯 Système de recommandations basé sur l'historique
 
 ## Tests
 
@@ -121,18 +116,23 @@
 - ✅ Service Wikidata
 - ✅ Composants Vue
 - ✅ Utilitaires
+- ⚠️ Tests de persistance
+- ⚠️ Tests de sauvegarde
 
 ### Tests d'Intégration
 - ⚠️ Navigation
 - ⚠️ Chargement des données
 - ⚠️ Gestion des erreurs
 - ⚠️ Cache
+- ⚠️ Tests de la base de données
+- ⚠️ Tests de sauvegarde
 
 ### Tests de Performance
 - ⚠️ Temps de chargement
 - ⚠️ Utilisation mémoire
 - ⚠️ Latence API
 - ⚠️ Cache
+- ⚠️ Performance de la base de données
 
 ## Dépendances
 
@@ -141,12 +141,16 @@
 - TypeScript
 - Axios
 - DateFormatter
+- Docker
+- PostgreSQL
+- Redis (pour le cache)
 
 ### Développement
 - Vite
 - ESLint
 - Prettier
 - Vitest
+- Docker Compose
 
 ## Notes de Développement
 
@@ -155,15 +159,21 @@
 - Composants Vue 3 avec Composition API
 - Types TypeScript stricts
 - Documentation détaillée
+- Architecture microservices avec Docker
+- Système de persistance distribué
 
 ### Bonnes Pratiques
 - Code modulaire
 - Tests unitaires
 - Documentation à jour
 - Gestion des erreurs
+- Gestion des versions de la base de données
+- Sauvegarde automatique
 
 ### Optimisations
 - Cache intelligent
 - Chargement progressif
 - Requêtes SPARQL optimisées
-- Gestion de la mémoire 
+- Gestion de la mémoire
+- Optimisation des requêtes SQL
+- Indexation des données 
