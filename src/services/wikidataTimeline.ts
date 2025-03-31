@@ -146,7 +146,7 @@ export class WikidataTimelineService {
       SELECT DISTINCT 
         ?item ?itemLabel 
         ?startDate ?endDate 
-        (GROUP_CONCAT(DISTINCT ?locationLabel; separator=", ") AS ?locations)
+        (COALESCE(GROUP_CONCAT(DISTINCT ?locationLabel; separator=", "), "Globale") AS ?locations)
         (COUNT(DISTINCT ?child) AS ?childCount)
       WHERE {
         ${parentFilter}
@@ -157,9 +157,25 @@ export class WikidataTimelineService {
         
         # Localisation (avec vérification des labels)
         OPTIONAL { 
-          { ?item wdt:P17 ?locationEntity }
-          UNION { ?item wdt:P276 ?locationEntity }
-          UNION { ?item wdt:P131 ?locationEntity }
+          {
+            # Localisations directes
+            { ?item wdt:P17 ?locationEntity }
+            UNION { ?item wdt:P276 ?locationEntity }
+            UNION { ?item wdt:P131 ?locationEntity }
+          }
+          UNION {
+            # Localisations avec P518 (apply to part)
+            ?item p:P518 ?statement.
+            ?statement ps:P518 ?locationEntity.
+            OPTIONAL { ?statement pq:P518 ?partEntity. }
+          }
+          UNION {
+            # Localisations indirectes via les parties
+            ?item wdt:P527 ?partEntity.
+            { ?partEntity wdt:P17 ?locationEntity }
+            UNION { ?partEntity wdt:P276 ?locationEntity }
+            UNION { ?partEntity wdt:P131 ?locationEntity }
+          }
           FILTER(EXISTS { ?locationEntity rdfs:label ?locationLabel. })
         }
         

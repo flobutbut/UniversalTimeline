@@ -292,7 +292,7 @@ VALUES ?item {
 SELECT DISTINCT 
   ?item ?itemLabel 
   ?startDate ?endDate 
-  (GROUP_CONCAT(DISTINCT ?locationLabel; separator=", ") AS ?locations)
+  (COALESCE(GROUP_CONCAT(DISTINCT ?locationLabel; separator=", "), "Globale") AS ?locations)
   (COUNT(DISTINCT ?child) AS ?childCount)
 WHERE {
   # Filtre parent dynamique
@@ -304,9 +304,25 @@ WHERE {
   
   # Localisation (avec vérification des labels)
   OPTIONAL { 
-    { ?item wdt:P17 ?locationEntity }
-    UNION { ?item wdt:P276 ?locationEntity }
-    UNION { ?item wdt:P131 ?locationEntity }
+    {
+      # Localisations directes
+      { ?item wdt:P17 ?locationEntity }
+      UNION { ?item wdt:P276 ?locationEntity }
+      UNION { ?item wdt:P131 ?locationEntity }
+    }
+    UNION {
+      # Localisations avec P518 (apply to part)
+      ?item p:P518 ?statement.
+      ?statement ps:P518 ?locationEntity.
+      OPTIONAL { ?statement pq:P518 ?partEntity. }
+    }
+    UNION {
+      # Localisations indirectes via les parties
+      ?item wdt:P527 ?partEntity.
+      { ?partEntity wdt:P17 ?locationEntity }
+      UNION { ?partEntity wdt:P276 ?locationEntity }
+      UNION { ?partEntity wdt:P131 ?locationEntity }
+    }
     FILTER(EXISTS { ?locationEntity rdfs:label ?locationLabel. })
   }
   
@@ -333,11 +349,13 @@ LIMIT 100
    - Liste des éons principaux définie en constantes
    - Filtre parent adaptatif selon le contexte
    - Cascade de langues construite dynamiquement
+   - Valeur par défaut "Globale" pour les localisations manquantes
 
 2. **Optimisation des requêtes** :
    - Optimisation des agrégations avec GROUP_CONCAT
    - Meilleure gestion des labels avec cascade de langues
    - Vérification de l'existence des labels pour les localisations
+   - Support des localisations avec P518 et des relations indirectes
 
 3. **Navigation** :
    - Pile de navigation simplifiée

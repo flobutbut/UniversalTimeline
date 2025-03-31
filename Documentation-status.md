@@ -20,11 +20,9 @@
 
 ### Prochaines étapes
 - Amélioration du service WikidataTimeline
-  - Implémentation de la cascade de langues (fr,en,es,de)
-  - Mise en place du mécanisme de secours pour les labels
-  - Amélioration de la détection des localisations (P518)
   - Extension des propriétés de dates (P569/P570/P571)
   - Filtrage des entités non-périodes
+  - Correction des problèmes de détection des localisations
 - Interface et UX
   - Création du design system
   - Amélioration de l'accessibilité
@@ -56,6 +54,11 @@
 - ✅ Cascade de langues (fr, en, es, de)
 - ✅ Mécanisme de secours pour les labels
 - ✅ Formatage des dates
+- 🔄 Gestion des localisations
+  - ✅ Support de P518 (apply to part)
+  - ✅ Localisations indirectes via les parties
+  - ✅ Valeur par défaut "Globale"
+  - ⚠️ Problèmes de détection dans certains cas
 
 ### Interface Utilisateur
 - ✅ Interface utilisateur améliorée
@@ -65,6 +68,7 @@
 - ✅ Support responsive
 - ✅ Bouton de retour fonctionnel
 - ✅ Gestion de la pile de navigation
+- ✅ Affichage des localisations avec fallback
 - 🔄 Visualisation chronologique
 - 🔄 Design system
 - 📅 Affichage des événements
@@ -87,6 +91,7 @@
    - ✅ Performance des requêtes
    - ✅ Navigation hiérarchique
    - ✅ Affichage du bouton de retour
+   - ⚠️ Détection incomplète des localisations
 
 2. **Performance**
    - 🔄 Optimisation du chargement initial
