@@ -21,6 +21,10 @@
 - Optimisation des performances
 - Amélioration de l'accessibilité
 - Tests utilisateurs
+- Amélioration de la gestion des titres multilingues
+- Filtrage avancé des entités
+- Extension des propriétés de dates
+- Amélioration de la détection des localisations
 
 ## État des Fonctionnalités
 
@@ -86,13 +90,24 @@
 ## Plan de Développement
 
 ### Court Terme
-- 🔄 Améliorer les requêtes de localisation
-- 🔄 Optimiser les performances
-- 🔄 Tests de performance
-- 🔄 Documentation des APIs
-- 🔄 Mise en place de la base de données Docker
-- 🔄 Développement du système de sauvegarde
-- 🔄 Création du design system
+- 🔄 Amélioration du service WikidataTimeline
+  - Implémentation de la cascade de langues (fr,en,es,de)
+  - Mise en place du mécanisme de secours pour les labels
+  - Filtrage des entités non-périodes
+  - Extension des propriétés de dates (P569/P570/P571)
+  - Amélioration de la détection des localisations (P518)
+- 🔄 Infrastructure et persistance
+  - Mise en place de la base de données Docker
+  - Développement du système de sauvegarde
+  - Optimisation du stockage local
+- 🔄 Interface et UX
+  - Création du design system
+  - Amélioration de l'accessibilité
+  - Optimisation des performances
+- 🔄 Tests et documentation
+  - Tests de performance
+  - Documentation des APIs
+  - Tests de persistance et sauvegarde
 
 ### Moyen Terme
 - 📅 Ajouter la recherche
