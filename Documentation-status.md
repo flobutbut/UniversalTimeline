@@ -18,13 +18,21 @@
 - Aucun problème critique connu
 
 ### Prochaines étapes
-- Optimisation des performances
-- Amélioration de l'accessibilité
-- Tests utilisateurs
-- Amélioration de la gestion des titres multilingues
-- Filtrage avancé des entités
-- Extension des propriétés de dates
-- Amélioration de la détection des localisations
+- Amélioration du service WikidataTimeline
+  - Implémentation de la cascade de langues (fr,en,es,de)
+  - Mise en place du mécanisme de secours pour les labels
+  - Amélioration de la détection des localisations (P518)
+  - Extension des propriétés de dates (P569/P570/P571)
+  - Filtrage des entités non-périodes
+- Interface et UX
+  - Création du design system
+  - Amélioration de l'accessibilité
+  - Optimisation des performances
+  - Implémentation de la visualisation temporelle
+- Tests et documentation
+  - Tests de performance
+  - Documentation des APIs
+  - Tests de persistance et sauvegarde
 
 ## État des Fonctionnalités
 
@@ -33,8 +41,8 @@
 - ✅ Support des catégories Wikidata
 - ✅ Gestion des sous-périodes
 - ✅ Support multilingue amélioré
-- ⚠️ Base de données Docker pour la persistance
-- ⚠️ Système de sauvegarde des périodes utilisateur
+- 📅 Base de données Docker pour la persistance
+- 📅 Système de sauvegarde des périodes utilisateur
 
 ### Service Wikidata
 - ✅ Service WikidataTimeline optimisé
@@ -42,8 +50,8 @@
 - ✅ Système de cache
 - ✅ Gestion des erreurs
 - ✅ Retries automatiques
-- ⚠️ Script de vérification de présence en base
-- ⚠️ Système de persistance des données
+- 📅 Script de vérification de présence en base
+- 📅 Système de persistance des données
 
 ### Interface Utilisateur
 - ✅ Interface utilisateur améliorée
@@ -53,16 +61,16 @@
 - ✅ Support responsive
 - ✅ Bouton de retour fonctionnel
 - ✅ Gestion de la pile de navigation
-- ⚠️ Visualisation chronologique
-- ⚠️ Design system
-- ⚠️ Affichage des événements
+- 🔄 Visualisation chronologique
+- 🔄 Design system
+- 📅 Affichage des événements
 
 ### Performance
 - ✅ Cache de 5 minutes
 - ✅ Limitation des requêtes
 - ✅ Chargement à la demande
 - ✅ Optimisation des requêtes SPARQL
-- ⚠️ Optimisation du stockage local
+- 📅 Optimisation du stockage local
 
 ## Problèmes et Solutions
 
@@ -76,16 +84,16 @@
    - ✅ Affichage du bouton de retour
 
 2. **Performance**
-   - ⚠️ Optimisation du chargement initial
-   - ⚠️ Réduction de la latence API
-   - ⚠️ Amélioration du cache
-   - ⚠️ Optimisation du stockage local
+   - 🔄 Optimisation du chargement initial
+   - 🔄 Réduction de la latence API
+   - 🔄 Amélioration du cache
+   - 📅 Optimisation du stockage local
 
 3. **Interface**
-   - ⚠️ Expérience mobile à améliorer
-   - ⚠️ Optimisation des transitions
-   - ⚠️ Amélioration de l'accessibilité
-   - ⚠️ Mise en place du design system
+   - 🔄 Expérience mobile à améliorer
+   - 🔄 Optimisation des transitions
+   - 🔄 Amélioration de l'accessibilité
+   - 🔄 Mise en place du design system
 
 ## Plan de Développement
 
@@ -93,36 +101,35 @@
 - 🔄 Amélioration du service WikidataTimeline
   - Implémentation de la cascade de langues (fr,en,es,de)
   - Mise en place du mécanisme de secours pour les labels
-  - Filtrage des entités non-périodes
-  - Extension des propriétés de dates (P569/P570/P571)
   - Amélioration de la détection des localisations (P518)
-- 🔄 Infrastructure et persistance
-  - Mise en place de la base de données Docker
-  - Développement du système de sauvegarde
-  - Optimisation du stockage local
+  - Extension des propriétés de dates (P569/P570/P571)
+  - Filtrage des entités non-périodes
 - 🔄 Interface et UX
   - Création du design system
   - Amélioration de l'accessibilité
   - Optimisation des performances
+  - Implémentation de la visualisation temporelle avec échelles de temps cohérentes
 - 🔄 Tests et documentation
   - Tests de performance
   - Documentation des APIs
   - Tests de persistance et sauvegarde
 
 ### Moyen Terme
-- 📅 Ajouter la recherche
-- 📅 Filtrage par catégories
-- 📅 Visualisation temporelle
-- 📅 Export des données
-- 📅 Implémentation de la visualisation chronologique
-- 📅 Intégration des événements géologiques
+- 📅 Infrastructure et persistance
+  - Mise en place de la base de données Docker
+  - Développement du système de sauvegarde
+  - Optimisation du stockage local
+- 📅 Fonctionnalités avancées
+  - Ajouter la recherche
+  - Filtrage par catégories
+  - Intégration des événements géologiques
 
 ### Long Terme
-- 🎯 Support des événements géologiques
 - 🎯 Intégration de médias
 - 🎯 Mode hors ligne
 - 🎯 API publique
 - 🎯 Système de recommandations basé sur l'historique
+- 🎯 Export des données
 
 ## Tests
 
