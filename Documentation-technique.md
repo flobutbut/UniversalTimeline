@@ -19,34 +19,35 @@ src/
     └── dateFormatter.ts
 ```
 
-### Structure des Données
+## Structure de données
 
-#### Types Principaux
+### Types principaux
 
 ```typescript
 interface Period {
-  id: string;                    // Identifiant Wikidata unique
-  label: string;                 // Nom de la période
-  startDate?: string;           // Date de début formatée
-  endDate?: string;             // Date de fin formatée
-  categoryIds: string[];        // IDs des catégories Wikidata
-  categoryLabels: string[];     // Labels des catégories
-  location?: string;            // Localisation géographique
-  childrenPreloaded: boolean;   // Indique si les enfants sont chargés
-  children: SimplePeriod[];     // Sous-périodes
-  loading: boolean;             // État de chargement
-  isMainEon: boolean;          // Indique si c'est un éon principal
+  id: string;              // Identifiant Wikidata
+  label: string;           // Nom de la période
+  startDate?: string;      // Date de début formatée
+  endDate?: string;        // Date de fin formatée
+  location?: string;       // Localisation principale
+  hasChildren: boolean;    // Indique si la période a des sous-périodes
+  isMainEon: boolean;      // Indique si c'est un éon principal
+  categoryIds: string[];   // IDs des catégories (maintenant vide)
+  categoryLabels: string[]; // Labels des catégories (maintenant vide)
+  childrenPreloaded: boolean; // État de préchargement des enfants
+  children: Period[];      // Liste des périodes enfants
+  loading: boolean;        // État de chargement
 }
 
 interface SimplePeriod {
-  id: string;                   // Identifiant Wikidata unique
-  label: string;                // Nom de la période
-  startDate?: string;          // Date de début formatée
-  endDate?: string;            // Date de fin formatée
-  categoryIds: string[];       // IDs des catégories Wikidata
-  location?: string;           // Localisation géographique
-  hasChildren: boolean;        // Indique si la période a des sous-périodes
-  isMainEon: boolean;         // Indique si c'est un éon principal
+  id: string;              // Identifiant Wikidata
+  label: string;           // Nom de la période
+  startDate?: string;      // Date de début formatée
+  endDate?: string;        // Date de fin formatée
+  location?: string;       // Localisation principale
+  hasChildren: boolean;    // Indique si la période a des sous-périodes
+  isMainEon: boolean;      // Indique si c'est un éon principal
+  categoryIds: string[];   // IDs des catégories (maintenant vide)
 }
 ```
 
@@ -114,7 +115,6 @@ Composant de présentation pour chaque période.
 - Affichage conditionnel basé sur la profondeur de navigation
 - Styles isolés pour le bouton
 - Émission d'événements de clic
-- Positionnement dans la barre de contrôle
 
 #### LanguageSelector
 - Sélection de la langue d'affichage (FR/EN)
@@ -351,133 +351,63 @@ La gestion de la localisation des périodes géologiques et archéologiques rest
 
 ## Requêtes SPARQL
 
-### Requête pour les éons principaux
-```sparql
-PREFIX wd: <http://www.wikidata.org/entity/>
-PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+La requête principale a été simplifiée pour se concentrer sur les informations essentielles :
 
-SELECT DISTINCT ?item ?itemLabel 
-    (SAMPLE(?startDate) AS ?debut) 
-    (SAMPLE(?endDate) AS ?fin) 
-    ?categoryId ?categoryLabel
-    (GROUP_CONCAT(DISTINCT ?locationLabel; separator=", ") AS ?locations)
-    (COUNT(DISTINCT ?child) AS ?childCount)
+```sparql
+SELECT DISTINCT 
+  ?item ?itemLabel 
+  ?startDate ?endDate 
+  (GROUP_CONCAT(DISTINCT ?locationLabel; separator=", ") AS ?locations)
+  (COUNT(DISTINCT ?child) AS ?childCount)
 WHERE {
-  VALUES ?item { 
-    wd:Q104460  # Hadéen
-    wd:Q104168  # Archéen
-    wd:Q104162  # Protérozoïque
-    wd:Q101313  # Phanérozoïque
-  }
+  # Filtre parent (éons principaux ou enfants)
+  ${parentFilter}
   
   # Dates
   OPTIONAL { ?item wdt:P580 ?startDate. }
   OPTIONAL { ?item wdt:P582 ?endDate. }
   
-  # Catégories
+  # Localisation (avec vérification des labels)
   OPTIONAL { 
-    ?item wdt:P31 ?categoryId.
+    { ?item wdt:P17 ?locationEntity }
+    UNION { ?item wdt:P276 ?locationEntity }
+    UNION { ?item wdt:P131 ?locationEntity }
+    FILTER(EXISTS { ?locationEntity rdfs:label ?locationLabel. })
   }
   
-  # Localisation
-  OPTIONAL { 
-    {?item wdt:P17 ?locationEntity}
-    UNION {?item wdt:P276 ?locationEntity}
-    UNION {?item wdt:P131 ?locationEntity}
-  }
-  
-  # Vérifie s'il y a des enfants
+  # Vérification des enfants
   OPTIONAL {
-    { ?child wdt:P361 ?item } 
-    UNION { ?item wdt:P527 ?child }
+    ?child wdt:P361 ?item.
   }
   
   # Labels
   SERVICE wikibase:label { 
-    bd:serviceParam wikibase:language "fr".
+    bd:serviceParam wikibase:language "${language}".
     ?item rdfs:label ?itemLabel.
-    ?categoryId rdfs:label ?categoryLabel.
     ?locationEntity rdfs:label ?locationLabel.
   }
 }
-GROUP BY ?item ?itemLabel ?categoryId ?categoryLabel
-ORDER BY ?debut
-```
-
-### Requête pour les sous-périodes
-```sparql
-PREFIX wd: <http://www.wikidata.org/entity/>
-PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX wikibase: <http://wikiba.se/ontology#>
-PREFIX bd: <http://www.bigdata.com/rdf#>
-
-SELECT DISTINCT ?child ?childLabel 
-  ?startDate ?endDate 
-  ?categoryId ?categoryLabel
-  (GROUP_CONCAT(DISTINCT ?locationLabel; separator=", ") AS ?locations)
-WHERE {
-  # Relation parent-enfant
-  { ?child wdt:P361 wd:PARENT_ID }
-  UNION { wd:PARENT_ID wdt:P527 ?child }
-  
-  # FILTRE: S'assurer que c'est une période temporelle
-  {
-    ?child wdt:P31 ?periodType.
-    VALUES ?periodType {
-      wd:Q23387    # Éon
-      wd:Q3253162  # Ère
-      wd:Q186081   # Période
-      wd:Q11514315 # Époque
-      wd:Q47018901 # Âge
-    }
-  }
-  UNION {
-    ?child wdt:P31 ?childType.
-    ?childType wdt:P279+ wd:Q186081.  # Sous-classe de Période
-  }
-  
-  # Dates
-  OPTIONAL { ?child wdt:P580 ?startDate. }
-  OPTIONAL { ?child wdt:P582 ?endDate. }
-  
-  # Catégories
-  OPTIONAL { ?child wdt:P31 ?categoryId. }
-  
-  # Localisation
-  OPTIONAL { 
-    {?child wdt:P17 ?locationEntity}
-    UNION {?child wdt:P276 ?locationEntity}
-    UNION {?child wdt:P131 ?locationEntity}
-  }
-  
-  # Labels
-  SERVICE wikibase:label { 
-    bd:serviceParam wikibase:language "fr".
-    ?child rdfs:label ?childLabel.
-    ?categoryId rdfs:label ?categoryLabel.
-    ?locationEntity rdfs:label ?locationLabel.
-  }
-}
-GROUP BY ?child ?childLabel ?startDate ?endDate ?categoryId ?categoryLabel
+GROUP BY ?item ?itemLabel ?startDate ?endDate
 ORDER BY ?startDate
 LIMIT 100
 ```
 
-### Requête pour vérifier les sous-périodes
-```sparql
-PREFIX wd: <http://www.wikidata.org/entity/>
-PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+### Principales modifications
 
-ASK {
-  {
-    { ?grandchild wdt:P361 wd:CHILD_ID }
-    UNION { wd:CHILD_ID wdt:P527 ?grandchild }
-  }
-  FILTER(?grandchild != wd:CHILD_ID)
-}
-```
+1. **Simplification des données** :
+   - Suppression de la gestion des catégories
+   - Simplification de la structure de navigation
+   - Optimisation des requêtes SPARQL
+
+2. **Amélioration des performances** :
+   - Réduction du nombre de requêtes
+   - Optimisation des agrégations
+   - Meilleure gestion du cache
+
+3. **Navigation** :
+   - Pile de navigation simplifiée
+   - Gestion des états de chargement par période
+   - Meilleure gestion des erreurs
 
 ## Gestion des erreurs
 
@@ -563,3 +493,28 @@ Optimisations mises en place :
 - **Erreur** : Affichage des messages d'erreur avec option de réessai
 - **Sélection** : Mise en évidence de la période sélectionnée
 - **Navigation** : Bouton de retour conditionnel 
+
+## Structure des composants
+
+### GeologicalPeriods.vue
+- Gestion de la navigation hiérarchique
+- Intégration du composant BackButton
+- Gestion des états de chargement et des erreurs
+- Affichage en grille des périodes
+
+### GeologicalPeriodCard.vue
+- Affichage des informations d'une période
+- Gestion des états (sélection, chargement)
+- Styles optimisés pour le contraste
+- Support des sous-périodes
+
+### BackButton.vue
+- Composant réutilisable pour la navigation
+- Style cohérent avec le design système
+- Gestion des événements de clic
+
+## Styles et Thème
+- Utilisation de variables CSS pour les couleurs
+- Support du mode clair/sombre
+- Contraste optimisé pour l'accessibilité
+- Transitions et animations fluides 

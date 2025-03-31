@@ -1,62 +1,52 @@
 <template>
   <div 
-    class="period-card"
-    :class="{ 'selected': isSelected }"
-    @click="$emit('click')"
+    class="period-card" 
+    :class="{ 
+      'selected': isSelected,
+      'loading': loading,
+      'has-children': period.hasChildren,
+      'main-eon': period.isMainEon
+    }"
+    @click="$emit('select', period)"
   >
     <div class="period-header">
       <h3 class="period-title">{{ period.label }}</h3>
-      <div class="period-categories">
-        <span 
-          v-for="(category, index) in period.categoryLabels" 
-          :key="index"
-          class="category-tag"
-        >
-          {{ category }}
-        </span>
+      <div v-if="period.hasChildren" class="children-count">
+        {{ period.hasChildren ? 'Sous-périodes disponibles' : '' }}
       </div>
     </div>
-    
-    <div class="period-dates">
-      <div class="date-range">
-        <span class="date-label">Début:</span>
-        <span class="date-value">{{ period.startDate || 'Non spécifié' }}</span>
+
+    <div class="period-details">
+      <div v-if="period.startDate || period.endDate" class="period-dates">
+        <span v-if="period.startDate">{{ period.startDate }}</span>
+        <span v-if="period.startDate && period.endDate"> - </span>
+        <span v-if="period.endDate">{{ period.endDate }}</span>
       </div>
-      <div class="date-range">
-        <span class="date-label">Fin:</span>
-        <span class="date-value">{{ period.endDate || 'Non spécifié' }}</span>
+
+      <div v-if="period.location" class="period-location">
+        <i class="fas fa-map-marker-alt"></i>
+        {{ period.location }}
       </div>
     </div>
-    
-    <div v-if="period.location" class="period-location">
-      <span class="location-label">Localisation:</span>
-      <span class="location-value">{{ period.location }}</span>
-    </div>
-    
-    <div class="period-footer">
-      <div v-if="period.loading" class="loading-indicator">
-        Chargement...
-      </div>
-      <div v-else-if="period.children.length > 0" class="children-count">
-        {{ period.children.length }} sous-période(s)
-      </div>
-      <div v-else class="children-hint">
-        Sous-périodes disponibles
-      </div>
+
+    <div v-if="loading" class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { Period } from '../types/geological';
 
-defineProps<{
+const props = defineProps<{
   period: Period;
-  isSelected?: boolean;
+  isSelected: boolean;
+  loading?: boolean;
 }>();
 
 defineEmits<{
-  (e: 'click'): void;
+  (e: 'select', period: Period): void;
 }>();
 </script>
 
@@ -69,6 +59,7 @@ defineEmits<{
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid #e0e0e0;
+  color: #213547;
 }
 
 .period-card:hover {
@@ -88,7 +79,7 @@ defineEmits<{
 .period-title {
   margin: 0;
   font-size: 1.2em;
-  color: #333;
+  color: #213547;
 }
 
 .period-categories {
@@ -109,6 +100,7 @@ defineEmits<{
 .period-dates {
   margin: 12px 0;
   font-size: 0.9em;
+  color: #213547;
 }
 
 .date-range {
@@ -118,18 +110,19 @@ defineEmits<{
 }
 
 .date-label {
-  color: #666;
+  color: #213547;
+  opacity: 0.7;
 }
 
 .date-value {
-  color: #333;
+  color: #213547;
   font-weight: 500;
 }
 
 .period-location {
   margin: 12px 0;
   font-size: 0.9em;
-  color: #666;
+  color: #213547;
 }
 
 .location-label {
@@ -141,7 +134,8 @@ defineEmits<{
   padding-top: 12px;
   border-top: 1px solid #eee;
   font-size: 0.9em;
-  color: #666;
+  color: #213547;
+  opacity: 0.7;
 }
 
 .loading-indicator {
@@ -149,6 +143,7 @@ defineEmits<{
 }
 
 .children-count, .children-hint {
-  color: #666;
+  color: #213547;
+  opacity: 0.8;
 }
 </style> 

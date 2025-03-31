@@ -123,158 +123,86 @@ export class WikidataTimelineService {
     );
   }
 
-  private buildMainEonsQuery(language: string): string {
-    return `
-      PREFIX wd: <http://www.wikidata.org/entity/>
-      PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      
-      SELECT DISTINCT ?item ?itemLabel 
-          (SAMPLE(?startDate) AS ?debut) 
-          (SAMPLE(?endDate) AS ?fin) 
-          ?categoryId ?categoryLabel
-          (GROUP_CONCAT(DISTINCT ?locationLabel; separator=", ") AS ?locations)
-          (COUNT(DISTINCT ?child) AS ?childCount)
+  private buildQuery(options: QueryOptions): string {
+    const { language = 'fr', parentId } = options;
+    
+    // Définition des éons principaux
+    const mainEons = [
+      'Q104460',  // Hadéen
+      'Q104168',  // Archéen
+      'Q104162',  // Protérozoïque
+      'Q101313'   // Phanérozoïque
+    ];
+
+    // Construction du filtre parent
+    const parentFilter = parentId 
+      ? `?item wdt:P361 wd:${parentId}.`  // Si on a un parent, on cherche ses enfants
+      : `VALUES ?item { wd:${mainEons.join(' wd:')} }`; // Liste des éons principaux
+
+    // Construction de la requête
+    const query = `
+      SELECT DISTINCT 
+        ?item ?itemLabel 
+        ?startDate ?endDate 
+        (GROUP_CONCAT(DISTINCT ?locationLabel; separator=", ") AS ?locations)
+        (COUNT(DISTINCT ?child) AS ?childCount)
       WHERE {
-        VALUES ?item { 
-          wd:${MAIN_EONS.HADEAN} 
-          wd:${MAIN_EONS.ARCHEAN} 
-          wd:${MAIN_EONS.PROTEROZOIC} 
-          wd:${MAIN_EONS.PHANEROZOIC} 
-        }
+        ${parentFilter}
         
         # Dates
         OPTIONAL { ?item wdt:P580 ?startDate. }
         OPTIONAL { ?item wdt:P582 ?endDate. }
         
-        # Catégories
+        # Localisation (avec vérification des labels)
         OPTIONAL { 
-          ?item wdt:P31 ?categoryId.
+          { ?item wdt:P17 ?locationEntity }
+          UNION { ?item wdt:P276 ?locationEntity }
+          UNION { ?item wdt:P131 ?locationEntity }
+          FILTER(EXISTS { ?locationEntity rdfs:label ?locationLabel. })
         }
         
-        # Localisation
-        OPTIONAL { 
-          {?item wdt:P17 ?locationEntity}  # pays
-          UNION {?item wdt:P276 ?locationEntity}  # lieu
-          UNION {?item wdt:P131 ?locationEntity}  # situé dans l'entité administrative
-        }
-        
-        # Vérifie s'il y a des enfants
+        # Vérification des enfants
         OPTIONAL {
-          { ?child wdt:P361 ?item } 
-          UNION { ?item wdt:P527 ?child }
+          ?child wdt:P361 ?item.
         }
         
         # Labels
         SERVICE wikibase:label { 
           bd:serviceParam wikibase:language "${language}".
           ?item rdfs:label ?itemLabel.
-          ?categoryId rdfs:label ?categoryLabel.
           ?locationEntity rdfs:label ?locationLabel.
         }
       }
-      GROUP BY ?item ?itemLabel ?categoryId ?categoryLabel
-      ORDER BY ?debut
-    `;
-  }
-
-  private buildChildrenQuery(parentId: string, options: QueryOptions): string {
-    return `
-      PREFIX wd: <http://www.wikidata.org/entity/>
-      PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      PREFIX wikibase: <http://wikiba.se/ontology#>
-      PREFIX bd: <http://www.bigdata.com/rdf#>
-      
-      SELECT DISTINCT ?child ?childLabel 
-        ?startDate ?endDate 
-        ?categoryId ?categoryLabel
-        (GROUP_CONCAT(DISTINCT ?locationLabel; separator=", ") AS ?locations)
-      WHERE {
-        # Relation parent-enfant
-        { ?child wdt:P361 wd:${parentId} }
-        UNION { wd:${parentId} wdt:P527 ?child }
-        
-        # FILTRE: S'assurer que c'est une période temporelle
-        {
-          ?child wdt:P31 ?periodType.
-          VALUES ?periodType {
-            wd:Q23387    # Éon
-            wd:Q3253162  # Ère
-            wd:Q186081   # Période
-            wd:Q11514315 # Époque
-            wd:Q47018901 # Âge
-          }
-        }
-        UNION {
-          ?child wdt:P31 ?childType.
-          ?childType wdt:P279+ wd:Q186081.  # Sous-classe de Période
-        }
-        
-        # Dates
-        OPTIONAL { ?child wdt:P580 ?startDate. }
-        OPTIONAL { ?child wdt:P582 ?endDate. }
-        
-        # Catégories
-        OPTIONAL { ?child wdt:P31 ?categoryId. }
-        
-        # Localisation
-        OPTIONAL { 
-          {?child wdt:P17 ?locationEntity}
-          UNION {?child wdt:P276 ?locationEntity}
-          UNION {?child wdt:P131 ?locationEntity}
-        }
-        
-        # Labels
-        SERVICE wikibase:label { 
-          bd:serviceParam wikibase:language "${options.language}".
-          ?child rdfs:label ?childLabel.
-          ?categoryId rdfs:label ?categoryLabel.
-          ?locationEntity rdfs:label ?locationLabel.
-        }
-      }
-      GROUP BY ?child ?childLabel ?startDate ?endDate ?categoryId ?categoryLabel
+      GROUP BY ?item ?itemLabel ?startDate ?endDate
       ORDER BY ?startDate
       LIMIT 100
     `;
+
+    console.log('Requête SPARQL:', query);
+    return query;
   }
 
-  private transformToPeriod(binding: any): Period {
-    const itemId = binding.item.value.split('/').pop();
-    const categoryId = binding.categoryId?.value.split('/').pop() || '';
-    
-    return {
-      id: itemId,
-      label: binding.itemLabel?.value || itemId,
-      startDate: binding.debut?.value ? DateFormatter.format(binding.debut.value, 'geological') : undefined,
-      endDate: binding.fin?.value ? DateFormatter.format(binding.fin.value, 'geological') : undefined,
-      categoryIds: [categoryId],
-      categoryLabels: [binding.categoryLabel?.value || categoryId],
-      location: binding.locations?.value,
-      childrenPreloaded: false,
-      children: [],
-      loading: false,
-      isMainEon: Object.values(MAIN_EONS).includes(itemId)
-    };
-  }
+  private transformResponse(bindings: any[]): SimplePeriod[] {
+    return bindings.map(binding => {
+      const period: SimplePeriod = {
+        id: binding.item.value.split('/').pop() || '',
+        label: binding.itemLabel.value,
+        startDate: binding.startDate?.value ? DateFormatter.format(binding.startDate.value, 'geological') : undefined,
+        endDate: binding.endDate?.value ? DateFormatter.format(binding.endDate.value, 'geological') : undefined,
+        location: binding.locations?.value,
+        hasChildren: parseInt(binding.childCount?.value || '0') > 0,
+        isMainEon: false,
+        categoryIds: [] // On garde un tableau vide pour la compatibilité
+      };
 
-  private transformToSimplePeriod(binding: any): SimplePeriod {
-    const childId = binding.child.value.split('/').pop();
-    const categoryId = binding.categoryId?.value.split('/').pop() || '';
-    
-    // Vérifier si la période a des enfants
-    const hasChildren = binding.hasChildren?.value === "true";
-    
-    return {
-      id: childId,
-      label: binding.childLabel?.value || childId,
-      startDate: binding.startDate?.value ? DateFormatter.format(binding.startDate.value, 'geological') : undefined,
-      endDate: binding.endDate?.value ? DateFormatter.format(binding.endDate.value, 'geological') : undefined,
-      categoryIds: [categoryId],
-      location: binding.locations?.value,
-      hasChildren: hasChildren,
-      isMainEon: Object.values(MAIN_EONS).includes(childId)
-    };
+      // Déterminer si c'est un éon principal
+      const mainEons = ['Q104460', 'Q104168', 'Q104162', 'Q101313'];
+      if (mainEons.includes(period.id)) {
+        period.isMainEon = true;
+      }
+
+      return period;
+    });
   }
 
   async getMainEons(options: QueryOptions = {}): Promise<Period[]> {
@@ -287,7 +215,7 @@ export class WikidataTimelineService {
     }
 
     return this.retryOperation(async () => {
-      const query = this.buildMainEonsQuery(language);
+      const query = this.buildQuery(options);
       
       try {
         const response = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
@@ -296,7 +224,15 @@ export class WikidataTimelineService {
           headers: { 'Accept': 'application/sparql-results+json' }
         });
 
-        const periods = response.data.results.bindings.map(binding => this.transformToPeriod(binding));
+        const simplePeriods = this.transformResponse(response.data.results.bindings);
+        const periods: Period[] = simplePeriods.map(period => ({
+          ...period,
+          categoryLabels: period.categoryIds,
+          childrenPreloaded: false,
+          children: [],
+          loading: false
+        }));
+
         this.setCache(cacheKey, periods);
         return periods;
       } catch (error) {
@@ -331,7 +267,7 @@ export class WikidataTimelineService {
         }
       });
 
-      return response.data.boolean;
+      return response.data.boolean ?? false;
     } catch (error) {
       console.error(`Erreur lors de la vérification des enfants pour ${childId}:`, error);
       return false;
@@ -353,7 +289,7 @@ export class WikidataTimelineService {
     }
 
     return this.retryOperation(async () => {
-      const query = this.buildChildrenQuery(parentId, options);
+      const query = this.buildQuery({ ...options, parentId });
       
       try {
         // Log de la requête pour le débogage
@@ -362,14 +298,14 @@ export class WikidataTimelineService {
         
         const response = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
           params: { 
-            query: query.trim(), // Suppression des espaces inutiles
+            query: query.trim(),
             format: 'json'
           },
           timeout: REQUEST_TIMEOUT,
           headers: { 
             'Accept': 'application/sparql-results+json'
           },
-          validateStatus: (status) => status === 200 // Seul le statut 200 est accepté
+          validateStatus: (status) => status === 200
         });
 
         // Validation de la réponse
@@ -381,15 +317,9 @@ export class WikidataTimelineService {
           throw new WikidataError('Format de réponse invalide', 'INVALID_RESPONSE_FORMAT');
         }
 
-        // Vérifier les enfants pour chaque période
-        const children = await Promise.all(
-          response.data.results.bindings.map(async (binding) => {
-            const childId = binding.child.value.split('/').pop();
-            const hasChildren = await this.checkHasChildren(childId);
-            return this.transformToSimplePeriod({ ...binding, hasChildren: { value: hasChildren.toString() } });
-          })
-        );
-
+        // Transformation directe des résultats sans vérification supplémentaire
+        const children = this.transformResponse(response.data.results.bindings);
+        
         this.setCache(cacheKey, children);
         return children;
       } catch (error) {

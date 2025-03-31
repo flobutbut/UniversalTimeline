@@ -1,6 +1,34 @@
-# Documentation de Statut
+# État du Projet
+
+## Version actuelle : 1.2.1
+
+### Dernières modifications
+- Correction des problèmes de contraste dans l'interface utilisateur
+- Optimisation des styles pour une meilleure lisibilité
+- Restauration de l'utilisation du composant BackButton
+
+### Fonctionnalités implémentées
+- Navigation hiérarchique des périodes géologiques
+- Affichage des dates et localisations
+- Gestion des états de chargement
+- Gestion des erreurs avec retry
+- Support multilingue (FR/EN)
+
+### Problèmes connus
+- Aucun problème critique connu
+
+### Prochaines étapes
+- Optimisation des performances
+- Amélioration de l'accessibilité
+- Tests utilisateurs
 
 ## État Actuel
+
+### Version 1.2.0 (En cours)
+- Simplification de la structure de données
+- Optimisation des requêtes SPARQL
+- Amélioration de la navigation
+- Meilleure gestion des erreurs
 
 ### Fonctionnalités Implémentées
 

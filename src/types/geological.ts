@@ -19,16 +19,16 @@ export const PERIOD_CATEGORIES = {
 export interface Period {
   id: string;
   label: string;
-  description?: string;
   startDate?: string;
   endDate?: string;
-  categoryIds: string[];            // IDs des catégories pour filtrage
-  categoryLabels: string[];         // Labels des catégories pour affichage
-  location?: string;                // Localisation principale (simplifiée)
-  childrenPreloaded: boolean;       // Indique si les enfants sont préchargés
-  children: SimplePeriod[];         // Liste des périodes enfants simplifiées
-  loading: boolean;                 // État de chargement
-  isMainEon: boolean;              // Indique si c'est un éon principal
+  location?: string;
+  hasChildren: boolean;
+  isMainEon: boolean;
+  categoryIds: string[];
+  categoryLabels: string[];
+  childrenPreloaded: boolean;
+  children: Period[];
+  loading: boolean;
 }
 
 // Version simplifiée d'une période pour l'affichage dans la liste des enfants
@@ -37,17 +37,32 @@ export interface SimplePeriod {
   label: string;
   startDate?: string;
   endDate?: string;
-  categoryIds: string[];
   location?: string;
-  hasChildren?: boolean;            // Indique si cette période a des enfants
-  isMainEon: boolean;              // Indique si c'est un éon principal
+  hasChildren: boolean;
+  isMainEon: boolean;
+  categoryIds: string[];
 }
 
 // Types pour les réponses Wikidata
 export interface WikidataBinding {
-  value: string;
-  type: string;
-  'xml:lang'?: string;
+  item?: {
+    value: string;
+  };
+  itemLabel?: {
+    value: string;
+  };
+  startDate?: {
+    value: string;
+  };
+  endDate?: {
+    value: string;
+  };
+  locations?: {
+    value: string;
+  };
+  childCount?: {
+    value: string;
+  };
 }
 
 export interface WikidataResult {
@@ -65,6 +80,9 @@ export interface WikidataResult {
 }
 
 export interface WikidataResponse {
+  head: {
+    vars: string[];
+  };
   results: {
     bindings: WikidataBinding[];
   };

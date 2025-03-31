@@ -12,29 +12,40 @@ L'application permet de naviguer dans une timeline des périodes géologiques, e
 
 ### Navigation
 
-1. **Vue Initiale**
-   - Affichage des quatre éons principaux
-   - Chaque éon est présenté dans une carte avec :
+1. **Vue principale**
+   - Affichage des éons géologiques principaux
+   - Chaque carte affiche :
      - Nom de l'éon
-     - Dates de début et de fin
-     - Catégories associées
-     - Localisation géographique
-     - Indication du nombre de sous-périodes
-
-2. **Navigation Hiérarchique**
-   - Clic sur une période pour accéder à ses sous-périodes
-   - Bouton retour pour remonter dans la hiérarchie
-   - Indication visuelle de la période sélectionnée
-   - Chargement progressif des sous-périodes
-
-3. **Affichage des Périodes**
-   - Carte pour chaque période avec :
-     - Titre de la période
-     - Tags de catégories
-     - Dates de début et de fin
+     - Dates de début et fin (si disponibles)
      - Localisation (si disponible)
-     - État de chargement
-     - Indication des sous-périodes
+     - Indication du nombre de sous-périodes disponibles
+
+2. **Navigation hiérarchique**
+   - Bouton "Retour" pour revenir au niveau précédent
+   - Titre dynamique indiquant le niveau actuel
+   - Indicateur de chargement pour chaque période
+
+3. **États de chargement**
+   - Spinner global pour le chargement initial
+   - Spinner individuel pour chaque période en cours de chargement
+   - Message d'erreur avec bouton de réessai
+
+### Fonctionnalités
+
+1. **Affichage des périodes**
+   - Format de date géologique (ex: "4.5 Ga")
+   - Localisation simplifiée
+   - Indication visuelle des périodes avec sous-périodes
+
+2. **Navigation**
+   - Navigation intuitive entre les niveaux
+   - Conservation de l'historique de navigation
+   - Retour rapide aux éons principaux
+
+3. **Gestion des erreurs**
+   - Messages d'erreur clairs et explicites
+   - Possibilité de réessayer le chargement
+   - Logs détaillés pour le débogage
 
 ### Interface Utilisateur
 
@@ -203,4 +214,31 @@ La navigation se fait de manière hiérarchique, permettant aux utilisateurs d'e
 3. **Gestion des Erreurs**
    - En cas d'erreur de chargement, un message explicite est affiché
    - Un bouton "Réessayer" permet de relancer le chargement
-   - La navigation reste cohérente même en cas d'erreur 
+   - La navigation reste cohérente même en cas d'erreur
+
+## Interface Utilisateur
+
+### Navigation
+- Affichage hiérarchique des périodes géologiques
+- Bouton de retour pour remonter dans la hiérarchie
+- Titre dynamique indiquant le niveau actuel
+- Indication visuelle des sous-périodes disponibles
+
+### Affichage des Périodes
+- Cartes avec informations essentielles
+- Dates de début et de fin
+- Localisation géographique
+- Indicateur de chargement
+- État de sélection
+
+### Gestion des États
+- Chargement initial des éons
+- Chargement des sous-périodes
+- Messages d'erreur avec option de retry
+- Transitions fluides entre les états
+
+### Accessibilité
+- Contraste optimisé pour la lisibilité
+- Support du mode clair/sombre
+- Navigation au clavier
+- Messages d'état clairs 
