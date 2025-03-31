@@ -1,37 +1,94 @@
-# État du Projet
+# État du Projet - Timeline Géologique
 
-## Version actuelle : 1.2.1
+## État Actuel
 
-### Dernières modifications
-- Correction des problèmes de contraste dans l'interface utilisateur
-- Optimisation des styles pour une meilleure lisibilité
-- Restauration de l'utilisation du composant BackButton
+### Services Implémentés
+1. **WikidataTimelineService**
+   - Gestion des requêtes SPARQL vers Wikidata
+   - Transformation des données
+   - Gestion des erreurs et retries
+   - Intégration avec le nouveau système de cache
 
-### Fonctionnalités implémentées
-- Navigation hiérarchique des périodes géologiques
-- Affichage des dates et localisations
-- Gestion des états de chargement
-- Gestion des erreurs avec retry
-- Support multilingue (FR/EN)
-- Gestion des langues (fr, en, es, de)
+2. **CacheService**
+   - Implémentation d'une stratégie LRU (Least Recently Used)
+   - Gestion de la taille du cache
+   - Monitoring des statistiques d'utilisation
+   - Nettoyage automatique des entrées expirées
 
-### Problèmes connus
-- Aucun problème critique connu
+3. **ProgressiveLoadingService**
+   - Gestion des priorités de chargement
+   - Préchargement intelligent
+   - Limitation des requêtes concurrentes
+   - Monitoring des états de chargement
+   - Statistiques de performance
+   - Gestion des temps de chargement
+   - Suivi des erreurs
 
-### Prochaines étapes
-- Amélioration du service WikidataTimeline
-  - Extension des propriétés de dates (P569/P570/P571)
-  - Filtrage des entités non-périodes
-  - Correction des problèmes de détection des localisations
-- Interface et UX
-  - Création du design system
-  - Amélioration de l'accessibilité
-  - Optimisation des performances
-  - Implémentation de la visualisation temporelle
-- Tests et documentation
-  - Tests de performance
-  - Documentation des APIs
-  - Tests de persistance et sauvegarde
+### Fonctionnalités Implémentées
+1. Chargement initial des éons principaux
+2. Chargement des enfants d'une période
+3. Système de cache optimisé
+4. Gestion des erreurs et retries
+5. Support multilingue
+6. Chargement progressif des données
+7. Système de logging structuré
+   - Logs des interactions utilisateur
+   - Suivi des requêtes API
+   - Monitoring du cache
+   - Traçabilité des erreurs
+
+### Problèmes Résolus
+1. **Gestion du cache**
+   - ✅ Structure de cache typée
+   - ✅ Gestion de la mémoire optimisée
+   - ✅ Monitoring des statistiques
+   - ✅ Correction des erreurs de typage dans le cache
+
+2. **Performance**
+   - ✅ Chargement progressif des données
+   - ✅ Gestion des requêtes parallèles
+   - ✅ Préchargement intelligent
+   - ✅ Optimisation des types pour les périodes
+
+3. **Maintenance**
+   - ✅ Séparation des responsabilités
+   - ✅ Code plus testable
+   - ✅ Documentation à jour
+   - ✅ Correction des interfaces TypeScript
+
+## Prochaines Étapes
+
+1. **Tests**
+   - Implémenter des tests unitaires pour chaque service
+   - Ajouter des tests d'intégration
+   - Mettre en place des tests de performance
+
+2. **Optimisations**
+   - Optimiser les requêtes SPARQL
+   - Améliorer la gestion de la mémoire
+   - Optimiser le préchargement
+
+3. **Documentation**
+   - Documenter l'API des services
+   - Ajouter des exemples d'utilisation
+   - Mettre à jour la documentation technique
+
+## Notes Techniques
+
+### Cache
+- Durée de vie : 5 minutes
+- Taille maximale : 100 entrées
+- Stratégie d'éviction : LRU
+
+### Chargement Progressif
+- Maximum 3 requêtes concurrentes
+- Seuil de préchargement : 80% de la hauteur de la fenêtre
+- 3 niveaux de priorité : visible, preload, background
+
+### API Wikidata
+- Timeout : 30 secondes
+- Maximum 3 tentatives de retry
+- Délai entre les tentatives : 1 seconde
 
 ## État des Fonctionnalités
 
@@ -146,8 +203,32 @@
 ### Tests Unitaires
 - ✅ Types et interfaces
 - ✅ Service Wikidata
+  - ✅ Chargement des éons
+  - ✅ Chargement des enfants
+  - ✅ Gestion du cache
+  - ✅ Gestion des erreurs
 - ✅ Composants Vue
+  - ✅ GeologicalPeriodCard
+    - ✅ Rendu
+    - ✅ Interactions
+    - ✅ Styles
+    - ✅ Formatage des dates
+    - ✅ Localisation
 - ✅ Utilitaires
+- ✅ Tests du CacheService
+  - ✅ Configuration
+  - ✅ Opérations de base
+  - ✅ Gestion de la taille
+  - ✅ Expiration
+  - ✅ Statistiques
+  - ✅ Nettoyage
+- ✅ Tests du ProgressiveLoadingService
+  - ✅ Configuration
+  - ✅ Chargement des périodes
+  - ✅ Chargement des enfants
+  - ✅ Gestion de la file d'attente
+  - ✅ Statistiques
+  - ✅ Monitoring des états
 - ⚠️ Tests de persistance
 - ⚠️ Tests de sauvegarde
 

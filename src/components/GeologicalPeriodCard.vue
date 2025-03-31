@@ -7,6 +7,7 @@
       'has-children': period.hasChildren,
       'main-eon': period.isMainEon
     }"
+    :data-period-id="period.id"
     @click="$emit('select', period)"
   >
     <div class="period-header">
@@ -43,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { watch } from 'vue';
 import type { Period } from '../types/geological';
 
 const props = defineProps<{
@@ -55,6 +56,16 @@ const props = defineProps<{
 defineEmits<{
   (e: 'select', period: Period): void;
 }>();
+
+// Surveiller les changements d'état de chargement
+watch(() => props.loading, (newValue) => {
+  console.log(`[Card] État de chargement pour ${props.period.id}: ${newValue ? 'chargement' : 'terminé'}`);
+});
+
+// Surveiller la sélection
+watch(() => props.isSelected, (newValue) => {
+  console.log(`[Card] État de sélection pour ${props.period.id}: ${newValue ? 'sélectionné' : 'désélectionné'}`);
+});
 </script>
 
 <style scoped>

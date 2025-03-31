@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios';
-import type { GeologicalPeriod, WikidataResponse } from '../types/geological';
+import type { Period, WikidataResponse } from '../types/geological';
 import { DateFormatter } from '../utils/dateFormatter';
+import { CacheService } from './index';
 
 const WIKIDATA_API_URL = '/api/wikidata/sparql';
 const MAX_RETRIES = 3;
@@ -9,7 +10,7 @@ const REQUEST_TIMEOUT = 30000; // 30 secondes
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 interface CacheEntry {
-  data: GeologicalPeriod[];
+  data: Period[];
   timestamp: number;
 }
 
@@ -34,8 +35,6 @@ export class WikidataError extends Error {
 export class WikidataService {
   private static instance: WikidataService;
   private cache: Map<string, CacheEntry> = new Map();
-  private defaultLimit = 20;
-  private defaultLanguage = 'fr';
 
   private constructor() {}
 
@@ -50,7 +49,7 @@ export class WikidataService {
     return `${options.limit}-${options.offset}-${options.language}-${options.parentId || 'root'}`;
   }
 
-  private getFromCache(key: string): GeologicalPeriod[] | null {
+  private getFromCache(key: string): Period[] | null {
     const entry = this.cache.get(key);
     if (entry && Date.now() - entry.timestamp < CACHE_DURATION) {
       return entry.data;
@@ -58,7 +57,7 @@ export class WikidataService {
     return null;
   }
 
-  private setCache(key: string, data: GeologicalPeriod[]): void {
+  private setCache(key: string, data: Period[]): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now()
@@ -167,40 +166,7 @@ export class WikidataService {
     return query;
   }
 
-  private formatDate(dateString: string): string {
-    try {
-      // Gestion des différentes précisions de dates
-      if (dateString.match(/^\d{4}$/)) {
-        // Format année uniquement
-        return dateString;
-      } else if (dateString.match(/^\d{4}-\d{2}$/)) {
-        // Format année-mois
-        const [year, month] = dateString.split('-');
-        const date = new Date(parseInt(year), parseInt(month) - 1);
-        return date.toLocaleDateString('fr-FR', {
-          year: 'numeric',
-          month: 'long'
-        });
-      } else if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        // Format année-mois-jour
-        const date = new Date(dateString);
-        return date.toLocaleDateString('fr-FR', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
-      } else {
-        // Format non reconnu, on retourne la date brute
-        console.warn('Format de date non reconnu:', dateString);
-        return dateString;
-      }
-    } catch (error) {
-      console.error('Erreur de formatage de date:', error);
-      return dateString;
-    }
-  }
-
-  private transformResponse(bindings: any[]): GeologicalPeriod[] {
+  private transformResponse(bindings: any[]): Period[] {
     console.log('Début de transformation des données...');
     console.log('Nombre total de périodes:', bindings.length);
     
@@ -236,14 +202,19 @@ export class WikidataService {
         }
       }
 
-      const period = {
+      const period: Period = {
         id: binding.item.value.split('/').pop() || '',
         label: binding.itemLabel.value,
-        description: locationDescription,
         startDate: binding.startDate?.value ? DateFormatter.format(binding.startDate.value, 'geological') : undefined,
         endDate: binding.endDate?.value ? DateFormatter.format(binding.endDate.value, 'geological') : undefined,
-        parentPeriod: undefined,
-        childPeriods: []
+        location: locationDescription,
+        hasChildren: false,
+        isMainEon: false,
+        categoryIds: [],
+        categoryLabels: [],
+        children: [],
+        loading: false,
+        childrenPreloaded: false
       };
 
       console.log('Période transformée:', period);
@@ -251,7 +222,7 @@ export class WikidataService {
     });
   }
 
-  async getGeologicalPeriods(options: QueryOptions): Promise<GeologicalPeriod[]> {
+  async getGeologicalPeriods(options: QueryOptions): Promise<Period[]> {
     const cacheKey = this.getCacheKey(options);
     const cachedData = this.getFromCache(cacheKey);
     if (cachedData) {
@@ -299,7 +270,7 @@ export class WikidataService {
     });
   }
 
-  async getChildPeriods(parentId: string, options: QueryOptions = {}): Promise<GeologicalPeriod[]> {
+  async getChildPeriods(parentId: string, options: QueryOptions = {}): Promise<Period[]> {
     return this.getGeologicalPeriods({
       ...options,
       parentId

@@ -69,6 +69,40 @@ interface QueryOptions {
 - Cascade de langues (fr, en, es, de)
 - Mécanisme de secours pour les labels
 
+### Système de Logging
+Le service utilise un système de logging structuré avec différents niveaux et catégories :
+
+#### Catégories de Logs
+1. **[Timeline]** - Logs des interactions utilisateur
+   - Préfixé par `##` pour une meilleure visibilité
+   - Suit le flux de navigation et les actions utilisateur
+   - Affiche les labels des périodes pour une meilleure lisibilité
+
+2. **[API]** - Logs des requêtes et réponses
+   - Détails des requêtes SPARQL
+   - Tentatives de reconnexion
+   - Erreurs d'API
+
+3. **[Cache]** - Logs du système de cache
+   - Génération des clés
+   - Hits/misses du cache
+   - Mise en cache des données
+
+4. **[SPARQL]** - Logs des requêtes SPARQL
+   - Génération des requêtes
+   - Paramètres utilisés
+
+#### Exemple de Flux de Logs
+```
+## [Timeline] Chargement initial des éons principaux
+[API] Requête SPARQL pour les éons principaux
+## [Timeline] Éons principaux chargés: Hadéen, Archéen, Protérozoïque, Phanérozoïque
+
+## [Timeline] Navigation vers les enfants de Q101313
+[API] Requête SPARQL pour les enfants de Q101313
+## [Timeline] Enfants chargés pour Q101313: Paléozoïque, Mésozoïque, Cénozoïque
+```
+
 ### Formatage des Dates (`dateFormatter.ts`)
 - Classe utilitaire pour le formatage des dates
 - Gestion des différents formats de dates :
@@ -453,3 +487,71 @@ SERVICE wikibase:label {
 1. Label disponible dans la langue préférée
 2. Label disponible dans une langue de secours
 3. Label vide ou malformé -> utilisation de l'ID Wikidata
+
+## Tests Unitaires
+
+### ProgressiveLoadingService
+
+Le service de chargement progressif est testé de manière exhaustive avec les scénarios suivants :
+
+#### Configuration
+- Vérification de la configuration par défaut
+  - Nombre maximum de requêtes concurrentes : 3
+  - Seuil de préchargement : 80%
+  - Niveaux de priorité : visible (1), preload (2), background (3)
+- Mise à jour de la configuration
+  - Modification des paramètres
+  - Persistance des changements
+
+#### Chargement des Périodes
+- Chargement réussi d'une période
+  - Vérification de l'état de chargement
+  - Mise à jour des statistiques
+  - Gestion des temps de chargement
+- Gestion des erreurs
+  - Capture des erreurs
+  - Mise à jour de l'état
+  - Statistiques d'échec
+- Prévention des chargements multiples
+  - Détection des requêtes en cours
+  - Évitement des doublons
+
+#### Chargement des Enfants
+- Chargement réussi des enfants
+  - Vérification de l'état de chargement
+  - Mise à jour des statistiques
+  - Gestion des temps de chargement
+- Gestion des erreurs
+  - Capture des erreurs
+  - Mise à jour de l'état
+  - Statistiques d'échec
+
+#### Gestion de la File d'Attente
+- Limitation des requêtes concurrentes
+  - Respect de la limite maximale
+  - Mise en file d'attente des requêtes excédentaires
+- Priorisation des requêtes
+  - Ordre de traitement selon la priorité
+  - Gestion des différents niveaux de priorité
+
+#### Statistiques
+- Suivi des requêtes
+  - Nombre total de requêtes
+  - Requêtes complétées
+  - Requêtes échouées
+- Temps de chargement
+  - Calcul de la moyenne
+  - Suivi des temps individuels
+- État de la file d'attente
+  - Taille de la file
+  - Nombre de requêtes actives
+
+#### Monitoring des États
+- États de chargement
+  - Indication de chargement en cours
+  - Progression du chargement
+  - Gestion des erreurs
+- Temps de chargement
+  - Horodatage de début
+  - Horodatage de fin
+  - Calcul de la durée

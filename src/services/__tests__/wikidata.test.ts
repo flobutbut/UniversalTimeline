@@ -3,9 +3,11 @@ import axios from 'axios';
 import { WikidataService, WikidataError } from '../wikidata';
 import type { WikidataResponse } from '../../types/geological';
 import { mockGeologicalPeriods } from '../../mocks/geological';
+import { WikidataTimelineService } from '../wikidataTimeline';
+import type { QueryOptions } from '../../types/geological';
 
 vi.mock('axios');
-const mockedAxios = axios as unknown as jest.Mocked<typeof axios>;
+const mockedAxios = axios as unknown as { get: jest.Mock };
 
 describe('WikidataService', () => {
   let service: WikidataService;
@@ -222,5 +224,44 @@ describe('WikidataService', () => {
       expect(cachedResult1).toEqual(result1);
       expect(cachedResult2).toEqual(result2);
     });
+  });
+});
+
+describe('WikidataTimelineService', () => {
+  let service: WikidataTimelineService;
+
+  beforeEach(() => {
+    service = WikidataTimelineService.getInstance();
+    vi.clearAllMocks();
+  });
+
+  it('should fetch geological periods successfully', async () => {
+    const mockResponse = {
+      data: {
+        results: {
+          bindings: [
+            {
+              item: { value: 'Q123' },
+              itemLabel: { value: 'Test Period' },
+              startDate: { value: '2023-01-01' },
+              endDate: { value: '2023-12-31' },
+              childCount: { value: '0' }
+            }
+          ]
+        }
+      }
+    };
+
+    mockedAxios.get.mockResolvedValueOnce(mockResponse);
+
+    const result = await service.getMainEons({ language: 'fr' });
+    expect(result).toBeDefined();
+    expect(result.length).toBe(1);
+  });
+
+  it('should handle API errors', async () => {
+    mockedAxios.get.mockRejectedValueOnce(new Error('API Error'));
+
+    await expect(service.getMainEons({ language: 'fr' })).rejects.toThrow('API Error');
   });
 }); 

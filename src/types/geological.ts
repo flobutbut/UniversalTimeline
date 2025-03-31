@@ -41,6 +41,10 @@ export interface SimplePeriod {
   hasChildren: boolean;
   isMainEon: boolean;
   categoryIds: string[];
+  categoryLabels: string[];
+  childrenPreloaded: boolean;
+  children: Period[];
+  loading: boolean;
 }
 
 // Types pour les réponses Wikidata
@@ -61,6 +65,21 @@ export interface WikidataBinding {
     value: string;
   };
   childCount?: {
+    value: string;
+  };
+  locationLabel?: {
+    value: string;
+  };
+  child?: {
+    value: string;
+  };
+  childLabel?: {
+    value: string;
+  };
+  categoryId?: {
+    value: string;
+  };
+  categoryLabel?: {
     value: string;
   };
 }
@@ -99,8 +118,9 @@ export interface QueryOptions {
   languages?: string[];
 }
 
-// Type pour le cache
+export type CacheValue = Period | SimplePeriod | Period[] | SimplePeriod[];
+
 export interface CacheEntry {
-  data: Period[] | SimplePeriod[];
+  value: CacheValue;
   timestamp: number;
 } 

@@ -1,13 +1,15 @@
 import axios, { AxiosError } from 'axios';
-import type { Period, SimplePeriod, QueryOptions, CacheEntry, WikidataResponse } from '../types/geological';
-import { MAIN_EONS, PERIOD_CATEGORIES } from '../types/geological';
+import type { Period, SimplePeriod, QueryOptions, WikidataResponse, WikidataBinding } from '../types/geological';
+import { MAIN_EONS } from '../types/geological';
 import { DateFormatter } from '../utils/dateFormatter';
+import { CacheService } from './index';
 
 const WIKIDATA_API_URL = '/api/wikidata/sparql';
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 seconde
 const REQUEST_TIMEOUT = 30000; // 30 secondes
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_MAX_SIZE = 100; // Nombre maximum d'entrées dans le cache
 
 export class WikidataError extends Error {
   constructor(
@@ -22,11 +24,16 @@ export class WikidataError extends Error {
 
 export class WikidataTimelineService {
   private static instance: WikidataTimelineService;
-  private cache: Map<string, CacheEntry> = new Map();
+  private cache: CacheService;
   private defaultLanguage = 'fr';
   private defaultLanguages = ['fr', 'en', 'es', 'de'];
 
-  private constructor() {}
+  private constructor() {
+    this.cache = new CacheService({
+      duration: CACHE_DURATION,
+      maxSize: CACHE_MAX_SIZE
+    });
+  }
 
   static getInstance(): WikidataTimelineService {
     if (!WikidataTimelineService.instance) {
@@ -36,23 +43,20 @@ export class WikidataTimelineService {
   }
 
   private getCacheKey(options: QueryOptions): string {
-    const languagesKey = options.languages?.join('-') || this.defaultLanguages.join('-');
-    return `${languagesKey}-${options.parentId || 'root'}-${options.categoryId || 'all'}`;
+    const key = `${options.limit}-${options.offset}-${options.language}-${options.parentId || 'root'}`;
+    console.log(`[Cache] Génération de la clé: ${key}`);
+    return key;
   }
 
-  private getFromCache(key: string): Period[] | SimplePeriod[] | null {
-    const entry = this.cache.get(key);
-    if (entry && Date.now() - entry.timestamp < CACHE_DURATION) {
-      return entry.data;
-    }
-    return null;
+  private getFromCache(key: string): Period[] | null {
+    const cached = this.cache.get<Period[]>(key);
+    console.log(`[Cache] ${cached ? 'Données trouvées' : 'Données non trouvées'} pour la clé: ${key}`);
+    return cached;
   }
 
-  private setCache(key: string, data: Period[] | SimplePeriod[]): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now()
-    });
+  private setCache(key: string, data: Period[]): void {
+    console.log(`[Cache] Mise en cache de ${data.length} périodes pour la clé: ${key}`);
+    this.cache.set(key, data);
   }
 
   private async retryOperation<T>(
@@ -63,6 +67,7 @@ export class WikidataTimelineService {
       return await operation();
     } catch (error) {
       if (retries > 0 && this.isRetryableError(error)) {
+        console.log(`[API] Tentative de reconnexion (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`);
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
         return this.retryOperation(operation, retries - 1);
       }
@@ -196,19 +201,142 @@ export class WikidataTimelineService {
       LIMIT 100
     `;
 
-    console.log('Requête SPARQL:', query);
+    console.log(`[SPARQL] Requête générée pour ${parentId ? `parent ${parentId}` : 'éons principaux'}`);
     return query;
   }
 
-  private transformResponse(bindings: any[]): SimplePeriod[] {
+  // Nouvelles méthodes pour l'approche progressive
+  private buildInitialQuery(): string {
+    return `
+      SELECT DISTINCT ?item ?itemLabel (COUNT(DISTINCT ?child) AS ?childCount)
+      WHERE {
+        VALUES ?item { wd:${Object.values(MAIN_EONS).join(' wd:')} }
+        OPTIONAL { ?child wdt:P361 ?item. }
+        SERVICE wikibase:label { 
+          bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
+          ?item rdfs:label ?itemLabel.
+        }
+      }
+      GROUP BY ?item ?itemLabel
+    `;
+  }
+
+  private buildDetailsQuery(periodId: string): string {
+    return `
+      SELECT DISTINCT ?item ?itemLabel ?startDate ?endDate
+      WHERE {
+        BIND(wd:${periodId} AS ?item)
+        OPTIONAL { ?item wdt:P580 ?startDate. }
+        OPTIONAL { ?item wdt:P582 ?endDate. }
+        SERVICE wikibase:label { 
+          bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
+          ?item rdfs:label ?itemLabel.
+        }
+      }
+    `;
+  }
+
+  private buildLocationQuery(periodId: string): string {
+    return `
+      SELECT DISTINCT ?locationLabel
+      WHERE {
+        BIND(wd:${periodId} AS ?item)
+        {
+          { ?item wdt:P17 ?locationEntity }
+          UNION { ?item wdt:P276 ?locationEntity }
+          UNION { ?item wdt:P131 ?locationEntity }
+        }
+        UNION {
+          ?item p:P518 ?statement.
+          ?statement ps:P518 ?locationEntity.
+        }
+        SERVICE wikibase:label { 
+          bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
+          ?locationEntity rdfs:label ?locationLabel.
+        }
+      }
+    `;
+  }
+
+  private buildChildrenQuery(periodId: string): string {
+    return `
+      SELECT DISTINCT ?child ?childLabel
+      WHERE {
+        ?child wdt:P361 wd:${periodId}.
+        SERVICE wikibase:label { 
+          bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
+          ?child rdfs:label ?childLabel.
+        }
+      }
+    `;
+  }
+
+  // Méthodes utilitaires pour la transformation des données
+  private isMainEon(id: string): boolean {
+    return Object.values(MAIN_EONS).includes(id as any);
+  }
+
+  private transformToSimplePeriods(data: WikidataResponse): SimplePeriod[] {
+    return data.results.bindings.map(binding => ({
+      id: binding.item?.value.split('/').pop() || '',
+      label: binding.itemLabel?.value || '',
+      hasChildren: parseInt(binding.childCount?.value || '0') > 0,
+      isMainEon: this.isMainEon(binding.item?.value.split('/').pop() || ''),
+      categoryIds: [],
+      categoryLabels: [],
+      childrenPreloaded: false,
+      children: [],
+      loading: false,
+      startDate: undefined,
+      endDate: undefined,
+      location: undefined
+    }));
+  }
+
+  private mergePeriodData(
+    baseData: WikidataResponse,
+    locationData: WikidataResponse,
+    childrenData: WikidataResponse
+  ): Period {
+    const base = baseData.results.bindings[0];
+    const locations = locationData.results.bindings.map(b => b.locationLabel?.value || '');
+    const children = childrenData.results.bindings.map(b => ({
+      id: b.child?.value.split('/').pop() || '',
+      label: b.childLabel?.value || '',
+      hasChildren: false,
+      isMainEon: false,
+      categoryIds: [],
+      startDate: undefined,
+      endDate: undefined,
+      location: undefined,
+      children: [],
+      loading: false,
+      childrenPreloaded: false,
+      categoryLabels: []
+    }));
+
+    return {
+      id: base.item?.value.split('/').pop() || '',
+      label: base.itemLabel?.value || '',
+      startDate: base.startDate?.value,
+      endDate: base.endDate?.value,
+      location: locations.length > 0 ? locations.join(', ') : 'Globale',
+      hasChildren: children.length > 0,
+      isMainEon: this.isMainEon(base.item?.value.split('/').pop() || ''),
+      categoryIds: [],
+      categoryLabels: [],
+      children,
+      loading: false,
+      childrenPreloaded: false
+    };
+  }
+
+  private transformResponse(bindings: WikidataBinding[]): SimplePeriod[] {
     return bindings.map(binding => {
-      // Extraction de l'ID de l'item
-      const itemId = binding.item.value.split('/').pop() || '';
-      
-      // Gestion du label avec mécanisme de secours
+      const itemId = binding.item?.value.split('/').pop() || '';
       let label = binding.itemLabel?.value;
       if (!label || label.trim() === '') {
-        label = itemId; // Utilisation de l'ID comme fallback
+        label = itemId;
       }
 
       const period: SimplePeriod = {
@@ -218,33 +346,34 @@ export class WikidataTimelineService {
         endDate: binding.endDate?.value ? DateFormatter.format(binding.endDate.value, 'geological') : undefined,
         location: binding.locations?.value,
         hasChildren: parseInt(binding.childCount?.value || '0') > 0,
-        isMainEon: false,
-        categoryIds: [] // On garde un tableau vide pour la compatibilité
+        isMainEon: this.isMainEon(itemId),
+        categoryIds: [],
+        categoryLabels: [],
+        childrenPreloaded: false,
+        children: [],
+        loading: false
       };
-
-      // Déterminer si c'est un éon principal
-      const mainEons = ['Q104460', 'Q104168', 'Q104162', 'Q101313'];
-      if (mainEons.includes(period.id)) {
-        period.isMainEon = true;
-      }
 
       return period;
     });
   }
 
   async getMainEons(options: QueryOptions = {}): Promise<Period[]> {
+    console.log('## [Timeline] Chargement initial des éons principaux');
     const { language = this.defaultLanguage } = options;
     const cacheKey = this.getCacheKey({ language });
     const cachedData = this.getFromCache(cacheKey);
     
     if (cachedData) {
-      return cachedData as Period[];
+      console.log('## [Timeline] Éons principaux trouvés dans le cache');
+      return cachedData;
     }
 
     return this.retryOperation(async () => {
       const query = this.buildQuery(options);
       
       try {
+        console.log('[API] Requête SPARQL pour les éons principaux');
         const response = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
           params: { query, format: 'json' },
           timeout: REQUEST_TIMEOUT,
@@ -252,6 +381,8 @@ export class WikidataTimelineService {
         });
 
         const simplePeriods = this.transformResponse(response.data.results.bindings);
+        console.log('## [Timeline] Éons principaux chargés:', simplePeriods.map(p => p.label).join(', '));
+
         const periods: Period[] = simplePeriods.map(period => ({
           ...period,
           categoryLabels: period.categoryIds,
@@ -268,41 +399,9 @@ export class WikidataTimelineService {
     });
   }
 
-  private async checkHasChildren(childId: string): Promise<boolean> {
-    const query = `
-      PREFIX wd: <http://www.wikidata.org/entity/>
-      PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-      
-      ASK {
-        {
-          { ?grandchild wdt:P361 wd:${childId} }
-          UNION { wd:${childId} wdt:P527 ?grandchild }
-        }
-        FILTER(?grandchild != wd:${childId})
-      }
-    `;
-
-    try {
-      const response = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
-        params: { 
-          query: query.trim(),
-          format: 'json'
-        },
-        timeout: REQUEST_TIMEOUT,
-        headers: { 
-          'Accept': 'application/sparql-results+json'
-        }
-      });
-
-      return response.data.boolean ?? false;
-    } catch (error) {
-      console.error(`Erreur lors de la vérification des enfants pour ${childId}:`, error);
-      return false;
-    }
-  }
-
   async getChildren(parentId: string, options: QueryOptions = {}): Promise<SimplePeriod[]> {
-    // Validation des paramètres
+    console.log(`## [Timeline] Navigation vers les enfants de ${parentId}`);
+    
     if (!parentId || typeof parentId !== 'string') {
       throw new WikidataError('ID parent invalide', 'INVALID_PARAMETER');
     }
@@ -312,17 +411,15 @@ export class WikidataTimelineService {
     const cachedData = this.getFromCache(cacheKey);
     
     if (cachedData) {
-      return cachedData as SimplePeriod[];
+      console.log(`## [Timeline] Enfants trouvés dans le cache pour ${parentId}`);
+      return cachedData;
     }
 
     return this.retryOperation(async () => {
       const query = this.buildQuery({ ...options, parentId });
       
       try {
-        // Log de la requête pour le débogage
-        console.log('Requête SPARQL:', query);
-        console.log('Options:', { parentId, language });
-        
+        console.log(`[API] Requête SPARQL pour les enfants de ${parentId}`);
         const response = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
           params: { 
             query: query.trim(),
@@ -335,7 +432,6 @@ export class WikidataTimelineService {
           validateStatus: (status) => status === 200
         });
 
-        // Validation de la réponse
         if (!response.data) {
           throw new WikidataError('Réponse vide de Wikidata', 'EMPTY_RESPONSE');
         }
@@ -344,30 +440,160 @@ export class WikidataTimelineService {
           throw new WikidataError('Format de réponse invalide', 'INVALID_RESPONSE_FORMAT');
         }
 
-        // Transformation directe des résultats sans vérification supplémentaire
         const children = this.transformResponse(response.data.results.bindings);
+        console.log(`## [Timeline] Enfants chargés pour ${parentId}:`, children.map(c => c.label).join(', '));
         
         this.setCache(cacheKey, children);
         return children;
       } catch (error) {
-        // Log détaillé de l'erreur
-        if (error instanceof AxiosError) {
-          console.error('Erreur Axios:', {
-            status: error.response?.status,
-            statusText: error.response?.statusText,
-            data: error.response?.data,
-            config: {
-              url: error.config?.url,
-              method: error.config?.method,
-              params: error.config?.params
-            }
-          });
-        } else {
-          console.error('Erreur inattendue:', error);
-        }
-        
+        console.error(`[Timeline] Erreur lors du chargement des enfants de ${parentId}:`, error);
         throw this.handleError(error);
       }
     });
+  }
+
+  async loadInitialEons(): Promise<SimplePeriod[]> {
+    const cacheKey = 'initial-eons';
+    const cached = this.getFromCache(cacheKey);
+    if (cached && Array.isArray(cached) && cached.length > 0 && 'hasChildren' in cached[0]) {
+      return cached as SimplePeriod[];
+    }
+
+    return this.retryOperation(async () => {
+      const query = this.buildInitialQuery();
+      try {
+        const response = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
+          params: { query, format: 'json' },
+          timeout: REQUEST_TIMEOUT,
+          headers: { 'Accept': 'application/sparql-results+json' }
+        });
+
+        const periods = this.transformToSimplePeriods(response.data);
+        this.setCache(cacheKey, periods);
+        return periods;
+      } catch (error) {
+        throw this.handleError(error);
+      }
+    });
+  }
+
+  async loadPeriodDetails(periodId: string): Promise<Period> {
+    const cacheKey = `period-${periodId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached && !Array.isArray(cached) && 'children' in (cached as object)) {
+      return cached as Period;
+    }
+
+    return this.retryOperation(async () => {
+      try {
+        // Exécution parallèle des requêtes
+        const [baseData, locationData, childrenData] = await Promise.all([
+          axios.get<WikidataResponse>(WIKIDATA_API_URL, {
+            params: { query: this.buildDetailsQuery(periodId), format: 'json' },
+            timeout: REQUEST_TIMEOUT,
+            headers: { 'Accept': 'application/sparql-results+json' }
+          }),
+          axios.get<WikidataResponse>(WIKIDATA_API_URL, {
+            params: { query: this.buildLocationQuery(periodId), format: 'json' },
+            timeout: REQUEST_TIMEOUT,
+            headers: { 'Accept': 'application/sparql-results+json' }
+          }),
+          axios.get<WikidataResponse>(WIKIDATA_API_URL, {
+            params: { query: this.buildChildrenQuery(periodId), format: 'json' },
+            timeout: REQUEST_TIMEOUT,
+            headers: { 'Accept': 'application/sparql-results+json' }
+          })
+        ]);
+
+        const period = this.mergePeriodData(
+          baseData.data,
+          locationData.data,
+          childrenData.data
+        );
+
+        this.setCache(cacheKey, [period]);
+        return period;
+      } catch (error) {
+        throw this.handleError(error);
+      }
+    });
+  }
+
+  async loadChildrenDetails(parentId: string): Promise<Period[]> {
+    console.log(`## [Timeline] Préchargement des détails des enfants de ${parentId}`);
+    
+    const cacheKey = `children-${parentId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached && Array.isArray(cached) && cached.length > 0 && 'children' in (cached[0] as object)) {
+      console.log(`## [Timeline] Détails des enfants trouvés dans le cache`);
+      return cached;
+    }
+
+    return this.retryOperation(async () => {
+      try {
+        console.log(`[API] Requête SPARQL pour la liste des enfants de ${parentId}`);
+        const childrenResponse = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
+          params: { query: this.buildChildrenQuery(parentId), format: 'json' },
+          timeout: REQUEST_TIMEOUT,
+          headers: { 'Accept': 'application/sparql-results+json' }
+        });
+
+        console.log(`[API] Chargement des détails pour ${childrenResponse.data.results.bindings.length} enfants`);
+        const childrenDetails = await Promise.all(
+          childrenResponse.data.results.bindings.map(async (binding) => {
+            const childId = binding.child?.value.split('/').pop() || '';
+            return this.loadPeriodDetails(childId);
+          })
+        );
+
+        console.log(`## [Timeline] Préchargement terminé:`, 
+          childrenDetails.map(c => c.label).join(', '));
+        
+        this.setCache(cacheKey, childrenDetails);
+        return childrenDetails;
+      } catch (error) {
+        console.error(`[Timeline] Erreur lors du préchargement des détails des enfants:`, error);
+        throw this.handleError(error);
+      }
+    });
+  }
+
+  async getPeriod(periodId: string): Promise<Period> {
+    console.log(`## [Timeline] Sélection de la période ${periodId}`);
+    
+    const cacheKey = `period-${periodId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached && !Array.isArray(cached)) {
+      console.log(`## [Timeline] Détails de la période trouvés dans le cache`);
+      return cached as Period;
+    }
+
+    const period = await this.retryOperation(async () => {
+      console.log(`[API] Requête SPARQL pour les détails de ${periodId}`);
+      const query = this.buildQuery({ language: this.defaultLanguage, parentId: periodId });
+      const response = await axios.get(WIKIDATA_API_URL, {
+        params: { query, format: 'json' },
+        timeout: REQUEST_TIMEOUT,
+        headers: { 'Accept': 'application/sparql-results+json' }
+      });
+
+      if (!response.data?.results?.bindings?.[0]) {
+        throw new WikidataError('Période non trouvée', 'NOT_FOUND');
+      }
+
+      const period = this.transformResponse([response.data.results.bindings[0]])[0];
+      console.log(`## [Timeline] Détails chargés pour ${period.label} (${periodId})`);
+      
+      this.setCache(cacheKey, [period]);
+      return period;
+    });
+
+    return period;
+  }
+
+  // Méthode utilitaire pour nettoyer le cache
+  clearCache(): void {
+    console.log('[Cache] Nettoyage du cache');
+    this.cache.clear();
   }
 } 
