@@ -24,6 +24,7 @@ export class WikidataTimelineService {
   private static instance: WikidataTimelineService;
   private cache: Map<string, CacheEntry> = new Map();
   private defaultLanguage = 'fr';
+  private defaultLanguages = ['fr', 'en', 'es', 'de'];
 
   private constructor() {}
 
@@ -35,7 +36,8 @@ export class WikidataTimelineService {
   }
 
   private getCacheKey(options: QueryOptions): string {
-    return `${options.language}-${options.parentId || 'root'}-${options.categoryId || 'all'}`;
+    const languagesKey = options.languages?.join('-') || this.defaultLanguages.join('-');
+    return `${languagesKey}-${options.parentId || 'root'}-${options.categoryId || 'all'}`;
   }
 
   private getFromCache(key: string): Period[] | SimplePeriod[] | null {
@@ -124,7 +126,7 @@ export class WikidataTimelineService {
   }
 
   private buildQuery(options: QueryOptions): string {
-    const { language = 'fr', parentId } = options;
+    const { parentId, languages = this.defaultLanguages } = options;
     
     // Définition des éons principaux
     const mainEons = [
@@ -166,9 +168,9 @@ export class WikidataTimelineService {
           ?child wdt:P361 ?item.
         }
         
-        # Labels
+        # Labels avec cascade de langues
         SERVICE wikibase:label { 
-          bd:serviceParam wikibase:language "${language}".
+          bd:serviceParam wikibase:language "${languages.join(',')}".
           ?item rdfs:label ?itemLabel.
           ?locationEntity rdfs:label ?locationLabel.
         }
@@ -184,9 +186,18 @@ export class WikidataTimelineService {
 
   private transformResponse(bindings: any[]): SimplePeriod[] {
     return bindings.map(binding => {
+      // Extraction de l'ID de l'item
+      const itemId = binding.item.value.split('/').pop() || '';
+      
+      // Gestion du label avec mécanisme de secours
+      let label = binding.itemLabel?.value;
+      if (!label || label.trim() === '') {
+        label = itemId; // Utilisation de l'ID comme fallback
+      }
+
       const period: SimplePeriod = {
-        id: binding.item.value.split('/').pop() || '',
-        label: binding.itemLabel.value,
+        id: itemId,
+        label: label,
         startDate: binding.startDate?.value ? DateFormatter.format(binding.startDate.value, 'geological') : undefined,
         endDate: binding.endDate?.value ? DateFormatter.format(binding.endDate.value, 'geological') : undefined,
         location: binding.locations?.value,

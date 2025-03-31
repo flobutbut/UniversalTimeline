@@ -13,6 +13,7 @@
 - Gestion des états de chargement
 - Gestion des erreurs avec retry
 - Support multilingue (FR/EN)
+- Gestion des langues (fr, en, es, de)
 
 ### Problèmes connus
 - Aucun problème critique connu
@@ -52,6 +53,9 @@
 - ✅ Retries automatiques
 - 📅 Script de vérification de présence en base
 - 📅 Système de persistance des données
+- ✅ Cascade de langues (fr, en, es, de)
+- ✅ Mécanisme de secours pour les labels
+- ✅ Formatage des dates
 
 ### Interface Utilisateur
 - ✅ Interface utilisateur améliorée
@@ -64,6 +68,7 @@
 - 🔄 Visualisation chronologique
 - 🔄 Design system
 - 📅 Affichage des événements
+- ✅ Contraste optimisé
 
 ### Performance
 - ✅ Cache de 5 minutes

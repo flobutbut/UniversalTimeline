@@ -91,11 +91,12 @@ export interface WikidataResponse {
 
 // Options pour les requêtes
 export interface QueryOptions {
+  limit?: number;
+  offset?: number;
   language?: string;
   parentId?: string;
   categoryId?: string;
-  limit?: number;
-  offset?: number;
+  languages?: string[];
 }
 
 // Type pour le cache
