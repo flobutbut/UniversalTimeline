@@ -5,14 +5,13 @@ export class TimelineScalingService {
   /**
    * Convertit une date en années avant aujourd'hui
    */
-  private convertDateToYearsBeforePresent(dateStr: string): number {
+  convertDateToYearsBeforePresent(dateStr: string): number {
     // Si c'est une date ISO
     if (dateStr.includes('T')) {
       const match = dateStr.match(/(-?\d+)-/);
       if (match) {
         return Math.abs(parseInt(match[1]));
       }
-      return 0;
     }
 
     // Si c'est une date géologique

@@ -98,6 +98,7 @@ interface WikidataBinding {
 - Calcul des positions relatives des périodes
 - Calcul des largeurs relatives des périodes
 - Génération des styles CSS pour le positionnement
+- Conversion des dates en années avant le présent
 
 ### Système de Logging
 Le service utilise un système de logging structuré avec différents niveaux et catégories :

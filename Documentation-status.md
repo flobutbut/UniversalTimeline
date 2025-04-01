@@ -93,10 +93,10 @@
 - Aucun problème majeur connu
 
 ## Prochaines Étapes
-1. Implémentation des tests unitaires
-2. Optimisation des performances
-3. Ajout des filtres de recherche
-4. Documentation des composants
+1. Optimisation des performances
+2. Amélioration de la gestion des erreurs
+3. Mise en place des tests
+4. Documentation utilisateur
 
 ## Notes Techniques
 - Vue 3 + TypeScript
