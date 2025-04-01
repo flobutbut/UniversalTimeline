@@ -16,8 +16,7 @@ L'application permet de naviguer dans une timeline des périodes géologiques, e
    - Affichage des éons géologiques principaux
    - Chaque carte affiche :
      - Nom de l'éon
-     - Dates de début et fin (si disponibles)
-     - Localisation (si disponible)
+     - Dates de début et fin avec leurs localisations respectives
      - Indication du nombre de sous-périodes disponibles
 
 2. **Navigation hiérarchique**
@@ -34,7 +33,7 @@ L'application permet de naviguer dans une timeline des périodes géologiques, e
 
 1. **Affichage des périodes**
    - Format de date géologique (ex: "4.5 Ga")
-   - Localisation simplifiée
+   - Localisations temporelles avec dates associées
    - Indication visuelle des périodes avec sous-périodes
 
 2. **Navigation**
@@ -70,17 +69,15 @@ L'application permet de naviguer dans une timeline des périodes géologiques, e
 1. **Chargement**
    - Chargement initial des éons principaux
    - Chargement à la demande des sous-périodes
-   - Mise en cache des résultats
    - Gestion des erreurs de chargement
 
 2. **Performance**
-   - Limitation à 100 sous-périodes par requête
-   - Cache de 5 minutes
    - Retry automatique en cas d'erreur
    - Timeout de 30 secondes
+   - Maximum 3 tentatives de retry
 
 3. **Internationalisation**
-   - Support multilingue
+   - Support multilingue (FR/EN)
    - Format de dates localisé
    - Labels et descriptions traduits
 
@@ -98,11 +95,11 @@ L'application permet de naviguer dans une timeline des périodes géologiques, e
 ### Navigation Approfondie
 
 1. L'utilisateur sélectionne un éon
-2. Les sous-périodes sont chargées progressivement
+2. Les sous-périodes sont chargées avec leurs localisations temporelles
 3. L'utilisateur peut :
-   - Voir les détails de chaque sous-période
+   - Voir les dates et localisations détaillées
    - Naviguer plus profondément dans la hiérarchie
-   - Revenir en arrière à tout moment
+   - Revenir en arrière avec le bouton retour
 
 ### Gestion des Erreurs
 
@@ -119,14 +116,14 @@ L'application permet de naviguer dans une timeline des périodes géologiques, e
 ## Limitations
 
 1. **Données**
-   - Maximum 100 sous-périodes par requête
    - Certaines périodes peuvent manquer de données
    - Localisation géographique parfois incomplète
+   - Support multilingue limité à FR/EN
 
 2. **Performance**
    - Temps de chargement dépendant de la connexion
    - Latence possible avec l'API Wikidata
-   - Cache limité à 5 minutes
+   - Maximum 3 tentatives de retry
 
 3. **Interface**
    - Navigation uniquement verticale
@@ -144,27 +141,30 @@ L'application permet de naviguer dans une timeline des périodes géologiques, e
   - `language`: fr/en
   - `format`: json
   - `type`: item
-  - `limit`: 20
-  - `continue`: offset
 
 ### Structure des Données
 ```typescript
-interface GeologicalPeriod {
-  id: string;
-  label: string;
-  description?: string;
+interface Period {
+  id: string;              // Identifiant Wikidata
+  label: string;           // Nom de la période
+  temporalData: TemporalLocation[]; // Données temporelles avec localisations
+  hasChildren: boolean;    // Indique si la période a des sous-périodes
+  isMainEon: boolean;      // Indique si c'est un éon principal
+  categoryIds: string[];   // IDs des catégories
+  categoryLabels: string[]; // Labels des catégories
+  children: Period[];      // Liste des périodes enfants
+  loading: boolean;        // État de chargement
+  childrenPreloaded: boolean; // État de préchargement des enfants
+  locations: string[];     // Liste des localisations
+  directLocations: string[]; // Localisations directes
+}
+
+interface TemporalLocation {
+  startDate?: string;      // Date de début formatée
+  endDate?: string;        // Date de fin formatée
+  location: string;        // Localisation associée
 }
 ```
-
-### Cache
-- Durée de validité : 5 minutes
-- Clé de cache : combinaison de limit/offset/language
-- Invalidation automatique
-
-### Pagination
-- 20 éléments par page
-- Navigation Précédent/Suivant
-- Désactivation des boutons aux limites
 
 ## Améliorations Futures
 1. Ajout d'une barre de recherche
@@ -218,11 +218,49 @@ La navigation se fait de manière hiérarchique, permettant aux utilisateurs d'e
 
 ## Interface Utilisateur
 
+### Design System
+L'application utilise un design system cohérent avec les caractéristiques suivantes :
+- Taille de base de police : 13px
+- Système de couleurs harmonieux et accessible
+- Espacement cohérent basé sur 8px
+- Typographie responsive et lisible
+- Support du mode sombre/clair
+
 ### Navigation
-- Affichage hiérarchique des périodes géologiques
-- Bouton de retour pour remonter dans la hiérarchie
-- Titre dynamique indiquant le niveau actuel
-- Indication visuelle des sous-périodes disponibles
+- Header fixe avec titre et sélecteur de langue
+- Affichage horizontal des périodes avec défilement fluide
+- Bouton retour pour remonter dans la hiérarchie
+- Indicateurs de chargement
+- Messages d'erreur avec option de retry
+
+### Composants
+- Cartes de période géologique avec effets de survol
+- Sélecteur de langue avec états actifs/inactifs
+- Bouton retour avec animation
+- Indicateurs de chargement
+- Messages d'erreur et de succès
+
+### Responsive Design
+L'interface s'adapte à différentes tailles d'écran :
+- Mobile : 1 colonne avec défilement horizontal
+- Tablette : 2 colonnes avec défilement horizontal
+- Desktop : 3-4 colonnes avec défilement horizontal
+- Grand écran : 4 colonnes avec défilement horizontal
+
+### États Visuels
+- États de chargement avec spinner
+- États d'erreur avec messages explicites et bouton retry
+- États de succès avec confirmation
+- États de survol sur les éléments interactifs
+- États actifs pour les contrôles
+
+### Accessibilité
+- Contraste suffisant pour la lisibilité
+- Focus visible sur les éléments interactifs
+- Structure sémantique HTML
+- Support des lecteurs d'écran
+- Navigation au clavier
+- Barre de défilement personnalisée et accessible
 
 ### Affichage des Périodes
 - Cartes avec informations essentielles

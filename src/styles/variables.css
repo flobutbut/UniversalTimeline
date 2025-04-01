@@ -1,0 +1,70 @@
+:root {
+  /* Base */
+  --base-font-size: 13px;
+  --base-line-height: 1.5;
+  --base-spacing: 8px;
+
+  /* Typography */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-size-xs: calc(var(--base-font-size) * 0.75);  /* 9.75px */
+  --font-size-sm: calc(var(--base-font-size) * 0.875); /* 11.375px */
+  --font-size-base: var(--base-font-size);             /* 13px */
+  --font-size-lg: calc(var(--base-font-size) * 1.125); /* 14.625px */
+  --font-size-xl: calc(var(--base-font-size) * 1.25);  /* 16.25px */
+  --font-size-2xl: calc(var(--base-font-size) * 1.5);  /* 19.5px */
+  --font-size-3xl: calc(var(--base-font-size) * 1.875); /* 24.375px */
+
+  /* Colors */
+  --color-primary: #2563eb;
+  --color-primary-light: #60a5fa;
+  --color-primary-dark: #1d4ed8;
+  --color-secondary: #64748b;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-background: #ffffff;
+  --color-surface: #f8fafc;
+  --color-text: #1e293b;
+  --color-text-light: #64748b;
+  --color-border: #e2e8f0;
+
+  /* Spacing */
+  --spacing-xs: calc(var(--base-spacing) * 0.5);  /* 4px */
+  --spacing-sm: var(--base-spacing);              /* 8px */
+  --spacing-md: calc(var(--base-spacing) * 1.5);  /* 12px */
+  --spacing-lg: calc(var(--base-spacing) * 2);    /* 16px */
+  --spacing-xl: calc(var(--base-spacing) * 3);    /* 24px */
+  --spacing-2xl: calc(var(--base-spacing) * 4);   /* 32px */
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+
+  /* Z-index */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal: 1040;
+  --z-index-popover: 1050;
+  --z-index-tooltip: 1060;
+
+  /* Breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+} 

@@ -1,74 +1,70 @@
-# Test API Wikidata - Périodes Géologiques
+# Timeline Géologique - Wikidata
 
-Ce projet est une application web moderne utilisant Vue 3 et TypeScript pour récupérer et visualiser des informations sur les périodes géologiques via l'API Wikidata.
+Une application web interactive pour explorer les périodes géologiques à partir des données Wikidata.
 
-## Description
-Ce projet vise à créer une interface utilisateur interactive permettant de tester la connexion avec l'API Wikidata et de récupérer des informations sur les périodes géologiques, notamment leurs dates de début et de fin.
+## Caractéristiques
+
+- Navigation hiérarchique dans les périodes géologiques
+- Affichage horizontal avec défilement fluide
+- Support multilingue (Français et Anglais)
+- Interface utilisateur moderne et responsive
+- Gestion des erreurs avec retry
+- Formatage intelligent des dates
 
 ## Technologies
-- Vue 3 (Composition API)
+
+- Vue.js 3
 - TypeScript
 - Vite
-- API Wikidata (SPARQL)
 - Yarn
+- Wikidata API
 
 ## Installation
 
 ```bash
 # Cloner le projet
-git clone [URL_DU_REPO]
+git clone https://github.com/votre-username/timeline-geologique.git
 
 # Installer les dépendances
 yarn install
-```
 
-## Développement
-
-```bash
 # Lancer le serveur de développement
 yarn dev
-
-# Build pour la production
-yarn build
-
-# Prévisualiser le build
-yarn preview
 ```
-
-## Fonctionnalités
-- Affichage des périodes géologiques
-- Dates de début et de fin
-- Descriptions détaillées
-- Relations entre les périodes
-- Interface utilisateur responsive
-- Gestion des erreurs
-
-## Documentation
-- [Documentation Technique](Documentation-technique.md)
-- [Documentation d'État](Documentation-status.md)
-- [Documentation Fonctionnelle](Documentation-fonctionnelle.md)
 
 ## Structure du Projet
+
 ```
-api_Wikidata/
-├── Documentation-technique.md
-├── Documentation-status.md
-├── Documentation-fonctionnelle.md
-├── README.md
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── src/
-    ├── main.ts
-    ├── App.vue
-    ├── components/
-    │   └── GeologicalPeriods.vue
-    ├── types/
-    │   └── geological.ts
-    ├── services/
-    │   └── wikidata.ts
-    └── assets/
+src/
+  components/     # Composants Vue
+  services/      # Services (Wikidata, etc.)
+  styles/        # Styles CSS
+  types/         # Types TypeScript
+  utils/         # Utilitaires
+  App.vue        # Composant racine
+  main.ts        # Point d'entrée
 ```
 
+## Design System
+
+Le projet utilise un design system moderne avec :
+- Taille de base de police : 13px
+- Système de couleurs harmonieux
+- Espacement basé sur 8px
+- Typographie responsive
+- Support du mode sombre/clair
+- Classes utilitaires pour le développement rapide
+
+## Documentation
+
+- [Documentation Technique](Documentation-technique.md)
+- [Documentation Fonctionnelle](Documentation-fonctionnelle.md)
+- [État du Projet](Documentation-status.md)
+
 ## Contribution
+
 Les contributions sont les bienvenues. N'hésitez pas à ouvrir une issue ou à soumettre une pull request.
+
+## Licence
+
+MIT

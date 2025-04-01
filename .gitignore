@@ -16,13 +16,6 @@ node_modules
 !.yarn/sdks
 !.yarn/versions
 
-# Build
-dist
-dist-ssr
-*.local
-coverage
-*.tsbuildinfo
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -34,18 +27,24 @@ coverage
 *.sln
 *.sw?
 
-# Environment
-.env
-.env.*
-!.env.example
+# Build
+dist
+dist-ssr
+*.local
 
 # Testing
-coverage/
-.nyc_output/
+coverage
+.nyc_output
+
+# Environment
+.env
+.env.local
+.env.*.local
 
 # Cache
-.cache/
-.temp/
+.cache
+.temp
+.tmp
 
 # Dépendances
 .pnp/

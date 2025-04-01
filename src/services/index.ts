@@ -1,1 +1,1 @@
-export { WikidataTimelineService } from './wikidataTimeline'; 
+export * from './wikidataTimeline'; 
