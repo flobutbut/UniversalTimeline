@@ -1,5 +1,14 @@
 # Documentation Fonctionnelle
 
+## Objectif
+Application d'interaction avec l'API Wikidata
+
+## Fonctionnalités
+- À définir selon les besoins spécifiques du projet
+
+## Composants
+- GeologicalPeriodCard : Affichage des informations sur les périodes géologiques
+
 ## Vue d'ensemble
 L'application permet de naviguer dans la hiérarchie des périodes géologiques en utilisant les données de Wikidata. Elle offre une interface utilisateur intuitive et responsive.
 
@@ -352,4 +361,49 @@ L'interface s'adapte à différentes tailles d'écran :
 - Contraste optimisé pour la lisibilité
 - Support du mode clair/sombre
 - Navigation au clavier
-- Messages d'état clairs 
+- Messages d'état clairs
+
+## Performance
+
+### Optimisations
+1. **Requêtes**
+   - Utilisation de DISTINCT pour éviter les doublons
+   - Agrégation optimisée des données
+   - Optimisation des jointures
+   - Requêtes directes vers l'API Wikidata
+
+2. **Chargement progressif**
+   - Chargement initial des éons principaux
+   - Chargement à la demande des sous-périodes
+   - Vérification asynchrone des enfants 
+
+## Validation des Données
+
+### Critères de Validité d'une Période
+Une période est considérée comme valide si :
+1. Elle possède au moins une date (début ou fin)
+2. Elle possède un label dans une des langues configurées
+3. Elle est correctement liée à la hiérarchie des périodes
+
+### Gestion des Cas Invalides
+- Les périodes sans dates sont automatiquement filtrées
+- Les périodes sans label sont ignorées
+- Des logs détaillés sont générés pour le débogage
+- Des messages d'erreur explicites sont retournés
+
+### Performance
+- Filtrage optimisé au niveau SPARQL
+- Validation supplémentaire côté client
+- Logs détaillés pour le suivi des périodes filtrées 
+
+## Affichage des Dates
+
+### Format d'Affichage
+- Très anciennes (≥ 1 milliard d'années) : "X.XX Ga"
+- Anciennes (≥ 1 million d'années) : "X.XX Ma"
+- Récentes (< 1 million d'années) : "XXXX ans"
+
+### Exemples
+- Hadéen : "4.50 Ga"
+- Extinction K-T : "65.50 Ma"
+- Néolithique : "12000 ans" 

@@ -26,6 +26,13 @@
 2. Intégration de Lucide Icons
 3. Création du favicon personnalisé
 4. Optimisation des composants UI
+5. ✅ Suppression du système de cache pour simplifier l'architecture
+6. ✅ Optimisation des requêtes directes vers l'API Wikidata
+7. ✅ Amélioration de la gestion des états de chargement
+8. ✅ Implémentation du filtrage hybride SPARQL/TypeScript
+9. ✅ Amélioration de la validation des périodes
+10. ✅ Optimisation des requêtes SPARQL
+11. ✅ Gestion des erreurs améliorée
 
 ## Problèmes Connus
 - Aucun problème majeur connu
@@ -45,6 +52,12 @@
 # État du Projet - Timeline Géologique
 
 ## État Actuel
+- Architecture simplifiée sans système de cache
+- Requêtes directes vers l'API Wikidata
+- Performance optimisée via la gestion des requêtes SPARQL
+- Filtrage robuste des périodes invalides
+- Validation des données temporelles
+- Logs détaillés pour le débogage
 
 ### Services Implémentés
 1. **WikidataTimelineService**
@@ -310,3 +323,15 @@
 - Gestion de la mémoire
 - Optimisation des requêtes SQL
 - Indexation des données 
+
+# Status du Projet
+
+## En cours
+- Structure de base mise en place
+- Configuration TypeScript
+- Configuration Vue.js
+
+## À faire
+- Documentation des composants
+- Tests unitaires
+- Documentation des services API 

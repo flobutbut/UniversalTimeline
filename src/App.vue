@@ -2,6 +2,7 @@
 import GeologicalPeriods from './components/GeologicalPeriods.vue'
 import LanguageSelector from './components/LanguageSelector.vue'
 import BackButton from './components/BackButton.vue'
+import Header from './components/Header.vue'
 import { ref, onMounted } from 'vue'
 import { WikidataTimelineService } from './services'
 import type { Period } from './types/geological'
@@ -12,6 +13,7 @@ const displayedPeriods = ref<Period[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 const currentLanguage = ref('fr')
+const selectedLanguage = ref('fr')
 
 const handlePeriodClick = async (period: Period) => {
   currentPeriod.value = period
@@ -44,14 +46,10 @@ onMounted(async () => {
 </script>
 
 <template>
+  <Header
+    v-model="selectedLanguage"
+  />
   <div class="app">
-    <header class="header">
-      <div class="header-content">
-        <h1 class="header-title">Timeline Géologique</h1>
-        <LanguageSelector v-model="currentLanguage" />
-      </div>
-    </header>
-
     <main class="main-content">
       <BackButton v-if="currentPeriod" @click="goBack" />
       <GeologicalPeriods
@@ -74,17 +72,6 @@ onMounted(async () => {
 .main-content {
   flex: 1;
   width: 100%;
-}
-
-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-header h1 {
-  color: #2c3e50;
-  font-size: 2.5em;
-  margin: 0;
 }
 
 body {

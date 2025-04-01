@@ -21,19 +21,13 @@ export class DateFormatter {
 
       // Extraction de l'année depuis la chaîne ISO
       if (dateString.includes('T') && dateString.endsWith('Z')) {
-        // Format: -538800000-01-01T00:00:00Z
         years = Math.abs(parseInt(dateString.split('-')[1] || dateString.split('T')[0]));
-        console.log('Année extraite:', years);
       }
-      // Si c'est une date simple (YYYY-MM-DD)
       else if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
         years = Math.abs(parseInt(dateString.split('-')[0]));
-        console.log('Année extraite:', years);
       }
-      // Si c'est juste une année
       else if (dateString.match(/^\d{4}$/)) {
         years = Math.abs(parseInt(dateString));
-        console.log('Année extraite:', years);
       }
       else {
         console.warn('Format de date non reconnu:', dateString);
@@ -49,11 +43,9 @@ export class DateFormatter {
       } else if (years >= 1000000) {
         // Millions d'années (Ma)
         return `${(years / 1000000).toFixed(2)} Ma`;
-      } else if (years >= 1000) {
-        // Milliers d'années (ka)
-        return `${(years / 1000).toFixed(2)} ka`;
       } else {
-        // Années
+        // Pour toutes les années inférieures à 1 million
+        // On retourne simplement le nombre d'années
         return `${years} ans`;
       }
     } catch (error) {

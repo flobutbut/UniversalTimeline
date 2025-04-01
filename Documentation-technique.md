@@ -1,5 +1,24 @@
 # Documentation Technique
 
+## Stack Technique
+- Vue.js 3
+- TypeScript
+- Vite
+- CSS
+
+## Structure du Projet
+- `/src`
+  - `/components` : Composants Vue réutilisables
+  - `/services` : Logique métier et appels API
+  - `/types` : Types TypeScript
+  - `/utils` : Fonctions utilitaires
+  - `/styles` : Styles modulaires
+  - `/assets` : Ressources statiques
+
+## Configuration
+- Utilisation de Yarn comme gestionnaire de paquets
+- Configuration Vite pour le bundling
+
 ## Architecture
 
 Le projet utilise Vue 3 avec TypeScript pour créer une interface de navigation des périodes géologiques en utilisant l'API SPARQL de Wikidata.
@@ -99,16 +118,29 @@ Le service utilise un système de logging structuré avec différents niveaux et
 ## [Timeline] Éons principaux chargés: Hadéen, Archéen, Protérozoïque, Phanérozoïque
 ```
 
-### Formatage des Dates (`dateFormatter.ts`)
-- Classe utilitaire pour le formatage des dates
-- Gestion des différents formats de dates :
-  - Dates géologiques (années avant le présent)
-  - Dates françaises (JJ/MM/AAAA)
-  - Dates anglaises (MM/DD/YYYY)
-- Conversion automatique des unités :
-  - Ga (Giga-années) pour les dates ≥ 1 000 000 000 ans
-  - Ma (Méga-années) pour les dates ≥ 1 000 000 ans
-  - ans pour les dates < 1 000 000 ans
+### Formatage des Dates
+
+Le service utilise trois formats de dates :
+1. **Ga** (Giga-années) pour les dates ≥ 1 000 000 000 ans
+   - Exemple : "4.50 Ga"
+2. **Ma** (Méga-années) pour les dates ≥ 1 000 000 ans
+   - Exemple : "65.50 Ma"
+3. **ans** pour toutes les dates < 1 000 000 ans
+   - Exemple : "5200 ans"
+
+#### Exemples de formatage :
+```typescript
+// Dates géologiques
+4500000000 → "4.50 Ga"
+65500000 → "65.50 Ma"
+5200 → "5200 ans"    // Nouveau format pour les dates < 1M ans
+```
+
+### Règles de Formatage
+- Les dates sont toujours exprimées en années avant le présent
+- Deux décimales pour Ga et Ma
+- Nombre entier pour les années < 1M
+- Suffixe "ans" pour les dates récentes
 
 ### Méthodes principales
 - `loadPeriod(periodId: string): Promise<Period>`
@@ -568,3 +600,83 @@ La navigation est gérée de manière hiérarchique :
 - Bouton de retour pour remonter dans la hiérarchie
 - Gestion des états de chargement
 - Gestion des erreurs avec retry
+
+## Service WikidataTimeline
+
+### Configuration
+```typescript
+const WIKIDATA_API_URL = '/api/wikidata/sparql';
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 seconde
+const REQUEST_TIMEOUT = 30000; // 30 secondes
+```
+
+### Architecture
+- Pattern Singleton pour garantir une instance unique
+- Support multilingue (fr, en) par défaut
+- Système de retry pour la gestion des erreurs
+- Timeout de 30 secondes sur les requêtes
+
+### Filtrage des Périodes
+Le service implémente une stratégie de filtrage hybride :
+
+1. **Filtrage SPARQL**
+```sparql
+# Filtrage : au moins une date doit exister
+{
+  ?item p:P580 ?startStatement.
+  ?startStatement ps:P580 ?startDate.
+} UNION {
+  ?item p:P582 ?endStatement.
+  ?endStatement ps:P582 ?endDate.
+}
+```
+
+2. **Validation TypeScript**
+```typescript
+private isValidPeriod(binding: WikidataBinding): boolean {
+  // Vérification des dates
+  const hasStartDate = !!binding.startDate?.value;
+  const hasEndDate = !!binding.endDate?.value;
+  
+  // Vérification du label
+  const hasLabel = !!binding.itemLabel?.value;
+  
+  return (hasStartDate || hasEndDate) && hasLabel;
+}
+```
+
+### Traitement des Données
+1. Filtrage initial via SPARQL
+2. Validation des données reçues
+3. Transformation en objets Period
+4. Regroupement par localisation
+
+### Gestion des Erreurs
+- Système de retry automatique (3 tentatives)
+- Délai de 1 seconde entre les tentatives
+- Timeout de 30 secondes sur les requêtes
+- Logs détaillés pour le débogage
+
+### Points d'Attention
+1. **Performance**
+   - Les requêtes SPARQL sont complexes
+   - Chargement synchrone des enfants
+   - Impact potentiel sur les temps de réponse
+
+2. **Dépendances**
+   - Structure spécifique des données Wikidata
+   - Nécessite une connexion stable
+   - Dépend de la disponibilité de l'API Wikidata
+
+### Exemple d'Utilisation
+```typescript
+const service = WikidataTimelineService.getInstance();
+const period = await service.loadPeriod('Q104460'); // Hadéen
+```
+
+### Logs et Débogage
+Le service inclut un système de logging détaillé :
+- Logs des tentatives de chargement
+- Logs des erreurs et retries
+- Logs de transformation des données

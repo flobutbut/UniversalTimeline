@@ -35,6 +35,15 @@ export class WikidataTimelineService {
       WHERE {
         VALUES ?item { wd:${periodId} }
         
+        # Filtrage : au moins une date doit exister
+        {
+          ?item p:P580 ?startStatement.
+          ?startStatement ps:P580 ?startDate.
+        } UNION {
+          ?item p:P582 ?endStatement.
+          ?endStatement ps:P582 ?endDate.
+        }
+        
         # Labels
         SERVICE wikibase:label { 
           bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
@@ -96,7 +105,31 @@ export class WikidataTimelineService {
     `;
   }
 
-  private transformToPeriod(binding: WikidataBinding): Period {
+  private isValidPeriod(binding: WikidataBinding): boolean {
+    // Vérification de la présence d'au moins une date
+    const hasStartDate = !!binding.startDate?.value;
+    const hasEndDate = !!binding.endDate?.value;
+    
+    if (!hasStartDate && !hasEndDate) {
+      console.log(`[Filter] Période ${binding.item?.value} ignorée : aucune date`);
+      return false;
+    }
+
+    // Vérification du label
+    if (!binding.itemLabel?.value) {
+      console.log(`[Filter] Période ${binding.item?.value} ignorée : pas de label`);
+      return false;
+    }
+
+    return true;
+  }
+
+  private transformToPeriod(binding: WikidataBinding): Period | null {
+    // Validation des données
+    if (!this.isValidPeriod(binding)) {
+      return null;
+    }
+
     const periodId = binding.item?.value.split('/').pop() || '';
     const startLocation = binding.startLocationLabel?.value || "Globale";
     const endLocation = binding.endLocationLabel?.value || "Globale";
@@ -187,11 +220,8 @@ export class WikidataTimelineService {
   }
 
   async loadPeriod(periodId: string): Promise<Period> {
-    console.log(`[Debug] Chargement de la période ${periodId}`);
-    
     return this.retryOperation(async () => {
       try {
-        // 1. Charger les données temporelles
         const temporalResponse = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
           params: { query: this.buildTemporalQuery(periodId), format: 'json' },
           timeout: REQUEST_TIMEOUT,
@@ -202,12 +232,16 @@ export class WikidataTimelineService {
           throw new Error(`Aucune donnée trouvée pour la période ${periodId}`);
         }
 
-        // 2. Transformer les données en objets Period
-        const periods = temporalResponse.data.results.bindings.map(binding => 
-          this.transformToPeriod(binding)
-        );
+        // Transformation et filtrage des périodes
+        const periods = temporalResponse.data.results.bindings
+          .map(binding => this.transformToPeriod(binding))
+          .filter((period): period is Period => period !== null);
 
-        // 3. Regrouper les périodes par localisation
+        if (periods.length === 0) {
+          throw new Error(`Aucune période valide trouvée pour ${periodId}`);
+        }
+
+        // 2. Regrouper les périodes par localisation
         const groupedPeriods = this.groupPeriodsByLocation(periods);
 
         // 4. Charger les enfants

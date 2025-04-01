@@ -84,11 +84,4 @@ export interface QueryOptions {
   parentId?: string;
   categoryId?: string;
   languages?: string[];
-}
-
-export type CacheValue = Period | Period[];
-
-export interface CacheEntry {
-  value: CacheValue;
-  timestamp: number;
 } 
