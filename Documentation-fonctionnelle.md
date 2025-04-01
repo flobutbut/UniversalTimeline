@@ -10,7 +10,7 @@ Application d'interaction avec l'API Wikidata
 - GeologicalPeriodCard : Affichage des informations sur les périodes géologiques
 
 ## Vue d'ensemble
-L'application permet de naviguer dans la hiérarchie des périodes géologiques en utilisant les données de Wikidata. Elle offre une interface utilisateur intuitive et responsive.
+Le projet est une application web permettant de naviguer dans une timeline géologique interactive, utilisant les données de Wikidata.
 
 ## Fonctionnalités Principales
 

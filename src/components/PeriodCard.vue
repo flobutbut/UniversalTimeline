@@ -8,7 +8,7 @@
       'main-eon': period.isMainEon
     }"
     :data-period-id="period.id"
-    @click="$emit('select', period)"
+    @click="handleClick"
   >
     <div class="main-container">
       <div class="card-content">
@@ -51,7 +51,7 @@ const props = defineProps<{
   loading?: boolean;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'select', period: Period): void;
 }>();
 
@@ -71,18 +71,27 @@ const formatDate = (date: string): string => {
 
 // Surveiller les changements d'état de chargement
 watch(() => props.loading, (newValue) => {
-  console.log(`[Card] État de chargement pour ${props.period.id}: ${newValue ? 'chargement' : 'terminé'}`);
+  // Suppression du log
 });
 
 // Surveiller la sélection
 watch(() => props.isSelected, (newValue) => {
-  console.log(`[Card] État de sélection pour ${props.period.id}: ${newValue ? 'sélectionné' : 'désélectionné'}`);
+  // Suppression du log
 });
 
 // Ajout des logs dans le composant
 watch(() => props.period, (newPeriod) => {
-  console.log(`[Card] Période reçue: ${newPeriod.id} - ${newPeriod.label} - hasChildren: ${newPeriod.hasChildren}`);
+  // Suppression du log
 }, { immediate: true });
+
+const handleClick = () => {
+  console.log('[PeriodCard] Click sur la période:', {
+    id: props.period.id,
+    label: props.period.label,
+    hasChildren: props.period.hasChildren
+  });
+  emit('select', props.period);
+};
 </script>
 
 <style scoped>

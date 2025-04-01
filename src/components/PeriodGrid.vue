@@ -14,6 +14,16 @@
     </div>
 
     <div v-else class="timeline-container">
+      <div class="navigation-header">
+        <button 
+          v-if="navigationStack.length > 0" 
+          class="back-button"
+          @click="goBack"
+        >
+          <i class="fas fa-arrow-left"></i>
+          Retour
+        </button>
+      </div>
       <div class="timeline-line"></div>
       <div class="periods-container">
         <PeriodCard
@@ -21,9 +31,10 @@
           :key="period.id"
           :period="period"
           :is-selected="false"
-          :loading="false"
+          :loading="loadingPeriods[period.id]"
           class="timeline-card"
           :style="getPeriodStyles(period)"
+          @click="selectPeriod(period)"
         />
       </div>
       <div class="events-container">
@@ -36,6 +47,8 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import type { Period } from '../types/geological';
 import { TimelineScalingService } from '../services/timelineScaling';
+import { WikidataTimelineService } from '../services/wikidataTimeline';
+import { MAIN_EONS } from '../types/geological';
 import PeriodCard from './PeriodCard.vue';
 
 const props = defineProps<{
@@ -43,32 +56,52 @@ const props = defineProps<{
   loading: boolean;
 }>();
 
+const emit = defineEmits<{
+  (e: 'period-click', period: Period): void;
+}>();
+
 const scalingService = new TimelineScalingService();
+const timelineService = WikidataTimelineService.getInstance();
 const totalDuration = ref(0);
 const startYears = ref(0);
 const error = ref<string | null>(null);
+const navigationStack = ref<Period[]>([]);
+const loadingPeriods = ref<Record<string, boolean>>({});
+const currentPeriods = ref<Period[]>(props.periods);
+
+// Fonction pour extraire la date de début d'une période
+const getStartDate = (period: Period): number => {
+  const startDate = period.temporalData[0]?.startDate;
+  if (!startDate) return 0;
+  
+  // Convertir la date en nombre (en millions d'années)
+  const match = startDate.match(/(\d+(?:\.\d+)?)/);
+  return match ? parseFloat(match[1]) : 0;
+};
+
+// Fonction pour trier les périodes chronologiquement
+const sortPeriods = (periods: Period[]): Period[] => {
+  return [...periods].sort((a, b) => {
+    const dateA = getStartDate(a);
+    const dateB = getStartDate(b);
+    return dateB - dateA; // Tri décroissant (du plus récent au plus ancien)
+  });
+};
 
 // Trier les périodes chronologiquement
 const sortedPeriods = computed(() => {
-  return [...props.periods].sort((a, b) => {
-    const dateA = scalingService.convertDateToYearsBeforePresent(a.temporalData[0]?.startDate || '0 ans');
-    const dateB = scalingService.convertDateToYearsBeforePresent(b.temporalData[0]?.startDate || '0 ans');
-    return dateB - dateA; // Tri décroissant (du plus récent au plus ancien)
-  });
+  return sortPeriods(currentPeriods.value);
 });
 
 // Calculer les durées et positions quand les périodes changent
 const updateTimelineScaling = () => {
   try {
-    console.log('[Timeline] Mise à jour des calculs pour', props.periods.length, 'périodes');
-    totalDuration.value = scalingService.calculateTotalDuration(props.periods);
-    if (props.periods.length > 0) {
+    totalDuration.value = scalingService.calculateTotalDuration(currentPeriods.value);
+    if (currentPeriods.value.length > 0) {
       // Utiliser la date de début de la période la plus récente comme référence
-      startYears.value = Math.max(...props.periods.map(p => 
+      startYears.value = Math.max(...currentPeriods.value.map(p => 
         scalingService.convertDateToYearsBeforePresent(p.temporalData[0]?.startDate || '0 ans')
       ));
-      console.log('[Timeline] Durée totale:', totalDuration.value, 'ans');
-      console.log('[Timeline] Années de début:', startYears.value, 'ans');
     }
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Erreur lors du calcul des positions';
@@ -76,7 +109,12 @@ const updateTimelineScaling = () => {
 };
 
 // Surveiller les changements de périodes
-watch(() => props.periods, updateTimelineScaling, { immediate: true });
+watch(() => currentPeriods.value, updateTimelineScaling, { immediate: true });
+
+// Surveiller les changements des props
+watch(() => props.periods, (newPeriods) => {
+  currentPeriods.value = newPeriods;
+}, { immediate: true });
 
 onMounted(() => {
   updateTimelineScaling();
@@ -84,6 +122,74 @@ onMounted(() => {
 
 const getPeriodStyles = (period: Period) => {
   return scalingService.calculatePeriodStyles(period, totalDuration.value, startYears.value);
+};
+
+const selectPeriod = async (period: Period) => {
+  if (!period.hasChildren) return;
+  
+  console.log(`[Timeline] Sélection de la période ${period.id} (${period.label})`);
+  loadingPeriods.value[period.id] = true;
+  
+  try {
+    const loadedPeriod = await timelineService.loadPeriod(period.id);
+    navigationStack.value.push(period);
+    currentPeriods.value = loadedPeriod.children || [];
+    emit('period-click', loadedPeriod);
+  } catch (err) {
+    console.error('[Timeline] Erreur lors du chargement des enfants:', err);
+    error.value = err instanceof Error ? err.message : 'Erreur lors du chargement des sous-périodes';
+  } finally {
+    loadingPeriods.value[period.id] = false;
+  }
+};
+
+const goBack = async () => {
+  if (navigationStack.value.length === 0) return;
+  
+  // On retire la période courante de la pile
+  navigationStack.value.pop();
+  
+  // Si on a encore des périodes dans la pile, on charge le parent
+  if (navigationStack.value.length > 0) {
+    const parent = navigationStack.value[navigationStack.value.length - 1];
+    loadingPeriods.value[parent.id] = true;
+    try {
+      const loadedPeriod = await timelineService.loadPeriod(parent.id);
+      currentPeriods.value = loadedPeriod.children || [];
+      emit('period-click', loadedPeriod);
+    } catch (err) {
+      console.error('[Timeline] Erreur lors du chargement du parent:', err);
+      error.value = err instanceof Error ? err.message : 'Erreur lors du chargement de la période parent';
+    } finally {
+      loadingPeriods.value[parent.id] = false;
+    }
+  } else {
+    // Si on est revenu à la racine, on utilise les périodes initiales des props
+    currentPeriods.value = props.periods;
+    emit('period-click', props.periods[0]);
+  }
+};
+
+const retryLoading = async () => {
+  if (navigationStack.value.length > 0) {
+    const parent = navigationStack.value[navigationStack.value.length - 1];
+    await selectPeriod(parent);
+  } else {
+    // Recharger les périodes initiales
+    try {
+      const mainEons = await Promise.all([
+        timelineService.loadPeriod(MAIN_EONS.PHANEROZOIC),
+        timelineService.loadPeriod(MAIN_EONS.PROTEROZOIC),
+        timelineService.loadPeriod(MAIN_EONS.ARCHEAN),
+        timelineService.loadPeriod(MAIN_EONS.HADEAN)
+      ]);
+      currentPeriods.value = mainEons[0].children || [];
+      emit('period-click', mainEons[0]); // On émet la première période comme référence
+    } catch (err) {
+      console.error('[Timeline] Erreur lors du rechargement:', err);
+      error.value = err instanceof Error ? err.message : 'Erreur lors du rechargement';
+    }
+  }
 };
 </script>
 
@@ -175,5 +281,32 @@ const getPeriodStyles = (period: Period) => {
   padding: 2rem;
   color: #666;
   font-style: italic;
+}
+
+.navigation-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 0.5rem;
+  z-index: 2;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-700);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: var(--color-neutral-200);
 }
 </style> 

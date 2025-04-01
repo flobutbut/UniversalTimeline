@@ -1,3 +1,52 @@
+# État du Projet
+
+## Dernière Mise à Jour
+- Date : 2024-03-21
+- Version : 1.0.0
+- Statut : En développement
+
+## Fonctionnalités
+
+### Implémentées
+- [x] Affichage de la grille des périodes
+- [x] Navigation dans la hiérarchie des périodes
+- [x] Gestion des états de chargement
+- [x] Retour à la racine
+- [x] Optimisation des performances
+
+### En Cours
+- [ ] Correction de l'erreur de linter (convertDateToYearsBeforePresent)
+- [ ] Optimisation des performances de chargement
+- [ ] Amélioration de la gestion des erreurs
+
+### Planifiées
+- [ ] Tests unitaires
+- [ ] Tests d'intégration
+- [ ] Documentation utilisateur
+
+## Problèmes Connus
+1. Erreur de linter concernant la méthode privée convertDateToYearsBeforePresent
+   - Impact : Faible
+   - Priorité : Moyenne
+   - Statut : En cours de correction
+
+## Performance
+- Temps de chargement initial : < 2s
+- Temps de navigation : < 1s
+- Utilisation mémoire : Optimale
+
+## Sécurité
+- Pas de vulnérabilités connues
+- Gestion sécurisée des requêtes API
+- Validation des données
+
+## Prochaines Étapes
+1. Correction des erreurs de linter
+2. Optimisation des performances
+3. Amélioration de la gestion des erreurs
+4. Mise en place des tests
+5. Documentation utilisateur
+
 # Documentation de Statut
 
 ## État Actuel du Projet

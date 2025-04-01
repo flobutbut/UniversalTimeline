@@ -693,3 +693,20 @@ Le service inclut un système de logging détaillé :
 - Logs des tentatives de chargement
 - Logs des erreurs et retries
 - Logs de transformation des données
+
+## État du Projet
+
+### Fonctionnalités Implémentées
+- [x] Affichage de la grille des périodes
+- [x] Navigation dans la hiérarchie
+- [x] Gestion des états de chargement
+- [x] Retour à la racine
+- [x] Optimisation des performances
+
+### Problèmes Connus
+- Erreur de linter concernant la méthode privée convertDateToYearsBeforePresent
+
+### Prochaines Étapes
+- Correction de l'erreur de linter
+- Optimisation des performances de chargement
+- Amélioration de la gestion des erreurs

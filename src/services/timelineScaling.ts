@@ -39,7 +39,6 @@ export class TimelineScalingService {
     const endYears = Math.min(...years.map(y => y.end), 0);
     const duration = startYears - endYears;
 
-    console.log(`[Timeline] Durée totale: ${duration} ans (${startYears} → ${endYears} ans)`);
     return duration;
   }
 
@@ -80,7 +79,6 @@ export class TimelineScalingService {
       startYears
     );
 
-    console.log(`[Timeline] ${period.label}: ${width.toFixed(1)}% largeur, ${left.toFixed(1)}% position`);
     return {
       width: `${width}%`,
       left: `${left}%`
