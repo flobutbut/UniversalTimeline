@@ -1,3 +1,47 @@
+# Documentation de Statut
+
+## État Actuel du Projet
+
+### Fonctionnalités Implémentées
+- ✅ Affichage de la liste des périodes géologiques
+- ✅ Navigation dans la hiérarchie des périodes
+- ✅ Sélection de la langue
+- ✅ Design system complet
+- ✅ Icônes Lucide intégrées
+- ✅ Favicon personnalisé
+
+### Fonctionnalités en Cours
+- 🔄 Optimisation des performances
+- 🔄 Tests unitaires
+- 🔄 Documentation des composants
+
+### Fonctionnalités Planifiées
+- 📅 Filtres de recherche
+- 📅 Visualisation temporelle
+- 📅 Export des données
+- 📅 Mode sombre
+
+## Dernières Modifications
+1. Ajout du design system complet
+2. Intégration de Lucide Icons
+3. Création du favicon personnalisé
+4. Optimisation des composants UI
+
+## Problèmes Connus
+- Aucun problème majeur connu
+
+## Prochaines Étapes
+1. Implémentation des tests unitaires
+2. Optimisation des performances
+3. Ajout des filtres de recherche
+4. Documentation des composants
+
+## Notes Techniques
+- Vue 3 + TypeScript
+- Vite
+- Lucide Icons
+- Design System personnalisé
+
 # État du Projet - Timeline Géologique
 
 ## État Actuel

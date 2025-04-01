@@ -1,11 +1,11 @@
 :root {
   /* Base */
   --base-font-size: 13px;
-  --base-line-height: 1.5;
+  --base-line-height: 1.69;  /* 22px pour 13px */
   --base-spacing: 8px;
 
   /* Typography */
-  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   --font-size-xs: calc(var(--base-font-size) * 0.75);  /* 9.75px */
   --font-size-sm: calc(var(--base-font-size) * 0.875); /* 11.375px */
   --font-size-base: var(--base-font-size);             /* 13px */
@@ -13,6 +13,12 @@
   --font-size-xl: calc(var(--base-font-size) * 1.25);  /* 16.25px */
   --font-size-2xl: calc(var(--base-font-size) * 1.5);  /* 19.5px */
   --font-size-3xl: calc(var(--base-font-size) * 1.875); /* 24.375px */
+
+  /* Line Heights */
+  --line-height-tight: 1.4;    /* ~18px pour 13px */
+  --line-height-normal: 1.69;  /* 22px pour 13px */
+  --line-height-relaxed: 1.85; /* ~24px pour 13px */
+  --line-height-loose: 2.15;   /* ~28px pour 13px */
 
   /* Colors */
   --color-primary: #2563eb;

@@ -15,24 +15,22 @@
         <h3 class="period-title">{{ period.label }}</h3>
       </div>
       <div class="header-right">
+        <ArrowIcon v-if="period.hasChildren" />
+      </div>
+    </div>
+
+    <div class="period-footer">
+      <div class="footer-left">
         <div v-if="hasTemporalData" class="period-dates">
           <span v-if="firstTemporalData.startDate">{{ formatDate(firstTemporalData.startDate) }}</span>
           <span v-if="firstTemporalData.startDate && firstTemporalData.endDate"> - </span>
           <span v-if="firstTemporalData.endDate">{{ formatDate(firstTemporalData.endDate) }}</span>
         </div>
       </div>
-    </div>
-
-    <div class="period-footer">
-      <div class="footer-left">
+      <div class="footer-right">
         <div class="period-location">
           <i class="fas fa-map-marker-alt"></i>
           {{ firstTemporalData.location }}
-        </div>
-      </div>
-      <div class="footer-right">
-        <div v-if="period.hasChildren" class="children-count">
-          Sous-périodes disponibles
         </div>
       </div>
     </div>
@@ -47,6 +45,7 @@
 import { computed, watch } from 'vue';
 import { DateFormatter } from '../utils/dateFormatter';
 import type { Period } from '../types/geological';
+import ArrowIcon from './ArrowIcon.vue';
 
 const props = defineProps<{
   period: Period;
@@ -84,7 +83,7 @@ watch(() => props.isSelected, (newValue) => {
 
 // Ajout des logs dans le composant
 watch(() => props.period, (newPeriod) => {
-  console.log(`[Card] Période reçue: ${newPeriod.id} - ${newPeriod.label}`);
+  console.log(`[Card] Période reçue: ${newPeriod.id} - ${newPeriod.label} - hasChildren: ${newPeriod.hasChildren}`);
 }, { immediate: true });
 </script>
 
@@ -92,7 +91,7 @@ watch(() => props.period, (newPeriod) => {
 .period-card {
   background: white;
   border-radius: 8px;
-  padding: 16px;
+  padding: 12px 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
@@ -112,17 +111,24 @@ watch(() => props.period, (newPeriod) => {
 .period-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  margin-bottom: 0;
 }
 
 .header-left {
   flex: 1;
   text-align: left;
+  margin: 0;
 }
 
 .header-right {
   margin-left: 16px;
   text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  line-height: 0;
 }
 
 .period-title {
@@ -131,18 +137,23 @@ watch(() => props.period, (newPeriod) => {
   font-weight: bold;
   color: #213547;
   text-align: left;
+  line-height: var(--line-height-normal);
+  display: flex;
+  align-items: center;
 }
 
 .period-dates {
   font-size: 1em;
   color: #213547;
-  text-align: right;
+  text-align: left;
+  line-height: var(--line-height-normal);
 }
 
 .period-footer {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  margin-top: 0;
 }
 
 .footer-left {
@@ -159,6 +170,7 @@ watch(() => props.period, (newPeriod) => {
   font-size: 1em;
   color: #213547;
   text-align: left;
+  line-height: var(--line-height-normal);
 }
 
 .children-count {
@@ -166,6 +178,7 @@ watch(() => props.period, (newPeriod) => {
   color: #213547;
   opacity: 0.8;
   text-align: right;
+  line-height: var(--line-height-normal);
 }
 
 .loading-spinner {

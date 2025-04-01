@@ -1,12 +1,85 @@
 # Documentation Fonctionnelle
 
 ## Vue d'ensemble
+L'application permet de naviguer dans la hiérarchie des périodes géologiques en utilisant les données de Wikidata. Elle offre une interface utilisateur intuitive et responsive.
 
-L'application permet de naviguer dans une timeline des périodes géologiques, en commençant par les quatre éons principaux :
-- Hadéen
-- Archéen
-- Protérozoïque
-- Phanérozoïque
+## Fonctionnalités Principales
+
+### Navigation
+- Affichage de la liste des périodes géologiques
+- Navigation dans la hiérarchie des périodes
+- Bouton de retour pour remonter dans la hiérarchie
+- Indicateurs visuels pour les périodes avec sous-périodes
+
+### Interface Utilisateur
+- Design system cohérent
+- Icônes Lucide pour une meilleure expérience utilisateur
+- Responsive design
+- Animations fluides
+- Favicon personnalisé
+
+### Personnalisation
+- Sélection de la langue d'affichage
+- Thème visuel cohérent
+- Typographie optimisée
+
+## Composants UI
+
+### GeologicalPeriodCard
+- Affichage des informations de la période
+- Indicateur de sous-périodes
+- Style cohérent avec le design system
+- Animations au survol
+
+### ArrowIcon
+- Indicateur visuel pour les sous-périodes
+- Style cohérent avec le design system
+- Animation au survol
+
+### BackButton
+- Navigation vers le niveau supérieur
+- Style cohérent avec le design system
+- Icône de retour
+
+### LanguageSelector
+- Sélection de la langue d'affichage
+- Style cohérent avec le design system
+- Liste déroulante des langues disponibles
+
+## Design System
+
+### Typographie
+- Police de base : -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
+- Tailles de police : xs (9.75px) à 3xl (24.375px)
+- Interlignage : 1.5
+
+### Couleurs
+- Primaire : #2563eb
+- Secondaire : #64748b
+- Success : #22c55e
+- Warning : #f59e0b
+- Error : #ef4444
+- Background : #ffffff
+- Surface : #f8fafc
+- Text : #1e293b
+- Text Light : #64748b
+- Border : #e2e8f0
+
+### Espacement
+- Base : 8px
+- Multiplicateurs : 0.5x à 8x
+- Système cohérent pour les marges et paddings
+
+### Bordures et Ombres
+- Rayons de bordure : sm (4px) à full (9999px)
+- Ombres : sm à xl
+- Transitions : fast (150ms) à slow (350ms)
+
+## Interactions Utilisateur
+- Hover effects sur les cartes
+- Transitions fluides
+- Retours visuels sur les actions
+- Navigation intuitive
 
 ## Fonctionnalités
 

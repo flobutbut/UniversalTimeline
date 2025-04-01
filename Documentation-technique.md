@@ -11,9 +11,13 @@ src/
 │   ├── GeologicalPeriods.vue
 │   ├── GeologicalPeriodCard.vue
 │   ├── LanguageSelector.vue
-│   └── BackButton.vue
+│   ├── BackButton.vue
+│   └── ArrowIcon.vue
 ├── services/
 │   └── wikidataTimeline.ts
+├── styles/
+│   ├── variables.css
+│   └── base.css
 ├── types/
 │   └── geological.ts
 └── utils/
@@ -155,6 +159,13 @@ Composant pour la sélection de langue.
 #### Fonctionnalités
 - Sélection de la langue
 - Mise à jour de la langue de l'interface
+
+### ArrowIcon.vue
+Composant pour les icônes de flèche.
+
+#### Fonctionnalités
+- Affichage des icônes de flèche
+- Réutilisation pour diverses utilisations
 
 ## Configuration
 
@@ -469,24 +480,80 @@ Le design system est composé de trois fichiers principaux :
 - `src/style.css` : Styles spécifiques à l'application et import des autres fichiers
 
 ### Variables CSS
-- Taille de base : 13px
-- Système de couleurs cohérent
-- Système d'espacement basé sur 8px
-- Typographie responsive
-- Breakpoints pour le responsive design
+Le projet utilise un système de variables CSS pour maintenir une cohérence visuelle :
 
-### Classes Utilitaires
-- Classes de flexbox et grid
-- Classes d'espacement
-- Classes de couleurs
-- Classes de typographie
-- Classes responsives
+```css
+:root {
+  /* Base */
+  --base-font-size: 13px;
+  --base-line-height: 1.5;
+  --base-spacing: 8px;
 
-### Performance
-- Utilisation de variables CSS pour une maintenance optimale
-- Pas de duplication de code
-- Optimisation des sélecteurs CSS
-- Support des préfixes vendeurs automatique
+  /* Typography */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-size-xs: calc(var(--base-font-size) * 0.75);  /* 9.75px */
+  --font-size-sm: calc(var(--base-font-size) * 0.875); /* 11.375px */
+  --font-size-base: var(--base-font-size);             /* 13px */
+  --font-size-lg: calc(var(--base-font-size) * 1.125); /* 14.625px */
+  --font-size-xl: calc(var(--base-font-size) * 1.25);  /* 16.25px */
+  --font-size-2xl: calc(var(--base-font-size) * 1.5);  /* 19.5px */
+  --font-size-3xl: calc(var(--base-font-size) * 1.875); /* 24.375px */
+
+  /* Colors */
+  --color-primary: #2563eb;
+  --color-primary-light: #60a5fa;
+  --color-primary-dark: #1d4ed8;
+  --color-secondary: #64748b;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-background: #ffffff;
+  --color-surface: #f8fafc;
+  --color-text: #1e293b;
+  --color-text-light: #64748b;
+  --color-border: #e2e8f0;
+
+  /* Spacing */
+  --spacing-xs: calc(var(--base-spacing) * 0.5);  /* 4px */
+  --spacing-sm: var(--base-spacing);              /* 8px */
+  --spacing-md: calc(var(--base-spacing) * 1.5);  /* 12px */
+  --spacing-lg: calc(var(--base-spacing) * 2);    /* 16px */
+  --spacing-xl: calc(var(--base-spacing) * 3);    /* 24px */
+  --spacing-2xl: calc(var(--base-spacing) * 4);   /* 32px */
+  --spacing-3xl: calc(var(--base-spacing) * 6);   /* 48px */
+  --spacing-4xl: calc(var(--base-spacing) * 8);   /* 64px */
+
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  --border-radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+```
+
+### Icônes
+Le projet utilise Lucide Icons pour les icônes :
+- Installation : `yarn add lucide-vue-next`
+- Import : `import { IconName } from 'lucide-vue-next'`
+- Utilisation : `<IconName class="icon" />`
+
+### Composants UI
+- `ArrowIcon.vue` : Composant réutilisable pour les icônes de flèche
+- `BackButton.vue` : Bouton de retour avec icône
+- `LanguageSelector.vue` : Sélecteur de langue
+- `GeologicalPeriodCard.vue` : Carte de période avec design system
 
 ### Intégration
 Le design system est intégré de manière non intrusive avec l'architecture existante :
