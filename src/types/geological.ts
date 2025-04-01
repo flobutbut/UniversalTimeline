@@ -16,72 +16,44 @@ export const PERIOD_CATEGORIES = {
 } as const;
 
 // Version complète d'une période
-export interface Period {
-  id: string;
-  label: string;
+export interface TemporalLocation {
   startDate?: string;
   endDate?: string;
-  location?: string;
-  hasChildren: boolean;
-  isMainEon: boolean;
-  categoryIds: string[];
-  categoryLabels: string[];
-  childrenPreloaded: boolean;
-  children: Period[];
-  loading: boolean;
+  location: string;
 }
 
-// Version simplifiée d'une période pour l'affichage dans la liste des enfants
-export interface SimplePeriod {
+export interface PeriodData {
   id: string;
   label: string;
-  startDate?: string;
-  endDate?: string;
-  location?: string;
+  temporalData: TemporalLocation[];
   hasChildren: boolean;
   isMainEon: boolean;
   categoryIds: string[];
   categoryLabels: string[];
-  childrenPreloaded: boolean;
-  children: Period[];
+  children: PeriodData[];
   loading: boolean;
+  childrenPreloaded: boolean;
+  locations: string[];
+  directLocations: string[];
+}
+
+export interface Period extends PeriodData {
+  // Period étend PeriodData sans ajouter de propriétés supplémentaires
 }
 
 // Types pour les réponses Wikidata
 export interface WikidataBinding {
-  item?: {
-    value: string;
-  };
-  itemLabel?: {
-    value: string;
-  };
-  startDate?: {
-    value: string;
-  };
-  endDate?: {
-    value: string;
-  };
-  locations?: {
-    value: string;
-  };
-  childCount?: {
-    value: string;
-  };
-  locationLabel?: {
-    value: string;
-  };
-  child?: {
-    value: string;
-  };
-  childLabel?: {
-    value: string;
-  };
-  categoryId?: {
-    value: string;
-  };
-  categoryLabel?: {
-    value: string;
-  };
+  item?: { value: string };
+  itemLabel?: { value: string };
+  startDate?: { value: string };
+  endDate?: { value: string };
+  locationLabel?: { value: string };
+  startLocationLabel?: { value: string };
+  endLocationLabel?: { value: string };
+  childCount?: { value: string };
+  statement?: { value: string };
+  child?: { value: string };
+  childLabel?: { value: string };
 }
 
 export interface WikidataResult {
@@ -99,13 +71,9 @@ export interface WikidataResult {
 }
 
 export interface WikidataResponse {
-  head: {
-    vars: string[];
-  };
   results: {
     bindings: WikidataBinding[];
   };
-  boolean?: boolean;
 }
 
 // Options pour les requêtes
@@ -118,7 +86,7 @@ export interface QueryOptions {
   languages?: string[];
 }
 
-export type CacheValue = Period | SimplePeriod | Period[] | SimplePeriod[];
+export type CacheValue = Period | Period[];
 
 export interface CacheEntry {
   value: CacheValue;

@@ -2,6 +2,9 @@
  * Classe utilitaire pour le formatage des dates
  */
 export class DateFormatter {
+  private static readonly GEOLOGICAL_DATE_PATTERN = /^(\d+(?:\.\d+)?)\s*(Ga|Ma|ka|ans)$/;
+  private static readonly RECENT_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+
   /**
    * Convertit une date en années avant le présent (Ga, Ma, ans)
    */
@@ -9,6 +12,11 @@ export class DateFormatter {
     try {
       console.log('Formatage de la date:', dateString);
       
+      // Si la date est déjà formatée avec Ga, Ma, ka ou ans, on la retourne telle quelle
+      if (dateString.endsWith(' Ga') || dateString.endsWith(' Ma') || dateString.endsWith(' ka') || dateString.endsWith(' ans')) {
+        return dateString;
+      }
+
       let years: number;
 
       // Extraction de l'année depuis la chaîne ISO
@@ -41,6 +49,9 @@ export class DateFormatter {
       } else if (years >= 1000000) {
         // Millions d'années (Ma)
         return `${(years / 1000000).toFixed(2)} Ma`;
+      } else if (years >= 1000) {
+        // Milliers d'années (ka)
+        return `${(years / 1000).toFixed(2)} ka`;
       } else {
         // Années
         return `${years} ans`;
@@ -88,16 +99,26 @@ export class DateFormatter {
   /**
    * Formate une date selon le format demandé
    */
-  static format(dateString: string, format: 'geological' | 'french' | 'english' = 'geological'): string {
-    switch (format) {
-      case 'geological':
-        return this.formatGeologicalDate(dateString);
-      case 'french':
-        return this.formatFrenchDate(dateString);
-      case 'english':
-        return this.formatEnglishDate(dateString);
-      default:
-        return dateString;
+  static format(date: string, type: 'geological' | 'recent' = 'geological'): string {
+    // Si la date est déjà formatée avec Ga, Ma, ka ou ans, on la retourne telle quelle
+    if (date.endsWith(' Ga') || date.endsWith(' Ma') || date.endsWith(' ka') || date.endsWith(' ans')) {
+      return date;
     }
+
+    // Si la date est au format ISO (YYYY-MM-DD), on utilise le formatage récent
+    if (this.RECENT_DATE_PATTERN.test(date)) {
+      return this.formatRecentDate(date);
+    }
+
+    // Sinon, on utilise le formatage géologique
+    return this.formatGeologicalDate(date);
+  }
+
+  private static formatRecentDate(date: string): string {
+    const match = date.match(this.RECENT_DATE_PATTERN);
+    if (!match) return date;
+
+    const [, year, month, day] = match;
+    return `${day}/${month}/${year}`;
   }
 } 

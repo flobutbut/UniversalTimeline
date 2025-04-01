@@ -35,15 +35,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { WikidataTimelineService } from '../services/wikidataTimeline';
-import { ProgressiveLoadingServiceImpl } from '../services/ProgressiveLoadingService';
 import GeologicalPeriodCard from './GeologicalPeriodCard.vue';
 import BackButton from './BackButton.vue';
-import type { Period, SimplePeriod } from '../types/geological';
+import type { Period } from '../types/geological';
+import { MAIN_EONS } from '../types/geological';
 
 const timelineService = WikidataTimelineService.getInstance();
-const loadingService = ProgressiveLoadingServiceImpl.getInstance();
 const periods = ref<Period[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
@@ -51,16 +50,24 @@ const selectedPeriod = ref<Period | null>(null);
 const loadingPeriods = ref<Record<string, boolean>>({});
 const navigationStack = ref<Period[]>([]);
 
-// Observer pour le chargement progressif
-let observer: IntersectionObserver | null = null;
+// Fonction pour extraire la date de début d'une période
+const getStartDate = (period: Period): number => {
+  const startDate = period.temporalData[0]?.startDate;
+  if (!startDate) return 0;
+  
+  // Convertir la date en nombre (en millions d'années)
+  const match = startDate.match(/(\d+(?:\.\d+)?)/);
+  return match ? parseFloat(match[1]) : 0;
+};
 
-const transformToPeriod = (simplePeriod: SimplePeriod): Period => ({
-  ...simplePeriod,
-  categoryLabels: simplePeriod.categoryIds,
-  childrenPreloaded: false,
-  children: [],
-  loading: false
-});
+// Fonction pour trier les périodes chronologiquement
+const sortPeriods = (periods: Period[]): Period[] => {
+  return [...periods].sort((a, b) => {
+    const dateA = getStartDate(a);
+    const dateB = getStartDate(b);
+    return dateB - dateA; // Tri décroissant (du plus récent au plus ancien)
+  });
+};
 
 const currentTitle = computed(() => {
   if (navigationStack.value.length === 0) {
@@ -70,67 +77,31 @@ const currentTitle = computed(() => {
   return current.label;
 });
 
-const setupIntersectionObserver = () => {
-  if (observer) {
-    observer.disconnect();
-  }
-
-  observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const periodId = entry.target.getAttribute('data-period-id');
-        if (periodId) {
-          console.log(`[ProgressiveLoading] Carte ${periodId} visible dans la vue`);
-          loadingService.updatePreloadState(periodId, entry.target as HTMLElement);
-          const state = loadingService.getLoadingState(periodId);
-          console.log(`[ProgressiveLoading] État de chargement pour ${periodId}:`, state);
-        }
-      }
-    });
-  }, {
-    root: null,
-    rootMargin: '0px',
-    threshold: 0.1
-  });
-};
-
-const observePeriodCards = () => {
-  const cards = document.querySelectorAll('.period-card');
-  console.log(`[ProgressiveLoading] Observation de ${cards.length} cartes`);
-  cards.forEach(card => {
-    observer?.observe(card);
-  });
-};
-
 const fetchPeriods = async (parentId?: string) => {
   console.log(`[Timeline] Chargement des périodes${parentId ? ` pour le parent ${parentId}` : ''}`);
   loading.value = true;
   error.value = null;
   
   try {
-    const options = {
-      language: 'fr',
-      parentId
-    };
-    
-    const result = parentId 
-      ? await timelineService.getChildren(parentId, options)
-      : await timelineService.getMainEons(options);
-      
-    console.log(`[Timeline] ${result.length} périodes chargées`);
-    periods.value = result.map(transformToPeriod);
+    if (parentId) {
+      const parent = await timelineService.loadPeriod(parentId);
+      periods.value = sortPeriods(parent.children);
+    } else {
+      // Charger les éons principaux
+      const mainEons = await Promise.all([
+        timelineService.loadPeriod(MAIN_EONS.PHANEROZOIC),  // Phanérozoïque
+        timelineService.loadPeriod(MAIN_EONS.PROTEROZOIC),  // Protérozoïque
+        timelineService.loadPeriod(MAIN_EONS.ARCHEAN),      // Archéen
+        timelineService.loadPeriod(MAIN_EONS.HADEAN)        // Hadéen
+      ]);
+      periods.value = sortPeriods(mainEons);
+    }
     
     // Mettre à jour les états de chargement
     periods.value.forEach(period => {
-      const state = loadingService.getLoadingState(period.id);
-      loadingPeriods.value[period.id] = state.loading;
-      console.log(`[ProgressiveLoading] État initial pour ${period.id}:`, state);
+      loadingPeriods.value[period.id] = false;
     });
     
-    // Observer les nouvelles cartes
-    nextTick(() => {
-      observePeriodCards();
-    });
   } catch (err) {
     console.error('[Timeline] Erreur lors du chargement:', err);
     error.value = err instanceof Error ? err.message : 'Erreur lors du chargement des périodes';
@@ -148,23 +119,17 @@ const selectPeriod = async (period: Period) => {
   
   try {
     console.log(`[Timeline] Chargement des enfants pour ${period.id}`);
-    const children = await timelineService.getChildren(period.id, { language: 'fr' });
-    console.log(`[Timeline] ${children.length} enfants chargés pour ${period.id}`);
+    const loadedPeriod = await timelineService.loadPeriod(period.id);
+    console.log(`[Timeline] ${loadedPeriod.children.length} enfants chargés pour ${period.id}`);
     
     navigationStack.value.push(period);
-    periods.value = children.map(transformToPeriod);
+    periods.value = sortPeriods(loadedPeriod.children);
     
     // Mettre à jour les états de chargement
     periods.value.forEach(child => {
-      const state = loadingService.getLoadingState(child.id);
-      loadingPeriods.value[child.id] = state.loading;
-      console.log(`[ProgressiveLoading] État initial pour l'enfant ${child.id}:`, state);
+      loadingPeriods.value[child.id] = false;
     });
     
-    // Observer les nouvelles cartes
-    nextTick(() => {
-      observePeriodCards();
-    });
   } catch (err) {
     console.error('[Timeline] Erreur lors du chargement des enfants:', err);
     error.value = err instanceof Error ? err.message : 'Erreur lors du chargement des sous-périodes';
@@ -206,14 +171,11 @@ const retryLoading = () => {
 };
 
 onMounted(() => {
-  setupIntersectionObserver();
   fetchPeriods();
 });
 
 onUnmounted(() => {
-  if (observer) {
-    observer.disconnect();
-  }
+  // Nettoyage si nécessaire
 });
 </script>
 

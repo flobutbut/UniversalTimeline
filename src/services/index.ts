@@ -1,2 +1,1 @@
-export { CacheService } from './CacheService';
-export { ProgressiveLoadingServiceImpl } from './ProgressiveLoadingService'; 
+export { WikidataTimelineService } from './wikidataTimeline'; 

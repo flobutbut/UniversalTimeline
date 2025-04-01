@@ -15,10 +15,10 @@
         <h3 class="period-title">{{ period.label }}</h3>
       </div>
       <div class="header-right">
-        <div v-if="period.startDate || period.endDate" class="period-dates">
-          <span v-if="period.startDate">{{ period.startDate }}</span>
-          <span v-if="period.startDate && period.endDate"> - </span>
-          <span v-if="period.endDate">{{ period.endDate }}</span>
+        <div v-if="hasTemporalData" class="period-dates">
+          <span v-if="firstTemporalData.startDate">{{ formatDate(firstTemporalData.startDate) }}</span>
+          <span v-if="firstTemporalData.startDate && firstTemporalData.endDate"> - </span>
+          <span v-if="firstTemporalData.endDate">{{ formatDate(firstTemporalData.endDate) }}</span>
         </div>
       </div>
     </div>
@@ -27,7 +27,7 @@
       <div class="footer-left">
         <div class="period-location">
           <i class="fas fa-map-marker-alt"></i>
-          {{ period.location || 'Globale' }}
+          {{ firstTemporalData.location }}
         </div>
       </div>
       <div class="footer-right">
@@ -44,7 +44,8 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue';
+import { computed, watch } from 'vue';
+import { DateFormatter } from '../utils/dateFormatter';
 import type { Period } from '../types/geological';
 
 const props = defineProps<{
@@ -57,6 +58,20 @@ defineEmits<{
   (e: 'select', period: Period): void;
 }>();
 
+// Computed properties pour la nouvelle structure
+const hasTemporalData = computed(() => {
+  return props.period.temporalData && props.period.temporalData.length > 0;
+});
+
+const firstTemporalData = computed(() => {
+  return props.period.temporalData[0] || { startDate: undefined, endDate: undefined };
+});
+
+// Formatage des dates
+const formatDate = (date: string): string => {
+  return DateFormatter.format(date, 'geological');
+};
+
 // Surveiller les changements d'état de chargement
 watch(() => props.loading, (newValue) => {
   console.log(`[Card] État de chargement pour ${props.period.id}: ${newValue ? 'chargement' : 'terminé'}`);
@@ -66,6 +81,11 @@ watch(() => props.loading, (newValue) => {
 watch(() => props.isSelected, (newValue) => {
   console.log(`[Card] État de sélection pour ${props.period.id}: ${newValue ? 'sélectionné' : 'désélectionné'}`);
 });
+
+// Ajout des logs dans le composant
+watch(() => props.period, (newPeriod) => {
+  console.log(`[Card] Période reçue: ${newPeriod.id} - ${newPeriod.label}`);
+}, { immediate: true });
 </script>
 
 <style scoped>
