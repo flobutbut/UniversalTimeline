@@ -106,6 +106,7 @@ watch(() => props.period, (newPeriod) => {
   height: 100%;
   width: 100%;
   box-sizing: border-box;
+  transition: transform var(--transition-normal);
 }
 
 /* Layout mobile (par défaut) */
@@ -134,6 +135,7 @@ watch(() => props.period, (newPeriod) => {
 .period-card:hover .main-container {
   background: var(--color-surface-hover);
   box-shadow: none;
+  transform: translateY(-4px);
 }
 
 .period-card.selected .main-container {

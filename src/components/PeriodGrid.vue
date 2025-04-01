@@ -15,15 +15,19 @@
 
     <div v-else class="timeline-container">
       <div class="timeline-line"></div>
-      <PeriodCard
-        v-for="period in sortedPeriods"
-        :key="period.id"
-        :period="period"
-        :is-selected="false"
-        :loading="false"
-        class="timeline-card"
-        :style="getPeriodStyles(period)"
-      />
+      <div class="periods-container">
+        <PeriodCard
+          v-for="period in sortedPeriods"
+          :key="period.id"
+          :period="period"
+          :is-selected="false"
+          :loading="false"
+          class="timeline-card"
+          :style="getPeriodStyles(period)"
+        />
+      </div>
+      <div class="events-container">
+      </div>
     </div>
   </div>
 </template>
@@ -86,19 +90,20 @@ const getPeriodStyles = (period: Period) => {
 <style scoped>
 .period-grid {
   width: 100%;
-  min-height: 100px;
-  padding: 20px 0;
+  height: 100%;
   overflow-x: auto;
+  padding: var(--spacing-md);
 }
 
 .timeline-container {
   position: relative;
   width: 100%;
-  min-height: 100px;
+  height: 100%;
   background-color: #fff;
   border-radius: 8px;
-  padding: 20px 0;
   min-width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .timeline-line {
@@ -106,18 +111,37 @@ const getPeriodStyles = (period: Period) => {
   left: 0;
   right: 0;
   top: 50%;
+  transform: translateY(-50%);
   height: 2px;
-  background-color: #e0e0e0;
+  background-color: var(--color-neutral-700);
   z-index: 0;
+}
+
+.periods-container {
+  width: 100%;
+  height: 50%;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: flex-end;
+  bottom: 4px;
+}
+
+.events-container {
+  width: 100%;
+  height: 50%;
+  position: relative;
+  padding: 0;
+  margin: 0;
 }
 
 .timeline-card {
   position: absolute;
-  height: 68px;
+  height: 64px;
   z-index: 1;
   cursor: pointer;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: 0;
   will-change: transform, left;
 }
 

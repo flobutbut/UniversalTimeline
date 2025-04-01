@@ -86,8 +86,10 @@ onMounted(async () => {
 <style>
 .app {
   min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .main-content {
@@ -95,16 +97,22 @@ onMounted(async () => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  padding: 1rem;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.main-content > * {
+  height: 50%;
+  min-height: 0;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f0f2f5;
+  background: var(--color-background);
+  height: 100vh;
+  overflow: hidden;
 }
 </style>

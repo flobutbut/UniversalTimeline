@@ -24,8 +24,8 @@ defineEmits<{
 
 <style scoped>
 .header {
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--color-background-bright);
+  border-bottom: 1px solid var(--color-border-light);
   padding: var(--spacing-md) 0;
   width: 100%;
   position: sticky;

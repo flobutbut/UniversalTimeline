@@ -1,35 +1,37 @@
 <template>
   <div class="geological-periods">
-    <div class="navigation-header">
-      <BackButton 
-        v-if="navigationStack.length > 0" 
-        @click="goBack"
-      />
-      <h2>{{ currentTitle }}</h2>
-    </div>
+    <div class="content-wrapper">
+      <div class="navigation-header">
+        <BackButton 
+          v-if="navigationStack.length > 0" 
+          @click="goBack"
+        />
+        <h2>{{ currentTitle }}</h2>
+      </div>
 
-    <div v-if="error" class="error-message">
-      <i class="fas fa-exclamation-circle"></i>
-      {{ error }}
-      <button class="retry-button" @click="retryLoading">
-        Réessayer
-      </button>
-    </div>
+      <div v-if="error" class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ error }}
+        <button class="retry-button" @click="retryLoading">
+          Réessayer
+        </button>
+      </div>
 
-    <div v-else-if="loading" class="loading-container">
-      <i class="fas fa-spinner fa-spin"></i>
-      <span>Chargement des périodes...</span>
-    </div>
+      <div v-else-if="loading" class="loading-container">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span>Chargement des périodes...</span>
+      </div>
 
-    <div v-else class="periods-grid">
-      <GeologicalPeriodCard
-        v-for="period in periods"
-        :key="period.id"
-        :period="period"
-        :is-selected="selectedPeriod?.id === period.id"
-        :loading="loadingPeriods[period.id]"
-        @select="selectPeriod"
-      />
+      <div v-else class="periods-grid">
+        <GeologicalPeriodCard
+          v-for="period in periods"
+          :key="period.id"
+          :period="period"
+          :is-selected="selectedPeriod?.id === period.id"
+          :loading="loadingPeriods[period.id]"
+          @select="selectPeriod"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -173,18 +175,33 @@ onUnmounted(() => {
 <style scoped>
 .geological-periods {
   padding: 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  gap: 1rem;
 }
 
 .navigation-header {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
   gap: 1rem;
+  flex-shrink: 0;
+  padding-left: 0;
 }
 
 .navigation-header h2 {
   color: #213547;
   margin: 0;
+  padding-left: 0;
 }
 
 .error-message {
@@ -192,10 +209,10 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  margin-bottom: 1rem;
   border-radius: 4px;
   background-color: #ffebee;
   color: #c62828;
+  flex-shrink: 0;
 }
 
 .retry-button {
@@ -225,5 +242,9 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  min-height: 0;
+  align-content: center;
 }
 </style> 

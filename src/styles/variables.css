@@ -28,9 +28,11 @@
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
-  --color-background: #ffffff;
+
 
   /* Neutral Colors */
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f8fafc;
   --color-neutral-100: #edf2f7;  /* Surface */
   --color-neutral-200: #e2e8f0;  /* Border */
   --color-neutral-300: #cbd5e1;  /* Light text */
@@ -42,9 +44,12 @@
   --color-neutral-900: #0f172a;  /* Text dark */
 
   /* Legacy color mappings */
+  --color-background-bright: var(--color-neutral-0);
+  --color-background: var(--color-neutral-50);
   --color-surface: var(--color-neutral-100);
   --color-surface-hover: var(--color-neutral-200);
   --color-border: var(--color-neutral-300);
+  --color-border-light: var(--color-neutral-200);
   --color-text: var(--color-neutral-800);
   --color-text-light: var(--color-neutral-500);
 
