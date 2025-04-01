@@ -118,9 +118,7 @@ const selectPeriod = async (period: Period) => {
   loadingPeriods.value[period.id] = true;
   
   try {
-    console.log(`[Timeline] Chargement des enfants pour ${period.id}`);
     const loadedPeriod = await timelineService.loadPeriod(period.id);
-    console.log(`[Timeline] ${loadedPeriod.children.length} enfants chargés pour ${period.id}`);
     
     navigationStack.value.push(period);
     periods.value = sortPeriods(loadedPeriod.children);
@@ -142,16 +140,12 @@ const goBack = () => {
   if (navigationStack.value.length === 0) return;
   
   const currentPeriod = navigationStack.value[navigationStack.value.length - 1];
-  console.log(`[Navigation] Retour depuis ${currentPeriod.id} (${currentPeriod.label})`);
-  
   navigationStack.value.pop();
   const parent = navigationStack.value[navigationStack.value.length - 1];
   
   if (parent) {
-    console.log(`[Navigation] Chargement des enfants de ${parent.id}`);
     fetchPeriods(parent.id);
   } else {
-    console.log('[Navigation] Retour à la liste des éons');
     fetchPeriods();
   }
   
@@ -159,13 +153,10 @@ const goBack = () => {
 };
 
 const retryLoading = () => {
-  console.log('[Timeline] Tentative de rechargement');
   if (navigationStack.value.length > 0) {
     const parent = navigationStack.value[navigationStack.value.length - 1];
-    console.log(`[Timeline] Rechargement depuis le parent ${parent.id}`);
     fetchPeriods(parent.id);
   } else {
-    console.log('[Timeline] Rechargement depuis la racine');
     fetchPeriods();
   }
 };

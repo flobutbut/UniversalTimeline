@@ -93,6 +93,12 @@ interface WikidataBinding {
 - Support multilingue (fr, en)
 - Gestion des localisations temporelles
 
+### Service TimelineScaling (`timelineScaling.ts`)
+- Calcul de la durée totale des périodes
+- Calcul des positions relatives des périodes
+- Calcul des largeurs relatives des périodes
+- Génération des styles CSS pour le positionnement
+
 ### Système de Logging
 Le service utilise un système de logging structuré avec différents niveaux et catégories :
 
@@ -198,6 +204,13 @@ Composant pour les icônes de flèche.
 #### Fonctionnalités
 - Affichage des icônes de flèche
 - Réutilisation pour diverses utilisations
+
+### PeriodGrid (`PeriodGrid.vue`)
+- Affichage des périodes en une seule colonne
+- Positionnement absolu des cartes basé sur leur durée
+- Mise à l'échelle automatique des largeurs
+- Affichage des dates formatées
+- Styles CSS pour une présentation claire
 
 ## Configuration
 

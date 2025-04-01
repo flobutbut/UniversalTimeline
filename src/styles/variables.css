@@ -29,10 +29,24 @@
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --color-background: #ffffff;
-  --color-surface: #f8fafc;
-  --color-text: #1e293b;
-  --color-text-light: #64748b;
-  --color-border: #e2e8f0;
+
+  /* Neutral Colors */
+  --color-neutral-100: #edf2f7;  /* Surface */
+  --color-neutral-200: #e2e8f0;  /* Border */
+  --color-neutral-300: #cbd5e1;  /* Light text */
+  --color-neutral-400: #94a3b8;  /* Medium text */
+  --color-neutral-500: #64748b;  /* Text light */
+  --color-neutral-600: #475569;  /* Text medium */
+  --color-neutral-700: #334155;  /* Text */
+  --color-neutral-800: #1e293b;  /* Text */
+  --color-neutral-900: #0f172a;  /* Text dark */
+
+  /* Legacy color mappings */
+  --color-surface: var(--color-neutral-100);
+  --color-surface-hover: var(--color-neutral-200);
+  --color-border: var(--color-neutral-300);
+  --color-text: var(--color-neutral-800);
+  --color-text-light: var(--color-neutral-500);
 
   /* Spacing */
   --spacing-xs: calc(var(--base-spacing) * 0.5);  /* 4px */

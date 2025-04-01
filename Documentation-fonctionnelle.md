@@ -401,9 +401,16 @@ Une période est considérée comme valide si :
 ### Format d'Affichage
 - Très anciennes (≥ 1 milliard d'années) : "X.XX Ga"
 - Anciennes (≥ 1 million d'années) : "X.XX Ma"
-- Récentes (< 1 million d'années) : "XXXX ans"
+- Récentes (< 1 million d'années) : "XXXX ans" 
 
-### Exemples
-- Hadéen : "4.50 Ga"
-- Extinction K-T : "65.50 Ma"
-- Néolithique : "12000 ans" 
+### Visualisation Temporelle
+- Affichage des périodes en une seule colonne
+- Largeur des cartes proportionnelle à la durée des périodes
+- Positionnement relatif basé sur les dates de début
+- Gestion des périodes sans date de fin (utilisation de la date actuelle)
+- Affichage des dates formatées (Ga, Ma, ans)
+- Interface responsive en une seule colonne
+
+### Composants UI
+
+// ... existing code ... 

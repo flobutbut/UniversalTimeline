@@ -111,13 +111,11 @@ export class WikidataTimelineService {
     const hasEndDate = !!binding.endDate?.value;
     
     if (!hasStartDate && !hasEndDate) {
-      console.log(`[Filter] Période ${binding.item?.value} ignorée : aucune date`);
       return false;
     }
 
     // Vérification du label
     if (!binding.itemLabel?.value) {
-      console.log(`[Filter] Période ${binding.item?.value} ignorée : pas de label`);
       return false;
     }
 
@@ -210,7 +208,6 @@ export class WikidataTimelineService {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error('Unknown error');
         if (attempt < MAX_RETRIES) {
-          console.log(`[API] Tentative ${attempt}/${MAX_RETRIES} échouée, nouvelle tentative dans ${RETRY_DELAY}ms`);
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
         }
       }
@@ -263,9 +260,9 @@ export class WikidataTimelineService {
           });
 
           // Transformer les données de l'enfant
-          const childPeriods = childTemporalResponse.data.results.bindings.map(binding => 
-            this.transformToPeriod(binding)
-          );
+          const childPeriods = childTemporalResponse.data.results.bindings
+            .map(binding => this.transformToPeriod(binding))
+            .filter((period): period is Period => period !== null);
 
           // Regrouper les périodes de l'enfant par localisation
           const groupedChildPeriods = this.groupPeriodsByLocation(childPeriods);

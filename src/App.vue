@@ -3,9 +3,11 @@ import GeologicalPeriods from './components/GeologicalPeriods.vue'
 import LanguageSelector from './components/LanguageSelector.vue'
 import BackButton from './components/BackButton.vue'
 import Header from './components/Header.vue'
+import PeriodGrid from './components/PeriodGrid.vue'
 import { ref, onMounted } from 'vue'
 import { WikidataTimelineService } from './services'
 import type { Period } from './types/geological'
+import { MAIN_EONS } from './types/geological'
 
 const timelineService = WikidataTimelineService.getInstance()
 const currentPeriod = ref<Period | null>(null)
@@ -41,7 +43,22 @@ const goBack = async () => {
 }
 
 onMounted(async () => {
-  await loadChildren('Q123456') // ID de la racine
+  // Charger les éons principaux
+  loading.value = true
+  error.value = null
+  try {
+    const mainEons = await Promise.all([
+      timelineService.loadPeriod(MAIN_EONS.PHANEROZOIC),
+      timelineService.loadPeriod(MAIN_EONS.PROTEROZOIC),
+      timelineService.loadPeriod(MAIN_EONS.ARCHEAN),
+      timelineService.loadPeriod(MAIN_EONS.HADEAN)
+    ])
+    displayedPeriods.value = mainEons
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : 'Une erreur est survenue'
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
@@ -58,6 +75,10 @@ onMounted(async () => {
         :error="error"
         @period-click="handlePeriodClick"
       />
+      <PeriodGrid
+        :periods="displayedPeriods"
+        :loading="loading"
+      />
     </main>
   </div>
 </template>
@@ -72,6 +93,10 @@ onMounted(async () => {
 .main-content {
   flex: 1;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1rem;
 }
 
 body {

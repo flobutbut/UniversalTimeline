@@ -74,35 +74,34 @@ const formatDate = (date: string): string => {
 
 // Surveiller les changements d'état de chargement
 watch(() => props.loading, (newValue) => {
-  console.log(`[Card] État de chargement pour ${props.period.id}: ${newValue ? 'chargement' : 'terminé'}`);
+  // Suppression du log
 });
 
 // Surveiller la sélection
 watch(() => props.isSelected, (newValue) => {
-  console.log(`[Card] État de sélection pour ${props.period.id}: ${newValue ? 'sélectionné' : 'désélectionné'}`);
+  // Suppression du log
 });
 
 // Ajout des logs dans le composant
 watch(() => props.period, (newPeriod) => {
-  console.log(`[Card] Période reçue: ${newPeriod.id} - ${newPeriod.label} - hasChildren: ${newPeriod.hasChildren}`);
+  // Suppression du log
 }, { immediate: true });
 </script>
 
 <style scoped>
 .period-card {
-  background: white;
-  border-radius: 8px;
-  padding: 12px 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid #e0e0e0;
-  color: #213547;
+  transition: var(--transition-normal);
+  color: var(--color-text);
   height: 68px;
   box-sizing: border-box;
   position: relative;
   flex: 0 0 auto;
   width: 100%;
+  border: 1px solid var(--color-border);
 }
 
 .card-content {
@@ -113,12 +112,14 @@ watch(() => props.period, (newPeriod) => {
 }
 
 .period-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary);
 }
 
 .period-card.selected {
-  border-color: #2196f3;
-  background-color: #f5f9ff;
+  background: var(--color-primary);
+  color: var(--color-background);
+  border-color: var(--color-primary);
 }
 
 .period-header {
@@ -135,7 +136,7 @@ watch(() => props.period, (newPeriod) => {
 }
 
 .header-right {
-  margin-left: 16px;
+  margin-left: var(--spacing-md);
   text-align: right;
   display: flex;
   align-items: center;
@@ -144,9 +145,9 @@ watch(() => props.period, (newPeriod) => {
 
 .period-title {
   margin: 0;
-  font-size: 1em;
-  font-weight: bold;
-  color: #213547;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
   text-align: left;
   line-height: var(--line-height-normal);
   white-space: nowrap;
@@ -169,14 +170,14 @@ watch(() => props.period, (newPeriod) => {
 }
 
 .footer-right {
-  margin-left: 16px;
+  margin-left: var(--spacing-md);
   text-align: right;
   white-space: nowrap;
 }
 
 .period-dates {
-  font-size: 1em;
-  color: #213547;
+  font-size: var(--font-size-base);
+  color: var(--color-text-light);
   text-align: left;
   line-height: var(--line-height-normal);
   white-space: nowrap;
@@ -186,8 +187,8 @@ watch(() => props.period, (newPeriod) => {
 }
 
 .period-location {
-  font-size: 1em;
-  color: #213547;
+  font-size: var(--font-size-base);
+  color: var(--color-text-light);
   text-align: left;
   line-height: var(--line-height-normal);
 }
@@ -200,7 +201,7 @@ watch(() => props.period, (newPeriod) => {
   align-items: center;
   justify-content: center;
   z-index: 1;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   pointer-events: none;
   width: 100%;
   height: 100%;
@@ -214,7 +215,7 @@ watch(() => props.period, (newPeriod) => {
   width: 24px;
   height: 24px;
   border: 3px solid rgba(33, 150, 243, 0.1);
-  border-top-color: #2196f3;
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0;

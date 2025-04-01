@@ -9,17 +9,20 @@
 - ✅ Design system complet
 - ✅ Icônes Lucide intégrées
 - ✅ Favicon personnalisé
+- ✅ Visualisation temporelle des périodes
+- ✅ Mise à l'échelle automatique des durées
 
 ### Fonctionnalités en Cours
 - 🔄 Optimisation des performances
 - 🔄 Tests unitaires
 - 🔄 Documentation des composants
+- 🔄 Amélioration de la visualisation temporelle
 
 ### Fonctionnalités Planifiées
 - 📅 Filtres de recherche
-- 📅 Visualisation temporelle
 - 📅 Export des données
 - 📅 Mode sombre
+- 📅 Zoom sur les périodes
 
 ## Dernières Modifications
 1. Ajout du design system complet
@@ -33,6 +36,9 @@
 9. ✅ Amélioration de la validation des périodes
 10. ✅ Optimisation des requêtes SPARQL
 11. ✅ Gestion des erreurs améliorée
+12. ✅ Implémentation de la visualisation temporelle
+13. ✅ Création du service TimelineScaling
+14. ✅ Mise à l'échelle automatique des périodes
 
 ## Problèmes Connus
 - Aucun problème majeur connu
