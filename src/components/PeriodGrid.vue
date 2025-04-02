@@ -7,6 +7,7 @@
 
     <div v-else-if="error" class="error-message">
       {{ error }}
+      <button @click="retryLoading">Réessayer</button>
     </div>
 
     <div v-else-if="periods.length === 0" class="empty-message">
@@ -15,14 +16,11 @@
 
     <div v-else class="timeline-container">
       <div class="navigation-header">
-        <button 
-          v-if="navigationStack.length > 0" 
-          class="back-button"
+        <BackButton 
+          v-if="navigationStack.length > 0"
+          :period="navigationStack[navigationStack.length - 1]"
           @click="goBack"
-        >
-          <i class="fas fa-arrow-left"></i>
-          Retour
-        </button>
+        />
       </div>
       <div class="timeline-line"></div>
       <div class="periods-container">
@@ -50,6 +48,7 @@ import { TimelineScalingService } from '../services/timelineScaling';
 import { WikidataTimelineService } from '../services/wikidataTimeline';
 import { MAIN_EONS } from '../types/geological';
 import PeriodCard from './PeriodCard.vue';
+import BackButton from './BackButton.vue';
 
 const props = defineProps<{
   periods: Period[];
@@ -195,10 +194,10 @@ const retryLoading = async () => {
 
 <style scoped>
 .period-grid {
+  position: relative;
   width: 100%;
   height: 100%;
   overflow-x: auto;
-  padding: var(--spacing-md);
 }
 
 .timeline-container {
@@ -290,23 +289,5 @@ const retryLoading = async () => {
   right: 0;
   padding: 0.5rem;
   z-index: 2;
-}
-
-.back-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  background-color: var(--color-neutral-100);
-  color: var(--color-neutral-700);
-  cursor: pointer;
-  font-size: 0.875rem;
-  transition: background-color 0.2s;
-}
-
-.back-button:hover {
-  background-color: var(--color-neutral-200);
 }
 </style> 

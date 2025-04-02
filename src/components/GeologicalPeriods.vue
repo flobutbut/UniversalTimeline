@@ -4,6 +4,7 @@
       <div class="navigation-header">
         <BackButton 
           v-if="navigationStack.length > 0" 
+          :period="navigationStack[navigationStack.length - 1]"
           @click="goBack"
         />
         <h2>{{ currentTitle }}</h2>

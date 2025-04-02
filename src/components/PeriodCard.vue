@@ -96,7 +96,7 @@ const handleClick = () => {
 
 <style scoped>
 .period-card {
-  background: transparent;
+  background: var(--color-neutral-0);
   padding: 0 1px;
   cursor: pointer;
   color: var(--color-text);

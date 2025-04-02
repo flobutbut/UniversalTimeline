@@ -16,9 +16,15 @@ Le projet est une application web permettant de naviguer dans une timeline géol
 
 ### Navigation
 - Affichage de la liste des périodes géologiques
-- Navigation dans la hiérarchie des périodes
-- Bouton de retour pour remonter dans la hiérarchie
+- Navigation dans la hiérarchie des périodes avec period-click
+- Bouton de retour pour remonter dans la hiérarchie avec informations temporelles
 - Indicateurs visuels pour les périodes avec sous-périodes
+- Gestion des états de chargement par période
+- Support multilingue (fr, en)
+- Tri chronologique des périodes
+- Formatage des dates (Ga, Ma, ans)
+- Gestion des erreurs avec retry
+- Visualisation temporelle avec échelle adaptative
 
 ### Interface Utilisateur
 - Design system cohérent
@@ -130,21 +136,24 @@ Le projet est une application web permettant de naviguer dans une timeline géol
 
 ### Interface Utilisateur
 
-1. **Contrôles**
-   - Sélecteur de langue (FR/EN)
-   - Bouton retour pour la navigation
+1. **Grille des périodes**
+   - Affichage chronologique
+   - Cartes interactives
    - Indicateurs de chargement
 
-2. **États Visuels**
-   - Carte sélectionnée : bordure bleue et fond légèrement bleuté
-   - État de chargement : indicateur de progression
-   - Présence de sous-périodes : compteur ou indication
-   - Erreurs : messages explicites
+2. **Navigation**
+   - Bouton retour avec informations temporelles
+   - Affichage du label de la période parent
+   - Affichage des dates et de la localisation
+   - Indicateurs de progression
+   - Gestion des erreurs
 
-3. **Responsive Design**
-   - Grille adaptative pour les cartes
-   - Espacement optimisé
-   - Légendes et textes lisibles
+3. **États visuels**
+   - États de chargement avec spinner
+   - États d'erreur avec messages explicites et bouton retry
+   - États de succès avec confirmation
+   - États de survol sur les éléments interactifs
+   - États actifs pour les contrôles
 
 ### Gestion des Données
 

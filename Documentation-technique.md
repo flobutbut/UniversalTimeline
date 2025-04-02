@@ -31,9 +31,11 @@ src/
 │   ├── GeologicalPeriodCard.vue
 │   ├── LanguageSelector.vue
 │   ├── BackButton.vue
+│   ├── PeriodGrid.vue
 │   └── ArrowIcon.vue
 ├── services/
-│   └── wikidataTimeline.ts
+│   ├── wikidataTimeline.ts
+│   └── timelineScaling.ts
 ├── styles/
 │   ├── variables.css
 │   └── base.css
@@ -85,13 +87,130 @@ interface WikidataBinding {
 ## Services
 
 ### Service WikidataTimeline (`wikidataTimeline.ts`)
+- Pattern Singleton pour garantir une instance unique
 - Gestion des requêtes SPARQL vers l'API Wikidata
 - Transformation des données brutes en objets typés
-- Gestion des erreurs et des timeouts
-- Logging détaillé pour le débogage
-- Gestion avancée des dates avec différents formats
+- Gestion des erreurs avec système de retry (3 tentatives)
+- Timeout de 30 secondes sur les requêtes
 - Support multilingue (fr, en)
-- Gestion des localisations temporelles
+- Gestion des localisations temporelles (P518)
+- Chargement progressif des enfants
+- Validation des données reçues
+
+#### Configuration
+```typescript
+const WIKIDATA_API_URL = '/api/wikidata/sparql';
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 seconde
+const REQUEST_TIMEOUT = 30000; // 30 secondes
+```
+
+#### Requêtes SPARQL
+Le service utilise deux types de requêtes :
+
+1. **Requête temporelle** (`buildTemporalQuery`) :
+```sparql
+SELECT DISTINCT 
+  ?item ?itemLabel 
+  ?startDate ?endDate 
+  ?startLocationLabel ?endLocationLabel
+  (COUNT(DISTINCT ?child) AS ?childCount)
+WHERE {
+  VALUES ?item { wd:${periodId} }
+  
+  # Filtrage : au moins une date doit exister
+  {
+    ?item p:P580 ?startStatement.
+    ?startStatement ps:P580 ?startDate.
+  } UNION {
+    ?item p:P582 ?endStatement.
+    ?endStatement ps:P582 ?endDate.
+  }
+  
+  # Labels
+  SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
+    ?item rdfs:label ?itemLabel.
+  }
+
+  # Start time avec localisations
+  OPTIONAL {
+    ?item p:P580 ?startStatement.
+    ?startStatement ps:P580 ?startDate.
+    OPTIONAL {
+      ?startStatement pq:P518 ?startLocation.
+      SERVICE wikibase:label { 
+        bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
+        ?startLocation rdfs:label ?startLocationLabel.
+      }
+    }
+  }
+
+  # End time avec localisations
+  OPTIONAL {
+    ?item p:P582 ?endStatement.
+    ?endStatement ps:P582 ?endDate.
+    OPTIONAL {
+      ?endStatement pq:P518 ?endLocation.
+      SERVICE wikibase:label { 
+        bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
+        ?endLocation rdfs:label ?endLocationLabel.
+      }
+    }
+  }
+
+  # Enfants
+  OPTIONAL {
+    ?child wdt:P361 ?item.
+  }
+}
+GROUP BY ?item ?itemLabel ?startDate ?endDate ?startLocationLabel ?endLocationLabel
+ORDER BY ?startDate
+```
+
+2. **Requête des enfants** (`buildChildrenQuery`) :
+```sparql
+SELECT DISTINCT 
+  ?child ?childLabel
+  (COUNT(DISTINCT ?grandChild) AS ?childCount)
+WHERE {
+  ?child wdt:P361 wd:${periodId}.
+  SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
+    ?child rdfs:label ?childLabel.
+  }
+  OPTIONAL {
+    ?grandChild wdt:P361 ?child.
+  }
+}
+GROUP BY ?child ?childLabel
+```
+
+#### Validation des Données
+```typescript
+private isValidPeriod(binding: WikidataBinding): boolean {
+  // Vérification de la présence d'au moins une date
+  const hasStartDate = !!binding.startDate?.value;
+  const hasEndDate = !!binding.endDate?.value;
+  
+  if (!hasStartDate && !hasEndDate) {
+    return false;
+  }
+
+  // Vérification du label
+  if (!binding.itemLabel?.value) {
+    return false;
+  }
+
+  return true;
+}
+```
+
+#### Gestion des Erreurs
+- Système de retry automatique (3 tentatives)
+- Délai de 1 seconde entre les tentatives
+- Timeout de 30 secondes sur les requêtes
+- Logs d'erreur pour le débogage
 
 ### Service TimelineScaling (`timelineScaling.ts`)
 - Calcul de la durée totale des périodes
@@ -100,64 +219,25 @@ interface WikidataBinding {
 - Génération des styles CSS pour le positionnement
 - Conversion des dates en années avant le présent
 
-### Système de Logging
-Le service utilise un système de logging structuré avec différents niveaux et catégories :
+#### Fonctionnalités principales
 
-#### Catégories de Logs
-1. **[Timeline]** - Logs des interactions utilisateur
-   - Préfixé par `##` pour une meilleure visibilité
-   - Suit le flux de navigation et les actions utilisateur
-   - Affiche les labels des périodes pour une meilleure lisibilité
-
-2. **[API]** - Logs des requêtes et réponses
-   - Détails des requêtes SPARQL
-   - Tentatives de reconnexion
-   - Erreurs d'API
-
-3. **[SPARQL]** - Logs des requêtes SPARQL
-   - Génération des requêtes
-   - Paramètres utilisés
-
-#### Exemple de Flux de Logs
-```
-## [Timeline] Chargement initial des éons principaux
-[API] Requête SPARQL pour les éons principaux
-## [Timeline] Éons principaux chargés: Hadéen, Archéen, Protérozoïque, Phanérozoïque
-```
-
-### Formatage des Dates
-
-Le service utilise trois formats de dates :
-1. **Ga** (Giga-années) pour les dates ≥ 1 000 000 000 ans
-   - Exemple : "4.50 Ga"
-2. **Ma** (Méga-années) pour les dates ≥ 1 000 000 ans
-   - Exemple : "65.50 Ma"
-3. **ans** pour toutes les dates < 1 000 000 ans
-   - Exemple : "5200 ans"
-
-#### Exemples de formatage :
+1. **Calcul de la durée totale**
 ```typescript
-// Dates géologiques
-4500000000 → "4.50 Ga"
-65500000 → "65.50 Ma"
-5200 → "5200 ans"    // Nouveau format pour les dates < 1M ans
+calculateTotalDuration(periods: Period[]): number
 ```
+- Tri des périodes par date de début (plus récente en premier)
+- Utilisation de la date de début de la première période comme point de départ (0%)
+- Utilisation de la date de fin de la dernière période comme point d'arrivée (100%)
+- Calcul de la durée totale comme différence entre ces deux points
 
-### Règles de Formatage
-- Les dates sont toujours exprimées en années avant le présent
-- Deux décimales pour Ga et Ma
-- Nombre entier pour les années < 1M
-- Suffixe "ans" pour les dates récentes
-
-### Méthodes principales
-- `loadPeriod(periodId: string): Promise<Period>`
-- `getChildren(parentId: string): Promise<Period[]>`
-
-### Fonctionnalités
-- Retry automatique en cas d'erreur
-- Support multilingue (fr, en)
-- Requêtes SPARQL optimisées
-- Gestion des localisations temporelles
+2. **Calcul des positions et largeurs**
+```typescript
+calculateRelativePosition(dateString: string, totalDuration: number, startYears: number): number
+calculatePeriodWidth(period: Period, totalDuration: number): number
+```
+- Calcul des positions relatives (0-100%) pour chaque période
+- Calcul des largeurs relatives basées sur la durée de chaque période
+- Normalisation par rapport à la durée totale
 
 ## Composants
 
@@ -171,6 +251,22 @@ Composant principal qui gère l'affichage et la navigation dans la timeline.
 - Support multilingue
 - Gestion des erreurs
 - Contraste optimisé
+
+### PeriodGrid.vue
+Composant pour l'affichage des périodes en grille.
+
+#### Fonctionnalités
+- Affichage des périodes en une seule colonne
+- Mise à l'échelle automatique des largeurs
+- Navigation hiérarchique
+- Gestion des états de chargement par période
+- Gestion des erreurs avec retry
+- Support multilingue (fr, en)
+- Émission d'événements period-click
+- Intégration avec TimelineScaling
+- Gestion de la pile de navigation
+- Tri chronologique des périodes
+- Formatage des dates (Ga, Ma, ans)
 
 ### GeologicalPeriodCard.vue
 Composant de présentation pour chaque période.
@@ -206,13 +302,6 @@ Composant pour les icônes de flèche.
 - Affichage des icônes de flèche
 - Réutilisation pour diverses utilisations
 
-### PeriodGrid (`PeriodGrid.vue`)
-- Affichage des périodes en une seule colonne
-- Positionnement absolu des cartes basé sur leur durée
-- Mise à l'échelle automatique des largeurs
-- Affichage des dates formatées
-- Styles CSS pour une présentation claire
-
 ## Configuration
 
 ### Technologies Utilisées
@@ -243,57 +332,6 @@ Le projet utilise Vite comme bundler avec la configuration suivante :
 - Proxy configuré pour l'API Wikidata (`/api/wikidata/*` -> `https://www.wikidata.org`)
 - Gestion des en-têtes CORS et User-Agent via le proxy
 - Support du HMR (Hot Module Replacement)
-
-### API Wikidata
-- Utilisation de l'API REST Wikidata via le proxy local
-- Endpoint : `/api/wikidata/w/api.php`
-- Paramètres de requête :
-  - `action`: wbsearchentities
-  - `format`: json
-  - `language`: fr/en
-  - `type`: item
-  - `limit`: 20 (par défaut)
-
-## Architecture Technique
-
-### Service Wikidata
-- Implémentation du pattern Singleton
-- Gestion des requêtes SPARQL vers l'API Wikidata
-- Support multilingue (fr, en)
-- Gestion des erreurs
-- Timeout de 30 secondes
-- Maximum 3 tentatives de retry
-- Délai de 1 seconde entre les tentatives
-
-### Système de Gestion des Erreurs
-#### Erreurs
-- Messages d'erreur localisés
-- Codes d'erreur spécifiques
-- Erreur d'origine (pour le debugging)
-
-#### Codes d'Erreur
-- `RATE_LIMIT` : Limite de requêtes dépassée
-- `SERVICE_UNAVAILABLE` : Service indisponible
-- `INVALID_REQUEST` : Requête mal formée
-- `INVALID_RESPONSE` : Réponse API invalide
-- `INVALID_PERIOD_DATA` : Données de période incomplètes
-- `API_ERROR` : Erreur de communication
-- `UNKNOWN_ERROR` : Erreur non catégorisée
-
-#### Mécanisme de Retry
-- Configuration :
-  - Maximum 3 tentatives
-  - Délai de 1 seconde entre les tentatives
-  - Timeout de 30 secondes par requête
-- Erreurs retentées :
-  - Erreurs réseau
-  - Code 429 (Rate Limit)
-  - Codes 503/504 (Service Unavailable)
-
-#### Validation des Données
-- Vérification de la structure de réponse
-- Validation des champs obligatoires
-- Transformation sécurisée des données
 
 ## Tests
 
@@ -615,86 +653,6 @@ La navigation est gérée de manière hiérarchique :
 - Gestion des états de chargement
 - Gestion des erreurs avec retry
 
-## Service WikidataTimeline
-
-### Configuration
-```typescript
-const WIKIDATA_API_URL = '/api/wikidata/sparql';
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 seconde
-const REQUEST_TIMEOUT = 30000; // 30 secondes
-```
-
-### Architecture
-- Pattern Singleton pour garantir une instance unique
-- Support multilingue (fr, en) par défaut
-- Système de retry pour la gestion des erreurs
-- Timeout de 30 secondes sur les requêtes
-
-### Filtrage des Périodes
-Le service implémente une stratégie de filtrage hybride :
-
-1. **Filtrage SPARQL**
-```sparql
-# Filtrage : au moins une date doit exister
-{
-  ?item p:P580 ?startStatement.
-  ?startStatement ps:P580 ?startDate.
-} UNION {
-  ?item p:P582 ?endStatement.
-  ?endStatement ps:P582 ?endDate.
-}
-```
-
-2. **Validation TypeScript**
-```typescript
-private isValidPeriod(binding: WikidataBinding): boolean {
-  // Vérification des dates
-  const hasStartDate = !!binding.startDate?.value;
-  const hasEndDate = !!binding.endDate?.value;
-  
-  // Vérification du label
-  const hasLabel = !!binding.itemLabel?.value;
-  
-  return (hasStartDate || hasEndDate) && hasLabel;
-}
-```
-
-### Traitement des Données
-1. Filtrage initial via SPARQL
-2. Validation des données reçues
-3. Transformation en objets Period
-4. Regroupement par localisation
-
-### Gestion des Erreurs
-- Système de retry automatique (3 tentatives)
-- Délai de 1 seconde entre les tentatives
-- Timeout de 30 secondes sur les requêtes
-- Logs détaillés pour le débogage
-
-### Points d'Attention
-1. **Performance**
-   - Les requêtes SPARQL sont complexes
-   - Chargement synchrone des enfants
-   - Impact potentiel sur les temps de réponse
-
-2. **Dépendances**
-   - Structure spécifique des données Wikidata
-   - Nécessite une connexion stable
-   - Dépend de la disponibilité de l'API Wikidata
-
-### Exemple d'Utilisation
-```typescript
-const service = WikidataTimelineService.getInstance();
-const period = await service.loadPeriod('Q104460'); // Hadéen
-```
-
-### Logs et Débogage
-Le service inclut un système de logging détaillé :
-- Logs des tentatives de chargement
-- Logs des erreurs et retries
-- Logs de transformation des données
-
 ## État du Projet
 
 ### Fonctionnalités Implémentées
@@ -711,3 +669,14 @@ Le service inclut un système de logging détaillé :
 - Correction de l'erreur de linter
 - Optimisation des performances de chargement
 - Amélioration de la gestion des erreurs
+
+### Composants Vue.js
+
+#### BackButton.vue
+- Gère le bouton de retour dans la navigation
+- Affiche le label de la période parent
+- Affiche les informations temporelles et la localisation
+- Style rouge distinctif avec hover
+- Utilise DateFormatter pour le formatage des dates
+
+#### PeriodGrid.vue

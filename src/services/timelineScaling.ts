@@ -29,16 +29,21 @@ export class TimelineScalingService {
   calculateTotalDuration(periods: Period[]): number {
     if (periods.length === 0) return 0;
 
-    const years = periods.map(p => ({
-      start: this.convertDateToYearsBeforePresent(p.temporalData[0]?.startDate || '0 ans'),
-      end: this.convertDateToYearsBeforePresent(p.temporalData[0]?.endDate || '0 ans')
-    }));
+    // Trier les périodes par date de début (la plus récente en premier)
+    const sortedPeriods = [...periods].sort((a, b) => {
+      const aStart = this.convertDateToYearsBeforePresent(a.temporalData[0]?.startDate || '0 ans');
+      const bStart = this.convertDateToYearsBeforePresent(b.temporalData[0]?.startDate || '0 ans');
+      return bStart - aStart;
+    });
 
-    const startYears = Math.max(...years.map(y => y.start));
-    const endYears = Math.min(...years.map(y => y.end), 0);
-    const duration = startYears - endYears;
+    // Prendre la date de début de la première période (la plus récente)
+    const firstPeriodStart = this.convertDateToYearsBeforePresent(sortedPeriods[0].temporalData[0]?.startDate || '0 ans');
+    
+    // Prendre la date de fin de la dernière période (la plus ancienne)
+    const lastPeriodEnd = this.convertDateToYearsBeforePresent(sortedPeriods[sortedPeriods.length - 1].temporalData[0]?.endDate || '0 ans');
 
-    return duration;
+    // Calculer la durée totale
+    return firstPeriodStart - lastPeriodEnd;
   }
 
   /**
