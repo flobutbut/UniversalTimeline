@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # Base de données des catégories
+  categories_db:
+    image: postgres:15
+    container_name: categories_db
+    environment:
+      POSTGRES_DB: categories_db
+      POSTGRES_USER: categories_user
+      POSTGRES_PASSWORD: categories_password
+    volumes:
+      - ./init-categories.sql:/docker-entrypoint-initdb.d/init-categories.sql
+      - categories_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U categories_user -d categories_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Base de données principale pour les périodes géologiques
+  periods-db:
+    image: postgres:15
+    container_name: periods-db
+    environment:
+      POSTGRES_DB: periods_db
+      POSTGRES_USER: periods_user
+      POSTGRES_PASSWORD: periods_password
+    volumes:
+      - ./init-periods.sql:/docker-entrypoint-initdb.d/init-periods.sql
+      - periods_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+    restart: unless-stopped
+
+  # Base de données pour les événements
+  events-db:
+    image: postgres:15
+    container_name: events-db
+    environment:
+      POSTGRES_DB: events_db
+      POSTGRES_USER: events_user
+      POSTGRES_PASSWORD: events_password
+    volumes:
+      - ./init-events.sql:/docker-entrypoint-initdb.d/init-events.sql
+      - events_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+    restart: unless-stopped
+
+  # Base de données pour les stories
+  stories-db:
+    image: postgres:15
+    container_name: stories-db
+    environment:
+      POSTGRES_DB: stories_db
+      POSTGRES_USER: stories_user
+      POSTGRES_PASSWORD: stories_password
+    volumes:
+      - ./init-stories.sql:/docker-entrypoint-initdb.d/init-stories.sql
+      - stories_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+    restart: unless-stopped
+
+  # Interface d'administration (pgAdmin)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+    ports:
+      - "5050:80"
+    volumes:
+      - ./servers.json:/pgadmin4/servers.json
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - db_network
+    depends_on:
+      - categories_db
+      - periods-db
+      - events-db
+      - stories-db
+    restart: unless-stopped
+
+volumes:
+  categories_data:
+  periods_data:
+  events_data:
+  stories_data:
+  pgadmin_data:
+
+networks:
+  db_network:
+    driver: bridge 

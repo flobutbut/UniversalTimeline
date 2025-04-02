@@ -60,6 +60,8 @@
 - 🔄 Tests unitaires
 - 🔄 Documentation des composants
 - 🔄 Amélioration de la visualisation temporelle
+- 🔄 Mise en place de la base de données PostgreSQL
+- 🔄 Intégration du stockage local des périodes
 
 ### Performance
 - Temps de chargement initial : < 2s
@@ -68,6 +70,7 @@
 - Timeout API : 30 secondes
 - Maximum 3 tentatives de retry
 - Délai entre les tentatives : 1 seconde
+- Temps de réponse base de données : < 100ms
 
 ## Problèmes et Solutions
 
@@ -110,14 +113,15 @@
 ### Court Terme
 1. **Corrections et Améliorations**
    - Correction des erreurs de linter
-   - Mise en place des tests
-   - Amélioration de la gestion des erreurs
    - Optimisation des performances
+   - Amélioration de la gestion des erreurs
+   - Mise en place des tests
    - Documentation utilisateur
-   - Amélioration de l'affordance du bouton retour
-   - Animation de transition dans la navigation entre deux périodes 
+   - Animation de transition dans la navigation entre deux périodes
    - Gestion des périodes trop petites
-   - Gestion des overlap de périodes
+   - Amélioration de l'affordance du bouton retour
+   - Configuration de la base de données
+   - Migration des données existantes
 
 2. **Tests**
    - ✅ Tests unitaires pour WikidataTimelineService

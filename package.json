@@ -12,9 +12,11 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@types/pg": "^8.11.11",
     "@vueuse/core": "^13.0.0",
     "axios": "^1.8.4",
     "lucide-vue-next": "^0.486.0",
+    "pg": "^8.14.1",
     "vue": "^3.5.13"
   },
   "devDependencies": {

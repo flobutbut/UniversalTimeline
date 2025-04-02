@@ -680,3 +680,56 @@ La navigation est gérée de manière hiérarchique :
 - Utilise DateFormatter pour le formatage des dates
 
 #### PeriodGrid.vue
+
+## Infrastructure
+
+### Base de Données
+- PostgreSQL 16 (Alpine)
+- Deux bases de données distinctes :
+  - `periods_db` : Stockage des périodes géologiques
+  - `events_db` : Stockage des événements
+- Interface d'administration : pgAdmin4
+
+#### Structure des Tables
+
+1. **Table periods**
+```sql
+CREATE TABLE periods (
+    id VARCHAR(50) PRIMARY KEY,
+    label_fr VARCHAR(255),
+    label_en VARCHAR(255),
+    description_fr TEXT,
+    description_en TEXT,
+    start_date VARCHAR(50),
+    end_date VARCHAR(50),
+    parent_id VARCHAR(50),
+    category VARCHAR(100),
+    temporal_location VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+2. **Table events**
+```sql
+CREATE TABLE events (
+    id VARCHAR(50) PRIMARY KEY,
+    label_fr VARCHAR(255),
+    label_en VARCHAR(255),
+    description_fr TEXT,
+    description_en TEXT,
+    date VARCHAR(50),
+    period_id VARCHAR(50),
+    category VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (period_id) REFERENCES periods(id)
+);
+```
+
+#### Service DatabaseService
+- Gestion des connexions à la base de données
+- Méthodes CRUD pour les périodes
+- Support multilingue (fr, en)
+- Gestion des relations parent/enfant
+- Optimisation des performances avec index
