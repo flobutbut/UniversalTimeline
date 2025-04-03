@@ -13,7 +13,7 @@
 ```mermaid
 graph TD
     A[App.vue] --> B[GeologicalPeriods.vue]
-    B --> C[WikidataTimelineService.loadPeriod]
+    B --> C[WikidataQueryService.loadPeriod]
     C --> D[Requête SPARQL Wikidata]
     D --> E[Transformation Period]
     E --> F[Affichage GeologicalPeriodCard]
@@ -21,7 +21,7 @@ graph TD
 
 1. App.vue se charge
 2. GeologicalPeriods.vue est initialisé
-3. WikidataTimelineService.loadPeriod() est appelé
+3. WikidataQueryService.loadPeriod() est appelé
 4. Requête SPARQL à Wikidata
 5. Transformation des données en Period[]
 6. Affichage des éons dans GeologicalPeriodCard[]
@@ -34,7 +34,7 @@ graph TD
     A[Click utilisateur] --> B[GeologicalPeriodCard.vue]
     B --> C[Événement 'select']
     C --> D[GeologicalPeriods.selectPeriod]
-    D --> E[WikidataTimelineService.getChildren]
+    D --> E[WikidataQueryService.getChildren]
     E --> F[Requête SPARQL]
     F --> G[Transformation]
     G --> H[Mise à jour navigation]
@@ -130,7 +130,13 @@ interface TemporalLocation {
 ```
 
 ### Services clés
-- WikidataTimelineService : Gestion des données et requêtes SPARQL
+- WikidataQueryService : Gestion des données et requêtes SPARQL
+- DatabaseQueryService : Gestion des données de la base de données locale
+- TimelineScalingService : Calcul des positions et dimensions des périodes
+- StoryService : Gestion des stories géologiques
+- DatabaseService : Opérations CRUD sur la base de données
+- DatabaseImportService : Import des données depuis Wikidata
+- WikidataSearchService : Recherche dans Wikidata
 
 ### Points d'attention
 - Gestion de la mémoire

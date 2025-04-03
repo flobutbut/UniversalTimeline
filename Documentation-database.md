@@ -41,6 +41,7 @@
 | Colonne | Type | Description |
 |---------|------|-------------|
 | id | VARCHAR(255) | Identifiant unique de la période |
+| wikidata_id | VARCHAR(255) | Identifiant Wikidata (QID) |
 | label_fr | TEXT | Label en français |
 | label_en | TEXT | Label en anglais |
 | description_fr | TEXT | Description en français |
@@ -63,6 +64,7 @@
 | Colonne | Type | Description |
 |---------|------|-------------|
 | id | VARCHAR(255) | Identifiant unique de l'événement |
+| wikidata_id | VARCHAR(255) | Identifiant Wikidata (QID) |
 | label_fr | TEXT | Label en français |
 | label_en | TEXT | Label en anglais |
 | description_fr | TEXT | Description en français |
@@ -128,6 +130,7 @@ interface Category {
 ```typescript
 interface Period {
   id: string;
+  wikidataId: string;
   label: MultilingualText;
   description?: MultilingualText;
   startDate: string; // Format ISO 8601
@@ -145,6 +148,7 @@ interface Period {
 ```typescript
 interface Event {
   id: string;
+  wikidataId: string;
   label: MultilingualText;
   description?: MultilingualText;
   date: string;      // Format ISO 8601
@@ -183,12 +187,16 @@ interface Story {
 
 ### Base de Données des Périodes
 - Index sur `id`
+- Index sur `wikidata_id`
 - Index sur `parent_id`
 - Index sur `start_date` et `end_date`
+- Contrainte UNIQUE sur `wikidata_id`
 
 ### Base de Données des Événements
 - Index sur `id`
+- Index sur `wikidata_id`
 - Index sur `date`
+- Contrainte UNIQUE sur `wikidata_id`
 
 ### Base de Données des Stories
 - Index sur `story_periods(story_id, period_id)`
@@ -201,4 +209,5 @@ interface Story {
 3. La hiérarchie des catégories est gérée via le champ `parent_id` dans la table `categories`
 4. Les stories peuvent contenir à la fois des périodes et des événements
 5. Toutes les entités (périodes, événements, stories) peuvent appartenir à plusieurs catégories
-6. Toutes les tables incluent des timestamps de création et de mise à jour 
+6. Toutes les tables incluent des timestamps de création et de mise à jour
+7. Les identifiants Wikidata (QID) sont stockés dans le champ `wikidata_id` et doivent être uniques 

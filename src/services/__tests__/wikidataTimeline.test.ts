@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import axios from 'axios';
-import { WikidataTimelineService } from '../wikidataTimeline';
+import { WikidataQueryService } from '../WikidataQueryService';
 import type { WikidataResponse } from '../../types/geological';
 
 vi.mock('axios');
 const mockedAxios = axios as unknown as { get: jest.Mock };
 
-describe('WikidataTimelineService', () => {
-  let service: WikidataTimelineService;
+describe('WikidataQueryService', () => {
+  let service: WikidataQueryService;
   const mockResponse = {
     results: {
       bindings: [
@@ -26,12 +26,12 @@ describe('WikidataTimelineService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    service = WikidataTimelineService.getInstance();
+    service = WikidataQueryService.getInstance();
   });
 
   it('should be a singleton', () => {
-    const instance1 = WikidataTimelineService.getInstance();
-    const instance2 = WikidataTimelineService.getInstance();
+    const instance1 = WikidataQueryService.getInstance();
+    const instance2 = WikidataQueryService.getInstance();
     expect(instance1).toBe(instance2);
   });
 

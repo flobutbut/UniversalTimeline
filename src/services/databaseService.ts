@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import axios from 'axios';
 import type {
   Period,
   Event,
@@ -6,268 +6,138 @@ import type {
   Category
 } from '../types/database';
 
+export interface DatabaseConfig {
+  host: string;
+  port: number;
+  database: string;
+  user: string;
+  password: string;
+}
+
+export interface QueryResult {
+  rows: any[];
+  rowCount: number;
+}
+
 export class DatabaseService {
-  private periodsPool: Pool;
-  private eventsPool: Pool;
-  private storiesPool: Pool;
-  private categoriesPool: Pool;
+  private static instance: DatabaseService;
+  private readonly API_BASE_URL = '/api/database';
 
-  constructor() {
-    // Connexion à la base des périodes
-    this.periodsPool = new Pool({
-      user: 'periods_user',
-      host: 'localhost',
-      database: 'periods_db',
-      password: 'periods_password',
-      port: 5432,
-    });
+  private constructor() {}
 
-    // Connexion à la base des événements
-    this.eventsPool = new Pool({
-      user: 'events_user',
-      host: 'localhost',
-      database: 'events_db',
-      password: 'events_password',
-      port: 5433,
-    });
+  public static getInstance(): DatabaseService {
+    if (!DatabaseService.instance) {
+      DatabaseService.instance = new DatabaseService();
+    }
+    return DatabaseService.instance;
+  }
 
-    // Connexion à la base des stories
-    this.storiesPool = new Pool({
-      user: 'stories_user',
-      host: 'localhost',
-      database: 'stories_db',
-      password: 'stories_password',
-      port: 5434,
-    });
+  public async query(query: string, params: any[] = [], database: string = 'periods'): Promise<QueryResult> {
+    try {
+      const response = await axios.post(`${this.API_BASE_URL}/query`, {
+        query,
+        params,
+        database
+      });
+      return {
+        rows: response.data,
+        rowCount: response.data.length
+      };
+    } catch (error) {
+      console.error('Erreur lors de la requête à la base de données:', error);
+      throw new Error('Erreur lors de la requête à la base de données');
+    }
+  }
 
-    // Connexion à la base des catégories
-    this.categoriesPool = new Pool({
-      user: 'categories_user',
-      host: 'localhost',
-      database: 'categories_db',
-      password: 'categories_password',
-      port: 5435,
-    });
+  public async testConnection(config: DatabaseConfig): Promise<boolean> {
+    try {
+      const response = await axios.post(`${this.API_BASE_URL}/test-connection`, config);
+      return response.data.success;
+    } catch (error) {
+      console.error('Erreur lors du test de connexion:', error);
+      return false;
+    }
   }
 
   // Méthodes pour la base des catégories
   async saveCategory(category: Category): Promise<void> {
-    const query = `
-      INSERT INTO categories (
-        id, label_fr, label_en, description_fr, description_en,
-        parent_id
-      ) VALUES ($1, $2, $3, $4, $5, $6)
-      ON CONFLICT (id) DO UPDATE SET
-        label_fr = EXCLUDED.label_fr,
-        label_en = EXCLUDED.label_en,
-        description_fr = EXCLUDED.description_fr,
-        description_en = EXCLUDED.description_en,
-        parent_id = EXCLUDED.parent_id,
-        updated_at = CURRENT_TIMESTAMP
-    `;
-
-    const values = [
-      category.id,
-      category.label.fr,
-      category.label.en,
-      category.description?.fr || null,
-      category.description?.en || null,
-      category.parentId || null
-    ];
-
-    await this.categoriesPool.query(query, values);
+    try {
+      await axios.post(`${this.API_BASE_URL}/categories`, category);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de la catégorie:', error);
+      throw new Error('Erreur lors de la sauvegarde de la catégorie');
+    }
   }
 
   async getCategory(id: string): Promise<Category | null> {
-    const query = `
-      SELECT * FROM categories WHERE id = $1
-    `;
-
-    const result = await this.categoriesPool.query(query, [id]);
-    if (result.rows.length === 0) return null;
-
-    const row = result.rows[0];
-    return {
-      id: row.id,
-      label: { fr: row.label_fr, en: row.label_en },
-      description: row.description_fr || row.description_en ? {
-        fr: row.description_fr,
-        en: row.description_en
-      } : undefined,
-      parentId: row.parent_id
-    };
+    try {
+      const response = await axios.get(`${this.API_BASE_URL}/categories/${id}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        return null;
+      }
+      console.error('Erreur lors de la récupération de la catégorie:', error);
+      throw new Error('Erreur lors de la récupération de la catégorie');
+    }
   }
 
   async getAllCategories(): Promise<Category[]> {
-    const query = `
-      SELECT * FROM categories ORDER BY label_fr
-    `;
-
-    const result = await this.categoriesPool.query(query);
-    return result.rows.map(row => ({
-      id: row.id,
-      label: { fr: row.label_fr, en: row.label_en },
-      description: row.description_fr || row.description_en ? {
-        fr: row.description_fr,
-        en: row.description_en
-      } : undefined,
-      parentId: row.parent_id
-    }));
+    try {
+      const response = await axios.get(`${this.API_BASE_URL}/categories`);
+      return response.data;
+    } catch (error) {
+      console.error('Erreur lors de la récupération des catégories:', error);
+      throw new Error('Erreur lors de la récupération des catégories');
+    }
   }
 
   // Méthodes pour la base des périodes
   async savePeriod(period: Period): Promise<void> {
-    const query = `
-      INSERT INTO periods (
-        id, label_fr, label_en, description_fr, description_en,
-        start_date, end_date, parent_id, temporal_location
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      ON CONFLICT (id) DO UPDATE SET
-        label_fr = EXCLUDED.label_fr,
-        label_en = EXCLUDED.label_en,
-        description_fr = EXCLUDED.description_fr,
-        description_en = EXCLUDED.description_en,
-        start_date = EXCLUDED.start_date,
-        end_date = EXCLUDED.end_date,
-        parent_id = EXCLUDED.parent_id,
-        temporal_location = EXCLUDED.temporal_location,
-        updated_at = CURRENT_TIMESTAMP
-    `;
-
-    const values = [
-      period.id,
-      period.label.fr,
-      period.label.en,
-      period.description?.fr || null,
-      period.description?.en || null,
-      period.startDate,
-      period.endDate,
-      period.parentId,
-      period.temporalLocation
-    ];
-
-    await this.periodsPool.query(query, values);
-
-    // Sauvegarde des catégories
-    if (period.categories.length > 0) {
-      const categoryQuery = `
-        INSERT INTO period_categories (period_id, category_id)
-        VALUES ($1, $2)
-        ON CONFLICT DO NOTHING
-      `;
-
-      for (const category of period.categories) {
-        await this.categoriesPool.query(categoryQuery, [period.id, category.id]);
-      }
+    try {
+      await axios.post(`${this.API_BASE_URL}/periods`, period);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de la période:', error);
+      throw new Error('Erreur lors de la sauvegarde de la période');
     }
   }
 
   // Méthodes pour la base des événements
   async saveEvent(event: Event): Promise<void> {
-    const query = `
-      INSERT INTO events (
-        id, label_fr, label_en, description_fr, description_en,
-        date
-      ) VALUES ($1, $2, $3, $4, $5, $6)
-      ON CONFLICT (id) DO UPDATE SET
-        label_fr = EXCLUDED.label_fr,
-        label_en = EXCLUDED.label_en,
-        description_fr = EXCLUDED.description_fr,
-        description_en = EXCLUDED.description_en,
-        date = EXCLUDED.date,
-        updated_at = CURRENT_TIMESTAMP
-    `;
-
-    const values = [
-      event.id,
-      event.label.fr,
-      event.label.en,
-      event.description?.fr || null,
-      event.description?.en || null,
-      event.date
-    ];
-
-    await this.eventsPool.query(query, values);
-
-    // Sauvegarde des catégories
-    if (event.categories.length > 0) {
-      const categoryQuery = `
-        INSERT INTO event_categories (event_id, category_id)
-        VALUES ($1, $2)
-        ON CONFLICT DO NOTHING
-      `;
-
-      for (const category of event.categories) {
-        await this.categoriesPool.query(categoryQuery, [event.id, category.id]);
-      }
+    try {
+      await axios.post(`${this.API_BASE_URL}/events`, event);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de l\'événement:', error);
+      throw new Error('Erreur lors de la sauvegarde de l\'événement');
     }
   }
 
   // Méthodes pour la base des stories
   async saveStory(story: CreateStoryRequest): Promise<number> {
-    const query = `
-      INSERT INTO stories (
-        title_fr, title_en, description_fr, description_en,
-        author, is_public
-      ) VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id
-    `;
-
-    const values = [
-      story.title.fr,
-      story.title.en,
-      story.description?.fr || null,
-      story.description?.en || null,
-      story.author,
-      story.isPublic || false
-    ];
-
-    const result = await this.storiesPool.query(query, values);
-    const storyId = result.rows[0].id;
-
-    // Sauvegarde des catégories
-    if (story.categories.length > 0) {
-      const categoryQuery = `
-        INSERT INTO story_categories (story_id, category_id)
-        VALUES ($1, $2)
-        ON CONFLICT DO NOTHING
-      `;
-
-      for (const category of story.categories) {
-        await this.categoriesPool.query(categoryQuery, [storyId, category.id]);
-      }
+    try {
+      const response = await axios.post(`${this.API_BASE_URL}/stories`, story);
+      return response.data.id;
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de la story:', error);
+      throw new Error('Erreur lors de la sauvegarde de la story');
     }
-
-    return storyId;
   }
 
   async addPeriodToStory(storyId: number, periodId: string): Promise<void> {
-    const query = `
-      INSERT INTO story_periods (story_id, period_id)
-      VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
-    `;
-
-    await this.storiesPool.query(query, [storyId, periodId]);
+    try {
+      await axios.post(`${this.API_BASE_URL}/stories/${storyId}/periods/${periodId}`);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de la période à la story:', error);
+      throw new Error('Erreur lors de l\'ajout de la période à la story');
+    }
   }
 
   async addEventToStory(storyId: number, eventId: string): Promise<void> {
-    const query = `
-      INSERT INTO story_events (story_id, event_id)
-      VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
-    `;
-
-    await this.storiesPool.query(query, [storyId, eventId]);
-  }
-
-  // Méthode pour fermer toutes les connexions
-  async close(): Promise<void> {
-    await Promise.all([
-      this.periodsPool.end(),
-      this.eventsPool.end(),
-      this.storiesPool.end(),
-      this.categoriesPool.end()
-    ]);
+    try {
+      await axios.post(`${this.API_BASE_URL}/stories/${storyId}/events/${eventId}`);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de l\'événement à la story:', error);
+      throw new Error('Erreur lors de l\'ajout de l\'événement à la story');
+    }
   }
 } 

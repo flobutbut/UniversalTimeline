@@ -1,22 +1,27 @@
 # État du Projet
 
 ## Dernière Mise à Jour
-- Date : 2024-03-21
-- Version : 1.0.0
+- Date : 2024-04-02
+- Version : 1.1.0
 - Statut : En développement
 
 ## État Actuel du Projet
 
 ### Architecture
-- Requêtes directes vers l'API Wikidata
-- Performance optimisée via la gestion des requêtes SPARQL
-- Filtrage robuste des périodes invalides
-- Validation des données temporelles
-- Logs détaillés pour le débogage
+- Architecture en cours de refonte :
+  - Migration progressive vers une architecture basée sur des bases de données PostgreSQL
+  - Système d'import manuel via barre de recherche
+  - Import automatique lors de la sélection d'une période/événement
+  - API REST pour l'accès aux données
+- Performance optimisée via :
+  - Requêtes SQL optimisées
+  - Mise en cache des données fréquemment utilisées
+  - Chargement progressif des données
+  - Gestion des connexions à la base de données
 
 ### Services Implémentés
 
-#### WikidataTimelineService
+#### WikidataQueryService
 - ✅ Gestion des requêtes SPARQL vers Wikidata
 - ✅ Transformation des données avec support des localisations temporelles
 - ✅ Gestion des erreurs et retries
@@ -27,6 +32,19 @@
 - ✅ Optimisation des types pour les périodes
 - ✅ Support des localisations temporelles
 - ✅ Formatage des dates
+- 🔄 Ajout de la recherche globale
+- 🔄 Intégration avec la base de données
+- ✅ Tests unitaires pour WikidataQueryService
+
+#### DatabaseService
+- ✅ Configuration des bases de données PostgreSQL
+- ✅ Gestion des connexions et pools
+- ✅ Méthodes CRUD pour les périodes
+- ✅ Gestion des catégories
+- ✅ Support des transactions
+- 🔄 Implémentation des méthodes pour les événements
+- 🔄 Implémentation des méthodes pour les stories
+- 🔄 Système de détection des doublons
 
 #### TimelineScaling
 - ✅ Calcul de la durée totale des périodes
@@ -35,6 +53,8 @@
 - ✅ Génération des styles CSS
 - ✅ Conversion des dates
 - ✅ Correction de la mise à l'échelle des périodes du début/centre
+- 🔄 Support des événements sur la frise
+- 🔄 Gestion des superpositions d'événements
 
 ### Fonctionnalités Implémentées
 - ✅ Affichage de la liste des périodes géologiques
@@ -51,17 +71,29 @@
 - ✅ Icônes Lucide intégrées
 - ✅ Favicon personnalisé
 - ✅ Mise à l'échelle automatique des durées
+- ✅ Configuration des bases de données PostgreSQL
+- ✅ Structure des tables et relations
+- ✅ Système de catégories
 
 ### Fonctionnalités en Cours
-- 🔄 Correction de l'erreur de linter (convertDateToYearsBeforePresent)
+- 🔄 Implémentation de la barre de recherche globale
+  - Support multilingue (fr, en)
+  - Détection automatique de la langue de recherche
+  - Affichage cohérent des résultats dans la langue de recherche
+  - Gestion des entités sans traduction
+- 🔄 Système d'import progressif via recherche
+- 🔄 Gestion des doublons lors de l'import
+- 🔄 Mise à jour de l'interface pour utiliser la base de données
+- 🔄 Implémentation des événements sur la frise
+- 🔄 Système de création et gestion des stories
+- 🔄 Tests unitaires pour les nouveaux services
+- 🔄 Documentation des nouvelles fonctionnalités
 - 🔄 Optimisation des performances de chargement
 - 🔄 Amélioration de la gestion des erreurs
 - 🔄 Tests de la navigation period-click
 - 🔄 Tests unitaires
 - 🔄 Documentation des composants
 - 🔄 Amélioration de la visualisation temporelle
-- 🔄 Mise en place de la base de données PostgreSQL
-- 🔄 Intégration du stockage local des périodes
 
 ### Performance
 - Temps de chargement initial : < 2s
@@ -71,19 +103,33 @@
 - Maximum 3 tentatives de retry
 - Délai entre les tentatives : 1 seconde
 - Temps de réponse base de données : < 100ms
+- Temps de recherche : < 500ms
+- Temps d'import : < 1s
+- Temps de détection de langue : < 100ms
 
 ## Problèmes et Solutions
 
 ### Problèmes Connus
-1. Erreur de linter concernant la méthode privée convertDateToYearsBeforePresent
-   - Impact : Faible
-   - Priorité : Moyenne
-   - Statut : En cours de correction
+1. Implémentation de la barre de recherche
+   - Impact : Élevé
+   - Priorité : Haute
+   - Statut : En cours de développement
+   - Problèmes spécifiques :
+     - Filtrage des entités temporelles :
+       - Périodes : présence de P580 (start time) ET P582 (end time)
+       - Événements : présence de P585 (point in time)
+     - Support multilingue (fr, en)
+     - Gestion des entités sans traduction
 
-2. Détection incomplète des localisations
+2. Gestion des doublons lors de l'import
+   - Impact : Moyen
+   - Priorité : Haute
+   - Statut : En cours de développement
+
+3. Implémentation des événements sur la frise
    - Impact : Moyen
    - Priorité : Moyenne
-   - Statut : En cours d'amélioration
+   - Statut : En cours de développement
 
 ### Problèmes Résolus
 1. **Localisation**
@@ -108,11 +154,28 @@
    - ✅ Correction des interfaces TypeScript
    - ✅ Suppression du code obsolète
 
+4. **Base de données**
+   - ✅ Configuration des bases PostgreSQL
+   - ✅ Structure des tables
+   - ✅ Système de catégories
+   - ✅ Relations entre les tables
+
 ## Plan de Développement
 
 ### Court Terme
-1. **Corrections et Améliorations**
-   - Correction des erreurs de linter
+1. **Implémentation de la Barre de Recherche**
+   - Création du composant de recherche
+   - Intégration dans le header
+   - Requête SPARQL de recherche
+   - Affichage des résultats
+
+2. **Système d'Import Progressif**
+   - Import lors de la sélection
+   - Gestion des doublons
+   - Feedback utilisateur
+   - Tests d'import
+
+3. **Corrections et Améliorations**
    - Optimisation des performances
    - Amélioration de la gestion des erreurs
    - Mise en place des tests
@@ -120,37 +183,30 @@
    - Animation de transition dans la navigation entre deux périodes
    - Gestion des périodes trop petites
    - Amélioration de l'affordance du bouton retour
-   - Configuration de la base de données
-   - Migration des données existantes
 
-2. **Tests**
-   - ✅ Tests unitaires pour WikidataTimelineService
+4. **Tests**
+   - ✅ Tests unitaires pour WikidataQueryService
+     - Tests du singleton
+     - Tests de chargement des périodes
+     - Tests de chargement des stories
+     - Tests de gestion des erreurs
    - ✅ Tests des composants Vue
    - 📅 Tests d'intégration
    - 📅 Tests de performance
-
-3. **Optimisations**
-   - ✅ Optimisation des requêtes SPARQL
-   - ✅ Amélioration de la gestion des localisations
-   - 📅 Optimisation du chargement des enfants
-
-4. **Documentation**
-   - ✅ Documentation technique à jour
-   - ✅ Documentation fonctionnelle à jour
-   - ✅ Documentation d'état à jour
+   - 📅 Tests de recherche et d'import
 
 ### Moyen Terme
 1. **Enrichissement des Données**
    - Création de liens entre les catégories
    - Récupération des liens Wikipedia dans les requêtes
    - Composant tooltip pour les détails des événements/périodes
-   - Enregistrement des périodes dans une base de données
+   - Système de stories
 
 2. **Gestion des Événements**
-   - Requêtes des événements
-   - Ajout des événements sur la frise
-   - Création de story/branches (périodes + événements)
-   - Ajout du breadcrumb des branches/Story
+   - ✅ Requêtes des événements
+   - 🔄 Ajout des événements sur la frise
+   - 📅 Création de story/branches (périodes + événements)
+   - 📅 Ajout du breadcrumb des branches/Story
 
 3. **Interface Utilisateur**
    - Amélioration des animations
@@ -164,6 +220,7 @@
 ### Long Terme
 - 🎯 Système de recommandations basé sur l'historique
 - 🎯 Export des données
+- 🎯 API publique pour les données
 
 ## Notes Techniques
 - Vue 3 + TypeScript
@@ -171,4 +228,7 @@
 - Lucide Icons
 - Design System personnalisé
 - API Wikidata avec proxy local
-- Support multilingue (fr, en) 
+- Support multilingue (fr, en)
+- PostgreSQL (5 bases distinctes)
+- Docker pour l'environnement de développement
+- PGAdmin pour la gestion des bases 

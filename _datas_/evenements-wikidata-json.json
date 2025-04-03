@@ -1,0 +1,242 @@
+[
+  {
+    "evenement": "Big Bang",
+    "qid": "Q323"
+  },
+  {
+    "evenement": "Formation des premières étoiles",
+    "qid": "Q3343986"
+  },
+  {
+    "evenement": "Formation de la première supernova",
+    "qid": null
+  },
+  {
+    "evenement": "Formation des amas globulaires",
+    "qid": "Q52863547"
+  },
+  {
+    "evenement": "Formation du bulbe galactique",
+    "qid": null
+  },
+  {
+    "evenement": "Formation du disque épais",
+    "qid": null
+  },
+  {
+    "evenement": "Fusion avec la galaxie naine de Sagittaire",
+    "qid": null
+  },
+  {
+    "evenement": "Stabilisation de la structure spirale",
+    "qid": null
+  },
+  {
+    "evenement": "Formation de la nébuleuse solaire",
+    "qid": "Q162230"
+  },
+  {
+    "evenement": "Formation du Soleil",
+    "qid": "Q2373740"
+  },
+  {
+    "evenement": "Formation de la Terre",
+    "qid": "Q1235542"
+  },
+  {
+    "evenement": "Formation de la Lune",
+    "qid": "Q333656"
+  },
+  {
+    "evenement": "Formation de la croûte terrestre",
+    "qid": null
+  },
+  {
+    "evenement": "Formation des océans",
+    "qid": "Q428962"
+  },
+  {
+    "evenement": "Premiers minéraux connus (zircons)",
+    "qid": "Q2603003"
+  },
+  {
+    "evenement": "Formation de l'atmosphère primitive",
+    "qid": null
+  },
+  {
+    "evenement": "Fin du grand bombardement tardif",
+    "qid": "Q80800"
+  },
+  {
+    "evenement": "Premières traces de vie",
+    "qid": "Q13433688"
+  },
+  {
+    "evenement": "Formation des premières cyanobactéries",
+    "qid": "Q653049"
+  },
+  {
+    "evenement": "Apparition de l'oxygène atmosphérique (Grande Oxydation)",
+    "qid": "Q1545904"
+  },
+  {
+    "evenement": "Apparition des premiers eucaryotes",
+    "qid": "Q145262"
+  },
+  {
+    "evenement": "Glaciation huronienne",
+    "qid": "Q1393590"
+  },
+  {
+    "evenement": "Formation du supercontinent Columbia",
+    "qid": "Q833611"
+  },
+  {
+    "evenement": "Glaciation sturtienne",
+    "qid": "Q1636908"
+  },
+  {
+    "evenement": "Faune d'Édiacara",
+    "qid": "Q463516"
+  },
+  {
+    "evenement": "Explosion cambrienne",
+    "qid": "Q177060"
+  },
+  {
+    "evenement": "Premiers poissons",
+    "qid": "Q152"
+  },
+  {
+    "evenement": "Colonisation des terres par les plantes",
+    "qid": "Q1136609"
+  },
+  {
+    "evenement": "Apparition des insectes",
+    "qid": "Q1390"
+  },
+  {
+    "evenement": "Apparition des premiers amphibiens",
+    "qid": "Q25229"
+  },
+  {
+    "evenement": "Formation de la Pangée",
+    "qid": "Q46253"
+  },
+  {
+    "evenement": "Apparition des reptiles",
+    "qid": "Q10908"
+  },
+  {
+    "evenement": "Apparition des dinosaures",
+    "qid": "Q10811"
+  },
+  {
+    "evenement": "Séparation de la Pangée",
+    "qid": null
+  },
+  {
+    "evenement": "Apparition des premiers mammifères",
+    "qid": "Q7377"
+  },
+  {
+    "evenement": "Extinction Permien-Trias",
+    "qid": "Q214851"
+  },
+  {
+    "evenement": "Extinction Crétacé-Tertiaire",
+    "qid": "Q46368"
+  },
+  {
+    "evenement": "Apparition des premiers primates",
+    "qid": "Q7358"
+  },
+  {
+    "evenement": "Formation de l'Himalaya",
+    "qid": "Q12467092"
+  },
+  {
+    "evenement": "Apparition des premiers hominidés",
+    "qid": "Q3238722"
+  },
+  {
+    "evenement": "Début des glaciations quaternaires",
+    "qid": "Q11746"
+  },
+  {
+    "evenement": "Apparition du genre Homo",
+    "qid": "Q171283"
+  },
+  {
+    "evenement": "Première utilisation contrôlée du feu",
+    "qid": "Q3098972"
+  },
+  {
+    "evenement": "Apparition d'Homo sapiens",
+    "qid": "Q15978631"
+  },
+  {
+    "evenement": "Début de l'art pariétal",
+    "qid": "Q5825"
+  },
+  {
+    "evenement": "Fin de la dernière période glaciaire",
+    "qid": "Q121557"
+  },
+  {
+    "evenement": "Début de l'agriculture",
+    "qid": "Q181053"
+  },
+  {
+    "evenement": "Invention de l'écriture",
+    "qid": "Q8767"
+  },
+  {
+    "evenement": "Construction des pyramides de Gizeh",
+    "qid": "Q37200"
+  },
+  {
+    "evenement": "Naissance de Bouddha",
+    "qid": "Q9441"
+  },
+  {
+    "evenement": "Fondation de Rome",
+    "qid": "Q4940"
+  },
+  {
+    "evenement": "Naissance de Jésus-Christ",
+    "qid": "Q302"
+  },
+  {
+    "evenement": "Chute de l'Empire romain d'Occident",
+    "qid": "Q132605"
+  },
+  {
+    "evenement": "Début de l'Hégire",
+    "qid": "Q4389"
+  },
+  {
+    "evenement": "Découverte de l'Amérique par Christophe Colomb",
+    "qid": "Q8667"
+  },
+  {
+    "evenement": "Révolution industrielle",
+    "qid": "Q11651"
+  },
+  {
+    "evenement": "Révolution française",
+    "qid": "Q6534"
+  },
+  {
+    "evenement": "Première Guerre mondiale",
+    "qid": "Q361"
+  },
+  {
+    "evenement": "Seconde Guerre mondiale",
+    "qid": "Q362"
+  },
+  {
+    "evenement": "Premier pas sur la Lune",
+    "qid": "Q29962"
+  }
+]

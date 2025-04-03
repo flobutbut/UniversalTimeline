@@ -21,6 +21,18 @@ export default defineConfig({
             }
           });
         }
+      },
+      '/api/database': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('error', (err: Error) => {
+            // Log uniquement les erreurs critiques
+            if ((err as any).code !== 'ECONNRESET') {
+              process.stderr.write(`Proxy Error: ${err.message}\n`);
+            }
+          });
+        }
       }
     }
   }

@@ -44,8 +44,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import type { Period } from '../types/geological';
-import { TimelineScalingService } from '../services/timelineScaling';
-import { WikidataTimelineService } from '../services/wikidataTimeline';
+import { TimelineScalingService, WikidataQueryService } from '../services';
 import { MAIN_EONS } from '../types/geological';
 import PeriodCard from './PeriodCard.vue';
 import BackButton from './BackButton.vue';
@@ -60,7 +59,7 @@ const emit = defineEmits<{
 }>();
 
 const scalingService = new TimelineScalingService();
-const timelineService = WikidataTimelineService.getInstance();
+const timelineService = WikidataQueryService.getInstance();
 const totalDuration = ref(0);
 const startYears = ref(0);
 const error = ref<string | null>(null);

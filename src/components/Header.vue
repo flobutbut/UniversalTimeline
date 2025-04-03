@@ -2,16 +2,20 @@
   <header class="header">
     <div class="header-content">
       <h1 class="header-title">Timeline Géologique</h1>
-      <LanguageSelector
-        :model-value="modelValue"
-        @update:model-value="$emit('update:modelValue', $event)"
-      />
+      <SearchBar class="header-search" />
+      <div class="header-right">
+        <LanguageSelector
+          :model-value="modelValue"
+          @update:model-value="$emit('update:modelValue', $event)"
+        />
+      </div>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
 import LanguageSelector from './LanguageSelector.vue';
+import SearchBar from './SearchBar.vue';
 
 defineProps<{
   modelValue: string;
@@ -36,9 +40,10 @@ defineEmits<{
 .header-content {
   margin: 0 auto;
   padding: 0 var(--spacing-lg);
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .header-title {
@@ -46,5 +51,17 @@ defineEmits<{
   font-weight: 600;
   color: var(--color-text);
   margin: 0;
+  white-space: nowrap;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.header-search {
+  max-width: 400px;
+  width: 100%;
 }
 </style> 

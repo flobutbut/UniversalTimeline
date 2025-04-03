@@ -27,15 +27,20 @@ Le projet utilise Vue 3 avec TypeScript pour créer une interface de navigation 
 ```
 src/
 ├── components/
-│   ├── GeologicalPeriods.vue
-│   ├── GeologicalPeriodCard.vue
-│   ├── LanguageSelector.vue
 │   ├── BackButton.vue
+│   ├── Header.vue
+│   ├── LanguageSelector.vue
 │   ├── PeriodGrid.vue
-│   └── ArrowIcon.vue
+│   └── __tests__/
 ├── services/
-│   ├── wikidataTimeline.ts
-│   └── timelineScaling.ts
+│   ├── WikidataQueryService.ts
+│   ├── DatabaseQueryService.ts
+│   ├── TimelineScalingService.ts
+│   ├── StoryService.ts
+│   ├── DatabaseService.ts
+│   ├── DatabaseImportService.ts
+│   ├── WikidataSearchService.ts
+│   └── __tests__/
 ├── styles/
 │   ├── variables.css
 │   └── base.css
@@ -86,7 +91,7 @@ interface WikidataBinding {
 
 ## Services
 
-### Service WikidataTimeline (`wikidataTimeline.ts`)
+### Service WikidataQueryService (`WikidataQueryService.ts`)
 - Pattern Singleton pour garantir une instance unique
 - Gestion des requêtes SPARQL vers l'API Wikidata
 - Transformation des données brutes en objets typés
@@ -97,160 +102,71 @@ interface WikidataBinding {
 - Chargement progressif des enfants
 - Validation des données reçues
 
-#### Configuration
-```typescript
-const WIKIDATA_API_URL = '/api/wikidata/sparql';
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 seconde
-const REQUEST_TIMEOUT = 30000; // 30 secondes
-```
+### Service DatabaseQueryService (`DatabaseQueryService.ts`)
+- Gestion des requêtes vers la base de données locale
+- Chargement des périodes et leurs relations
+- Gestion des catégories
+- Support multilingue (fr, en)
+- Optimisation des performances avec index
+- Gestion des transactions
 
-#### Requêtes SPARQL
-Le service utilise deux types de requêtes :
-
-1. **Requête temporelle** (`buildTemporalQuery`) :
-```sparql
-SELECT DISTINCT 
-  ?item ?itemLabel 
-  ?startDate ?endDate 
-  ?startLocationLabel ?endLocationLabel
-  (COUNT(DISTINCT ?child) AS ?childCount)
-WHERE {
-  VALUES ?item { wd:${periodId} }
-  
-  # Filtrage : au moins une date doit exister
-  {
-    ?item p:P580 ?startStatement.
-    ?startStatement ps:P580 ?startDate.
-  } UNION {
-    ?item p:P582 ?endStatement.
-    ?endStatement ps:P582 ?endDate.
-  }
-  
-  # Labels
-  SERVICE wikibase:label { 
-    bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
-    ?item rdfs:label ?itemLabel.
-  }
-
-  # Start time avec localisations
-  OPTIONAL {
-    ?item p:P580 ?startStatement.
-    ?startStatement ps:P580 ?startDate.
-    OPTIONAL {
-      ?startStatement pq:P518 ?startLocation.
-      SERVICE wikibase:label { 
-        bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
-        ?startLocation rdfs:label ?startLocationLabel.
-      }
-    }
-  }
-
-  # End time avec localisations
-  OPTIONAL {
-    ?item p:P582 ?endStatement.
-    ?endStatement ps:P582 ?endDate.
-    OPTIONAL {
-      ?endStatement pq:P518 ?endLocation.
-      SERVICE wikibase:label { 
-        bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
-        ?endLocation rdfs:label ?endLocationLabel.
-      }
-    }
-  }
-
-  # Enfants
-  OPTIONAL {
-    ?child wdt:P361 ?item.
-  }
-}
-GROUP BY ?item ?itemLabel ?startDate ?endDate ?startLocationLabel ?endLocationLabel
-ORDER BY ?startDate
-```
-
-2. **Requête des enfants** (`buildChildrenQuery`) :
-```sparql
-SELECT DISTINCT 
-  ?child ?childLabel
-  (COUNT(DISTINCT ?grandChild) AS ?childCount)
-WHERE {
-  ?child wdt:P361 wd:${periodId}.
-  SERVICE wikibase:label { 
-    bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
-    ?child rdfs:label ?childLabel.
-  }
-  OPTIONAL {
-    ?grandChild wdt:P361 ?child.
-  }
-}
-GROUP BY ?child ?childLabel
-```
-
-#### Validation des Données
-```typescript
-private isValidPeriod(binding: WikidataBinding): boolean {
-  // Vérification de la présence d'au moins une date
-  const hasStartDate = !!binding.startDate?.value;
-  const hasEndDate = !!binding.endDate?.value;
-  
-  if (!hasStartDate && !hasEndDate) {
-    return false;
-  }
-
-  // Vérification du label
-  if (!binding.itemLabel?.value) {
-    return false;
-  }
-
-  return true;
-}
-```
-
-#### Gestion des Erreurs
-- Système de retry automatique (3 tentatives)
-- Délai de 1 seconde entre les tentatives
-- Timeout de 30 secondes sur les requêtes
-- Logs d'erreur pour le débogage
-
-### Service TimelineScaling (`timelineScaling.ts`)
+### Service TimelineScalingService (`TimelineScalingService.ts`)
 - Calcul de la durée totale des périodes
 - Calcul des positions relatives des périodes
 - Calcul des largeurs relatives des périodes
 - Génération des styles CSS pour le positionnement
 - Conversion des dates en années avant le présent
 
-#### Fonctionnalités principales
+### Service StoryService (`StoryService.ts`)
+- Gestion des stories géologiques
+- Chargement des éons principaux
+- Transformation des données en format story
+- Support multilingue (fr, en)
 
-1. **Calcul de la durée totale**
-```typescript
-calculateTotalDuration(periods: Period[]): number
-```
-- Tri des périodes par date de début (plus récente en premier)
-- Utilisation de la date de début de la première période comme point de départ (0%)
-- Utilisation de la date de fin de la dernière période comme point d'arrivée (100%)
-- Calcul de la durée totale comme différence entre ces deux points
+### Service DatabaseService (`DatabaseService.ts`)
+- Gestion des connexions à la base de données
+- Méthodes CRUD pour les périodes
+- Support multilingue (fr, en)
+- Gestion des relations parent/enfant
+- Optimisation des performances avec index
 
-2. **Calcul des positions et largeurs**
-```typescript
-calculateRelativePosition(dateString: string, totalDuration: number, startYears: number): number
-calculatePeriodWidth(period: Period, totalDuration: number): number
-```
-- Calcul des positions relatives (0-100%) pour chaque période
-- Calcul des largeurs relatives basées sur la durée de chaque période
-- Normalisation par rapport à la durée totale
+### Service DatabaseImportService (`DatabaseImportService.ts`)
+- Import des données depuis Wikidata
+- Gestion des doublons
+- Validation des données
+- Support multilingue (fr, en)
+- Gestion des transactions
+
+### Service WikidataSearchService (`WikidataSearchService.ts`)
+- Recherche dans Wikidata
+- Gestion du cache des résultats
+- Support multilingue (fr, en)
+- Optimisation des requêtes
 
 ## Composants
 
-### GeologicalPeriods.vue
-Composant principal qui gère l'affichage et la navigation dans la timeline.
+### BackButton.vue
+Composant de navigation retour.
 
 #### Fonctionnalités
-- Affichage des éons principaux
-- Navigation dans la hiérarchie des périodes
-- Gestion du chargement progressif
-- Support multilingue
-- Gestion des erreurs
+- Affichage conditionnel basé sur la profondeur de navigation
+- Styles isolés pour le bouton
+- Émission d'événements de clic
 - Contraste optimisé
+
+### Header.vue
+Composant pour le titre de la page.
+
+#### Fonctionnalités
+- Affichage du titre de la page
+- Support multilingue
+
+### LanguageSelector.vue
+Composant pour la sélection de langue.
+
+#### Fonctionnalités
+- Sélection de la langue
+- Mise à jour de la langue de l'interface
 
 ### PeriodGrid.vue
 Composant pour l'affichage des périodes en grille.
@@ -267,40 +183,6 @@ Composant pour l'affichage des périodes en grille.
 - Gestion de la pile de navigation
 - Tri chronologique des périodes
 - Formatage des dates (Ga, Ma, ans)
-
-### GeologicalPeriodCard.vue
-Composant de présentation pour chaque période.
-
-#### Fonctionnalités
-- Affichage des informations de base
-- Indication visuelle de la sélection
-- Affichage des catégories
-- Gestion des états de chargement
-- Indication de la présence de sous-périodes
-- Contraste optimisé
-
-### BackButton.vue
-Composant de navigation retour.
-
-#### Fonctionnalités
-- Affichage conditionnel basé sur la profondeur de navigation
-- Styles isolés pour le bouton
-- Émission d'événements de clic
-- Contraste optimisé
-
-### LanguageSelector.vue
-Composant pour la sélection de langue.
-
-#### Fonctionnalités
-- Sélection de la langue
-- Mise à jour de la langue de l'interface
-
-### ArrowIcon.vue
-Composant pour les icônes de flèche.
-
-#### Fonctionnalités
-- Affichage des icônes de flèche
-- Réutilisation pour diverses utilisations
 
 ## Configuration
 
@@ -338,11 +220,11 @@ Le projet utilise Vite comme bundler avec la configuration suivante :
 ### Structure des Tests
 - Tests unitaires dans le dossier `__tests__/`
 - Tests des composants Vue avec Vue Test Utils
-- Tests du service Wikidata
+- Tests des services Wikidata et Base de données
 - Tests des utilitaires de formatage
 
-### Tests Unitaires du Service
-- Test du pattern Singleton
+### Tests Unitaires des Services
+- Test du pattern Singleton pour WikidataQueryService
 - Test des requêtes avec options par défaut
 - Test des requêtes avec options personnalisées
 - Tests de gestion des erreurs :
@@ -352,6 +234,9 @@ Le projet utilise Vite comme bundler avec la configuration suivante :
   - Timeouts
   - Erreurs réseau
 - Mock des appels API avec Vitest
+- Tests des requêtes base de données
+- Tests des transformations de données
+- Tests des calculs de mise à l'échelle
 
 ### Tests des Composants
 - Test de l'état de chargement initial
@@ -372,6 +257,9 @@ Le projet utilise Vite comme bundler avec la configuration suivante :
 - Tests d'intégration pour les composants
 - Mocks pour les dépendances externes
 - Couverture de code > 80%
+- Tests des cas d'erreur
+- Tests de performance
+- Tests de sécurité
 
 ### Code
 - Utilisation de TypeScript strict
@@ -380,6 +268,8 @@ Le projet utilise Vite comme bundler avec la configuration suivante :
 - Respect des conventions de nommage
 - Composants réutilisables
 - Styles isolés
+- Architecture modulaire
+- Séparation des responsabilités
 
 ### UI/UX
 - Design responsive
@@ -389,6 +279,8 @@ Le projet utilise Vite comme bundler avec la configuration suivante :
 - Transitions fluides
 - Hiérarchie visuelle claire
 - Contraste optimisé
+- Support multilingue
+- Accessibilité (WCAG 2.1)
 
 ## Propriétés Wikidata
 
@@ -491,16 +383,30 @@ ORDER BY ?startDate
    - Utilisation de DISTINCT pour éviter les doublons
    - Agrégation optimisée des données
    - Optimisation des jointures
+   - Mise en cache des résultats
+   - Requêtes parallèles
 
 2. **Chargement progressif**
    - Chargement initial des éons principaux
    - Chargement à la demande des sous-périodes
    - Vérification asynchrone des enfants
+   - Préchargement intelligent
+
+3. **Base de données**
+   - Index optimisés
+   - Requêtes préparées
+   - Pool de connexions
+   - Transactions atomiques
+   - Gestion des doublons
 
 ### Monitoring
 - Logs des requêtes SPARQL
 - Suivi des erreurs
 - Métriques de performance
+- Temps de réponse
+- Utilisation mémoire
+- Charge CPU
+- Temps de chargement
 
 ## Navigation
 
@@ -508,39 +414,49 @@ ORDER BY ?startDate
 - Pile de navigation (`navigationStack`) pour gérer l'historique
 - État du parent courant (`currentParent`)
 - Sélection de période (`selectedPeriod`)
+- Gestion de la langue sélectionnée (`selectedLanguage`)
 
 ### Flux
 1. **Chargement Initial**
    - Affichage des éons principaux
    - `currentParent` initialisé à `null`
+   - Chargement des éons principaux (Phanérozoïque, Protérozoïque, Archéen, Hadéen)
 
 2. **Navigation Vers une Sous-période**
+   - Si nous sommes à la racine, ajout de la période courante à la pile
    - Mise à jour de `currentParent` avec l'ID de la période sélectionnée
-   - Ajout de l'état précédent dans la pile de navigation
    - Chargement des sous-périodes si nécessaire
 
 3. **Retour**
-   - Restauration de l'état précédent depuis la pile
-   - Mise à jour de `currentParent` avec l'ID du parent précédent
-   - Réinitialisation si retour aux éons principaux
+   - Vérification de la pile de navigation
+   - Si pile vide (niveau racine), rechargement des éons principaux
+   - Sinon, récupération de la période précédente depuis la pile
+   - Chargement des sous-périodes de la période précédente
+   - Gestion des états de chargement pendant la navigation
 
 ### États
 - **Chargement** : Indicateur visuel pendant le chargement des données
 - **Erreur** : Affichage des messages d'erreur avec option de réessai
 - **Sélection** : Mise en évidence de la période sélectionnée
-- **Navigation** : Bouton de retour conditionnel 
+- **Navigation** : Bouton de retour conditionnel
+- **Langue** : Gestion de la langue sélectionnée via v-model
 
 ## Styles et Thème
 - Utilisation de variables CSS pour les couleurs
 - Support du mode clair/sombre
 - Contraste optimisé pour l'accessibilité
-- Transitions et animations fluides 
+- Transitions et animations fluides
+- Design system cohérent
+- Responsive design
+- Support des grands écrans
 
 ## Gestion des langues
 
 ### Configuration
 - Langues par défaut : fr, en
 - Gestion des labels vides ou malformés
+- Fallback sur l'ID Wikidata si nécessaire
+- Support des caractères spéciaux
 
 ### Requête SPARQL
 ```sparql
@@ -634,10 +550,9 @@ Le projet utilise Lucide Icons pour les icônes :
 - Utilisation : `<IconName class="icon" />`
 
 ### Composants UI
-- `ArrowIcon.vue` : Composant réutilisable pour les icônes de flèche
 - `BackButton.vue` : Bouton de retour avec icône
 - `LanguageSelector.vue` : Sélecteur de langue
-- `GeologicalPeriodCard.vue` : Carte de période avec design system
+- `PeriodGrid.vue` : Carte de période avec design system
 
 ### Intégration
 Le design system est intégré de manière non intrusive avec l'architecture existante :
@@ -661,14 +576,26 @@ La navigation est gérée de manière hiérarchique :
 - [x] Gestion des états de chargement
 - [x] Retour à la racine
 - [x] Optimisation des performances
+- [x] Support multilingue
+- [x] Gestion des erreurs
+- [x] Design system
+- [x] Tests unitaires
+- [x] Base de données locale
 
 ### Problèmes Connus
 - Erreur de linter concernant la méthode privée convertDateToYearsBeforePresent
+- Optimisation des performances de chargement
+- Gestion des périodes trop petites
 
 ### Prochaines Étapes
 - Correction de l'erreur de linter
 - Optimisation des performances de chargement
 - Amélioration de la gestion des erreurs
+- Implémentation de la barre de recherche
+- Système d'import progressif
+- Gestion des événements sur la frise
+- Tests d'intégration
+- Documentation utilisateur
 
 ### Composants Vue.js
 
@@ -680,6 +607,12 @@ La navigation est gérée de manière hiérarchique :
 - Utilise DateFormatter pour le formatage des dates
 
 #### PeriodGrid.vue
+
+Le composant `PeriodGrid.vue` est responsable de l'affichage des périodes géologiques dans une grille. Il gère :
+- L'affichage des périodes dans une grille responsive
+- La gestion des états de chargement
+- La gestion des erreurs
+- Les interactions utilisateur (sélection de période)
 
 ## Infrastructure
 

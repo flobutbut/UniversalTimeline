@@ -10,8 +10,6 @@ export class DateFormatter {
    */
   static formatGeologicalDate(dateString: string): string {
     try {
-      console.log('Formatage de la date:', dateString);
-      
       // Si la date est déjà formatée avec Ga, Ma, ka ou ans, on la retourne telle quelle
       if (dateString.endsWith(' Ga') || dateString.endsWith(' Ma') || dateString.endsWith(' ka') || dateString.endsWith(' ans')) {
         return dateString;
@@ -30,11 +28,8 @@ export class DateFormatter {
         years = Math.abs(parseInt(dateString));
       }
       else {
-        console.warn('Format de date non reconnu:', dateString);
         return dateString;
       }
-
-      console.log('Années calculées:', years);
 
       // Conversion en années avant le présent
       if (years >= 1000000000) {
@@ -49,7 +44,6 @@ export class DateFormatter {
         return `${years} ans`;
       }
     } catch (error) {
-      console.error('Erreur de formatage de date géologique:', error);
       return dateString;
     }
   }
@@ -66,7 +60,6 @@ export class DateFormatter {
         year: 'numeric'
       });
     } catch (error) {
-      console.error('Erreur de formatage de date française:', error);
       return dateString;
     }
   }
@@ -83,7 +76,6 @@ export class DateFormatter {
         year: 'numeric'
       });
     } catch (error) {
-      console.error('Erreur de formatage de date anglaise:', error);
       return dateString;
     }
   }

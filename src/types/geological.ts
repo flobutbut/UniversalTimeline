@@ -6,6 +6,11 @@ export const MAIN_EONS = {
   PHANEROZOIC: 'Q101313'
 } as const;
 
+// Story principale
+export const MAIN_STORY = {
+  PLANET_EARTH: 'Q2' // Q2 est l'ID Wikidata pour la Terre
+} as const;
+
 // Types pour les catégories de périodes
 export const PERIOD_CATEGORIES = {
   EON: 'Q23387',           // éon

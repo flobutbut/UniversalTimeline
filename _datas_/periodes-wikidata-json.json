@@ -1,0 +1,182 @@
+[
+  {
+    "periode": "Univers Moderne",
+    "qid": null
+  },
+  {
+    "periode": "Formation de Univers Moderne",
+    "qid": null
+  },
+  {
+    "periode": "Voie Lactée",
+    "qid": "Q2"
+  },
+  {
+    "periode": "Big Bang",
+    "qid": "Q323"
+  },
+  {
+    "periode": "Ère de Planck",
+    "qid": "Q172932"
+  },
+  {
+    "periode": "Ère de la Grande Unification",
+    "qid": "Q898941"
+  },
+  {
+    "periode": "Ère Électrofaible",
+    "qid": "Q899367"
+  },
+  {
+    "periode": "Ère Hadronique",
+    "qid": "Q899383"
+  },
+  {
+    "periode": "Ère Leptonique",
+    "qid": "Q899379"
+  },
+  {
+    "periode": "Ère de la Nucléosynthèse Primordiale",
+    "qid": "Q217416"
+  },
+  {
+    "periode": "Ère de la Recombinaison",
+    "qid": "Q899426"
+  },
+  {
+    "periode": "Ère des Âges Sombres",
+    "qid": "Q1236209"
+  },
+  {
+    "periode": "Ère de Réionisation",
+    "qid": "Q901651"
+  },
+  {
+    "periode": "Formation de la Voie Lactée",
+    "qid": null
+  },
+  {
+    "periode": "Formation des premières étoiles",
+    "qid": null
+  },
+  {
+    "periode": "Formation des premiers amas globulaires",
+    "qid": null
+  },
+  {
+    "periode": "Formation des premières structures galactiques",
+    "qid": null
+  },
+  {
+    "periode": "Formation du disque galactique",
+    "qid": null
+  },
+  {
+    "periode": "Formation des bras spiraux",
+    "qid": null
+  },
+  {
+    "periode": "Formation du bulbe galactique",
+    "qid": null
+  },
+  {
+    "periode": "Système solaire",
+    "qid": "Q544"
+  },
+  {
+    "periode": "Terre",
+    "qid": "Q2"
+  },
+  {
+    "periode": "Éon Hadéen",
+    "qid": "Q151264"
+  },
+  {
+    "periode": "Éon Archéen",
+    "qid": "Q46886"
+  },
+  {
+    "periode": "Éon Protérozoïque",
+    "qid": "Q44882"
+  },
+  {
+    "periode": "Paléoprotérozoïque",
+    "qid": "Q271359"
+  },
+  {
+    "periode": "Mésoprotérozoïque",
+    "qid": "Q271398"
+  },
+  {
+    "periode": "Néoprotérozoïque",
+    "qid": "Q271422"
+  },
+  {
+    "periode": "Cryogénien",
+    "qid": "Q203367"
+  },
+  {
+    "periode": "Éon Phanérozoïque",
+    "qid": "Q23040"
+  },
+  {
+    "periode": "Paléozoïque",
+    "qid": "Q23057"
+  },
+  {
+    "periode": "Mésozoïque",
+    "qid": "Q5390"
+  },
+  {
+    "periode": "Cénozoïque",
+    "qid": "Q23041"
+  },
+  {
+    "periode": "Cambrien",
+    "qid": "Q5146"
+  },
+  {
+    "periode": "Ordovicien",
+    "qid": "Q5146"
+  },
+  {
+    "periode": "Silurien",
+    "qid": "Q5426"
+  },
+  {
+    "periode": "Dévonien",
+    "qid": "Q1934"
+  },
+  {
+    "periode": "Carbonifère",
+    "qid": "Q1929"
+  },
+  {
+    "periode": "Permien",
+    "qid": "Q5301"
+  },
+  {
+    "periode": "Trias",
+    "qid": "Q5383"
+  },
+  {
+    "periode": "Jurassique",
+    "qid": "Q5386"
+  },
+  {
+    "periode": "Crétacé",
+    "qid": "Q5334"
+  },
+  {
+    "periode": "Paléogène",
+    "qid": "Q23018"
+  },
+  {
+    "periode": "Néogène",
+    "qid": "Q3982"
+  },
+  {
+    "periode": "Quaternaire",
+    "qid": "Q1747846"
+  }
+]

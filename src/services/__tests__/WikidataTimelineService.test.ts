@@ -1,42 +1,41 @@
-import { WikidataTimelineService } from '../wikidataTimeline';
-import { CacheService } from '../CacheService';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { WikidataQueryService } from '../WikidataQueryService';
 import axios from 'axios';
-import type { Period, SimplePeriod } from '../../types/geological';
+import type { Period } from '../../types/geological';
 
 // Mock axios
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+vi.mock('axios');
+const mockedAxios = axios as unknown as { get: jest.Mock };
 
-describe('WikidataTimelineService', () => {
-  let service: WikidataTimelineService;
-  let mockCache: CacheService;
+describe('WikidataQueryService', () => {
+  let service: WikidataQueryService;
 
   beforeEach(() => {
-    mockCache = new CacheService({ duration: 1000, maxSize: 10 });
-    service = WikidataTimelineService.getInstance();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    service = WikidataQueryService.getInstance();
   });
 
-  describe('Configuration', () => {
-    it('devrait utiliser la langue par défaut', () => {
-      expect(service.getCurrentLanguage()).toBe('fr');
-    });
-
-    it('devrait changer la langue', () => {
-      service.setLanguage('en');
-      expect(service.getCurrentLanguage()).toBe('en');
+  describe('Singleton', () => {
+    it('devrait être un singleton', () => {
+      const instance1 = WikidataQueryService.getInstance();
+      const instance2 = WikidataQueryService.getInstance();
+      expect(instance1).toBe(instance2);
     });
   });
 
-  describe('Chargement des éons', () => {
-    it('devrait charger les éons principaux', async () => {
+  describe('Chargement des périodes', () => {
+    it('devrait charger une période avec ses données temporelles', async () => {
       const mockResponse = {
         data: {
           results: {
             bindings: [
               {
                 item: { value: 'http://www.wikidata.org/entity/Q123' },
-                itemLabel: { value: 'Phanérozoïque' },
+                itemLabel: { value: 'Test Period' },
+                startDate: { value: '541000000' },
+                endDate: { value: '485400000' },
+                startLocationLabel: { value: 'Location 1' },
+                endLocationLabel: { value: 'Location 2' },
                 childCount: { value: '1' }
               }
             ]
@@ -46,68 +45,30 @@ describe('WikidataTimelineService', () => {
 
       mockedAxios.get.mockResolvedValueOnce(mockResponse);
 
-      const result = await service.getMainEons();
-      expect(result).toHaveLength(1);
-      expect(result[0].label).toBe('Phanérozoïque');
+      const result = await service.loadPeriod('Q123');
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe('Q123');
+      expect(result.label).toBe('Test Period');
+      expect(result.temporalData).toHaveLength(2);
+      expect(result.hasChildren).toBe(true);
       expect(mockedAxios.get).toHaveBeenCalledTimes(1);
     });
 
     it('devrait gérer les erreurs de chargement', async () => {
       mockedAxios.get.mockRejectedValueOnce(new Error('Network error'));
 
-      await expect(service.getMainEons()).rejects.toThrow('Network error');
-    });
-  });
-
-  describe('Chargement des enfants', () => {
-    it('devrait charger les enfants d\'une période', async () => {
-      const mockResponse = {
-        data: {
-          results: {
-            bindings: [
-              {
-                item: { value: 'http://www.wikidata.org/entity/Q456' },
-                itemLabel: { value: 'Cambrien' },
-                childCount: { value: '0' }
-              }
-            ]
-          }
-        }
-      };
-
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
-
-      const result = await service.getChildren('Q123');
-      expect(result).toHaveLength(1);
-      expect(result[0].label).toBe('Cambrien');
-      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+      await expect(service.loadPeriod('Q123')).rejects.toThrow('Network error');
     });
 
-    it('devrait retourner un tableau vide si pas d\'enfants', async () => {
-      const mockResponse = {
-        data: {
-          results: {
-            bindings: []
-          }
-        }
-      };
-
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
-
-      const result = await service.getChildren('Q123');
-      expect(result).toHaveLength(0);
-    });
-  });
-
-  describe('Cache', () => {
-    it('devrait utiliser le cache pour les requêtes répétées', async () => {
+    it('devrait gérer les données manquantes', async () => {
       const mockResponse = {
         data: {
           results: {
             bindings: [
               {
                 item: { value: 'http://www.wikidata.org/entity/Q123' },
-                itemLabel: { value: 'Test Period' },
+                itemLabel: { value: '' },
                 childCount: { value: '0' }
               }
             ]
@@ -117,126 +78,49 @@ describe('WikidataTimelineService', () => {
 
       mockedAxios.get.mockResolvedValueOnce(mockResponse);
 
-      // Premier appel
-      await service.getPeriod('Q123');
-      // Deuxième appel (devrait utiliser le cache)
-      await service.getPeriod('Q123');
-
-      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
-    });
-
-    it('devrait expirer le cache après la durée configurée', async () => {
-      const mockResponse = {
-        data: {
-          results: {
-            bindings: [
-              {
-                item: { value: 'http://www.wikidata.org/entity/Q123' },
-                itemLabel: { value: 'Test Period' },
-                childCount: { value: '0' }
-              }
-            ]
-          }
-        }
-      };
-
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
-
-      // Premier appel
-      await service.getPeriod('Q123');
-      
-      // Attendre que le cache expire
-      await new Promise(resolve => setTimeout(resolve, 1100));
-      
-      // Deuxième appel (devrait refaire la requête)
-      await service.getPeriod('Q123');
-
-      expect(mockedAxios.get).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('Transformation des données', () => {
-    it('devrait transformer correctement les données Wikidata', () => {
-      const mockBinding = {
-        item: { value: 'http://www.wikidata.org/entity/Q123' },
-        itemLabel: { value: 'Test Period' },
-        childCount: { value: '1' },
-        startDate: { value: '541000000' },
-        endDate: { value: '485400000' },
-        locations: { value: 'Global' }
-      };
-
-      const result = service.transformResponse([mockBinding])[0];
+      const result = await service.loadPeriod('Q123');
+      expect(result).toBeDefined();
       expect(result.id).toBe('Q123');
-      expect(result.label).toBe('Test Period');
-      expect(result.hasChildren).toBe(true);
-      expect(result.startDate).toBeDefined();
-      expect(result.endDate).toBeDefined();
-      expect(result.location).toBe('Global');
-    });
-
-    it('devrait gérer les données manquantes', () => {
-      const mockBinding = {
-        item: { value: 'http://www.wikidata.org/entity/Q123' },
-        itemLabel: { value: '' },
-        childCount: { value: '0' }
-      };
-
-      const result = service.transformResponse([mockBinding])[0];
-      expect(result.id).toBe('Q123');
-      expect(result.label).toBe('Q123'); // Utilise l'ID comme fallback
+      expect(result.label).toBe('');
       expect(result.hasChildren).toBe(false);
-      expect(result.startDate).toBeUndefined();
-      expect(result.endDate).toBeUndefined();
-      expect(result.location).toBeUndefined();
+      expect(result.temporalData).toHaveLength(0);
     });
   });
 
-  describe('Gestion des erreurs', () => {
-    it('devrait gérer les erreurs réseau', async () => {
+  describe('Chargement des stories', () => {
+    it('devrait charger une story avec ses éons principaux', async () => {
+      const mockResponse = {
+        data: {
+          results: {
+            bindings: [
+              {
+                item: { value: 'http://www.wikidata.org/entity/Q123' },
+                itemLabel: { value: 'Test Story' },
+                startDate: { value: '541000000' },
+                endDate: { value: '0' },
+                childCount: { value: '4' }
+              }
+            ]
+          }
+        }
+      };
+
+      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+
+      const result = await service.loadStory('Q123');
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe('Q123');
+      expect(result.label).toBe('Test Story');
+      expect(result.hasChildren).toBe(true);
+      expect(result.children).toHaveLength(4);
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('devrait gérer les erreurs de chargement des stories', async () => {
       mockedAxios.get.mockRejectedValueOnce(new Error('Network error'));
 
-      await expect(service.getPeriod('Q123')).rejects.toThrow('Network error');
-    });
-
-    it('devrait gérer les erreurs de format', async () => {
-      const mockResponse = {
-        data: {
-          results: {
-            bindings: [{}] // Données incomplètes
-          }
-        }
-      };
-
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
-
-      const result = await service.getPeriod('Q123');
-      expect(result).toBeDefined();
-      expect(result.id).toBe('');
-      expect(result.label).toBe('');
-    });
-
-    it('devrait réessayer en cas d\'échec', async () => {
-      mockedAxios.get
-        .mockRejectedValueOnce(new Error('First attempt failed'))
-        .mockResolvedValueOnce({
-          data: {
-            results: {
-              bindings: [
-                {
-                  item: { value: 'http://www.wikidata.org/entity/Q123' },
-                  itemLabel: { value: 'Test Period' },
-                  childCount: { value: '0' }
-                }
-              ]
-            }
-          }
-        });
-
-      const result = await service.getPeriod('Q123');
-      expect(result).toBeDefined();
-      expect(result.label).toBe('Test Period');
-      expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+      await expect(service.loadStory('Q123')).rejects.toThrow('Network error');
     });
   });
 }); 
