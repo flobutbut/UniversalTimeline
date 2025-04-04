@@ -15,7 +15,7 @@ services:
       - ./database/init-all.sql:/docker-entrypoint-initdb.d/init-all.sql
       - wikidata_data:/var/lib/postgresql/data
     networks:
-      - db_network
+      - wikidata_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U wikidata_user -d wikidata_db"]
       interval: 5s
@@ -23,9 +23,34 @@ services:
       retries: 5
     restart: unless-stopped
 
+  # Serveur API
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: api_server
+    environment:
+      DATABASE_URL: postgresql://wikidata_user:wikidata_password@wikidata_db:5432/wikidata_db
+      NODE_ENV: development
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      wikidata_db:
+        condition: service_healthy
+    networks:
+      - wikidata_network
+    restart: unless-stopped
+    command: ["npm", "run", "dev"]
+
 volumes:
   wikidata_data:
+    name: wikidata_data
 
 networks:
-  db_network:
+  wikidata_network:
+    name: wikidata_network
     driver: bridge 
