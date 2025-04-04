@@ -36,6 +36,14 @@
         />
       </div>
       <div class="events-container">
+        <EventCard
+          v-for="event in events"
+          :key="event.id"
+          :event="event"
+          :is-selected="selectedEvent?.id === event.id"
+          :card-style="getEventStyles(event)"
+          @click="selectEvent(event)"
+        />
       </div>
     </div>
   </div>
@@ -43,11 +51,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
-import type { Period } from '../types/geological';
-import { TimelineScalingService, WikidataQueryService } from '../services';
+import type { Period, Event } from '../types/geological';
+import { TimelineScalingService, WikidataQueryService, DatabaseQueryService } from '../services';
 import { MAIN_EONS } from '../types/geological';
 import PeriodCard from './PeriodCard.vue';
 import BackButton from './BackButton.vue';
+import EventCard from './EventCard.vue';
 
 const props = defineProps<{
   periods: Period[];
@@ -56,16 +65,20 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'period-click', period: Period): void;
+  (e: 'event-click', event: Event): void;
 }>();
 
 const scalingService = new TimelineScalingService();
 const timelineService = WikidataQueryService.getInstance();
+const databaseService = DatabaseQueryService.getInstance();
 const totalDuration = ref(0);
 const startYears = ref(0);
 const error = ref<string | null>(null);
 const navigationStack = ref<Period[]>([]);
 const loadingPeriods = ref<Record<string, boolean>>({});
 const currentPeriods = ref<Period[]>(props.periods);
+const events = ref<Event[]>([]);
+const selectedEvent = ref<Event | null>(null);
 
 // Fonction pour extraire la date de début d'une période
 const getStartDate = (period: Period): number => {
@@ -114,31 +127,48 @@ watch(() => props.periods, (newPeriods) => {
   currentPeriods.value = newPeriods;
 }, { immediate: true });
 
-onMounted(() => {
+// Charger tous les événements au démarrage
+onMounted(async () => {
   updateTimelineScaling();
+  try {
+    console.log('[PeriodGrid] Chargement initial des événements');
+    const eventsData = await databaseService.getAllEvents();
+    console.log(`[PeriodGrid] ${eventsData.length} événements chargés`);
+    events.value = eventsData;
+  } catch (err) {
+    console.error('[PeriodGrid] Erreur lors du chargement des événements:', err);
+    error.value = err instanceof Error ? err.message : 'Erreur lors du chargement des événements';
+  }
 });
 
 const getPeriodStyles = (period: Period) => {
   return scalingService.calculatePeriodStyles(period, totalDuration.value, startYears.value);
 };
 
-const selectPeriod = async (period: Period) => {
-  if (!period.hasChildren) return;
+// Calculer les styles pour un événement
+const getEventStyles = (event: Event) => {
+  const position = scalingService.calculateRelativePosition(
+    event.date,
+    totalDuration.value,
+    startYears.value
+  );
   
-  console.log(`[Timeline] Sélection de la période ${period.id} (${period.label})`);
-  loadingPeriods.value[period.id] = true;
-  
-  try {
-    const loadedPeriod = await timelineService.loadPeriod(period.id);
-    navigationStack.value.push(period);
-    currentPeriods.value = loadedPeriod.children || [];
-    emit('period-click', loadedPeriod);
-  } catch (err) {
-    console.error('[Timeline] Erreur lors du chargement des enfants:', err);
-    error.value = err instanceof Error ? err.message : 'Erreur lors du chargement des sous-périodes';
-  } finally {
-    loadingPeriods.value[period.id] = false;
-  }
+  return {
+    width: '100px', // Largeur fixe pour les événements
+    left: `${position}%`
+  };
+};
+
+// Sélectionner un événement
+const selectEvent = (event: Event) => {
+  selectedEvent.value = event;
+  emit('event-click', event);
+};
+
+// Fonction pour sélectionner une période
+const selectPeriod = (period: Period) => {
+  console.log(`[PeriodGrid] Sélection de la période ${period.id}`);
+  emit('period-click', period);
 };
 
 const goBack = async () => {
@@ -238,6 +268,9 @@ const retryLoading = async () => {
   position: relative;
   padding: 0;
   margin: 0;
+  display: flex;
+  align-items: flex-start;
+  top: 4px;
 }
 
 .timeline-card {

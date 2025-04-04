@@ -89,4 +89,14 @@ export interface QueryOptions {
   parentId?: string;
   categoryId?: string;
   languages?: string[];
+}
+
+export interface Event {
+  id: string;
+  label: string;
+  date: string;
+  description?: string;
+  location?: string;
+  category?: string;
+  source?: string;
 } 
