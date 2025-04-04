@@ -422,4 +422,81 @@ Une période est considérée comme valide si :
 
 ### Composants UI
 
-// ... existing code ... 
+## Recherche Temporelle
+
+### Types de Recherche
+
+1. **Événements**
+   - Recherche d'événements ponctuels dans le temps
+   - Affichage : "Il y a X ans/Ma/Ga"
+   - Exemple : "Big Bang" → "Il y a 13.8 Ga"
+
+2. **Périodes**
+   - Recherche d'intervalles de temps
+   - Affichage : "Durée (il y a X ans/Ma/Ga)"
+   - Exemple : "Jurassique" → "56 Ma (il y a 145 Ma)"
+
+3. **Personnages Historiques**
+   - Recherche de personnes avec leurs dates de vie
+   - Affichage : "Age ans (il y a X ans)" ou "Né/Mort il y a X ans"
+   - Exemple : "Napoléon" → "51 ans (il y a 203 ans)"
+
+### Formatage des Dates
+
+1. **Dates Géologiques**
+   - Milliards d'années : "13.8 Ga"
+   - Millions d'années : "145 Ma"
+
+2. **Dates Historiques**
+   - Années simples pour les périodes < 1M ans
+   - Format : "3200 ans"
+
+3. **Dates Modernes**
+   - Format standard pour les dates récentes
+   - Calcul précis du temps écoulé
+
+### Fonctionnalités de Recherche
+
+1. **Recherche Textuelle**
+   - Recherche par nom d'événement/période/personne
+   - Support multilingue (français par défaut)
+   - Suggestions automatiques
+
+2. **Filtres**
+   - Par type (événement/période/personne)
+   - Par échelle de temps
+   - Par localisation
+
+3. **Résultats**
+   - Affichage du nom et de la description
+   - Formatage intelligent des dates
+   - Indication des lieux associés
+
+## Utilisation
+
+### Exemples de Recherche
+
+1. **Événements Géologiques**
+   ```
+   Recherche : "Big Bang"
+   Résultat : Il y a 13.8 Ga
+   ```
+
+2. **Périodes Historiques**
+   ```
+   Recherche : "Âge du Bronze"
+   Résultat : 2200 ans (il y a 3200 ans)
+   ```
+
+3. **Personnages**
+   ```
+   Recherche : "Jules César"
+   Résultat : 56 ans (il y a 2067 ans)
+   ```
+
+### Notes d'Utilisation
+
+- Les dates sont automatiquement converties dans le format le plus approprié
+- Les durées sont calculées précisément pour les périodes
+- Le temps écoulé est toujours calculé par rapport à aujourd'hui
+- Les lieux sont indiqués quand ils sont disponibles 

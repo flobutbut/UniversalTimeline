@@ -1,54 +1,73 @@
 # Documentation Technique
 
 ## Stack Technique
-- Vue.js 3
-- TypeScript
-- Vite
-- CSS
+- Frontend :
+  - Vue.js 3
+  - TypeScript
+  - Vite
+  - CSS
+- Backend :
+  - Node.js avec Express.js
+  - TypeScript
+  - PostgreSQL
+  - Docker
+- Outils :
+  - Yarn
+  - Docker Compose
+  - pgAdmin
 
 ## Structure du Projet
-- `/src`
-  - `/components` : Composants Vue réutilisables
-  - `/services` : Logique métier et appels API
-  - `/types` : Types TypeScript
-  - `/utils` : Fonctions utilitaires
-  - `/styles` : Styles modulaires
-  - `/assets` : Ressources statiques
+```
+api_Wikidata/
+├─ _datas_/               # Données sources JSON
+├─ config/               # Configuration (mots de passe, serveurs)
+├─ database/            # Scripts SQL et shell
+├─ dist/                # Build de production
+├─ public/              # Assets statiques
+├─ server/              # Backend Express
+│  ├─ src/
+│  │  ├─ api/          # Routes et configuration DB
+│  │  ├─ types/        # Types TypeScript
+│  │  └─ index.ts      # Point d'entrée
+│  └─ package.json
+└─ src/                 # Frontend Vue
+   ├─ assets/          # Ressources statiques
+   ├─ components/      # Composants Vue
+   ├─ services/        # Services (API, Wikidata)
+   ├─ styles/          # Styles CSS
+   ├─ types/           # Types TypeScript
+   ├─ utils/           # Utilitaires
+   ├─ App.vue
+   └─ main.ts
+```
 
 ## Configuration
-- Utilisation de Yarn comme gestionnaire de paquets
-- Configuration Vite pour le bundling
+- Frontend :
+  - Vite pour le bundling
+  - TypeScript strict
+  - CSS modulaire
+  - Tests avec Vitest
+- Backend :
+  - Express.js avec TypeScript
+  - PostgreSQL avec Docker
+  - Support multilingue (fr, en)
 
 ## Architecture
 
-Le projet utilise Vue 3 avec TypeScript pour créer une interface de navigation des périodes géologiques en utilisant l'API SPARQL de Wikidata.
+Le projet est divisé en deux parties principales :
 
-### Structure du Projet
-```
-src/
-├── components/
-│   ├── BackButton.vue
-│   ├── Header.vue
-│   ├── LanguageSelector.vue
-│   ├── PeriodGrid.vue
-│   └── __tests__/
-├── services/
-│   ├── WikidataQueryService.ts
-│   ├── DatabaseQueryService.ts
-│   ├── TimelineScalingService.ts
-│   ├── StoryService.ts
-│   ├── DatabaseService.ts
-│   ├── DatabaseImportService.ts
-│   ├── WikidataSearchService.ts
-│   └── __tests__/
-├── styles/
-│   ├── variables.css
-│   └── base.css
-├── types/
-│   └── geological.ts
-└── utils/
-    └── dateFormatter.ts
-```
+### Frontend (Vue 3)
+- Interface utilisateur pour la navigation des périodes géologiques
+- Composants Vue réutilisables
+- Services pour l'interaction avec l'API et Wikidata
+- Styles modulaires avec variables CSS
+- Tests unitaires avec Vitest
+
+### Backend (Express)
+- API REST pour l'accès aux données
+- Base de données PostgreSQL
+- Intégration avec Wikidata
+- Support multilingue
 
 ## Structure de données
 
@@ -56,613 +75,275 @@ src/
 
 ```typescript
 interface Period {
-  id: string;              // Identifiant Wikidata
-  label: string;           // Nom de la période
-  temporalData: TemporalLocation[]; // Données temporelles avec localisations
-  hasChildren: boolean;    // Indique si la période a des sous-périodes
-  isMainEon: boolean;      // Indique si c'est un éon principal
-  categoryIds: string[];   // IDs des catégories
-  categoryLabels: string[]; // Labels des catégories
-  children: Period[];      // Liste des périodes enfants
-  loading: boolean;        // État de chargement
-  childrenPreloaded: boolean; // État de préchargement des enfants
-  locations: string[];     // Liste des localisations
-  directLocations: string[]; // Localisations directes
+  id: string;              // Identifiant unique
+  wikidataId: string;      // Identifiant Wikidata
+  label: MultilingualText; // Label multilingue
+  description?: MultilingualText; // Description multilingue
+  startDate: string;       // Date de début
+  endDate: string;         // Date de fin
+  parentId: string | null; // ID de la période parente
+  temporalLocation: string; // Localisation temporelle
+  categories: Category[];   // Catégories associées
+  children: Period[];      // Périodes enfants
+  createdAt: Date;         // Date de création
+  updatedAt: Date;         // Date de mise à jour
 }
 
-interface TemporalLocation {
-  startDate?: string;      // Date de début formatée
-  endDate?: string;        // Date de fin formatée
-  location: string;        // Localisation associée
+interface Event {
+  id: string;              // Identifiant unique
+  wikidataId: string;      // Identifiant Wikidata
+  label: MultilingualText; // Label multilingue
+  description?: MultilingualText; // Description multilingue
+  date: string;            // Date de l'événement
+  categories: Category[];   // Catégories associées
+  createdAt: Date;         // Date de création
+  updatedAt: Date;         // Date de mise à jour
 }
 
-interface WikidataBinding {
-  item?: { value: string };
-  itemLabel?: { value: string };
-  startDate?: { value: string };
-  endDate?: { value: string };
-  startLocationLabel?: { value: string };
-  endLocationLabel?: { value: string };
-  childCount?: { value: string };
-  child?: { value: string };
-  childLabel?: { value: string };
+interface Category {
+  id: string;              // Identifiant unique
+  label: MultilingualText; // Label multilingue
+  description?: MultilingualText; // Description multilingue
+  parentId?: string | null; // ID de la catégorie parente
+}
+
+interface MultilingualText {
+  fr: string;              // Texte en français
+  en: string;              // Texte en anglais
 }
 ```
 
 ## Services
 
-### Service WikidataQueryService (`WikidataQueryService.ts`)
-- Pattern Singleton pour garantir une instance unique
-- Gestion des requêtes SPARQL vers l'API Wikidata
-- Transformation des données brutes en objets typés
-- Gestion des erreurs avec système de retry (3 tentatives)
-- Timeout de 30 secondes sur les requêtes
-- Support multilingue (fr, en)
-- Gestion des localisations temporelles (P518)
-- Chargement progressif des enfants
-- Validation des données reçues
+### Frontend
+- `DatabaseQueryService` : Interaction avec l'API backend
+- `WikidataQueryService` : Requêtes vers Wikidata
+- `TimelineScalingService` : Calcul des échelles temporelles
+- `StoryService` : Gestion des stories
+- `DatabaseImportService` : Import des données
+- `WikidataSearchService` : Recherche dans Wikidata
 
-### Service DatabaseQueryService (`DatabaseQueryService.ts`)
-- Gestion des requêtes vers la base de données locale
-- Chargement des périodes et leurs relations
-- Gestion des catégories
-- Support multilingue (fr, en)
-- Optimisation des performances avec index
-- Gestion des transactions
+### Backend
+- `database.ts` : Configuration PostgreSQL
+- `routes.ts` : Endpoints API
 
-### Service TimelineScalingService (`TimelineScalingService.ts`)
-- Calcul de la durée totale des périodes
-- Calcul des positions relatives des périodes
-- Calcul des largeurs relatives des périodes
-- Génération des styles CSS pour le positionnement
-- Conversion des dates en années avant le présent
+## Composants Vue
 
-### Service StoryService (`StoryService.ts`)
-- Gestion des stories géologiques
-- Chargement des éons principaux
-- Transformation des données en format story
-- Support multilingue (fr, en)
+### Navigation
+- `BackButton.vue` : Navigation retour
+- `Header.vue` : En-tête de page
+- `LanguageSelector.vue` : Sélection de langue
+- `SearchBar.vue` : Barre de recherche
 
-### Service DatabaseService (`DatabaseService.ts`)
-- Gestion des connexions à la base de données
-- Méthodes CRUD pour les périodes
-- Support multilingue (fr, en)
-- Gestion des relations parent/enfant
-- Optimisation des performances avec index
+### Affichage
+- `PeriodGrid.vue` : Grille des périodes
+- `PeriodCard.vue` : Carte de période
+- `EventCard.vue` : Carte d'événement
+- `ArrowIcon.vue` : Icône de flèche
+- `Favicon.vue` : Favicon
 
-### Service DatabaseImportService (`DatabaseImportService.ts`)
-- Import des données depuis Wikidata
-- Gestion des doublons
-- Validation des données
-- Support multilingue (fr, en)
-- Gestion des transactions
+## API Endpoints
 
-### Service WikidataSearchService (`WikidataSearchService.ts`)
-- Recherche dans Wikidata
-- Gestion du cache des résultats
-- Support multilingue (fr, en)
-- Optimisation des requêtes
+### Périodes
+- `GET /api/periods` : Récupère toutes les périodes avec leurs catégories
 
-## Composants
+### Événements
+- `GET /api/events` : Récupère tous les événements avec leurs catégories et dates Wikidata
 
-### BackButton.vue
-Composant de navigation retour.
+### Stories
+- `GET /api/stories` : Récupère toutes les stories avec leurs catégories
 
-#### Fonctionnalités
-- Affichage conditionnel basé sur la profondeur de navigation
-- Styles isolés pour le bouton
-- Émission d'événements de clic
-- Contraste optimisé
-
-### Header.vue
-Composant pour le titre de la page.
-
-#### Fonctionnalités
-- Affichage du titre de la page
-- Support multilingue
-
-### LanguageSelector.vue
-Composant pour la sélection de langue.
-
-#### Fonctionnalités
-- Sélection de la langue
-- Mise à jour de la langue de l'interface
-
-### PeriodGrid.vue
-Composant pour l'affichage des périodes en grille.
-
-#### Fonctionnalités
-- Affichage des périodes en une seule colonne
-- Mise à l'échelle automatique des largeurs
-- Navigation hiérarchique
-- Gestion des états de chargement par période
-- Gestion des erreurs avec retry
-- Support multilingue (fr, en)
-- Émission d'événements period-click
-- Intégration avec TimelineScaling
-- Gestion de la pile de navigation
-- Tri chronologique des périodes
-- Formatage des dates (Ga, Ma, ans)
+### Catégories
+- `GET /api/categories` : Récupère toutes les catégories
 
 ## Configuration
 
 ### Technologies Utilisées
-- Vue 3 avec Composition API
-- TypeScript
-- Axios pour les requêtes HTTP
-- SPARQL pour les requêtes Wikidata
+- Frontend :
+  - Vue 3 avec Composition API
+  - TypeScript
+  - Vite
+  - CSS modulaire
+- Backend :
+  - Node.js avec Express.js
+  - TypeScript
+  - PostgreSQL
+  - Docker
+- Outils :
+  - Yarn
+  - Docker Compose
+  - pgAdmin
 
 ### Configuration Requise
 - Node.js >= 16
 - Yarn >= 1.22
+- Docker
+- PostgreSQL 16
 
 ### Installation
 ```bash
+# Installation des dépendances
 yarn install
+
+# Démarrage de la base de données
+docker-compose up -d
+
+# Initialisation de la base de données
+docker exec -i wikidata_db psql -U wikidata_user -d wikidata_db < database/init-all.sql
+
+# Démarrage du serveur backend
+cd server && yarn dev
+
+# Dans un autre terminal, démarrage du frontend
+yarn dev
 ```
 
 ### Scripts Disponibles
-- `yarn dev` : Lance le serveur de développement
-- `yarn build` : Compile le projet pour la production
-- `yarn preview` : Prévisualise la version de production
-- `yarn test` : Lance les tests unitaires
-- `yarn test:coverage` : Lance les tests avec couverture
-- `yarn test:ui` : Lance l'interface utilisateur des tests
-
-### Vite
-Le projet utilise Vite comme bundler avec la configuration suivante :
-- Proxy configuré pour l'API Wikidata (`/api/wikidata/*` -> `https://www.wikidata.org`)
-- Gestion des en-têtes CORS et User-Agent via le proxy
-- Support du HMR (Hot Module Replacement)
+- Frontend :
+  - `yarn dev` : Lance le serveur de développement
+  - `yarn build` : Compile pour la production
+  - `yarn preview` : Prévisualise la production
+  - `yarn test` : Lance les tests
+- Backend :
+  - `cd server && yarn dev` : Lance le serveur Express
+  - `cd server && yarn build` : Compile TypeScript
+  - `cd server && yarn start` : Lance en production
 
 ## Tests
 
 ### Structure des Tests
-- Tests unitaires dans le dossier `__tests__/`
-- Tests des composants Vue avec Vue Test Utils
-- Tests des services Wikidata et Base de données
-- Tests des utilitaires de formatage
+- Frontend :
+  - Tests des composants Vue
+  - Tests des services
+  - Tests des utilitaires
+- Backend :
+  - Tests des routes API
+  - Tests des connexions DB
+  - Tests des requêtes Wikidata
 
-### Tests Unitaires des Services
-- Test du pattern Singleton pour WikidataQueryService
-- Test des requêtes avec options par défaut
-- Test des requêtes avec options personnalisées
-- Tests de gestion des erreurs :
-  - Erreurs HTTP (429, 503, 504)
-  - Erreurs de validation des données
-  - Mécanisme de retry
-  - Timeouts
-  - Erreurs réseau
-- Mock des appels API avec Vitest
-- Tests des requêtes base de données
-- Tests des transformations de données
-- Tests des calculs de mise à l'échelle
-
-### Tests des Composants
-- Test de l'état de chargement initial
-- Test de l'affichage des données
-- Tests de gestion des erreurs :
-  - Affichage des messages d'erreur
-  - Fonctionnement du bouton de retry
-  - États d'erreur spécifiques
-  - Transitions d'état
-- Test du changement de langue
-- Test de la navigation hiérarchique
-- Utilisation de Vue Test Utils pour le montage et les interactions
+### Tests Unitaires
+- Frontend :
+  - Tests des composants avec Vue Test Utils
+  - Tests des services avec Vitest
+  - Tests des transformations de données
+- Backend :
+  - Tests des endpoints API
+  - Tests des connexions DB
+  - Tests des erreurs
 
 ## Bonnes Pratiques
 
-### Tests
-- Tests unitaires pour les services
-- Tests d'intégration pour les composants
-- Mocks pour les dépendances externes
-- Couverture de code > 80%
-- Tests des cas d'erreur
-- Tests de performance
-- Tests de sécurité
-
 ### Code
-- Utilisation de TypeScript strict
+- TypeScript strict
 - Documentation des fonctions
-- Gestion des cas d'erreur
-- Respect des conventions de nommage
-- Composants réutilisables
-- Styles isolés
+- Gestion des erreurs
+- Conventions de nommage
 - Architecture modulaire
 - Séparation des responsabilités
 
-### UI/UX
-- Design responsive
-- États de chargement
-- Messages d'erreur clairs
-- Navigation intuitive
-- Transitions fluides
-- Hiérarchie visuelle claire
-- Contraste optimisé
+### Frontend
+- Composants réutilisables
+- Styles modulaires
+- Gestion d'état
+- Performance
+- Accessibilité
 - Support multilingue
-- Accessibilité (WCAG 2.1)
 
-## Propriétés Wikidata
+### Backend
+- Documentation API
+- Gestion des erreurs HTTP
+- Validation des données
+- Performance
+- Sécurité
+- Support multilingue
 
-### Localisation
-- P276 (situé dans) : Première tentative, résultats incomplets
-- P706 (situé sur le territoire géographique) : Deuxième tentative, résultats non concluants
-
-La gestion de la localisation des périodes géologiques et archéologiques reste un défi à résoudre. Les propriétés testées ne donnent pas les résultats escomptés. 
-
-### Requêtes SPARQL
-
-La requête principale est construite dynamiquement en fonction des paramètres :
-
-```sparql
-# Définition des éons principaux (constantes dans le code)
-VALUES ?item { 
-  wd:Q104460  # Hadéen
-  wd:Q104168  # Archéen
-  wd:Q104162  # Protérozoïque
-  wd:Q101313  # Phanérozoïque
-}
-
-# Requête principale
-SELECT DISTINCT 
-  ?item ?itemLabel 
-  ?startDate ?endDate 
-  ?startLocationLabel ?endLocationLabel
-  (COUNT(DISTINCT ?child) AS ?childCount)
-WHERE {
-  VALUES ?item { wd:${periodId} }
-  
-  # Labels
-  SERVICE wikibase:label { 
-    bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
-    ?item rdfs:label ?itemLabel.
-  }
-
-  # Start time avec localisations
-  OPTIONAL {
-    ?item p:P580 ?startStatement.
-    ?startStatement ps:P580 ?startDate.
-    OPTIONAL {
-      ?startStatement pq:P518 ?startLocation.
-      SERVICE wikibase:label { 
-        bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
-        ?startLocation rdfs:label ?startLocationLabel.
-      }
-    }
-  }
-
-  # End time avec localisations
-  OPTIONAL {
-    ?item p:P582 ?endStatement.
-    ?endStatement ps:P582 ?endDate.
-    OPTIONAL {
-      ?endStatement pq:P518 ?endLocation.
-      SERVICE wikibase:label { 
-        bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
-        ?endLocation rdfs:label ?endLocationLabel.
-      }
-    }
-  }
-
-  # Enfants
-  OPTIONAL {
-    ?child wdt:P361 ?item.
-  }
-}
-GROUP BY ?item ?itemLabel ?startDate ?endDate ?startLocationLabel ?endLocationLabel
-ORDER BY ?startDate
-```
-
-### Principales modifications
-
-1. **Construction dynamique** :
-   - Liste des éons principaux définie en constantes
-   - Filtre parent adaptatif selon le contexte
-   - Support multilingue (fr, en)
-   - Gestion des localisations temporelles
-
-2. **Optimisation des requêtes** :
-   - Optimisation des agrégations avec GROUP_CONCAT
-   - Meilleure gestion des labels
-   - Vérification de l'existence des labels pour les localisations
-   - Support des localisations avec P518
-
-3. **Navigation** :
-   - Pile de navigation simplifiée
-   - Gestion des états de chargement par période
-   - Meilleure gestion des erreurs
-
-4. **Gestion des langues** :
-   - Support multilingue (fr, en)
-   - Gestion des labels vides ou malformés
-
-## Performance
-
-### Optimisations
-1. **Requêtes**
-   - Utilisation de DISTINCT pour éviter les doublons
-   - Agrégation optimisée des données
-   - Optimisation des jointures
-   - Mise en cache des résultats
-   - Requêtes parallèles
-
-2. **Chargement progressif**
-   - Chargement initial des éons principaux
-   - Chargement à la demande des sous-périodes
-   - Vérification asynchrone des enfants
-   - Préchargement intelligent
-
-3. **Base de données**
-   - Index optimisés
-   - Requêtes préparées
-   - Pool de connexions
-   - Transactions atomiques
-   - Gestion des doublons
-
-### Monitoring
-- Logs des requêtes SPARQL
-- Suivi des erreurs
-- Métriques de performance
-- Temps de réponse
-- Utilisation mémoire
-- Charge CPU
-- Temps de chargement
-
-## Navigation
-
-### Structure
-- Pile de navigation (`navigationStack`) pour gérer l'historique
-- État du parent courant (`currentParent`)
-- Sélection de période (`selectedPeriod`)
-- Gestion de la langue sélectionnée (`selectedLanguage`)
-
-### Flux
-1. **Chargement Initial**
-   - Affichage des éons principaux
-   - `currentParent` initialisé à `null`
-   - Chargement des éons principaux (Phanérozoïque, Protérozoïque, Archéen, Hadéen)
-
-2. **Navigation Vers une Sous-période**
-   - Si nous sommes à la racine, ajout de la période courante à la pile
-   - Mise à jour de `currentParent` avec l'ID de la période sélectionnée
-   - Chargement des sous-périodes si nécessaire
-
-3. **Retour**
-   - Vérification de la pile de navigation
-   - Si pile vide (niveau racine), rechargement des éons principaux
-   - Sinon, récupération de la période précédente depuis la pile
-   - Chargement des sous-périodes de la période précédente
-   - Gestion des états de chargement pendant la navigation
-
-### États
-- **Chargement** : Indicateur visuel pendant le chargement des données
-- **Erreur** : Affichage des messages d'erreur avec option de réessai
-- **Sélection** : Mise en évidence de la période sélectionnée
-- **Navigation** : Bouton de retour conditionnel
-- **Langue** : Gestion de la langue sélectionnée via v-model
-
-## Styles et Thème
-- Utilisation de variables CSS pour les couleurs
-- Support du mode clair/sombre
-- Contraste optimisé pour l'accessibilité
-- Transitions et animations fluides
-- Design system cohérent
-- Responsive design
-- Support des grands écrans
-
-## Gestion des langues
-
-### Configuration
-- Langues par défaut : fr, en
-- Gestion des labels vides ou malformés
-- Fallback sur l'ID Wikidata si nécessaire
-- Support des caractères spéciaux
-
-### Requête SPARQL
-```sparql
-SERVICE wikibase:label {
-  bd:serviceParam wikibase:language "[fr,en]".
-  ?item rdfs:label ?itemLabel.
-}
-```
-
-### Transformation des données
-1. Label disponible dans la langue préférée
-2. Label disponible dans une langue de secours
-3. Label vide ou malformé -> utilisation de l'ID Wikidata
-
-## Design System
-
-### Architecture
-Le design system est composé de trois fichiers principaux :
-- `src/styles/variables.css` : Définition des variables CSS (couleurs, espacements, typographie, etc.)
-- `src/styles/base.css` : Styles de base et classes utilitaires
-- `src/style.css` : Styles spécifiques à l'application et import des autres fichiers
-
-### Variables CSS
-Le projet utilise un système de variables CSS pour maintenir une cohérence visuelle :
-
-```css
-:root {
-  /* Base */
-  --base-font-size: 13px;
-  --base-line-height: 1.5;
-  --base-spacing: 8px;
-
-  /* Typography */
-  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  --font-size-xs: calc(var(--base-font-size) * 0.75);  /* 9.75px */
-  --font-size-sm: calc(var(--base-font-size) * 0.875); /* 11.375px */
-  --font-size-base: var(--base-font-size);             /* 13px */
-  --font-size-lg: calc(var(--base-font-size) * 1.125); /* 14.625px */
-  --font-size-xl: calc(var(--base-font-size) * 1.25);  /* 16.25px */
-  --font-size-2xl: calc(var(--base-font-size) * 1.5);  /* 19.5px */
-  --font-size-3xl: calc(var(--base-font-size) * 1.875); /* 24.375px */
-
-  /* Colors */
-  --color-primary: #2563eb;
-  --color-primary-light: #60a5fa;
-  --color-primary-dark: #1d4ed8;
-  --color-secondary: #64748b;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-background: #ffffff;
-  --color-surface: #f8fafc;
-  --color-text: #1e293b;
-  --color-text-light: #64748b;
-  --color-border: #e2e8f0;
-
-  /* Spacing */
-  --spacing-xs: calc(var(--base-spacing) * 0.5);  /* 4px */
-  --spacing-sm: var(--base-spacing);              /* 8px */
-  --spacing-md: calc(var(--base-spacing) * 1.5);  /* 12px */
-  --spacing-lg: calc(var(--base-spacing) * 2);    /* 16px */
-  --spacing-xl: calc(var(--base-spacing) * 3);    /* 24px */
-  --spacing-2xl: calc(var(--base-spacing) * 4);   /* 32px */
-  --spacing-3xl: calc(var(--base-spacing) * 6);   /* 48px */
-  --spacing-4xl: calc(var(--base-spacing) * 8);   /* 64px */
-
-  /* Border Radius */
-  --border-radius-sm: 4px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 16px;
-  --border-radius-full: 9999px;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 350ms ease;
-}
-```
-
-### Icônes
-Le projet utilise Lucide Icons pour les icônes :
-- Installation : `yarn add lucide-vue-next`
-- Import : `import { IconName } from 'lucide-vue-next'`
-- Utilisation : `<IconName class="icon" />`
-
-### Composants UI
-- `BackButton.vue` : Bouton de retour avec icône
-- `LanguageSelector.vue` : Sélecteur de langue
-- `PeriodGrid.vue` : Carte de période avec design system
-
-### Intégration
-Le design system est intégré de manière non intrusive avec l'architecture existante :
-- Compatible avec les composants Vue.js
-- Respecte la structure de données existante
-- S'intègre avec le système de formatage des dates
-- Supporte le système de localisation
-
-### Navigation
-La navigation est gérée de manière hiérarchique :
-- Affichage horizontal des périodes avec défilement
-- Bouton de retour pour remonter dans la hiérarchie
-- Gestion des états de chargement
-- Gestion des erreurs avec retry
+### Base de données
+- Transactions
+- Indexation
+- Connexions
+- Support multilingue
+- Contraintes d'intégrité
 
 ## État du Projet
 
 ### Fonctionnalités Implémentées
-- [x] Affichage de la grille des périodes
-- [x] Navigation dans la hiérarchie
-- [x] Gestion des états de chargement
-- [x] Retour à la racine
-- [x] Optimisation des performances
+- [x] Frontend Vue 3
+- [x] Backend Express
+- [x] Base de données PostgreSQL
+- [x] Intégration Wikidata
 - [x] Support multilingue
-- [x] Gestion des erreurs
-- [x] Design system
 - [x] Tests unitaires
-- [x] Base de données locale
+- [x] Documentation
 
 ### Problèmes Connus
-- Erreur de linter concernant la méthode privée convertDateToYearsBeforePresent
-- Optimisation des performances de chargement
-- Gestion des périodes trop petites
+- Optimisation des requêtes Wikidata
+- Cache des dates d'événements
+- Performance des requêtes complexes
+- Gestion des états de chargement
 
 ### Prochaines Étapes
-- Correction de l'erreur de linter
-- Optimisation des performances de chargement
-- Amélioration de la gestion des erreurs
-- Implémentation de la barre de recherche
-- Système d'import progressif
-- Gestion des événements sur la frise
+- Optimisation des performances
+- Implémentation du cache
 - Tests d'intégration
-- Documentation utilisateur
+- Documentation API
+- Monitoring
+- Sécurité
 
-### Composants Vue.js
+## Utilitaires
 
-#### BackButton.vue
-- Gère le bouton de retour dans la navigation
-- Affiche le label de la période parent
-- Affiche les informations temporelles et la localisation
-- Style rouge distinctif avec hover
-- Utilise DateFormatter pour le formatage des dates
+### DateFormatter
 
-#### PeriodGrid.vue
+Classe utilitaire pour la gestion et la conversion des dates dans différents formats.
 
-Le composant `PeriodGrid.vue` est responsable de l'affichage des périodes géologiques dans une grille. Il gère :
-- L'affichage des périodes dans une grille responsive
-- La gestion des états de chargement
-- La gestion des erreurs
-- Les interactions utilisateur (sélection de période)
+#### Formats supportés
 
-## Infrastructure
+- **Dates ISO8601** : Format standard avec support des millisecondes et fuseaux horaires
+- **Dates Wikidata** : Format spécifique de Wikidata incluant les dates négatives
+- **Dates géologiques** : Support des formats Ga (milliards d'années) et Ma (millions d'années)
+- **Dates historiques** : Support des formats BCE/BC et des millénaires
+- **Dates relatives** : Support des formats "il y a X ans"
 
-### Base de Données
-- PostgreSQL 16 (Alpine)
-- Deux bases de données distinctes :
-  - `periods_db` : Stockage des périodes géologiques
-  - `events_db` : Stockage des événements
-- Interface d'administration : pgAdmin4
+#### Fonctionnalités principales
 
-#### Structure des Tables
+- **Conversion automatique** : Détection et conversion automatique des formats
+- **Normalisation** : Conversion en format ISO8602 pour stockage
+- **Formatage intelligent** : 
+  - Dates géologiques : affichage en Ga/Ma pour les grandes périodes
+  - Dates historiques : affichage en années pour les périodes < 1M ans
+  - Support des calculs de durée et de temps écoulé
 
-1. **Table periods**
-```sql
-CREATE TABLE periods (
-    id VARCHAR(50) PRIMARY KEY,
-    label_fr VARCHAR(255),
-    label_en VARCHAR(255),
-    description_fr TEXT,
-    description_en TEXT,
-    start_date VARCHAR(50),
-    end_date VARCHAR(50),
-    parent_id VARCHAR(50),
-    category VARCHAR(100),
-    temporal_location VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
+#### Méthodes principales
 
-2. **Table events**
-```sql
-CREATE TABLE events (
-    id VARCHAR(50) PRIMARY KEY,
-    label_fr VARCHAR(255),
-    label_en VARCHAR(255),
-    description_fr TEXT,
-    description_en TEXT,
-    date VARCHAR(50),
-    period_id VARCHAR(50),
-    category VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (period_id) REFERENCES periods(id)
-);
-```
+- `processDate(date: string)` : Traite une date et retourne tous les formats disponibles
+- `formatYearsToGeological(years: number)` : Convertit un nombre d'années en format approprié
+- `parseToISO8602(date: string)` : Convertit une date en format ISO8602
+- `formatFromISO8602(date: string, format: string)` : Convertit depuis ISO8602 vers le format demandé
 
-#### Service DatabaseService
-- Gestion des connexions à la base de données
-- Méthodes CRUD pour les périodes
-- Support multilingue (fr, en)
-- Gestion des relations parent/enfant
-- Optimisation des performances avec index
+### WikidataSearchService
+
+Service de recherche et formatage des données Wikidata.
+
+#### Types de recherche
+
+- **Événements** : Dates ponctuelles
+- **Périodes** : Intervalles de temps avec début et fin
+- **Personnes** : Personnages historiques avec dates de naissance/décès
+
+#### Formatage des résultats
+
+- **Événements** : "Il y a X ans/Ma/Ga"
+- **Périodes** : "Durée (il y a X ans/Ma/Ga)"
+- **Personnes** : "Age ans (il y a X ans/Ma/Ga)" ou "Né/Mort il y a X ans/Ma/Ga"
+
+#### Gestion du cache
+
+- Cache de 5 minutes pour les résultats
+- Clé de cache basée sur la requête et les options
+
+## Tests
+
+Les tests unitaires couvrent :
+- Parsing des différents formats de dates
+- Conversion vers/depuis ISO8602
+- Formatage des durées et temps écoulés
+- Gestion des erreurs et cas limites

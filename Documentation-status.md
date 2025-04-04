@@ -231,4 +231,39 @@
 - Support multilingue (fr, en)
 - PostgreSQL (5 bases distinctes)
 - Docker pour l'environnement de développement
-- PGAdmin pour la gestion des bases 
+- PGAdmin pour la gestion des bases
+
+## Fonctionnalités Implémentées
+
+### Gestion des Dates
+- ✅ Support des dates géologiques (Ga, Ma)
+- ✅ Support des dates historiques (BCE/BC)
+- ✅ Support des dates modernes
+- ✅ Conversion automatique des formats
+- ✅ Calcul des durées et temps écoulés
+- ✅ Format intelligent selon l'échelle de temps
+
+### Recherche Wikidata
+- ✅ Recherche d'événements
+- ✅ Recherche de périodes
+- ✅ Recherche de personnages historiques
+- ✅ Cache des résultats
+- ✅ Gestion des erreurs
+
+### Formatage des Résultats
+- ✅ Format "Il y a X ans" pour les événements
+- ✅ Format "Durée (il y a X ans)" pour les périodes
+- ✅ Format "Age (il y a X ans)" pour les personnes
+- ✅ Adaptation du format selon l'échelle (ans, Ma, Ga)
+- ✅ Support des lieux de début/fin
+
+## En Cours de Développement
+- 🔄 Amélioration de la précision des dates
+- 🔄 Optimisation des performances de recherche
+- 🔄 Support multilingue complet
+
+## Prochaines Étapes
+- ⏳ Support des ères géologiques
+- ⏳ Filtres de recherche avancés
+- ⏳ Interface de visualisation temporelle
+- ⏳ Export des résultats 

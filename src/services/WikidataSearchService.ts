@@ -5,10 +5,12 @@ interface WikidataBinding {
   item?: { value: string };
   itemLabel?: { value: string };
   description?: { value: string };
-  startDate?: { value: string };
-  endDate?: { value: string };
+  startDate?: { value: string };  // Date de naissance pour les personnes
+  endDate?: { value: string };    // Date de décès pour les personnes
   startLocationLabel?: { value: string };
   endLocationLabel?: { value: string };
+  birthPlace?: { value: string }; // Lieu de naissance
+  deathPlace?: { value: string }; // Lieu de décès
 }
 
 interface WikidataResponse {
@@ -20,7 +22,7 @@ interface WikidataResponse {
 export interface SearchResult {
   id: string;
   label: string;
-  type: 'period' | 'event';
+  type: 'period' | 'event' | 'person';
   date: string;
   description?: string;
   startDate?: string;
@@ -163,9 +165,12 @@ export class WikidataSearchService {
           if (!entity) return false;
 
           const claims = entity.claims || {};
-          const startClaim = claims.P580?.[0]?.mainsnak?.datavalue?.value;
-          const endClaim = claims.P582?.[0]?.mainsnak?.datavalue?.value;
-          const pointInTimeClaim = claims.P585?.[0]?.mainsnak?.datavalue?.value;
+          const birthDate = claims.P569?.[0]?.mainsnak?.datavalue?.value;  // Date de naissance
+          const deathDate = claims.P570?.[0]?.mainsnak?.datavalue?.value;  // Date de décès
+          const startClaim = claims.P580?.[0]?.mainsnak?.datavalue?.value; // Début période
+          const endClaim = claims.P582?.[0]?.mainsnak?.datavalue?.value;   // Fin période
+          const pointInTimeClaim = claims.P585?.[0]?.mainsnak?.datavalue?.value; // Date événement
+          const instanceOf = claims.P31?.[0]?.mainsnak?.datavalue?.value?.id;    // Type d'entité
 
           // Filtrer selon le type demandé
           if (type === 'period') {
@@ -173,29 +178,34 @@ export class WikidataSearchService {
           } else if (type === 'event') {
             return pointInTimeClaim;
           } else {
-            return (startClaim && endClaim) || pointInTimeClaim;
+            return (startClaim && endClaim) || pointInTimeClaim || (birthDate || deathDate);
           }
         })
         .map((item: any) => {
           const entity = detailsResponse.data.entities[item.id];
           const claims = entity?.claims || {};
           
-          // Correction de l'accès aux dates
+          // Dates pour les personnes
+          const birthDate = claims.P569?.[0]?.mainsnak?.datavalue?.value?.time;
+          const deathDate = claims.P570?.[0]?.mainsnak?.datavalue?.value?.time;
+          const birthPlace = claims.P19?.[0]?.mainsnak?.datavalue?.value?.id;
+          const deathPlace = claims.P20?.[0]?.mainsnak?.datavalue?.value?.id;
+          
+          // Dates pour les périodes et événements
           const startClaim = claims.P580?.[0]?.mainsnak?.datavalue?.value?.time;
           const endClaim = claims.P582?.[0]?.mainsnak?.datavalue?.value?.time;
           const pointInTimeClaim = claims.P585?.[0]?.mainsnak?.datavalue?.value?.time;
 
-          const startDate = startClaim ? this.parseWikidataDate(startClaim) : undefined;
-          const endDate = endClaim ? this.parseWikidataDate(endClaim) : undefined;
-          const pointInTime = pointInTimeClaim ? this.parseWikidataDate(pointInTimeClaim) : undefined;
+          // Déterminer le type
+          let resultType: 'period' | 'event' | 'person' = 'event';
+          if (birthDate || deathDate) {
+            resultType = 'person';
+          } else if (startClaim && endClaim) {
+            resultType = 'period';
+          }
 
-          // Déterminer le type en fonction des dates
-          const resultType = startDate && endDate ? 'period' : 'event';
-
-          // Formater la date en fonction du type
-          const date = resultType === 'period' 
-            ? this.formatPeriodDate(startDate, endDate)
-            : this.formatEventDate(pointInTime || startDate); // Utiliser startDate comme fallback
+          // Formater les dates selon le type
+          const date = this.formatDate(resultType, birthDate || startClaim || pointInTimeClaim, deathDate || endClaim);
 
           return {
             id: item.id,
@@ -203,10 +213,10 @@ export class WikidataSearchService {
             description: item.description,
             type: resultType,
             date,
-            startDate,
-            endDate,
-            startLocation: "Globale",
-            endLocation: "Globale"
+            startDate: birthDate || startClaim,
+            endDate: deathDate || endClaim,
+            startLocation: birthPlace || "Globale",
+            endLocation: deathPlace || "Globale"
           };
         });
 
@@ -222,55 +232,73 @@ export class WikidataSearchService {
     }
   }
 
+  private formatDate(type: 'period' | 'event' | 'person', start?: string, end?: string): string {
+    if (type === 'person') {
+      return this.formatPersonDates(start, end);
+    } else if (type === 'period') {
+      return this.formatPeriodDate(start, end);
+    } else {
+      return this.formatEventDate(start);
+    }
+  }
+
+  private formatPersonDates(birthDate?: string, deathDate?: string): string {
+    if (!birthDate && !deathDate) return 'Dates inconnues';
+    
+    const birth = birthDate ? DateFormatter.processDate(birthDate) : null;
+    const death = deathDate ? DateFormatter.processDate(deathDate) : null;
+    
+    if (birth && death) {
+      // Calculer l'âge
+      const age = Math.abs(death.numericValues.year - birth.numericValues.year);
+      return `${age} ans (il y a ${DateFormatter.formatYearsToGeological(death.numericValues.yearsFromNow)})`;
+    } else if (birth) {
+      return `Né il y a ${DateFormatter.formatYearsToGeological(birth.numericValues.yearsFromNow)}`;
+    } else if (death) {
+      return `Mort il y a ${DateFormatter.formatYearsToGeological(death.numericValues.yearsFromNow)}`;
+    }
+    
+    return 'Dates inconnues';
+  }
+
   private parseWikidataDate(dateString: string): string | undefined {
     if (!dateString) return undefined;
-
-    // Nettoyer la chaîne de date
-    const cleanDate = dateString.trim();
-
-    // Cas 1: Format scientifique (ex: -4.5E9)
-    if (cleanDate.includes('E')) {
-      const num = parseFloat(cleanDate);
-      if (!isNaN(num)) {
-        // Convertir en format ISO
-        const year = Math.abs(Math.round(num));
-        return `${year}-01-01`;
-      }
-    }
-
-    // Cas 2: Format standard Wikidata (+/-YYYY-MM-DDT00:00:00Z)
-    const standardMatch = cleanDate.match(/^([+-])(\d+)-(\d{2})-(\d{2})/);
-    if (standardMatch) {
-      const [, sign, year, month, day] = standardMatch;
-      return `${Math.abs(parseInt(year))}-${month}-${day}`;
-    }
-
-    // Cas 3: Format année simple (+/-YYYY)
-    const simpleMatch = cleanDate.match(/^([+-]?\d+)$/);
-    if (simpleMatch) {
-      const year = parseInt(simpleMatch[1]);
-      return `${Math.abs(year)}-01-01`;
-    }
-
-    console.warn('Format de date non reconnu:', dateString);
-    return undefined;
+    return dateString.trim();
   }
 
   private formatPeriodDate(start?: string, end?: string): string {
     if (!start) return 'Date inconnue';
     
     if (!end) {
-      return DateFormatter.format(start, 'geological');
+      const result = DateFormatter.processDate(start);
+      return `Il y a ${result.geological}`;
     }
     
-    const startFormatted = DateFormatter.format(start, 'geological');
-    const endFormatted = DateFormatter.format(end, 'geological');
-    return `${startFormatted} - ${endFormatted}`;
+    const startResult = DateFormatter.processDate(start);
+    const endResult = DateFormatter.processDate(end);
+    
+    // Calculer la durée
+    const duration = Math.abs(endResult.numericValues.year - startResult.numericValues.year);
+    const durationFormatted = DateFormatter.formatYearsToGeological(duration);
+    
+    // Calculer le "il y a" depuis la fin
+    const yearsAgo = endResult.numericValues.yearsFromNow;
+    const yearsAgoFormatted = DateFormatter.formatYearsToGeological(yearsAgo);
+    
+    return `${durationFormatted} (il y a ${yearsAgoFormatted})`;
   }
 
   private formatEventDate(date?: string): string {
     if (!date) return 'Date inconnue';
-    return DateFormatter.format(date, 'geological');
+    const result = DateFormatter.processDate(date);
+    
+    // Pour les dates géologiques, utiliser le format Ga/Ma/ka
+    if (result.geological.includes('Ga') || result.geological.includes('Ma') || result.geological.includes('ka')) {
+      return `Il y a ${result.geological}`;
+    }
+    
+    // Pour les dates récentes, utiliser le nombre d'années écoulées
+    return `Il y a ${result.numericValues.yearsFromNow} ans`;
   }
 
   public clearCache(): void {

@@ -1,14 +1,18 @@
 # Documentation des Bases de Données
 
-## Structure des Bases de Données
+## Structure de la Base de Données
 
-### Base de Données des Catégories (categories_db)
+### Base de Données Principale (wikidata_db)
 
-#### Table `categories`
+La base de données est organisée en schémas distincts pour une meilleure organisation logique des données.
+
+#### Schéma `categories`
+
+##### Table `categories`
 - **Description** : Stocke les informations sur les catégories
-- **Port** : 5435
-- **Utilisateur** : categories_user
-- **Mot de passe** : categories_password
+- **Port** : 5432
+- **Utilisateur** : wikidata_user
+- **Mot de passe** : wikidata_password
 
 | Colonne | Type | Description |
 |---------|------|-------------|
@@ -21,7 +25,7 @@
 | created_at | TIMESTAMP | Date de création |
 | updated_at | TIMESTAMP | Date de mise à jour |
 
-#### Tables de Liaison
+##### Tables de Liaison
 - **Description** : Tables de liaison entre catégories et autres entités
 
 | Table | Description | Colonnes |
@@ -30,13 +34,10 @@
 | event_categories | Lie les événements aux catégories | event_id, category_id |
 | story_categories | Lie les stories aux catégories | story_id, category_id |
 
-### Base de Données des Périodes (periods_db)
+#### Schéma `periods`
 
-#### Table `periods`
+##### Table `periods`
 - **Description** : Stocke les informations sur les périodes
-- **Port** : 5432
-- **Utilisateur** : periods_user
-- **Mot de passe** : periods_password
 
 | Colonne | Type | Description |
 |---------|------|-------------|
@@ -53,13 +54,10 @@
 | created_at | TIMESTAMP | Date de création |
 | updated_at | TIMESTAMP | Date de mise à jour |
 
-### Base de Données des Événements (events_db)
+#### Schéma `events`
 
-#### Table `events`
+##### Table `events`
 - **Description** : Stocke les informations sur les événements
-- **Port** : 5433
-- **Utilisateur** : events_user
-- **Mot de passe** : events_password
 
 | Colonne | Type | Description |
 |---------|------|-------------|
@@ -73,13 +71,10 @@
 | created_at | TIMESTAMP | Date de création |
 | updated_at | TIMESTAMP | Date de mise à jour |
 
-### Base de Données des Stories (stories_db)
+#### Schéma `stories`
 
-#### Table `stories`
+##### Table `stories`
 - **Description** : Stocke les informations sur les stories créées par les utilisateurs
-- **Port** : 5434
-- **Utilisateur** : stories_user
-- **Mot de passe** : stories_password
 
 | Colonne | Type | Description |
 |---------|------|-------------|
@@ -93,21 +88,13 @@
 | created_at | TIMESTAMP | Date de création |
 | updated_at | TIMESTAMP | Date de mise à jour |
 
-#### Table `story_periods`
-- **Description** : Table de liaison entre stories et périodes
+##### Tables de Liaison
+- **Description** : Tables de liaison entre stories et autres entités
 
-| Colonne | Type | Description |
-|---------|------|-------------|
-| story_id | INTEGER | ID de la story |
-| period_id | VARCHAR(255) | ID de la période |
-
-#### Table `story_events`
-- **Description** : Table de liaison entre stories et événements
-
-| Colonne | Type | Description |
-|---------|------|-------------|
-| story_id | INTEGER | ID de la story |
-| event_id | VARCHAR(255) | ID de l'événement |
+| Table | Description | Colonnes |
+|-------|-------------|-----------|
+| story_periods | Lie les stories aux périodes | story_id, period_id |
+| story_events | Lie les stories aux événements | story_id, event_id |
 
 ## Types TypeScript
 
@@ -176,29 +163,29 @@ interface Story {
 
 ## Contraintes et Indexes
 
-### Base de Données des Catégories
-- Index sur `id`
-- Index sur `parent_id` pour la hiérarchie des catégories
+### Schéma Categories
+- Index sur `categories(id)`
+- Index sur `categories(parent_id)` pour la hiérarchie des catégories
 - Index sur les tables de liaison :
   - `period_categories(period_id, category_id)`
   - `event_categories(event_id, category_id)`
   - `story_categories(story_id, category_id)`
 - Contrainte de clé étrangère sur `parent_id` pour la hiérarchie
 
-### Base de Données des Périodes
-- Index sur `id`
-- Index sur `wikidata_id`
-- Index sur `parent_id`
-- Index sur `start_date` et `end_date`
+### Schéma Periods
+- Index sur `periods(id)`
+- Index sur `periods(wikidata_id)`
+- Index sur `periods(parent_id)`
+- Index sur `periods(start_date)` et `periods(end_date)`
 - Contrainte UNIQUE sur `wikidata_id`
 
-### Base de Données des Événements
-- Index sur `id`
-- Index sur `wikidata_id`
-- Index sur `date`
+### Schéma Events
+- Index sur `events(id)`
+- Index sur `events(wikidata_id)`
+- Index sur `events(date)`
 - Contrainte UNIQUE sur `wikidata_id`
 
-### Base de Données des Stories
+### Schéma Stories
 - Index sur `story_periods(story_id, period_id)`
 - Index sur `story_events(story_id, event_id)`
 
@@ -210,4 +197,5 @@ interface Story {
 4. Les stories peuvent contenir à la fois des périodes et des événements
 5. Toutes les entités (périodes, événements, stories) peuvent appartenir à plusieurs catégories
 6. Toutes les tables incluent des timestamps de création et de mise à jour
-7. Les identifiants Wikidata (QID) sont stockés dans le champ `wikidata_id` et doivent être uniques 
+7. Les identifiants Wikidata (QID) sont stockés dans le champ `wikidata_id` et doivent être uniques
+8. La base de données utilise des schémas distincts pour une meilleure organisation logique des données 
