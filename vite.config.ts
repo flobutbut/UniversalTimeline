@@ -22,7 +22,7 @@ export default defineConfig({
           });
         }
       },
-      '/api/database': {
+      '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         configure: (proxy) => {
