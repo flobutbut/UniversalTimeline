@@ -21,22 +21,11 @@
     </div>
 
     <!-- Résultats de recherche -->
-    <div v-if="showResults && searchResults.length > 0" class="search-results">
-      <div
-        v-for="result in searchResults"
-        :key="result.id"
-        class="result-item"
-        @click="handleSelect(result)"
-        @mouseenter="selectedIndex = searchResults.indexOf(result)"
-        :class="{ 'selected': selectedIndex === searchResults.indexOf(result) }"
-      >
-        <div class="result-content">
-          <div class="result-title">{{ result.label }}</div>
-          <div class="result-metadata">{{ result.type }} • {{ result.id }}</div>
-        </div>
-        <div class="result-date">{{ formatDate(result.date) }}</div>
-      </div>
-    </div>
+    <SearchResults
+      v-if="showResults && searchResults.length > 0"
+      :results="searchResults"
+      @select="handleSelect"
+    />
 
     <!-- État de chargement -->
     <div v-if="isSearching" class="loading-state">
@@ -57,6 +46,7 @@ import { debounce } from 'lodash-es'
 import { WikidataSearchService, type SearchResult } from '../services/WikidataSearchService'
 import { DatabaseImportService } from '../services/DatabaseImportService'
 import { DateFormatter } from '../utils/dateFormatter'
+import SearchResults from './SearchResults.vue'
 
 const searchService = WikidataSearchService.getInstance()
 const importService = DatabaseImportService.getInstance()
@@ -111,6 +101,10 @@ const handleSelect = (result: SearchResult) => {
   searchQuery.value = result.label
   showResults.value = false
   selectedIndex.value = -1
+  
+  // Ouvrir la page Wikidata dans un nouvel onglet
+  const wikidataUrl = `https://www.wikidata.org/wiki/${result.id}`
+  window.open(wikidataUrl, '_blank')
 }
 
 // Gestionnaire de focus

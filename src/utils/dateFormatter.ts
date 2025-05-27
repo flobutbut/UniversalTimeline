@@ -43,6 +43,37 @@ interface DateConversionResult {
   };
 }
 
+interface FormattedDateResult {
+  timeElapsed: string;    // "Il y a X ans" ou "Il y a X Ma"
+  duration?: string;      // "(durée: Y ans)" uniquement pour les périodes
+  rawDate: string;        // Date brute pour référence
+  type: 'period' | 'event'; // Type pour le composant
+}
+
+export interface DateFormattingOptions {
+  type: 'person' | 'period' | 'event';
+  startDate?: string;
+  endDate?: string;
+  format?: 'geological' | 'french';
+}
+
+export interface FormattedPersonDate {
+  timeElapsed: string;    // "Il y a X ans"
+  age?: string;          // "Y ans"
+  rawDate: string;       // Date brute
+}
+
+export interface FormattedPeriodDate {
+  timeElapsed: string;    // "Il y a X ans"
+  duration: string;      // "durée: Y ans"
+  rawDate: string;       // Date brute
+}
+
+export interface FormattedEventDate {
+  timeElapsed: string;    // "Il y a X ans" ou "Il y a X Ma"
+  rawDate: string;       // Date brute
+}
+
 export class DateFormatter {
   // Constantes pour le format ISO8602
   public static readonly TIME_SCALE = {
@@ -583,7 +614,7 @@ export class DateFormatter {
         geological: this.formatFromISO8602(iso8602Date, 'geological'),
         french: this.formatFromISO8602(iso8602Date, 'french'),
         frenchTime: this.formatFromISO8602(iso8602Date, 'french-time'),
-        years: this.formatFromISO8602(iso8602Date, 'years'),
+        years: `${yearsFromNow} ans`,
         isISO8602,
         numericValues: {
           year,
@@ -629,5 +660,158 @@ export class DateFormatter {
       // Pour les milliers d'années et moins, on affiche simplement le nombre d'années
       return `${Math.round(years)} ans`;
     }
+  }
+
+  /**
+   * Formate une date pour l'affichage, en prenant en compte le type (période ou événement)
+   */
+  public static formatForDisplay(
+    date: string,
+    type: 'period' | 'event',
+    format: 'geological' | 'french' = 'geological'
+  ): FormattedDateResult {
+    try {
+      const processedDate = this.processDate(date);
+      const isGeological = processedDate.numericValues.totalYears >= 1000000;
+
+      // Format de base pour le temps écoulé
+      const timeElapsed = isGeological
+        ? processedDate.geological
+        : processedDate.years;
+
+      // Pour les périodes, calculer la durée si nous avons une date de fin
+      let duration: string | undefined;
+      if (type === 'period' && processedDate.numericValues.totalYears > 0) {
+        duration = `(durée: ${processedDate.geological})`;
+      }
+
+      return {
+        timeElapsed,
+        duration,
+        rawDate: date,
+        type
+      };
+    } catch (error) {
+      console.error(`Erreur lors du formatage de la date ${date}:`, error);
+      return {
+        timeElapsed: date,
+        rawDate: date,
+        type
+      };
+    }
+  }
+
+  /**
+   * Formate une date selon son type et ses options
+   */
+  public static formatDate(options: DateFormattingOptions): FormattedPersonDate | FormattedPeriodDate | FormattedEventDate {
+    const { type, startDate, endDate, format = 'geological' } = options;
+
+    switch (type) {
+      case 'person':
+        return this.formatPersonDate(startDate, endDate);
+      case 'period':
+        return this.formatPeriodDate(startDate, endDate);
+      case 'event':
+        return this.formatEventDate(startDate);
+      default:
+        throw new Error(`Type de date non supporté: ${type}`);
+    }
+  }
+
+  /**
+   * Formate une date pour une personne
+   */
+  private static formatPersonDate(birthDate?: string, deathDate?: string): FormattedPersonDate {
+    if (!birthDate && !deathDate) {
+      return {
+        timeElapsed: 'Dates inconnues',
+        rawDate: ''
+      };
+    }
+
+    const birth = birthDate ? this.processDate(birthDate) : null;
+    const death = deathDate ? this.processDate(deathDate) : null;
+
+    if (birth && death) {
+      const age = Math.abs(death.numericValues.year - birth.numericValues.year);
+      return {
+        timeElapsed: this.formatYearsToGeological(death.numericValues.yearsFromNow),
+        age: `${age} ans`,
+        rawDate: `${birthDate} - ${deathDate}`
+      };
+    } else if (birth) {
+      return {
+        timeElapsed: this.formatYearsToGeological(birth.numericValues.yearsFromNow),
+        rawDate: birthDate || ''
+      };
+    } else {
+      return {
+        timeElapsed: this.formatYearsToGeological(death!.numericValues.yearsFromNow),
+        rawDate: deathDate || ''
+      };
+    }
+  }
+
+  /**
+   * Formate une date pour une période
+   */
+  private static formatPeriodDate(start?: string, end?: string): FormattedPeriodDate {
+    if (!start) {
+      return {
+        timeElapsed: 'Date inconnue',
+        duration: '',
+        rawDate: ''
+      };
+    }
+
+    if (!end) {
+      const result = this.processDate(start);
+      return {
+        timeElapsed: result.geological,
+        duration: '',
+        rawDate: start
+      };
+    }
+
+    const startResult = this.processDate(start);
+    const endResult = this.processDate(end);
+    
+    const duration = Math.abs(endResult.numericValues.year - startResult.numericValues.year);
+    const durationFormatted = this.formatYearsToGeological(duration);
+    const yearsAgo = endResult.numericValues.yearsFromNow;
+    const yearsAgoFormatted = this.formatYearsToGeological(yearsAgo);
+
+    return {
+      timeElapsed: yearsAgoFormatted,
+      duration: `durée: ${durationFormatted}`,
+      rawDate: `${start} - ${end}`
+    };
+  }
+
+  /**
+   * Formate une date pour un événement
+   */
+  private static formatEventDate(date?: string): FormattedEventDate {
+    if (!date) {
+      return {
+        timeElapsed: 'Date inconnue',
+        rawDate: ''
+      };
+    }
+
+    const result = this.processDate(date);
+    
+    if (result.geological.includes('Ga') || result.geological.includes('Ma') || result.geological.includes('ka')) {
+      return {
+        timeElapsed: result.geological,
+        rawDate: date
+      };
+    }
+    
+    return {
+      timeElapsed: `${result.numericValues.yearsFromNow} ans`,
+      rawDate: date
+    };
   }
 } 

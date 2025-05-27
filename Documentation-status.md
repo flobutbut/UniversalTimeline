@@ -257,6 +257,29 @@
 - ✅ Adaptation du format selon l'échelle (ans, Ma, Ga)
 - ✅ Support des lieux de début/fin
 
+## Formatage des Dates
+- ✅ Centralisation du formatage dans `DateFormatter`
+- ✅ Gestion cohérente des différents types (événements, périodes, personnes)
+- ✅ Correction du problème de double "Il y a"
+- ✅ Documentation technique et fonctionnelle mise à jour
+- ✅ Implémentation du système de retry (3 tentatives)
+- ✅ Mise en place du cache (5 minutes) et du debounce (300ms)
+- ✅ Gestion des timeouts (10 secondes)
+
+### Prochaines Étapes
+- [ ] Mettre à jour les tests unitaires pour le nouveau formatage
+- [ ] Ajouter des tests d'intégration pour vérifier l'affichage
+- [ ] Vérifier la cohérence sur tous les types de dates
+- [ ] Optimiser les performances du formatage
+- [ ] Ajouter des tests de performance pour le cache et le debounce
+- [ ] Documenter les cas d'erreur et leur gestion
+
+### Points d'Attention
+- Vérifier la cohérence du formatage entre les différents services
+- S'assurer que le cache est correctement invalidé
+- Surveiller les performances du debounce
+- Maintenir la cohérence des formats d'affichage
+
 ## En Cours de Développement
 - 🔄 Amélioration de la précision des dates
 - 🔄 Optimisation des performances de recherche
@@ -266,4 +289,8 @@
 - ⏳ Support des ères géologiques
 - ⏳ Filtres de recherche avancés
 - ⏳ Interface de visualisation temporelle
-- ⏳ Export des résultats 
+- ⏳ Export des résultats
+- [ ] Mettre à jour les tests unitaires pour le nouveau formatage
+- [ ] Ajouter des tests d'intégration pour vérifier l'affichage
+- [ ] Vérifier la cohérence sur tous les types de dates
+- [ ] Optimiser les performances du formatage 

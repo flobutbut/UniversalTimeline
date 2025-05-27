@@ -407,20 +407,48 @@ Une période est considérée comme valide si :
 
 ## Affichage des Dates
 
-### Format d'Affichage
-- Très anciennes (≥ 1 milliard d'années) : "X.XX Ga"
-- Anciennes (≥ 1 million d'années) : "X.XX Ma"
-- Récentes (< 1 million d'années) : "XXXX ans" 
+### Format des Dates
+Le système affiche les dates de manière cohérente selon leur type :
 
-### Visualisation Temporelle
-- Affichage des périodes en une seule colonne
-- Largeur des cartes proportionnelle à la durée des périodes
-- Positionnement relatif basé sur les dates de début
-- Gestion des périodes sans date de fin (utilisation de la date actuelle)
-- Affichage des dates formatées (Ga, Ma, ans)
-- Interface responsive en une seule colonne
+1. **Événements** (ex: Extinction du Crétacé)
+   - Format : "Il y a X Ma" pour les dates géologiques
+   - Format : "Il y a X ans" pour les dates historiques
+   - Exemple : "Il y a 66 Ma"
 
-### Composants UI
+2. **Périodes** (ex: Règne de Louis XIV)
+   - Format : "Il y a X ans (durée: Y ans)" pour les dates historiques
+   - Format : "Il y a X Ma (durée: Y Ma)" pour les dates géologiques
+   - Exemple : "Il y a 310 ans (durée: 77 ans)"
+
+3. **Personnes**
+   - Avec dates complètes : "Il y a X ans (Y ans)"
+   - Avec date partielle : "Il y a X ans"
+   - Exemple : "Il y a 310 ans (77 ans)"
+
+### Règles de Formatage
+- Les dates géologiques (> 1 million d'années) utilisent le format Ma (millions d'années)
+- Les dates historiques utilisent le format "ans"
+- La durée est toujours affichée entre parenthèses pour les périodes
+- L'âge est affiché entre parenthèses pour les personnes
+- Le préfixe "Il y a" est systématiquement utilisé
+
+### Exemples
+- Événement géologique : "Il y a 66 Ma"
+- Événement historique : "Il y a 310 ans"
+- Période géologique : "Il y a 66 Ma (durée: 1 Ma)"
+- Période historique : "Il y a 310 ans (durée: 77 ans)"
+- Personne avec dates complètes : "Il y a 310 ans (77 ans)"
+- Personne avec date partielle : "Il y a 310 ans"
+
+### Gestion des Erreurs
+- En cas d'erreur de formatage, la date brute est affichée
+- Les erreurs sont loggées dans la console pour le débogage
+- Le système tente de reformater la date jusqu'à 3 fois en cas d'échec
+
+### Performance
+- Les résultats de recherche sont mis en cache pendant 5 minutes
+- Les requêtes sont debounced (300ms) pour éviter les appels inutiles
+- Timeout de 10 secondes sur les requêtes Wikidata
 
 ## Recherche Temporelle
 

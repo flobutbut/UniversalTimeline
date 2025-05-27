@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { DateFormatter } from '../utils/dateFormatter';
+import type { FormattedPersonDate, FormattedPeriodDate, FormattedEventDate } from '../utils/dateFormatter';
 
 interface WikidataBinding {
   item?: { value: string };
@@ -233,72 +234,28 @@ export class WikidataSearchService {
   }
 
   private formatDate(type: 'period' | 'event' | 'person', start?: string, end?: string): string {
-    if (type === 'person') {
-      return this.formatPersonDates(start, end);
-    } else if (type === 'period') {
-      return this.formatPeriodDate(start, end);
-    } else {
-      return this.formatEventDate(start);
-    }
-  }
+    const formatted = DateFormatter.formatDate({
+      type,
+      startDate: start,
+      endDate: end
+    });
 
-  private formatPersonDates(birthDate?: string, deathDate?: string): string {
-    if (!birthDate && !deathDate) return 'Dates inconnues';
-    
-    const birth = birthDate ? DateFormatter.processDate(birthDate) : null;
-    const death = deathDate ? DateFormatter.processDate(deathDate) : null;
-    
-    if (birth && death) {
-      // Calculer l'âge
-      const age = Math.abs(death.numericValues.year - birth.numericValues.year);
-      return `${age} ans (il y a ${DateFormatter.formatYearsToGeological(death.numericValues.yearsFromNow)})`;
-    } else if (birth) {
-      return `Né il y a ${DateFormatter.formatYearsToGeological(birth.numericValues.yearsFromNow)}`;
-    } else if (death) {
-      return `Mort il y a ${DateFormatter.formatYearsToGeological(death.numericValues.yearsFromNow)}`;
+    switch (type) {
+      case 'person':
+        const personDate = formatted as FormattedPersonDate;
+        return personDate.age 
+          ? `Il y a ${personDate.timeElapsed} (${personDate.age})`
+          : `Il y a ${personDate.timeElapsed}`;
+      case 'period':
+        const periodDate = formatted as FormattedPeriodDate;
+        return periodDate.duration
+          ? `Il y a ${periodDate.timeElapsed} (${periodDate.duration})`
+          : `Il y a ${periodDate.timeElapsed}`;
+      case 'event':
+        return `Il y a ${(formatted as FormattedEventDate).timeElapsed}`;
+      default:
+        return 'Date inconnue';
     }
-    
-    return 'Dates inconnues';
-  }
-
-  private parseWikidataDate(dateString: string): string | undefined {
-    if (!dateString) return undefined;
-    return dateString.trim();
-  }
-
-  private formatPeriodDate(start?: string, end?: string): string {
-    if (!start) return 'Date inconnue';
-    
-    if (!end) {
-      const result = DateFormatter.processDate(start);
-      return `Il y a ${result.geological}`;
-    }
-    
-    const startResult = DateFormatter.processDate(start);
-    const endResult = DateFormatter.processDate(end);
-    
-    // Calculer la durée
-    const duration = Math.abs(endResult.numericValues.year - startResult.numericValues.year);
-    const durationFormatted = DateFormatter.formatYearsToGeological(duration);
-    
-    // Calculer le "il y a" depuis la fin
-    const yearsAgo = endResult.numericValues.yearsFromNow;
-    const yearsAgoFormatted = DateFormatter.formatYearsToGeological(yearsAgo);
-    
-    return `${durationFormatted} (il y a ${yearsAgoFormatted})`;
-  }
-
-  private formatEventDate(date?: string): string {
-    if (!date) return 'Date inconnue';
-    const result = DateFormatter.processDate(date);
-    
-    // Pour les dates géologiques, utiliser le format Ga/Ma/ka
-    if (result.geological.includes('Ga') || result.geological.includes('Ma') || result.geological.includes('ka')) {
-      return `Il y a ${result.geological}`;
-    }
-    
-    // Pour les dates récentes, utiliser le nombre d'années écoulées
-    return `Il y a ${result.numericValues.yearsFromNow} ans`;
   }
 
   public clearCache(): void {

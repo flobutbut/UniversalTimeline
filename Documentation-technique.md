@@ -340,10 +340,70 @@ Service de recherche et formatage des données Wikidata.
 - Cache de 5 minutes pour les résultats
 - Clé de cache basée sur la requête et les options
 
-## Tests
+## Formatage des Dates
 
-Les tests unitaires couvrent :
-- Parsing des différents formats de dates
-- Conversion vers/depuis ISO8602
-- Formatage des durées et temps écoulés
-- Gestion des erreurs et cas limites
+### Architecture du DateFormatter
+Le `DateFormatter` est une classe utilitaire qui gère la conversion et le formatage des dates dans différents formats :
+
+1. **Types de Dates Supportés**
+   - Événements (point dans le temps)
+   - Périodes (début et fin)
+   - Personnes (dates de naissance/décès)
+
+2. **Formats Supportés**
+   - Wikidata (ISO8601 avec précision)
+   - ISO8601 standard
+   - Dates françaises (JJ/MM/AAAA)
+   - Dates anglaises (MM/JJ/AAAA)
+   - Dates BCE/BC
+   - Dates géologiques (Ga, Ma, ka, ans)
+   - Dates relatives
+
+3. **Interfaces Principales**
+```typescript
+interface FormattedDateResult {
+  timeElapsed: string;    // Format: "Il y a X ans" ou "Il y a X Ma"
+  duration?: string;      // Format: "(durée: Y ans)" pour les périodes
+  rawDate: string;        // Date brute d'origine
+  type: 'period' | 'event' | 'person';
+}
+
+interface DateFormattingOptions {
+  type: 'period' | 'event' | 'person';
+  startDate?: string;
+  endDate?: string;
+  format?: 'geological' | 'french';
+}
+```
+
+### Flux de Formatage
+1. **Entrée** : Date brute (string)
+2. **Traitement** :
+   - Détection du format d'entrée
+   - Conversion en format ISO8602
+   - Formatage selon le type (événement/période/personne)
+3. **Sortie** : Objet formaté avec temps écoulé et durée si applicable
+
+### Gestion des Erreurs
+- Logging des erreurs dans la console
+- Retour de la date brute en cas d'erreur
+- Système de retry pour les requêtes Wikidata (3 tentatives)
+
+### Cache et Performance
+- Cache des résultats de recherche (5 minutes)
+- Debounce des requêtes (300ms)
+- Timeout des requêtes (10 secondes)
+
+### Utilisation dans les Services
+1. **WikidataSearchService**
+   - Formatage des dates de recherche
+   - Gestion du cache et des retries
+   - Debounce des requêtes
+
+2. **WikidataQueryService**
+   - Formatage des dates pour l'affichage
+   - Gestion des périodes et événements
+
+3. **DatabaseImportService**
+   - Formatage des dates avant import
+   - Validation des formats
