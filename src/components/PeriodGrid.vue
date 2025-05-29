@@ -1,27 +1,24 @@
 <template>
   <div class="period-grid">
+    <div class="navigation-header">
+      <BackButton 
+        v-if="props.currentPeriod"
+        v-bind="props.parentPeriod ? { period: props.parentPeriod } : { period: { label: 'Racine', temporalData: [], hasChildren: false, isMainEon: false, categoryIds: [], categoryLabels: [], children: [], loading: false, childrenPreloaded: false, locations: [], directLocations: [], id: 'root' } }"
+        @click="goBack"
+      />
+    </div>
     <div v-if="loading" class="loading-container">
       <i class="fas fa-spinner fa-spin"></i>
       <span>Chargement de la timeline...</span>
     </div>
-
     <div v-else-if="error" class="error-message">
       {{ error }}
       <button @click="retryLoading">Réessayer</button>
     </div>
-
     <div v-else-if="periods.length === 0" class="empty-message">
       Aucune période à afficher
     </div>
-
     <div v-else class="timeline-container">
-      <div class="navigation-header">
-        <BackButton 
-          v-if="navigationStack.length > 0"
-          :period="navigationStack[navigationStack.length - 1]"
-          @click="goBack"
-        />
-      </div>
       <div class="timeline-line"></div>
       <div class="periods-container">
         <PeriodCard
@@ -61,11 +58,14 @@ import EventCard from './EventCard.vue';
 const props = defineProps<{
   periods: Period[];
   loading: boolean;
+  parentPeriod: Period | null;
+  currentPeriod: Period | null;
 }>();
 
 const emit = defineEmits<{
   (e: 'period-click', period: Period): void;
   (e: 'event-click', event: Event): void;
+  (e: 'go-back'): void;
 }>();
 
 const scalingService = new TimelineScalingService();
@@ -74,7 +74,6 @@ const databaseService = DatabaseQueryService.getInstance();
 const totalDuration = ref(0);
 const startYears = ref(0);
 const error = ref<string | null>(null);
-const navigationStack = ref<Period[]>([]);
 const loadingPeriods = ref<Record<string, boolean>>({});
 const currentPeriods = ref<Period[]>(props.periods);
 const events = ref<Event[]>([]);
@@ -171,37 +170,13 @@ const selectPeriod = (period: Period) => {
   emit('period-click', period);
 };
 
-const goBack = async () => {
-  if (navigationStack.value.length === 0) return;
-  
-  // On retire la période courante de la pile
-  navigationStack.value.pop();
-  
-  // Si on a encore des périodes dans la pile, on charge le parent
-  if (navigationStack.value.length > 0) {
-    const parent = navigationStack.value[navigationStack.value.length - 1];
-    loadingPeriods.value[parent.id] = true;
-    try {
-      const loadedPeriod = await timelineService.loadPeriod(parent.id);
-      currentPeriods.value = loadedPeriod.children || [];
-      emit('period-click', loadedPeriod);
-    } catch (err) {
-      console.error('[Timeline] Erreur lors du chargement du parent:', err);
-      error.value = err instanceof Error ? err.message : 'Erreur lors du chargement de la période parent';
-    } finally {
-      loadingPeriods.value[parent.id] = false;
-    }
-  } else {
-    // Si on est revenu à la racine, on utilise les périodes initiales des props
-    currentPeriods.value = props.periods;
-    emit('period-click', props.periods[0]);
-  }
-};
+const goBack = () => {
+  emit('go-back')
+}
 
 const retryLoading = async () => {
-  if (navigationStack.value.length > 0) {
-    const parent = navigationStack.value[navigationStack.value.length - 1];
-    await selectPeriod(parent);
+  if (props.parentPeriod) {
+    await selectPeriod(props.parentPeriod);
   } else {
     // Recharger les périodes initiales
     try {

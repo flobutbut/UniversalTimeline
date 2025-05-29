@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import LanguageSelector from './components/LanguageSelector.vue'
 import BackButton from './components/BackButton.vue'
 import Header from './components/Header.vue'
 import PeriodGrid from './components/PeriodGrid.vue'
@@ -10,21 +9,18 @@ import { MAIN_STORY } from './types/geological'
 
 const timelineService = WikidataQueryService.getInstance()
 const storyService = StoryService.getInstance()
+const parentStack = ref<Period[]>([])
 const currentPeriod = ref<Period | null>(null)
 const displayedPeriods = ref<Period[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 const currentLanguage = ref('fr')
 const selectedLanguage = ref('fr')
-const navigationStack = ref<Period[]>([])
 
 const handlePeriodClick = async (period: Period) => {
-  console.log(`[App] Clic sur la période:`, {
-    id: period.id,
-    label: period.label,
-    hasChildren: period.hasChildren
-  });
-  navigationStack.value.push(currentPeriod.value || period)
+  if (currentPeriod.value) {
+    parentStack.value.push(currentPeriod.value)
+  }
   currentPeriod.value = period
   await loadPeriod(period.id)
 }
@@ -54,9 +50,8 @@ const loadPeriod = async (periodId: string) => {
 }
 
 const goBack = async () => {
-  console.log(`[App] Retour - Taille de la pile:`, navigationStack.value.length);
-  if (navigationStack.value.length === 0) {
-    // Si nous sommes à la racine, recharger la story Planète Terre
+  if (parentStack.value.length === 0) {
+    // Retour à la racine
     console.log(`[App] Retour à la racine - Chargement de la story Planète Terre`);
     loading.value = true
     error.value = null
@@ -73,23 +68,19 @@ const goBack = async () => {
       });
       displayedPeriods.value = story.children
       currentPeriod.value = null
+      parentStack.value = []
     } catch (e) {
       console.error(`[App] Erreur lors du chargement de la story:`, e);
       error.value = e instanceof Error ? e.message : 'Une erreur est survenue'
     } finally {
       loading.value = false
     }
-  } else {
-    // Sinon, revenir à la période précédente
-    const previousPeriod = navigationStack.value.pop()
-    if (previousPeriod) {
-      console.log(`[App] Retour à la période précédente:`, {
-        id: previousPeriod.id,
-        label: previousPeriod.label
-      });
-      currentPeriod.value = previousPeriod
-      await loadPeriod(previousPeriod.id)
-    }
+    return
+  }
+  const parent = parentStack.value.pop()
+  if (parent) {
+    currentPeriod.value = parent
+    await loadPeriod(parent.id)
   }
 }
 
@@ -128,7 +119,10 @@ onMounted(async () => {
       <PeriodGrid 
         :periods="displayedPeriods"
         :loading="loading"
+        :parent-period="parentStack.length > 0 ? parentStack[parentStack.length - 1] : null"
+        :current-period="currentPeriod"
         @period-click="handlePeriodClick"
+        @go-back="goBack"
       />
     </main>
   </div>
