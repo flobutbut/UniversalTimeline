@@ -233,52 +233,27 @@
 - Docker pour l'environnement de développement
 - PGAdmin pour la gestion des bases
 
-## Fonctionnalités Implémentées
-
-### Gestion des Dates
-- ✅ Support des dates géologiques (Ga, Ma)
-- ✅ Support des dates historiques (BCE/BC)
-- ✅ Support des dates modernes
-- ✅ Conversion automatique des formats
-- ✅ Calcul des durées et temps écoulés
-- ✅ Format intelligent selon l'échelle de temps
-
-### Recherche Wikidata
-- ✅ Recherche d'événements
-- ✅ Recherche de périodes
-- ✅ Recherche de personnages historiques
-- ✅ Cache des résultats
-- ✅ Gestion des erreurs
-
-### Formatage des Résultats
-- ✅ Format "Il y a X ans" pour les événements
-- ✅ Format "Durée (il y a X ans)" pour les périodes
-- ✅ Format "Age (il y a X ans)" pour les personnes
-- ✅ Adaptation du format selon l'échelle (ans, Ma, Ga)
-- ✅ Support des lieux de début/fin
-
 ## Formatage des Dates
-- ✅ Centralisation du formatage dans `DateFormatter`
-- ✅ Gestion cohérente des différents types (événements, périodes, personnes)
-- ✅ Correction du problème de double "Il y a"
-- ✅ Documentation technique et fonctionnelle mise à jour
-- ✅ Implémentation du système de retry (3 tentatives)
-- ✅ Mise en place du cache (5 minutes) et du debounce (300ms)
-- ✅ Gestion des timeouts (10 secondes)
 
-### Prochaines Étapes
-- [ ] Mettre à jour les tests unitaires pour le nouveau formatage
-- [ ] Ajouter des tests d'intégration pour vérifier l'affichage
-- [ ] Vérifier la cohérence sur tous les types de dates
-- [ ] Optimiser les performances du formatage
-- [ ] Ajouter des tests de performance pour le cache et le debounce
-- [ ] Documenter les cas d'erreur et leur gestion
+### Implémentation
+✅ Centralisation du formatage dans `DateFormatter`
+✅ Simplification du code de formatage
+✅ Gestion unifiée des différents types de dates
+
+### Fonctionnalités
+✅ Format ISO8602 pour la base de données
+✅ Formatage adapté pour l'affichage
+✅ Gestion des dates géologiques, historiques et modernes
+✅ Support des périodes, événements et personnes
 
 ### Points d'Attention
-- Vérifier la cohérence du formatage entre les différents services
-- S'assurer que le cache est correctement invalidé
-- Surveiller les performances du debounce
-- Maintenir la cohérence des formats d'affichage
+⚠️ Vérifier la cohérence des dates importées de Wikidata
+⚠️ Surveiller les performances du formatage
+
+### Prochaines Étapes
+- Optimiser la détection des formats de dates
+- Ajouter des tests unitaires pour le formatage
+- Améliorer la gestion des fuseaux horaires
 
 ## En Cours de Développement
 - 🔄 Amélioration de la précision des dates
@@ -289,7 +264,7 @@
 - ⏳ Support des ères géologiques
 - ⏳ Filtres de recherche avancés
 - ⏳ Interface de visualisation temporelle
-- ⏳ Export des résultats
+- ⏳ Export des résultats 
 - [ ] Mettre à jour les tests unitaires pour le nouveau formatage
 - [ ] Ajouter des tests d'intégration pour vérifier l'affichage
 - [ ] Vérifier la cohérence sur tous les types de dates

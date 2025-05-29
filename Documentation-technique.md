@@ -342,68 +342,34 @@ Service de recherche et formatage des données Wikidata.
 
 ## Formatage des Dates
 
-### Architecture du DateFormatter
-Le `DateFormatter` est une classe utilitaire qui gère la conversion et le formatage des dates dans différents formats :
+Le formatage des dates est centralisé dans la classe `DateFormatter` qui gère :
+- La conversion vers le format ISO8602 pour la base de données
+- Le formatage pour l'affichage dans l'interface utilisateur
+- La gestion des différents types de dates (périodes, événements, personnes)
 
-1. **Types de Dates Supportés**
-   - Événements (point dans le temps)
-   - Périodes (début et fin)
-   - Personnes (dates de naissance/décès)
-
-2. **Formats Supportés**
-   - Wikidata (ISO8601 avec précision)
-   - ISO8601 standard
-   - Dates françaises (JJ/MM/AAAA)
-   - Dates anglaises (MM/JJ/AAAA)
-   - Dates BCE/BC
-   - Dates géologiques (Ga, Ma, ka, ans)
-   - Dates relatives
-
-3. **Interfaces Principales**
-```typescript
-interface FormattedDateResult {
-  timeElapsed: string;    // Format: "Il y a X ans" ou "Il y a X Ma"
-  duration?: string;      // Format: "(durée: Y ans)" pour les périodes
-  rawDate: string;        // Date brute d'origine
-  type: 'period' | 'event' | 'person';
-}
-
-interface DateFormattingOptions {
-  type: 'period' | 'event' | 'person';
-  startDate?: string;
-  endDate?: string;
-  format?: 'geological' | 'french';
-}
+#### Format ISO8602
+Format utilisé pour stocker les dates dans la base de données :
 ```
+[Échelle de temps][Signe][Valeur][Unité][Précision][Fuseau horaire]
+```
+- Échelle de temps : G (Géologique), H (Historique), M (Moderne)
+- Signe : + ou -
+- Valeur : nombre
+- Unité : Y (années)
+- Précision : 0-8 (année à milliseconde)
+- Fuseau horaire : optionnel
 
-### Flux de Formatage
-1. **Entrée** : Date brute (string)
-2. **Traitement** :
-   - Détection du format d'entrée
-   - Conversion en format ISO8602
-   - Formatage selon le type (événement/période/personne)
-3. **Sortie** : Objet formaté avec temps écoulé et durée si applicable
+#### Conversion des Dates
+La conversion est gérée par la méthode `parseToISO8602` qui :
+1. Détecte le format d'entrée
+2. Convertit en format ISO8602
+3. Valide le résultat
 
-### Gestion des Erreurs
-- Logging des erreurs dans la console
-- Retour de la date brute en cas d'erreur
-- Système de retry pour les requêtes Wikidata (3 tentatives)
-
-### Cache et Performance
-- Cache des résultats de recherche (5 minutes)
-- Debounce des requêtes (300ms)
-- Timeout des requêtes (10 secondes)
-
-### Utilisation dans les Services
-1. **WikidataSearchService**
-   - Formatage des dates de recherche
-   - Gestion du cache et des retries
-   - Debounce des requêtes
-
-2. **WikidataQueryService**
-   - Formatage des dates pour l'affichage
-   - Gestion des périodes et événements
-
-3. **DatabaseImportService**
-   - Formatage des dates avant import
-   - Validation des formats
+#### Formatage pour l'Affichage
+Le formatage pour l'affichage est géré par la méthode `formatForSearch` qui :
+1. Formate la date selon son type (période, événement, personne)
+2. Ajoute le préfixe "Il y a" approprié
+3. Inclut des informations supplémentaires selon le type :
+   - Pour les personnes : l'âge
+   - Pour les périodes : la durée
+   - Pour les événements : la date simple

@@ -814,4 +814,44 @@ export class DateFormatter {
       rawDate: date
     };
   }
+
+  /**
+   * Formate une date pour l'affichage dans les résultats de recherche
+   */
+  public static formatForSearch(
+    date: string,
+    type: 'period' | 'event' | 'person',
+    options?: {
+      startDate?: string,
+      endDate?: string
+    }
+  ): string {
+    try {
+      const formatted = this.formatDate({
+        type,
+        startDate: options?.startDate || date,
+        endDate: options?.endDate
+      });
+
+      switch (type) {
+        case 'person':
+          const personDate = formatted as FormattedPersonDate;
+          return personDate.age 
+            ? `Il y a ${personDate.timeElapsed} (${personDate.age})`
+            : `Il y a ${personDate.timeElapsed}`;
+        case 'period':
+          const periodDate = formatted as FormattedPeriodDate;
+          return periodDate.duration
+            ? `Il y a ${periodDate.timeElapsed} (${periodDate.duration})`
+            : `Il y a ${periodDate.timeElapsed}`;
+        case 'event':
+          return `Il y a ${(formatted as FormattedEventDate).timeElapsed}`;
+        default:
+          return 'Date inconnue';
+      }
+    } catch (error) {
+      console.error(`Erreur lors du formatage de la date ${date}:`, error);
+      return 'Date inconnue';
+    }
+  }
 } 

@@ -234,28 +234,7 @@ export class WikidataSearchService {
   }
 
   private formatDate(type: 'period' | 'event' | 'person', start?: string, end?: string): string {
-    const formatted = DateFormatter.formatDate({
-      type,
-      startDate: start,
-      endDate: end
-    });
-
-    switch (type) {
-      case 'person':
-        const personDate = formatted as FormattedPersonDate;
-        return personDate.age 
-          ? `Il y a ${personDate.timeElapsed} (${personDate.age})`
-          : `Il y a ${personDate.timeElapsed}`;
-      case 'period':
-        const periodDate = formatted as FormattedPeriodDate;
-        return periodDate.duration
-          ? `Il y a ${periodDate.timeElapsed} (${periodDate.duration})`
-          : `Il y a ${periodDate.timeElapsed}`;
-      case 'event':
-        return `Il y a ${(formatted as FormattedEventDate).timeElapsed}`;
-      default:
-        return 'Date inconnue';
-    }
+    return DateFormatter.formatForSearch(start || '', type, { startDate: start, endDate: end });
   }
 
   public clearCache(): void {

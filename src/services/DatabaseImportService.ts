@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { SearchResult } from './WikidataSearchService'
+import { DateFormatter } from '../utils/dateFormatter'
 
 export class DatabaseImportService {
   private static instance: DatabaseImportService
@@ -90,9 +91,13 @@ export class DatabaseImportService {
     }
   }
 
-  private parseDate(dateString: string): Date | null {
-    // TODO: Implémenter le parsing des dates selon le format Wikidata
-    // Pour le moment, on retourne null
-    return null
+  private parseDate(dateString: string): string | null {
+    try {
+      if (!dateString) return null;
+      return DateFormatter.parseToISO8602(dateString);
+    } catch (error) {
+      console.error('Erreur lors du parsing de la date:', error);
+      return null;
+    }
   }
 } 
