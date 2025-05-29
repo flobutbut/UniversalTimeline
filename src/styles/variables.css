@@ -122,7 +122,7 @@
   --color-background: var(--color-neutral-0);
   --color-surface: var(--color-neutral-50);
   --color-surface-hover: var(--color-neutral-100);
-  --color-border: var(--color-neutral-200);
+  --color-border: var(--color-neutral-100);
   --color-border-light: var(--color-neutral-100);
   --color-text: var(--color-neutral-700);
   --color-text-light: var(--color-neutral-400);

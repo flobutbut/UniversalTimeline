@@ -54,13 +54,13 @@ const formatDate = (date: string, type: 'period' | 'event' | 'person') => {
   left: 0;
   right: 0;
   margin-top: var(--spacing-xs);
-  background-color: var(--color-surface);
+  background-color: var(--color-neutral-0);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   max-height: 400px;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: var(--z-index-dropdown);
 }
 
 .result-item {
@@ -69,9 +69,9 @@ const formatDate = (date: string, type: 'period' | 'event' | 'person') => {
   align-items: flex-start;
   padding: var(--spacing-sm) var(--spacing-md);
   cursor: pointer;
-  transition: var(--transition-fast);
-  border-bottom: 1px solid var(--color-border-light);
-  background-color: var(--color-background-bright);
+  transition: background-color var(--transition-fast);
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-neutral-0);
 }
 
 .result-item:last-child {
@@ -80,7 +80,7 @@ const formatDate = (date: string, type: 'period' | 'event' | 'person') => {
 
 .result-item:hover,
 .result-item.selected {
-  background-color: var(--color-background);
+  background-color: var(--color-surface);
 }
 
 .result-content {
@@ -92,20 +92,23 @@ const formatDate = (date: string, type: 'period' | 'event' | 'person') => {
 .result-title {
   font-weight: 500;
   color: var(--color-text);
-  margin-bottom: 2px;
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-tight);
 }
 
 .result-metadata {
   font-size: var(--font-size-sm);
   color: var(--color-text-light);
   font-weight: normal;
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
 }
 
 .result-date {
   color: var(--color-text-light);
   font-size: var(--font-size-sm);
   white-space: nowrap;
-  margin-top: 2px;
+  margin-top: var(--spacing-xs);
+  line-height: var(--line-height-tight);
 }
 </style> 

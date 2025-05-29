@@ -193,11 +193,11 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   align-items: center;
-  background-color: var(--color-surface);
-  border-radius: 3px;
+  background-color: var(--color-neutral-0);
+  border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid var(--color-border);
-  transition: var(--transition-normal);
+  transition: all var(--transition-normal);
   height: 40px;
 }
 
@@ -218,7 +218,7 @@ onUnmounted(() => {
 
 .search-input {
   width: 100%;
-  background: none;
+  background: transparent !important;
   border: none;
   outline: none;
   color: var(--color-text);
@@ -226,6 +226,28 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   align-items: center;
+  padding: 0;
+  box-shadow: none;
+}
+
+.search-input:focus,
+.search-input:active,
+.search-input:hover {
+  background: transparent !important;
+  box-shadow: none;
+}
+
+/* Pour l'autofill (Chrome, Safari) */
+.search-input:-webkit-autofill,
+.search-input:-webkit-autofill:focus,
+.search-input:-webkit-autofill:hover,
+.search-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  background: transparent !important;
+  color: var(--color-text) !important;
+  -webkit-text-fill-color: var(--color-text) !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .search-input::placeholder {
