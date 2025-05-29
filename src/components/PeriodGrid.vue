@@ -227,17 +227,19 @@ const retryLoading = async () => {
   width: 100%;
   height: 100%;
   overflow-x: auto;
+  background-color: var(--color-background);
 }
 
 .timeline-container {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #fff;
-  border-radius: 8px;
+  background-color: var(--color-neutral-0);
+  border-radius: var(--radius-lg);
   min-width: 100%;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-sm);
 }
 
 .timeline-line {
@@ -247,7 +249,7 @@ const retryLoading = async () => {
   top: 50%;
   transform: translateY(-50%);
   height: 2px;
-  background-color: var(--color-neutral-700);
+  background-color: var(--color-border);
   z-index: 0;
 }
 
@@ -280,37 +282,57 @@ const retryLoading = async () => {
   cursor: pointer;
   bottom: 0;
   will-change: transform, left;
+  transition: transform var(--transition-fast);
 }
 
 .timeline-card:hover {
   z-index: 2;
+  transform: translateY(-2px);
 }
 
 .loading-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  padding: 2rem;
-  color: #213547;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  color: var(--color-text);
 }
 
 .loading-container i {
-  color: #2196f3;
+  color: var(--color-primary);
 }
 
 .error-message {
-  padding: 1rem;
-  margin: 1rem 0;
-  border-radius: 4px;
-  background-color: #ffebee;
-  color: #c62828;
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  border-radius: var(--radius-md);
+  background-color: var(--color-error);
+  color: var(--color-neutral-0);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.error-message button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-neutral-0);
+  color: var(--color-error);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.error-message button:hover {
+  background-color: var(--color-neutral-100);
 }
 
 .empty-message {
   text-align: center;
-  padding: 2rem;
-  color: #666;
+  padding: var(--spacing-xl);
+  color: var(--color-text-light);
   font-style: italic;
 }
 
@@ -319,7 +341,7 @@ const retryLoading = async () => {
   top: 0;
   left: 0;
   right: 0;
-  padding: 0.5rem;
+  padding: var(--spacing-sm);
   z-index: 2;
 }
 </style> 

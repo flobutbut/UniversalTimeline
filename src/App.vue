@@ -124,26 +124,25 @@ onMounted(async () => {
     <Header 
       v-model="selectedLanguage"
     />
-    <div class="main-content">
+    <main class="main-content">
       <PeriodGrid 
         :periods="displayedPeriods"
         :loading="loading"
         @period-click="handlePeriodClick"
       />
-    </div>
-    <LanguageSelector 
-      v-model="selectedLanguage"
-    />
+    </main>
   </div>
 </template>
 
-<style>
+<style scoped>
 .app {
   min-height: 100vh;
   height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
 .main-content {
@@ -151,9 +150,10 @@ onMounted(async () => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  padding: 0;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
   overflow: hidden;
+  background-color: var(--color-background);
 }
 
 .main-content > * {
@@ -161,12 +161,16 @@ onMounted(async () => {
   min-height: 0;
 }
 
-body {
+:global(body) {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--color-background);
+  background-color: var(--color-background);
+  color: var(--color-text);
   height: 100vh;
   overflow: hidden;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
 }
 </style>

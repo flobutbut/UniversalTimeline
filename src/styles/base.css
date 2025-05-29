@@ -5,6 +5,17 @@
   box-sizing: border-box;
 }
 
+/* Transition de thème */
+:root {
+  color-scheme: light dark;
+}
+
+/* Transition douce pour les changements de thème */
+body {
+  transition: background-color var(--transition-normal),
+              color var(--transition-normal);
+}
+
 body {
   font-family: var(--font-family-base);
   font-size: var(--font-size-base);
@@ -20,6 +31,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.25;
   margin-bottom: var(--spacing-md);
+  color: var(--color-text);
 }
 
 h1 { font-size: var(--font-size-3xl); }
@@ -31,6 +43,7 @@ h6 { font-size: var(--font-size-sm); }
 
 p {
   margin-bottom: var(--spacing-md);
+  color: var(--color-text);
 }
 
 /* Links */
@@ -53,12 +66,14 @@ button {
   border: none;
   background: none;
   padding: 0;
+  color: var(--color-text);
 }
 
 /* Lists */
 ul, ol {
   margin-bottom: var(--spacing-md);
   padding-left: var(--spacing-xl);
+  color: var(--color-text);
 }
 
 /* Images */
@@ -73,7 +88,19 @@ input, select, textarea {
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
-  color: inherit;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  transition: border-color var(--transition-fast),
+              background-color var(--transition-fast);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background-color: var(--color-surface);
 }
 
 /* Focus styles */
@@ -146,4 +173,32 @@ input, select, textarea {
   .lg\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
   .lg\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
   .lg\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Dark mode specific styles */
+[data-theme="dark"] {
+  /* Amélioration du contraste pour le mode sombre */
+  --color-primary: #60a5fa;
+  --color-primary-dark: #3b82f6;
+  
+  /* Ajustement des ombres pour le mode sombre */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4);
+}
+
+/* Styles pour les éléments de formulaire en mode sombre */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: var(--color-neutral-50);
+  border-color: var(--color-neutral-200);
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+  background-color: var(--color-neutral-100);
+  border-color: var(--color-primary);
 } 
