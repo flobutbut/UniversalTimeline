@@ -13,7 +13,7 @@
         <div class="result-metadata">{{ result.type }} • {{ result.id }}</div>
       </div>
       <div class="result-date">
-        {{ formatDate(result.date, result.type) }}
+        {{ result.date }}
       </div>
     </div>
   </div>
@@ -22,7 +22,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { SearchResult } from '../services/WikidataSearchService'
-import { DateFormatter } from '../utils/dateFormatter'
 
 const props = defineProps<{
   results: SearchResult[]
@@ -36,14 +35,6 @@ const selectedIndex = ref(-1)
 
 const handleSelect = (result: SearchResult) => {
   emit('select', result)
-}
-
-const formatDate = (date: string, type: 'period' | 'event' | 'person') => {
-  const displayType = type === 'person' ? 'event' : type
-  const formatted = DateFormatter.formatForDisplay(date, displayType)
-  return formatted.duration 
-    ? `${formatted.timeElapsed} ${formatted.duration}`
-    : formatted.timeElapsed
 }
 </script>
 

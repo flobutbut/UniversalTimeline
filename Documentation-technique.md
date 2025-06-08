@@ -335,6 +335,8 @@ Service de recherche et formatage des données Wikidata.
 - **Périodes** : "Durée (il y a X ans/Ma/Ga)"
 - **Personnes** : "Age ans (il y a X ans/Ma/Ga)" ou "Né/Mort il y a X ans/Ma/Ga"
 
+> Note : Le formatage des dates est effectué une seule fois dans le `WikidataSearchService` et les dates formatées sont utilisées directement dans les composants d'affichage pour éviter les doubles formatages.
+
 #### Gestion du cache
 
 - Cache de 5 minutes pour les résultats
