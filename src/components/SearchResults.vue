@@ -9,11 +9,17 @@
       :class="{ 'selected': selectedIndex === results.indexOf(result) }"
     >
       <div class="result-content">
-        <div class="result-title">{{ result.label }}</div>
-        <div class="result-metadata">{{ result.type }} • {{ result.id }}</div>
-      </div>
-      <div class="result-date">
-        {{ result.date }}
+        <div class="result-row">
+          <div class="result-title">{{ result.label }}</div>
+          <div class="result-date">{{ result.date }}</div>
+        </div>
+        <div class="result-row">
+          <span class="result-meta">{{ result.type }} • {{ result.id }}</span>
+          <div class="result-actions">
+            <button class="action-button" @click.stop="handleSave(result)">Save</button>
+            <button class="action-button" @click.stop="openWikidata(result.id)">Wikidata</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -29,12 +35,21 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'select', result: SearchResult): void
+  (e: 'save', result: SearchResult): void
 }>()
 
 const selectedIndex = ref(-1)
 
 const handleSelect = (result: SearchResult) => {
   emit('select', result)
+}
+
+const handleSave = (result: SearchResult) => {
+  emit('save', result)
+}
+
+const openWikidata = (id: string) => {
+  window.open(`https://www.wikidata.org/wiki/${id}`, '_blank')
 }
 </script>
 
@@ -80,26 +95,61 @@ const handleSelect = (result: SearchResult) => {
   margin-right: var(--spacing-md);
 }
 
-.result-title {
-  font-weight: 500;
-  color: var(--color-text);
-  margin-bottom: var(--spacing-xs);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-tight);
+.result-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
-.result-metadata {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-light);
-  font-weight: normal;
+.result-title {
+  flex: 1 1 auto;
+  font-weight: 500;
+  color: var(--color-text);
+  font-size: var(--font-size-base);
   line-height: var(--line-height-tight);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .result-date {
   color: var(--color-text-light);
   font-size: var(--font-size-sm);
   white-space: nowrap;
-  margin-top: var(--spacing-xs);
-  line-height: var(--line-height-tight);
+  margin-left: var(--spacing-md);
+}
+
+.result-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-light);
+  font-size: var(--font-size-sm);
+}
+
+.result-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.action-button:hover {
+  color: var(--color-primary-dark);
 }
 </style> 
