@@ -41,15 +41,17 @@ const emit = defineEmits<{
 const selectedIndex = ref(-1)
 
 const handleSelect = (result: SearchResult) => {
-  emit('select', result)
+  window.showToast(`Sélection de ${result.label}`, 'info')
 }
 
 const handleSave = (result: SearchResult) => {
   emit('save', result)
+  window.showToast(`${result.label} sauvegardé`, 'success')
 }
 
 const openWikidata = (id: string) => {
   window.open(`https://www.wikidata.org/wiki/${id}`, '_blank')
+  window.showToast('Ouverture de Wikidata dans un nouvel onglet', 'info')
 }
 </script>
 

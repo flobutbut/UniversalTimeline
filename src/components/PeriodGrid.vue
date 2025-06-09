@@ -209,7 +209,7 @@ const retryLoading = async () => {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: var(--color-neutral-0);
+  background-color: var(--color-surface);
   border-radius: var(--radius-lg);
   min-width: 100%;
   display: flex;

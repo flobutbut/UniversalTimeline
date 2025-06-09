@@ -96,7 +96,7 @@ const handleClick = () => {
 
 <style scoped>
 .period-card {
-  background: var(--color-neutral-0);
+  background: var(--color-surface);
   padding: 0 1px;
   cursor: pointer;
   color: var(--color-text);
@@ -109,7 +109,7 @@ const handleClick = () => {
 }
 
 .main-container {
-  background: var(--color-surface);
+  background: var(--color-neutral-100);
   border-radius: var(--radius-sm);
   padding: var(--spacing-md) var(--spacing-lg);
   height: 100%;
@@ -143,13 +143,13 @@ const handleClick = () => {
 
 .period-card:hover .main-container {
   background: var(--color-surface-hover);
-  box-shadow: none;
+  box-shadow: var(--shadow-sm);
   transform: translateY(-4px);
 }
 
 .period-card.selected .main-container {
   background: var(--color-primary);
-  color: var(--color-background);
+  color: var(--color-neutral-0);
 }
 
 .period-header {
@@ -179,6 +179,10 @@ const handleClick = () => {
   width: 100%;
 }
 
+.period-card.selected .period-title {
+  color: var(--color-neutral-0);
+}
+
 .period-footer {
   display: flex;
   justify-content: space-between;
@@ -205,6 +209,10 @@ const handleClick = () => {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+}
+
+.period-card.selected .period-info {
+  color: var(--color-neutral-0);
 }
 
 .location-separator {

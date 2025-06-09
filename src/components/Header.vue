@@ -17,7 +17,7 @@ import ThemeToggle from './ThemeToggle.vue';
 
 <style scoped>
 .header {
-  background-color: var(--color-neutral-0);
+  background-color: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   padding: var(--spacing-md) 0;
   width: 100%;

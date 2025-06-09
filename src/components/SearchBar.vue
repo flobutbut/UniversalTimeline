@@ -193,7 +193,7 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   align-items: center;
-  background-color: var(--color-neutral-0);
+  background-color: var(--color-surface);
   border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid var(--color-border);
@@ -260,13 +260,13 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   margin-top: var(--spacing-xs);
-  background-color: var(--color-surface);
+  background-color: var(--color-neutral-100);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   max-height: 400px;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: var(--z-index-dropdown);
 }
 
 .loading-state {
@@ -287,9 +287,10 @@ onUnmounted(() => {
   right: 0;
   margin-top: var(--spacing-xs);
   padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--color-error-light);
+  background-color: var(--color-neutral-100);
   color: var(--color-error);
-  border-radius: 3px;
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
 }
 

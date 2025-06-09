@@ -2,6 +2,7 @@
 import BackButton from './components/BackButton.vue'
 import Header from './components/Header.vue'
 import PeriodGrid from './components/PeriodGrid.vue'
+import Toast from './components/Toast.vue'
 import { ref, onMounted } from 'vue'
 import { WikidataQueryService, StoryService } from './services'
 import type { Period } from './types/geological'
@@ -16,6 +17,7 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const currentLanguage = ref('fr')
 const selectedLanguage = ref('fr')
+const toast = ref<InstanceType<typeof Toast> | null>(null)
 
 const handlePeriodClick = async (period: Period) => {
   if (currentPeriod.value) {
@@ -108,6 +110,14 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+// Exposer le toast pour qu'il soit accessible globalement
+const showToast = (message: string, type: 'info' | 'success' | 'error' = 'info') => {
+  toast.value?.show(message, type)
+}
+
+// Exposer la fonction showToast globalement
+window.showToast = showToast
 </script>
 
 <template>
@@ -125,6 +135,7 @@ onMounted(async () => {
         @go-back="goBack"
       />
     </main>
+    <Toast ref="toast" />
   </div>
 </template>
 
