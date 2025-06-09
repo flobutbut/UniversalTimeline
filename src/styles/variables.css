@@ -42,6 +42,7 @@
   --color-neutral-900: #212121;
   --color-background: var(--color-neutral-100);
   --color-surface: var(--color-neutral-0);
+  --color-surface-hover: var(--color-neutral-100);
 
   /* Neutral Colors - Light Theme */
   --color-neutral-50: #f8fafc;

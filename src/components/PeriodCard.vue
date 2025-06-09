@@ -143,7 +143,6 @@ const handleClick = () => {
 
 .period-card:hover .main-container {
   background: var(--color-surface-hover);
-  box-shadow: var(--shadow-sm);
   transform: translateY(-4px);
 }
 
