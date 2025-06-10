@@ -71,7 +71,7 @@ onMounted(async () => {
 
 <style scoped>
 .database-view {
-  padding: 1rem;
+  padding: var(--spacing-md);
   height: 100%;
 }
 
@@ -80,36 +80,38 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   height: 100%;
-  font-size: 1.2rem;
+  font-size: var(--font-size-lg);
 }
 
 .error {
-  color: var(--error-color);
+  color: var(--color-error);
 }
 
 .columns {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
   height: 100%;
 }
 
 .column {
-  background: var(--background-secondary);
-  border-radius: 8px;
-  padding: 1rem;
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
   overflow-y: auto;
 }
 
 .column h2 {
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--border-color);
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--color-border);
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 </style> 

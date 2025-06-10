@@ -36,12 +36,11 @@ const handleEdit = () => {
 
 <style scoped>
 .database-card {
-  background: var(--color-surface);
-  border-radius: var(--border-radius-md);
+  background: var(--color-neutral-0);
+  border-radius: var(--radius-md);
   padding: var(--spacing-md);
-  margin-bottom: var(--spacing-sm);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow var(--transition-fast);
 }
 
 .database-card:hover {
@@ -52,12 +51,11 @@ const handleEdit = () => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-sm);
 }
 
 .card-header h3 {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   color: var(--color-text);
 }
 
@@ -70,7 +68,7 @@ const handleEdit = () => {
 .date {
   flex: 1 1 auto;
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--color-text-light);
 }
 
 .action-button {
@@ -99,7 +97,7 @@ const handleEdit = () => {
   background: var(--color-primary-light);
   color: var(--color-primary);
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--radius-sm);
   font-size: var(--font-size-sm);
 }
 
