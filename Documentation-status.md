@@ -269,3 +269,47 @@
 - [ ] Ajouter des tests d'intégration pour vérifier l'affichage
 - [ ] Vérifier la cohérence sur tous les types de dates
 - [ ] Optimiser les performances du formatage 
+
+## Fonctionnalités Implémentées ✅
+
+### Vue Timeline
+- Affichage de la timeline avec les événements
+- Navigation temporelle
+- Filtrage par catégories
+- Recherche Wikidata
+- Sauvegarde des éléments
+
+### Vue Base de Données
+- Affichage en trois colonnes (Périodes, Événements, Stories)
+- Cartes d'information avec titre, date et catégories
+- Bouton d'édition pour chaque élément
+- Navigation entre les vues
+- Design responsive
+
+## En Cours de Développement 🚧
+
+### Vue Base de Données
+- Implémentation de la fonctionnalité d'édition
+- Amélioration de la gestion des catégories
+- Optimisation des performances pour de grandes quantités de données
+
+## À Faire 📝
+
+### Général
+- Tests unitaires et d'intégration
+- Documentation utilisateur
+- Optimisation des performances
+- Gestion des erreurs et des cas limites
+
+### Vue Base de Données
+- Filtrage avancé
+- Tri des éléments
+- Export des données
+- Gestion des conflits de données
+
+## Problèmes Connus ⚠️
+
+### Vue Base de Données
+- Le bouton d'édition n'a pas encore de fonctionnalité implémentée
+- Les catégories ne sont pas encore cliquables pour le filtrage
+- Pas de pagination pour de grandes quantités de données 

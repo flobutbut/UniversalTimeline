@@ -528,3 +528,43 @@ Le système affiche les dates de manière cohérente selon leur type :
 - Les durées sont calculées précisément pour les périodes
 - Le temps écoulé est toujours calculé par rapport à aujourd'hui
 - Les lieux sont indiqués quand ils sont disponibles 
+
+## Vue Base de Données
+
+### Objectif
+La vue base de données permet d'afficher et de gérer les données historiques de manière organisée, avec une séparation claire entre les périodes, les événements et les stories.
+
+### Fonctionnalités
+
+#### Affichage des Données
+- Organisation en trois colonnes distinctes :
+  - Périodes : périodes historiques avec dates de début et fin
+  - Événements : événements ponctuels avec date unique
+  - Stories : récits historiques sans date spécifique
+
+#### Cartes d'Information
+- Chaque élément est affiché dans une carte contenant :
+  - Titre de l'élément
+  - Date(s) associée(s)
+  - Catégories sous forme de tags
+  - Bouton d'édition
+
+#### Navigation
+- Accès via le bouton "Base de données" dans le header
+- Possibilité de basculer entre la vue timeline et la vue base de données
+
+#### Actions
+- Édition des éléments via le bouton "Edit"
+- Affichage des catégories pour une meilleure organisation
+- Gestion des dates selon le type d'élément
+
+### Interface Utilisateur
+- Design moderne et épuré
+- Responsive pour tous les écrans
+- Animations subtiles pour une meilleure expérience utilisateur
+- Support du thème sombre/clair
+
+### Intégration
+- Utilisation des données Wikidata
+- Synchronisation avec la vue timeline
+- Gestion cohérente des catégories 

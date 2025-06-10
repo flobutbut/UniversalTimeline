@@ -375,3 +375,53 @@ Le formatage pour l'affichage est géré par la méthode `formatForSearch` qui :
    - Pour les personnes : l'âge
    - Pour les périodes : la durée
    - Pour les événements : la date simple
+
+## Architecture du Projet
+
+### Structure des Composants
+- `App.vue` : Composant racine
+  - `Header.vue` : Navigation et recherche
+  - `TimelineView.vue` : Vue principale de la timeline
+  - `DatabaseView.vue` : Vue de la base de données
+    - `DatabaseCard.vue` : Composant de carte pour afficher les éléments
+  - `SearchResults.vue` : Résultats de recherche
+
+### Services
+- `WikidataSearchService.ts` : Gestion des recherches Wikidata
+- `DatabaseViewService.ts` : Gestion des données de la vue base de données
+
+### Types
+- `database.ts` : Types pour les données de la base
+  - `Period` : Période historique
+  - `Event` : Événement historique
+  - `Story` : Histoire
+  - `Category` : Catégorie
+
+## Composants Principaux
+
+### DatabaseView.vue
+- Affiche les données en trois colonnes : Périodes, Événements, Stories
+- Utilise le service DatabaseViewService pour la gestion des données
+- Responsive avec grid layout
+
+### DatabaseCard.vue
+- Composant réutilisable pour afficher les éléments
+- Propriétés :
+  - `type` : 'period' | 'event' | 'story'
+  - `title` : Titre de l'élément
+  - `date` : Date (optionnelle)
+  - `categories` : Liste des catégories
+- Événements :
+  - `edit` : Émis lors du clic sur le bouton d'édition
+
+## Styles
+- Utilisation de variables CSS pour la cohérence
+- Design responsive
+- Animations subtiles pour l'interaction
+- Thème sombre/clair supporté
+
+## État du Projet
+- Vue base de données implémentée
+- Navigation entre les vues fonctionnelle
+- Système de recherche Wikidata intégré
+- Gestion des catégories en place
