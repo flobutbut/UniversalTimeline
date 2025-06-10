@@ -1,6 +1,6 @@
 import { ref } from 'vue';
-import type { Period, Event, Story } from '../types';
 import { DatabaseQueryService } from './DatabaseQueryService';
+import type { Period, Event, Story } from '../types/database';
 
 export class DatabaseViewService {
   private static instance: DatabaseViewService;
@@ -9,6 +9,7 @@ export class DatabaseViewService {
   private stories = ref<Story[]>([]);
   private loading = ref(false);
   private error = ref<string | null>(null);
+  private databaseQueryService = DatabaseQueryService.getInstance();
 
   private constructor() {}
 
@@ -19,44 +20,50 @@ export class DatabaseViewService {
     return DatabaseViewService.instance;
   }
 
-  public async loadData() {
+  public getPeriods() {
+    return this.periods.value;
+  }
+
+  public getEvents() {
+    return this.events.value;
+  }
+
+  public getStories() {
+    return this.stories.value;
+  }
+
+  public getLoading() {
+    return this.loading.value;
+  }
+
+  public getError() {
+    return this.error.value;
+  }
+
+  public async loadData(): Promise<void> {
     this.loading.value = true;
     this.error.value = null;
 
     try {
+      console.log('[DatabaseViewService] Début du chargement des données');
       const [periodsData, eventsData, storiesData] = await Promise.all([
-        DatabaseQueryService.getInstance().getAllPeriods(),
-        DatabaseQueryService.getInstance().getAllEvents(),
-        DatabaseQueryService.getInstance().getAllStories()
+        this.databaseQueryService.getAllPeriods(),
+        this.databaseQueryService.getAllEvents(),
+        this.databaseQueryService.getAllStories()
       ]);
+
+      console.log('[DatabaseViewService] Périodes chargées:', periodsData.length);
+      console.log('[DatabaseViewService] Premier événement chargé:', JSON.stringify(eventsData[0], null, 2));
+      console.log('[DatabaseViewService] Stories chargées:', storiesData.length);
 
       this.periods.value = periodsData;
       this.events.value = eventsData;
       this.stories.value = storiesData;
-    } catch (err) {
-      this.error.value = err instanceof Error ? err.message : 'Une erreur est survenue';
+    } catch (error) {
+      console.error('[DatabaseViewService] Erreur lors du chargement des données:', error);
+      throw error;
     } finally {
       this.loading.value = false;
     }
-  }
-
-  public getPeriods() {
-    return this.periods;
-  }
-
-  public getEvents() {
-    return this.events;
-  }
-
-  public getStories() {
-    return this.stories;
-  }
-
-  public getLoading() {
-    return this.loading;
-  }
-
-  public getError() {
-    return this.error;
   }
 } 

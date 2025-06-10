@@ -1,9 +1,8 @@
 <template>
   <div class="database-card" :class="{ 'is-period': type === 'period', 'is-event': type === 'event', 'is-story': type === 'story' }">
     <div class="card-header">
-      <h3>{{ title }}</h3>
-      <div class="card-row">
-        <span v-if="date" class="date">{{ date }}</span>
+      <div class="title-row">
+        <h3>{{ title }}</h3>
         <button class="action-button" @click.stop="handleEdit">Edit</button>
       </div>
     </div>
@@ -16,18 +15,17 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import type { Category } from '../types/database';
 
-const props = defineProps<{
+interface Props {
   type: 'period' | 'event' | 'story';
   title: string;
-  date?: string;
-  categories?: Category[];
-}>();
+  categories: Category[];
+}
 
-const emit = defineEmits<{
-  (e: 'edit'): void
-}>();
+const props = defineProps<Props>();
+const emit = defineEmits(['edit']);
 
 const handleEdit = () => {
   emit('edit');
@@ -53,6 +51,13 @@ const handleEdit = () => {
   gap: var(--spacing-xs);
 }
 
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
 .card-header h3 {
   margin: 0;
   font-size: var(--font-size-base);
@@ -63,12 +68,7 @@ const handleEdit = () => {
   display: flex;
   align-items: center;
   width: 100%;
-}
-
-.date {
-  flex: 1 1 auto;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  justify-content: flex-end;
 }
 
 .action-button {

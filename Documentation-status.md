@@ -313,3 +313,20 @@
 - Le bouton d'édition n'a pas encore de fonctionnalité implémentée
 - Les catégories ne sont pas encore cliquables pour le filtrage
 - Pas de pagination pour de grandes quantités de données 
+
+## Corrections récentes
+
+### 2024-04-04
+- Correction du problème d'affichage des données dans DatabaseView
+  - Modification des getters dans DatabaseViewService pour retourner les valeurs des refs
+  - Ajout du formatage des données dans DatabaseQueryService
+  - Mise à jour des refs locales dans DatabaseView après le chargement
+  - Documentation des bonnes pratiques pour la gestion des données
+
+### Problèmes connus
+- Aucun problème majeur connu actuellement
+
+### Améliorations prévues
+- Ajout de tests unitaires pour les services
+- Amélioration de la gestion des erreurs
+- Optimisation des performances de chargement des données 

@@ -425,3 +425,102 @@ Le formatage pour l'affichage est géré par la méthode `formatForSearch` qui :
 - Navigation entre les vues fonctionnelle
 - Système de recherche Wikidata intégré
 - Gestion des catégories en place
+
+## Gestion des données
+
+### Services
+
+#### DatabaseQueryService
+- Responsable de la communication avec l'API
+- Formate les données reçues de l'API selon les types définis
+- Gère les erreurs et le logging des requêtes
+- Retourne les données formatées prêtes à être utilisées par les composants
+
+#### DatabaseViewService
+- Singleton qui gère l'état global des données
+- Utilise des refs Vue pour stocker les données
+- Les getters retournent les valeurs des refs (`.value`) et non les refs elles-mêmes
+- Charge les données via DatabaseQueryService
+- Met à jour les refs avec les données formatées
+
+### Composants
+
+#### DatabaseView
+- Utilise DatabaseViewService pour charger les données
+- Définit des refs locales pour stocker les données
+- Met à jour les refs locales avec les données du service après le chargement
+- Affiche les données via des composants DatabaseCard
+
+### Format des données
+
+#### Événements (Event)
+```typescript
+{
+  id: string;
+  label: {
+    fr: string;
+    en: string;
+  };
+  date: string;
+  description?: {
+    fr: string;
+    en: string;
+  };
+  categories: Category[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+#### Périodes (Period)
+```typescript
+{
+  id: string;
+  label: {
+    fr: string;
+    en: string;
+  };
+  description?: {
+    fr: string;
+    en: string;
+  };
+  startDate: string;
+  endDate: string;
+  parentId: string | null;
+  temporalLocation: string;
+  categories: Category[];
+  children: Period[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+#### Stories
+```typescript
+{
+  id: number;
+  title: {
+    fr: string;
+    en: string;
+  };
+  description?: {
+    fr: string;
+    en: string;
+  };
+  author: string;
+  isPublic: boolean;
+  categories: Category[];
+  periods: Period[];
+  events: Event[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Bonnes pratiques
+1. Toujours formater les données reçues de l'API selon les types définis
+2. Utiliser des refs Vue pour la réactivité
+3. Retourner les valeurs des refs (`.value`) et non les refs elles-mêmes
+4. Mettre à jour les refs locales après le chargement des données
+5. Utiliser des types stricts pour éviter les erreurs de format
+6. Logger les données à chaque étape pour faciliter le débogage

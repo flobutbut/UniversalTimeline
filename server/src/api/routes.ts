@@ -133,7 +133,12 @@ router.get('/events', async (req, res) => {
         e.id,
         e.wikidata_id,
         e.label_fr,
+        e.label_en,
         e.description_fr,
+        e.description_en,
+        e.created_at,
+        e.updated_at,
+        c.id as category_id,
         c.label_fr as category_label
       FROM events.events e
       LEFT JOIN categories.event_categories ec ON e.id = ec.event_id
@@ -143,6 +148,7 @@ router.get('/events', async (req, res) => {
 
     const result = await dbQuery(sqlQuery);
     console.log(`[API] ${result.rows.length} événements trouvés dans la base de données`);
+    console.log('[API] Premier événement brut de la base de données:', JSON.stringify(result.rows[0], null, 2));
     
     // Récupérer les dates depuis Wikidata pour chaque événement
     console.log('[API] Début de la récupération des dates depuis Wikidata');
@@ -152,11 +158,24 @@ router.get('/events', async (req, res) => {
         const date = await getEventDateFromWikidata(row.wikidata_id);
         const event = {
           id: row.id,
-          label: row.label_fr,
+          label: {
+            fr: row.label_fr,
+            en: row.label_en || row.label_fr
+          },
           date: date || 'Date inconnue',
-          description: row.description_fr,
-          category: row.category_label,
-          source: 'Wikidata'
+          description: row.description_fr ? {
+            fr: row.description_fr,
+            en: row.description_en || row.description_fr
+          } : undefined,
+          categories: row.category_label ? [{
+            id: row.category_id,
+            label: {
+              fr: row.category_label,
+              en: row.category_label
+            }
+          }] : [],
+          createdAt: row.created_at,
+          updatedAt: row.updated_at
         };
         console.log(`[API] Événement traité :`, event);
         return event;
@@ -217,96 +236,5 @@ router.get('/categories', async (req, res) => {
     res.status(500).json({ error: 'Erreur lors de la récupération des catégories' });
   }
 });
-
-interface TimelineEvent {
-  id: string;
-  label: string;
-  date: string;
-  description: string;
-  category: string;
-  source: string;
-}
-
-const eventIds: Record<string, string> = {
-  'EVT_BIGBANG': 'Big Bang',
-  'EVT_FIRST_STARS': 'Formation des premières étoiles',
-  'EVT_GLOB_CLUSTERS': 'Formation des amas globulaires',
-  'EVT_SOLAR_NEB': 'Formation de la nébuleuse solaire',
-  'EVT_SUN_FORM': 'Formation du Soleil',
-  'EVT_EARTH_FORM': 'Formation de la Terre',
-  'EVT_MOON_FORM': 'Formation de la Lune',
-  'EVT_OCEAN_FORM': 'Formation des océans',
-  'EVT_FIRST_MIN': 'Premiers minéraux connus (zircons)',
-  'EVT_FIRST_LIFE': 'Premières traces de vie',
-  'EVT_CYANOBACT': 'Formation des premières cyanobactéries',
-  'EVT_GOE': 'Apparition de l\'oxygène atmosphérique (Grande Oxydation)',
-  'EVT_EUKAR': 'Apparition des premiers eucaryotes',
-  'EVT_HURON_GLAC': 'Glaciation huronienne',
-  'EVT_COLUMBIA': 'Formation du supercontinent Columbia',
-  'EVT_STURT_GLAC': 'Glaciation sturtienne',
-  'EVT_EDIACARA': 'Faune d\'Édiacara',
-  'EVT_CAMBRIAN': 'Explosion cambrienne',
-  'EVT_FIRST_FISH': 'Premiers poissons',
-  'EVT_LAND_PLANTS': 'Colonisation des terres par les plantes',
-  'EVT_INSECTS': 'Apparition des insectes',
-  'EVT_AMPHIBIANS': 'Apparition des premiers amphibiens',
-  'EVT_REPTILES': 'Apparition des reptiles',
-  'EVT_PANGAEA': 'Formation de la Pangée',
-  'EVT_DINOSAURS': 'Apparition des dinosaures',
-  'EVT_MAMMALS': 'Apparition des premiers mammifères',
-  'EVT_PT_EXT': 'Extinction Permien-Trias',
-  'EVT_KT_EXT': 'Extinction Crétacé-Tertiaire',
-  'EVT_PRIMATES': 'Apparition des premiers primates',
-  'EVT_HOMINIDS': 'Apparition des premiers hominidés',
-  'EVT_HOMO': 'Apparition du genre Homo',
-  'EVT_FIRE_USE': 'Première utilisation contrôlée du feu',
-  'EVT_SAPIENS': 'Apparition d\'Homo sapiens',
-  'EVT_CAVE_ART': 'Début de l\'art pariétal',
-  'EVT_LAST_GLAC': 'Fin de la dernière période glaciaire',
-  'EVT_AGRICULTURE': 'Début de l\'agriculture',
-  'EVT_WRITING': 'Invention de l\'écriture',
-  'EVT_PYRAMIDS': 'Construction des pyramides de Gizeh',
-  'EVT_BUDDHA': 'Naissance de Bouddha',
-  'EVT_ROME': 'Fondation de Rome',
-  'EVT_JESUS': 'Naissance de Jésus-Christ',
-  'EVT_HEGIRA': 'Début de l\'Hégire',
-  'EVT_ROME_FALL': 'Chute de l\'Empire romain d\'Occident',
-  'EVT_FR_REV': 'Révolution française',
-  'EVT_IND_REV': 'Révolution industrielle',
-  'EVT_WW1': 'Première Guerre mondiale',
-  'EVT_WW2': 'Seconde Guerre mondiale',
-  'EVT_MOON_LAND': 'Premier pas sur la Lune'
-};
-
-async function getEvents(): Promise<TimelineEvent[]> {
-  const events: TimelineEvent[] = [];
-  
-  for (const [id, label] of Object.entries(eventIds)) {
-    try {
-      const wikidataId = id.split('_')[1];
-      const date = await getEventDateFromWikidata(wikidataId);
-      events.push({
-        id,
-        label,
-        date: date || 'Date inconnue',
-        description: 'À venir',
-        category: 'À venir',
-        source: 'Wikidata'
-      });
-    } catch (error) {
-      console.error(`[API] Erreur lors de la récupération de l'événement ${id}:`, error);
-      events.push({
-        id,
-        label,
-        date: 'Date inconnue',
-        description: 'À venir',
-        category: 'À venir',
-        source: 'Wikidata'
-      });
-    }
-  }
-
-  return events;
-}
 
 export default router; 

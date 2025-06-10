@@ -568,3 +568,27 @@ La vue base de données permet d'afficher et de gérer les données historiques 
 - Utilisation des données Wikidata
 - Synchronisation avec la vue timeline
 - Gestion cohérente des catégories 
+
+## Flux de données
+
+### Chargement des données
+1. L'utilisateur accède à la page DatabaseView
+2. Le composant DatabaseView est monté
+3. DatabaseViewService est instancié (singleton)
+4. DatabaseViewService charge les données via DatabaseQueryService
+5. DatabaseQueryService fait les requêtes à l'API
+6. Les données reçues sont formatées selon les types définis
+7. Les données formatées sont stockées dans les refs de DatabaseViewService
+8. DatabaseView met à jour ses refs locales avec les données du service
+9. Les données sont affichées via les composants DatabaseCard
+
+### Format des données
+- Tous les textes sont multilingues (fr/en)
+- Les dates sont au format ISO 8601
+- Les catégories sont des objets avec id et label
+- Les relations (périodes, événements, stories) sont gérées via des IDs
+
+### Gestion des erreurs
+- Les erreurs de l'API sont capturées et loggées
+- Les erreurs de formatage sont gérées avec des valeurs par défaut
+- Les erreurs sont affichées à l'utilisateur via le composant DatabaseView 
