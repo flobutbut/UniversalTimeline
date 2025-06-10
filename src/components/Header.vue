@@ -4,6 +4,9 @@
       <h1 class="header-title">Timeline Géologique</h1>
       <SearchBar class="header-search" />
       <div class="header-right">
+        <button class="database-button" @click="$emit('toggle-view')">
+          {{ isDatabaseView ? 'Timeline' : 'Base de données' }}
+        </button>
         <ThemeToggle />
       </div>
     </div>
@@ -13,6 +16,14 @@
 <script setup lang="ts">
 import SearchBar from './SearchBar.vue';
 import ThemeToggle from './ThemeToggle.vue';
+
+defineProps<{
+  isDatabaseView: boolean
+}>();
+
+defineEmits<{
+  (e: 'toggle-view'): void
+}>();
 </script>
 
 <style scoped>
@@ -45,6 +56,11 @@ import ThemeToggle from './ThemeToggle.vue';
   margin: 0;
   white-space: nowrap;
   line-height: var(--line-height-tight);
+  text-decoration: none;
+}
+
+.header-title:hover {
+  color: var(--color-primary);
 }
 
 .header-right {
@@ -57,6 +73,23 @@ import ThemeToggle from './ThemeToggle.vue';
   max-width: 400px;
   width: 100%;
   flex: 1;
+}
+
+.database-button {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+}
+
+.database-button:hover {
+  background-color: var(--color-primary-dark);
 }
 
 @media (max-width: var(--breakpoint-md)) {
@@ -73,6 +106,11 @@ import ThemeToggle from './ThemeToggle.vue';
 
   .header-right {
     margin-left: auto;
+  }
+
+  .database-button {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
   }
 }
 </style> 

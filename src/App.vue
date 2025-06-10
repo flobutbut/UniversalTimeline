@@ -1,12 +1,24 @@
 <script setup lang="ts">
-import BackButton from './components/BackButton.vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import Header from './components/Header.vue'
 import PeriodGrid from './components/PeriodGrid.vue'
+import DatabaseView from './components/DatabaseView.vue'
 import Toast from './components/Toast.vue'
-import { ref, onMounted } from 'vue'
 import { WikidataQueryService, StoryService } from './services'
 import type { Period } from './types/geological'
-import { MAIN_STORY } from './types/geological'
+
+const route = useRoute()
+const isDatabaseView = ref(false)
+
+// Mettre à jour isDatabaseView quand la route change
+watch(() => route.path, (newPath) => {
+  isDatabaseView.value = newPath === '/database'
+}, { immediate: true })
+
+const toggleView = () => {
+  isDatabaseView.value = !isDatabaseView.value
+}
 
 const timelineService = WikidataQueryService.getInstance()
 const storyService = StoryService.getInstance()
@@ -15,8 +27,6 @@ const currentPeriod = ref<Period | null>(null)
 const displayedPeriods = ref<Period[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
-const currentLanguage = ref('fr')
-const selectedLanguage = ref('fr')
 const toast = ref<InstanceType<typeof Toast> | null>(null)
 
 const handlePeriodClick = async (period: Period) => {
@@ -123,10 +133,12 @@ window.showToast = showToast
 <template>
   <div class="app">
     <Header 
-      v-model="selectedLanguage"
+      :is-database-view="isDatabaseView"
+      @toggle-view="toggleView"
     />
     <main class="main-content">
       <PeriodGrid 
+        v-if="!isDatabaseView"
         :periods="displayedPeriods"
         :loading="loading"
         :parent-period="parentStack.length > 0 ? parentStack[parentStack.length - 1] : null"
@@ -134,6 +146,7 @@ window.showToast = showToast
         @period-click="handlePeriodClick"
         @go-back="goBack"
       />
+      <DatabaseView v-else />
     </main>
     <Toast ref="toast" />
   </div>

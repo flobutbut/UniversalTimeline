@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Period, Event } from '../types/geological';
+import type { Period, Event, Story } from '../types/database';
 
 const API_BASE_URL = '/api';
 
@@ -73,6 +73,28 @@ export class DatabaseQueryService {
     } catch (error) {
       console.error('[DatabaseQueryService] Erreur lors de la récupération des événements:', error);
       throw new Error('Erreur lors de la récupération des événements');
+    }
+  }
+
+  public async getAllPeriods(): Promise<Period[]> {
+    try {
+      console.log('[DatabaseQueryService] Chargement de toutes les périodes');
+      const response = await axios.get(`${API_BASE_URL}/periods`);
+      return response.data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la récupération des périodes:', error);
+      throw new Error('Erreur lors de la récupération des périodes');
+    }
+  }
+
+  public async getAllStories(): Promise<Story[]> {
+    try {
+      console.log('[DatabaseQueryService] Chargement de toutes les stories');
+      const response = await axios.get(`${API_BASE_URL}/stories`);
+      return response.data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la récupération des stories:', error);
+      throw new Error('Erreur lors de la récupération des stories');
     }
   }
 } 
