@@ -330,3 +330,6 @@
 - Ajout de tests unitaires pour les services
 - Amélioration de la gestion des erreurs
 - Optimisation des performances de chargement des données 
+
+- [x] Auto-remplissage Wikidata pour les périodes
+- [x] Auto-remplissage Wikidata pour les événements (titre, description, date) 

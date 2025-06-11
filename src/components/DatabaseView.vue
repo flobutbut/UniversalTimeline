@@ -10,7 +10,7 @@
       <div class="column">
         <div class="column-header">
           <h2>Périodes</h2>
-          <button class="action-button" @click="handleAddPeriod">Add</button>
+          <button class="action-button" @click="openAddModal('period')">Add</button>
         </div>
         <div class="content">
           <DatabaseCard
@@ -21,14 +21,14 @@
             :date="period?.startDate"
             :endDate="period?.endDate"
             :categories="period.categories"
-            @edit="handleEditPeriod(period)"
+            @edit="openEditModal('period', period)"
           />
         </div>
       </div>
       <div class="column">
         <div class="column-header">
           <h2>Événements</h2>
-          <button class="action-button" @click="handleAddEvent">Add</button>
+          <button class="action-button" @click="openAddModal('event')">Add</button>
         </div>
         <div class="content">
           <DatabaseCard
@@ -38,7 +38,7 @@
             :title="event.label.fr"
             :date="event?.date"
             :categories="event.categories"
-            @edit="handleEditEvent(event)"
+            @edit="openEditModal('event', event)"
           />
         </div>
       </div>
@@ -59,6 +59,15 @@
         </div>
       </div>
     </div>
+    <EditModal
+      v-if="showModal"
+      :show="showModal"
+      :type="modalType"
+      :isEdit="modalEdit"
+      :data="modalData"
+      @close="closeModal"
+      @submit="handleModalSubmit"
+    />
   </div>
 </template>
 
@@ -66,14 +75,67 @@
 import { onMounted, ref } from 'vue';
 import { DatabaseViewService } from '../services/DatabaseViewService';
 import DatabaseCard from './DatabaseCard.vue';
+import EditModal from './EditModal.vue';
 import type { Event, Period, Story } from '../types/database';
+import { DatabaseQueryService } from '../services/DatabaseQueryService';
 
 const databaseService = DatabaseViewService.getInstance();
+const queryService = DatabaseQueryService.getInstance();
 const periods = ref<Period[]>([]);
 const events = ref<Event[]>([]);
 const stories = ref<Story[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
+
+// Modale
+const showModal = ref(false);
+const modalType = ref<'period' | 'event'>('period');
+const modalEdit = ref(false);
+const modalData = ref<any>(null);
+
+function openAddModal(type: 'period' | 'event') {
+  modalType.value = type;
+  modalEdit.value = false;
+  modalData.value = null;
+  showModal.value = true;
+}
+
+function openEditModal(type: 'period' | 'event', data: any) {
+  modalType.value = type;
+  modalEdit.value = true;
+  modalData.value = data;
+  showModal.value = true;
+}
+
+function closeModal() {
+  showModal.value = false;
+}
+
+async function handleModalSubmit(formData: any) {
+  try {
+    if (modalType.value === 'period') {
+      if (modalEdit.value && modalData.value?.id) {
+        await queryService.updatePeriod(modalData.value.id, formData);
+      } else {
+        await queryService.createPeriod(formData);
+      }
+    } else if (modalType.value === 'event') {
+      if (modalEdit.value && modalData.value?.id) {
+        await queryService.updateEvent(modalData.value.id, formData);
+      } else {
+        await queryService.createEvent(formData);
+      }
+    }
+    await databaseService.loadData();
+    periods.value = databaseService.getPeriods();
+    events.value = databaseService.getEvents();
+    stories.value = databaseService.getStories();
+    showModal.value = false;
+  } catch (error) {
+    // Les toasts d'erreur sont déjà gérés dans le service
+    console.error('[DatabaseView] Erreur lors de la soumission du formulaire', error);
+  }
+}
 
 onMounted(async () => {
   try {
@@ -112,22 +174,6 @@ const handleAddStory = () => {
 
 const handleEditStory = (story: Story) => {
   console.log('[DatabaseView] Édition de la story:', story);
-};
-
-const handleEditEvent = (event: Event) => {
-  console.log('[DatabaseView] Édition de l\'événement:', event);
-};
-
-const handleEditPeriod = (period: Period) => {
-  console.log('[DatabaseView] Édition de la période:', period);
-};
-
-const handleAddPeriod = () => {
-  console.log('[DatabaseView] Ajout d\'une nouvelle période');
-};
-
-const handleAddEvent = () => {
-  console.log('[DatabaseView] Ajout d\'un nouvel événement');
 };
 </script>
 

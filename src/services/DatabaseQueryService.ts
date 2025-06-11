@@ -189,4 +189,110 @@ export class DatabaseQueryService {
       throw error;
     }
   }
+
+  // Création d'une période
+  public async createPeriod(data: any): Promise<any> {
+    try {
+      const payload = {
+        id: data.qid,
+        wikidata_id: data.qid,
+        label: { fr: data.title.fr, en: data.title.en },
+        description: { fr: data.description.fr, en: data.description.en },
+        start_date: data.startDate,
+        end_date: data.endDate,
+        parent_id: data.parentId,
+        temporal_location: data.temporalLocation,
+      };
+      const response = await axios.post(`${API_BASE_URL}/periods`, payload);
+      window.showToast('Période créée avec succès', 'success');
+      return response.data;
+    } catch (error: any) {
+      if (error?.response?.data?.code === '23505' || (error?.response?.data?.message && error.response.data.message.includes('duplicate'))) {
+        window.showToast('Une période avec ce Q-id existe déjà dans la base.', 'error');
+      } else {
+        window.showToast('Erreur lors de la création de la période', 'error');
+      }
+      throw error;
+    }
+  }
+
+  // Mise à jour d'une période
+  public async updatePeriod(id: string, data: any): Promise<any> {
+    try {
+      const payload = {
+        wikidata_id: data.qid,
+        label: { fr: data.title.fr, en: data.title.en },
+        description: { fr: data.description.fr, en: data.description.en },
+        start_date: data.startDate,
+        end_date: data.endDate,
+        parent_id: data.parentId,
+        temporal_location: data.temporalLocation,
+        // TODO: gérer les catégories si besoin
+      };
+      const response = await axios.put(`${API_BASE_URL}/periods/${id}`, payload);
+      window.showToast('Période mise à jour avec succès', 'success');
+      return response.data;
+    } catch (error) {
+      window.showToast('Erreur lors de la mise à jour de la période', 'error');
+      throw error;
+    }
+  }
+
+  // Création d'un événement
+  public async createEvent(data: any): Promise<any> {
+    try {
+      const payload = {
+        id: data.qid,
+        wikidata_id: data.qid,
+        label: { fr: data.title.fr, en: data.title.en },
+        description: { fr: data.description.fr, en: data.description.en },
+        date: data.date,
+      };
+      const response = await axios.post(`${API_BASE_URL}/events`, payload);
+      window.showToast('Événement créé avec succès', 'success');
+      return response.data;
+    } catch (error: any) {
+      if (error?.response?.data?.code === '23505' || (error?.response?.data?.message && error.response.data.message.includes('duplicate'))) {
+        window.showToast('Un événement avec ce Q-id existe déjà dans la base.', 'error');
+      } else {
+        window.showToast('Erreur lors de la création de l\'événement', 'error');
+      }
+      throw error;
+    }
+  }
+
+  // Mise à jour d'un événement
+  public async updateEvent(id: string, data: any): Promise<any> {
+    try {
+      const payload = {
+        wikidata_id: data.qid,
+        label: { fr: data.title.fr, en: data.title.en },
+        description: { fr: data.description.fr, en: data.description.en },
+        date: data.date,
+        // TODO: gérer les catégories si besoin
+      };
+      const response = await axios.put(`${API_BASE_URL}/events/${id}`, payload);
+      window.showToast('Événement mis à jour avec succès', 'success');
+      return response.data;
+    } catch (error) {
+      window.showToast('Erreur lors de la mise à jour de l\'événement', 'error');
+      throw error;
+    }
+  }
+
+  // Vérifier si un événement existe par son Q-id
+  public async getEventById(qid: string): Promise<Event> {
+    try {
+      console.log(`[DatabaseQueryService] Vérification de l'existence de l'événement:`, qid);
+      const response = await axios.get(`${API_BASE_URL}/events/${qid}`);
+      console.log(`[DatabaseQueryService] Réponse de la base de données:`, response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error(`[DatabaseQueryService] Erreur lors de la vérification de l'événement:`, error);
+      if (error.response?.status === 404) {
+        throw new Error('Événement non trouvé');
+      }
+      throw error;
+    }
+  }
 } 

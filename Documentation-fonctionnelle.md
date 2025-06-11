@@ -592,3 +592,8 @@ La vue base de données permet d'afficher et de gérer les données historiques 
 - Les erreurs de l'API sont capturées et loggées
 - Les erreurs de formatage sont gérées avec des valeurs par défaut
 - Les erreurs sont affichées à l'utilisateur via le composant DatabaseView 
+
+### Auto-remplissage Wikidata pour les événements
+
+- Lors de la création ou l'édition d'un événement, la saisie d'un Q-id inexistant en base déclenche une tentative de récupération automatique des informations principales (titre, description, date) depuis Wikidata.
+- Un toast informe l'utilisateur du succès ou de l'échec de l'opération. 

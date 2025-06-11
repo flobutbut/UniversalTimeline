@@ -524,3 +524,13 @@ Le formatage pour l'affichage est géré par la méthode `formatForSearch` qui :
 4. Mettre à jour les refs locales après le chargement des données
 5. Utiliser des types stricts pour éviter les erreurs de format
 6. Logger les données à chaque étape pour faciliter le débogage
+
+## [2024-06-10] Auto-remplissage Wikidata pour les événements
+
+- Ajout de la méthode `loadEvent(eventId)` dans `WikidataQueryService` :
+  - Interroge Wikidata pour récupérer le label, la description et la date d'un événement à partir de son Q-id.
+- Dans `EditModal.vue`, si le type est "event" et que le Q-id n'existe pas en base, appel automatique à `wikidataService.loadEvent`.
+  - Pré-remplit les champs titre (fr/en), description (fr/en) et date si trouvés.
+  - Affiche un toast de succès ou d'erreur selon le résultat.
+
+Ce mécanisme fonctionne de façon similaire à celui déjà en place pour les périodes.
