@@ -8,7 +8,10 @@
     </div>
     <div v-else class="columns">
       <div class="column">
-        <h2>Périodes</h2>
+        <div class="column-header">
+          <h2>Périodes</h2>
+          <button class="action-button" @click="handleAddPeriod">Add</button>
+        </div>
         <div class="content">
           <DatabaseCard
             v-for="period in periods"
@@ -23,7 +26,10 @@
         </div>
       </div>
       <div class="column">
-        <h2>Événements</h2>
+        <div class="column-header">
+          <h2>Événements</h2>
+          <button class="action-button" @click="handleAddEvent">Add</button>
+        </div>
         <div class="content">
           <DatabaseCard
             v-for="event in events"
@@ -115,6 +121,14 @@ const handleEditEvent = (event: Event) => {
 const handleEditPeriod = (period: Period) => {
   console.log('[DatabaseView] Édition de la période:', period);
 };
+
+const handleAddPeriod = () => {
+  console.log('[DatabaseView] Ajout d\'une nouvelle période');
+};
+
+const handleAddEvent = () => {
+  console.log('[DatabaseView] Ajout d\'un nouvel événement');
+};
 </script>
 
 <style scoped>
@@ -152,7 +166,6 @@ const handleEditPeriod = (period: Period) => {
 .column h2 {
   margin-bottom: var(--spacing-sm);
   padding-bottom: var(--spacing-sm);
-  border-bottom: 2px solid var(--color-border);
   font-size: var(--font-size-lg);
   color: var(--color-text);
 }
@@ -170,6 +183,12 @@ const handleEditPeriod = (period: Period) => {
   margin-bottom: var(--spacing-sm);
   padding-bottom: var(--spacing-sm);
   border-bottom: 2px solid var(--color-border);
+}
+
+.column-header h2 {
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+  margin: 0;
 }
 
 .action-button {
