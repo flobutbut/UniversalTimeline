@@ -6,11 +6,6 @@
         <button class="action-button" @click.stop="handleEdit">Edit</button>
       </div>
     </div>
-    <div v-if="categories && categories.length > 0" class="card-categories">
-      <span v-for="category in categories" :key="category.id" class="category-tag">
-        {{ category.label.fr }}
-      </span>
-    </div>
   </div>
 </template>
 

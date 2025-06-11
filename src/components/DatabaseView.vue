@@ -60,13 +60,21 @@
       </div>
     </div>
     <EditModal
-      v-if="showModal"
-      :show="showModal"
-      :type="modalType"
-      :isEdit="modalEdit"
-      :data="modalData"
-      @close="closeModal"
-      @submit="handleModalSubmit"
+      v-if="showAddModal"
+      :isOpen="showAddModal"
+      :type="currentType"
+      mode="create"
+      @close="closeAddModal"
+      @save="handleSave"
+    />
+    <EditModal
+      v-if="showEditModal"
+      :isOpen="showEditModal"
+      :type="currentType"
+      mode="edit"
+      :data="currentItem"
+      @close="closeEditModal"
+      @save="handleSave"
     />
   </div>
 </template>
@@ -88,53 +96,47 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 
 // Modale
-const showModal = ref(false);
-const modalType = ref<'period' | 'event'>('period');
-const modalEdit = ref(false);
-const modalData = ref<any>(null);
+const showAddModal = ref(false);
+const showEditModal = ref(false);
+const currentType = ref<'period' | 'event'>('period');
+const currentItem = ref<any>(null);
 
 function openAddModal(type: 'period' | 'event') {
-  modalType.value = type;
-  modalEdit.value = false;
-  modalData.value = null;
-  showModal.value = true;
-}
-
-function openEditModal(type: 'period' | 'event', data: any) {
-  modalType.value = type;
-  modalEdit.value = true;
-  modalData.value = data;
-  showModal.value = true;
-}
-
-function closeModal() {
-  showModal.value = false;
-}
-
-async function handleModalSubmit(formData: any) {
-  try {
-    if (modalType.value === 'period') {
-      if (modalEdit.value && modalData.value?.id) {
-        await queryService.updatePeriod(modalData.value.id, formData);
-      } else {
-        await queryService.createPeriod(formData);
-      }
-    } else if (modalType.value === 'event') {
-      if (modalEdit.value && modalData.value?.id) {
-        await queryService.updateEvent(modalData.value.id, formData);
-      } else {
-        await queryService.createEvent(formData);
-      }
-    }
-    await databaseService.loadData();
-    periods.value = databaseService.getPeriods();
-    events.value = databaseService.getEvents();
-    stories.value = databaseService.getStories();
-    showModal.value = false;
-  } catch (error) {
-    // Les toasts d'erreur sont déjà gérés dans le service
-    console.error('[DatabaseView] Erreur lors de la soumission du formulaire', error);
+  // Fermer d'abord la modale d'édition si elle est ouverte
+  if (showEditModal.value) {
+    closeEditModal();
   }
+  currentType.value = type;
+  showAddModal.value = true;
+}
+
+function closeAddModal() {
+  showAddModal.value = false;
+  currentItem.value = null;
+}
+
+function openEditModal(type: 'period' | 'event', item: any) {
+  // Fermer d'abord la modale d'ajout si elle est ouverte
+  if (showAddModal.value) {
+    closeAddModal();
+  }
+  currentType.value = type;
+  currentItem.value = item;
+  showEditModal.value = true;
+}
+
+function closeEditModal() {
+  showEditModal.value = false;
+  currentItem.value = null;
+}
+
+async function handleSave() {
+  await databaseService.loadData();
+  periods.value = databaseService.getPeriods();
+  events.value = databaseService.getEvents();
+  stories.value = databaseService.getStories();
+  closeAddModal();
+  closeEditModal();
 }
 
 onMounted(async () => {

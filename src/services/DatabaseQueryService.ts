@@ -79,20 +79,21 @@ export class DatabaseQueryService {
       // Formater les données selon le type Event
       const formattedEvents = data.map((event: any) => ({
         id: event.id,
+        wikidata_id: event.wikidata_id,
         label: {
-          fr: event.label,
-          en: event.label_en || event.label
+          fr: event.label.fr || event.label_fr || event.label,
+          en: event.label.en || event.label_en || event.label_fr || event.label
         },
         date: event.date,
         description: event.description ? {
-          fr: event.description,
-          en: event.description_en || event.description
+          fr: event.description.fr || event.description_fr || event.description,
+          en: event.description.en || event.description_en || event.description_fr || event.description
         } : undefined,
-        categories: event.category ? [{
-          id: event.category,
+        categories: event.categories || event.category ? [{
+          id: event.category?.id || event.category_id,
           label: {
-            fr: event.category,
-            en: event.category
+            fr: event.category?.label?.fr || event.category_label || event.category,
+            en: event.category?.label?.en || event.category_label || event.category
           }
         }] : [],
         createdAt: new Date(event.created_at || Date.now()),
@@ -252,7 +253,9 @@ export class DatabaseQueryService {
       window.showToast('Événement créé avec succès', 'success');
       return response.data;
     } catch (error: any) {
-      if (error?.response?.data?.code === '23505' || (error?.response?.data?.message && error.response.data.message.includes('duplicate'))) {
+      if (error?.response?.status === 409 || 
+          error?.response?.data?.code === '23505' || 
+          (error?.response?.data?.message && error.response.data.message.includes('duplicate'))) {
         window.showToast('Un événement avec ce Q-id existe déjà dans la base.', 'error');
       } else {
         window.showToast('Erreur lors de la création de l\'événement', 'error');
@@ -284,15 +287,39 @@ export class DatabaseQueryService {
   public async getEventById(qid: string): Promise<Event> {
     try {
       console.log(`[DatabaseQueryService] Vérification de l'existence de l'événement:`, qid);
-      const response = await axios.get(`${API_BASE_URL}/events/${qid}`);
-      console.log(`[DatabaseQueryService] Réponse de la base de données:`, response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error(`[DatabaseQueryService] Erreur lors de la vérification de l'événement:`, error);
-      if (error.response?.status === 404) {
+      
+      // Validation du format du Q-id
+      if (!qid.match(/^Q\d+$/)) {
+        throw new Error('Format de Q-id invalide');
+      }
+
+      // Récupérer tous les événements et filtrer par wikidata_id
+      const response = await axios.get(`${API_BASE_URL}/events`);
+      const events = response.data;
+      const existingEvent = events.find((event: any) => event.wikidata_id === qid || event.id === qid);
+
+      if (!existingEvent) {
         throw new Error('Événement non trouvé');
       }
-      throw error;
+
+      console.log(`[DatabaseQueryService] Événement trouvé:`, existingEvent);
+      return existingEvent;
+    } catch (error: any) {
+      // Ne log que les erreurs non-404
+      if (error.message !== 'Événement non trouvé') {
+        console.error(`[DatabaseQueryService] Erreur lors de la vérification de l'événement:`, {
+          qid,
+          message: error.message
+        });
+      }
+
+      if (error.message === 'Format de Q-id invalide') {
+        throw error;
+      } else if (error.message === 'Événement non trouvé') {
+        throw error;
+      } else {
+        throw new Error(`Erreur lors de la vérification de l'événement: ${error.message}`);
+      }
     }
   }
 } 

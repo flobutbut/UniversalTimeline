@@ -5,6 +5,8 @@ import axios from 'axios';
 
 const router = express.Router();
 
+console.log('########################## BACKEND CODE ACTIF ##########################');
+
 // Fonction pour récupérer la date depuis Wikidata
 export async function getEventDateFromWikidata(wikidataId: string): Promise<string | null> {
   try {
@@ -117,7 +119,23 @@ router.get('/periods', async (req, res) => {
     `;
 
     const result = await dbQuery(sqlQuery);
-    res.json(result.rows);
+    // Correction : mapping explicite pour chaque période
+    const periods = result.rows.map((row: any) => ({
+      id: row.id,
+      wikidata_id: row.wikidata_id,
+      label_fr: row.label_fr,
+      label_en: row.label_en,
+      description_fr: row.description_fr,
+      description_en: row.description_en,
+      start_date: row.start_date,
+      end_date: row.end_date,
+      parent_id: row.parent_id,
+      temporal_location: row.temporal_location,
+      category_label: row.category_label,
+      created_at: row.created_at,
+      updated_at: row.updated_at
+    }));
+    res.json(periods);
   } catch (error) {
     console.error('Erreur lors de la récupération des périodes:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des périodes' });
@@ -131,7 +149,7 @@ router.get('/events', async (req, res) => {
     const sqlQuery = `
       SELECT 
         e.id,
-        e.wikidata_id,
+        e.wikidata_id AS wikidata_id,
         e.label_fr,
         e.label_en,
         e.description_fr,
@@ -147,6 +165,9 @@ router.get('/events', async (req, res) => {
     `;
 
     const result = await dbQuery(sqlQuery);
+    console.log('########################## DEBUG SQL EVENTS ##########################');
+    console.log(JSON.stringify(result.rows, null, 2));
+    console.log('#####################################################################');
     console.log(`[API] ${result.rows.length} événements trouvés dans la base de données`);
     console.log('[API] Premier événement brut de la base de données:', JSON.stringify(result.rows[0], null, 2));
     
@@ -158,6 +179,7 @@ router.get('/events', async (req, res) => {
         const date = await getEventDateFromWikidata(row.wikidata_id);
         const event = {
           id: row.id,
+          wikidata_id: row.wikidata_id,
           label: {
             fr: row.label_fr,
             en: row.label_en || row.label_fr
@@ -182,7 +204,9 @@ router.get('/events', async (req, res) => {
       })
     );
 
-    console.log('[API] Envoi de la réponse avec les événements');
+    console.log('########################## DEBUG OBJ EVENT ##########################');
+    console.log(JSON.stringify(eventsWithDates[0], null, 2));
+    console.log('#####################################################################');
     res.json(eventsWithDates);
   } catch (error) {
     console.error('[API] Erreur lors de la récupération des événements:', error);

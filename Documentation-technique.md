@@ -534,3 +534,16 @@ Le formatage pour l'affichage est géré par la méthode `formatForSearch` qui :
   - Affiche un toast de succès ou d'erreur selon le résultat.
 
 Ce mécanisme fonctionne de façon similaire à celui déjà en place pour les périodes.
+
+## [2024-06-10] Amélioration de la vérification d'existence des événements
+
+- Modification de la méthode de vérification d'existence des événements
+  - Utilisation de l'endpoint `/api/events` au lieu de `/api/events/{qid}`
+  - Filtrage des événements par `wikidata_id` côté client
+  - Élimination des erreurs 404 dans la console
+- Amélioration de la gestion des erreurs et validation des Q-ids
+  - Configuration d'Axios pour ignorer les erreurs 404 dans la console
+  - Logs uniquement pour les erreurs non-404
+- Logs plus détaillés pour le débogage
+- Messages d'erreur plus explicites pour l'utilisateur
+- Double validation du format Q-id (côté client et service)

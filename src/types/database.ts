@@ -14,6 +14,7 @@ export interface Category {
 // Types pour les périodes
 export interface Period {
   id: string;
+  wikidata_id?: string;
   label: MultilingualText;
   description?: MultilingualText;
   startDate: string; // Format ISO 8601
@@ -29,6 +30,7 @@ export interface Period {
 // Types pour les événements
 export interface Event {
   id: string;
+  wikidata_id?: string;
   label: MultilingualText;
   description?: MultilingualText;
   date: string;      // Format ISO 8601
