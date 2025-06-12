@@ -394,19 +394,6 @@ export class DatabaseQueryService {
     }
   }
 
-  async loadCategories(): Promise<Category[]> {
-    try {
-      const response = await fetch('/api/categories');
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Erreur lors du chargement des catégories:', error);
-      throw new Error('Erreur lors du chargement des catégories');
-    }
-  }
-
   // Méthodes pour le chargement des données de liste
   public async getListPeriods(): Promise<ListPeriod[]> {
     try {
@@ -425,6 +412,7 @@ export class DatabaseQueryService {
           fr: period.label_fr,
           en: period.label_en || period.label_fr
         },
+        description: period.description_fr ? { fr: period.description_fr, en: period.description_en || period.description_fr } : { fr: '', en: '' },
         startDate: period.start_date,
         endDate: period.end_date,
         categories: period.category_label ? [{
@@ -433,7 +421,10 @@ export class DatabaseQueryService {
             fr: period.category_label,
             en: period.category_label
           }
-        }] : []
+        }] : [],
+        createdAt: period.created_at ? new Date(period.created_at) : new Date(),
+        updatedAt: period.updated_at ? new Date(period.updated_at) : new Date(),
+        children: []
       }));
       return formattedPeriods;
     } catch (error) {
@@ -460,6 +451,7 @@ export class DatabaseQueryService {
           en: event.label.en || event.label_en || event.label_fr || event.label
         },
         date: event.date,
+        description: event.description || { fr: event.description_fr || '', en: event.description_en || event.description_fr || '' },
         categories: event.categories || event.category ? [{
           id: event.category?.id || event.category_id,
           label: {

@@ -76,15 +76,14 @@ export class DatabaseViewService {
       if (!period) {
         throw new Error('Période non trouvée');
       }
+      // On suppose que la description est bien présente dans la liste (fr et en)
       return {
         ...period,
-        description: { fr: '', en: '' },
-        wikidata_id: (period as any).wikidata_id || '',
-        parentId: null,
-        temporalLocation: '',
-        children: [],
-        createdAt: new Date(),
-        updatedAt: new Date()
+        // fallback si jamais la description n'est pas présente
+        description: period.description || { fr: '', en: '' },
+        createdAt: period.createdAt || new Date(),
+        updatedAt: period.updatedAt || new Date(),
+        children: period.children || []
       };
     } catch (error) {
       console.error('[DatabaseViewService] Erreur lors du chargement des données complètes de la période:', error);
@@ -100,12 +99,13 @@ export class DatabaseViewService {
       if (!event) {
         throw new Error('Événement non trouvé');
       }
+      // On suppose que la description est bien présente dans la liste (fr et en)
       return {
         ...event,
-        description: { fr: '', en: '' },
-        wikidata_id: (event as any).wikidata_id || '',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        // fallback si jamais la description n'est pas présente
+        description: event.description || { fr: '', en: '' },
+        createdAt: event.createdAt || new Date(),
+        updatedAt: event.updatedAt || new Date()
       };
     } catch (error) {
       console.error('[DatabaseViewService] Erreur lors du chargement des données complètes de l\'événement:', error);

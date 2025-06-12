@@ -58,13 +58,6 @@
               type="textarea"
             />
           </div>
-          <div class="form-group">
-            <Input
-              v-model="form.categories"
-              label="Catégories"
-              placeholder="Catégories (séparées par des virgules)"
-            />
-          </div>
           <template v-if="type === 'period'">
             <div class="form-group">
               <Input
@@ -172,7 +165,6 @@ const form = reactive({
   startDate: props.data?.temporalData?.[0]?.startDate || '',
   endDate: props.data?.temporalData?.[0]?.endDate || '',
   date: props.data?.date || '',
-  categories: props.data?.categoryIds || [],
   parentId: props.data?.parent_id || '',
   temporalLocation: props.data?.temporal_location || ''
 });
@@ -180,7 +172,6 @@ const form = reactive({
 const qidExistsInBase = ref(false);
 const existingItem = ref<any>(null);
 const qidError = ref('');
-const categories = ref<Category[]>([]);
 
 const isValid = computed(() => {
   if (!form.qid) return false;
@@ -208,7 +199,6 @@ watch(
       form.endDate = val.end_date || val.endDate || '';
       form.parentId = val.parent_id || val.parentId || '';
       form.temporalLocation = val.temporal_location || val.temporalLocation || '';
-      form.categories = val.categories || [];
       qidExistsInBase.value = false;
       existingItem.value = val;
     } else {
@@ -223,7 +213,6 @@ watch(
       form.endDate = '';
       form.parentId = '';
       form.temporalLocation = '';
-      form.categories = [];
       qidExistsInBase.value = false;
       existingItem.value = null;
     }
@@ -303,7 +292,6 @@ const handleSubmit = async () => {
       end_date: form.endDate,
       parent_id: form.parentId,
       temporal_location: form.temporalLocation,
-      categories: Array.isArray(form.categories) ? [...form.categories] : []
     };
     if ('id' in formData) {
       delete formData.id;
@@ -337,7 +325,6 @@ const openModal = (type: 'period' | 'event', mode: 'create' | 'edit', data?: any
   form.endDate = '';
   form.parentId = '';
   form.temporalLocation = '';
-  form.categories = [];
 
   // En mode édition, préremplir les champs
   if (mode === 'edit' && data) {
@@ -352,7 +339,6 @@ const openModal = (type: 'period' | 'event', mode: 'create' | 'edit', data?: any
     form.endDate = data.end_date || '';
     form.parentId = data.parent_id || '';
     form.temporalLocation = data.temporal_location || '';
-    form.categories = data.categories || [];
     console.log('Formulaire prérempli:', form)
   }
 }
@@ -419,16 +405,6 @@ const fillFromWikidata = async () => {
     showError('Erreur lors du chargement des données Wikidata');
   }
 };
-
-// Charger les catégories au montage du composant
-onMounted(async () => {
-  try {
-    categories.value = await queryService.loadCategories();
-  } catch (error) {
-    console.error('Erreur lors du chargement des catégories:', error);
-    window.showToast('Erreur lors du chargement des catégories', 'error');
-  }
-});
 </script>
 
 <style scoped>
