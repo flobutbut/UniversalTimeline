@@ -28,7 +28,7 @@ export class WikidataQueryService {
   private buildTemporalQuery(periodId: string): string {
     return `
       SELECT DISTINCT 
-        ?item ?itemLabel 
+        ?item ?itemLabel ?itemDescriptionFr ?itemDescriptionEn
         ?startDate ?endDate 
         ?startLocationLabel ?endLocationLabel
         (COUNT(DISTINCT ?child) AS ?childCount)
@@ -48,6 +48,18 @@ export class WikidataQueryService {
         SERVICE wikibase:label { 
           bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
           ?item rdfs:label ?itemLabel.
+        }
+
+        # Descriptions en français
+        OPTIONAL {
+          ?item schema:description ?itemDescriptionFr.
+          FILTER(LANG(?itemDescriptionFr) = "fr")
+        }
+
+        # Descriptions en anglais
+        OPTIONAL {
+          ?item schema:description ?itemDescriptionEn.
+          FILTER(LANG(?itemDescriptionEn) = "en")
         }
 
         # Start time avec localisations
@@ -81,7 +93,7 @@ export class WikidataQueryService {
           ?child wdt:P361 ?item.
         }
       }
-      GROUP BY ?item ?itemLabel ?startDate ?endDate ?startLocationLabel ?endLocationLabel
+      GROUP BY ?item ?itemLabel ?itemDescriptionFr ?itemDescriptionEn ?startDate ?endDate ?startLocationLabel ?endLocationLabel
       ORDER BY ?startDate
     `;
   }
@@ -140,7 +152,7 @@ export class WikidataQueryService {
     if (startLocation === endLocation) {
       temporalData.push({
         startDate: binding.startDate?.value,
-        endDate: binding.endDate?.value,
+        endDate: binding.endDate?.value || 'TODAY',
         location: startLocation
       });
     } else {
@@ -157,12 +169,29 @@ export class WikidataQueryService {
           endDate: binding.endDate.value,
           location: endLocation
         });
+      } else {
+        temporalData.push({
+          endDate: 'TODAY',
+          location: endLocation
+        });
       }
     }
+
+    console.log('[WikidataQueryService] Données transformées:', {
+      id: periodId,
+      label: binding.itemLabel?.value,
+      descriptionFr: binding.itemDescriptionFr?.value,
+      descriptionEn: binding.itemDescriptionEn?.value,
+      temporalData
+    });
 
     return {
       id: periodId,
       label: binding.itemLabel?.value || '',
+      description: {
+        fr: binding.itemDescriptionFr?.value || '',
+        en: binding.itemDescriptionEn?.value || ''
+      },
       temporalData,
       hasChildren: parseInt(binding.childCount?.value || '0') > 0,
       isMainEon: this.isMainEon(periodId),

@@ -128,6 +128,7 @@ export class DatabaseQueryService {
       // Formater les données selon le type Period
       const formattedPeriods = data.map((period: any) => ({
         id: period.id,
+        wikidata_id: period.wikidata_id,
         label: {
           fr: period.label_fr,
           en: period.label_en || period.label_fr
@@ -225,6 +226,7 @@ export class DatabaseQueryService {
   // Mise à jour d'une période
   public async updatePeriod(id: string, data: any): Promise<any> {
     try {
+      console.log('[DatabaseQueryService] Mise à jour de la période:', { id, data });
       const payload = {
         wikidata_id: data.qid,
         label: { fr: data.title.fr, en: data.title.en },
@@ -233,12 +235,14 @@ export class DatabaseQueryService {
         end_date: data.endDate,
         parent_id: data.parentId,
         temporal_location: data.temporalLocation,
-        // TODO: gérer les catégories si besoin
+        categories: data.categories
       };
+      console.log('[DatabaseQueryService] Payload de mise à jour:', payload);
       const response = await axios.put(`${API_BASE_URL}/periods/${id}`, payload);
       window.showToast('Période mise à jour avec succès', 'success');
       return response.data;
     } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la mise à jour de la période:', error);
       window.showToast('Erreur lors de la mise à jour de la période', 'error');
       throw error;
     }
@@ -272,24 +276,20 @@ export class DatabaseQueryService {
   // Mise à jour d'un événement
   public async updateEvent(id: string, data: any): Promise<any> {
     try {
-      console.log('[DatabaseQueryService] Mise à jour de l\'événement avec les données:', data);
+      console.log('[DatabaseQueryService] Mise à jour de l\'événement:', { id, data });
       const payload = {
+        wikidata_id: data.qid,
         label: { fr: data.title.fr, en: data.title.en },
         description: { fr: data.description.fr, en: data.description.en },
-        categories: data.categories,
-        wikidata_id: data.qid
+        date: data.date,
+        categories: data.categories
       };
-      console.log('[DatabaseQueryService] URL de mise à jour:', `${API_BASE_URL}/events/${id}`);
+      console.log('[DatabaseQueryService] Payload de mise à jour:', payload);
       const response = await axios.put(`${API_BASE_URL}/events/${id}`, payload);
       window.showToast('Événement mis à jour avec succès', 'success');
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       console.error('[DatabaseQueryService] Erreur lors de la mise à jour de l\'événement:', error);
-      console.error('[DatabaseQueryService] Détails de l\'erreur:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        url: error.config?.url
-      });
       window.showToast('Erreur lors de la mise à jour de l\'événement', 'error');
       throw error;
     }

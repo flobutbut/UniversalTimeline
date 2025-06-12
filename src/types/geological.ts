@@ -43,20 +43,36 @@ export interface PeriodData {
 }
 
 export interface Period extends PeriodData {
-  // Period étend PeriodData sans ajouter de propriétés supplémentaires
+  id: string;
+  wikidata_id?: string;
+  label: string;
+  description: {
+    fr: string;
+    en: string;
+  };
+  temporalData: TemporalLocation[];
+  hasChildren: boolean;
+  isMainEon: boolean;
+  categoryIds: string[];
+  categoryLabels: string[];
+  children: Period[];
+  loading: boolean;
+  childrenPreloaded: boolean;
+  locations: string[];
+  directLocations: string[];
 }
 
 // Types pour les réponses Wikidata
 export interface WikidataBinding {
   item?: { value: string };
   itemLabel?: { value: string };
+  itemDescriptionFr?: { value: string };
+  itemDescriptionEn?: { value: string };
   startDate?: { value: string };
   endDate?: { value: string };
-  locationLabel?: { value: string };
   startLocationLabel?: { value: string };
   endLocationLabel?: { value: string };
   childCount?: { value: string };
-  statement?: { value: string };
   child?: { value: string };
   childLabel?: { value: string };
   description?: { value: string };

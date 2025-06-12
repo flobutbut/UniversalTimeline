@@ -265,7 +265,7 @@ router.get('/categories', async (req, res) => {
 router.put('/events/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { label, description, categories, wikidata_id } = req.body;
+    const { label, description, categories, wikidata_id, date } = req.body;
 
     console.log(`[API] Mise à jour de l'événement ${id} avec les données:`, req.body);
 
@@ -289,13 +289,14 @@ router.put('/events/:id', async (req, res) => {
         description_fr = $3,
         description_en = $4,
         wikidata_id = $5,
+        date = $6,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $6
+      WHERE id = $7
       RETURNING *
     `;
 
     console.log('[API] Requête SQL:', updateEventQuery);
-    console.log('[API] Paramètres:', [label.fr, label.en || label.fr, description?.fr, description?.en || description?.fr, wikidata_id, id]);
+    console.log('[API] Paramètres:', [label.fr, label.en || label.fr, description?.fr, description?.en || description?.fr, wikidata_id, date, id]);
 
     const result = await dbQuery(updateEventQuery, [
       label.fr,
@@ -303,6 +304,7 @@ router.put('/events/:id', async (req, res) => {
       description?.fr,
       description?.en || description?.fr,
       wikidata_id,
+      date,
       id
     ]);
 
@@ -344,6 +346,86 @@ router.put('/events/:id', async (req, res) => {
   } catch (error) {
     console.error('[API] Erreur lors de la mise à jour de l\'événement:', error);
     res.status(500).json({ error: 'Erreur lors de la mise à jour de l\'événement' });
+  }
+});
+
+// Route pour mettre à jour une période
+router.put('/periods/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { label, description, start_date, end_date, parent_id, temporal_location, wikidata_id } = req.body;
+
+    console.log(`[API] Mise à jour de la période ${id} avec les données:`, req.body);
+
+    // Validation des données requises
+    if (!wikidata_id) {
+      console.error('[API] wikidata_id manquant dans les données');
+      return res.status(400).json({ error: 'wikidata_id est requis' });
+    }
+
+    if (!label || !label.fr) {
+      console.error('[API] label.fr manquant dans les données');
+      return res.status(400).json({ error: 'label.fr est requis' });
+    }
+
+    // Si end_date est vide, utiliser "TODAY"
+    const finalEndDate = end_date || 'TODAY';
+
+    // Mise à jour de la période
+    const updatePeriodQuery = `
+      UPDATE periods.periods
+      SET 
+        label_fr = $1,
+        label_en = $2,
+        description_fr = $3,
+        description_en = $4,
+        start_date = NULLIF($5, ''),
+        end_date = $6,
+        parent_id = NULLIF($7, ''),
+        temporal_location = $8,
+        wikidata_id = $9,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $10
+      RETURNING *
+    `;
+
+    console.log('[API] Requête SQL:', updatePeriodQuery);
+    console.log('[API] Paramètres:', [
+      label.fr,
+      label.en || label.fr,
+      description?.fr,
+      description?.en || description?.fr,
+      start_date || null,
+      finalEndDate,
+      parent_id || null,
+      temporal_location,
+      wikidata_id,
+      id
+    ]);
+
+    const result = await dbQuery(updatePeriodQuery, [
+      label.fr,
+      label.en || label.fr,
+      description?.fr,
+      description?.en || description?.fr,
+      start_date || null,
+      finalEndDate,
+      parent_id || null,
+      temporal_location,
+      wikidata_id,
+      id
+    ]);
+
+    if (result.rows.length === 0) {
+      console.log('[API] Aucune période trouvée avec l\'ID:', id);
+      return res.status(404).json({ error: 'Période non trouvée' });
+    }
+
+    console.log('[API] Période mise à jour:', result.rows[0]);
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('[API] Erreur lors de la mise à jour de la période:', error);
+    res.status(500).json({ error: 'Erreur lors de la mise à jour de la période' });
   }
 });
 

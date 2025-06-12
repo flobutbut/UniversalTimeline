@@ -187,7 +187,7 @@ watch(
   (val) => {
     if (props.mode === 'edit' && val) {
       console.log('[EditModal] Données reçues pour édition:', val)
-      form.qid = val.wikidata_id || val.id || '';
+      form.qid = val.wikidata_id || '';
       form.title.fr = val.label?.fr || '';
       form.title.en = val.label?.en || '';
       form.description.fr = val.description?.fr || '';
@@ -220,45 +220,35 @@ watch(
   { immediate: true }
 );
 
-async function validateQid() {
+const validateQid = async () => {
   if (!form.qid) {
-    qidExistsInBase.value = false;
-    existingItem.value = null;
+    qidError.value = 'Le Q-id est requis';
     return;
   }
 
-  // Validation du format du Q-id
   if (!form.qid.match(/^Q\d+$/)) {
-    window.showToast('Le Q-id doit commencer par Q suivi de chiffres', 'error');
-    qidExistsInBase.value = false;
-    existingItem.value = null;
+    qidError.value = 'Format de Q-id invalide';
     return;
   }
 
   try {
-    if (props.type === 'period') {
-      const period = await queryService.loadPeriod(form.qid);
+    const periods = await queryService.getAllPeriods();
+    const period = periods.find(p => p.wikidata_id === form.qid);
+    if (period) {
       qidExistsInBase.value = true;
       existingItem.value = period;
-      window.showToast('Une période avec ce Q-id existe déjà dans la base. Vous pouvez la mettre à jour.', 'info');
-    } else if (props.type === 'event') {
-      const event = await queryService.getEventById(form.qid);
-      qidExistsInBase.value = true;
-      existingItem.value = event;
-      window.showToast('Un événement avec ce Q-id existe déjà dans la base. Vous pouvez le mettre à jour.', 'info');
-    }
-  } catch (e: any) {
-    // Si non trouvé, l'entrée n'existe pas en base locale
-    if (e.message === 'Événement non trouvé' || e.message === 'Période non trouvée') {
+      qidError.value = 'Ce Q-id existe déjà dans la base';
+    } else {
       qidExistsInBase.value = false;
       existingItem.value = null;
-    } else {
-      // Autre type d'erreur
-      console.error('Erreur lors de la vérification du Q-id:', e);
-      window.showToast('Erreur lors de la vérification du Q-id', 'error');
+      qidError.value = '';
     }
+  } catch (error) {
+    qidExistsInBase.value = false;
+    existingItem.value = null;
+    qidError.value = '';
   }
-}
+};
 
 const closeModal = () => {
   console.log('[EditModal] Fermeture de la modale');
@@ -335,34 +325,49 @@ const openModal = (type: 'period' | 'event', mode: 'create' | 'edit', data?: any
   }
 }
 
-async function fillFromWikidata() {
+const showError = (message: string) => {
+  window.showToast(message, 'error');
+};
+
+const showSuccess = (message: string) => {
+  window.showToast(message, 'success');
+};
+
+const fillFromWikidata = async () => {
   if (!form.qid) {
-    window.showToast('Veuillez d\'abord entrer un Q-id', 'error');
+    showError('Veuillez entrer un Q-id Wikidata');
     return;
   }
 
   try {
-    if (props.type === 'period') {
-      const wikidataPeriod = await wikidataService.loadPeriod(form.qid);
-      form.title.fr = wikidataPeriod.label || '';
-      form.title.en = wikidataPeriod.label || '';
-      form.startDate = wikidataPeriod.temporalData?.[0]?.startDate || '';
-      form.endDate = wikidataPeriod.temporalData?.[0]?.endDate || '';
-      window.showToast('Champs pré-remplis depuis Wikidata', 'success');
-    } else if (props.type === 'event') {
-      const wikidataEvent = await wikidataService.loadEvent(form.qid);
-      form.title.fr = wikidataEvent.label || '';
-      form.title.en = wikidataEvent.label || '';
-      form.description.fr = wikidataEvent.description || '';
-      form.description.en = wikidataEvent.description || '';
-      form.date = wikidataEvent.date || '';
-      window.showToast('Champs pré-remplis depuis Wikidata', 'success');
+    const data = await wikidataService.loadPeriod(form.qid);
+    if (data) {
+      // Mise à jour des champs du formulaire
+      form.title.fr = data.label;
+      form.title.en = data.label;
+      
+      // Mise à jour des descriptions dans les bonnes langues
+      form.description.fr = data.description.fr;
+      form.description.en = data.description.en;
+
+      // Mise à jour des dates si disponibles
+      if (data.temporalData && data.temporalData.length > 0) {
+        const temporalData = data.temporalData[0];
+        if (temporalData.startDate) {
+          form.startDate = temporalData.startDate;
+        }
+        if (temporalData.endDate) {
+          form.endDate = temporalData.endDate;
+        }
+      }
+
+      showSuccess('Données Wikidata chargées avec succès');
     }
   } catch (error) {
-    console.error('Erreur lors du remplissage depuis Wikidata:', error);
-    window.showToast('Erreur lors du remplissage depuis Wikidata', 'error');
+    console.error('Erreur lors du chargement des données Wikidata:', error);
+    showError('Erreur lors du chargement des données Wikidata');
   }
-}
+};
 
 // Charger les catégories au montage du composant
 onMounted(async () => {
