@@ -591,3 +591,27 @@ Ce mécanisme fonctionne de façon similaire à celui déjà en place pour les p
 - Mise en cache des requêtes Wikidata
 - Pagination des résultats
 - Optimisation des requêtes SQL
+
+## [MAJ 2025-06-12] Optimisations et évolutions techniques majeures
+
+### Optimisation du chargement des données
+- Le composant DatabaseView charge désormais uniquement les titres (fr) des périodes et événements au chargement initial.
+- Les données complètes sont chargées à la demande lors de l'ouverture d'une modale d'édition.
+
+### Gestion des QID Wikidata
+- Vérification d'unicité du QID avant sauvegarde.
+- Suppression automatique de l'objet conflictuel en cas de doublon de QID (avec toast utilisateur).
+
+### Amélioration de la récupération des dates pour les événements
+- Prise en compte des propriétés Wikidata :
+  - P585 (point in time)
+  - P580 (date de début)
+  - P569 (date de naissance)
+  - P1319 (date la plus ancienne)
+- Ordre de priorité : P585 > P580 > P569 > P1319.
+
+### Backend : nouvelle route DELETE
+- Ajout de la route DELETE /api/events/:id pour permettre la suppression d'un événement par son identifiant technique.
+
+### Robustesse des payloads
+- Conversion systématique des champs Vue (Proxy) en objets simples avant envoi au backend.

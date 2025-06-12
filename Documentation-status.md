@@ -321,3 +321,11 @@
 
 - [x] Auto-remplissage Wikidata pour les périodes
 - [x] Auto-remplissage Wikidata pour les événements (titre, description, date) 
+
+## [MAJ 2025-06-12] État des évolutions récentes
+
+- Optimisation du chargement initial (listes légères, chargement différé des détails).
+- Robustesse accrue sur la gestion des QID Wikidata (unicité, suppression automatique en cas de conflit).
+- Suppression automatique fonctionnelle via la nouvelle route DELETE côté backend.
+- Récupération des dates d'événements enrichie (P585, P580, P569, P1319).
+- Payloads nettoyés avant envoi au backend. 

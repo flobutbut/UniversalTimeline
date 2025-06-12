@@ -448,26 +448,39 @@ export class WikidataQueryService {
   }
 
   // Charger un événement depuis Wikidata par Q-id
-  async loadEvent(eventId: string): Promise<{ label: string, description?: string, date?: string }> {
+  async loadEvent(eventId: string): Promise<{ label: string | { fr?: string; en?: string }, description?: { fr: string, en: string }, date?: string }> {
     return this.retryOperation(async () => {
       try {
         const query = `
           SELECT DISTINCT 
             ?item ?itemLabel 
-            ?description
+            ?descriptionfr
+            ?descriptionen
             ?date
+            ?startDate
+            ?birthDate
+            ?earliestDate
           WHERE {
             VALUES ?item { wd:${eventId} }
             
             SERVICE wikibase:label { 
               bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
               ?item rdfs:label ?itemLabel.
-              ?item schema:description ?description.
             }
 
             OPTIONAL {
-              ?item wdt:P585 ?date.
+              ?item schema:description ?descriptionfr.
+              FILTER(LANG(?descriptionfr) = "fr")
             }
+            OPTIONAL {
+              ?item schema:description ?descriptionen.
+              FILTER(LANG(?descriptionen) = "en")
+            }
+
+            OPTIONAL { ?item wdt:P585 ?date. }
+            OPTIONAL { ?item wdt:P580 ?startDate. }
+            OPTIONAL { ?item wdt:P569 ?birthDate. }
+            OPTIONAL { ?item wdt:P1319 ?earliestDate. }
           }
         `;
 
@@ -482,10 +495,25 @@ export class WikidataQueryService {
         }
 
         const binding = response.data.results.bindings[0];
+        console.log('[WikidataQueryService] Binding événement Wikidata:', binding);
+        // Choisir la première date disponible (P585, P580, P569, P1319)
+        let eventDate = '';
+        if (binding.date?.value) {
+          eventDate = binding.date.value;
+        } else if (binding.startDate?.value) {
+          eventDate = binding.startDate.value;
+        } else if (binding.birthDate?.value) {
+          eventDate = binding.birthDate.value;
+        } else if (binding.earliestDate?.value) {
+          eventDate = binding.earliestDate.value;
+        }
         return {
           label: binding.itemLabel?.value || '',
-          description: binding.description?.value || '',
-          date: binding.date?.value || ''
+          description: {
+            fr: binding['descriptionfr']?.value || binding['descriptionFr']?.value || '',
+            en: binding['descriptionen']?.value || binding['descriptionEn']?.value || ''
+          },
+          date: eventDate
         };
       } catch (error) {
         console.error('Erreur lors du chargement de l\'événement:', error);

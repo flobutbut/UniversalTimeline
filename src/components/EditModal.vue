@@ -4,7 +4,16 @@
       <div class="modal-header">
         <h2>{{ mode === 'edit' ? 'Modifier' : 'Créer' }} {{ type === 'period' ? 'une période' : 'un événement' }}</h2>
       </div>
-      <form @submit.prevent="handleSubmit" class="modal-form">
+      <div v-if="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <span>Chargement des données...</span>
+      </div>
+      <div v-else-if="error" class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{ error }}</span>
+        <button @click="$emit('close')">Fermer</button>
+      </div>
+      <form v-else @submit.prevent="handleSubmit" class="modal-form">
         <div class="form-grid">
           <div class="form-group">
             <Input
@@ -134,6 +143,8 @@ const props = defineProps<{
   type: 'period' | 'event';
   mode: 'create' | 'edit';
   data?: any;
+  loading?: boolean;
+  error?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -264,17 +275,38 @@ const handleSubmit = async () => {
       return;
     }
 
+    // Vérification de l'existence d'un conflit de QID
+    let conflict = null;
+    if (props.type === 'event') {
+      try {
+        const existing = await queryService.getEventById(form.qid);
+        // Si l'événement trouvé n'est pas celui en cours d'édition, il y a conflit
+        if (existing && existing.id !== props.data.id) {
+          conflict = existing;
+        }
+      } catch (e) { /* Pas de conflit si non trouvé */ }
+    }
+    // (On pourrait faire pareil pour les périodes)
+
+    // Si conflit, suppression de l'objet conflictuel
+    if (conflict) {
+      await queryService.deleteEvent(conflict.id);
+      window.showToast('Un événement avec ce Q-id existait déjà. Il a été supprimé automatiquement.', 'error');
+    }
+
     const formData = {
       ...form,
       type: modalType.value,
-      // Ajout des champs manquants pour la compatibilité
       label: form.title,
       wikidata_id: form.qid,
       start_date: form.startDate,
       end_date: form.endDate,
       parent_id: form.parentId,
       temporal_location: form.temporalLocation,
-      categories: Array.isArray(form.categories) ? form.categories : []
+      categories: Array.isArray(form.categories) ? [...form.categories] : []
+    };
+    if ('id' in formData) {
+      delete formData.id;
     }
     console.log('[EditModal] Données à soumettre:', formData);
     emit('submit', formData);
@@ -340,18 +372,35 @@ const fillFromWikidata = async () => {
   }
 
   try {
-    const data = await wikidataService.loadPeriod(form.qid);
+    let data;
+    if (props.type === 'period') {
+      data = await wikidataService.loadPeriod(form.qid);
+    } else if (props.type === 'event') {
+      data = await wikidataService.loadEvent(form.qid);
+    } else {
+      showError('Type non supporté pour Wikidata');
+      return;
+    }
+
     if (data) {
       // Mise à jour des champs du formulaire
-      form.title.fr = data.label;
-      form.title.en = data.label;
-      
-      // Mise à jour des descriptions dans les bonnes langues
-      form.description.fr = data.description.fr;
-      form.description.en = data.description.en;
-
-      // Mise à jour des dates si disponibles
-      if (data.temporalData && data.temporalData.length > 0) {
+      if (typeof data.label === 'object' && data.label !== null) {
+        const labelObj = data.label as { fr?: string; en?: string };
+        form.title.fr = labelObj.fr || '';
+        form.title.en = labelObj.en || '';
+      } else {
+        form.title.fr = data.label || '';
+        form.title.en = data.label || '';
+      }
+      if (typeof data.description === 'object' && data.description !== null) {
+        const descObj = data.description as { fr?: string; en?: string };
+        form.description.fr = descObj.fr || '';
+        form.description.en = descObj.en || '';
+      } else {
+        form.description.fr = data.description || '';
+        form.description.en = data.description || '';
+      }
+      if (props.type === 'period' && 'temporalData' in data && Array.isArray(data.temporalData) && data.temporalData.length > 0) {
         const temporalData = data.temporalData[0];
         if (temporalData.startDate) {
           form.startDate = temporalData.startDate;
@@ -360,7 +409,9 @@ const fillFromWikidata = async () => {
           form.endDate = temporalData.endDate;
         }
       }
-
+      if (props.type === 'event' && 'date' in data && typeof data.date === 'string') {
+        form.date = data.date;
+      }
       showSuccess('Données Wikidata chargées avec succès');
     }
   } catch (error) {
@@ -517,5 +568,50 @@ onMounted(async () => {
   font-size: var(--font-size-sm);
   margin-top: var(--spacing-xs);
   font-weight: 600;
+}
+.loading-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  color: var(--color-text);
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.error-message {
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  border-radius: var(--radius-md);
+  background-color: var(--color-error);
+  color: var(--color-neutral-0);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+.error-message button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-neutral-0);
+  color: var(--color-error);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.error-message button:hover {
+  background-color: var(--color-neutral-100);
 }
 </style> 

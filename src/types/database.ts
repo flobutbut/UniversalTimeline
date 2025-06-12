@@ -1,3 +1,25 @@
+// Types pour les données de liste
+export interface ListPeriod {
+  id: string;
+  label: MultilingualText;
+  startDate: string;
+  endDate: string;
+  categories: Category[];
+}
+
+export interface ListEvent {
+  id: string;
+  label: MultilingualText;
+  date: string;
+  categories: Category[];
+}
+
+export interface ListStory {
+  id: number;
+  title: MultilingualText;
+  categories: Category[];
+}
+
 // Types communs
 export interface MultilingualText {
   fr: string;

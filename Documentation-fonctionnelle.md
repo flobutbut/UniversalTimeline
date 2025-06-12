@@ -651,3 +651,11 @@ La vue base de données permet d'afficher et de gérer les données historiques 
 2. Modifier les informations
 3. Optionnel : Cliquer sur "Remplir avec Wikidata"
 4. Valider les modifications 
+
+## [MAJ 2025-06-12] Fonctionnalités et expérience utilisateur
+
+- Lors de l'édition ou de la création d'un événement/période, le QID Wikidata est vérifié pour éviter les doublons.
+- Si un doublon est détecté, l'objet conflictuel est supprimé automatiquement et l'utilisateur est informé par un toast.
+- Les dates des événements sont récupérées intelligemment depuis Wikidata (point in time, date de début, date de naissance, date la plus ancienne).
+- L'utilisateur peut éditer un événement même si la date Wikidata n'est pas renseignée (champ éditable).
+- L'interface est plus rapide grâce au chargement différé des données détaillées. 

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Period, Event, Story } from '../types/database';
+import type { Period, Event, Story, ListPeriod, ListEvent, ListStory } from '../types/database';
 
 const API_BASE_URL = '/api';
 
@@ -273,6 +273,52 @@ export class DatabaseQueryService {
     }
   }
 
+  // Méthodes pour le chargement des données complètes
+  public async getPeriod(periodId: string): Promise<Period> {
+    try {
+      console.log('[DatabaseQueryService] Récupération de la période:', periodId);
+      const response = await fetch(`/api/periods/${periodId}`);
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la récupération de la période:', error);
+      throw error;
+    }
+  }
+
+  public async getEvent(eventId: string): Promise<Event> {
+    try {
+      console.log('[DatabaseQueryService] Récupération de l\'événement:', eventId);
+      const response = await fetch(`/api/events/${eventId}`);
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la récupération de l\'événement:', error);
+      throw error;
+    }
+  }
+
+  public async getStory(storyId: number): Promise<Story> {
+    try {
+      console.log('[DatabaseQueryService] Récupération de la story:', storyId);
+      const response = await fetch(`/api/stories/${storyId}`);
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la récupération de la story:', error);
+      throw error;
+    }
+  }
+
   // Mise à jour d'un événement
   public async updateEvent(id: string, data: any): Promise<any> {
     try {
@@ -285,9 +331,19 @@ export class DatabaseQueryService {
         categories: data.categories
       };
       console.log('[DatabaseQueryService] Payload de mise à jour:', payload);
-      const response = await axios.put(`${API_BASE_URL}/events/${id}`, payload);
+      const response = await fetch(`/api/events/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      const responseData = await response.json();
       window.showToast('Événement mis à jour avec succès', 'success');
-      return response.data;
+      return responseData;
     } catch (error) {
       console.error('[DatabaseQueryService] Erreur lors de la mise à jour de l\'événement:', error);
       window.showToast('Erreur lors de la mise à jour de l\'événement', 'error');
@@ -306,8 +362,11 @@ export class DatabaseQueryService {
       }
 
       // Récupérer tous les événements et filtrer par wikidata_id
-      const response = await axios.get(`${API_BASE_URL}/events`);
-      const events = response.data;
+      const response = await fetch('/api/events');
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      const events = await response.json();
       const existingEvent = events.find((event: any) => event.wikidata_id === qid || event.id === qid);
 
       if (!existingEvent) {
@@ -337,11 +396,131 @@ export class DatabaseQueryService {
 
   async loadCategories(): Promise<Category[]> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/categories`);
-      return response.data;
+      const response = await fetch('/api/categories');
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      return await response.json();
     } catch (error) {
       console.error('Erreur lors du chargement des catégories:', error);
       throw new Error('Erreur lors du chargement des catégories');
+    }
+  }
+
+  // Méthodes pour le chargement des données de liste
+  public async getListPeriods(): Promise<ListPeriod[]> {
+    try {
+      console.log('[DatabaseQueryService] Récupération des périodes...');
+      const response = await fetch('/api/periods');
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('[DatabaseQueryService] Réponse brute de l\'API pour les périodes:', data);
+      // Formater les données selon le type ListPeriod
+      const formattedPeriods = data.map((period: any) => ({
+        id: period.id,
+        wikidata_id: period.wikidata_id || '',
+        label: {
+          fr: period.label_fr,
+          en: period.label_en || period.label_fr
+        },
+        startDate: period.start_date,
+        endDate: period.end_date,
+        categories: period.category_label ? [{
+          id: period.category_id,
+          label: {
+            fr: period.category_label,
+            en: period.category_label
+          }
+        }] : []
+      }));
+      return formattedPeriods;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la récupération des périodes:', error);
+      throw error;
+    }
+  }
+
+  public async getListEvents(): Promise<ListEvent[]> {
+    try {
+      console.log('[DatabaseQueryService] Récupération des événements...');
+      const response = await fetch('/api/events');
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('[DatabaseQueryService] Réponse brute de l\'API:', data);
+      // Formater les données selon le type ListEvent
+      const formattedEvents = data.map((event: any) => ({
+        id: event.id,
+        wikidata_id: event.wikidata_id || '',
+        label: {
+          fr: event.label.fr || event.label_fr || event.label,
+          en: event.label.en || event.label_en || event.label_fr || event.label
+        },
+        date: event.date,
+        categories: event.categories || event.category ? [{
+          id: event.category?.id || event.category_id,
+          label: {
+            fr: event.category?.label?.fr || event.category_label || event.category,
+            en: event.category?.label?.en || event.category_label || event.category
+          }
+        }] : []
+      }));
+      return formattedEvents;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la récupération des événements:', error);
+      throw error;
+    }
+  }
+
+  public async getListStories(): Promise<ListStory[]> {
+    try {
+      console.log('[DatabaseQueryService] Récupération des stories...');
+      const response = await fetch('/api/stories');
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('[DatabaseQueryService] Réponse brute de l\'API pour les stories:', data);
+      
+      // Formater les données selon le type ListStory
+      const formattedStories = data.map((story: any) => ({
+        id: story.id,
+        title: {
+          fr: story.title_fr,
+          en: story.title_en || story.title_fr
+        },
+        categories: story.categories || []
+      }));
+      
+      return formattedStories;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la récupération des stories:', error);
+      throw error;
+    }
+  }
+
+  // Suppression d'un événement par son id
+  public async deleteEvent(id: string): Promise<void> {
+    try {
+      const response = await fetch(`/api/events/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) {
+        // Si 404, on considère comme déjà supprimé
+        if (response.status === 404) {
+          console.warn(`[DatabaseQueryService] L'événement ${id} était déjà supprimé.`);
+          return;
+        }
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      window.showToast('Événement supprimé avec succès', 'success');
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la suppression de l\'événement:', error);
+      window.showToast('Erreur lors de la suppression de l\'événement', 'error');
+      throw error;
     }
   }
 } 

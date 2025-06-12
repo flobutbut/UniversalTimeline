@@ -89,6 +89,8 @@
       :type="currentType"
       mode="edit"
       :data="currentItem"
+      :loading="loadingDetails"
+      :error="loadingError"
       @close="closeEditModal"
       @submit="handleSave"
     />
@@ -100,14 +102,14 @@ import { onMounted, ref, computed } from 'vue';
 import { DatabaseViewService } from '../services/DatabaseViewService';
 import DatabaseCard from './DatabaseCard.vue';
 import EditModal from './EditModal.vue';
-import type { Event, Period, Story } from '../types/database';
+import type { Event, Period, Story, ListPeriod, ListEvent, ListStory } from '../types/database';
 import { DatabaseQueryService } from '../services/DatabaseQueryService';
 
 const databaseService = DatabaseViewService.getInstance();
 const queryService = DatabaseQueryService.getInstance();
-const periods = ref<Period[]>([]);
-const events = ref<Event[]>([]);
-const stories = ref<Story[]>([]);
+const periods = ref<ListPeriod[]>([]);
+const events = ref<ListEvent[]>([]);
+const stories = ref<ListStory[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
@@ -121,6 +123,10 @@ const currentMode = ref<'create' | 'edit'>('create');
 // Ajout des refs pour la recherche
 const periodSearch = ref('');
 const eventSearch = ref('');
+
+// Ajout des refs pour le chargement des données détaillées
+const loadingDetails = ref(false);
+const loadingError = ref<string | null>(null);
 
 // Computed properties pour le filtrage
 const filteredPeriods = computed(() => {
@@ -156,7 +162,7 @@ function closeAddModal() {
   currentItem.value = null;
 }
 
-function openEditModal(type: 'period' | 'event', item: any) {
+async function openEditModal(type: 'period' | 'event', item: any) {
   console.log('[DatabaseView] Ouverture de la modale d\'édition:', { type, item });
   // Fermer d'abord la modale d'ajout si elle est ouverte
   if (showAddModal.value) {
@@ -164,8 +170,30 @@ function openEditModal(type: 'period' | 'event', item: any) {
   }
   currentType.value = type;
   currentMode.value = 'edit';
-  currentItem.value = item;
-  showEditModal.value = true;
+  
+  try {
+    loadingDetails.value = true;
+    loadingError.value = null;
+    
+    // Charger les données complètes de l'élément
+    if (type === 'period') {
+      currentItem.value = await databaseService.loadFullPeriod(item.id);
+    } else if (type === 'event') {
+      currentItem.value = await databaseService.loadFullEvent(item.id);
+    }
+    showEditModal.value = true;
+  } catch (error: any) {
+    console.error('[DatabaseView] Erreur lors du chargement des données complètes:', error);
+    if (error.message?.includes('404') || error.message?.includes('Not Found')) {
+      loadingError.value = 'L\'élément n\'a pas été trouvé dans la base de données';
+      window.showToast('L\'élément n\'a pas été trouvé dans la base de données', 'error');
+    } else {
+      loadingError.value = 'Erreur lors du chargement des données';
+      window.showToast('Erreur lors du chargement des données', 'error');
+    }
+  } finally {
+    loadingDetails.value = false;
+  }
 }
 
 function closeEditModal() {
@@ -203,7 +231,7 @@ async function handleSave(formData: any) {
 
     console.log('[DatabaseView] Rechargement des données...');
     // Recharger les données après la mise à jour
-    await databaseService.loadData();
+    await databaseService.loadListData();
     periods.value = databaseService.getPeriods();
     events.value = databaseService.getEvents();
     stories.value = databaseService.getStories();
@@ -225,7 +253,7 @@ async function handleSave(formData: any) {
 onMounted(async () => {
   try {
     console.log('[DatabaseView] Chargement des données...');
-    await databaseService.loadData();
+    await databaseService.loadListData();
     console.log('[DatabaseView] Données chargées');
     
     // Mettre à jour les refs avec les données du service
@@ -257,8 +285,15 @@ const handleAddStory = () => {
   console.log('[DatabaseView] Ajout d\'une nouvelle story');
 };
 
-const handleEditStory = (story: Story) => {
+const handleEditStory = async (story: ListStory) => {
   console.log('[DatabaseView] Édition de la story:', story);
+  try {
+    const fullStory = await databaseService.loadFullStory(story.id);
+    // TODO: Implémenter l'ouverture de la modale d'édition pour les stories
+  } catch (error) {
+    console.error('[DatabaseView] Erreur lors du chargement des données de la story:', error);
+    window.showToast('Erreur lors du chargement des données', 'error');
+  }
 };
 </script>
 

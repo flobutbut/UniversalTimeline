@@ -77,6 +77,7 @@ export interface WikidataBinding {
   childLabel?: { value: string };
   description?: { value: string };
   date?: { value: string };
+  [key: string]: any;
 }
 
 export interface WikidataResult {

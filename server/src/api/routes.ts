@@ -429,4 +429,22 @@ router.put('/periods/:id', async (req, res) => {
   }
 });
 
+// Route pour supprimer un événement
+router.delete('/events/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Supprimer les catégories associées (si besoin)
+    await dbQuery('DELETE FROM categories.event_categories WHERE event_id = $1', [id]);
+    // Supprimer l'événement
+    const result = await dbQuery('DELETE FROM events.events WHERE id = $1 RETURNING *', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Événement non trouvé' });
+    }
+    res.status(204).send();
+  } catch (error) {
+    console.error('[API] Erreur lors de la suppression de l\'événement:', error);
+    res.status(500).json({ error: 'Erreur lors de la suppression de l\'événement' });
+  }
+});
+
 export default router; 
