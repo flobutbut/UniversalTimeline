@@ -10,11 +10,19 @@
       <div class="column">
         <div class="column-header">
           <h2>Périodes</h2>
-          <button class="action-button" @click="openAddModal('period')">Add</button>
+          <div class="header-actions">
+            <input 
+              type="text" 
+              v-model="periodSearch" 
+              placeholder="Rechercher une période..." 
+              class="search-input"
+            />
+            <button class="action-button" @click="openAddModal('period')">Add</button>
+          </div>
         </div>
         <div class="content">
           <DatabaseCard
-            v-for="period in periods"
+            v-for="period in filteredPeriods"
             :key="period.id"
             type="period"
             :title="period.label.fr"
@@ -28,11 +36,19 @@
       <div class="column">
         <div class="column-header">
           <h2>Événements</h2>
-          <button class="action-button" @click="openAddModal('event')">Add</button>
+          <div class="header-actions">
+            <input 
+              type="text" 
+              v-model="eventSearch" 
+              placeholder="Rechercher un événement..." 
+              class="search-input"
+            />
+            <button class="action-button" @click="openAddModal('event')">Add</button>
+          </div>
         </div>
         <div class="content">
           <DatabaseCard
-            v-for="event in events"
+            v-for="event in filteredEvents"
             :key="event.id"
             type="event"
             :title="event.label.fr"
@@ -65,7 +81,7 @@
       :type="currentType"
       mode="create"
       @close="closeAddModal"
-      @save="handleSave"
+      @submit="handleSave"
     />
     <EditModal
       v-if="showEditModal"
@@ -74,13 +90,13 @@
       mode="edit"
       :data="currentItem"
       @close="closeEditModal"
-      @save="handleSave"
+      @submit="handleSave"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { DatabaseViewService } from '../services/DatabaseViewService';
 import DatabaseCard from './DatabaseCard.vue';
 import EditModal from './EditModal.vue';
@@ -100,6 +116,30 @@ const showAddModal = ref(false);
 const showEditModal = ref(false);
 const currentType = ref<'period' | 'event'>('period');
 const currentItem = ref<any>(null);
+const currentMode = ref<'create' | 'edit'>('create');
+
+// Ajout des refs pour la recherche
+const periodSearch = ref('');
+const eventSearch = ref('');
+
+// Computed properties pour le filtrage
+const filteredPeriods = computed(() => {
+  if (!periodSearch.value) return periods.value;
+  const searchLower = periodSearch.value.toLowerCase();
+  return periods.value.filter(period => 
+    period.label.fr.toLowerCase().includes(searchLower) ||
+    period.categories?.some(cat => String(cat).toLowerCase().includes(searchLower))
+  );
+});
+
+const filteredEvents = computed(() => {
+  if (!eventSearch.value) return events.value;
+  const searchLower = eventSearch.value.toLowerCase();
+  return events.value.filter(event => 
+    event.label.fr.toLowerCase().includes(searchLower) ||
+    event.categories?.some(cat => String(cat).toLowerCase().includes(searchLower))
+  );
+});
 
 function openAddModal(type: 'period' | 'event') {
   // Fermer d'abord la modale d'édition si elle est ouverte
@@ -107,6 +147,7 @@ function openAddModal(type: 'period' | 'event') {
     closeEditModal();
   }
   currentType.value = type;
+  currentMode.value = 'create';
   showAddModal.value = true;
 }
 
@@ -116,11 +157,13 @@ function closeAddModal() {
 }
 
 function openEditModal(type: 'period' | 'event', item: any) {
+  console.log('[DatabaseView] Ouverture de la modale d\'édition:', { type, item });
   // Fermer d'abord la modale d'ajout si elle est ouverte
   if (showAddModal.value) {
     closeAddModal();
   }
   currentType.value = type;
+  currentMode.value = 'edit';
   currentItem.value = item;
   showEditModal.value = true;
 }
@@ -130,13 +173,53 @@ function closeEditModal() {
   currentItem.value = null;
 }
 
-async function handleSave() {
-  await databaseService.loadData();
-  periods.value = databaseService.getPeriods();
-  events.value = databaseService.getEvents();
-  stories.value = databaseService.getStories();
-  closeAddModal();
-  closeEditModal();
+async function handleSave(formData: any) {
+  try {
+    console.log('[DatabaseView] Début de la sauvegarde:', {
+      type: currentType.value,
+      mode: currentMode.value,
+      currentItem: currentItem.value,
+      formData
+    });
+    
+    if (currentType.value === 'period') {
+      if (currentMode.value === 'edit') {
+        console.log('[DatabaseView] Mise à jour de la période:', currentItem.value.id);
+        await queryService.updatePeriod(currentItem.value.id, formData);
+      } else {
+        console.log('[DatabaseView] Création d\'une nouvelle période');
+        await queryService.createPeriod(formData);
+      }
+    } else if (currentType.value === 'event') {
+      if (currentMode.value === 'edit') {
+        console.log('[DatabaseView] Mise à jour de l\'événement:', currentItem.value.id);
+        const response = await queryService.updateEvent(currentItem.value.id, formData);
+        console.log('[DatabaseView] Réponse de la mise à jour:', response);
+      } else {
+        console.log('[DatabaseView] Création d\'un nouvel événement');
+        await queryService.createEvent(formData);
+      }
+    }
+
+    console.log('[DatabaseView] Rechargement des données...');
+    // Recharger les données après la mise à jour
+    await databaseService.loadData();
+    periods.value = databaseService.getPeriods();
+    events.value = databaseService.getEvents();
+    stories.value = databaseService.getStories();
+    
+    console.log('[DatabaseView] Données rechargées:', {
+      periods: periods.value.length,
+      events: events.value.length,
+      stories: stories.value.length
+    });
+    
+    closeAddModal();
+    closeEditModal();
+  } catch (error) {
+    console.error('[DatabaseView] Erreur lors de la sauvegarde:', error);
+    window.showToast('Erreur lors de la sauvegarde des données', 'error');
+  }
 }
 
 onMounted(async () => {
@@ -253,5 +336,25 @@ const handleEditStory = (story: Story) => {
 
 .action-button:hover {
   color: var(--color-primary-dark);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.search-input {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  width: 200px;
+  transition: border-color var(--transition-fast);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
 }
 </style> 

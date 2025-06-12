@@ -59,6 +59,8 @@ export interface WikidataBinding {
   statement?: { value: string };
   child?: { value: string };
   childLabel?: { value: string };
+  description?: { value: string };
+  date?: { value: string };
 }
 
 export interface WikidataResult {

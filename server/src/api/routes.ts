@@ -261,4 +261,90 @@ router.get('/categories', async (req, res) => {
   }
 });
 
+// Route pour mettre à jour un événement
+router.put('/events/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { label, description, categories, wikidata_id } = req.body;
+
+    console.log(`[API] Mise à jour de l'événement ${id} avec les données:`, req.body);
+
+    // Validation des données requises
+    if (!wikidata_id) {
+      console.error('[API] wikidata_id manquant dans les données');
+      return res.status(400).json({ error: 'wikidata_id est requis' });
+    }
+
+    if (!label || !label.fr) {
+      console.error('[API] label.fr manquant dans les données');
+      return res.status(400).json({ error: 'label.fr est requis' });
+    }
+
+    // Mise à jour de l'événement
+    const updateEventQuery = `
+      UPDATE events.events
+      SET 
+        label_fr = $1,
+        label_en = $2,
+        description_fr = $3,
+        description_en = $4,
+        wikidata_id = $5,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $6
+      RETURNING *
+    `;
+
+    console.log('[API] Requête SQL:', updateEventQuery);
+    console.log('[API] Paramètres:', [label.fr, label.en || label.fr, description?.fr, description?.en || description?.fr, wikidata_id, id]);
+
+    const result = await dbQuery(updateEventQuery, [
+      label.fr,
+      label.en || label.fr,
+      description?.fr,
+      description?.en || description?.fr,
+      wikidata_id,
+      id
+    ]);
+
+    if (result.rows.length === 0) {
+      console.log('[API] Aucun événement trouvé avec l\'ID:', id);
+      return res.status(404).json({ error: 'Événement non trouvé' });
+    }
+
+    console.log('[API] Événement mis à jour:', result.rows[0]);
+
+    // Mise à jour des catégories
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      console.log('[API] Mise à jour des catégories:', categories);
+      
+      // Supprimer les anciennes catégories
+      await dbQuery('DELETE FROM categories.event_categories WHERE event_id = $1', [id]);
+
+      // Filtrer les catégories valides (avec un ID)
+      const validCategories = categories.filter(cat => cat && cat.id);
+      
+      if (validCategories.length > 0) {
+        // Ajouter les nouvelles catégories
+        const categoryValues = validCategories.map((_, index) => `($1, $${index + 2})`).join(',');
+        const categoryParams = [id, ...validCategories.map(cat => cat.id)];
+        
+        const insertCategoryQuery = `
+          INSERT INTO categories.event_categories (event_id, category_id)
+          VALUES ${categoryValues}
+        `;
+        
+        console.log('[API] Requête SQL pour les catégories:', insertCategoryQuery);
+        console.log('[API] Paramètres des catégories:', categoryParams);
+        
+        await dbQuery(insertCategoryQuery, categoryParams);
+      }
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('[API] Erreur lors de la mise à jour de l\'événement:', error);
+    res.status(500).json({ error: 'Erreur lors de la mise à jour de l\'événement' });
+  }
+});
+
 export default router; 

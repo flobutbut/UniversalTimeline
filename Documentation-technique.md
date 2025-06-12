@@ -547,3 +547,47 @@ Ce mécanisme fonctionne de façon similaire à celui déjà en place pour les p
 - Logs plus détaillés pour le débogage
 - Messages d'erreur plus explicites pour l'utilisateur
 - Double validation du format Q-id (côté client et service)
+
+## Architecture
+
+### Frontend (Vue.js)
+- Composants de base réutilisables :
+  - `Button.vue` : Boutons avec 3 variantes (primary, secondary, tertiary)
+  - `Input.vue` : Champs de formulaire avec validation et gestion des erreurs
+- Composants spécifiques :
+  - `DatabaseView.vue` : Vue principale de la base de données
+  - `DatabaseCard.vue` : Carte pour afficher les périodes et événements
+  - `EditModal.vue` : Modal d'édition avec support Wikidata
+
+### Backend (Node.js)
+- API REST avec Express
+- Base de données PostgreSQL
+- Intégration avec l'API Wikidata
+
+## Services
+
+### DatabaseQueryService
+- Gestion des requêtes vers la base de données
+- Méthodes CRUD pour les périodes et événements
+- Gestion des catégories
+
+### WikidataQueryService
+- Requêtes SPARQL vers Wikidata
+- Récupération des données des périodes et événements
+- Formatage des dates et localisations
+
+## Design System
+- Variables CSS pour la cohérence visuelle
+- Composants réutilisables
+- Gestion des états (hover, focus, disabled)
+- Support multilingue (FR/EN)
+
+## Sécurité
+- Validation des données côté serveur
+- Protection contre les injections SQL
+- Gestion des erreurs et logging
+
+## Performance
+- Mise en cache des requêtes Wikidata
+- Pagination des résultats
+- Optimisation des requêtes SQL

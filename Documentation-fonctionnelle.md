@@ -597,3 +597,57 @@ La vue base de données permet d'afficher et de gérer les données historiques 
 
 - Lors de la création ou l'édition d'un événement, la saisie d'un Q-id inexistant en base déclenche une tentative de récupération automatique des informations principales (titre, description, date) depuis Wikidata.
 - Un toast informe l'utilisateur du succès ou de l'échec de l'opération. 
+
+## Fonctionnalités
+
+### Gestion des Périodes et Événements
+- Création, modification et suppression
+- Validation des données
+- Support multilingue (FR/EN)
+- Gestion des dates et localisations
+
+### Intégration Wikidata
+- Récupération automatique des données
+- Bouton "Remplir avec Wikidata"
+- Validation des Q-ids
+- Gestion des erreurs de connexion
+
+### Interface Utilisateur
+- Design system cohérent
+- Composants réutilisables
+- Validation en temps réel
+- Messages d'erreur explicites
+
+### Formulaires
+- Validation des champs requis
+- Format des dates flexible
+- Gestion des catégories
+- Support des descriptions multilingues
+
+## Workflows
+
+### Création d'une Période
+1. Cliquer sur "Nouvelle période"
+2. Remplir le Q-id Wikidata
+3. Optionnel : Cliquer sur "Remplir avec Wikidata"
+4. Compléter les informations manquantes
+5. Valider la création
+
+### Modification d'une Période
+1. Cliquer sur l'icône d'édition
+2. Modifier les informations
+3. Optionnel : Cliquer sur "Remplir avec Wikidata"
+4. Valider les modifications
+
+### Création d'un Événement
+1. Cliquer sur "Nouvel événement"
+2. Remplir le Q-id Wikidata
+3. Optionnel : Cliquer sur "Remplir avec Wikidata"
+4. Compléter les informations manquantes
+5. Valider la création
+
+### Modification d'un Événement
+1. Cliquer sur l'icône d'édition
+2. Modifier les informations
+3. Optionnel : Cliquer sur "Remplir avec Wikidata"
+4. Valider les modifications 

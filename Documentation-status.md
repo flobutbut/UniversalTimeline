@@ -1,9 +1,10 @@
 # État du Projet
 
-## Dernière Mise à Jour
-- Date : 2024-04-02
-- Version : 1.1.0
-- Statut : En développement
+## Dernières Mises à Jour
+- Ajout des composants de base (Button, Input)
+- Amélioration de l'interface utilisateur
+- Correction de la gestion des Q-ids Wikidata
+- Optimisation des requêtes SPARQL
 
 ## État Actuel du Projet
 
@@ -74,6 +75,12 @@
 - ✅ Configuration des bases de données PostgreSQL
 - ✅ Structure des tables et relations
 - ✅ Système de catégories
+- ✅ Design system cohérent
+- ✅ Composants réutilisables
+- ✅ Intégration Wikidata
+- ✅ Gestion des périodes et événements
+- ✅ Support multilingue
+- ✅ Validation des données
 
 ### Fonctionnalités en Cours
 - 🔄 Implémentation de la barre de recherche globale
@@ -94,6 +101,9 @@
 - 🔄 Tests unitaires
 - 🔄 Documentation des composants
 - 🔄 Amélioration de la visualisation temporelle
+- Amélioration de la gestion des erreurs
+- Optimisation des performances
+- Tests unitaires
 
 ### Performance
 - Temps de chargement initial : < 2s
@@ -127,6 +137,21 @@
    - Statut : En cours de développement
 
 3. Implémentation des événements sur la frise
+   - Impact : Moyen
+   - Priorité : Moyenne
+   - Statut : En cours de développement
+
+4. Format des dates à standardiser
+   - Impact : Moyen
+   - Priorité : Moyenne
+   - Statut : En cours de développement
+
+5. Gestion des timeouts Wikidata
+   - Impact : Moyen
+   - Priorité : Moyenne
+   - Statut : En cours de développement
+
+6. Performance des requêtes complexes
    - Impact : Moyen
    - Priorité : Moyenne
    - Statut : En cours de développement
@@ -261,58 +286,21 @@
 - 🔄 Support multilingue complet
 
 ## Prochaines Étapes
-- ⏳ Support des ères géologiques
-- ⏳ Filtres de recherche avancés
-- ⏳ Interface de visualisation temporelle
-- ⏳ Export des résultats 
-- [ ] Mettre à jour les tests unitaires pour le nouveau formatage
-- [ ] Ajouter des tests d'intégration pour vérifier l'affichage
-- [ ] Vérifier la cohérence sur tous les types de dates
-- [ ] Optimiser les performances du formatage 
+1. Implémentation du cache Wikidata
+2. Ajout des tests unitaires
+3. Documentation API
+4. Monitoring des performances
 
-## Fonctionnalités Implémentées ✅
+## À Faire
+- Documentation API
+- Tests d'intégration
+- Monitoring
+- Cache Wikidata
 
-### Vue Timeline
-- Affichage de la timeline avec les événements
-- Navigation temporelle
-- Filtrage par catégories
-- Recherche Wikidata
-- Sauvegarde des éléments
-
-### Vue Base de Données
-- Affichage en trois colonnes (Périodes, Événements, Stories)
-- Cartes d'information avec titre, date et catégories
-- Bouton d'édition pour chaque élément
-- Navigation entre les vues
-- Design responsive
-
-## En Cours de Développement 🚧
-
-### Vue Base de Données
-- Implémentation de la fonctionnalité d'édition
-- Amélioration de la gestion des catégories
-- Optimisation des performances pour de grandes quantités de données
-
-## À Faire 📝
-
-### Général
-- Tests unitaires et d'intégration
-- Documentation utilisateur
-- Optimisation des performances
-- Gestion des erreurs et des cas limites
-
-### Vue Base de Données
-- Filtrage avancé
-- Tri des éléments
-- Export des données
-- Gestion des conflits de données
-
-## Problèmes Connus ⚠️
-
-### Vue Base de Données
-- Le bouton d'édition n'a pas encore de fonctionnalité implémentée
-- Les catégories ne sont pas encore cliquables pour le filtrage
-- Pas de pagination pour de grandes quantités de données 
+## Problèmes Connus
+- Format des dates à standardiser
+- Gestion des timeouts Wikidata
+- Performance des requêtes complexes
 
 ## Corrections récentes
 

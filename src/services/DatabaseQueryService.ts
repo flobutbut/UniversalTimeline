@@ -3,6 +3,11 @@ import type { Period, Event, Story } from '../types/database';
 
 const API_BASE_URL = '/api';
 
+interface Category {
+  id: string;
+  label: string;
+}
+
 export class DatabaseQueryService {
   private static instance: DatabaseQueryService;
 
@@ -267,17 +272,24 @@ export class DatabaseQueryService {
   // Mise à jour d'un événement
   public async updateEvent(id: string, data: any): Promise<any> {
     try {
+      console.log('[DatabaseQueryService] Mise à jour de l\'événement avec les données:', data);
       const payload = {
-        wikidata_id: data.qid,
         label: { fr: data.title.fr, en: data.title.en },
         description: { fr: data.description.fr, en: data.description.en },
-        date: data.date,
-        // TODO: gérer les catégories si besoin
+        categories: data.categories,
+        wikidata_id: data.qid
       };
+      console.log('[DatabaseQueryService] URL de mise à jour:', `${API_BASE_URL}/events/${id}`);
       const response = await axios.put(`${API_BASE_URL}/events/${id}`, payload);
       window.showToast('Événement mis à jour avec succès', 'success');
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
+      console.error('[DatabaseQueryService] Erreur lors de la mise à jour de l\'événement:', error);
+      console.error('[DatabaseQueryService] Détails de l\'erreur:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        url: error.config?.url
+      });
       window.showToast('Erreur lors de la mise à jour de l\'événement', 'error');
       throw error;
     }
@@ -320,6 +332,16 @@ export class DatabaseQueryService {
       } else {
         throw new Error(`Erreur lors de la vérification de l'événement: ${error.message}`);
       }
+    }
+  }
+
+  async loadCategories(): Promise<Category[]> {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/categories`);
+      return response.data;
+    } catch (error) {
+      console.error('Erreur lors du chargement des catégories:', error);
+      throw new Error('Erreur lors du chargement des catégories');
     }
   }
 } 

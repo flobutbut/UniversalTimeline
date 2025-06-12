@@ -420,30 +420,48 @@ export class WikidataQueryService {
 
   // Charger un événement depuis Wikidata par Q-id
   async loadEvent(eventId: string): Promise<{ label: string, description?: string, date?: string }> {
-    try {
-      const query = `
-        SELECT ?item ?itemLabel ?description ?pointInTime WHERE {
-          VALUES ?item { wd:${eventId} }
-          OPTIONAL { ?item rdfs:label ?itemLabel. FILTER(LANG(?itemLabel) = 'fr') }
-          OPTIONAL { ?item schema:description ?description. FILTER(LANG(?description) = 'fr') }
-          OPTIONAL { ?item p:P585 ?statement. ?statement ps:P585 ?pointInTime. }
-        } LIMIT 1
-      `;
-      const response = await axios.get('/api/wikidata/sparql', {
-        params: { query, format: 'json' },
-        timeout: 10000,
-        headers: { 'Accept': 'application/sparql-results+json' }
-      });
-      const bindings = response.data?.results?.bindings;
-      if (!bindings || !bindings.length) throw new Error('Aucune donnée trouvée pour cet événement');
-      const b = bindings[0];
-      return {
-        label: b.itemLabel?.value || '',
-        description: b.description?.value || '',
-        date: b.pointInTime?.value || ''
-      };
-    } catch (error) {
-      throw error;
-    }
+    return this.retryOperation(async () => {
+      try {
+        const query = `
+          SELECT DISTINCT 
+            ?item ?itemLabel 
+            ?description
+            ?date
+          WHERE {
+            VALUES ?item { wd:${eventId} }
+            
+            SERVICE wikibase:label { 
+              bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
+              ?item rdfs:label ?itemLabel.
+              ?item schema:description ?description.
+            }
+
+            OPTIONAL {
+              ?item wdt:P585 ?date.
+            }
+          }
+        `;
+
+        const response = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
+          params: { query, format: 'json' },
+          timeout: REQUEST_TIMEOUT,
+          headers: { 'Accept': 'application/sparql-results+json' }
+        });
+
+        if (!response.data?.results?.bindings?.length) {
+          throw new Error(`Aucune donnée trouvée pour l'événement ${eventId}`);
+        }
+
+        const binding = response.data.results.bindings[0];
+        return {
+          label: binding.itemLabel?.value || '',
+          description: binding.description?.value || '',
+          date: binding.date?.value || ''
+        };
+      } catch (error) {
+        console.error('Erreur lors du chargement de l\'événement:', error);
+        throw error;
+      }
+    });
   }
 } 

@@ -23,6 +23,7 @@ const props = defineProps<Props>();
 const emit = defineEmits(['edit']);
 
 const handleEdit = () => {
+  console.log('[DatabaseCard] Émission de l\'événement edit');
   emit('edit');
 };
 </script>
