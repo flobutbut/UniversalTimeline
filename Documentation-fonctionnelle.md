@@ -702,3 +702,9 @@ La vue base de données permet d'afficher et de gérer les données historiques 
 - L'utilisateur interagit avec une interface cohérente, sans désynchronisation
 - Les modifications sont fiables et persistantes
 - Les composants secondaires seront améliorés dans une prochaine étape 
+
+## Saisie et gestion des dates
+
+- L'utilisateur peut saisir n'importe quel format de date pour les événements et les périodes, y compris des dates négatives ou exotiques (ex : `-145000000-01-01T00:00:00Z`).
+- Il n'y a plus de limitation ni d'erreur lors de la saisie ou de la modification de ces champs.
+- L'interface et l'API sont synchronisées pour accepter et restituer ces formats de date. 

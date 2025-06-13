@@ -351,4 +351,13 @@
 - 🔜 Suppression du code mort à venir
 - 🔜 Audit des composants secondaires (PeriodGrid, PeriodCard, EventCard)
 
-Le projet est stable et prêt pour le nettoyage final avant d'autres évolutions. 
+Le projet est stable et prêt pour le nettoyage final avant d'autres évolutions.
+
+# Documentation de statut
+
+## État du projet
+
+- La gestion des dates (événements et périodes) est désormais robuste : tous les champs sont en TEXT, il n'y a plus d'erreur 500 liée au format des dates.
+- Les migrations SQL nécessaires ont été appliquées et sont versionnées dans le dossier `server/prisma/migrations/`.
+- Plus aucune limitation connue sur le format des dates dans l'API.
+- Le projet est à jour et synchronisé sur la branche `Database_view`. 

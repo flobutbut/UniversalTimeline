@@ -694,3 +694,20 @@ Ce mécanisme fonctionne de façon similaire à celui déjà en place pour les p
 ### Points critiques
 - Cohérence entre backend (routes, structure des réponses) et frontend (mapping des champs, centralisation des accès)
 - Robustesse de la gestion des mutations et du rechargement des données
+
+## Gestion des dates (événements et périodes)
+
+- Les champs `date` (événements), `start_date` et `end_date` (périodes) sont de type **TEXT** dans la base PostgreSQL.
+- Ce choix permet de stocker des dates très anciennes, négatives ou exotiques (ex : `-145000000-01-01T00:00:00Z`) sans erreur, contrairement au type `timestamp`.
+- Les migrations SQL assurant cette robustesse sont versionnées dans `server/prisma/migrations/`.
+- Toute mention d'un stockage en `timestamp` ou `date` pour ces champs est obsolète et a été supprimée.
+
+## Robustesse de l'API
+
+- Les routes `/api/events` et `/api/periods` acceptent tous les formats de date sans lever d'erreur 500.
+- Les mises à jour et créations d'événements/périodes sont fiables, même avec des dates négatives ou non-standards.
+
+## Synchronisation Docker / Beekeeper
+
+- La base utilisée par l'API est celle du conteneur Docker (`wikidata_db`, user `wikidata_user`).
+- Pour voir les modifications en temps réel dans Beekeeper, il faut se connecter à cette base.
