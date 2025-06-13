@@ -73,16 +73,12 @@ export class DatabaseQueryService {
   public async getAllEvents(): Promise<Event[]> {
     try {
       console.log('[DatabaseQueryService] Récupération des événements...');
-      const response = await fetch('/api/events');
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log('[DatabaseQueryService] Réponse brute de l\'API:', data);
-      console.log('[DatabaseQueryService] Nombre d\'événements reçus:', data.length);
+      const response = await axios.get(`${API_BASE_URL}/events`);
+      console.log('[DatabaseQueryService] Réponse brute de l\'API:', response.data);
+      console.log('[DatabaseQueryService] Nombre d\'événements reçus:', response.data.length);
       
       // Formater les données selon le type Event
-      const formattedEvents = data.map((event: any) => ({
+      const formattedEvents = response.data.map((event: any) => ({
         id: event.id,
         wikidata_id: event.wikidata_id,
         label: {

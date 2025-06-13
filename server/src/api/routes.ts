@@ -69,16 +69,8 @@ export async function getEventDateFromWikidata(wikidataId: string): Promise<stri
       const dateStr = data.results.bindings[0].date.value;
       console.log(`[API] Date brute reçue: ${dateStr}`);
       
-      // Gestion des dates négatives (av. J.-C.)
-      if (dateStr.startsWith('-')) {
-        const year = parseInt(dateStr.substring(1, 5));
-        return `${year} av. J.-C.`;
-      }
-      // Gestion des dates positives (ap. J.-C.)
-      else {
-        const year = parseInt(dateStr.substring(0, 4));
-        return `${year} ap. J.-C.`;
-      }
+      // Conserver le format ISO de la date
+      return dateStr;
     }
 
     return null;
@@ -154,6 +146,7 @@ router.get('/events', async (req, res) => {
         e.label_en,
         e.description_fr,
         e.description_en,
+        e.date,
         e.created_at,
         e.updated_at,
         c.id as category_id,
@@ -165,18 +158,27 @@ router.get('/events', async (req, res) => {
     `;
 
     const result = await dbQuery(sqlQuery);
-    console.log('########################## DEBUG SQL EVENTS ##########################');
-    console.log(JSON.stringify(result.rows, null, 2));
-    console.log('#####################################################################');
     console.log(`[API] ${result.rows.length} événements trouvés dans la base de données`);
-    console.log('[API] Premier événement brut de la base de données:', JSON.stringify(result.rows[0], null, 2));
     
-    // Récupérer les dates depuis Wikidata pour chaque événement
+    // Récupérer les dates depuis Wikidata uniquement pour les événements qui n'en ont pas
     console.log('[API] Début de la récupération des dates depuis Wikidata');
     const eventsWithDates = await Promise.all(
       result.rows.map(async (row: any) => {
         console.log(`[API] Traitement de l'événement ${row.id} (Wikidata ID: ${row.wikidata_id})`);
-        const date = await getEventDateFromWikidata(row.wikidata_id);
+        let date = row.date;
+        
+        // Si pas de date en base, on la récupère depuis Wikidata
+        if (!date && row.wikidata_id) {
+          date = await getEventDateFromWikidata(row.wikidata_id);
+          // Mettre à jour la date en base de données
+          if (date) {
+            await dbQuery(
+              'UPDATE events.events SET date = $1 WHERE id = $2',
+              [date, row.id]
+            );
+          }
+        }
+
         const event = {
           id: row.id,
           wikidata_id: row.wikidata_id,
@@ -199,14 +201,10 @@ router.get('/events', async (req, res) => {
           createdAt: row.created_at,
           updatedAt: row.updated_at
         };
-        console.log(`[API] Événement traité :`, event);
         return event;
       })
     );
 
-    console.log('########################## DEBUG OBJ EVENT ##########################');
-    console.log(JSON.stringify(eventsWithDates[0], null, 2));
-    console.log('#####################################################################');
     res.json(eventsWithDates);
   } catch (error) {
     console.error('[API] Erreur lors de la récupération des événements:', error);

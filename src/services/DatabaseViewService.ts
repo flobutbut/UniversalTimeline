@@ -106,7 +106,7 @@ export class DatabaseViewService {
         wikidata_id: (event as any).wikidata_id || '',
         label: event.label,
         description: (event as any).description ?? { fr: '', en: '' },
-        date: (event as any).date || '',
+        date: (event as any).date || (event as any).temporalData?.[0]?.date || '',
         categories: (event as any).categories ?? [],
         createdAt: (event as any).createdAt ?? new Date(),
         updatedAt: (event as any).updatedAt ?? new Date()
