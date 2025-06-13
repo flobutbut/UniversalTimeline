@@ -1,318 +1,172 @@
 <template>
-  <div class="search-container">
+  <div 
+    class="search-bar" 
+    :class="{ 
+      'search-bar--minified': minified,
+      'search-bar--naked': naked,
+      'is-expanded': isExpanded
+    }"
+  >
     <div class="search-input-wrapper">
-      <Search class="search-icon" />
       <input
-        v-model="searchQuery"
+        v-if="!minified || isExpanded"
+        ref="searchInput"
+        v-model="searchValue"
         type="text"
-        placeholder="Rechercher une période ou un événement..."
         class="search-input"
-        @focus="showResults = true"
-        @blur="handleBlur"
+        :placeholder="placeholder"
+        @input="handleInput"
       />
       <button
-        v-if="searchQuery"
-        class="reset-button"
-        @click="handleReset"
-        @mousedown.prevent
+        ref="toggleButton"
+        class="search-toggle"
+        @click="toggleExpand"
+        :aria-label="isExpanded ? 'Réduire la recherche' : 'Agrandir la recherche'"
       >
-        <X class="reset-icon" />
+        <Icon :icon="isExpanded ? 'mdi:close' : 'mdi:magnify'" />
       </button>
-    </div>
-
-    <!-- Résultats de recherche -->
-    <SearchResults
-      v-if="showResults && searchResults.length > 0"
-      :results="searchResults"
-      @select="handleSelect"
-    />
-
-    <!-- État de chargement -->
-    <div v-if="isSearching" class="loading-state">
-      <Loader2 class="animate-spin" />
-    </div>
-
-    <!-- Message d'erreur -->
-    <div v-if="error" class="error-message">
-      {{ error }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { Search, Loader2, X } from 'lucide-vue-next'
-import { debounce } from 'lodash-es'
-import { WikidataSearchService, type SearchResult } from '../services/WikidataSearchService'
-import { DatabaseImportService } from '../services/DatabaseImportService'
-import { DateFormatter } from '../utils/dateFormatter'
-import SearchResults from './SearchResults.vue'
+import { ref, watch } from 'vue';
+import { Icon } from '@iconify/vue';
 
-const searchService = WikidataSearchService.getInstance()
-const importService = DatabaseImportService.getInstance()
-
-const searchQuery = ref('')
-const searchResults = ref<SearchResult[]>([])
-const showResults = ref(false)
-const error = ref<string | null>(null)
-const selectedIndex = ref(-1)
-const isSearching = ref(false)
-
-const handleSearch = async () => {
-  console.log('🔍 Début de la recherche dans le composant')
-  if (!searchQuery.value.trim()) {
-    console.log('❌ Requête vide, annulation')
-    searchResults.value = []
-    return
-  }
-
-  try {
-    console.log('🔄 Démarrage de la recherche pour:', searchQuery.value)
-    isSearching.value = true
-    error.value = null
-    searchResults.value = await searchService.search(searchQuery.value)
-    console.log('✅ Résultats reçus:', searchResults.value.length)
-  } catch (err) {
-    console.error('❌ Erreur lors de la recherche:', err)
-    error.value = 'Erreur lors de la recherche'
-    searchResults.value = []
-  } finally {
-    console.log('🏁 Fin de la recherche')
-    isSearching.value = false
-  }
+interface Props {
+  modelValue: string;
+  placeholder?: string;
+  minified?: boolean;
+  naked?: boolean;
 }
 
-// Debounce la recherche
-let searchTimeout: NodeJS.Timeout | null = null
-watch(searchQuery, (newValue) => {
-  console.log('📝 Changement de la requête:', newValue)
-  if (searchTimeout) {
-    console.log('⏱️ Annulation du timeout précédent')
-    clearTimeout(searchTimeout)
-  }
-  searchTimeout = setTimeout(() => {
-    console.log('⏱️ Déclenchement de la recherche après debounce')
-    handleSearch()
-  }, 300)
-})
+const props = withDefaults(defineProps<Props>(), {
+  placeholder: 'Rechercher...',
+  minified: false,
+  naked: false
+});
 
-// Gestionnaire de sélection
-const handleSelect = (result: SearchResult) => {
-  searchQuery.value = result.label
-  showResults.value = false
-  selectedIndex.value = -1
-  
-  // Ouvrir la page Wikidata dans un nouvel onglet
-  const wikidataUrl = `https://www.wikidata.org/wiki/${result.id}`
-  window.open(wikidataUrl, '_blank')
-}
+const emit = defineEmits(['update:modelValue']);
 
-// Gestionnaire de focus
-const handleFocus = () => {
-  showResults.value = true
-}
+const searchValue = ref(props.modelValue);
+const isExpanded = ref(false);
+const searchInput = ref<HTMLInputElement | null>(null);
+const toggleButton = ref<HTMLButtonElement | null>(null);
 
-// Gestionnaire de clic en dehors
-const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('.search-input-wrapper')) {
-    showResults.value = false
-  }
-}
+watch(() => props.modelValue, (newValue) => {
+  searchValue.value = newValue;
+});
 
-// Gestionnaire de navigation au clavier
-const handleKeyDown = (event: KeyboardEvent) => {
-  if (!showResults.value) return
+const handleInput = () => {
+  emit('update:modelValue', searchValue.value);
+};
 
-  switch (event.key) {
-    case 'ArrowDown':
-      event.preventDefault()
-      selectedIndex.value = Math.min(selectedIndex.value + 1, searchResults.value.length - 1)
-      break
-    case 'ArrowUp':
-      event.preventDefault()
-      selectedIndex.value = Math.max(selectedIndex.value - 1, -1)
-      break
-    case 'Enter':
-      event.preventDefault()
-      if (selectedIndex.value >= 0 && selectedIndex.value < searchResults.value.length) {
-        handleSelect(searchResults.value[selectedIndex.value])
+const toggleExpand = () => {
+  isExpanded.value = !isExpanded.value;
+  if (!isExpanded.value) {
+    searchValue.value = '';
+    emit('update:modelValue', '');
+    if (searchInput.value) {
+      searchInput.value.blur();
+    }
+    if (toggleButton.value) {
+      toggleButton.value.blur();
+    }
+  } else {
+    setTimeout(() => {
+      if (searchInput.value) {
+        searchInput.value.focus();
       }
-      break
-    case 'Escape':
-      event.preventDefault()
-      showResults.value = false
-      selectedIndex.value = -1
-      break
+    }, 0);
   }
-}
-
-// Gestionnaire de blur avec délai pour permettre le clic
-const handleBlur = () => {
-  setTimeout(() => {
-    showResults.value = false
-  }, 200)
-}
-
-// Formatage de la date
-const formatDate = (date: string) => {
-  return DateFormatter.format(date, 'geological')
-}
-
-// Gestionnaire de réinitialisation
-const handleReset = () => {
-  searchQuery.value = ''
-  searchResults.value = []
-  showResults.value = false
-  selectedIndex.value = -1
-}
-
-// Nettoyage
-onMounted(() => {
-  window.addEventListener('keydown', handleKeyDown)
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown)
-  document.removeEventListener('click', handleClickOutside)
-  if (searchTimeout) {
-    clearTimeout(searchTimeout)
-  }
-})
+};
 </script>
 
 <style scoped>
-.search-container {
+.search-bar {
   position: relative;
-  width: 100%;
-  max-width: 600px;
+  width: fit-content;
+  min-width: 32px;
 }
 
 .search-input-wrapper {
-  position: relative;
   display: flex;
   align-items: center;
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-neutral-0);
   border: 1px solid var(--color-border);
-  transition: all var(--transition-normal);
-  height: 40px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  width: 100%;
+  height: 32px;
 }
 
-.search-input-wrapper:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
-}
-
-.search-icon {
-  color: var(--color-text-light);
-  margin-right: var(--spacing-sm);
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
+.search-bar--minified .search-input-wrapper {
+  width: 32px;
   justify-content: center;
+}
+
+.search-bar--minified.is-expanded .search-input-wrapper {
+  width: 200px;
+  padding: 0 var(--spacing-sm);
+}
+
+.search-bar--naked .search-input-wrapper {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.search-bar--naked .search-input-wrapper:focus-within {
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-sm);
 }
 
 .search-input {
-  width: 100%;
-  background: transparent !important;
+  flex: 1;
+  min-width: 120px;
+  height: 32px;
+  padding: 0 16px;
   border: none;
-  outline: none;
-  color: var(--color-text);
+  background: transparent;
+  color: var(--text-color);
   font-size: var(--font-size-base);
-  height: 100%;
-  display: flex;
-  align-items: center;
-  padding: 0;
-  box-shadow: none;
+  outline: none;
+  transition: all 0.2s ease;
+
+  &:focus {
+    background: transparent;
+  }
 }
 
-.search-input:focus,
-.search-input:active,
-.search-input:hover {
-  background: transparent !important;
-  box-shadow: none;
-}
-
-/* Pour l'autofill (Chrome, Safari) */
-.search-input:-webkit-autofill,
-.search-input:-webkit-autofill:focus,
-.search-input:-webkit-autofill:hover,
-.search-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
-  box-shadow: 0 0 0 1000px transparent inset !important;
-  background: transparent !important;
-  color: var(--color-text) !important;
-  -webkit-text-fill-color: var(--color-text) !important;
-  transition: background-color 5000s ease-in-out 0s;
-}
-
-.search-input::placeholder {
-  color: var(--color-text-light);
-}
-
-.search-results {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: var(--spacing-xs);
-  background-color: var(--color-neutral-100);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  max-height: 400px;
-  overflow-y: auto;
-  z-index: var(--z-index-dropdown);
-}
-
-.loading-state {
-  position: absolute;
-  right: var(--spacing-md);
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-text-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.error-message {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: var(--spacing-xs);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--color-neutral-100);
-  color: var(--color-error);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-}
-
-.reset-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.search-toggle {
   background: none;
   border: none;
   padding: 0;
-  cursor: pointer;
   color: var(--color-text-light);
-  transition: var(--transition-fast);
-  margin-left: var(--spacing-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
 }
 
-.reset-button:hover {
-  color: var(--color-text);
+.search-toggle:hover {
+  color: var(--color-primary);
 }
 
-.reset-icon {
-  width: 16px;
-  height: 16px;
+.search-toggle .iconify {
+  width: 20px;
+  height: 20px;
+}
+
+.search-bar--naked {
+  .search-input {
+    &:focus {
+      background: transparent;
+    }
+  }
 }
 </style> 

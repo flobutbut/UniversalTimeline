@@ -13,11 +13,11 @@
         <div class="column-header">
           <h2>Périodes</h2>
           <div class="header-actions">
-            <input
+            <SearchBar
               v-model="periodSearch"
-              type="text"
-              class="search-input"
-              placeholder="Rechercher..."
+              placeholder="Rechercher une période..."
+              :minified="true"
+              :naked="true"
             />
             <button class="action-button" @click="handleAddPeriod">Add</button>
           </div>
@@ -39,11 +39,11 @@
         <div class="column-header">
           <h2>Événements</h2>
           <div class="header-actions">
-            <input
+            <SearchBar
               v-model="eventSearch"
-              type="text"
-              class="search-input"
-              placeholder="Rechercher..."
+              placeholder="Rechercher un événement..."
+              :minified="true"
+              :naked="true"
             />
             <button class="action-button" @click="handleAddEvent">Add</button>
           </div>
@@ -164,6 +164,7 @@ import { onMounted, ref, computed } from 'vue';
 import { DatabaseViewService } from '../services/DatabaseViewService';
 import DatabaseCard from './DatabaseCard.vue';
 import EditModal from './EditModal.vue';
+import SearchBar from './SearchBar.vue';
 import type { Event, Period, Story, ListPeriod, ListEvent, ListStory } from '../types/database';
 import { DatabaseQueryService } from '../services/DatabaseQueryService';
 

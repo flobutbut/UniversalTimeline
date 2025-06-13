@@ -29,20 +29,11 @@ export class WikidataQueryService {
     return `
       SELECT DISTINCT 
         ?item ?itemLabel ?itemDescriptionFr ?itemDescriptionEn
-        ?startDate ?endDate 
+        ?startDate ?endDate ?formationDate
         ?startLocationLabel ?endLocationLabel
         (COUNT(DISTINCT ?child) AS ?childCount)
       WHERE {
         VALUES ?item { wd:${periodId} }
-        
-        # Filtrage : au moins une date doit exister
-        {
-          ?item p:P580 ?startStatement.
-          ?startStatement ps:P580 ?startDate.
-        } UNION {
-          ?item p:P582 ?endStatement.
-          ?endStatement ps:P582 ?endDate.
-        }
         
         # Labels
         SERVICE wikibase:label { 
@@ -60,6 +51,11 @@ export class WikidataQueryService {
         OPTIONAL {
           ?item schema:description ?itemDescriptionEn.
           FILTER(LANG(?itemDescriptionEn) = "en")
+        }
+
+        # Date de formation (P571)
+        OPTIONAL {
+          ?item wdt:P571 ?formationDate.
         }
 
         # Start time avec localisations
@@ -93,8 +89,7 @@ export class WikidataQueryService {
           ?child wdt:P361 ?item.
         }
       }
-      GROUP BY ?item ?itemLabel ?itemDescriptionFr ?itemDescriptionEn ?startDate ?endDate ?startLocationLabel ?endLocationLabel
-      ORDER BY ?startDate
+      GROUP BY ?item ?itemLabel ?itemDescriptionFr ?itemDescriptionEn ?startDate ?endDate ?formationDate ?startLocationLabel ?endLocationLabel
     `;
   }
 
@@ -135,63 +130,54 @@ export class WikidataQueryService {
   }
 
   private transformToPeriod(binding: WikidataBinding): Period | null {
-    // Validation des données
-    if (!this.isValidPeriod(binding)) {
+    console.log('[WikidataQueryService] Transformation du binding:', binding);
+    
+    if (!binding.item?.value) {
+      console.log('[WikidataQueryService] Pas de valeur item dans le binding');
       return null;
     }
 
-    const periodId = binding.item?.value.split('/').pop() || '';
-    const startLocation = binding.startLocationLabel?.value || "Globale";
-    const endLocation = binding.endLocationLabel?.value || "Globale";
-    const locations = new Set([startLocation, endLocation]);
+    const periodId = binding.item.value.split('/').pop() || '';
+    const locations = new Set<string>();
 
-    // Créer un objet TemporalLocation pour chaque combinaison de dates et localisations
-    const temporalData: TemporalLocation[] = [];
-    
-    // Si les localisations sont identiques, créer un seul objet avec les deux dates
-    if (startLocation === endLocation) {
-      temporalData.push({
-        startDate: binding.startDate?.value,
-        endDate: binding.endDate?.value || 'TODAY',
-        location: startLocation
-      });
-    } else {
-      // Sinon, créer des objets séparés pour chaque localisation
-      if (binding.startDate?.value) {
-        temporalData.push({
-          startDate: binding.startDate.value,
-          location: startLocation
-        });
-      }
-      
-      if (binding.endDate?.value) {
-        temporalData.push({
-          endDate: binding.endDate.value,
-          location: endLocation
-        });
-      } else {
-        temporalData.push({
-          endDate: 'TODAY',
-          location: endLocation
-        });
-      }
+    // Créer les données temporelles avec les dates disponibles
+    const temporalData: TemporalLocation[] = [{
+      startDate: binding.formationDate?.value || binding.startDate?.value || '',
+      endDate: binding.endDate?.value || 'TODAY',
+      location: binding.startLocationLabel?.value || binding.endLocationLabel?.value || "Globale"
+    }];
+
+    // Ajouter la localisation si elle existe
+    const location = binding.startLocationLabel?.value || binding.endLocationLabel?.value;
+    if (location) {
+      locations.add(location);
     }
 
-    console.log('[WikidataQueryService] Données transformées:', {
-      id: periodId,
-      label: binding.itemLabel?.value,
-      descriptionFr: binding.itemDescriptionFr?.value,
-      descriptionEn: binding.itemDescriptionEn?.value,
-      temporalData
+    // Gestion des labels et descriptions
+    const label = binding.itemLabel?.value;
+    const description = {
+      fr: binding.itemDescriptionFr?.value || '',
+      en: binding.itemDescriptionEn?.value || ''
+    };
+
+    console.log('[WikidataQueryService] Données extraites:', {
+      periodId,
+      label,
+      description,
+      temporalData,
+      locations: Array.from(locations)
     });
 
-    return {
+    if (!label) {
+      console.log('[WikidataQueryService] Pas de label trouvé');
+      return null;
+    }
+
+    // Créer la période avec les données de base
+    const period: Period = {
       id: periodId,
-      label: binding.itemLabel?.value || '',
-      description: {
-        fr: binding.itemDescriptionFr?.value || '',
-        en: binding.itemDescriptionEn?.value || ''
-      },
+      label,
+      description,
       temporalData,
       hasChildren: parseInt(binding.childCount?.value || '0') > 0,
       isMainEon: this.isMainEon(periodId),
@@ -203,6 +189,9 @@ export class WikidataQueryService {
       locations: Array.from(locations),
       directLocations: Array.from(locations)
     };
+
+    console.log('[WikidataQueryService] Période créée:', period);
+    return period;
   }
 
   private transformChildToPeriod(binding: WikidataBinding): Period {
@@ -211,6 +200,10 @@ export class WikidataQueryService {
     return {
       id: periodId,
       label: binding.childLabel?.value || '',
+      description: {
+        fr: '',
+        en: ''
+      },
       temporalData: [],
       hasChildren: parseInt(binding.childCount?.value || '0') > 0,
       isMainEon: this.isMainEon(periodId),
@@ -248,11 +241,16 @@ export class WikidataQueryService {
   async loadPeriod(periodId: string): Promise<Period> {
     return this.retryOperation(async () => {
       try {
+        const query = this.buildTemporalQuery(periodId);
+        console.log('[WikidataQueryService] Requête SPARQL:', query);
+
         const temporalResponse = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
-          params: { query: this.buildTemporalQuery(periodId), format: 'json' },
+          params: { query, format: 'json' },
           timeout: REQUEST_TIMEOUT,
           headers: { 'Accept': 'application/sparql-results+json' }
         });
+
+        console.log('[WikidataQueryService] Réponse Wikidata brute:', temporalResponse.data);
 
         if (!temporalResponse.data?.results?.bindings?.length) {
           throw new Error(`Aucune donnée trouvée pour la période ${periodId}`);
@@ -260,8 +258,13 @@ export class WikidataQueryService {
 
         // Transformation et filtrage des périodes
         const periods = temporalResponse.data.results.bindings
-          .map(binding => this.transformToPeriod(binding))
+          .map(binding => {
+            console.log('[WikidataQueryService] Binding à transformer:', binding);
+            return this.transformToPeriod(binding);
+          })
           .filter((period): period is Period => period !== null);
+
+        console.log('[WikidataQueryService] Périodes transformées:', periods);
 
         if (periods.length === 0) {
           throw new Error(`Aucune période valide trouvée pour ${periodId}`);
@@ -269,6 +272,7 @@ export class WikidataQueryService {
 
         // 2. Regrouper les périodes par localisation
         const groupedPeriods = this.groupPeriodsByLocation(periods);
+        console.log('[WikidataQueryService] Périodes groupées:', groupedPeriods);
 
         // 4. Charger les enfants
         const childrenResponse = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
@@ -276,6 +280,8 @@ export class WikidataQueryService {
           timeout: REQUEST_TIMEOUT,
           headers: { 'Accept': 'application/sparql-results+json' }
         });
+
+        console.log('[WikidataQueryService] Réponse enfants brute:', childrenResponse.data);
 
         // 5. Charger les données temporelles pour chaque enfant
         const childrenPromises = childrenResponse.data.results.bindings.map(async binding => {
@@ -309,11 +315,14 @@ export class WikidataQueryService {
         const children = childrenArrays.flat();
 
         // 6. Retourner la période avec ses enfants
-        return {
+        const result = {
           ...groupedPeriods[0],
           children,
           childrenPreloaded: true
         };
+
+        console.log('[WikidataQueryService] Résultat final:', result);
+        return result;
       } catch (error) {
         console.error(`[Debug] Erreur lors du chargement de la période ${periodId}:`, error);
         throw error;
@@ -322,6 +331,15 @@ export class WikidataQueryService {
   }
 
   private groupPeriodsByLocation(periods: Period[]): Period[] {
+    if (periods.length === 0) {
+      return [];
+    }
+
+    // Si la période n'a pas de données temporelles, la retourner telle quelle
+    if (periods[0].temporalData.length === 0) {
+      return [periods[0]];
+    }
+
     const locationGroups = new Map<string, Period>();
 
     periods.forEach(period => {

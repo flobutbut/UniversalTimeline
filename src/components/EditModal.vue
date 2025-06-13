@@ -28,9 +28,6 @@
                 :error="qidError"
                 @blur="validateQid"
               />
-              <div v-if="qidExistsInBase" class="qid-alert">
-                <span>Ce Q-id existe déjà dans la base. Vous ne pouvez pas créer un doublon.</span>
-              </div>
             </div>
           </template>
           <div class="form-group">
@@ -370,34 +367,43 @@ const fillFromWikidata = async () => {
   }
 
   try {
+    console.log('[EditModal] Début du chargement Wikidata pour Q-id:', form.qid);
     let data;
     if (props.type === 'period') {
       data = await wikidataService.loadPeriod(form.qid);
+      console.log('[EditModal] Données période reçues:', data);
     } else if (props.type === 'event') {
       data = await wikidataService.loadEvent(form.qid);
+      console.log('[EditModal] Données événement reçues:', data);
     } else {
       showError('Type non supporté pour Wikidata');
       return;
     }
 
     if (data) {
-      if (typeof data.label === 'object' && data.label !== null) {
-        const labelObj = data.label as { fr?: string; en?: string };
-        form.title.fr = labelObj.fr || '';
-        form.title.en = labelObj.en || '';
-      } else {
-        form.title.fr = data.label || '';
-        form.title.en = data.label || '';
+      console.log('[EditModal] Traitement des données reçues');
+      
+      // Gestion des labels
+      if (typeof data.label === 'string') {
+        console.log('[EditModal] Label unique reçu:', data.label);
+        form.title.fr = data.label;
+        form.title.en = data.label;
+      } else if (typeof data.label === 'object' && data.label !== null) {
+        console.log('[EditModal] Labels reçus:', data.label);
+        form.title.fr = data.label.fr || '';
+        form.title.en = data.label.en || '';
       }
-      if (typeof data.description === 'object' && data.description !== null) {
-        const descObj = data.description as { fr?: string; en?: string };
-        form.description.fr = descObj.fr || '';
-        form.description.en = descObj.en || '';
-      } else {
-        form.description.fr = data.description || '';
-        form.description.en = data.description || '';
+
+      // Gestion des descriptions
+      if (data.description) {
+        console.log('[EditModal] Descriptions reçues:', data.description);
+        form.description.fr = data.description.fr || '';
+        form.description.en = data.description.en || '';
       }
+
+      // Gestion des données temporelles pour les périodes
       if (props.type === 'period' && 'temporalData' in data && Array.isArray(data.temporalData) && data.temporalData.length > 0) {
+        console.log('[EditModal] Données temporelles reçues:', data.temporalData);
         const temporalData = data.temporalData[0];
         if (temporalData.startDate) {
           form.startDate = temporalData.startDate;
@@ -405,14 +411,17 @@ const fillFromWikidata = async () => {
         if (temporalData.endDate) {
           form.endDate = temporalData.endDate;
         }
+        if (temporalData.location) {
+          form.temporalLocation = temporalData.location;
+        }
       }
-      if (props.type === 'event' && 'date' in data && typeof data.date === 'string') {
-        form.date = data.date;
-      }
-      showSuccess('Données Wikidata chargées avec succès');
+
+      console.log('[EditModal] État final du formulaire:', form);
+      showSuccess('Données chargées depuis Wikidata');
     }
   } catch (error) {
-    showError('Erreur lors du chargement des données Wikidata');
+    console.error('[EditModal] Erreur lors du chargement depuis Wikidata:', error);
+    showError('Erreur lors du chargement depuis Wikidata');
   }
 };
 </script>
@@ -548,12 +557,6 @@ const fillFromWikidata = async () => {
   .form-grid {
     grid-template-columns: 1fr;
   }
-}
-.qid-alert {
-  color: var(--color-error);
-  font-size: var(--font-size-sm);
-  margin-top: var(--spacing-xs);
-  font-weight: 600;
 }
 .loading-overlay {
   display: flex;

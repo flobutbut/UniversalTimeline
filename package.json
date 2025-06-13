@@ -13,6 +13,7 @@
     "server": "NODE_OPTIONS='--loader ts-node/esm' ts-node --esm server/index.ts"
   },
   "dependencies": {
+    "@iconify/vue": "^5.0.0",
     "@prisma/client": "^6.5.0",
     "@types/lodash-es": "^4.17.12",
     "@types/pg": "^8.11.11",

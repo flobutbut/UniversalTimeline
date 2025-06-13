@@ -68,6 +68,7 @@ const handleEdit = () => {
   margin: 0;
   font-size: var(--font-size-base);
   color: var(--color-text);
+  font-weight: normal;
 }
 
 .card-row {
