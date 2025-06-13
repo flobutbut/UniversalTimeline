@@ -2,7 +2,11 @@
   <div v-if="isOpen" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>{{ mode === 'edit' ? 'Modifier' : 'Créer' }} {{ type === 'period' ? 'une période' : 'un événement' }}</h2>
+        <h2>{{ mode === 'edit' ? 'Modifier' : 'Créer' }} {{ 
+          type === 'period' ? 'une période' : 
+          type === 'event' ? 'un événement' : 
+          'une story' 
+        }}</h2>
       </div>
       <div v-if="loading" class="loading-overlay">
         <div class="spinner"></div>
@@ -15,18 +19,20 @@
       </div>
       <form v-else @submit.prevent="handleSubmit" class="modal-form">
         <div class="form-grid">
-          <div class="form-group">
-            <Input
-              v-model="form.qid"
-              label="Q-id Wikidata"
-              placeholder="Q12345"
-              :error="qidError"
-              @blur="validateQid"
-            />
-            <div v-if="qidExistsInBase" class="qid-alert">
-              <span>Ce Q-id existe déjà dans la base. Vous ne pouvez pas créer un doublon.</span>
+          <template v-if="type !== 'story'">
+            <div class="form-group">
+              <Input
+                v-model="form.qid"
+                label="Q-id Wikidata"
+                placeholder="Q12345"
+                :error="qidError"
+                @blur="validateQid"
+              />
+              <div v-if="qidExistsInBase" class="qid-alert">
+                <span>Ce Q-id existe déjà dans la base. Vous ne pouvez pas créer un doublon.</span>
+              </div>
             </div>
-          </div>
+          </template>
           <div class="form-group">
             <Input
               v-model="form.title.fr"
@@ -82,7 +88,7 @@
               <input v-model="form.temporalLocation" type="text" />
             </div>
           </template>
-          <template v-else>
+          <template v-else-if="type === 'event'">
             <div class="form-group">
               <Input
                 v-model="form.date"
@@ -91,11 +97,27 @@
               />
             </div>
           </template>
+          <template v-else-if="type === 'story'">
+            <div class="form-group">
+              <Input
+                v-model="form.author"
+                label="Auteur"
+                placeholder="Nom de l'auteur"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" v-model="form.isPublic" />
+                Story publique
+              </label>
+            </div>
+          </template>
         </div>
         <div class="form-actions">
           <div class="left-actions">
             <Button
-              v-if="mode === 'edit' && form.qid"
+              v-if="mode === 'edit' && form.qid && type !== 'story'"
               variant="secondary"
               icon="fas fa-database"
               @click="fillFromWikidata"
@@ -108,7 +130,7 @@
             <Button
               variant="primary"
               type="submit"
-              :disabled="!isValid || qidExistsInBase"
+              :disabled="!isValid || (type !== 'story' && qidExistsInBase)"
             >
               {{ mode === 'edit' ? 'Mettre à jour' : 'Créer' }}
             </Button>
@@ -133,7 +155,7 @@ interface Category {
 
 const props = defineProps<{
   isOpen: boolean;
-  type: 'period' | 'event';
+  type: 'period' | 'event' | 'story';
   mode: 'create' | 'edit';
   data?: any;
   loading?: boolean;
@@ -148,15 +170,15 @@ const emit = defineEmits<{
 const queryService = DatabaseQueryService.getInstance();
 const wikidataService = WikidataQueryService.getInstance();
 
-const modalType = ref<'period' | 'event'>(props.type);
+const modalType = ref<'period' | 'event' | 'story'>(props.type);
 const isCreateMode = ref<boolean>(props.mode === 'create');
 const open = ref<boolean>(props.isOpen);
 
 const form = reactive({
   qid: props.data?.wikidata_id || '',
   title: {
-    fr: props.data?.label?.fr || '',
-    en: props.data?.label?.en || ''
+    fr: props.data?.label?.fr || props.data?.title?.fr || '',
+    en: props.data?.label?.en || props.data?.title?.en || ''
   },
   description: {
     fr: props.data?.description?.fr || '',
@@ -166,7 +188,9 @@ const form = reactive({
   endDate: props.data?.temporalData?.[0]?.endDate || '',
   date: props.data?.date || '',
   parentId: props.data?.parent_id || '',
-  temporalLocation: props.data?.temporal_location || ''
+  temporalLocation: props.data?.temporal_location || '',
+  author: props.data?.author || '',
+  isPublic: props.data?.isPublic || false
 });
 
 const qidExistsInBase = ref(false);
@@ -174,7 +198,7 @@ const existingItem = ref<any>(null);
 const qidError = ref('');
 
 const isValid = computed(() => {
-  if (!form.qid) return false;
+  if (props.type !== 'story' && !form.qid) return false;
   if (!form.title.fr) return false;
   if (props.type === 'period') {
     if (!form.startDate || !form.endDate) return false;
@@ -188,7 +212,6 @@ watch(
   () => props.data,
   (val) => {
     if (props.mode === 'edit' && val) {
-      console.log('[EditModal] Données reçues pour édition:', val)
       form.qid = val.wikidata_id || '';
       form.title.fr = val.label?.fr || '';
       form.title.en = val.label?.en || '';
@@ -202,7 +225,6 @@ watch(
       qidExistsInBase.value = false;
       existingItem.value = val;
     } else {
-      // Réinitialisation du formulaire
       form.qid = '';
       form.title.fr = '';
       form.title.en = '';
@@ -251,33 +273,27 @@ const validateQid = async () => {
 };
 
 const closeModal = () => {
-  console.log('[EditModal] Fermeture de la modale');
   open.value = false;
   emit('close');
 }
 
 const handleSubmit = async () => {
   try {
-    // Validation du Q-id
-    if (!form.qid || !form.qid.match(/^Q\d+$/)) {
+    if (props.type !== 'story' && (!form.qid || !form.qid.match(/^Q\d+$/))) {
       window.showToast('Le Q-id doit commencer par Q suivi de chiffres', 'error');
       return;
     }
 
-    // Vérification de l'existence d'un conflit de QID
     let conflict = null;
     if (props.type === 'event') {
       try {
         const existing = await queryService.getEventById(form.qid);
-        // Si l'événement trouvé n'est pas celui en cours d'édition, il y a conflit
         if (existing && existing.id !== props.data.id) {
           conflict = existing;
         }
       } catch (e) { /* Pas de conflit si non trouvé */ }
     }
-    // (On pourrait faire pareil pour les périodes)
 
-    // Si conflit, suppression de l'objet conflictuel
     if (conflict) {
       await queryService.deleteEvent(conflict.id);
       window.showToast('Un événement avec ce Q-id existait déjà. Il a été supprimé automatiquement.', 'error');
@@ -292,15 +308,15 @@ const handleSubmit = async () => {
       end_date: form.endDate,
       parent_id: form.parentId,
       temporal_location: form.temporalLocation,
+      author: form.author,
+      isPublic: form.isPublic
     };
     if ('id' in formData) {
       delete formData.id;
     }
-    console.log('[EditModal] Données à soumettre:', formData);
     emit('submit', formData);
     closeModal();
   } catch (error) {
-    console.error('[EditModal] Erreur lors de la soumission:', error);
     window.showToast('Erreur lors de la soumission du formulaire', 'error');
   }
 }
@@ -309,12 +325,11 @@ function close() {
   emit('close');
 }
 
-const openModal = (type: 'period' | 'event', mode: 'create' | 'edit', data?: any) => {
+const openModal = (type: 'period' | 'event' | 'story', mode: 'create' | 'edit', data?: any) => {
   modalType.value = type
   isCreateMode.value = mode === 'create'
   open.value = true
 
-  // Réinitialiser le formulaire
   form.qid = '';
   form.title.fr = '';
   form.title.en = '';
@@ -326,9 +341,7 @@ const openModal = (type: 'period' | 'event', mode: 'create' | 'edit', data?: any
   form.parentId = '';
   form.temporalLocation = '';
 
-  // En mode édition, préremplir les champs
   if (mode === 'edit' && data) {
-    console.log('Mode édition - Données reçues:', data)
     form.qid = data.wikidata_id || data.qid || data.wikidataId || '';
     form.title.fr = data.label?.fr || data.title?.fr || '';
     form.title.en = data.label?.en || data.title?.en || '';
@@ -339,7 +352,6 @@ const openModal = (type: 'period' | 'event', mode: 'create' | 'edit', data?: any
     form.endDate = data.end_date || '';
     form.parentId = data.parent_id || '';
     form.temporalLocation = data.temporal_location || '';
-    console.log('Formulaire prérempli:', form)
   }
 }
 
@@ -369,7 +381,6 @@ const fillFromWikidata = async () => {
     }
 
     if (data) {
-      // Mise à jour des champs du formulaire
       if (typeof data.label === 'object' && data.label !== null) {
         const labelObj = data.label as { fr?: string; en?: string };
         form.title.fr = labelObj.fr || '';
@@ -401,7 +412,6 @@ const fillFromWikidata = async () => {
       showSuccess('Données Wikidata chargées avec succès');
     }
   } catch (error) {
-    console.error('Erreur lors du chargement des données Wikidata:', error);
     showError('Erreur lors du chargement des données Wikidata');
   }
 };

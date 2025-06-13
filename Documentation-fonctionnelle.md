@@ -659,3 +659,33 @@ La vue base de données permet d'afficher et de gérer les données historiques 
 - Les dates des événements sont récupérées intelligemment depuis Wikidata (point in time, date de début, date de naissance, date la plus ancienne).
 - L'utilisateur peut éditer un événement même si la date Wikidata n'est pas renseignée (champ éditable).
 - L'interface est plus rapide grâce au chargement différé des données détaillées. 
+
+## Gestion des Stories
+
+### Création d'une Story
+1. Dans la vue principale, cliquer sur le bouton "Add" dans la colonne Stories
+2. Remplir le formulaire :
+   - Titre en français (obligatoire)
+   - Titre en anglais (optionnel, utilise le titre français par défaut)
+   - Description en français (optionnel)
+   - Description en anglais (optionnel)
+   - Auteur (obligatoire)
+   - Visibilité (publique par défaut)
+3. Cliquer sur "Créer" pour sauvegarder la story
+
+### Modification d'une Story
+1. Cliquer sur le bouton d'édition d'une story existante
+2. Modifier les champs souhaités
+3. Cliquer sur "Mettre à jour" pour sauvegarder les modifications
+
+### Affichage des Stories
+- Les stories sont affichées dans une colonne dédiée
+- Chaque story affiche :
+  - Son titre en français
+  - Ses catégories associées
+  - Un bouton d'édition
+
+### Gestion des erreurs
+- Affichage d'un message d'erreur en cas d'échec de création/modification
+- Validation des champs obligatoires avant soumission
+- Gestion des erreurs de connexion au serveur 

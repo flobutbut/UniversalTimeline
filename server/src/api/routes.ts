@@ -241,6 +241,40 @@ router.get('/stories', async (req, res) => {
   }
 });
 
+// Route pour créer une nouvelle story
+router.post('/stories', async (req, res) => {
+  try {
+    const { title, description, author, isPublic } = req.body;
+    
+    const sqlQuery = `
+      INSERT INTO stories.stories (
+        title_fr,
+        title_en,
+        description_fr,
+        description_en,
+        author,
+        is_public
+      ) VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id
+    `;
+    
+    const values = [
+      title.fr,
+      title.en || title.fr,
+      description?.fr || null,
+      description?.en || description?.fr || null,
+      author,
+      isPublic ?? true
+    ];
+    
+    const result = await dbQuery(sqlQuery, values);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Erreur lors de la création de la story:', error);
+    res.status(500).json({ error: 'Erreur lors de la création de la story' });
+  }
+});
+
 // Route pour obtenir les catégories
 router.get('/categories', async (req, res) => {
   try {

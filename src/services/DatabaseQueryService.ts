@@ -484,12 +484,60 @@ export class DatabaseQueryService {
           fr: story.title_fr,
           en: story.title_en || story.title_fr
         },
-        categories: story.categories || []
+        categories: story.categories || [],
+        createdAt: new Date(story.created_at || Date.now()),
+        updatedAt: new Date(story.updated_at || Date.now())
       }));
       
       return formattedStories;
     } catch (error) {
       console.error('[DatabaseQueryService] Erreur lors de la récupération des stories:', error);
+      throw error;
+    }
+  }
+
+  public async createStory(storyData: any): Promise<Story> {
+    try {
+      console.log('[DatabaseQueryService] Création d\'une nouvelle story:', storyData);
+      const response = await fetch('/api/stories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(storyData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la création de la story:', error);
+      throw error;
+    }
+  }
+
+  public async updateStory(storyId: number, storyData: any): Promise<Story> {
+    try {
+      console.log('[DatabaseQueryService] Mise à jour de la story:', storyId, storyData);
+      const response = await fetch(`/api/stories/${storyId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(storyData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la mise à jour de la story:', error);
       throw error;
     }
   }

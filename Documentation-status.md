@@ -105,6 +105,12 @@
 - Optimisation des performances
 - Tests unitaires
 
+### Fonctionnalités récemment ajoutées
+- [x] Gestion complète des stories (création, modification, affichage)
+- [x] Interface utilisateur pour la gestion des stories
+- [x] API backend pour les stories
+- [x] Intégration avec la base de données
+
 ### Performance
 - Temps de chargement initial : < 2s
 - Temps de navigation : < 1s
@@ -328,4 +334,10 @@
 - Robustesse accrue sur la gestion des QID Wikidata (unicité, suppression automatique en cas de conflit).
 - Suppression automatique fonctionnelle via la nouvelle route DELETE côté backend.
 - Récupération des dates d'événements enrichie (P585, P580, P569, P1319).
-- Payloads nettoyés avant envoi au backend. 
+- Payloads nettoyés avant envoi au backend.
+
+## Prochaines étapes
+- [ ] Ajout de la gestion des catégories pour les stories
+- [ ] Implémentation de la liaison stories-périodes
+- [ ] Implémentation de la liaison stories-événements
+- [ ] Amélioration de l'interface utilisateur pour la gestion des stories 

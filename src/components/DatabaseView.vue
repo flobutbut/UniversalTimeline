@@ -116,7 +116,7 @@ const error = ref<string | null>(null);
 // Modale
 const showAddModal = ref(false);
 const showEditModal = ref(false);
-const currentType = ref<'period' | 'event'>('period');
+const currentType = ref<'period' | 'event' | 'story'>('period');
 const currentItem = ref<any>(null);
 const currentMode = ref<'create' | 'edit'>('create');
 
@@ -147,7 +147,7 @@ const filteredEvents = computed(() => {
   );
 });
 
-function openAddModal(type: 'period' | 'event') {
+function openAddModal(type: 'period' | 'event' | 'story') {
   // Fermer d'abord la modale d'édition si elle est ouverte
   if (showEditModal.value) {
     closeEditModal();
@@ -162,8 +162,7 @@ function closeAddModal() {
   currentItem.value = null;
 }
 
-async function openEditModal(type: 'period' | 'event', item: any) {
-  console.log('[DatabaseView] Ouverture de la modale d\'édition:', { type, item });
+async function openEditModal(type: 'period' | 'event' | 'story', item: any) {
   // Fermer d'abord la modale d'ajout si elle est ouverte
   if (showAddModal.value) {
     closeAddModal();
@@ -180,10 +179,11 @@ async function openEditModal(type: 'period' | 'event', item: any) {
       currentItem.value = await databaseService.loadFullPeriod(item.id);
     } else if (type === 'event') {
       currentItem.value = await databaseService.loadFullEvent(item.id);
+    } else if (type === 'story') {
+      currentItem.value = await databaseService.loadFullStory(item.id);
     }
     showEditModal.value = true;
   } catch (error: any) {
-    console.error('[DatabaseView] Erreur lors du chargement des données complètes:', error);
     if (error.message?.includes('404') || error.message?.includes('Not Found')) {
       loadingError.value = 'L\'élément n\'a pas été trouvé dans la base de données';
       window.showToast('L\'élément n\'a pas été trouvé dans la base de données', 'error');
@@ -203,58 +203,42 @@ function closeEditModal() {
 
 async function handleSave(formData: any) {
   try {
-    console.log('[DatabaseView] Début de la sauvegarde:', {
-      type: currentType.value,
-      mode: currentMode.value,
-      currentItem: currentItem.value,
-      formData
-    });
-    
     if (currentType.value === 'period') {
       if (currentMode.value === 'edit') {
-        console.log('[DatabaseView] Mise à jour de la période:', currentItem.value.id);
         await queryService.updatePeriod(currentItem.value.id, formData);
       } else {
-        console.log('[DatabaseView] Création d\'une nouvelle période');
         await queryService.createPeriod(formData);
       }
     } else if (currentType.value === 'event') {
       if (currentMode.value === 'edit') {
-        console.log('[DatabaseView] Mise à jour de l\'événement:', currentItem.value.id);
         const response = await queryService.updateEvent(currentItem.value.id, formData);
-        console.log('[DatabaseView] Réponse de la mise à jour:', response);
       } else {
-        console.log('[DatabaseView] Création d\'un nouvel événement');
         await queryService.createEvent(formData);
+      }
+    } else if (currentType.value === 'story') {
+      if (currentMode.value === 'edit') {
+        await queryService.updateStory(currentItem.value.id, formData);
+      } else {
+        await queryService.createStory(formData);
       }
     }
 
-    console.log('[DatabaseView] Rechargement des données...');
     // Recharger les données après la mise à jour
     await databaseService.loadListData();
     periods.value = databaseService.getPeriods();
     events.value = databaseService.getEvents();
     stories.value = databaseService.getStories();
     
-    console.log('[DatabaseView] Données rechargées:', {
-      periods: periods.value.length,
-      events: events.value.length,
-      stories: stories.value.length
-    });
-    
     closeAddModal();
     closeEditModal();
   } catch (error) {
-    console.error('[DatabaseView] Erreur lors de la sauvegarde:', error);
     window.showToast('Erreur lors de la sauvegarde des données', 'error');
   }
 }
 
 onMounted(async () => {
   try {
-    console.log('[DatabaseView] Chargement des données...');
     await databaseService.loadListData();
-    console.log('[DatabaseView] Données chargées');
     
     // Mettre à jour les refs avec les données du service
     periods.value = databaseService.getPeriods();
@@ -263,35 +247,29 @@ onMounted(async () => {
     loading.value = databaseService.getLoading();
     error.value = databaseService.getError();
     
-    console.log('[DatabaseView] Nombre d\'événements:', events.value.length);
-    console.log('[DatabaseView] Nombre de périodes:', periods.value.length);
-    console.log('[DatabaseView] Nombre de stories:', stories.value.length);
-    
     if (events.value.length > 0) {
-      console.log('[DatabaseView] Premier événement:', JSON.stringify(events.value[0], null, 2));
-    }
-    if (periods.value.length > 0) {
-      console.log('[DatabaseView] Première période:', JSON.stringify(periods.value[0], null, 2));
-    }
-    if (stories.value.length > 0) {
-      console.log('[DatabaseView] Première story:', JSON.stringify(stories.value[0], null, 2));
+      if (periods.value.length > 0) {
+        if (stories.value.length > 0) {
+        }
+      }
     }
   } catch (error) {
-    console.error('[DatabaseView] Erreur lors du chargement des données:', error);
   }
 });
 
 const handleAddStory = () => {
-  console.log('[DatabaseView] Ajout d\'une nouvelle story');
+  currentType.value = 'story';
+  currentMode.value = 'create';
+  showAddModal.value = true;
 };
 
 const handleEditStory = async (story: ListStory) => {
-  console.log('[DatabaseView] Édition de la story:', story);
   try {
-    const fullStory = await databaseService.loadFullStory(story.id);
-    // TODO: Implémenter l'ouverture de la modale d'édition pour les stories
+    currentType.value = 'story';
+    currentMode.value = 'edit';
+    currentItem.value = story;
+    showEditModal.value = true;
   } catch (error) {
-    console.error('[DatabaseView] Erreur lors du chargement des données de la story:', error);
     window.showToast('Erreur lors du chargement des données', 'error');
   }
 };

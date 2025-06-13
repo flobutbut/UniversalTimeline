@@ -615,3 +615,60 @@ Ce mécanisme fonctionne de façon similaire à celui déjà en place pour les p
 
 ### Robustesse des payloads
 - Conversion systématique des champs Vue (Proxy) en objets simples avant envoi au backend.
+
+## Gestion des Stories
+
+### Routes API
+- `GET /api/stories` : Récupère la liste des stories
+- `POST /api/stories` : Crée une nouvelle story
+  - Body : 
+    ```typescript
+    {
+      title: {
+        fr: string,
+        en: string
+      },
+      description?: {
+        fr: string,
+        en: string
+      },
+      author: string,
+      isPublic?: boolean
+    }
+    ```
+
+### Services
+- `DatabaseQueryService`
+  - `getListStories()` : Récupère la liste des stories
+  - `createStory(storyData)` : Crée une nouvelle story
+  - `updateStory(storyId, storyData)` : Met à jour une story existante
+
+### Composants
+- `DatabaseView.vue`
+  - Gestion de l'affichage des stories
+  - Bouton "Add" pour créer une nouvelle story
+  - Gestion de la modale d'édition
+
+- `EditModal.vue`
+  - Support du type 'story'
+  - Champs spécifiques :
+    - Titre (FR/EN)
+    - Description (FR/EN)
+    - Auteur
+    - Visibilité (publique/privée)
+
+### Base de données
+- Table `stories.stories`
+  - `id` : SERIAL PRIMARY KEY
+  - `title_fr` : TEXT NOT NULL
+  - `title_en` : TEXT NOT NULL
+  - `description_fr` : TEXT
+  - `description_en` : TEXT
+  - `author` : VARCHAR(255) NOT NULL
+  - `is_public` : BOOLEAN DEFAULT true
+  - `created_at` : TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  - `updated_at` : TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+- Tables de liaison
+  - `story_periods` : Liaison stories-périodes
+  - `story_events` : Liaison stories-événements
