@@ -3,7 +3,7 @@ const { Pool } = pkg;
 
 // Configuration de la base de données
 const dbConfig = {
-  connectionString: process.env.DATABASE_URL || 'postgresql://wikidata_user:wikidata_password@wikidata_db:5432/wikidata_db'
+  connectionString: process.env.DATABASE_URL || 'postgresql://wikidata_user:wikidata_password@localhost:5432/wikidata_db'
 };
 
 // Création du pool de connexion

@@ -212,6 +212,66 @@ router.get('/events', async (req, res) => {
   }
 });
 
+// Route pour créer un événement
+router.post('/events', async (req, res) => {
+  try {
+    const { id, wikidata_id, label, description, date } = req.body;
+
+    console.log('[API] Création d\'un événement avec les données:', req.body);
+
+    // Validation des données requises
+    if (!wikidata_id) {
+      console.error('[API] wikidata_id manquant dans les données');
+      return res.status(400).json({ error: 'wikidata_id est requis' });
+    }
+
+    if (!label || !label.fr) {
+      console.error('[API] label.fr manquant dans les données');
+      return res.status(400).json({ error: 'label.fr est requis' });
+    }
+
+    // Création de l'événement
+    const createEventQuery = `
+      INSERT INTO events.events (
+        id,
+        wikidata_id,
+        label_fr,
+        label_en,
+        description_fr,
+        description_en,
+        date,
+        created_at,
+        updated_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      RETURNING *
+    `;
+
+    console.log('[API] Requête SQL:', createEventQuery);
+    console.log('[API] Paramètres:', [id, wikidata_id, label.fr, label.en || label.fr, description?.fr, description?.en || description?.fr, date]);
+
+    const result = await dbQuery(createEventQuery, [
+      id,
+      wikidata_id,
+      label.fr,
+      label.en || label.fr,
+      description?.fr,
+      description?.en || description?.fr,
+      date
+    ]);
+
+    console.log('[API] Événement créé:', result.rows[0]);
+    res.status(201).json(result.rows[0]);
+  } catch (error: any) {
+    console.error('[API] Erreur lors de la création de l\'événement:', error);
+    if (error.code === '23505') { // Code d'erreur PostgreSQL pour violation de contrainte unique
+      res.status(409).json({ error: 'Un événement avec cet ID existe déjà' });
+    } else {
+      res.status(500).json({ error: 'Erreur lors de la création de l\'événement' });
+    }
+  }
+});
+
 // Route pour obtenir les stories
 router.get('/stories', async (req, res) => {
   try {
@@ -717,6 +777,69 @@ router.delete('/stories/:id', async (req, res) => {
   } catch (error) {
     console.error('Erreur lors de la suppression de la story:', error);
     res.status(500).json({ error: 'Erreur lors de la suppression de la story' });
+  }
+});
+
+// Route pour créer une période
+router.post('/periods', async (req, res) => {
+  try {
+    const { id, wikidata_id, label, description, start_date, end_date, parent_id, temporal_location } = req.body;
+
+    // Validation des données requises
+    if (!wikidata_id) {
+      console.error('[API] wikidata_id manquant dans les données');
+      return res.status(400).json({ error: 'wikidata_id est requis' });
+    }
+
+    if (!label || !label.fr) {
+      console.error('[API] label.fr manquant dans les données');
+      return res.status(400).json({ error: 'label.fr est requis' });
+    }
+
+    // Si parent_id est vide ou null, on le met à NULL dans la base de données
+    const finalParentId = parent_id && parent_id.trim() !== '' ? parent_id : null;
+
+    const sqlQuery = `
+      INSERT INTO periods.periods (
+        id,
+        wikidata_id,
+        label_fr,
+        label_en,
+        description_fr,
+        description_en,
+        start_date,
+        end_date,
+        parent_id,
+        temporal_location
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      RETURNING *
+    `;
+
+    console.log('[API] Requête SQL:', sqlQuery);
+    console.log('[API] Paramètres:', [id, wikidata_id, label.fr, label.en || label.fr, description?.fr, description?.en || description?.fr, start_date, end_date, finalParentId, temporal_location]);
+
+    const result = await dbQuery(sqlQuery, [
+      id,
+      wikidata_id,
+      label.fr,
+      label.en || label.fr,
+      description?.fr,
+      description?.en || description?.fr,
+      start_date,
+      end_date,
+      finalParentId,
+      temporal_location
+    ]);
+
+    console.log('[API] Période créée:', result.rows[0]);
+    res.status(201).json(result.rows[0]);
+  } catch (error: any) {
+    console.error('[API] Erreur lors de la création de la période:', error);
+    if (error.code === '23505') { // Code d'erreur PostgreSQL pour violation de contrainte unique
+      res.status(409).json({ error: 'Une période avec cet ID existe déjà' });
+    } else {
+      res.status(500).json({ error: 'Erreur lors de la création de la période' });
+    }
   }
 });
 

@@ -474,10 +474,12 @@ export class WikidataQueryService {
             ?item ?itemLabel 
             ?descriptionfr
             ?descriptionen
-            ?date
             ?startDate
+            ?endDate
+            ?pointInTime
             ?birthDate
             ?earliestDate
+            ?historicalEvent
           WHERE {
             VALUES ?item { wd:${eventId} }
             
@@ -495,10 +497,13 @@ export class WikidataQueryService {
               FILTER(LANG(?descriptionen) = "en")
             }
 
-            OPTIONAL { ?item wdt:P585 ?date. }
-            OPTIONAL { ?item wdt:P580 ?startDate. }
-            OPTIONAL { ?item wdt:P569 ?birthDate. }
-            OPTIONAL { ?item wdt:P1319 ?earliestDate. }
+            # Dates principales
+            OPTIONAL { ?item wdt:P580 ?startDate. }    # Date de début
+            OPTIONAL { ?item wdt:P582 ?endDate. }      # Date de fin
+            OPTIONAL { ?item wdt:P585 ?pointInTime. }  # Point dans le temps
+            OPTIONAL { ?item wdt:P569 ?birthDate. }    # Date de naissance
+            OPTIONAL { ?item wdt:P1319 ?earliestDate. } # Date la plus ancienne
+            OPTIONAL { ?item wdt:P837 ?historicalEvent. }
           }
         `;
 
@@ -514,17 +519,21 @@ export class WikidataQueryService {
 
         const binding = response.data.results.bindings[0];
         console.log('[WikidataQueryService] Binding événement Wikidata:', binding);
-        // Choisir la première date disponible (P585, P580, P569, P1319)
+        
+        // Choisir la première date disponible dans l'ordre de priorité
         let eventDate = '';
-        if (binding.date?.value) {
-          eventDate = binding.date.value;
-        } else if (binding.startDate?.value) {
+        if (binding.startDate?.value) {
           eventDate = binding.startDate.value;
+        } else if (binding.endDate?.value) {
+          eventDate = binding.endDate.value;
+        } else if (binding.pointInTime?.value) {
+          eventDate = binding.pointInTime.value;
         } else if (binding.birthDate?.value) {
           eventDate = binding.birthDate.value;
         } else if (binding.earliestDate?.value) {
           eventDate = binding.earliestDate.value;
         }
+
         return {
           label: binding.itemLabel?.value || '',
           description: {

@@ -114,7 +114,7 @@
         <div class="form-actions">
           <div class="left-actions">
             <Button
-              v-if="mode === 'edit' && form.qid && type !== 'story'"
+              v-if="form.qid && type !== 'story'"
               variant="secondary"
               icon="fas fa-database"
               @click="fillFromWikidata"
@@ -401,8 +401,14 @@ const fillFromWikidata = async () => {
         form.description.en = data.description.en || '';
       }
 
-      // Gestion des données temporelles pour les périodes
-      if (props.type === 'period' && 'temporalData' in data && Array.isArray(data.temporalData) && data.temporalData.length > 0) {
+      // Gestion des dates
+      if (props.type === 'event') {
+        const eventData = data as { date?: string };
+        if (eventData.date) {
+          console.log('[EditModal] Date reçue:', eventData.date);
+          form.date = eventData.date;
+        }
+      } else if (props.type === 'period' && 'temporalData' in data && Array.isArray(data.temporalData) && data.temporalData.length > 0) {
         console.log('[EditModal] Données temporelles reçues:', data.temporalData);
         const temporalData = data.temporalData[0];
         if (temporalData.startDate) {

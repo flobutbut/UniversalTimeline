@@ -32,6 +32,18 @@ export class DatabaseViewService {
     return this.stories.value;
   }
 
+  public setPeriods(periods: ListPeriod[]) {
+    this.periods.value = periods;
+  }
+
+  public setEvents(events: ListEvent[]) {
+    this.events.value = events;
+  }
+
+  public setStories(stories: ListStory[]) {
+    this.stories.value = stories;
+  }
+
   public getLoading() {
     return this.loading.value;
   }
