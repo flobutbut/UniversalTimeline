@@ -689,3 +689,16 @@ La vue base de données permet d'afficher et de gérer les données historiques 
 - Affichage d'un message d'erreur en cas d'échec de création/modification
 - Validation des champs obligatoires avant soumission
 - Gestion des erreurs de connexion au serveur 
+
+## Fonctionnalités principales (mise à jour)
+
+- Création, édition, suppression de stories, périodes, événements
+- Association/dissociation de périodes et événements à une story via drag & drop
+- Ouverture de la modale d'édition depuis la vue centralisée (DatabaseView.vue)
+- Toutes les modifications sont immédiatement reflétées dans l'interface grâce au rechargement global
+- Suppression de la gestion des catégories dans l'interface principale
+
+### Expérience utilisateur
+- L'utilisateur interagit avec une interface cohérente, sans désynchronisation
+- Les modifications sont fiables et persistantes
+- Les composants secondaires seront améliorés dans une prochaine étape 

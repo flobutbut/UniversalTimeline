@@ -1,9 +1,11 @@
 <template>
   <div class="database-view">
     <div v-if="loading" class="loading">
+      <div class="spinner"></div>
       <span>Chargement des données...</span>
     </div>
     <div v-else-if="error" class="error">
+      <i class="fas fa-exclamation-circle"></i>
       <span>{{ error }}</span>
     </div>
     <div v-else class="columns">
@@ -11,13 +13,13 @@
         <div class="column-header">
           <h2>Périodes</h2>
           <div class="header-actions">
-            <input 
-              type="text" 
-              v-model="periodSearch" 
-              placeholder="Rechercher une période..." 
+            <input
+              v-model="periodSearch"
+              type="text"
               class="search-input"
+              placeholder="Rechercher..."
             />
-            <button class="action-button" @click="openAddModal('period')">Add</button>
+            <button class="action-button" @click="handleAddPeriod">Add</button>
           </div>
         </div>
         <div class="content">
@@ -26,10 +28,10 @@
             :key="period.id"
             type="period"
             :title="period.label.fr"
-            :date="period?.startDate"
-            :endDate="period?.endDate"
             :categories="period.categories"
-            @edit="openEditModal('period', period)"
+            draggable="true"
+            @dragstart="handleDragStart($event, 'period', period)"
+            @edit="handleEditPeriod(period)"
           />
         </div>
       </div>
@@ -37,13 +39,13 @@
         <div class="column-header">
           <h2>Événements</h2>
           <div class="header-actions">
-            <input 
-              type="text" 
-              v-model="eventSearch" 
-              placeholder="Rechercher un événement..." 
+            <input
+              v-model="eventSearch"
+              type="text"
               class="search-input"
+              placeholder="Rechercher..."
             />
-            <button class="action-button" @click="openAddModal('event')">Add</button>
+            <button class="action-button" @click="handleAddEvent">Add</button>
           </div>
         </div>
         <div class="content">
@@ -52,9 +54,10 @@
             :key="event.id"
             type="event"
             :title="event.label.fr"
-            :date="event?.date"
             :categories="event.categories"
-            @edit="openEditModal('event', event)"
+            draggable="true"
+            @dragstart="handleDragStart($event, 'event', event)"
+            @edit="handleEditEvent(event)"
           />
         </div>
       </div>
@@ -65,13 +68,72 @@
         </div>
         <div class="content">
           <DatabaseCard
-            v-for="story in stories"
+            v-for="story in databaseService.getStories()"
             :key="story.id"
             type="story"
             :title="story.title.fr"
             :categories="story.categories"
+            :selected="selectedStory?.id === story.id"
+            @dragover.prevent
+            @drop="handleDrop($event, story)"
             @edit="handleEditStory(story)"
+            @click="selectStory(story)"
           />
+        </div>
+      </div>
+      <div class="column">
+        <div class="column-header">
+          <h2>Détails de la Story</h2>
+        </div>
+        <div v-if="loadingStoryDetails" class="loading-details">
+          <div class="spinner"></div>
+          <span>Chargement des détails...</span>
+        </div>
+        <div v-else-if="selectedStory" class="content">
+          <div class="story-details">
+            <h3>{{ selectedStory.title.fr }}</h3>
+            <p class="story-author">Auteur: {{ selectedStory.author }}</p>
+            <p class="story-visibility">
+              Visibilité: {{ selectedStory.isPublic ? 'Publique' : 'Privée' }}
+            </p>
+            <div class="story-description">
+              <h4>Description</h4>
+              <p>{{ selectedStory.description?.fr || 'Aucune description' }}</p>
+            </div>
+            <div class="story-periods">
+              <h4>Périodes associées</h4>
+              <div v-if="selectedStory.periods?.length" class="story-items">
+                <div
+                  v-for="period in selectedStory.periods"
+                  :key="period.id"
+                  class="story-item"
+                  @click="handleRemovePeriod(selectedStory, period)"
+                >
+                  {{ period.label.fr }}
+                  <i class="fas fa-times"></i>
+                </div>
+              </div>
+              <p v-else class="no-items">Aucune période associée</p>
+            </div>
+            <div class="story-events">
+              <h4>Événements associés</h4>
+              <div v-if="selectedStory.events?.length" class="story-items">
+                <div
+                  v-for="event in selectedStory.events"
+                  :key="event.id"
+                  class="story-item"
+                  @click="handleRemoveEvent(selectedStory, event)"
+                >
+                  {{ event.label.fr }}
+                  <i class="fas fa-times"></i>
+                </div>
+              </div>
+              <p v-else class="no-items">Aucun événement associé</p>
+            </div>
+          </div>
+        </div>
+        <div v-else class="no-selection">
+          <p>Sélectionnez une story pour voir ses détails</p>
         </div>
       </div>
     </div>
@@ -107,9 +169,7 @@ import { DatabaseQueryService } from '../services/DatabaseQueryService';
 
 const databaseService = DatabaseViewService.getInstance();
 const queryService = DatabaseQueryService.getInstance();
-const periods = ref<ListPeriod[]>([]);
-const events = ref<ListEvent[]>([]);
-const stories = ref<ListStory[]>([]);
+const fullStories = ref<Map<number, Story>>(new Map());
 const loading = ref(false);
 const error = ref<string | null>(null);
 
@@ -128,33 +188,57 @@ const eventSearch = ref('');
 const loadingDetails = ref(false);
 const loadingError = ref<string | null>(null);
 
+// État du drag & drop
+const draggedItem = ref<{ type: 'period' | 'event', data: any } | null>(null);
+
+// Ajout de la ref pour la story sélectionnée
+const selectedStory = ref<Story | null>(null);
+const loadingStoryDetails = ref(false);
+
 // Computed properties pour le filtrage
 const filteredPeriods = computed(() => {
-  if (!periodSearch.value) return periods.value;
   const searchLower = periodSearch.value.toLowerCase();
-  return periods.value.filter(period => 
-    period.label.fr.toLowerCase().includes(searchLower) ||
-    period.categories?.some(cat => String(cat).toLowerCase().includes(searchLower))
+  return databaseService.getPeriods().filter(period => 
+    period.label.fr.toLowerCase().includes(searchLower)
   );
 });
 
 const filteredEvents = computed(() => {
-  if (!eventSearch.value) return events.value;
   const searchLower = eventSearch.value.toLowerCase();
-  return events.value.filter(event => 
-    event.label.fr.toLowerCase().includes(searchLower) ||
-    event.categories?.some(cat => String(cat).toLowerCase().includes(searchLower))
+  return databaseService.getEvents().filter(event => 
+    event.label.fr.toLowerCase().includes(searchLower)
   );
 });
 
-function openAddModal(type: 'period' | 'event' | 'story') {
-  // Fermer d'abord la modale d'édition si elle est ouverte
-  if (showEditModal.value) {
-    closeEditModal();
-  }
-  currentType.value = type;
+// Fonctions pour gérer les modales
+function handleAddPeriod() {
+  currentType.value = 'period';
   currentMode.value = 'create';
   showAddModal.value = true;
+}
+
+function handleAddEvent() {
+  currentType.value = 'event';
+  currentMode.value = 'create';
+  showAddModal.value = true;
+}
+
+function handleAddStory() {
+  currentType.value = 'story';
+  currentMode.value = 'create';
+  showAddModal.value = true;
+}
+
+function handleEditPeriod(period: ListPeriod) {
+  openEditModal('period', period);
+}
+
+function handleEditEvent(event: ListEvent) {
+  openEditModal('event', event);
+}
+
+function handleEditStory(story: ListStory) {
+  openEditModal('story', story);
 }
 
 function closeAddModal() {
@@ -211,7 +295,7 @@ async function handleSave(formData: any) {
       }
     } else if (currentType.value === 'event') {
       if (currentMode.value === 'edit') {
-        const response = await queryService.updateEvent(currentItem.value.id, formData);
+        await queryService.updateEvent(currentItem.value.id, formData);
       } else {
         await queryService.createEvent(formData);
       }
@@ -225,10 +309,6 @@ async function handleSave(formData: any) {
 
     // Recharger les données après la mise à jour
     await databaseService.loadListData();
-    periods.value = databaseService.getPeriods();
-    events.value = databaseService.getEvents();
-    stories.value = databaseService.getStories();
-    
     closeAddModal();
     closeEditModal();
   } catch (error) {
@@ -236,43 +316,137 @@ async function handleSave(formData: any) {
   }
 }
 
-onMounted(async () => {
+// Fonction pour charger les données initiales
+async function loadInitialData() {
   try {
+    loading.value = true;
+    error.value = null;
     await databaseService.loadListData();
-    
-    // Mettre à jour les refs avec les données du service
-    periods.value = databaseService.getPeriods();
-    events.value = databaseService.getEvents();
-    stories.value = databaseService.getStories();
-    loading.value = databaseService.getLoading();
-    error.value = databaseService.getError();
-    
-    if (events.value.length > 0) {
-      if (periods.value.length > 0) {
-        if (stories.value.length > 0) {
+    // Charger les données complètes des stories
+    await Promise.all(
+      databaseService.getStories().map(async (story) => {
+        try {
+          const fullStory = await databaseService.loadFullStory(story.id);
+          fullStories.value.set(story.id, fullStory);
+        } catch (error) {
+          console.error(`Erreur lors du chargement de la story ${story.id}:`, error);
         }
-      }
-    }
-  } catch (error) {
+      })
+    );
+  } catch (error: any) {
+    error.value = error.message || 'Une erreur est survenue lors du chargement des données';
+    window.showToast(error.value, 'error');
+  } finally {
+    loading.value = false;
   }
+}
+
+// Charger les données au montage du composant
+onMounted(() => {
+  loadInitialData();
 });
 
-const handleAddStory = () => {
-  currentType.value = 'story';
-  currentMode.value = 'create';
-  showAddModal.value = true;
-};
-
-const handleEditStory = async (story: ListStory) => {
-  try {
-    currentType.value = 'story';
-    currentMode.value = 'edit';
-    currentItem.value = story;
-    showEditModal.value = true;
-  } catch (error) {
-    window.showToast('Erreur lors du chargement des données', 'error');
+// Gestion du drag & drop
+function handleDragStart(event: DragEvent, type: 'period' | 'event', item: any) {
+  draggedItem.value = { type, data: item };
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move';
   }
-};
+}
+
+async function handleDrop(event: DragEvent, story: ListStory) {
+  if (!draggedItem.value) return;
+
+  try {
+    if (draggedItem.value.type === 'period') {
+      await queryService.addPeriodToStory(story.id, draggedItem.value.data.id);
+      // Recharger les données de la story
+      const updatedStory = await databaseService.loadFullStory(story.id);
+      fullStories.value.set(story.id, updatedStory);
+      // Mettre à jour la story sélectionnée si c'est la même
+      if (selectedStory.value?.id === story.id) {
+        selectedStory.value = updatedStory;
+      }
+      window.showToast('Période ajoutée à la story avec succès', 'success');
+    } else if (draggedItem.value.type === 'event') {
+      await queryService.addEventToStory(story.id, draggedItem.value.data.id);
+      // Recharger les données de la story
+      const updatedStory = await databaseService.loadFullStory(story.id);
+      fullStories.value.set(story.id, updatedStory);
+      // Mettre à jour la story sélectionnée si c'est la même
+      if (selectedStory.value?.id === story.id) {
+        selectedStory.value = updatedStory;
+      }
+      window.showToast('Événement ajouté à la story avec succès', 'success');
+    }
+  } catch (error) {
+    window.showToast('Erreur lors de l\'ajout de l\'élément à la story', 'error');
+  }
+}
+
+async function handleRemovePeriod(story: ListStory, period: Period) {
+  try {
+    await queryService.removePeriodFromStory(story.id, period.id);
+    // Recharger les données de la story
+    const updatedStory = await databaseService.loadFullStory(story.id);
+    fullStories.value.set(story.id, updatedStory);
+    // Mettre à jour la story sélectionnée si c'est la même
+    if (selectedStory.value?.id === story.id) {
+      selectedStory.value = updatedStory;
+    }
+    window.showToast('Période retirée de la story avec succès', 'success');
+  } catch (error) {
+    window.showToast('Erreur lors du retrait de la période de la story', 'error');
+  }
+}
+
+async function handleRemoveEvent(story: ListStory, event: Event) {
+  try {
+    await queryService.removeEventFromStory(story.id, event.id);
+    // Recharger les données de la story
+    const updatedStory = await databaseService.loadFullStory(story.id);
+    fullStories.value.set(story.id, updatedStory);
+    // Mettre à jour la story sélectionnée si c'est la même
+    if (selectedStory.value?.id === story.id) {
+      selectedStory.value = updatedStory;
+    }
+    window.showToast('Événement retiré de la story avec succès', 'success');
+  } catch (error) {
+    window.showToast('Erreur lors du retrait de l\'événement de la story', 'error');
+  }
+}
+
+// Fonction pour charger les données complètes d'une story
+async function loadFullStory(storyId: number): Promise<Story> {
+  try {
+    if (!fullStories.value.has(storyId)) {
+      const story = await databaseService.loadFullStory(storyId);
+      fullStories.value.set(storyId, story);
+    }
+    const story = fullStories.value.get(storyId);
+    if (!story) {
+      throw new Error('Story non trouvée');
+    }
+    return story;
+  } catch (error) {
+    console.error('Erreur lors du chargement de la story:', error);
+    throw error;
+  }
+}
+
+// Fonction pour sélectionner une story
+async function selectStory(story: ListStory) {
+  try {
+    loadingStoryDetails.value = true;
+    const fullStory = await loadFullStory(story.id);
+    selectedStory.value = fullStory;
+  } catch (error) {
+    window.showToast('Erreur lors du chargement des détails de la story', 'error');
+    selectedStory.value = null;
+  } finally {
+    loadingStoryDetails.value = false;
+  }
+}
 </script>
 
 <style scoped>
@@ -369,5 +543,110 @@ const handleEditStory = async (story: ListStory) => {
 .search-input:focus {
   outline: none;
   border-color: var(--color-primary);
+}
+
+.story-content {
+  padding: var(--spacing-sm);
+}
+
+.story-periods,
+.story-events {
+  margin-bottom: var(--spacing-sm);
+}
+
+.story-periods h3,
+.story-events h3 {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xs);
+}
+
+.story-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.story-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-neutral-100);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.story-item:hover {
+  background: var(--color-neutral-200);
+}
+
+.story-item i {
+  color: var(--color-error);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.story-item:hover i {
+  opacity: 1;
+}
+
+.story-details {
+  padding: var(--spacing-md);
+}
+
+.story-details h3 {
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+}
+
+.story-author,
+.story-visibility {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xs);
+}
+
+.story-description {
+  margin: var(--spacing-md) 0;
+}
+
+.story-description h4,
+.story-periods h4,
+.story-events h4 {
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+}
+
+.no-items {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+.no-selection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+.loading-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-light);
+}
+
+.loading-details .spinner {
+  margin-bottom: var(--spacing-sm);
 }
 </style> 

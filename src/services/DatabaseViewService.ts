@@ -65,16 +65,26 @@ export class DatabaseViewService {
   public async loadFullPeriod(periodId: string): Promise<Period> {
     try {
       const periods = this.getPeriods();
+      console.log('[loadFullPeriod] Recherche de la période avec id:', periodId);
+      console.log('[loadFullPeriod] Liste des ids disponibles:', periods.map(p => p.id));
       const period = periods.find(p => p.id === periodId);
       if (!period) {
+        console.error('[loadFullPeriod] Période non trouvée pour id:', periodId);
         throw new Error('Période non trouvée');
       }
       return {
-        ...period,
-        description: period.description || { fr: '', en: '' },
-        createdAt: period.createdAt || new Date(),
-        updatedAt: period.updatedAt || new Date(),
-        children: period.children || []
+        id: period.id,
+        wikidata_id: (period as any).wikidata_id || '',
+        label: period.label,
+        description: (period as any).description ?? { fr: '', en: '' },
+        startDate: (period as any).startDate || (period as any).start_date || '',
+        endDate: (period as any).endDate || (period as any).end_date || '',
+        parentId: (period as any).parentId || (period as any).parent_id || null,
+        temporalLocation: (period as any).temporalLocation || (period as any).temporal_location || '',
+        categories: (period as any).categories ?? [],
+        children: (period as any).children ?? [],
+        createdAt: (period as any).createdAt ?? new Date(),
+        updatedAt: (period as any).updatedAt ?? new Date()
       };
     } catch (error) {
       throw error;
@@ -84,15 +94,22 @@ export class DatabaseViewService {
   public async loadFullEvent(eventId: string): Promise<Event> {
     try {
       const events = this.getEvents();
+      console.log('[loadFullEvent] Recherche de l\'événement avec id:', eventId);
+      console.log('[loadFullEvent] Liste des ids disponibles:', events.map(e => e.id));
       const event = events.find(e => e.id === eventId);
       if (!event) {
+        console.error('[loadFullEvent] Événement non trouvé pour id:', eventId);
         throw new Error('Événement non trouvé');
       }
       return {
-        ...event,
-        description: event.description || { fr: '', en: '' },
-        createdAt: event.createdAt || new Date(),
-        updatedAt: event.updatedAt || new Date()
+        id: event.id,
+        wikidata_id: (event as any).wikidata_id || '',
+        label: event.label,
+        description: (event as any).description ?? { fr: '', en: '' },
+        date: (event as any).date || '',
+        categories: (event as any).categories ?? [],
+        createdAt: (event as any).createdAt ?? new Date(),
+        updatedAt: (event as any).updatedAt ?? new Date()
       };
     } catch (error) {
       throw error;
@@ -101,23 +118,12 @@ export class DatabaseViewService {
 
   public async loadFullStory(storyId: number): Promise<Story> {
     try {
-      // En attendant que le backend soit prêt, on utilise les données de liste
-      const stories = await this.databaseQueryService.getListStories();
-      const story = stories.find(s => s.id === storyId);
+      // Appel à l'API de détail pour récupérer toutes les infos de la story
+      const story = await this.databaseQueryService.getStory(storyId);
       if (!story) {
         throw new Error('Story non trouvée');
       }
-      // Convertir les données de liste en données complètes
-      return {
-        ...story,
-        description: { fr: '', en: '' }, // Valeurs par défaut
-        author: '',
-        isPublic: false,
-        periods: [],
-        events: [],
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
+      return story;
     } catch (error) {
       throw error;
     }

@@ -542,6 +542,112 @@ export class DatabaseQueryService {
     }
   }
 
+  // Méthodes pour gérer les relations stories-périodes
+  public async addPeriodToStory(storyId: number, periodId: string): Promise<void> {
+    try {
+      console.log('[DatabaseQueryService] Ajout de la période à la story:', storyId, periodId);
+      const response = await fetch(`/api/stories/${storyId}/periods/${periodId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de l\'ajout de la période à la story:', error);
+      throw error;
+    }
+  }
+
+  public async removePeriodFromStory(storyId: number, periodId: string): Promise<void> {
+    try {
+      console.log('[DatabaseQueryService] Suppression de la période de la story:', storyId, periodId);
+      const response = await fetch(`/api/stories/${storyId}/periods/${periodId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la suppression de la période de la story:', error);
+      throw error;
+    }
+  }
+
+  public async getStoryPeriods(storyId: number): Promise<Period[]> {
+    try {
+      console.log('[DatabaseQueryService] Récupération des périodes de la story:', storyId);
+      const response = await fetch(`/api/stories/${storyId}/periods`);
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la récupération des périodes de la story:', error);
+      throw error;
+    }
+  }
+
+  // Méthodes pour gérer les relations stories-événements
+  public async addEventToStory(storyId: number, eventId: string): Promise<void> {
+    try {
+      console.log('[DatabaseQueryService] Ajout de l\'événement à la story:', storyId, eventId);
+      const response = await fetch(`/api/stories/${storyId}/events/${eventId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de l\'ajout de l\'événement à la story:', error);
+      throw error;
+    }
+  }
+
+  public async removeEventFromStory(storyId: number, eventId: string): Promise<void> {
+    try {
+      console.log('[DatabaseQueryService] Suppression de l\'événement de la story:', storyId, eventId);
+      const response = await fetch(`/api/stories/${storyId}/events/${eventId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la suppression de l\'événement de la story:', error);
+      throw error;
+    }
+  }
+
+  public async getStoryEvents(storyId: number): Promise<Event[]> {
+    try {
+      console.log('[DatabaseQueryService] Récupération des événements de la story:', storyId);
+      const response = await fetch(`/api/stories/${storyId}/events`);
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la récupération des événements de la story:', error);
+      throw error;
+    }
+  }
+
   // Suppression d'un événement par son id
   public async deleteEvent(id: string): Promise<void> {
     try {

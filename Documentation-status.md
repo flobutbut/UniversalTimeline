@@ -341,3 +341,14 @@
 - [ ] Implémentation de la liaison stories-périodes
 - [ ] Implémentation de la liaison stories-événements
 - [ ] Amélioration de l'interface utilisateur pour la gestion des stories 
+
+## État du projet (mise à jour)
+
+- ✅ Architecture centralisée en place (singleton DatabaseViewService)
+- ✅ Gestion robuste des mutations (création, édition, suppression)
+- ✅ Synchronisation UI/données garantie
+- ✅ Refactorisation des services et composants principaux terminée
+- 🔜 Suppression du code mort à venir
+- 🔜 Audit des composants secondaires (PeriodGrid, PeriodCard, EventCard)
+
+Le projet est stable et prêt pour le nettoyage final avant d'autres évolutions. 

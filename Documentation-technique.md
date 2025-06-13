@@ -672,3 +672,25 @@ Ce mécanisme fonctionne de façon similaire à celui déjà en place pour les p
 - Tables de liaison
   - `story_periods` : Liaison stories-périodes
   - `story_events` : Liaison stories-événements
+
+## Refactorisation de la gestion des entités
+
+- **Centralisation de la source de vérité** : Toutes les entités (stories, périodes, événements) sont désormais gérées via le singleton `DatabaseViewService`.
+- **Suppression des refs locales** : Les listes locales ont été supprimées des composants principaux pour éviter toute désynchronisation.
+- **Gestion des mutations** : Après chaque modification (création, édition, suppression), un rechargement global des données est effectué via le singleton.
+- **Adaptation des services** : `DatabaseQueryService` et `DatabaseViewService` ont été adaptés pour supporter les nouvelles routes backend et centraliser la logique d'accès aux données.
+- **Correction du mapping des champs** : Les méthodes de chargement détaillé garantissent la compatibilité avec la modale d'édition.
+- **Suppression de la gestion des catégories dans DatabaseCard.vue**.
+
+---
+
+### API utilisées
+- `GET /api/stories/:id` : Détail d'une story (périodes, événements, catégories…)
+- `DELETE /api/stories/:id` : Suppression d'une story et de ses liaisons
+- `GET/POST/PUT/DELETE` sur `/api/periods`, `/api/events`, `/api/stories`, `/api/stories/:storyId/periods/:periodId`, etc.
+
+---
+
+### Points critiques
+- Cohérence entre backend (routes, structure des réponses) et frontend (mapping des champs, centralisation des accès)
+- Robustesse de la gestion des mutations et du rechargement des données

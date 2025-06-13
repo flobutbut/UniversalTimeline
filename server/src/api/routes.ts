@@ -275,6 +275,126 @@ router.post('/stories', async (req, res) => {
   }
 });
 
+// Route pour ajouter une période à une story
+router.post('/stories/:storyId/periods/:periodId', async (req, res) => {
+  try {
+    const { storyId, periodId } = req.params;
+    
+    const sqlQuery = `
+      INSERT INTO stories.story_periods (story_id, period_id)
+      VALUES ($1, $2)
+      ON CONFLICT (story_id, period_id) DO NOTHING
+      RETURNING story_id, period_id
+    `;
+    
+    const result = await dbQuery(sqlQuery, [storyId, periodId]);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Erreur lors de l\'ajout de la période à la story:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'ajout de la période à la story' });
+  }
+});
+
+// Route pour ajouter un événement à une story
+router.post('/stories/:storyId/events/:eventId', async (req, res) => {
+  try {
+    const { storyId, eventId } = req.params;
+    
+    const sqlQuery = `
+      INSERT INTO stories.story_events (story_id, event_id)
+      VALUES ($1, $2)
+      ON CONFLICT (story_id, event_id) DO NOTHING
+      RETURNING story_id, event_id
+    `;
+    
+    const result = await dbQuery(sqlQuery, [storyId, eventId]);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Erreur lors de l\'ajout de l\'événement à la story:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'ajout de l\'événement à la story' });
+  }
+});
+
+// Route pour supprimer une période d'une story
+router.delete('/stories/:storyId/periods/:periodId', async (req, res) => {
+  try {
+    const { storyId, periodId } = req.params;
+    
+    const sqlQuery = `
+      DELETE FROM stories.story_periods
+      WHERE story_id = $1 AND period_id = $2
+      RETURNING story_id, period_id
+    `;
+    
+    const result = await dbQuery(sqlQuery, [storyId, periodId]);
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Erreur lors de la suppression de la période de la story:', error);
+    res.status(500).json({ error: 'Erreur lors de la suppression de la période de la story' });
+  }
+});
+
+// Route pour supprimer un événement d'une story
+router.delete('/stories/:storyId/events/:eventId', async (req, res) => {
+  try {
+    const { storyId, eventId } = req.params;
+    
+    const sqlQuery = `
+      DELETE FROM stories.story_events
+      WHERE story_id = $1 AND event_id = $2
+      RETURNING story_id, event_id
+    `;
+    
+    const result = await dbQuery(sqlQuery, [storyId, eventId]);
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Erreur lors de la suppression de l\'événement de la story:', error);
+    res.status(500).json({ error: 'Erreur lors de la suppression de l\'événement de la story' });
+  }
+});
+
+// Route pour obtenir les périodes d'une story
+router.get('/stories/:storyId/periods', async (req, res) => {
+  try {
+    const { storyId } = req.params;
+    
+    const sqlQuery = `
+      SELECT p.*
+      FROM periods.periods p
+      JOIN stories.story_periods sp ON p.id = sp.period_id
+      WHERE sp.story_id = $1
+      ORDER BY p.start_date
+    `;
+    
+    const result = await dbQuery(sqlQuery, [storyId]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des périodes de la story:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des périodes de la story' });
+  }
+});
+
+// Route pour obtenir les événements d'une story
+router.get('/stories/:storyId/events', async (req, res) => {
+  try {
+    const { storyId } = req.params;
+    
+    const sqlQuery = `
+      SELECT e.*
+      FROM events.events e
+      JOIN stories.story_events se ON e.id = se.event_id
+      WHERE se.story_id = $1
+      ORDER BY e.date
+    `;
+    
+    const result = await dbQuery(sqlQuery, [storyId]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des événements de la story:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des événements de la story' });
+  }
+});
+
 // Route pour obtenir les catégories
 router.get('/categories', async (req, res) => {
   try {
@@ -478,6 +598,127 @@ router.delete('/events/:id', async (req, res) => {
   } catch (error) {
     console.error('[API] Erreur lors de la suppression de l\'événement:', error);
     res.status(500).json({ error: 'Erreur lors de la suppression de l\'événement' });
+  }
+});
+
+// Route pour obtenir le détail d'une story
+router.get('/stories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Récupérer la story principale
+    const storyQuery = `
+      SELECT 
+        s.id,
+        s.title_fr,
+        s.title_en,
+        s.description_fr,
+        s.description_en,
+        s.author,
+        s.is_public,
+        s.created_at,
+        s.updated_at
+      FROM stories.stories s
+      WHERE s.id = $1
+    `;
+    const storyResult = await dbQuery(storyQuery, [id]);
+    if (storyResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Story non trouvée' });
+    }
+    const story = storyResult.rows[0];
+
+    // Récupérer les catégories associées
+    const categoriesQuery = `
+      SELECT c.id, c.label_fr, c.label_en, c.description_fr, c.description_en
+      FROM categories.categories c
+      JOIN categories.story_categories sc ON c.id = sc.category_id
+      WHERE sc.story_id = $1
+    `;
+    const categoriesResult = await dbQuery(categoriesQuery, [id]);
+    const categories = categoriesResult.rows.map(row => ({
+      id: row.id,
+      label: { fr: row.label_fr, en: row.label_en || row.label_fr },
+      description: row.description_fr ? { fr: row.description_fr, en: row.description_en || row.description_fr } : undefined
+    }));
+
+    // Récupérer les périodes associées
+    const periodsQuery = `
+      SELECT p.*
+      FROM periods.periods p
+      JOIN stories.story_periods sp ON p.id = sp.period_id
+      WHERE sp.story_id = $1
+      ORDER BY p.start_date
+    `;
+    const periodsResult = await dbQuery(periodsQuery, [id]);
+    const periods = periodsResult.rows.map(row => ({
+      id: row.id,
+      label: { fr: row.label_fr, en: row.label_en || row.label_fr },
+      description: row.description_fr ? { fr: row.description_fr, en: row.description_en || row.description_fr } : undefined,
+      startDate: row.start_date,
+      endDate: row.end_date,
+      parentId: row.parent_id,
+      temporalLocation: row.temporal_location,
+      categories: [],
+      children: [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
+
+    // Récupérer les événements associés
+    const eventsQuery = `
+      SELECT e.*
+      FROM events.events e
+      JOIN stories.story_events se ON e.id = se.event_id
+      WHERE se.story_id = $1
+      ORDER BY e.date
+    `;
+    const eventsResult = await dbQuery(eventsQuery, [id]);
+    const events = eventsResult.rows.map(row => ({
+      id: row.id,
+      label: { fr: row.label_fr, en: row.label_en || row.label_fr },
+      description: row.description_fr ? { fr: row.description_fr, en: row.description_en || row.description_fr } : undefined,
+      date: row.date,
+      categories: [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
+
+    // Construction de l'objet final
+    const storyData = {
+      id: story.id,
+      title: { fr: story.title_fr, en: story.title_en || story.title_fr },
+      description: story.description_fr ? { fr: story.description_fr, en: story.description_en || story.description_fr } : undefined,
+      author: story.author,
+      isPublic: story.is_public,
+      categories,
+      periods,
+      events,
+      createdAt: story.created_at,
+      updatedAt: story.updated_at
+    };
+    res.json(storyData);
+  } catch (error) {
+    console.error('Erreur lors de la récupération du détail de la story:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération du détail de la story' });
+  }
+});
+
+// Route pour supprimer une story
+router.delete('/stories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Supprimer les liaisons (événements, périodes, catégories)
+    await dbQuery('DELETE FROM stories.story_events WHERE story_id = $1', [id]);
+    await dbQuery('DELETE FROM stories.story_periods WHERE story_id = $1', [id]);
+    await dbQuery('DELETE FROM categories.story_categories WHERE story_id = $1', [id]);
+    // Supprimer la story elle-même
+    const result = await dbQuery('DELETE FROM stories.stories WHERE id = $1 RETURNING *', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Story non trouvée' });
+    }
+    res.status(204).send();
+  } catch (error) {
+    console.error('Erreur lors de la suppression de la story:', error);
+    res.status(500).json({ error: 'Erreur lors de la suppression de la story' });
   }
 });
 

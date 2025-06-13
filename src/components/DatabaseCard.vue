@@ -1,22 +1,32 @@
 <template>
-  <div class="database-card" :class="{ 'is-period': type === 'period', 'is-event': type === 'event', 'is-story': type === 'story' }">
+  <div
+    class="database-card"
+    :class="{
+      'database-card--period': type === 'period',
+      'database-card--event': type === 'event',
+      'database-card--story': type === 'story',
+      'database-card--selected': selected
+    }"
+  >
     <div class="card-header">
       <div class="title-row">
         <h3>{{ title }}</h3>
         <button class="action-button" @click.stop="handleEdit">Edit</button>
       </div>
     </div>
+    <div class="card-content">
+      <slot></slot>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { Category } from '../types/database';
 
 interface Props {
   type: 'period' | 'event' | 'story';
   title: string;
-  categories: Category[];
+  selected?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -83,20 +93,6 @@ const handleEdit = () => {
   color: var(--color-primary-dark);
 }
 
-.card-categories {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-xs);
-}
-
-.category-tag {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-}
-
 .is-period {
   border-left: 4px solid var(--color-period);
 }
@@ -107,5 +103,16 @@ const handleEdit = () => {
 
 .is-story {
   border-left: 4px solid var(--color-story);
+}
+
+.database-card--selected {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.database-card--selected:hover {
+  border-color: var(--color-primary-dark);
+  background-color: var(--color-primary-light);
 }
 </style> 
