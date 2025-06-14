@@ -708,3 +708,33 @@ La vue base de données permet d'afficher et de gérer les données historiques 
 - L'utilisateur peut saisir n'importe quel format de date pour les événements et les périodes, y compris des dates négatives ou exotiques (ex : `-145000000-01-01T00:00:00Z`).
 - Il n'y a plus de limitation ni d'erreur lors de la saisie ou de la modification de ces champs.
 - L'interface et l'API sont synchronisées pour accepter et restituer ces formats de date. 
+
+## Vue Graphique
+
+### Description
+La vue Graphique permet de visualiser les relations hiérarchiques entre les périodes géologiques sous forme d'arbre interactif.
+
+### Fonctionnalités actuelles
+- Panneau latéral avec liste des périodes
+- Structure de base pour la visualisation D3.js
+- Gestion des états de chargement
+- Gestion des erreurs
+- Interface utilisateur cohérente avec le design system
+
+### Fonctionnalités à venir
+- Visualisation des relations parent-enfant entre les périodes
+- Graphique interactif avec zoom et pan
+- Mise en évidence des périodes sélectionnées
+- Filtres et options de personnalisation
+- Export des données
+- Modification des relations entre périodes
+
+### État d'avancement
+- [x] Structure de base
+- [x] Intégration avec le design system
+- [x] Installation de D3.js
+- [ ] Implémentation du graphique
+- [ ] Gestion des données
+- [ ] Interactivité
+- [ ] Export des données
+- [ ] Modification des relations

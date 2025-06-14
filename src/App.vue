@@ -4,20 +4,27 @@ import { useRoute } from 'vue-router'
 import Header from './components/Header.vue'
 import PeriodGrid from './components/PeriodGrid.vue'
 import DatabaseView from './components/DatabaseView.vue'
+import GraphView from './components/GraphView.vue'
 import Toast from './components/Toast.vue'
-import { WikidataQueryService, StoryService } from './services'
+import { WikidataQueryService, StoryService, GraphViewService } from './services'
 import type { Period } from './types/geological'
 
 const route = useRoute()
-const isDatabaseView = ref(false)
+const currentView = ref<'timeline' | 'database' | 'graph'>('timeline')
 
-// Mettre à jour isDatabaseView quand la route change
+// Mettre à jour currentView quand la route change
 watch(() => route.path, (newPath) => {
-  isDatabaseView.value = newPath === '/database'
+  if (newPath === '/database') {
+    currentView.value = 'database'
+  } else if (newPath === '/graph') {
+    currentView.value = 'graph'
+  } else {
+    currentView.value = 'timeline'
+  }
 }, { immediate: true })
 
-const toggleView = () => {
-  isDatabaseView.value = !isDatabaseView.value
+const handleViewChange = (view: 'timeline' | 'database' | 'graph') => {
+  currentView.value = view
 }
 
 const timelineService = WikidataQueryService.getInstance()
@@ -69,14 +76,15 @@ const goBack = async () => {
     error.value = null
     try {
       const story = await storyService.loadPlanetEarth()
+      console.log('[App] Story Planète Terre brute:', story);
       console.log(`[App] Story Planète Terre chargée:`, {
         id: story.id,
         label: story.label,
-        childrenCount: story.children.length,
-        children: story.children.map(child => ({
+        childrenCount: story.children ? story.children.length : 'undefined',
+        children: story.children ? story.children.map(child => ({
           id: child.id,
           label: child.label
-        }))
+        })) : 'undefined'
       });
       displayedPeriods.value = story.children
       currentPeriod.value = null
@@ -97,22 +105,23 @@ const goBack = async () => {
 }
 
 onMounted(async () => {
-  // Charger la story Planète Terre
   console.log(`[App] Montage du composant - Chargement initial`);
   loading.value = true
   error.value = null
   try {
     const story = await storyService.loadPlanetEarth()
-    console.log(`[App] Story Planète Terre chargée initialement:`, {
-      id: story.id,
-      label: story.label,
-      childrenCount: story.children.length,
-      children: story.children.map(child => ({
-        id: child.id,
-        label: child.label
-      }))
-    });
-    displayedPeriods.value = story.children
+    console.log('[App] Story Planète Terre brute:', story);
+    // Si la story a des enfants, on les utilise
+    if (story.children && Array.isArray(story.children) && story.children.length > 0) {
+      displayedPeriods.value = story.children
+    } else {
+      // Sinon, on charge les éons principaux (ou une autre racine)
+      const timelineService = WikidataQueryService.getInstance()
+      const MAIN_EONS = ['Q104460', 'Q104168', 'Q104162', 'Q101313'] // IDs des éons principaux
+      const mainEons = await Promise.all(MAIN_EONS.map(id => timelineService.loadPeriod(id)))
+      displayedPeriods.value = mainEons.filter(Boolean)
+    }
+    console.log('displayedPeriods après fallback:', displayedPeriods.value);
   } catch (e) {
     console.error(`[App] Erreur lors du chargement initial:`, e);
     error.value = e instanceof Error ? e.message : 'Une erreur est survenue'
@@ -133,12 +142,12 @@ window.showToast = showToast
 <template>
   <div class="app">
     <Header 
-      :is-database-view="isDatabaseView"
-      @toggle-view="toggleView"
+      :current-view="currentView"
+      @change-view="handleViewChange"
     />
     <main class="main-content">
       <PeriodGrid 
-        v-if="!isDatabaseView"
+        v-if="currentView === 'timeline'"
         :periods="displayedPeriods"
         :loading="loading"
         :parent-period="parentStack.length > 0 ? parentStack[parentStack.length - 1] : null"
@@ -146,7 +155,8 @@ window.showToast = showToast
         @period-click="handlePeriodClick"
         @go-back="goBack"
       />
-      <DatabaseView v-else />
+      <DatabaseView v-else-if="currentView === 'database'" />
+      <GraphView v-else />
     </main>
     <Toast ref="toast" />
   </div>
@@ -172,6 +182,8 @@ window.showToast = showToast
   padding: var(--spacing-md);
   overflow: hidden;
   background-color: var(--color-background);
+  min-height: 0;
+  height: 100%;
 }
 
 .main-content > * {
@@ -190,5 +202,16 @@ window.showToast = showToast
   font-family: var(--font-family-base);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
+}
+
+.graph-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--spacing-lg);
+  text-align: center;
+  color: var(--color-text-secondary);
 }
 </style>

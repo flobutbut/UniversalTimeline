@@ -843,4 +843,70 @@ router.post('/periods', async (req, res) => {
   }
 });
 
+// Route pour obtenir une période par son ID
+router.get('/periods/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`[API] Récupération de la période ${id}`);
+
+    const sqlQuery = `
+      SELECT 
+        p.id,
+        p.wikidata_id,
+        p.label_fr,
+        p.label_en,
+        p.description_fr,
+        p.description_en,
+        p.start_date,
+        p.end_date,
+        p.parent_id,
+        p.temporal_location,
+        c.label_fr as category_label
+      FROM periods.periods p
+      LEFT JOIN categories.period_categories pc ON p.id = pc.period_id
+      LEFT JOIN categories.categories c ON pc.category_id = c.id
+      WHERE p.id = $1
+    `;
+
+    const result = await dbQuery(sqlQuery, [id]);
+
+    if (result.rows.length === 0) {
+      console.log(`[API] Période ${id} non trouvée`);
+      return res.status(404).json({ error: 'Période non trouvée' });
+    }
+
+    const period = {
+      id: result.rows[0].id,
+      wikidata_id: result.rows[0].wikidata_id,
+      label: {
+        fr: result.rows[0].label_fr,
+        en: result.rows[0].label_en || result.rows[0].label_fr
+      },
+      description: result.rows[0].description_fr ? {
+        fr: result.rows[0].description_fr,
+        en: result.rows[0].description_en || result.rows[0].description_fr
+      } : undefined,
+      startDate: result.rows[0].start_date,
+      endDate: result.rows[0].end_date,
+      parentId: result.rows[0].parent_id,
+      temporalLocation: result.rows[0].temporal_location,
+      categories: result.rows[0].category_label ? [{
+        id: result.rows[0].category_id,
+        label: {
+          fr: result.rows[0].category_label,
+          en: result.rows[0].category_label
+        }
+      }] : [],
+      createdAt: result.rows[0].created_at,
+      updatedAt: result.rows[0].updated_at
+    };
+
+    console.log(`[API] Période ${id} trouvée:`, period);
+    res.json(period);
+  } catch (error) {
+    console.error(`[API] Erreur lors de la récupération de la période ${req.params.id}:`, error);
+    res.status(500).json({ error: 'Erreur lors de la récupération de la période' });
+  }
+});
+
 export default router; 

@@ -27,11 +27,7 @@ export class DatabaseQueryService {
       console.log(`[DatabaseQueryService] Réponse de la base de données:`, {
         id: response.data.id,
         label: response.data.label,
-        childrenCount: response.data.children.length,
-        children: response.data.children.map((child: Period) => ({
-          id: child.id,
-          label: child.label
-        }))
+        parentId: response.data.parentId
       });
       return response.data;
     } catch (error) {

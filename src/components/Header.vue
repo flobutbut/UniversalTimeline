@@ -2,11 +2,13 @@
   <header class="header">
     <div class="header-content">
       <h1 class="header-title">Timeline Géologique</h1>
-      <SearchBar class="header-search" />
+      <SearchBar class="header-search" :modelValue="''" />
       <div class="header-right">
-        <button class="database-button" @click="$emit('toggle-view')">
-          {{ isDatabaseView ? 'Timeline' : 'Base de données' }}
-        </button>
+        <Tabs
+          :modelValue="currentView"
+          :tabs="tabs"
+          @update:modelValue="$emit('change-view', $event)"
+        />
         <ThemeToggle />
       </div>
     </div>
@@ -14,15 +16,25 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import SearchBar from './SearchBar.vue';
 import ThemeToggle from './ThemeToggle.vue';
+import Tabs from './base/Tabs.vue';
 
-defineProps<{
-  isDatabaseView: boolean
+type ViewType = 'timeline' | 'database' | 'graph';
+
+const props = defineProps<{
+  currentView: ViewType
 }>();
 
+const tabs = [
+  { label: 'Timeline', value: 'timeline' as ViewType, icon: 'mdi:timeline' },
+  { label: 'Base de données', value: 'database' as ViewType, icon: 'mdi:database' },
+  { label: 'Graph', value: 'graph' as ViewType, icon: 'mdi:graph' }
+];
+
 defineEmits<{
-  (e: 'toggle-view'): void
+  (e: 'change-view', view: ViewType): void
 }>();
 </script>
 
@@ -75,23 +87,6 @@ defineEmits<{
   flex: 1;
 }
 
-.database-button {
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  border: none;
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  text-decoration: none;
-}
-
-.database-button:hover {
-  background-color: var(--color-primary-dark);
-}
-
 @media (max-width: var(--breakpoint-md)) {
   .header-content {
     flex-wrap: wrap;
@@ -106,11 +101,6 @@ defineEmits<{
 
   .header-right {
     margin-left: auto;
-  }
-
-  .database-button {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-xs);
   }
 }
 </style> 

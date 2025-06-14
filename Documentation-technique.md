@@ -711,3 +711,31 @@ Ce mécanisme fonctionne de façon similaire à celui déjà en place pour les p
 
 - La base utilisée par l'API est celle du conteneur Docker (`wikidata_db`, user `wikidata_user`).
 - Pour voir les modifications en temps réel dans Beekeeper, il faut se connecter à cette base.
+
+## Dépendances
+
+### D3.js
+- **Version** : 7.9.0
+- **Utilisation** : Visualisation des relations entre les périodes géologiques
+- **Fonctionnalités utilisées** :
+  - Force-directed graph pour la visualisation des relations
+  - Simulation de force pour l'organisation des nœuds
+  - Zoom et pan pour la navigation
+  - Interactivité avec les nœuds et les liens
+
+### Composants Vue
+
+#### GraphView.vue
+- **Emplacement** : `src/components/GraphView.vue`
+- **Description** : Composant principal pour la visualisation graphique des données
+- **Fonctionnalités** :
+  - Panneau latéral avec liste des périodes
+  - Visualisation D3.js des relations entre périodes
+  - Gestion des états de chargement et d'erreur
+  - Interactivité avec les nœuds du graphe
+- **Props** : Aucune pour le moment
+- **Événements** : Aucun pour le moment
+- **Dépendances** :
+  - D3.js pour la visualisation
+  - Design system pour les styles
+  - Services pour la gestion des données

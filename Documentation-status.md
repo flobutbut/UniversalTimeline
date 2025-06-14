@@ -361,3 +361,36 @@ Le projet est stable et prêt pour le nettoyage final avant d'autres évolutions
 - Les migrations SQL nécessaires ont été appliquées et sont versionnées dans le dossier `server/prisma/migrations/`.
 - Plus aucune limitation connue sur le format des dates dans l'API.
 - Le projet est à jour et synchronisé sur la branche `Database_view`. 
+
+## Vue Graphique
+- [x] Création du composant de base
+- [x] Intégration dans l'application
+- [x] Gestion des états (chargement, erreur)
+- [x] Installation de D3.js
+- [ ] Implémentation du graphique D3
+- [ ] Gestion des données
+- [ ] Tests unitaires
+- [ ] Tests d'intégration
+
+## Dépendances
+- [x] D3.js (v7.9.0)
+- [x] Types D3.js (@types/d3)
+
+# Documentation de statut
+
+## État du projet
+
+- La gestion des dates (événements et périodes) est désormais robuste : tous les champs sont en TEXT, il n'y a plus d'erreur 500 liée au format des dates.
+- Les migrations SQL nécessaires ont été appliquées et sont versionnées dans le dossier `server/prisma/migrations/`.
+- Plus aucune limitation connue sur le format des dates dans l'API.
+- Le projet est à jour et synchronisé sur la branche `Database_view`. 
+
+## Vue Graphique
+- [x] Création du composant de base
+- [x] Intégration dans l'application
+- [x] Gestion des états (chargement, erreur)
+- [x] Installation de D3.js
+- [ ] Implémentation du graphique D3
+- [ ] Gestion des données
+- [ ] Tests unitaires
+- [ ] Tests d'intégration 
