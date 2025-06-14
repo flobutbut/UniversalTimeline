@@ -1,6 +1,6 @@
 <template>
-  <div v-if="isOpen" class="modal-overlay">
-    <div class="modal-content">
+  <div v-if="isOpen" class="modal-overlay" @click="handleOverlayClick">
+    <div class="modal-content" @click.stop>
       <div class="modal-header">
         <h2>{{ mode === 'edit' ? 'Modifier' : 'Créer' }} {{ 
           type === 'period' ? 'une période' : 
@@ -104,10 +104,10 @@
               />
             </div>
             <div class="form-group">
-              <label>
-                <input type="checkbox" v-model="form.isPublic" />
-                Story publique
-              </label>
+              <Switch
+                v-model="form.isPublic"
+                label="Story publique"
+              />
             </div>
           </template>
         </div>
@@ -139,11 +139,12 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch, toRefs, computed, onMounted } from 'vue';
+import { reactive, ref, watch, toRefs, computed, onMounted, onUnmounted } from 'vue';
 import { DatabaseQueryService } from '../services/DatabaseQueryService';
 import { WikidataQueryService } from '../services/WikidataQueryService';
 import Button from './base/Button.vue';
 import Input from './base/Input.vue';
+import Switch from './base/Switch.vue';
 
 interface Category {
   id: string;
@@ -430,6 +431,26 @@ const fillFromWikidata = async () => {
     showError('Erreur lors du chargement depuis Wikidata');
   }
 };
+
+const handleOverlayClick = (event: MouseEvent) => {
+  if (event.target === event.currentTarget) {
+    closeModal();
+  }
+};
+
+const handleEscapeKey = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    closeModal();
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('keydown', handleEscapeKey);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscapeKey);
+});
 </script>
 
 <style scoped>
@@ -446,7 +467,7 @@ const fillFromWikidata = async () => {
   background: var(--color-surface);
   color: var(--color-text);
   border-radius: var(--radius-lg);
-  padding: 2.5rem 2rem;
+  padding: var(--spacing-xl) var(--spacing-2xl);
   min-width: 700px;
   max-width: 90vw;
   box-shadow: var(--shadow-xl);
@@ -489,18 +510,41 @@ const fillFromWikidata = async () => {
   border-radius: var(--radius-md);
   padding: var(--spacing-sm);
   font-size: var(--font-size-base);
+  width: 100%;
+  transition: border-color var(--transition-fast);
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
 }
 .form-group textarea {
-  min-height: 60px;
+  min-height: 120px;
   resize: vertical;
+  line-height: 1.5;
+  font-family: inherit;
+  padding: var(--spacing-md);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  vertical-align: top;
+  text-align: left;
+  display: block;
+  box-sizing: border-box;
+}
+.form-group input {
+  height: 40px;
+  line-height: 40px;
+  padding: 0 var(--spacing-sm);
+  box-sizing: border-box;
+  display: block;
 }
 .form-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
 }
 .left-actions {
   display: flex;

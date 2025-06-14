@@ -44,7 +44,7 @@ const handleEdit = () => {
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .database-card:hover {
@@ -115,5 +115,17 @@ const handleEdit = () => {
 .database-card--selected:hover {
   border-color: var(--color-primary-dark);
   background-color: var(--color-primary-light);
+}
+
+.database-card--selected .action-button {
+  color: var(--color-neutral-0);
+}
+
+.database-card--selected .action-button:hover {
+  color: var(--color-neutral-100);
+}
+
+.database-card--story {
+  position: relative;
 }
 </style> 

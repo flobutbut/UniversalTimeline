@@ -6,7 +6,20 @@
     </label>
     <div class="base-input__wrapper">
       <i v-if="icon" :class="icon" class="base-input__icon"></i>
+      <textarea
+        v-if="type === 'textarea'"
+        :id="id"
+        :value="modelValue"
+        :placeholder="placeholder"
+        :disabled="disabled"
+        :required="required"
+        class="base-input__field"
+        @input="$emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
+        @blur="$emit('blur', $event)"
+        @focus="$emit('focus', $event)"
+      ></textarea>
       <input
+        v-else
         :id="id"
         :type="type"
         :value="modelValue"
@@ -101,6 +114,11 @@ defineEmits<{
   transition: all var(--transition-fast);
 }
 
+.base-input__field::placeholder {
+  color: var(--color-text-light);
+  opacity: 0.7;
+}
+
 .base-input__field:focus {
   outline: none;
   border-color: var(--color-primary);
@@ -132,8 +150,17 @@ defineEmits<{
 }
 
 /* Style spécifique pour les textareas */
-.base-input__field[type="textarea"] {
-  min-height: 100px;
+.base-input__field[type="textarea"],
+.base-input__field[type="textarea"]:focus {
+  min-height: 120px;
   resize: vertical;
+  line-height: 1.5;
+  padding-top: var(--spacing-md);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  vertical-align: top;
+  text-align: left;
+  display: block;
+  box-sizing: border-box;
 }
 </style> 

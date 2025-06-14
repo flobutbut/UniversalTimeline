@@ -74,8 +74,6 @@
             :title="story.title.fr"
             :categories="story.categories"
             :selected="selectedStory?.id === story.id"
-            @dragover.prevent
-            @drop="handleDrop($event, story)"
             @edit="handleEditStory(story)"
             @click="selectStory(story)"
           />
@@ -89,7 +87,12 @@
           <div class="spinner"></div>
           <span>Chargement des détails...</span>
         </div>
-        <div v-else-if="selectedStory" class="content">
+        <div v-else-if="selectedStory" class="content"
+          @dragover.prevent="handleDragOver"
+          @dragleave.prevent="handleDragLeave"
+          @drop.prevent="handleDrop"
+          :class="{ 'drag-over': isDragOver }"
+        >
           <div class="story-details">
             <h3>{{ selectedStory.title.fr }}</h3>
             <p class="story-author">Auteur: {{ selectedStory.author }}</p>
@@ -107,10 +110,8 @@
                   v-for="period in selectedStory.periods"
                   :key="period.id"
                   class="story-item"
-                  @click="handleRemovePeriod(selectedStory, period)"
                 >
                   {{ period.label.fr }}
-                  <i class="fas fa-times"></i>
                 </div>
               </div>
               <p v-else class="no-items">Aucune période associée</p>
@@ -122,10 +123,8 @@
                   v-for="event in selectedStory.events"
                   :key="event.id"
                   class="story-item"
-                  @click="handleRemoveEvent(selectedStory, event)"
                 >
                   {{ event.label.fr }}
-                  <i class="fas fa-times"></i>
                 </div>
               </div>
               <p v-else class="no-items">Aucun événement associé</p>
@@ -195,6 +194,7 @@ const draggedItem = ref<{ type: 'period' | 'event', data: any } | null>(null);
 // Ajout de la ref pour la story sélectionnée
 const selectedStory = ref<Story | null>(null);
 const loadingStoryDetails = ref(false);
+const isDragOver = ref(false);
 
 // Computed properties pour le filtrage
 const filteredPeriods = computed(() => {
@@ -465,29 +465,24 @@ function handleDragStart(event: DragEvent, type: 'period' | 'event', item: any) 
   }
 }
 
-async function handleDrop(event: DragEvent, story: ListStory) {
-  if (!draggedItem.value) return;
+async function handleDrop(event: DragEvent) {
+  isDragOver.value = false;
+  if (!draggedItem.value || !selectedStory.value) return;
 
   try {
     if (draggedItem.value.type === 'period') {
-      await queryService.addPeriodToStory(story.id, draggedItem.value.data.id);
+      await queryService.addPeriodToStory(selectedStory.value.id, draggedItem.value.data.id);
       // Recharger les données de la story
-      const updatedStory = await databaseService.loadFullStory(story.id);
-      fullStories.value.set(story.id, updatedStory);
-      // Mettre à jour la story sélectionnée si c'est la même
-      if (selectedStory.value?.id === story.id) {
-        selectedStory.value = updatedStory;
-      }
+      const updatedStory = await databaseService.loadFullStory(selectedStory.value.id);
+      fullStories.value.set(selectedStory.value.id, updatedStory);
+      selectedStory.value = updatedStory;
       window.showToast('Période ajoutée à la story avec succès', 'success');
     } else if (draggedItem.value.type === 'event') {
-      await queryService.addEventToStory(story.id, draggedItem.value.data.id);
+      await queryService.addEventToStory(selectedStory.value.id, draggedItem.value.data.id);
       // Recharger les données de la story
-      const updatedStory = await databaseService.loadFullStory(story.id);
-      fullStories.value.set(story.id, updatedStory);
-      // Mettre à jour la story sélectionnée si c'est la même
-      if (selectedStory.value?.id === story.id) {
-        selectedStory.value = updatedStory;
-      }
+      const updatedStory = await databaseService.loadFullStory(selectedStory.value.id);
+      fullStories.value.set(selectedStory.value.id, updatedStory);
+      selectedStory.value = updatedStory;
       window.showToast('Événement ajouté à la story avec succès', 'success');
     }
   } catch (error) {
@@ -495,61 +490,21 @@ async function handleDrop(event: DragEvent, story: ListStory) {
   }
 }
 
-async function handleRemovePeriod(story: ListStory, period: Period) {
-  try {
-    await queryService.removePeriodFromStory(story.id, period.id);
-    // Recharger les données de la story
-    const updatedStory = await databaseService.loadFullStory(story.id);
-    fullStories.value.set(story.id, updatedStory);
-    // Mettre à jour la story sélectionnée si c'est la même
-    if (selectedStory.value?.id === story.id) {
-      selectedStory.value = updatedStory;
-    }
-    window.showToast('Période retirée de la story avec succès', 'success');
-  } catch (error) {
-    window.showToast('Erreur lors du retrait de la période de la story', 'error');
+function handleDragOver(event: DragEvent) {
+  if (selectedStory.value) {
+    isDragOver.value = true;
   }
 }
 
-async function handleRemoveEvent(story: ListStory, event: Event) {
-  try {
-    await queryService.removeEventFromStory(story.id, event.id);
-    // Recharger les données de la story
-    const updatedStory = await databaseService.loadFullStory(story.id);
-    fullStories.value.set(story.id, updatedStory);
-    // Mettre à jour la story sélectionnée si c'est la même
-    if (selectedStory.value?.id === story.id) {
-      selectedStory.value = updatedStory;
-    }
-    window.showToast('Événement retiré de la story avec succès', 'success');
-  } catch (error) {
-    window.showToast('Erreur lors du retrait de l\'événement de la story', 'error');
-  }
-}
-
-// Fonction pour charger les données complètes d'une story
-async function loadFullStory(storyId: number): Promise<Story> {
-  try {
-    if (!fullStories.value.has(storyId)) {
-      const story = await databaseService.loadFullStory(storyId);
-      fullStories.value.set(storyId, story);
-    }
-    const story = fullStories.value.get(storyId);
-    if (!story) {
-      throw new Error('Story non trouvée');
-    }
-    return story;
-  } catch (error) {
-    console.error('Erreur lors du chargement de la story:', error);
-    throw error;
-  }
+function handleDragLeave(event: DragEvent) {
+  isDragOver.value = false;
 }
 
 // Fonction pour sélectionner une story
 async function selectStory(story: ListStory) {
   try {
     loadingStoryDetails.value = true;
-    const fullStory = await loadFullStory(story.id);
+    const fullStory = await databaseService.loadFullStory(story.id);
     selectedStory.value = fullStory;
   } catch (error) {
     window.showToast('Erreur lors du chargement des détails de la story', 'error');
@@ -759,5 +714,38 @@ async function selectStory(story: ListStory) {
 
 .loading-details .spinner {
   margin-bottom: var(--spacing-sm);
+}
+
+.content.drag-over {
+  background-color: var(--color-primary-light);
+  border: 2px dashed var(--color-primary);
+  border-radius: var(--radius-md);
+  position: relative;
+}
+
+.content.drag-over::after {
+  content: 'Déposer ici';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--color-primary);
+  color: var(--color-neutral-0);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  pointer-events: none;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 </style> 
