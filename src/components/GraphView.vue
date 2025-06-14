@@ -21,183 +21,153 @@
       @dragleave="handleDragLeave"
       @drop="handleDrop"
     >
-      <svg ref="svgRef"></svg>
+      <svg ref="svgRef">
+        <g ref="zoomGroupRef">
+          <g class="links">
+            <path
+              v-for="(link, i) in treeLinks"
+              :key="i"
+              :d="link.path"
+              fill="none"
+              stroke="#999"
+              stroke-width="2"
+              stroke-opacity="0.6"
+            />
+          </g>
+          <g class="nodes">
+            <foreignObject
+              v-for="node in treeNodes"
+              :key="node.id"
+              :x="node.y - 120"
+              :y="node.x - 40"
+              width="240"
+              height="80"
+              data-debug="nodebox"
+            >
+              <NodeBox :label="node.label" />
+            </foreignObject>
+          </g>
+        </g>
+      </svg>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, nextTick } from 'vue';
 import * as d3 from 'd3';
-import type { D3GraphNode, D3GraphLink, GraphPeriod, GraphLink } from '../types/graph';
+import type { GraphPeriod } from '../types/graph';
 import { GraphViewService, DatabaseQueryService } from '../services';
+import NodeBox from './base/NodeBox.vue';
 
 const graphViewService = GraphViewService.getInstance();
 const dbService = DatabaseQueryService.getInstance();
 const svgRef = ref<SVGSVGElement | null>(null);
-const simulation = ref<d3.Simulation<D3GraphNode, D3GraphLink> | null>(null);
+const zoomGroupRef = ref<SVGGElement | null>(null);
 const width = ref(800);
 const height = ref(600);
 const periodList = ref<any[]>([]);
 const draggedPeriodId = ref<string | null>(null);
 const isDragOver = ref(false);
 
-// Conversion des données du service en données D3
-function toD3Nodes(periods: GraphPeriod[]): D3GraphNode[] {
-  return periods.map(p => ({
-    id: p.id,
-    label: p.label,
-    description: p.description,
-    x: p.x,
-    y: p.y,
-    fx: p.fx,
-    fy: p.fy,
-    vx: p.vx,
-    vy: p.vy,
-    isMainEon: p.isMainEon
+const treeNodes = ref<any[]>([]);
+const treeLinks = ref<any[]>([]);
+
+function updateTreeData() {
+  const periods = graphViewService.getPeriods() as GraphPeriod[];
+  if (!periods.length) {
+    treeNodes.value = [];
+    treeLinks.value = [];
+    return;
+  }
+  // Construire la hiérarchie à partir des periods (parentId)
+  const nodeMap: Record<string, any> = {};
+  periods.forEach(p => nodeMap[p.id] = { ...p, children: [] });
+  let rootNodes: any[] = [];
+  periods.forEach(p => {
+    if (p.parentId && nodeMap[p.parentId]) {
+      nodeMap[p.parentId].children.push(nodeMap[p.id]);
+    } else {
+      rootNodes.push(nodeMap[p.id]);
+    }
+  });
+  let root: d3.HierarchyNode<GraphPeriod>;
+  if (rootNodes.length === 1) {
+    root = d3.hierarchy<GraphPeriod>(rootNodes[0]);
+  } else {
+    root = d3.hierarchy<GraphPeriod>({
+      id: 'root',
+      label: 'Racine',
+      description: '',
+      startDate: '',
+      endDate: '',
+      parentId: undefined,
+      temporalData: [],
+      hasChildren: false,
+      isMainEon: false,
+      categoryIds: [],
+      categoryLabels: [],
+      children: rootNodes,
+      loading: false,
+      childrenPreloaded: true,
+      locations: [],
+      directLocations: [],
+      x: undefined,
+      y: undefined,
+      fx: undefined,
+      fy: undefined,
+      vx: undefined,
+      vy: undefined
+    });
+  }
+  const treeLayout = d3.tree<GraphPeriod>().size([height.value, width.value - 100]);
+  treeLayout(root);
+  treeNodes.value = root.descendants().map(d => ({
+    id: d.data.id,
+    label: d.data.label,
+    x: d.x ?? 0,
+    y: d.y ?? 0
+  }));
+  treeLinks.value = root.links().map(link => ({
+    source: link.source,
+    target: link.target,
+    path: d3.linkHorizontal<d3.HierarchyPointLink<GraphPeriod>, d3.HierarchyPointNode<GraphPeriod>>()
+      .x(d => d.y)
+      .y(d => d.x)
+    (link as d3.HierarchyPointLink<GraphPeriod>)
   }));
 }
 
-function toD3Links(links: GraphLink[], nodes: D3GraphNode[]): D3GraphLink[] {
-  return links.map(l => ({
-    source: nodes.find(n => n.id === l.source) || l.source,
-    target: nodes.find(n => n.id === l.target) || l.target,
-    type: l.type
-  }));
-}
-
-const initSimulation = () => {
-  if (!svgRef.value) return;
-
-  // Nettoyer le SVG existant
-  d3.select(svgRef.value).selectAll('*').remove();
-
-  // Créer le conteneur SVG
-  const svg = d3.select(svgRef.value)
-    .attr('width', width.value)
-    .attr('height', height.value);
-
-  // Créer le groupe principal pour le zoom/pan
-  const zoomGroup = svg.append('g').attr('class', 'zoom-group');
-
-  // Créer le groupe pour les liens
-  const linkGroup = zoomGroup.append('g')
-    .attr('class', 'links');
-
-  // Créer le groupe pour les nœuds
-  const nodeGroup = zoomGroup.append('g')
-    .attr('class', 'nodes');
-
-  // Ajout du zoom/pan D3
-  svg.call(
-    d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.1, 5])
-      .on('zoom', (event) => {
-        zoomGroup.attr('transform', event.transform);
-      })
-  );
-
-  // Initialiser la simulation
-  simulation.value = d3.forceSimulation<D3GraphNode>()
-    .force('link', d3.forceLink<D3GraphNode, D3GraphLink>()
-      .id(d => d.id)
-      .distance(100))
-    .force('charge', d3.forceManyBody().strength(-300))
-    .force('center', d3.forceCenter(width.value / 2, height.value / 2))
-    .force('collision', d3.forceCollide().radius(50));
-
-  // Mettre à jour la simulation quand les données changent
-  watch(() => [graphViewService.getPeriods(), graphViewService.getLinks()], ([periods, links]) => {
-    console.log('[GraphView] periods:', periods, 'links:', links);
-    if (!simulation.value) return;
-    const nodes: D3GraphNode[] = toD3Nodes(periods as GraphPeriod[]);
-    const d3Links: D3GraphLink[] = toD3Links(links as GraphLink[], nodes);
-
-    // Mettre à jour les liens
-    const linkElements = linkGroup.selectAll<SVGLineElement, D3GraphLink>('line')
-      .data(d3Links, d => `${typeof d.source === 'string' ? d.source : d.source.id}-${typeof d.target === 'string' ? d.target : d.target.id}`);
-
-    linkElements.exit().remove();
-    linkElements.enter()
-      .append('line')
-      .attr('stroke', '#999')
-      .attr('stroke-opacity', 0.6)
-      .attr('stroke-width', 2)
-      .merge(linkElements);
-
-    // Mettre à jour les nœuds
-    const nodeElements = nodeGroup.selectAll<SVGGElement, D3GraphNode>('g')
-      .data(nodes, d => d.id);
-
-    nodeElements.exit().remove();
-    const nodeEnter = nodeElements.enter()
-      .append('g')
-      .attr('class', 'node');
-
-    nodeEnter.append('circle')
-      .attr('r', 20)
-      .attr('fill', '#69c0ff')
-      .attr('stroke', '#1890ff')
-      .attr('stroke-width', 2);
-
-    nodeEnter.append('text')
-      .attr('dy', '.35em')
-      .attr('text-anchor', 'middle')
-      .text(d => d.label)
-      .attr('fill', '#fff')
-      .style('font-size', '12px');
-
-    const nodeUpdate = nodeElements.merge(nodeEnter);
-    nodeUpdate.select('circle')
-      .attr('fill', d => d.isMainEon ? '#ff4d4f' : '#69c0ff');
-
-    // Ajouter le drag après la création des nœuds
-    nodeUpdate.call(d3.drag<SVGGElement, D3GraphNode>()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended));
-
-    // Mettre à jour la simulation
-    simulation.value
-      .nodes(nodes)
-      .on('tick', () => {
-        linkElements
-          .attr('x1', d => typeof d.source === 'string' ? 0 : d.source.x || 0)
-          .attr('y1', d => typeof d.source === 'string' ? 0 : d.source.y || 0)
-          .attr('x2', d => typeof d.target === 'string' ? 0 : d.target.x || 0)
-          .attr('y2', d => typeof d.target === 'string' ? 0 : d.target.y || 0);
-
-        nodeElements
-          .attr('transform', d => `translate(${d.x || 0},${d.y || 0})`);
-      });
-
-    (simulation.value.force('link') as d3.ForceLink<D3GraphNode, D3GraphLink>)
-      .links(d3Links);
-  }, { deep: true });
-};
-
-const dragstarted = (event: d3.D3DragEvent<SVGGElement, D3GraphNode, D3GraphNode>, d: D3GraphNode) => {
-  if (!simulation.value) return;
-  event.sourceEvent.stopPropagation();
-  d.fx = d.x;
-  d.fy = d.y;
-};
-
-const dragged = (event: d3.D3DragEvent<SVGGElement, D3GraphNode, D3GraphNode>, d: D3GraphNode) => {
-  if (!simulation.value) return;
-  d.fx = event.x;
-  d.fy = event.y;
-};
-
-const dragended = (event: d3.D3DragEvent<SVGGElement, D3GraphNode, D3GraphNode>, d: D3GraphNode) => {
-  if (!simulation.value) return;
-  d.fx = undefined;
-  d.fy = undefined;
-};
+watch(() => [graphViewService.getPeriods(), graphViewService.getLinks()], () => {
+  updateTreeData();
+  nextTick(() => {
+    // Réappliquer le zoom/pan après le DOM update
+    if (svgRef.value && zoomGroupRef.value) {
+      d3.select(svgRef.value).call(
+        d3.zoom<SVGSVGElement, unknown>()
+          .scaleExtent([0.1, 5])
+          .on('zoom', (event) => {
+            d3.select(zoomGroupRef.value).attr('transform', event.transform);
+          })
+      );
+    }
+  });
+}, { deep: true });
 
 onMounted(async () => {
   periodList.value = await dbService.getAllPeriods();
-  initSimulation();
+  updateTreeData();
+  nextTick(() => {
+    if (svgRef.value && zoomGroupRef.value) {
+      d3.select(svgRef.value).call(
+        d3.zoom<SVGSVGElement, unknown>()
+          .scaleExtent([0.1, 5])
+          .on('zoom', (event) => {
+            d3.select(zoomGroupRef.value).attr('transform', event.transform);
+          })
+      );
+    }
+  });
 });
 
 function handleDragStart(period: any) {
