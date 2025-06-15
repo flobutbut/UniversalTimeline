@@ -118,4 +118,31 @@ export interface Event {
   location?: string;
   category?: string;
   source?: string;
+}
+
+export interface ApiPeriod {
+  id: string;
+  wikidata_id?: string;
+  label: {
+    fr: string;
+    en: string;
+  };
+  description?: {
+    fr: string;
+    en: string;
+  };
+  startDate: string;
+  endDate: string;
+  hasParent: boolean;
+  children: string[];
+  temporalLocation?: string;
+  categories?: Array<{
+    id: string;
+    label: {
+      fr: string;
+      en: string;
+    };
+  }>;
+  createdAt?: string;
+  updatedAt?: string;
 } 

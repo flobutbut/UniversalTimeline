@@ -91,7 +91,8 @@ export async function getEventDateFromWikidata(wikidataId: string): Promise<stri
 // Route pour obtenir les périodes
 router.get('/periods', async (req, res) => {
   try {
-    const sqlQuery = `
+    console.log('[API] Récupération des périodes');
+    const result = await dbQuery(`
       SELECT 
         p.id,
         p.wikidata_id,
@@ -104,17 +105,16 @@ router.get('/periods', async (req, res) => {
         p.has_parent,
         p.children,
         p.temporal_location,
-        c.label_fr as category_label
+        c.label_fr as category_label,
+        c.id as category_id
       FROM periods.periods p
       LEFT JOIN categories.period_categories pc ON p.id = pc.period_id
       LEFT JOIN categories.categories c ON pc.category_id = c.id
       WHERE p.has_parent = false
       ORDER BY p.start_date
-    `;
+    `);
 
-    const result = await dbQuery(sqlQuery);
-    // Correction : mapping explicite pour chaque période
-    const periods = result.rows.map((row: any) => ({
+    const periods = result.rows.map(row => ({
       id: row.id,
       wikidata_id: row.wikidata_id,
       label_fr: row.label_fr,
@@ -127,12 +127,12 @@ router.get('/periods', async (req, res) => {
       children: row.children || [],
       temporal_location: row.temporal_location,
       category_label: row.category_label,
-      created_at: row.created_at,
-      updated_at: row.updated_at
+      category_id: row.category_id
     }));
+
     res.json(periods);
   } catch (error) {
-    console.error('Erreur lors de la récupération des périodes:', error);
+    console.error('[API] Erreur lors de la récupération des périodes:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des périodes' });
   }
 });

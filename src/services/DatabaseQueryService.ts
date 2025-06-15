@@ -21,14 +21,8 @@ export class DatabaseQueryService {
   }
 
   async loadPeriod(periodId: string): Promise<Period> {
-    console.log(`[DatabaseQueryService] Chargement de la période depuis la base de données:`, periodId);
     try {
       const response = await axios.get(`${API_BASE_URL}/periods/${periodId}`);
-      console.log(`[DatabaseQueryService] Réponse de la base de données:`, {
-        id: response.data.id,
-        label: response.data.label,
-        parentId: response.data.parentId
-      });
       return response.data;
     } catch (error) {
       console.error(`[DatabaseQueryService] Erreur lors du chargement de la période:`, error);
@@ -37,17 +31,8 @@ export class DatabaseQueryService {
   }
 
   async loadChildren(periodId: string): Promise<Period[]> {
-    console.log(`[DatabaseQueryService] Chargement des enfants depuis la base de données:`, periodId);
     try {
       const response = await axios.get(`${API_BASE_URL}/periods/${periodId}/children`);
-      console.log(`[DatabaseQueryService] Réponse des enfants:`, {
-        parentId: periodId,
-        childrenCount: response.data.length,
-        children: response.data.map((child: Period) => ({
-          id: child.id,
-          label: child.label
-        }))
-      });
       return response.data;
     } catch (error) {
       console.error(`[DatabaseQueryService] Erreur lors du chargement des enfants:`, error);
@@ -57,7 +42,6 @@ export class DatabaseQueryService {
 
   public async getEventsByPeriod(periodId: string): Promise<Event[]> {
     try {
-      console.log('Chargement des événements pour la période:', periodId);
       const response = await axios.get(`${API_BASE_URL}/periods/${periodId}/events`);
       return response.data;
     } catch (error) {
@@ -68,10 +52,7 @@ export class DatabaseQueryService {
 
   public async getAllEvents(): Promise<Event[]> {
     try {
-      console.log('[DatabaseQueryService] Récupération des événements...');
       const response = await axios.get(`${API_BASE_URL}/events`);
-      console.log('[DatabaseQueryService] Réponse brute de l\'API:', response.data);
-      console.log('[DatabaseQueryService] Nombre d\'événements reçus:', response.data.length);
       
       // Formater les données selon le type Event
       const formattedEvents = response.data.map((event: any) => ({
@@ -97,9 +78,6 @@ export class DatabaseQueryService {
         updatedAt: new Date(event.updated_at || Date.now())
       }));
       
-      if (formattedEvents.length > 0) {
-        console.log('[DatabaseQueryService] Premier événement formaté:', JSON.stringify(formattedEvents[0], null, 2));
-      }
       return formattedEvents;
     } catch (error) {
       console.error('[DatabaseQueryService] Erreur lors de la récupération des événements:', error);
@@ -109,13 +87,11 @@ export class DatabaseQueryService {
 
   public async getAllPeriods(): Promise<Period[]> {
     try {
-      console.log('[DatabaseQueryService] Récupération des périodes...');
       const response = await fetch('/api/periods');
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
       const data = await response.json();
-      console.log('[DatabaseQueryService] Réponse brute de l\'API pour les périodes:', data);
       
       // Formater les données selon le type Period
       const formattedPeriods = data.map((period: any) => ({
@@ -154,13 +130,11 @@ export class DatabaseQueryService {
 
   public async getAllStories(): Promise<Story[]> {
     try {
-      console.log('[DatabaseQueryService] Récupération des stories...');
       const response = await fetch('/api/stories');
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
       const data = await response.json();
-      console.log('[DatabaseQueryService] Réponse brute de l\'API pour les stories:', data);
       
       // Formater les données selon le type Story
       const formattedStories = data.map((story: any) => ({
@@ -218,7 +192,6 @@ export class DatabaseQueryService {
   // Mise à jour d'une période
   public async updatePeriod(id: string, data: any): Promise<any> {
     try {
-      console.log('[DatabaseQueryService] Mise à jour de la période:', { id, data });
       const payload = {
         wikidata_id: data.qid,
         label: { fr: data.title.fr, en: data.title.en },
@@ -229,7 +202,6 @@ export class DatabaseQueryService {
         temporal_location: data.temporalLocation,
         categories: data.categories
       };
-      console.log('[DatabaseQueryService] Payload de mise à jour:', payload);
       const response = await axios.put(`${API_BASE_URL}/periods/${id}`, payload);
       window.showToast('Période mise à jour avec succès', 'success');
       return response.data;
@@ -268,7 +240,6 @@ export class DatabaseQueryService {
   // Méthodes pour le chargement des données complètes
   public async getPeriod(periodId: string): Promise<Period> {
     try {
-      console.log('[DatabaseQueryService] Récupération de la période:', periodId);
       const response = await fetch(`/api/periods/${periodId}`);
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
@@ -283,7 +254,6 @@ export class DatabaseQueryService {
 
   public async getEvent(eventId: string): Promise<Event> {
     try {
-      console.log('[DatabaseQueryService] Récupération de l\'événement:', eventId);
       const response = await fetch(`/api/events/${eventId}`);
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
@@ -298,7 +268,6 @@ export class DatabaseQueryService {
 
   public async getStory(storyId: number): Promise<Story> {
     try {
-      console.log('[DatabaseQueryService] Récupération de la story:', storyId);
       const response = await fetch(`/api/stories/${storyId}`);
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
@@ -314,7 +283,6 @@ export class DatabaseQueryService {
   // Mise à jour d'un événement
   public async updateEvent(id: string, data: any): Promise<any> {
     try {
-      console.log('[DatabaseQueryService] Mise à jour de l\'événement:', { id, data });
       const payload = {
         wikidata_id: data.qid,
         label: { fr: data.title.fr, en: data.title.en },
@@ -322,7 +290,6 @@ export class DatabaseQueryService {
         date: data.date,
         categories: data.categories
       };
-      console.log('[DatabaseQueryService] Payload de mise à jour:', payload);
       const response = await fetch(`/api/events/${id}`, {
         method: 'PUT',
         headers: {
@@ -346,8 +313,6 @@ export class DatabaseQueryService {
   // Vérifier si un événement existe par son Q-id
   public async getEventById(qid: string): Promise<Event> {
     try {
-      console.log(`[DatabaseQueryService] Vérification de l'existence de l'événement:`, qid);
-      
       // Validation du format du Q-id
       if (!qid.match(/^Q\d+$/)) {
         throw new Error('Format de Q-id invalide');
@@ -365,17 +330,8 @@ export class DatabaseQueryService {
         throw new Error('Événement non trouvé');
       }
 
-      console.log(`[DatabaseQueryService] Événement trouvé:`, existingEvent);
       return existingEvent;
     } catch (error: any) {
-      // Ne log que les erreurs non-404
-      if (error.message !== 'Événement non trouvé') {
-        console.error(`[DatabaseQueryService] Erreur lors de la vérification de l'événement:`, {
-          qid,
-          message: error.message
-        });
-      }
-
       if (error.message === 'Format de Q-id invalide') {
         throw error;
       } else if (error.message === 'Événement non trouvé') {
@@ -389,13 +345,11 @@ export class DatabaseQueryService {
   // Méthodes pour le chargement des données de liste
   public async getListPeriods(): Promise<ListPeriod[]> {
     try {
-      console.log('[DatabaseQueryService] Récupération des périodes...');
       const response = await fetch('/api/periods');
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
       const data = await response.json();
-      console.log('[DatabaseQueryService] Réponse brute de l\'API pour les périodes:', data);
       // Formater les données selon le type ListPeriod
       const formattedPeriods = data.map((period: any) => ({
         id: period.id,
@@ -407,6 +361,8 @@ export class DatabaseQueryService {
         description: period.description_fr ? { fr: period.description_fr, en: period.description_en || period.description_fr } : { fr: '', en: '' },
         startDate: period.start_date,
         endDate: period.end_date,
+        hasParent: period.has_parent || false,
+        children: period.children || [],
         categories: period.category_label ? [{
           id: period.category_id,
           label: {
@@ -415,8 +371,7 @@ export class DatabaseQueryService {
           }
         }] : [],
         createdAt: period.created_at ? new Date(period.created_at) : new Date(),
-        updatedAt: period.updated_at ? new Date(period.updated_at) : new Date(),
-        children: []
+        updatedAt: period.updated_at ? new Date(period.updated_at) : new Date()
       }));
       return formattedPeriods;
     } catch (error) {
@@ -427,13 +382,11 @@ export class DatabaseQueryService {
 
   public async getListEvents(): Promise<ListEvent[]> {
     try {
-      console.log('[DatabaseQueryService] Récupération des événements...');
       const response = await fetch('/api/events');
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
       const data = await response.json();
-      console.log('[DatabaseQueryService] Réponse brute de l\'API:', data);
       // Formater les données selon le type ListEvent
       const formattedEvents = data.map((event: any) => ({
         id: event.id,
@@ -461,13 +414,11 @@ export class DatabaseQueryService {
 
   public async getListStories(): Promise<ListStory[]> {
     try {
-      console.log('[DatabaseQueryService] Récupération des stories...');
       const response = await fetch('/api/stories');
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
       const data = await response.json();
-      console.log('[DatabaseQueryService] Réponse brute de l\'API pour les stories:', data);
       
       // Formater les données selon le type ListStory
       const formattedStories = data.map((story: any) => ({
@@ -490,7 +441,6 @@ export class DatabaseQueryService {
 
   public async createStory(storyData: any): Promise<Story> {
     try {
-      console.log('[DatabaseQueryService] Création d\'une nouvelle story:', storyData);
       const response = await fetch('/api/stories', {
         method: 'POST',
         headers: {
@@ -513,7 +463,6 @@ export class DatabaseQueryService {
 
   public async updateStory(storyId: number, storyData: any): Promise<Story> {
     try {
-      console.log('[DatabaseQueryService] Mise à jour de la story:', storyId, storyData);
       const response = await fetch(`/api/stories/${storyId}`, {
         method: 'PUT',
         headers: {
@@ -537,7 +486,6 @@ export class DatabaseQueryService {
   // Méthodes pour gérer les relations stories-périodes
   public async addPeriodToStory(storyId: number, periodId: string): Promise<void> {
     try {
-      console.log('[DatabaseQueryService] Ajout de la période à la story:', storyId, periodId);
       const response = await fetch(`/api/stories/${storyId}/periods/${periodId}`, {
         method: 'POST',
         headers: {
@@ -556,7 +504,6 @@ export class DatabaseQueryService {
 
   public async removePeriodFromStory(storyId: number, periodId: string): Promise<void> {
     try {
-      console.log('[DatabaseQueryService] Suppression de la période de la story:', storyId, periodId);
       const response = await fetch(`/api/stories/${storyId}/periods/${periodId}`, {
         method: 'DELETE',
       });
@@ -572,7 +519,6 @@ export class DatabaseQueryService {
 
   public async getStoryPeriods(storyId: number): Promise<Period[]> {
     try {
-      console.log('[DatabaseQueryService] Récupération des périodes de la story:', storyId);
       const response = await fetch(`/api/stories/${storyId}/periods`);
       
       if (!response.ok) {
@@ -590,7 +536,6 @@ export class DatabaseQueryService {
   // Méthodes pour gérer les relations stories-événements
   public async addEventToStory(storyId: number, eventId: string): Promise<void> {
     try {
-      console.log('[DatabaseQueryService] Ajout de l\'événement à la story:', storyId, eventId);
       const response = await fetch(`/api/stories/${storyId}/events/${eventId}`, {
         method: 'POST',
         headers: {
@@ -609,7 +554,6 @@ export class DatabaseQueryService {
 
   public async removeEventFromStory(storyId: number, eventId: string): Promise<void> {
     try {
-      console.log('[DatabaseQueryService] Suppression de l\'événement de la story:', storyId, eventId);
       const response = await fetch(`/api/stories/${storyId}/events/${eventId}`, {
         method: 'DELETE',
       });
@@ -625,7 +569,6 @@ export class DatabaseQueryService {
 
   public async getStoryEvents(storyId: number): Promise<Event[]> {
     try {
-      console.log('[DatabaseQueryService] Récupération des événements de la story:', storyId);
       const response = await fetch(`/api/stories/${storyId}/events`);
       
       if (!response.ok) {
@@ -649,7 +592,6 @@ export class DatabaseQueryService {
       if (!response.ok) {
         // Si 404, on considère comme déjà supprimé
         if (response.status === 404) {
-          console.warn(`[DatabaseQueryService] L'événement ${id} était déjà supprimé.`);
           return;
         }
         throw new Error(`Erreur HTTP: ${response.status}`);

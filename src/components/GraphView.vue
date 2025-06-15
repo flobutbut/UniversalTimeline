@@ -7,7 +7,7 @@
         <FinderItem
           v-for="item in col"
           :key="item.id"
-          :label="item.label.fr || item.label"
+          :label="typeof item.label === 'string' ? item.label : item.label?.fr || ''"
           :selected="selectedIds[colIdx] === item.id"
           :hasChildren="hasChildren(item.id)"
           :itemId="item.id"
@@ -26,6 +26,7 @@ import { ref, computed, onMounted } from 'vue';
 import { DatabaseViewService } from '../services/DatabaseViewService';
 import FinderItem from './FinderItem.vue';
 import Toast from './Toast.vue';
+import type { ApiPeriod } from '../types/geological';
 
 const databaseViewService = DatabaseViewService.getInstance();
 const loading = ref(false);
@@ -82,64 +83,105 @@ const columns = computed(() => {
   return cols;
 });
 
-function handleSelect(item: any, colIdx: number) {
+const handleSelect = async (period: ApiPeriod, colIdx: number) => {
   selectedIds.value = selectedIds.value.slice(0, colIdx);
-  selectedIds.value[colIdx] = item.id;
-}
+  selectedIds.value[colIdx] = period.id;
+
+  // Si la période a des enfants, on les charge
+  if (period.children && period.children.length > 0) {
+    try {
+      // Charger les détails de chaque enfant
+      const childrenDetails = await Promise.all(
+        period.children.map(async (childId: string) => {
+          const response = await fetch(`/api/periods/${childId}`);
+          if (!response.ok) {
+            throw new Error(`Erreur lors du chargement de la période ${childId}`);
+          }
+          return response.json() as Promise<ApiPeriod>;
+        })
+      );
+
+      // Mettre à jour la liste des périodes avec les détails des enfants
+      const updatedPeriods = [...allPeriods.value];
+      childrenDetails.forEach((childData: ApiPeriod) => {
+        const existingIndex = updatedPeriods.findIndex(p => p.id === childData.id);
+        if (existingIndex !== -1) {
+          // Mettre à jour la période existante
+          updatedPeriods[existingIndex] = {
+            ...updatedPeriods[existingIndex],
+            ...childData,
+            label: childData.label.fr,
+            hasParent: childData.hasParent
+          };
+        } else {
+          // Ajouter la nouvelle période
+          updatedPeriods.push({
+            ...childData,
+            label: childData.label.fr,
+            hasParent: childData.hasParent
+          });
+        }
+      });
+
+      // Mettre à jour la liste des périodes
+      databaseViewService.setPeriods([...updatedPeriods]);
+    } catch (error) {
+      console.error('[GraphView] Erreur lors du chargement des enfants:', error);
+    }
+  }
+};
 
 function onDragStart(itemId: string) {
   draggedItemId.value = itemId;
 }
 
+function onDragOver(event: DragEvent) {
+  event.preventDefault();
+}
+
 async function onDrop(targetItemId: string) {
-  if (!draggedItemId.value || draggedItemId.value === targetItemId) return;
-  
+  if (!draggedItemId.value || !targetItemId) return;
+
   try {
-    loading.value = true;
-    // Récupérer la période cible et la période déplacée
-    const targetPeriod = allPeriods.value.find(p => p.id === targetItemId);
-    const draggedPeriod = allPeriods.value.find(p => p.id === draggedItemId.value);
+    // Mettre à jour le parent de la période déplacée
+    await databaseViewService.updateParent(draggedItemId.value, targetItemId);
     
-    if (!targetPeriod || !draggedPeriod) {
-      toast.value?.show('Période non trouvée', 'error');
-      return;
-    }
-
-    // Vérifier si la période n'est pas déjà un enfant
-    if (targetPeriod.children?.includes(draggedItemId.value)) {
-      toast.value?.show('Cette période est déjà un enfant de la période cible', 'info');
-      return;
-    }
-
-    // Vérifier si on ne crée pas une référence circulaire
-    if (draggedPeriod.children?.includes(targetItemId)) {
-      toast.value?.show('Impossible de déplacer une période dans son propre enfant', 'error');
-      return;
-    }
-
     // Mettre à jour les enfants de la période cible
-    const newChildren = [...(targetPeriod.children || []), draggedItemId.value];
+    const targetPeriod = allPeriods.value.find(p => p.id === targetItemId);
+    const newChildren = [...(targetPeriod?.children || []), draggedItemId.value];
     await databaseViewService.updateChildren(targetItemId, newChildren);
+    
+    // Mettre à jour le statut hasParent de la période déplacée
+    await databaseViewService.updateHasParent(draggedItemId.value, true);
 
-    // Recharger les données après modification des children
-    await databaseViewService.loadListData();
+    // Mettre à jour les données localement
+    const updatedPeriods = [...allPeriods.value];
+    const draggedPeriodIndex = updatedPeriods.findIndex(p => p.id === draggedItemId.value);
+    const targetPeriodIndex = updatedPeriods.findIndex(p => p.id === targetItemId);
 
-    // Mettre à jour has_parent de la période déplacée après le rechargement
-    const updatedDraggedPeriod = allPeriods.value.find(p => p.id === draggedItemId.value);
-    if (updatedDraggedPeriod && !updatedDraggedPeriod.hasParent) {
-      await databaseViewService.updateHasParent(draggedItemId.value, true);
-      // Recharger une dernière fois pour avoir l'état final
-      await databaseViewService.loadListData();
+    if (draggedPeriodIndex !== -1 && targetPeriodIndex !== -1) {
+      // Mettre à jour la période cible
+      const targetPeriod = updatedPeriods[targetPeriodIndex];
+      if (!targetPeriod.children) {
+        targetPeriod.children = [];
+      }
+      if (!targetPeriod.children.includes(draggedItemId.value)) {
+        targetPeriod.children.push(draggedItemId.value);
+      }
+      updatedPeriods[targetPeriodIndex] = targetPeriod;
+
+      // Mettre à jour la période déplacée
+      const draggedPeriod = updatedPeriods[draggedPeriodIndex];
+      draggedPeriod.hasParent = true;
+      updatedPeriods[draggedPeriodIndex] = draggedPeriod;
+
+      // Mettre à jour la liste des périodes
+      databaseViewService.setPeriods([...updatedPeriods]);
     }
-
-    draggedItemId.value = null;
-    toast.value?.show('Période déplacée avec succès', 'success');
-  } catch (e: unknown) {
-    const errorMessage = e instanceof Error ? e.message : 'Erreur lors du déplacement de la période';
-    error.value = errorMessage;
-    toast.value?.show(errorMessage, 'error');
+  } catch (error) {
+    console.error('[GraphView] Erreur lors du déplacement de la période:', error);
   } finally {
-    loading.value = false;
+    draggedItemId.value = null;
   }
 }
 </script>
