@@ -4,17 +4,19 @@
     <div v-else-if="error" class="finder-error">{{ error }}</div>
     <div v-else class="finder-columns">
       <div class="finder-column" v-for="(col, colIdx) in columns" :key="colIdx">
-        <FinderItem
-          v-for="item in col"
-          :key="item.id"
-          :label="typeof item.label === 'string' ? item.label : item.label?.fr || ''"
-          :selected="selectedIds[colIdx] === item.id"
-          :hasChildren="hasChildren(item.id)"
-          :itemId="item.id"
-          @click="handleSelect(item, colIdx)"
-          @dragstart="onDragStart"
-          @drop="onDrop"
-        />
+        <div class="finder-column-content">
+          <FinderItem
+            v-for="item in col"
+            :key="item.id"
+            :label="typeof item.label === 'string' ? item.label : item.label?.fr || ''"
+            :selected="selectedIds[colIdx] === item.id"
+            :hasChildren="hasChildren(item.id)"
+            :itemId="item.id"
+            @click="handleSelect(item, colIdx)"
+            @dragstart="onDragStart"
+            @drop="onDrop"
+          />
+        </div>
       </div>
     </div>
     <Toast ref="toast" />
@@ -143,17 +145,11 @@ async function onDrop(targetItemId: string) {
   if (!draggedItemId.value || !targetItemId) return;
 
   try {
-    // Mettre à jour le parent de la période déplacée
-    await databaseViewService.updateParent(draggedItemId.value, targetItemId);
-    
     // Mettre à jour les enfants de la période cible
     const targetPeriod = allPeriods.value.find(p => p.id === targetItemId);
     const newChildren = [...(targetPeriod?.children || []), draggedItemId.value];
     await databaseViewService.updateChildren(targetItemId, newChildren);
     
-    // Mettre à jour le statut hasParent de la période déplacée
-    await databaseViewService.updateHasParent(draggedItemId.value, true);
-
     // Mettre à jour les données localement
     const updatedPeriods = [...allPeriods.value];
     const draggedPeriodIndex = updatedPeriods.findIndex(p => p.id === draggedItemId.value);
@@ -193,6 +189,9 @@ async function onDrop(targetItemId: string) {
   background: var(--color-background);
   display: flex;
   flex-direction: column;
+  max-width: 100vw;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 .finder-loading, .finder-error {
   padding: var(--spacing-lg);
@@ -204,7 +203,9 @@ async function onDrop(targetItemId: string) {
   display: flex;
   flex-direction: row;
   height: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
+  max-width: 100vw;
+  box-sizing: border-box;
   background: var(--color-background);
 }
 .finder-column {
@@ -217,5 +218,124 @@ async function onDrop(targetItemId: string) {
   flex-direction: column;
   gap: 2px;
   height: 100%;
+  box-sizing: border-box;
+}
+.finder-column-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.graph-view {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  height: calc(100vh - 64px);
+  position: absolute;
+  inset: 64px 0 0 0;
+  overflow: hidden;
+}
+
+.column {
+  flex: 1;
+  min-width: 300px;
+  max-width: 400px;
+  background: var(--color-background-soft);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.column-header {
+  flex: 0 0 auto;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.column-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.column-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.column-content::-webkit-scrollbar-track {
+  background: var(--color-background-mute);
+  border-radius: 4px;
+}
+
+.column-content::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.column-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+.period-item {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background: var(--color-background);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.period-item:hover {
+  background: var(--color-background-soft);
+}
+
+.period-item.selected {
+  background: var(--color-primary);
+  color: white;
+}
+
+.period-item.has-children {
+  border-left: 3px solid var(--color-primary);
+}
+
+.period-item.has-parent {
+  opacity: 0.7;
+}
+
+.period-item.dragging {
+  opacity: 0.5;
+}
+
+.period-item.drag-over {
+  border: 2px dashed var(--color-primary);
+}
+
+.period-item .period-label {
+  font-weight: 500;
+}
+
+.period-item .period-dates {
+  font-size: 0.8em;
+  color: var(--color-text-light);
+}
+
+.period-item.selected .period-dates {
+  color: rgba(255, 255, 255, 0.8);
+}
+</style>
+
+<style>
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+#app {
+  height: 100%;
+  overflow: hidden;
 }
 </style> 

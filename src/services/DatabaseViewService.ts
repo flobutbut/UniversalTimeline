@@ -146,13 +146,6 @@ export class DatabaseViewService {
   }
 
   /**
-   * Met à jour le parent d'une période (drag & drop)
-   */
-  public async updateParent(periodId: string, newParentId: string | null): Promise<any> {
-    return this.databaseQueryService.updateParent(periodId, newParentId);
-  }
-
-  /**
    * Met à jour les enfants d'une période
    */
   public async updateChildren(periodId: string, newChildren: string[]): Promise<any> {

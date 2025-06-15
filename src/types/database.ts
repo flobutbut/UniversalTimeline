@@ -30,7 +30,6 @@ export interface Category {
   id: string;
   label: MultilingualText;
   description?: MultilingualText;
-  parentId?: string | null;
 }
 
 // Types pour les périodes

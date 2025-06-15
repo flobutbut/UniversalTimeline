@@ -77,10 +77,6 @@
               />
             </div>
             <div class="form-group">
-              <label>Parent</label>
-              <input v-model="form.parentId" type="text" placeholder="ID du parent" />
-            </div>
-            <div class="form-group">
               <label>Temporal location</label>
               <input v-model="form.temporalLocation" type="text" />
             </div>
@@ -185,7 +181,6 @@ const form = reactive({
   startDate: props.data?.temporalData?.[0]?.startDate || '',
   endDate: props.data?.temporalData?.[0]?.endDate || '',
   date: props.data?.date || '',
-  parentId: props.data?.parent_id || '',
   temporalLocation: props.data?.temporal_location || '',
   author: props.data?.author || '',
   isPublic: props.data?.isPublic || false
@@ -218,7 +213,6 @@ watch(
       form.date = val.date || '';
       form.startDate = val.start_date || val.startDate || '';
       form.endDate = val.end_date || val.endDate || '';
-      form.parentId = val.parent_id || val.parentId || '';
       form.temporalLocation = val.temporal_location || val.temporalLocation || '';
       qidExistsInBase.value = false;
       existingItem.value = val;
@@ -231,7 +225,6 @@ watch(
       form.date = '';
       form.startDate = '';
       form.endDate = '';
-      form.parentId = '';
       form.temporalLocation = '';
       qidExistsInBase.value = false;
       existingItem.value = null;
@@ -304,7 +297,6 @@ const handleSubmit = async () => {
       wikidata_id: form.qid,
       start_date: form.startDate,
       end_date: form.endDate,
-      parent_id: form.parentId,
       temporal_location: form.temporalLocation,
       author: form.author,
       isPublic: form.isPublic
@@ -336,7 +328,6 @@ const openModal = (type: 'period' | 'event' | 'story', mode: 'create' | 'edit', 
   form.date = '';
   form.startDate = '';
   form.endDate = '';
-  form.parentId = '';
   form.temporalLocation = '';
 
   if (mode === 'edit' && data) {
@@ -348,7 +339,6 @@ const openModal = (type: 'period' | 'event' | 'story', mode: 'create' | 'edit', 
     form.date = data.date || '';
     form.startDate = data.start_date || '';
     form.endDate = data.end_date || '';
-    form.parentId = data.parent_id || '';
     form.temporalLocation = data.temporal_location || '';
   }
 }

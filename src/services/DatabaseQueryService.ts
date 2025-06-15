@@ -605,20 +605,6 @@ export class DatabaseQueryService {
   }
 
   /**
-   * Met à jour le parent d'une période (drag & drop)
-   */
-  public async updateParent(periodId: string, newParentId: string | null): Promise<any> {
-    try {
-      const payload = { parent_id: newParentId };
-      const response = await axios.patch(`${API_BASE_URL}/periods/${periodId}/parent`, payload);
-      return response.data;
-    } catch (error) {
-      console.error('[DatabaseQueryService] Erreur lors de la mise à jour du parent:', error);
-      throw error;
-    }
-  }
-
-  /**
    * Met à jour les enfants d'une période
    */
   public async updateChildren(periodId: string, newChildren: string[]): Promise<any> {
