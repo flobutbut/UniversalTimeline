@@ -394,3 +394,13 @@ Le projet est stable et prêt pour le nettoyage final avant d'autres évolutions
 - [ ] Gestion des données
 - [ ] Tests unitaires
 - [ ] Tests d'intégration 
+
+## État de la base de données (avril 2024)
+
+- La table periods.periods a été mise à jour pour :
+  - Supprimer la colonne `parent_id` (remplacée par `children`)
+  - Conserver `has_parent` (boolean) qui indique si la période a des enfants
+  - Utiliser `children` (jsonb) pour stocker la liste des IDs des enfants directs
+- Un script de maintenance (`database/maintenance.sql`) permet de corriger et vérifier l'intégrité de ces champs.
+- Les requêtes de vérification utilisent désormais `label_fr` pour l'affichage.
+- Les informations de connexion sont documentées dans la documentation technique. 

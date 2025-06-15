@@ -131,7 +131,8 @@ export class DatabaseQueryService {
         } : undefined,
         startDate: period.start_date,
         endDate: period.end_date,
-        parentId: period.parent_id,
+        hasParent: period.has_parent,
+        children: period.children || [],
         temporalLocation: period.temporal_location,
         categories: period.category_label ? [{
           id: period.category_id,
@@ -140,7 +141,6 @@ export class DatabaseQueryService {
             en: period.category_label
           }
         }] : [],
-        children: [],
         createdAt: new Date(period.created_at || Date.now()),
         updatedAt: new Date(period.updated_at || Date.now())
       }));
@@ -199,7 +199,7 @@ export class DatabaseQueryService {
         description: { fr: data.description.fr, en: data.description.en },
         start_date: data.startDate,
         end_date: data.endDate,
-        parent_id: data.parentId,
+        children: data.children || [],
         temporal_location: data.temporalLocation,
       };
       const response = await axios.post(`${API_BASE_URL}/periods`, payload);
@@ -225,7 +225,7 @@ export class DatabaseQueryService {
         description: { fr: data.description.fr, en: data.description.en },
         start_date: data.startDate,
         end_date: data.endDate,
-        parent_id: data.parentId,
+        children: data.children || [],
         temporal_location: data.temporalLocation,
         categories: data.categories
       };
@@ -658,6 +658,48 @@ export class DatabaseQueryService {
     } catch (error) {
       console.error('[DatabaseQueryService] Erreur lors de la suppression de l\'événement:', error);
       window.showToast('Erreur lors de la suppression de l\'événement', 'error');
+      throw error;
+    }
+  }
+
+  /**
+   * Met à jour le parent d'une période (drag & drop)
+   */
+  public async updateParent(periodId: string, newParentId: string | null): Promise<any> {
+    try {
+      const payload = { parent_id: newParentId };
+      const response = await axios.patch(`${API_BASE_URL}/periods/${periodId}/parent`, payload);
+      return response.data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la mise à jour du parent:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Met à jour les enfants d'une période
+   */
+  public async updateChildren(periodId: string, newChildren: string[]): Promise<any> {
+    try {
+      const payload = { children: newChildren };
+      const response = await axios.patch(`${API_BASE_URL}/periods/${periodId}/children`, payload);
+      return response.data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la mise à jour des enfants:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Met à jour has_parent d'une période
+   */
+  public async updateHasParent(periodId: string, hasParent: boolean): Promise<any> {
+    try {
+      const payload = { has_parent: hasParent };
+      const response = await axios.patch(`${API_BASE_URL}/periods/${periodId}/has_parent`, payload);
+      return response.data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la mise à jour de has_parent:', error);
       throw error;
     }
   }

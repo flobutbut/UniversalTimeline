@@ -41,10 +41,10 @@ export interface Period {
   description?: MultilingualText;
   startDate: string; // Format ISO 8601
   endDate: string;   // Format ISO 8601
-  parentId: string | null;
+  hasParent: boolean;  // true si l'objet a des enfants, false si c'est une feuille
+  children: string[];  // Liste des IDs des enfants directs
   temporalLocation: string;
   categories: Category[];
-  children: Period[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -738,3 +738,14 @@ La vue Graphique permet de visualiser les relations hiérarchiques entre les pé
 - [ ] Interactivité
 - [ ] Export des données
 - [ ] Modification des relations
+
+## Gestion hiérarchique des périodes (backend et frontend)
+
+- Les périodes sont stockées dans la table `periods.periods` (schéma periods).
+- Chaque période possède :
+  - un identifiant unique (`id`)
+  - un champ `parent_id` (pour la hiérarchie)
+  - un booléen `has_parent` (pour identifier rapidement les racines)
+  - un tableau `children` (jsonb) listant les identifiants de ses enfants directs
+- La navigation dans l'application (vue Finder) exploite ces champs pour charger dynamiquement les enfants et optimiser les performances.
+- Un script de maintenance permet de garantir la cohérence de la hiérarchie et d'automatiser la correction des incohérences éventuelles.

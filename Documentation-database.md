@@ -49,7 +49,8 @@ La base de données est organisée en schémas distincts pour une meilleure orga
 | description_en | TEXT | Description en anglais |
 | start_date | TIMESTAMP | Date de début (format ISO 8601) |
 | end_date | TIMESTAMP | Date de fin (format ISO 8601) |
-| parent_id | VARCHAR(255) | ID de la période parente |
+| has_parent | BOOLEAN | Indique si la période a des enfants |
+| children | JSONB | Liste des IDs des enfants directs |
 | temporal_location | VARCHAR(255) | Localisation temporelle |
 | created_at | TIMESTAMP | Date de création |
 | updated_at | TIMESTAMP | Date de mise à jour |

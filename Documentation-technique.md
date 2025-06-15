@@ -739,3 +739,101 @@ Ce mécanisme fonctionne de façon similaire à celui déjà en place pour les p
   - D3.js pour la visualisation
   - Design system pour les styles
   - Services pour la gestion des données
+
+## Connexion à la base de données PostgreSQL
+
+- **Type** : PostgreSQL (via Docker)
+- **Nom du service Docker** : wikidata_db
+- **Image** : postgres:15
+- **Nom de la base** : wikidata_db
+- **Utilisateur** : wikidata_user
+- **Mot de passe** : wikidata_password
+- **Port exposé** : 5432 (hôte) → 5432 (conteneur)
+- **Schéma principal** : periods
+- **Table principale** : periods.periods
+
+### Exemple de connexion locale
+
+```bash
+psql -h localhost -p 5432 -U wikidata_user -d wikidata_db
+```
+
+### Exemple de connexion depuis un conteneur Docker
+
+```bash
+docker exec -it wikidata_db psql -U wikidata_user -d wikidata_db
+```
+
+### Variables d'environnement (docker-compose.yml)
+
+```yaml
+environment:
+  POSTGRES_DB: wikidata_db
+  POSTGRES_USER: wikidata_user
+  POSTGRES_PASSWORD: wikidata_password
+```
+
+## Structure de la table periods.periods
+
+- `id` (varchar, PK)
+- `wikidata_id` (varchar)
+- `label_fr` (text)
+- `label_en` (text)
+- `description_fr` (text)
+- `description_en` (text)
+- `start_date` (text)
+- `end_date` (text)
+- `temporal_location` (varchar)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
+- `has_parent` (boolean) - Indique si la période est un enfant d'une autre période
+- `children` (jsonb) - Liste des IDs des périodes enfants
+
+## Maintenance et intégrité
+
+- Un script SQL de maintenance est disponible dans `database/maintenance.sql` pour garantir la cohérence des champs `children`.
+- Les index sont créés automatiquement pour optimiser les requêtes et garantir l'intégrité des relations hiérarchiques.
+- La propriété `has_parent` est gérée indépendamment de `children` pour permettre une meilleure flexibilité dans la gestion des relations parent-enfant.
+
+## Problèmes courants et solutions
+
+### Exécution des scripts SQL
+
+#### Problèmes connus
+1. **Container non trouvé**
+   - Erreur : `Error response from daemon: No such container: api_db`
+   - Solution : Vérifier le nom du container avec `docker ps`
+   - Le container de base de données est nommé `wikidata_db` et non `api_db`
+
+2. **Utilisateur PostgreSQL incorrect**
+   - Erreur : `FATAL: role "postgres" does not exist`
+   - Solution : Utiliser l'utilisateur `wikidata_user` au lieu de `postgres`
+   - La base de données est nommée `wikidata_db`
+
+3. **Chemin des scripts**
+   - Erreur : `psql: error: could not open file "/app/database/script.sql"`
+   - Solution : Copier d'abord le script dans le container
+   - Utiliser `docker cp` pour copier le script dans `/tmp/` du container
+
+#### Procédure recommandée
+1. Copier le script dans le container :
+   ```bash
+   docker cp chemin/vers/script.sql wikidata_db:/tmp/
+   ```
+
+2. Exécuter le script :
+   ```bash
+   docker exec -i wikidata_db psql -U wikidata_user -d wikidata_db -f /tmp/script.sql
+   ```
+
+3. Vérifier les logs :
+   ```bash
+   docker logs wikidata_db --tail 50
+   ```
+
+#### Bonnes pratiques
+- Toujours vérifier le nom du container avec `docker ps`
+- Utiliser les bons identifiants (utilisateur et base de données)
+- Copier les scripts dans `/tmp/` avant de les exécuter
+- Vérifier les logs en cas d'erreur
+- Sauvegarder la base de données avant d'exécuter des scripts de modification

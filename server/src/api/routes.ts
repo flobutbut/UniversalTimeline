@@ -101,12 +101,14 @@ router.get('/periods', async (req, res) => {
         p.description_en,
         p.start_date,
         p.end_date,
-        p.parent_id,
+        p.has_parent,
+        p.children,
         p.temporal_location,
         c.label_fr as category_label
       FROM periods.periods p
       LEFT JOIN categories.period_categories pc ON p.id = pc.period_id
       LEFT JOIN categories.categories c ON pc.category_id = c.id
+      WHERE p.has_parent = false
       ORDER BY p.start_date
     `;
 
@@ -121,7 +123,8 @@ router.get('/periods', async (req, res) => {
       description_en: row.description_en,
       start_date: row.start_date,
       end_date: row.end_date,
-      parent_id: row.parent_id,
+      has_parent: row.has_parent,
+      children: row.children || [],
       temporal_location: row.temporal_location,
       category_label: row.category_label,
       created_at: row.created_at,
@@ -565,7 +568,7 @@ router.put('/events/:id', async (req, res) => {
 router.put('/periods/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { label, description, start_date, end_date, parent_id, temporal_location, wikidata_id } = req.body;
+    const { label, description, start_date, end_date, children, temporal_location, wikidata_id } = req.body;
 
     console.log(`[API] Mise à jour de la période ${id} avec les données:`, req.body);
 
@@ -593,7 +596,7 @@ router.put('/periods/:id', async (req, res) => {
         description_en = $4,
         start_date = NULLIF($5, ''),
         end_date = $6,
-        parent_id = NULLIF($7, ''),
+        children = $7,
         temporal_location = $8,
         wikidata_id = $9,
         updated_at = CURRENT_TIMESTAMP
@@ -609,7 +612,7 @@ router.put('/periods/:id', async (req, res) => {
       description?.en || description?.fr,
       start_date || null,
       finalEndDate,
-      parent_id || null,
+      children || [],
       temporal_location,
       wikidata_id,
       id
@@ -622,7 +625,7 @@ router.put('/periods/:id', async (req, res) => {
       description?.en || description?.fr,
       start_date || null,
       finalEndDate,
-      parent_id || null,
+      children || [],
       temporal_location,
       wikidata_id,
       id
@@ -713,10 +716,10 @@ router.get('/stories/:id', async (req, res) => {
       description: row.description_fr ? { fr: row.description_fr, en: row.description_en || row.description_fr } : undefined,
       startDate: row.start_date,
       endDate: row.end_date,
-      parentId: row.parent_id,
+      hasParent: row.has_parent,
+      children: row.children || [],
       temporalLocation: row.temporal_location,
       categories: [],
-      children: [],
       createdAt: row.created_at,
       updatedAt: row.updated_at
     }));
@@ -783,7 +786,7 @@ router.delete('/stories/:id', async (req, res) => {
 // Route pour créer une période
 router.post('/periods', async (req, res) => {
   try {
-    const { id, wikidata_id, label, description, start_date, end_date, parent_id, temporal_location } = req.body;
+    const { id, wikidata_id, label, description, start_date, end_date, children, temporal_location } = req.body;
 
     // Validation des données requises
     if (!wikidata_id) {
@@ -796,9 +799,6 @@ router.post('/periods', async (req, res) => {
       return res.status(400).json({ error: 'label.fr est requis' });
     }
 
-    // Si parent_id est vide ou null, on le met à NULL dans la base de données
-    const finalParentId = parent_id && parent_id.trim() !== '' ? parent_id : null;
-
     const sqlQuery = `
       INSERT INTO periods.periods (
         id,
@@ -809,14 +809,14 @@ router.post('/periods', async (req, res) => {
         description_en,
         start_date,
         end_date,
-        parent_id,
+        children,
         temporal_location
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *
     `;
 
     console.log('[API] Requête SQL:', sqlQuery);
-    console.log('[API] Paramètres:', [id, wikidata_id, label.fr, label.en || label.fr, description?.fr, description?.en || description?.fr, start_date, end_date, finalParentId, temporal_location]);
+    console.log('[API] Paramètres:', [id, wikidata_id, label.fr, label.en || label.fr, description?.fr, description?.en || description?.fr, start_date, end_date, children || [], temporal_location]);
 
     const result = await dbQuery(sqlQuery, [
       id,
@@ -827,19 +827,15 @@ router.post('/periods', async (req, res) => {
       description?.en || description?.fr,
       start_date,
       end_date,
-      finalParentId,
+      children || [],
       temporal_location
     ]);
 
     console.log('[API] Période créée:', result.rows[0]);
     res.status(201).json(result.rows[0]);
-  } catch (error: any) {
+  } catch (error) {
     console.error('[API] Erreur lors de la création de la période:', error);
-    if (error.code === '23505') { // Code d'erreur PostgreSQL pour violation de contrainte unique
-      res.status(409).json({ error: 'Une période avec cet ID existe déjà' });
-    } else {
-      res.status(500).json({ error: 'Erreur lors de la création de la période' });
-    }
+    res.status(500).json({ error: 'Erreur lors de la création de la période' });
   }
 });
 
@@ -859,7 +855,8 @@ router.get('/periods/:id', async (req, res) => {
         p.description_en,
         p.start_date,
         p.end_date,
-        p.parent_id,
+        p.has_parent,
+        p.children,
         p.temporal_location,
         c.label_fr as category_label
       FROM periods.periods p
@@ -888,7 +885,8 @@ router.get('/periods/:id', async (req, res) => {
       } : undefined,
       startDate: result.rows[0].start_date,
       endDate: result.rows[0].end_date,
-      parentId: result.rows[0].parent_id,
+      hasParent: result.rows[0].has_parent,
+      children: result.rows[0].children || [],
       temporalLocation: result.rows[0].temporal_location,
       categories: result.rows[0].category_label ? [{
         id: result.rows[0].category_id,
@@ -904,8 +902,88 @@ router.get('/periods/:id', async (req, res) => {
     console.log(`[API] Période ${id} trouvée:`, period);
     res.json(period);
   } catch (error) {
-    console.error(`[API] Erreur lors de la récupération de la période ${req.params.id}:`, error);
+    console.error('[API] Erreur lors de la récupération de la période:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération de la période' });
+  }
+});
+
+// Route pour mettre à jour les enfants d'une période
+router.patch('/periods/:id/children', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { children } = req.body;
+
+    // Vérifier que children est un tableau
+    if (!Array.isArray(children)) {
+      return res.status(400).json({ error: 'children doit être un tableau' });
+    }
+
+    // Vérifier que tous les éléments sont des chaînes de caractères
+    if (!children.every(child => typeof child === 'string')) {
+      return res.status(400).json({ error: 'tous les enfants doivent être des identifiants valides' });
+    }
+
+    // Récupérer d'abord la période actuelle pour avoir la liste des enfants existants
+    const currentPeriod = await dbQuery(`
+      SELECT children FROM periods.periods WHERE id = $1
+    `, [id]);
+
+    if (currentPeriod.rows.length === 0) {
+      return res.status(404).json({ error: 'Période non trouvée' });
+    }
+
+    // Fusionner les enfants existants avec les nouveaux
+    const existingChildren = currentPeriod.rows[0].children || [];
+    const newChildren = [...new Set([...existingChildren, ...children])];
+
+    // Mettre à jour les enfants de la période cible
+    const result = await dbQuery(`
+      UPDATE periods.periods
+      SET 
+        children = $1::jsonb,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+      RETURNING *
+    `, [JSON.stringify(newChildren), id]);
+
+    // Vérifier que les enfants ont été correctement enregistrés
+    const updatedPeriod = result.rows[0];
+    if (!Array.isArray(updatedPeriod.children)) {
+      console.error('[API] Les enfants n\'ont pas été correctement enregistrés comme un tableau');
+      return res.status(500).json({ error: 'Erreur lors de la mise à jour des enfants' });
+    }
+
+    res.json(updatedPeriod);
+  } catch (error: any) {
+    console.error('[API] Erreur PATCH /periods/:id/children:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Route pour mettre à jour le statut has_parent d'une période
+router.patch('/periods/:id/has_parent', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { has_parent } = req.body;
+
+    // Mettre à jour has_parent
+    const result = await dbQuery(`
+      UPDATE periods.periods
+      SET 
+        has_parent = $1,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+      RETURNING *
+    `, [has_parent, id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Période non trouvée' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error: any) {
+    console.error('[API] Erreur PATCH /periods/:id/has_parent:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 

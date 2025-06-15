@@ -70,14 +70,16 @@ export class GraphViewService {
       // Ajouter la période au graph
       this.periods.value.push(graphPeriod);
 
-      // Si la période a un parent, créer un lien
-      if (period.parentId) {
-        const link: GraphLink = {
-          source: period.parentId,
-          target: period.id,
-          type: 'parent'
-        };
-        this.links.value.push(link);
+      // Si la période a des enfants, créer des liens
+      if (period.children && period.children.length > 0) {
+        period.children.forEach(childId => {
+          const link: GraphLink = {
+            source: period.id,
+            target: childId,
+            type: 'parent'
+          };
+          this.links.value.push(link);
+        });
       }
     } catch (error) {
       console.error('[GraphViewService] Erreur lors de l\'ajout de la période au graph:', error);

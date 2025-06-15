@@ -1,271 +1,179 @@
 <template>
-  <div class="graph-flex-root">
-    <aside class="period-list">
-      <h2 class="period-list-title">Périodes</h2>
-      <ul class="period-list-items">
-        <li
-          v-for="period in periodList"
-          :key="period.id"
-          class="period-item"
-          draggable="true"
-          @dragstart="handleDragStart(period)"
-        >
-          {{ period.label.fr || period.label }}
-        </li>
-      </ul>
-    </aside>
-    <section
-      class="graph-area"
-      :class="{ 'drag-over': isDragOver }"
-      @dragover.prevent="handleDragOver"
-      @dragleave="handleDragLeave"
-      @drop="handleDrop"
-    >
-      <svg ref="svgRef">
-        <g ref="zoomGroupRef">
-          <g class="links">
-            <path
-              v-for="(link, i) in treeLinks"
-              :key="i"
-              :d="link.path"
-              fill="none"
-              stroke="#999"
-              stroke-width="2"
-              stroke-opacity="0.6"
-            />
-          </g>
-          <g class="nodes">
-            <foreignObject
-              v-for="node in treeNodes"
-              :key="node.id"
-              :x="node.y - 120"
-              :y="node.x - 40"
-              width="240"
-              height="80"
-              data-debug="nodebox"
-            >
-              <NodeBox :label="node.label" />
-            </foreignObject>
-          </g>
-        </g>
-      </svg>
-    </section>
+  <div class="finder-root">
+    <div v-if="loading" class="finder-loading">Chargement...</div>
+    <div v-else-if="error" class="finder-error">{{ error }}</div>
+    <div v-else class="finder-columns">
+      <div class="finder-column" v-for="(col, colIdx) in columns" :key="colIdx">
+        <FinderItem
+          v-for="item in col"
+          :key="item.id"
+          :label="item.label.fr || item.label"
+          :selected="selectedIds[colIdx] === item.id"
+          :hasChildren="hasChildren(item.id)"
+          :itemId="item.id"
+          @click="handleSelect(item, colIdx)"
+          @dragstart="onDragStart"
+          @drop="onDrop"
+        />
+      </div>
+    </div>
+    <Toast ref="toast" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick } from 'vue';
-import * as d3 from 'd3';
-import type { GraphPeriod } from '../types/graph';
-import { GraphViewService, DatabaseQueryService } from '../services';
-import NodeBox from './base/NodeBox.vue';
+import { ref, computed, onMounted } from 'vue';
+import { DatabaseViewService } from '../services/DatabaseViewService';
+import FinderItem from './FinderItem.vue';
+import Toast from './Toast.vue';
 
-const graphViewService = GraphViewService.getInstance();
-const dbService = DatabaseQueryService.getInstance();
-const svgRef = ref<SVGSVGElement | null>(null);
-const zoomGroupRef = ref<SVGGElement | null>(null);
-const width = ref(800);
-const height = ref(600);
-const periodList = ref<any[]>([]);
-const draggedPeriodId = ref<string | null>(null);
-const isDragOver = ref(false);
-
-const treeNodes = ref<any[]>([]);
-const treeLinks = ref<any[]>([]);
-
-function updateTreeData() {
-  const periods = graphViewService.getPeriods() as GraphPeriod[];
-  if (!periods.length) {
-    treeNodes.value = [];
-    treeLinks.value = [];
-    return;
-  }
-  // Construire la hiérarchie à partir des periods (parentId)
-  const nodeMap: Record<string, any> = {};
-  periods.forEach(p => nodeMap[p.id] = { ...p, children: [] });
-  let rootNodes: any[] = [];
-  periods.forEach(p => {
-    if (p.parentId && nodeMap[p.parentId]) {
-      nodeMap[p.parentId].children.push(nodeMap[p.id]);
-    } else {
-      rootNodes.push(nodeMap[p.id]);
-    }
-  });
-  let root: d3.HierarchyNode<GraphPeriod>;
-  if (rootNodes.length === 1) {
-    root = d3.hierarchy<GraphPeriod>(rootNodes[0]);
-  } else {
-    root = d3.hierarchy<GraphPeriod>({
-      id: 'root',
-      label: 'Racine',
-      description: '',
-      startDate: '',
-      endDate: '',
-      parentId: undefined,
-      temporalData: [],
-      hasChildren: false,
-      isMainEon: false,
-      categoryIds: [],
-      categoryLabels: [],
-      children: rootNodes,
-      loading: false,
-      childrenPreloaded: true,
-      locations: [],
-      directLocations: [],
-      x: undefined,
-      y: undefined,
-      fx: undefined,
-      fy: undefined,
-      vx: undefined,
-      vy: undefined
-    });
-  }
-  const treeLayout = d3.tree<GraphPeriod>().size([height.value, width.value - 100]);
-  treeLayout(root);
-  treeNodes.value = root.descendants().map(d => ({
-    id: d.data.id,
-    label: d.data.label,
-    x: d.x ?? 0,
-    y: d.y ?? 0
-  }));
-  treeLinks.value = root.links().map(link => ({
-    source: link.source,
-    target: link.target,
-    path: d3.linkHorizontal<d3.HierarchyPointLink<GraphPeriod>, d3.HierarchyPointNode<GraphPeriod>>()
-      .x(d => d.y)
-      .y(d => d.x)
-    (link as d3.HierarchyPointLink<GraphPeriod>)
-  }));
-}
-
-watch(() => [graphViewService.getPeriods(), graphViewService.getLinks()], () => {
-  updateTreeData();
-  nextTick(() => {
-    // Réappliquer le zoom/pan après le DOM update
-    if (svgRef.value && zoomGroupRef.value) {
-      d3.select(svgRef.value).call(
-        d3.zoom<SVGSVGElement, unknown>()
-          .scaleExtent([0.1, 5])
-          .on('zoom', (event) => {
-            d3.select(zoomGroupRef.value).attr('transform', event.transform);
-          })
-      );
-    }
-  });
-}, { deep: true });
+const databaseViewService = DatabaseViewService.getInstance();
+const loading = ref(false);
+const error = ref<string | null>(null);
+const toast = ref<InstanceType<typeof Toast> | null>(null);
 
 onMounted(async () => {
-  periodList.value = await dbService.getAllPeriods();
-  updateTreeData();
-  nextTick(() => {
-    if (svgRef.value && zoomGroupRef.value) {
-      d3.select(svgRef.value).call(
-        d3.zoom<SVGSVGElement, unknown>()
-          .scaleExtent([0.1, 5])
-          .on('zoom', (event) => {
-            d3.select(zoomGroupRef.value).attr('transform', event.transform);
-          })
-      );
-    }
-  });
+  loading.value = true;
+  error.value = null;
+  try {
+    await databaseViewService.loadListData();
+  } catch (e: any) {
+    error.value = e?.message || 'Erreur lors du chargement des périodes';
+  } finally {
+    loading.value = false;
+  }
 });
 
-function handleDragStart(period: any) {
-  draggedPeriodId.value = period.id;
+const allPeriods = computed(() => databaseViewService.getPeriods());
+const selectedIds = ref<string[]>([]);
+const draggedItemId = ref<string | null>(null);
+
+// Fonction optimisée pour vérifier si un item a des enfants
+function hasChildren(itemId: string): boolean {
+  const period = allPeriods.value.find(p => p.id === itemId);
+  return period?.children?.length > 0;
 }
 
-function handleDragOver() {
-  isDragOver.value = true;
+const columns = computed(() => {
+  const cols: any[][] = [];
+  // Première colonne : items sans parent (has_parent = false)
+  let currentLevel = allPeriods.value.filter(p => !p.hasParent);
+  console.log('[GraphView] Périodes sans parent:', currentLevel.map(p => ({ id: p.id, label: p.label.fr, hasParent: p.hasParent })));
+  cols.push(currentLevel);
+  
+  // Colonnes suivantes basées sur la sélection
+  for (const id of selectedIds.value) {
+    const selected = allPeriods.value.find(p => p.id === id);
+    if (!selected) break;
+    
+    // On utilise directement la liste des children
+    const children = allPeriods.value.filter(p => 
+      selected.children?.includes(p.id)
+    );
+    
+    if (children.length > 0) {
+      console.log(`[GraphView] Enfants de ${selected.label.fr}:`, children.map(p => ({ id: p.id, label: p.label.fr, hasParent: p.hasParent })));
+      cols.push(children);
+      currentLevel = children;
+    } else {
+      break;
+    }
+  }
+  return cols;
+});
+
+function handleSelect(item: any, colIdx: number) {
+  selectedIds.value = selectedIds.value.slice(0, colIdx);
+  selectedIds.value[colIdx] = item.id;
 }
 
-function handleDragLeave() {
-  isDragOver.value = false;
+function onDragStart(itemId: string) {
+  draggedItemId.value = itemId;
 }
 
-async function handleDrop() {
-  isDragOver.value = false;
-  if (draggedPeriodId.value) {
-    await graphViewService.addPeriodToGraph(draggedPeriodId.value);
-    draggedPeriodId.value = null;
+async function onDrop(targetItemId: string) {
+  if (!draggedItemId.value || draggedItemId.value === targetItemId) return;
+  
+  try {
+    loading.value = true;
+    // Récupérer la période cible et la période déplacée
+    const targetPeriod = allPeriods.value.find(p => p.id === targetItemId);
+    const draggedPeriod = allPeriods.value.find(p => p.id === draggedItemId.value);
+    
+    if (!targetPeriod || !draggedPeriod) {
+      toast.value?.show('Période non trouvée', 'error');
+      return;
+    }
+
+    // Vérifier si la période n'est pas déjà un enfant
+    if (targetPeriod.children?.includes(draggedItemId.value)) {
+      toast.value?.show('Cette période est déjà un enfant de la période cible', 'info');
+      return;
+    }
+
+    // Vérifier si on ne crée pas une référence circulaire
+    if (draggedPeriod.children?.includes(targetItemId)) {
+      toast.value?.show('Impossible de déplacer une période dans son propre enfant', 'error');
+      return;
+    }
+
+    // Mettre à jour les enfants de la période cible
+    const newChildren = [...(targetPeriod.children || []), draggedItemId.value];
+    await databaseViewService.updateChildren(targetItemId, newChildren);
+
+    // Recharger les données après modification des children
+    await databaseViewService.loadListData();
+
+    // Mettre à jour has_parent de la période déplacée après le rechargement
+    const updatedDraggedPeriod = allPeriods.value.find(p => p.id === draggedItemId.value);
+    if (updatedDraggedPeriod && !updatedDraggedPeriod.hasParent) {
+      await databaseViewService.updateHasParent(draggedItemId.value, true);
+      // Recharger une dernière fois pour avoir l'état final
+      await databaseViewService.loadListData();
+    }
+
+    draggedItemId.value = null;
+    toast.value?.show('Période déplacée avec succès', 'success');
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : 'Erreur lors du déplacement de la période';
+    error.value = errorMessage;
+    toast.value?.show(errorMessage, 'error');
+  } finally {
+    loading.value = false;
   }
 }
 </script>
 
 <style scoped>
-.graph-flex-root {
+.finder-root {
+  width: 100%;
+  height: 100%;
+  background: var(--color-background);
+  display: flex;
+  flex-direction: column;
+}
+.finder-loading, .finder-error {
+  padding: var(--spacing-lg);
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  text-align: center;
+}
+.finder-columns {
   display: flex;
   flex-direction: row;
   height: 100%;
-  min-height: 0;
+  overflow-x: auto;
   background: var(--color-background);
 }
-.period-list {
-  width: 300px;
+.finder-column {
+  min-width: 220px;
+  max-width: 320px;
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
+  padding: var(--spacing-md) 0;
   display: flex;
   flex-direction: column;
-  padding: var(--spacing-md);
-  min-width: 0;
-}
-.period-list-title {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  margin-bottom: var(--spacing-md);
-  color: var(--color-text);
-}
-.period-list-items {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  flex: 1;
-  overflow-y: auto;
-}
-.period-item {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--color-border);
-  color: var(--color-text);
-  cursor: grab;
-  font-size: var(--font-size-base);
-  transition: background 0.2s;
-}
-.period-item:hover {
-  background: var(--color-surface-hover);
-}
-.graph-area {
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
+  gap: 2px;
   height: 100%;
-  display: flex;
-  align-items: stretch;
-  justify-content: stretch;
-  background: var(--color-background);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 2px solid var(--color-border);
-  transition: border-color 0.2s, background 0.2s;
-}
-.graph-area.drag-over {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
-}
-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.links line {
-  stroke: #999;
-  stroke-opacity: 0.6;
-}
-.nodes circle {
-  stroke: #fff;
-  stroke-width: 2px;
-}
-.nodes text {
-  pointer-events: none;
-  font-family: sans-serif;
-  font-size: 12px;
 }
 </style> 

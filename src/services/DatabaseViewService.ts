@@ -21,7 +21,11 @@ export class DatabaseViewService {
   }
 
   public getPeriods() {
-    return this.periods.value;
+    return this.periods.value.map((p: any) => ({
+      ...p,
+      hasParent: typeof p.hasParent === 'boolean' ? p.hasParent : !!(p.parent_id),
+      children: Array.isArray(p.children) ? p.children : [],
+    }));
   }
 
   public getEvents() {
@@ -91,10 +95,10 @@ export class DatabaseViewService {
         description: (period as any).description ?? { fr: '', en: '' },
         startDate: (period as any).startDate || (period as any).start_date || '',
         endDate: (period as any).endDate || (period as any).end_date || '',
-        parentId: (period as any).parentId || (period as any).parent_id || null,
+        hasParent: (period as any).hasParent || (period as any).has_parent || false,
+        children: (period as any).children || [],
         temporalLocation: (period as any).temporalLocation || (period as any).temporal_location || '',
         categories: (period as any).categories ?? [],
-        children: (period as any).children ?? [],
         createdAt: (period as any).createdAt ?? new Date(),
         updatedAt: (period as any).updatedAt ?? new Date()
       };
@@ -139,5 +143,26 @@ export class DatabaseViewService {
     } catch (error) {
       throw error;
     }
+  }
+
+  /**
+   * Met à jour le parent d'une période (drag & drop)
+   */
+  public async updateParent(periodId: string, newParentId: string | null): Promise<any> {
+    return this.databaseQueryService.updateParent(periodId, newParentId);
+  }
+
+  /**
+   * Met à jour les enfants d'une période
+   */
+  public async updateChildren(periodId: string, newChildren: string[]): Promise<any> {
+    return this.databaseQueryService.updateChildren(periodId, newChildren);
+  }
+
+  /**
+   * Met à jour has_parent d'une période
+   */
+  public async updateHasParent(periodId: string, hasParent: boolean): Promise<any> {
+    return this.databaseQueryService.updateHasParent(periodId, hasParent);
   }
 } 
