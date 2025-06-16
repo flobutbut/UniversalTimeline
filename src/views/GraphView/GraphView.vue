@@ -21,7 +21,6 @@
             @click="handleSelect(item, colIdx)"
             @dragstart="onDragStart"
             @drop="onDrop"
-            :class="{ focused: focusedIndexes[colIdx] === idx }"
           />
         </div>
       </div>
@@ -41,6 +40,8 @@ const databaseViewService = DatabaseViewService.getInstance();
 const loading = ref(false);
 const error = ref<string | null>(null);
 const toast = ref<InstanceType<typeof Toast> | null>(null);
+const selectedIds = ref<string[]>([]);
+const draggedItemId = ref<string | null>(null);
 
 onMounted(async () => {
   loading.value = true;
@@ -55,11 +56,7 @@ onMounted(async () => {
 });
 
 const allPeriods = computed(() => databaseViewService.getPeriods());
-const selectedIds = ref<string[]>([]);
-const draggedItemId = ref<string | null>(null);
-const focusedIndexes = ref<number[]>([0]);
 
-// Fonction optimisée pour vérifier si un item a des enfants
 function hasChildren(itemId: string): boolean {
   const period = allPeriods.value.find(p => p.id === itemId);
   return period?.children?.length > 0;
@@ -67,23 +64,18 @@ function hasChildren(itemId: string): boolean {
 
 const columns = computed(() => {
   const cols: any[][] = [];
-  // Première colonne : items sans parent (has_parent = false)
   let currentLevel = allPeriods.value.filter(p => !p.hasParent);
-  console.log('[GraphView] Périodes sans parent:', currentLevel.map(p => ({ id: p.id, label: p.label.fr, hasParent: p.hasParent })));
   cols.push(currentLevel);
   
-  // Colonnes suivantes basées sur la sélection
   for (const id of selectedIds.value) {
     const selected = allPeriods.value.find(p => p.id === id);
     if (!selected) break;
     
-    // On utilise directement la liste des children
     const children = allPeriods.value.filter(p => 
       selected.children?.includes(p.id)
     );
     
     if (children.length > 0) {
-      console.log(`[GraphView] Enfants de ${selected.label.fr}:`, children.map(p => ({ id: p.id, label: p.label.fr, hasParent: p.hasParent })));
       cols.push(children);
       currentLevel = children;
     } else {
@@ -93,14 +85,102 @@ const columns = computed(() => {
   return cols;
 });
 
+function handleKeyDown(event: KeyboardEvent, colIdx: number) {
+  const col = columns.value[colIdx];
+  if (!col) return;
+
+  const currentSelectedId = selectedIds.value[colIdx];
+  let currentIndex = currentSelectedId ? col.findIndex(item => item.id === currentSelectedId) : -1;
+  
+  if (currentIndex === -1) {
+    currentIndex = 0;
+    const firstItem = col[0];
+    if (firstItem) {
+      selectedIds.value = selectedIds.value.slice(0, colIdx);
+      selectedIds.value[colIdx] = firstItem.id;
+    }
+  }
+
+  if (event.key === 'ArrowDown') {
+    const newIndex = Math.min(currentIndex + 1, col.length - 1);
+    const newItem = col[newIndex];
+    if (newItem) {
+      selectedIds.value = selectedIds.value.slice(0, colIdx);
+      selectedIds.value[colIdx] = newItem.id;
+      nextTick(() => {
+        const colEl = document.querySelectorAll('.finder-column')[colIdx];
+        if (colEl) {
+          const items = colEl.querySelectorAll('.finder-item');
+          const selectedItem = Array.from(items).find(
+            el => el.getAttribute('aria-selected') === 'true'
+          );
+          if (selectedItem) (selectedItem as HTMLElement).focus();
+        }
+      });
+    }
+    event.preventDefault();
+  } else if (event.key === 'ArrowUp') {
+    const newIndex = Math.max(currentIndex - 1, 0);
+    const newItem = col[newIndex];
+    if (newItem) {
+      selectedIds.value = selectedIds.value.slice(0, colIdx);
+      selectedIds.value[colIdx] = newItem.id;
+      nextTick(() => {
+        const colEl = document.querySelectorAll('.finder-column')[colIdx];
+        if (colEl) {
+          const items = colEl.querySelectorAll('.finder-item');
+          const selectedItem = Array.from(items).find(
+            el => el.getAttribute('aria-selected') === 'true'
+          );
+          if (selectedItem) (selectedItem as HTMLElement).focus();
+        }
+      });
+    }
+    event.preventDefault();
+  } else if (event.key === 'Enter' || event.key === 'ArrowRight') {
+    const currentItem = col[currentIndex];
+    if (currentItem) {
+      selectedIds.value = selectedIds.value.slice(0, colIdx + 1);
+      selectedIds.value[colIdx] = currentItem.id;
+      if (event.key === 'ArrowRight' && hasChildren(currentItem.id)) {
+        nextTick(() => {
+          focusColumn(colIdx + 1);
+        });
+      }
+    }
+    event.preventDefault();
+  } else if (event.key === 'ArrowLeft') {
+    if (colIdx > 0) {
+      selectedIds.value = selectedIds.value.slice(0, colIdx);
+      focusColumn(colIdx - 1);
+    }
+    event.preventDefault();
+  }
+}
+
+function focusColumn(colIdx: number) {
+  nextTick(() => {
+    const col = document.querySelectorAll('.finder-column')[colIdx];
+    if (col) {
+      const items = col.querySelectorAll('.finder-item');
+      const selectedId = selectedIds.value[colIdx];
+      let selectedItem = Array.from(items).find(
+        el => el.getAttribute('aria-selected') === 'true'
+      );
+      if (!selectedItem && items.length > 0) {
+        selectedItem = items[0];
+      }
+      if (selectedItem) (selectedItem as HTMLElement).focus();
+    }
+  });
+}
+
 const handleSelect = async (period: ApiPeriod, colIdx: number) => {
   selectedIds.value = selectedIds.value.slice(0, colIdx);
   selectedIds.value[colIdx] = period.id;
 
-  // Si la période a des enfants, on les charge
   if (period.children && period.children.length > 0) {
     try {
-      // Charger les détails de chaque enfant
       const childrenDetails = await Promise.all(
         period.children.map(async (childId: string) => {
           const response = await fetch(`/api/periods/${childId}`);
@@ -111,12 +191,10 @@ const handleSelect = async (period: ApiPeriod, colIdx: number) => {
         })
       );
 
-      // Mettre à jour la liste des périodes avec les détails des enfants
       const updatedPeriods = [...allPeriods.value];
       childrenDetails.forEach((childData: ApiPeriod) => {
         const existingIndex = updatedPeriods.findIndex(p => p.id === childData.id);
         if (existingIndex !== -1) {
-          // Mettre à jour la période existante
           updatedPeriods[existingIndex] = {
             ...updatedPeriods[existingIndex],
             ...childData,
@@ -124,7 +202,6 @@ const handleSelect = async (period: ApiPeriod, colIdx: number) => {
             hasParent: childData.hasParent
           };
         } else {
-          // Ajouter la nouvelle période
           updatedPeriods.push({
             ...childData,
             label: childData.label.fr,
@@ -133,7 +210,6 @@ const handleSelect = async (period: ApiPeriod, colIdx: number) => {
         }
       });
 
-      // Mettre à jour la liste des périodes
       databaseViewService.setPeriods([...updatedPeriods]);
     } catch (error) {
       console.error('[GraphView] Erreur lors du chargement des enfants:', error);
@@ -153,18 +229,15 @@ async function onDrop(targetItemId: string) {
   if (!draggedItemId.value || !targetItemId) return;
 
   try {
-    // Mettre à jour les enfants de la période cible
     const targetPeriod = allPeriods.value.find(p => p.id === targetItemId);
     const newChildren = [...(targetPeriod?.children || []), draggedItemId.value];
     await databaseViewService.updateChildren(targetItemId, newChildren);
     
-    // Mettre à jour les données localement
     const updatedPeriods = [...allPeriods.value];
     const draggedPeriodIndex = updatedPeriods.findIndex(p => p.id === draggedItemId.value);
     const targetPeriodIndex = updatedPeriods.findIndex(p => p.id === targetItemId);
 
     if (draggedPeriodIndex !== -1 && targetPeriodIndex !== -1) {
-      // Mettre à jour la période cible
       const targetPeriod = updatedPeriods[targetPeriodIndex];
       if (!targetPeriod.children) {
         targetPeriod.children = [];
@@ -174,12 +247,10 @@ async function onDrop(targetItemId: string) {
       }
       updatedPeriods[targetPeriodIndex] = targetPeriod;
 
-      // Mettre à jour la période déplacée
       const draggedPeriod = updatedPeriods[draggedPeriodIndex];
       draggedPeriod.hasParent = true;
       updatedPeriods[draggedPeriodIndex] = draggedPeriod;
 
-      // Mettre à jour la liste des périodes
       databaseViewService.setPeriods([...updatedPeriods]);
     }
   } catch (error) {
@@ -189,47 +260,7 @@ async function onDrop(targetItemId: string) {
   }
 }
 
-function focusColumn(colIdx: number) {
-  nextTick(() => {
-    const col = document.querySelectorAll('.finder-column')[colIdx] as HTMLElement;
-    if (col) col.focus();
-  });
-}
-
-function handleKeyDown(event: KeyboardEvent, colIdx: number) {
-  const col = columns.value[colIdx];
-  if (!col) return;
-  let idx = focusedIndexes.value[colIdx] ?? 0;
-  if (event.key === 'ArrowDown') {
-    idx = Math.min(idx + 1, col.length - 1);
-    focusedIndexes.value[colIdx] = idx;
-    event.preventDefault();
-  } else if (event.key === 'ArrowUp') {
-    idx = Math.max(idx - 1, 0);
-    focusedIndexes.value[colIdx] = idx;
-    event.preventDefault();
-  } else if (event.key === 'Enter') {
-    const item = col[idx];
-    if (item) handleSelect(item, colIdx);
-    event.preventDefault();
-  } else if (event.key === 'ArrowRight') {
-    const item = col[idx];
-    if (item) handleSelect(item, colIdx);
-    // Focus colonne suivante si elle existe
-    if (columns.value[colIdx + 1]) {
-      focusColumn(colIdx + 1);
-    }
-    event.preventDefault();
-  } else if (event.key === 'ArrowLeft') {
-    if (colIdx > 0) {
-      focusColumn(colIdx - 1);
-    }
-    event.preventDefault();
-  }
-}
-
 onMounted(() => {
-  // Focus la première colonne au chargement
   focusColumn(0);
 });
 </script>
@@ -245,12 +276,14 @@ onMounted(() => {
   overflow: hidden;
   box-sizing: border-box;
 }
+
 .finder-loading, .finder-error {
   padding: var(--spacing-lg);
   color: var(--color-text);
   font-size: var(--font-size-lg);
   text-align: center;
 }
+
 .finder-columns {
   display: flex;
   flex-direction: row;
@@ -260,6 +293,7 @@ onMounted(() => {
   box-sizing: border-box;
   background: var(--color-background);
 }
+
 .finder-column {
   min-width: 220px;
   max-width: 320px;
@@ -272,6 +306,7 @@ onMounted(() => {
   height: 100%;
   box-sizing: border-box;
 }
+
 .finder-column-content {
   flex: 1 1 auto;
   min-height: 0;
@@ -380,7 +415,7 @@ onMounted(() => {
   color: rgba(255, 255, 255, 0.8);
 }
 
-.focused {
+.finder-item-focused {
   outline: 2px solid var(--color-primary);
   background: var(--color-background-soft);
 }

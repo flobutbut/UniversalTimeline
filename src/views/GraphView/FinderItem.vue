@@ -112,5 +112,6 @@ function onDrop(event: DragEvent) {
 
 .finder-item:focus {
   background: var(--color-primary-light);
+  outline: none;
 }
 </style> 
