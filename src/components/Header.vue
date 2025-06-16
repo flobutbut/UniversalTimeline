@@ -47,7 +47,7 @@ defineEmits<{
   position: sticky;
   top: 0;
   z-index: var(--z-index-sticky);
-  box-shadow: var(--shadow-sm);
+
 }
 
 .header-content {

@@ -30,7 +30,8 @@
   --color-card: var(--color-neutral-300);
   --color-card-hover: var(--color-neutral-200);
   --color-border: var(--color-neutral-400);
-  --color-border-light: var(--color-neutral-200);
+  --color-border-light: var(--color-neutral-300);
+  --color-border-dark: var(--color-neutral-700);
   --color-text: var(--color-neutral-800);
   --color-text-light: var(--color-neutral-600);
 
@@ -121,13 +122,14 @@
   --color-warning-light: #fff3e0;
 
   /* Semantic Aliases */
-  --color-background: var(--color-neutral-300);
-  --color-surface: var(--color-neutral-50);
-  --color-surface-hover: var(--color-neutral-50);
-  --color-card: var(--color-neutral-300);
+  --color-background: var(--color-neutral-50);
+  --color-surface: var(--color-neutral-0);
+  --color-surface-hover: var(--color-neutral-100);
+  --color-card: var(--color-neutral-100);
   --color-card-hover: var(--color-neutral-200);
-  --color-border: var(--color-neutral-400);
-  --color-border-light: var(--color-neutral-200);
+  --color-border: var(--color-neutral-200);
+  --color-border-light: var(--color-neutral-100);
+  --color-border-dark: var(--color-neutral-400);
   --color-text: var(--color-neutral-800);
   --color-text-light: var(--color-neutral-600);
 

@@ -64,7 +64,6 @@ function onDrop(event: DragEvent) {
   padding: var(--spacing-sm) var(--spacing-md);
   cursor: pointer;
   color: var(--color-text);
-  border-radius: var(--radius-md);
   transition: background 0.2s, color 0.2s;
   font-size: var(--font-size-base);
   line-height: 1.5;
@@ -79,6 +78,7 @@ function onDrop(event: DragEvent) {
   justify-content: space-between;
   gap: var(--spacing-sm);
   background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .finder-item-content {

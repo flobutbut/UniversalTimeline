@@ -42,7 +42,7 @@ defineEmits<{
 .tabs {
   display: flex;
   gap: var(--spacing-xs);
-  background-color: var(--color-surface-hover);
+  background-color: var(--color-background);
   padding: var(--spacing-xs);
   border-radius: var(--radius-lg);
   width: fit-content;

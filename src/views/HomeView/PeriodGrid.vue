@@ -288,9 +288,10 @@ const retryLoading = async () => {
 .timeline-line {
   height: 2px;
   width: 100%;
-  background: var(--color-border);
+  background: var(--color-border-dark);
   position: relative;
   z-index: 2;
+  margin: 2px 0;
 }
 
 .events-container {

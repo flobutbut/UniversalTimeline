@@ -566,7 +566,7 @@ async function selectStory(story: ListStory) {
   align-items: center;
   margin-bottom: var(--spacing-sm);
   padding-bottom: var(--spacing-sm);
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .column-header h2 {
