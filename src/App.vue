@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import Header from './components/Header.vue'
-import PeriodGrid from './views/HomeView/PeriodGrid.vue'
-import DatabaseView from './views/DatabaseView/DatabaseView.vue'
-import GraphView from './views/GraphView/GraphView.vue'
-import Toast from './components/Toast.vue'
-import { WikidataQueryService, StoryService, GraphViewService } from './services'
-import type { Period } from './types/geological'
+import Header from '@/components/Header.vue'
+import PeriodGrid from '@/views/HomeView/PeriodGrid.vue'
+import DatabaseView from '@/views/DatabaseView/DatabaseView.vue'
+import GraphView from '@/views/GraphView/GraphView.vue'
+import Toast from '@/components/Toast.vue'
+import { WikidataQueryService, StoryService, GraphViewService } from '@/services'
+import type { Period } from '@/types/geological'
 
 const route = useRoute()
 const currentView = ref<'timeline' | 'database' | 'graph'>('timeline')

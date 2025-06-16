@@ -136,11 +136,12 @@
 
 <script setup lang="ts">
 import { reactive, ref, watch, toRefs, computed, onMounted, onUnmounted } from 'vue';
-import { DatabaseQueryService } from '../services/DatabaseQueryService';
-import { WikidataQueryService } from '../services/WikidataQueryService';
-import Button from './base/Button.vue';
-import Input from './base/Input.vue';
-import Switch from './base/Switch.vue';
+import { DatabaseQueryService } from '@/services/DatabaseQueryService';
+import { WikidataQueryService } from '@/services/WikidataQueryService';
+import Button from '@/components/base/Button.vue';
+import Input from '@/components/base/Input.vue';
+import Switch from '@/components/base/Switch.vue';
+import type { Period, Event, Story } from '@/types/database';
 
 interface Category {
   id: string;

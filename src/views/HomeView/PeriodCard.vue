@@ -42,8 +42,8 @@
 
 <script setup lang="ts">
 import { computed, watch } from 'vue';
-import { DateFormatter } from '../utils/dateFormatter';
-import type { Period } from '../types/geological';
+import { DateFormatter } from '@/utils/dateFormatter';
+import type { Period } from '@/types/geological';
 
 const props = defineProps<{
   period: Period;
@@ -97,7 +97,7 @@ const handleClick = () => {
 <style scoped>
 .period-card {
   background: transparent;
-  padding: 0 1px;
+  padding: 1px 1px;
   cursor: pointer;
   color: var(--color-text);
   height: 64px;

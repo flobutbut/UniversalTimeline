@@ -1,92 +1,44 @@
 <template>
-  <button 
-    class="back-button"
-    @click="$emit('click')"
-  >
-    {{ period.label }}
-    <div v-if="hasTemporalData" class="period-info">
-      <span v-if="firstTemporalData.startDate">{{ formatDate(firstTemporalData.startDate) }}</span>
-      <span v-if="firstTemporalData.startDate && firstTemporalData.endDate"> - </span>
-      <span v-if="firstTemporalData.endDate">{{ formatDate(firstTemporalData.endDate) }}</span>
-      <span v-if="firstTemporalData.location" class="location-separator">•</span>
-      <span v-if="firstTemporalData.location" class="period-location">
-        <i class="fas fa-map-marker-alt"></i>
-        {{ firstTemporalData.location }}
-      </span>
-    </div>
+  <button class="back-button" @click="emit('click')">
+    <i class="fas fa-arrow-left"></i>
+    <span>{{ period.label }}</span>
   </button>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import type { Period } from '../types/geological';
-import { DateFormatter } from '../utils/dateFormatter';
+interface SimplePeriod {
+  id: string;
+  label: string;
+}
 
 const props = defineProps<{
-  period: Period;
+  period: SimplePeriod;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'click'): void;
 }>();
-
-// Computed properties pour la nouvelle structure
-const hasTemporalData = computed(() => {
-  return props.period.temporalData && props.period.temporalData.length > 0;
-});
-
-const firstTemporalData = computed(() => {
-  return props.period.temporalData[0] || { startDate: undefined, endDate: undefined };
-});
-
-// Formatage des dates
-const formatDate = (date: string): string => {
-  return DateFormatter.format(date, 'geological');
-};
 </script>
 
 <style scoped>
 .back-button {
-  padding: 8px 16px;
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-size: var(--font-size-base);
-  font-weight: 600;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0px;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
 .back-button:hover {
-  background-color: #d32f2f;
+  background-color: var(--color-surface-hover);
 }
 
-.period-info {
-  font-size: 0.8em;
-  font-weight: normal;
-  opacity: 0.9;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.location-separator {
-  margin: 0 4px;
-  opacity: 0.7;
-}
-
-.period-location {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.period-location i {
+.back-button i {
   font-size: 0.9em;
 }
 </style> 

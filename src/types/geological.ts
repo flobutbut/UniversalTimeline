@@ -112,12 +112,27 @@ export interface QueryOptions {
 
 export interface Event {
   id: string;
-  label: string;
+  wikidata_id?: string;
+  label: {
+    fr: string;
+    en: string;
+  };
+  description?: {
+    fr: string;
+    en: string;
+  };
   date: string;
-  description?: string;
+  categories?: Array<{
+    id: string;
+    label: {
+      fr: string;
+      en: string;
+    };
+  }>;
   location?: string;
-  category?: string;
   source?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ApiPeriod {

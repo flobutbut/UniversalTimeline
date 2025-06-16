@@ -32,10 +32,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue';
-import { DatabaseViewService } from '../services/DatabaseViewService';
+import { DatabaseViewService } from '@/services/DatabaseViewService';
 import FinderItem from './FinderItem.vue';
-import Toast from './Toast.vue';
-import type { ApiPeriod } from '../types/geological';
+import Toast from '@/components/Toast.vue';
+import type { ApiPeriod } from '@/types/geological';
 
 const databaseViewService = DatabaseViewService.getInstance();
 const loading = ref(false);

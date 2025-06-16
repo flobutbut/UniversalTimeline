@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Event } from '../types/geological';
+import type { Event } from '@/types/geological';
 
 const props = defineProps<{
   event: Event;

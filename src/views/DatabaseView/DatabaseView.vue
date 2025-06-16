@@ -160,12 +160,12 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
-import { DatabaseViewService } from '../services/DatabaseViewService';
+import { DatabaseViewService } from '@/services/DatabaseViewService';
 import DatabaseCard from './DatabaseCard.vue';
 import EditModal from './EditModal.vue';
-import SearchBar from './SearchBar.vue';
-import type { Event, Period, Story, ListPeriod, ListEvent, ListStory } from '../types/database';
-import { DatabaseQueryService } from '../services/DatabaseQueryService';
+import SearchBar from '@/components/SearchBar.vue';
+import type { Event, Period, Story, ListPeriod, ListEvent, ListStory } from '@/types/database';
+import { DatabaseQueryService } from '@/services/DatabaseQueryService';
 
 const databaseService = DatabaseViewService.getInstance();
 const queryService = DatabaseQueryService.getInstance();

@@ -3,7 +3,7 @@
     <div class="navigation-header">
       <BackButton 
         v-if="props.currentPeriod"
-        v-bind="props.parentPeriod ? { period: props.parentPeriod } : { period: { label: 'Racine', temporalData: [], hasChildren: false, isMainEon: false, categoryIds: [], categoryLabels: [], children: [], loading: false, childrenPreloaded: false, locations: [], directLocations: [], id: 'root' } }"
+        :period="props.parentPeriod || { id: 'root', label: 'Racine' }"
         @click="goBack"
       />
     </div>
@@ -19,19 +19,25 @@
       Aucune période à afficher
     </div>
     <div v-else class="timeline-container">
-      <div class="timeline-line"></div>
       <div class="periods-container">
-        <PeriodCard
-          v-for="period in sortedPeriods"
-          :key="period.id"
-          :period="period"
-          :is-selected="false"
-          :loading="loadingPeriods[period.id]"
-          class="timeline-card"
-          :style="getPeriodStyles(period)"
-          @click="selectPeriod(period)"
-        />
+        <div
+          v-for="(periods, rowIndex) in periodsByRow"
+          :key="rowIndex"
+          class="period-row"
+        >
+          <PeriodCard
+            v-for="period in periods"
+            :key="period.id"
+            :period="period"
+            :is-selected="false"
+            :loading="loadingPeriods[period.id]"
+            class="timeline-card"
+            :style="getPeriodStyles(period)"
+            @click="selectPeriod(period)"
+          />
+        </div>
       </div>
+      <div class="timeline-line"></div>
       <div class="events-container">
         <EventCard
           v-for="event in events"
@@ -48,11 +54,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
-import type { Period, Event } from '../types/geological';
-import { TimelineScalingService, WikidataQueryService, DatabaseQueryService } from '../services';
-import { MAIN_EONS } from '../types/geological';
+import type { Period, Event } from '@/types/geological';
+import { TimelineScalingService, WikidataQueryService, DatabaseQueryService } from '@/services';
+import { MAIN_EONS } from '@/types/geological';
 import PeriodCard from './PeriodCard.vue';
-import BackButton from './BackButton.vue';
+import BackButton from '@/components/BackButton.vue';
 import EventCard from './EventCard.vue';
 
 const props = defineProps<{
@@ -78,6 +84,14 @@ const loadingPeriods = ref<Record<string, boolean>>({});
 const currentPeriods = ref<Period[]>(props.periods);
 const events = ref<Event[]>([]);
 const selectedEvent = ref<Event | null>(null);
+const ligneHeight = 48; // hauteur d'une ligne de période
+
+// Préparation multi-lignes
+const numberOfRows = 1; // Pour l'instant, une seule ligne
+const periodsByRow = computed(() => {
+  // Pour l'instant, une seule ligne
+  return [currentPeriods.value];
+});
 
 // Fonction pour extraire la date de début d'une période
 const getStartDate = (period: Period): number => {
@@ -141,7 +155,13 @@ onMounted(async () => {
 });
 
 const getPeriodStyles = (period: Period) => {
-  return scalingService.calculatePeriodStyles(period, totalDuration.value, startYears.value);
+  const row = (period as any).row ?? 0; // par défaut sur la première ligne
+  const baseStyles = scalingService.calculatePeriodStyles(period, totalDuration.value, startYears.value);
+  return {
+    ...baseStyles,
+    position: 'absolute',
+    top: `${row * ligneHeight}px`,
+  };
 };
 
 // Calculer les styles pour un événement
@@ -198,125 +218,90 @@ const retryLoading = async () => {
 
 <style scoped>
 .period-grid {
-  position: relative;
-  width: 100%;
   height: 100%;
-  overflow-x: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  overflow: hidden;
   background-color: var(--color-background);
 }
 
-.timeline-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  min-width: 100%;
+.navigation-header {
   display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow-sm);
-}
-
-.timeline-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 2px;
-  background-color: var(--color-border);
-  z-index: 0;
-}
-
-.periods-container {
-  width: 100%;
-  height: 50%;
-  position: relative;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  align-items: flex-end;
-  bottom: 4px;
-}
-
-.events-container {
-  width: 100%;
-  height: 50%;
-  position: relative;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  align-items: flex-start;
-  top: 4px;
-}
-
-.timeline-card {
-  position: absolute;
-  height: 64px;
-  z-index: 1;
-  cursor: pointer;
-  bottom: 0;
-  will-change: transform, left;
-  transition: transform var(--transition-fast);
-}
-
-.timeline-card:hover {
-  z-index: 2;
-  transform: translateY(-2px);
+  align-items: center;
+  gap: var(--spacing-md);
 }
 
 .loading-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-md);
-  padding: var(--spacing-xl);
-  color: var(--color-text);
-}
-
-.loading-container i {
-  color: var(--color-primary);
+  height: 100%;
 }
 
 .error-message {
-  padding: var(--spacing-md);
-  margin: var(--spacing-md) 0;
-  border-radius: var(--radius-md);
-  background-color: var(--color-error);
-  color: var(--color-neutral-0);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
   align-items: center;
-}
-
-.error-message button {
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--color-neutral-0);
+  justify-content: center;
+  gap: var(--spacing-md);
+  height: 100%;
   color: var(--color-error);
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.error-message button:hover {
-  background-color: var(--color-neutral-100);
 }
 
 .empty-message {
-  text-align: center;
-  padding: var(--spacing-xl);
-  color: var(--color-text-light);
-  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-secondary);
 }
 
-.navigation-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: var(--spacing-sm);
+.timeline-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: var(--color-surface);
+}
+
+.periods-container {
+  flex: 1 1 0;
+  position: relative;
+  width: 100%;
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.period-row {
+  position: relative;
+  width: 100%;
+  height: 64px;
+}
+
+.timeline-line {
+  height: 2px;
+  width: 100%;
+  background: var(--color-border);
+  position: relative;
   z-index: 2;
+}
+
+.events-container {
+  flex: 1 1 0;
+  position: relative;
+  width: 100%;
+  background: var(--color-surface);
+}
+
+.timeline-card {
+  position: relative;
+  transition: all var(--transition-fast);
 }
 </style> 
