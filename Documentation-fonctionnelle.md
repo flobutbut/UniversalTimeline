@@ -722,9 +722,7 @@ La vue Graphique permet de visualiser les relations hiérarchiques entre les pé
 - Interface utilisateur cohérente avec le design system
 
 ### Fonctionnalités à venir
-- Visualisation des relations parent-enfant entre les périodes
-- Graphique interactif avec zoom et pan
-- Mise en évidence des périodes sélectionnées
+- Amélioration de la navigation en colonnes
 - Filtres et options de personnalisation
 - Export des données
 - Modification des relations entre périodes
@@ -732,10 +730,9 @@ La vue Graphique permet de visualiser les relations hiérarchiques entre les pé
 ### État d'avancement
 - [x] Structure de base
 - [x] Intégration avec le design system
-- [x] Installation de D3.js
-- [ ] Implémentation du graphique
-- [ ] Gestion des données
-- [ ] Interactivité
+- [x] Implémentation de la navigation en colonnes
+- [x] Gestion des données
+- [x] Interactivité
 - [ ] Export des données
 - [ ] Modification des relations
 

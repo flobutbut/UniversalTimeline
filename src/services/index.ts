@@ -1,6 +1,5 @@
 export * from './DatabaseQueryService';
 export * from './DatabaseViewService';
-export * from './GraphViewService';
 export * from './WikidataQueryService';
 export * from './StoryService';
 export * from './databaseService';

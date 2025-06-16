@@ -714,29 +714,18 @@ Ce mécanisme fonctionne de façon similaire à celui déjà en place pour les p
 
 ## Dépendances
 
-### D3.js
-- **Version** : 7.9.0
-- **Utilisation** : Visualisation des relations entre les périodes géologiques
-- **Fonctionnalités utilisées** :
-  - Force-directed graph pour la visualisation des relations
-  - Simulation de force pour l'organisation des nœuds
-  - Zoom et pan pour la navigation
-  - Interactivité avec les nœuds et les liens
-
 ### Composants Vue
 
 #### GraphView.vue
 - **Emplacement** : `src/components/GraphView.vue`
 - **Description** : Composant principal pour la visualisation graphique des données
 - **Fonctionnalités** :
-  - Panneau latéral avec liste des périodes
-  - Visualisation D3.js des relations entre périodes
+  - Navigation en colonnes pour explorer la hiérarchie des périodes
   - Gestion des états de chargement et d'erreur
-  - Interactivité avec les nœuds du graphe
+  - Interactivité avec les éléments de la vue
 - **Props** : Aucune pour le moment
 - **Événements** : Aucun pour le moment
 - **Dépendances** :
-  - D3.js pour la visualisation
   - Design system pour les styles
   - Services pour la gestion des données
 

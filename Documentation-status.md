@@ -366,15 +366,14 @@ Le projet est stable et prêt pour le nettoyage final avant d'autres évolutions
 - [x] Création du composant de base
 - [x] Intégration dans l'application
 - [x] Gestion des états (chargement, erreur)
-- [x] Installation de D3.js
-- [ ] Implémentation du graphique D3
-- [ ] Gestion des données
+- [x] Implémentation de la navigation en colonnes
+- [x] Gestion des données
 - [ ] Tests unitaires
 - [ ] Tests d'intégration
 
 ## Dépendances
-- [x] D3.js (v7.9.0)
-- [x] Types D3.js (@types/d3)
+- [x] Design system
+- [x] Services de gestion des données
 
 # Documentation de statut
 
@@ -389,11 +388,10 @@ Le projet est stable et prêt pour le nettoyage final avant d'autres évolutions
 - [x] Création du composant de base
 - [x] Intégration dans l'application
 - [x] Gestion des états (chargement, erreur)
-- [x] Installation de D3.js
-- [ ] Implémentation du graphique D3
-- [ ] Gestion des données
+- [x] Implémentation de la navigation en colonnes
+- [x] Gestion des données
 - [ ] Tests unitaires
-- [ ] Tests d'intégration 
+- [ ] Tests d'intégration
 
 ## État de la base de données (avril 2024)
 
