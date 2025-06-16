@@ -541,7 +541,7 @@ async function selectStory(story: ListStory) {
 }
 
 .column {
-  background: var(--color-neutral-50);
+  background: var(--color-surface);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   overflow-y: auto;

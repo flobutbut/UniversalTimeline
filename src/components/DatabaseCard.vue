@@ -40,7 +40,7 @@ const handleEdit = () => {
 
 <style scoped>
 .database-card {
-  background: var(--color-neutral-0);
+  background: var(--color-card);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   box-shadow: var(--shadow-sm);
@@ -48,6 +48,7 @@ const handleEdit = () => {
 }
 
 .database-card:hover {
+  background: var(--color-card-hover);
   box-shadow: var(--shadow-md);
 }
 

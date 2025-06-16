@@ -3,10 +3,16 @@
     <div v-if="loading" class="finder-loading">Chargement...</div>
     <div v-else-if="error" class="finder-error">{{ error }}</div>
     <div v-else class="finder-columns">
-      <div class="finder-column" v-for="(col, colIdx) in columns" :key="colIdx">
+      <div
+        class="finder-column"
+        v-for="(col, colIdx) in columns"
+        :key="colIdx"
+        tabindex="0"
+        @keydown="(e) => handleKeyDown(e, colIdx)"
+      >
         <div class="finder-column-content">
           <FinderItem
-            v-for="item in col"
+            v-for="(item, idx) in col"
             :key="item.id"
             :label="typeof item.label === 'string' ? item.label : item.label?.fr || ''"
             :selected="selectedIds[colIdx] === item.id"
@@ -15,6 +21,7 @@
             @click="handleSelect(item, colIdx)"
             @dragstart="onDragStart"
             @drop="onDrop"
+            :class="{ focused: focusedIndexes[colIdx] === idx }"
           />
         </div>
       </div>
@@ -24,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { DatabaseViewService } from '../services/DatabaseViewService';
 import FinderItem from './FinderItem.vue';
 import Toast from './Toast.vue';
@@ -50,6 +57,7 @@ onMounted(async () => {
 const allPeriods = computed(() => databaseViewService.getPeriods());
 const selectedIds = ref<string[]>([]);
 const draggedItemId = ref<string | null>(null);
+const focusedIndexes = ref<number[]>([0]);
 
 // Fonction optimisée pour vérifier si un item a des enfants
 function hasChildren(itemId: string): boolean {
@@ -180,6 +188,50 @@ async function onDrop(targetItemId: string) {
     draggedItemId.value = null;
   }
 }
+
+function focusColumn(colIdx: number) {
+  nextTick(() => {
+    const col = document.querySelectorAll('.finder-column')[colIdx] as HTMLElement;
+    if (col) col.focus();
+  });
+}
+
+function handleKeyDown(event: KeyboardEvent, colIdx: number) {
+  const col = columns.value[colIdx];
+  if (!col) return;
+  let idx = focusedIndexes.value[colIdx] ?? 0;
+  if (event.key === 'ArrowDown') {
+    idx = Math.min(idx + 1, col.length - 1);
+    focusedIndexes.value[colIdx] = idx;
+    event.preventDefault();
+  } else if (event.key === 'ArrowUp') {
+    idx = Math.max(idx - 1, 0);
+    focusedIndexes.value[colIdx] = idx;
+    event.preventDefault();
+  } else if (event.key === 'Enter') {
+    const item = col[idx];
+    if (item) handleSelect(item, colIdx);
+    event.preventDefault();
+  } else if (event.key === 'ArrowRight') {
+    const item = col[idx];
+    if (item) handleSelect(item, colIdx);
+    // Focus colonne suivante si elle existe
+    if (columns.value[colIdx + 1]) {
+      focusColumn(colIdx + 1);
+    }
+    event.preventDefault();
+  } else if (event.key === 'ArrowLeft') {
+    if (colIdx > 0) {
+      focusColumn(colIdx - 1);
+    }
+    event.preventDefault();
+  }
+}
+
+onMounted(() => {
+  // Focus la première colonne au chargement
+  focusColumn(0);
+});
 </script>
 
 <style scoped>
@@ -240,7 +292,7 @@ async function onDrop(targetItemId: string) {
   flex: 1;
   min-width: 300px;
   max-width: 400px;
-  background: var(--color-background-soft);
+  background: var(--color-surface);
   border-radius: 8px;
   padding: 1rem;
   display: flex;
@@ -326,6 +378,11 @@ async function onDrop(targetItemId: string) {
 
 .period-item.selected .period-dates {
   color: rgba(255, 255, 255, 0.8);
+}
+
+.focused {
+  outline: 2px solid var(--color-primary);
+  background: var(--color-background-soft);
 }
 </style>
 

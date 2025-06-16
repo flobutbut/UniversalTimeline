@@ -96,7 +96,7 @@ const handleClick = () => {
 
 <style scoped>
 .period-card {
-  background: var(--color-surface);
+  background: transparent;
   padding: 0 1px;
   cursor: pointer;
   color: var(--color-text);
@@ -109,7 +109,7 @@ const handleClick = () => {
 }
 
 .main-container {
-  background: var(--color-neutral-100);
+  background: var(--color-card);
   border-radius: var(--radius-sm);
   padding: var(--spacing-md) var(--spacing-lg);
   height: 100%;
@@ -142,7 +142,7 @@ const handleClick = () => {
 }
 
 .period-card:hover .main-container {
-  background: var(--color-surface-hover);
+  background: var(--color-card-hover);
   transform: translateY(-4px);
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div
     class="finder-item"
-    :class="{ selected }"
+    :class="{ selected, droppable: isDroppable }"
     role="option"
     :aria-selected="selected ? 'true' : 'false'"
     @click="$emit('click')"
@@ -9,6 +9,7 @@
     draggable="true"
     @dragstart="onDragStart"
     @dragover.prevent="onDragOver"
+    @dragleave="onDragLeave"
     @drop.prevent="onDrop"
   >
     <div class="finder-item-content">
@@ -23,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 const props = defineProps<{
   label: string,
   selected?: boolean,
@@ -35,6 +37,8 @@ const emit = defineEmits<{
   (e: 'drop', itemId: string): void;
 }>();
 
+const isDroppable = ref(false);
+
 function onDragStart(event: DragEvent) {
   if (props.itemId) {
     event.dataTransfer?.setData('text/plain', props.itemId);
@@ -42,9 +46,13 @@ function onDragStart(event: DragEvent) {
   }
 }
 function onDragOver(event: DragEvent) {
-  // Permet le drop
+  isDroppable.value = true;
+}
+function onDragLeave(event: DragEvent) {
+  isDroppable.value = false;
 }
 function onDrop(event: DragEvent) {
+  isDroppable.value = false;
   if (props.itemId) {
     emit('drop', props.itemId);
   }
@@ -70,6 +78,7 @@ function onDrop(event: DragEvent) {
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-sm);
+  background: var(--color-card);
 }
 
 .finder-item-content {
@@ -86,8 +95,9 @@ function onDrop(event: DragEvent) {
   transition: opacity 0.2s;
 }
 
-.finder-item:hover .finder-item-chevron {
-  opacity: 1;
+.finder-item:hover, .finder-item.droppable {
+  background: var(--color-card-hover);
+  color: var(--color-text);
 }
 
 .finder-item.selected {
@@ -95,7 +105,12 @@ function onDrop(event: DragEvent) {
   color: var(--color-neutral-0);
 }
 
-.finder-item:hover, .finder-item:focus {
+.finder-item:hover .finder-item-chevron,
+.finder-item.droppable .finder-item-chevron {
+  opacity: 1;
+}
+
+.finder-item:focus {
   background: var(--color-primary-light);
 }
 </style> 
