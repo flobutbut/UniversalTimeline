@@ -81,10 +81,10 @@ interface Period {
   description?: MultilingualText; // Description multilingue
   startDate: string;       // Date de début
   endDate: string;         // Date de fin
-  parentId: string | null; // ID de la période parente
+  hasParent: boolean;      // Indique si la période a un parent
+  children: string[];      // IDs des périodes enfants
   temporalLocation: string; // Localisation temporelle
   categories: Category[];   // Catégories associées
-  children: Period[];      // Périodes enfants
   createdAt: Date;         // Date de création
   updatedAt: Date;         // Date de mise à jour
 }
@@ -112,6 +112,13 @@ interface MultilingualText {
   en: string;              // Texte en anglais
 }
 ```
+
+#### Gestion des relations parent/enfant
+- **Enfant** : champ `hasParent` (boolean)
+- **Parent** : champ `children` (array d'IDs)
+- Il n'y a plus de champ `parentId`.
+- Pour rattacher/détacher une période, il faut mettre à jour le champ `children` du parent et le champ `hasParent` de l'enfant.
+- La mise à jour du champ `children` remplace complètement la liste (pas de fusion avec les enfants existants).
 
 ## Services
 
@@ -486,10 +493,10 @@ Le formatage pour l'affichage est géré par la méthode `formatForSearch` qui :
   };
   startDate: string;
   endDate: string;
-  parentId: string | null;
+  hasParent: boolean;
+  children: string[];
   temporalLocation: string;
   categories: Category[];
-  children: Period[];
   createdAt: Date;
   updatedAt: Date;
 }

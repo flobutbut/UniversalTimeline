@@ -923,20 +923,7 @@ router.patch('/periods/:id/children', async (req, res) => {
       return res.status(400).json({ error: 'tous les enfants doivent être des identifiants valides' });
     }
 
-    // Récupérer d'abord la période actuelle pour avoir la liste des enfants existants
-    const currentPeriod = await dbQuery(`
-      SELECT children FROM periods.periods WHERE id = $1
-    `, [id]);
-
-    if (currentPeriod.rows.length === 0) {
-      return res.status(404).json({ error: 'Période non trouvée' });
-    }
-
-    // Fusionner les enfants existants avec les nouveaux
-    const existingChildren = currentPeriod.rows[0].children || [];
-    const newChildren = [...new Set([...existingChildren, ...children])];
-
-    // Mettre à jour les enfants de la période cible
+    // Mettre à jour directement les enfants de la période cible
     const result = await dbQuery(`
       UPDATE periods.periods
       SET 
@@ -944,7 +931,11 @@ router.patch('/periods/:id/children', async (req, res) => {
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $2
       RETURNING *
-    `, [JSON.stringify(newChildren), id]);
+    `, [JSON.stringify(children), id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Période non trouvée' });
+    }
 
     // Vérifier que les enfants ont été correctement enregistrés
     const updatedPeriod = result.rows[0];

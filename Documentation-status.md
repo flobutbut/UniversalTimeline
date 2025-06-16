@@ -190,6 +190,13 @@
    - ✅ Structure des tables
    - ✅ Système de catégories
    - ✅ Relations entre les tables
+   - ✅ Correction de la gestion des relations parent/enfant (fusion vs remplacement des enfants)
+
+### Relations parent/enfant
+- La relation parent/enfant est gérée uniquement via :
+  - `has_parent` (booléen) sur l'enfant
+  - `children` (array d'IDs) sur le parent
+- Il n'y a plus de champ `parentId` dans la base ou les types.
 
 ## Plan de Développement
 
