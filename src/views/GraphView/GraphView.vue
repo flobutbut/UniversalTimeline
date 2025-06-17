@@ -222,13 +222,13 @@ const handleSelect = async (period: ApiPeriod, colIdx: number) => {
           updatedPeriods[existingIndex] = {
             ...updatedPeriods[existingIndex],
             ...childData,
-            label: childData.label.fr,
+            label: childData.label,
             hasParent: childData.hasParent
           };
         } else {
           updatedPeriods.push({
             ...childData,
-            label: childData.label.fr,
+            label: childData.label,
             hasParent: childData.hasParent
           });
         }
@@ -355,11 +355,29 @@ async function onColumnDrop(colIdx: number) {
   draggedItemId.value = null;
 }
 
-function handleEdit(itemId: string) {
-  const period = allPeriods.value.find(p => p.id === itemId);
-  if (period) {
-    selectedPeriod.value = period;
+async function handleEdit(itemId: string) {
+  try {
+    loading.value = true;
+    error.value = null;
+    
+    // Utiliser le service pour charger les données complètes
+    const fullPeriod = await databaseViewService.loadFullPeriod(itemId);
+    // Convertir les dates en string si nécessaire
+    selectedPeriod.value = {
+      ...fullPeriod,
+      createdAt: fullPeriod.createdAt?.toISOString(),
+      updatedAt: fullPeriod.updatedAt?.toISOString()
+    };
     showEditModal.value = true;
+  } catch (error: any) {
+    console.error('[GraphView] Erreur lors du chargement de la période:', error);
+    if (error.message?.includes('404') || error.message?.includes('Not Found')) {
+      window?.showToast?.('La période n\'a pas été trouvée dans la base de données', 'error');
+    } else {
+      window?.showToast?.('Erreur lors du chargement de la période', 'error');
+    }
+  } finally {
+    loading.value = false;
   }
 }
 
