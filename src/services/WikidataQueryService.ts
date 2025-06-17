@@ -28,17 +28,25 @@ export class WikidataQueryService {
   private buildTemporalQuery(periodId: string): string {
     return `
       SELECT DISTINCT 
-        ?item ?itemLabel ?itemDescriptionFr ?itemDescriptionEn
+        ?item 
+        ?itemLabelFr ?itemLabelEn
+        ?itemDescriptionFr ?itemDescriptionEn
         ?startDate ?endDate ?formationDate
         ?startLocationLabel ?endLocationLabel
         (COUNT(DISTINCT ?child) AS ?childCount)
       WHERE {
         VALUES ?item { wd:${periodId} }
         
-        # Labels
-        SERVICE wikibase:label { 
-          bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
-          ?item rdfs:label ?itemLabel.
+        # Labels en français
+        OPTIONAL {
+          ?item rdfs:label ?itemLabelFr.
+          FILTER(LANG(?itemLabelFr) = "fr")
+        }
+
+        # Labels en anglais
+        OPTIONAL {
+          ?item rdfs:label ?itemLabelEn.
+          FILTER(LANG(?itemLabelEn) = "en")
         }
 
         # Descriptions en français
@@ -104,7 +112,7 @@ export class WikidataQueryService {
           ?child wdt:P361 ?item.
         }
       }
-      GROUP BY ?item ?itemLabel ?itemDescriptionFr ?itemDescriptionEn ?startDate ?endDate ?formationDate ?startLocationLabel ?endLocationLabel
+      GROUP BY ?item ?itemLabelFr ?itemLabelEn ?itemDescriptionFr ?itemDescriptionEn ?startDate ?endDate ?formationDate ?startLocationLabel ?endLocationLabel
     `;
   }
 
@@ -137,7 +145,7 @@ export class WikidataQueryService {
     }
 
     // Vérification du label
-    if (!binding.itemLabel?.value) {
+    if (!binding.itemLabelFr?.value && !binding.itemLabelEn?.value) {
       return false;
     }
 
@@ -169,7 +177,10 @@ export class WikidataQueryService {
     }
 
     // Gestion des labels et descriptions
-    const label = binding.itemLabel?.value;
+    const label = {
+      fr: binding.itemLabelFr?.value || '',
+      en: binding.itemLabelEn?.value || ''
+    };
     const description = {
       fr: binding.itemDescriptionFr?.value || '',
       en: binding.itemDescriptionEn?.value || ''
@@ -183,7 +194,7 @@ export class WikidataQueryService {
       locations: Array.from(locations)
     });
 
-    if (!label) {
+    if (!label.fr && !label.en) {
       console.log('[WikidataQueryService] Pas de label trouvé');
       return null;
     }
@@ -205,7 +216,6 @@ export class WikidataQueryService {
       directLocations: Array.from(locations)
     };
 
-    console.log('[WikidataQueryService] Période créée:', period);
     return period;
   }
 

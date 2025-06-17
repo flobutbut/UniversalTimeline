@@ -65,7 +65,8 @@ export interface Period extends PeriodData {
 // Types pour les réponses Wikidata
 export interface WikidataBinding {
   item?: { value: string };
-  itemLabel?: { value: string };
+  itemLabelFr?: { value: string };
+  itemLabelEn?: { value: string };
   itemDescriptionFr?: { value: string };
   itemDescriptionEn?: { value: string };
   startDate?: { value: string };
