@@ -431,23 +431,26 @@ function getParentLabel(colIdx: number): string {
   display: flex;
   flex-direction: row;
   height: 100%;
-  overflow-x: hidden;
+  overflow-x: auto;
   max-width: 100vw;
   box-sizing: border-box;
   background: var(--color-background);
+  gap: 0;
 }
 
 .finder-column {
-  min-width: 220px;
-  max-width: 320px;
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
   height: 100%;
   box-sizing: border-box;
   outline: none;
+  padding: 0;
 }
 
 .finder-column:focus {
@@ -458,15 +461,21 @@ function getParentLabel(colIdx: number): string {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 0;
   padding: var(--spacing-md);
   border-bottom: 1px solid var(--color-border);
+  gap: var(--spacing-sm);
 }
 
 .finder-column-header h2 {
   font-size: var(--font-size-lg);
   color: var(--color-text);
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
 }
 
 .action-button {
@@ -479,6 +488,7 @@ function getParentLabel(colIdx: number): string {
   transition: color var(--transition-fast);
   text-decoration: none;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .action-button:hover {
@@ -489,6 +499,11 @@ function getParentLabel(colIdx: number): string {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .graph-view {

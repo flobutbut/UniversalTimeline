@@ -133,8 +133,6 @@ function onDrop(event: DragEvent) {
   border-bottom: 1px solid var(--color-border-light);
   width: 100%;
   box-sizing: border-box;
-  max-width: 260px;
-  min-width: 260px;
 }
 
 .finder-item-content {
@@ -145,6 +143,7 @@ function onDrop(event: DragEvent) {
   white-space: nowrap;
   padding: 0 !important;
   margin: 0 !important;
+  margin-right: var(--spacing-sm);
 }
 
 .finder-item-actions {
