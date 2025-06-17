@@ -167,24 +167,92 @@ export class DatabaseQueryService {
   // Création d'une période
   public async createPeriod(data: any): Promise<any> {
     try {
+      console.log('[DatabaseQueryService] Données reçues pour la création:', JSON.stringify(data, null, 2));
+      
+      // Validation des champs obligatoires
+      if (!data.title?.fr) {
+        throw new Error('Le titre en français est obligatoire');
+      }
+      if (!data.startDate) {
+        throw new Error('La date de début est obligatoire');
+      }
+      if (!data.endDate) {
+        throw new Error('La date de fin est obligatoire');
+      }
+
+      // Vérifier si la période existe déjà
+      if (data.qid) {
+        try {
+          const existingPeriod = await this.getPeriodByWikidataId(data.qid);
+          if (existingPeriod) {
+            console.log('[DatabaseQueryService] Période existante trouvée:', existingPeriod);
+            // Retourner la période existante pour permettre son déplacement
+            return existingPeriod;
+          }
+        } catch (error: any) {
+          if (error.message.includes('existe déjà')) {
+            throw error;
+          }
+          // Si l'erreur n'est pas liée à l'existence de la période, on continue
+          console.log('[DatabaseQueryService] Erreur lors de la vérification de l\'existence de la période:', error);
+        }
+      }
+
       const payload = {
         id: generateUUID(),
-        wikidata_id: data.qid,
-        label: { fr: data.title.fr, en: data.title.en },
-        description: { fr: data.description.fr, en: data.description.en },
+        wikidata_id: data.qid || null,
+        label: {
+          fr: data.title.fr,
+          en: data.title.en || data.title.fr
+        },
+        description: {
+          fr: data.description?.fr || null,
+          en: data.description?.en || data.description?.fr || null
+        },
         start_date: data.startDate,
         end_date: data.endDate,
-        children: data.children || [],
-        temporal_location: data.temporalLocation,
+        children: [],
+        temporal_location: data.temporalLocation || null
       };
-      const response = await axios.post(`${API_BASE_URL}/periods`, payload);
+
+      console.log('[DatabaseQueryService] Payload de création:', JSON.stringify(payload, null, 2));
+      console.log('[DatabaseQueryService] URL de la requête:', `${API_BASE_URL}/periods`);
+      
+      const config = {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      };
+      
+      console.log('[DatabaseQueryService] Configuration de la requête:', config);
+      
+      const response = await axios.post(`${API_BASE_URL}/periods`, payload, config);
+      console.log('[DatabaseQueryService] Réponse du serveur:', response.data);
+      
       window.showToast('Période créée avec succès', 'success');
       return response.data;
     } catch (error: any) {
-      if (error?.response?.data?.code === '23505' || (error?.response?.data?.message && error.response.data.message.includes('duplicate'))) {
-        window.showToast('Une période avec ce Q-id existe déjà dans la base.', 'error');
+      console.error('[DatabaseQueryService] Erreur lors de la création:', error);
+      if (error.response) {
+        console.error('[DatabaseQueryService] Détails de l\'erreur:', {
+          status: error.response.status,
+          data: error.response.data,
+          headers: error.response.headers,
+          request: {
+            method: error.config?.method,
+            url: error.config?.url,
+            data: error.config?.data,
+            headers: error.config?.headers
+          }
+        });
+        // Afficher le message d'erreur du serveur s'il existe
+        if (error.response.data?.message) {
+          window.showToast(error.response.data.message, 'error');
+        } else {
+          window.showToast('Erreur lors de la création de la période', 'error');
+        }
       } else {
-        window.showToast('Erreur lors de la création de la période', 'error');
+        window.showToast(error.message || 'Erreur lors de la création de la période', 'error');
       }
       throw error;
     }

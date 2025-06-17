@@ -266,6 +266,15 @@ const closeModal = () => {
 
 const handleSubmit = async () => {
   try {
+    console.log('[EditModal] État du formulaire avant soumission:', {
+      qid: form.qid,
+      title: form.title,
+      description: form.description,
+      startDate: form.startDate,
+      endDate: form.endDate,
+      location: form.location
+    });
+
     if (props.type !== 'story' && (!form.qid || !form.qid.match(/^Q\d+$/))) {
       window.showToast('Le Q-id doit commencer par Q suivi de chiffres', 'error');
       return;
@@ -300,16 +309,19 @@ const handleSubmit = async () => {
     }
 
     const formData = {
-      ...form,
-      type: modalType.value,
-      label: form.title.fr,
-      wikidata_id: form.qid,
-      start_date: form.startDate,
-      end_date: form.endDate,
-      location: form.location,
-      author: form.author,
-      isPublic: form.isPublic,
-      children: [] as string[]
+      qid: form.qid,
+      title: {
+        fr: form.title.fr,
+        en: form.title.en || form.title.fr
+      },
+      description: {
+        fr: form.description.fr || null,
+        en: form.description.en || form.description.fr || null
+      },
+      startDate: form.startDate,
+      endDate: form.endDate,
+      temporalLocation: form.location || null,
+      children: []
     };
 
     // Conserver les enfants existants si nous sommes en mode édition
@@ -317,16 +329,15 @@ const handleSubmit = async () => {
       formData.children = props.data.children;
     }
 
-    if ('id' in formData) {
-      delete formData.id;
-    }
+    console.log('[EditModal] Données formatées pour l\'envoi:', JSON.stringify(formData, null, 2));
 
     // Émettre l'événement submit avant de fermer la modale
     emit('submit', formData);
     // Attendre un peu pour s'assurer que l'événement est traité
     await new Promise(resolve => setTimeout(resolve, 100));
     closeModal();
-  } catch (error) {
+  } catch (error: any) {
+    console.error('[EditModal] Erreur lors de la soumission:', error);
     window.showToast('Erreur lors de la soumission du formulaire', 'error');
   }
 }

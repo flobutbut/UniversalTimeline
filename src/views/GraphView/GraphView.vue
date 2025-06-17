@@ -14,6 +14,10 @@
         @drop.prevent="onColumnDrop(colIdx)"
         :class="{ 'drag-over': dragOverColumnIdx === colIdx }"
       >
+        <div class="finder-column-header">
+          <h2>{{ colIdx === 0 ? 'Périodes racines' : `Niveau ${colIdx + 1}` }}</h2>
+          <button class="action-button" @click="handleAddPeriod(colIdx)">Add</button>
+        </div>
         <div class="finder-column-content">
           <FinderItem
             v-for="(item, idx) in col"
@@ -40,6 +44,14 @@
       @close="closeEditModal"
       @submit="handleEditSubmit"
     />
+    <EditModal
+      v-if="showAddModal"
+      :is-open="showAddModal"
+      :type="'period'"
+      :mode="'create'"
+      @close="closeAddModal"
+      @submit="handleAddSubmit"
+    />
   </div>
 </template>
 
@@ -62,6 +74,8 @@ const draggedItemId = ref<string | null>(null);
 const dragOverColumnIdx = ref<number | null>(null);
 const showEditModal = ref(false);
 const selectedPeriod = ref<ApiPeriod | null>(null);
+const showAddModal = ref(false);
+const currentColumnIdx = ref<number | null>(null);
 
 onMounted(async () => {
   loading.value = true;
@@ -423,6 +437,51 @@ async function handleEditSubmit(formData: any) {
   }
 }
 
+function handleAddPeriod(colIdx: number) {
+  // Vérifier si on a besoin d'un parent et s'il est sélectionné
+  if (colIdx > 0 && !selectedIds.value[colIdx - 1]) {
+    window?.showToast?.('Veuillez sélectionner un parent avant d\'ajouter une période', 'error');
+    return;
+  }
+  currentColumnIdx.value = colIdx;
+  showAddModal.value = true;
+}
+
+function closeAddModal() {
+  showAddModal.value = false;
+  currentColumnIdx.value = null;
+}
+
+async function handleAddSubmit(formData: any) {
+  try {
+    console.log('[GraphView] Données reçues du formulaire:', JSON.stringify(formData, null, 2));
+    
+    const newPeriod = await databaseQueryService.createPeriod(formData);
+    console.log('[GraphView] Nouvelle période créée ou période existante trouvée:', newPeriod);
+    
+    // Si on est dans une colonne autre que la première, on doit lier la période au parent
+    if (currentColumnIdx.value !== null && currentColumnIdx.value > 0) {
+      const parentId = selectedIds.value[currentColumnIdx.value - 1];
+      if (parentId) {
+        console.log('[GraphView] Liaison avec le parent:', parentId);
+        await movePeriod(newPeriod.id, parentId);
+      }
+    }
+    
+    // Rechargement des données
+    await databaseViewService.loadListData();
+    closeAddModal();
+    window?.showToast?.('Période ajoutée avec succès', 'success');
+  } catch (error: any) {
+    console.error('[GraphView] Erreur lors de la création:', error);
+    if (error.response?.data?.message) {
+      window?.showToast?.(error.response.data.message, 'error');
+    } else {
+      window?.showToast?.(error instanceof Error ? error.message : 'Erreur lors de la création de la période', 'error');
+    }
+  }
+}
+
 onMounted(() => {
   focusColumn(0);
 });
@@ -468,6 +527,37 @@ onMounted(() => {
   gap: 2px;
   height: 100%;
   box-sizing: border-box;
+}
+
+.finder-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+  padding: 0 var(--spacing-md) var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.finder-column-header h2 {
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.action-button:hover {
+  color: var(--color-primary-dark);
 }
 
 .finder-column-content {
