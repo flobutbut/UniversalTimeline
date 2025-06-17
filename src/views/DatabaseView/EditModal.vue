@@ -18,9 +18,9 @@
         <button @click="$emit('close')">Fermer</button>
       </div>
       <form v-else @submit.prevent="handleSubmit" class="modal-form">
-        <div class="form-grid">
-          <template v-if="type !== 'story'">
-            <div class="form-group">
+        <div class="form-content">
+          <div class="form-row">
+            <div class="form-group full-width">
               <Input
                 v-model="form.qid"
                 label="Q-id Wikidata"
@@ -29,44 +29,52 @@
                 @blur="validateQid"
               />
             </div>
-          </template>
-          <div class="form-group">
-            <Input
-              v-model="form.title.fr"
-              label="Titre (Français)"
-              placeholder="Titre en français"
-              required
-            />
           </div>
-          <div class="form-group">
-            <Input
-              v-model="form.title.en"
-              label="Titre (Anglais)"
-              placeholder="Title in English"
-            />
+
+          <div class="form-row">
+            <div class="form-group">
+              <Input
+                v-model="form.title.fr"
+                label="Titre (Français)"
+                placeholder="Titre en français"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <Input
+                v-model="form.title.en"
+                label="Titre (Anglais)"
+                placeholder="Title in English"
+              />
+            </div>
           </div>
-          <div class="form-group">
-            <Input
-              v-model="form.description.fr"
-              label="Description (Français)"
-              placeholder="Description en français"
-              type="textarea"
-            />
+
+          <div class="form-row">
+            <div class="form-group">
+              <Input
+                v-model="form.description.fr"
+                label="Description (Français)"
+                placeholder="Description en français"
+                type="textarea"
+              />
+            </div>
+            <div class="form-group">
+              <Input
+                v-model="form.description.en"
+                label="Description (Anglais)"
+                placeholder="Description in English"
+                type="textarea"
+              />
+            </div>
           </div>
-          <div class="form-group">
-            <Input
-              v-model="form.description.en"
-              label="Description (Anglais)"
-              placeholder="Description in English"
-              type="textarea"
-            />
-          </div>
-          <template v-if="type === 'period'">
+
+          <div class="form-row" v-if="type === 'period'">
             <div class="form-group">
               <Input
                 v-model="form.startDate"
                 label="Date de début"
                 placeholder="Date brute"
+                required
               />
             </div>
             <div class="form-group">
@@ -74,38 +82,20 @@
                 v-model="form.endDate"
                 label="Date de fin"
                 placeholder="Date brute"
-              />
-            </div>
-            <div class="form-group">
-              <label>Temporal location</label>
-              <input v-model="form.temporalLocation" type="text" />
-            </div>
-          </template>
-          <template v-else-if="type === 'event'">
-            <div class="form-group">
-              <Input
-                v-model="form.date"
-                label="Date"
-                placeholder="Date brute"
-              />
-            </div>
-          </template>
-          <template v-else-if="type === 'story'">
-            <div class="form-group">
-              <Input
-                v-model="form.author"
-                label="Auteur"
-                placeholder="Nom de l'auteur"
                 required
               />
             </div>
-            <div class="form-group">
-              <Switch
-                v-model="form.isPublic"
-                label="Story publique"
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <Input
+                v-model="form.location"
+                label="Temporal location"
+                placeholder="Ex: Europe, France, Paris..."
               />
             </div>
-          </template>
+          </div>
         </div>
         <div class="form-actions">
           <div class="left-actions">
@@ -117,13 +107,16 @@
             >
               Remplir avec Wikidata
             </Button>
+            <span v-if="type === 'period'" class="children-count">
+              {{ directChildrenCount }} sous-périodes
+            </span>
           </div>
           <div class="right-actions">
             <Button variant="secondary" @click="closeModal">Annuler</Button>
             <Button
               variant="primary"
               type="submit"
-              :disabled="!isValid || (type !== 'story' && qidExistsInBase)"
+              :disabled="!isValid"
             >
               {{ mode === 'edit' ? 'Mettre à jour' : 'Créer' }}
             </Button>
@@ -179,17 +172,19 @@ const form = reactive({
     fr: props.data?.description?.fr || '',
     en: props.data?.description?.en || ''
   },
-  startDate: props.data?.temporalData?.[0]?.startDate || '',
-  endDate: props.data?.temporalData?.[0]?.endDate || '',
+  startDate: props.data?.start_date || '',
+  endDate: props.data?.end_date || '',
   date: props.data?.date || '',
-  temporalLocation: props.data?.temporal_location || '',
+  location: props.data?.location || '',
   author: props.data?.author || '',
-  isPublic: props.data?.isPublic || false
+  isPublic: props.data?.isPublic || false,
+  parentId: props.data?.parent_id || null
 });
 
 const qidExistsInBase = ref(false);
 const existingItem = ref<any>(null);
 const qidError = ref('');
+const directChildrenCount = ref('0');
 
 const isValid = computed(() => {
   if (props.type !== 'story' && !form.qid) return false;
@@ -207,14 +202,14 @@ watch(
   (val) => {
     if (props.mode === 'edit' && val) {
       form.qid = val.wikidata_id || '';
-      form.title.fr = val.label?.fr || '';
-      form.title.en = val.label?.en || '';
+      form.title.fr = val.label?.fr || val.title?.fr || '';
+      form.title.en = val.label?.en || val.title?.en || '';
       form.description.fr = val.description?.fr || '';
       form.description.en = val.description?.en || '';
       form.date = val.date || '';
       form.startDate = val.start_date || val.startDate || '';
       form.endDate = val.end_date || val.endDate || '';
-      form.temporalLocation = val.temporal_location || val.temporalLocation || '';
+      form.location = val.location || '';
       qidExistsInBase.value = false;
       existingItem.value = val;
     } else {
@@ -226,7 +221,7 @@ watch(
       form.date = '';
       form.startDate = '';
       form.endDate = '';
-      form.temporalLocation = '';
+      form.location = '';
       qidExistsInBase.value = false;
       existingItem.value = null;
     }
@@ -280,25 +275,38 @@ const handleSubmit = async () => {
     if (props.type === 'event') {
       try {
         const existing = await queryService.getEventById(form.qid);
-        if (existing && existing.id !== props.data.id) {
+        if (existing && existing.id !== props.data?.id) {
+          conflict = existing;
+        }
+      } catch (e) { /* Pas de conflit si non trouvé */ }
+    } else if (props.type === 'period') {
+      try {
+        const periods = await queryService.getAllPeriods();
+        const existing = periods.find(p => p.wikidata_id === form.qid);
+        if (existing && existing.id !== props.data?.id) {
           conflict = existing;
         }
       } catch (e) { /* Pas de conflit si non trouvé */ }
     }
 
     if (conflict) {
-      await queryService.deleteEvent(conflict.id);
-      window.showToast('Un événement avec ce Q-id existait déjà. Il a été supprimé automatiquement.', 'error');
+      if (props.type === 'event') {
+        await queryService.deleteEvent(conflict.id);
+        window.showToast('Un événement avec ce Q-id existait déjà. Il a été supprimé automatiquement.', 'error');
+      } else if (props.type === 'period') {
+        await queryService.deletePeriod(conflict.id);
+        window.showToast('Une période avec ce Q-id existait déjà. Elle a été supprimée automatiquement.', 'error');
+      }
     }
 
     const formData = {
       ...form,
       type: modalType.value,
-      label: form.title,
+      label: form.title.fr,
       wikidata_id: form.qid,
       start_date: form.startDate,
       end_date: form.endDate,
-      temporal_location: form.temporalLocation,
+      location: form.location,
       author: form.author,
       isPublic: form.isPublic
     };
@@ -317,9 +325,9 @@ function close() {
 }
 
 const openModal = (type: 'period' | 'event' | 'story', mode: 'create' | 'edit', data?: any) => {
-  modalType.value = type
-  isCreateMode.value = mode === 'create'
-  open.value = true
+  modalType.value = type;
+  isCreateMode.value = mode === 'create';
+  open.value = true;
 
   form.qid = '';
   form.title.fr = '';
@@ -329,7 +337,7 @@ const openModal = (type: 'period' | 'event' | 'story', mode: 'create' | 'edit', 
   form.date = '';
   form.startDate = '';
   form.endDate = '';
-  form.temporalLocation = '';
+  form.location = '';
 
   if (mode === 'edit' && data) {
     form.qid = data.wikidata_id || data.qid || data.wikidataId || '';
@@ -340,7 +348,7 @@ const openModal = (type: 'period' | 'event' | 'story', mode: 'create' | 'edit', 
     form.date = data.date || '';
     form.startDate = data.start_date || '';
     form.endDate = data.end_date || '';
-    form.temporalLocation = data.temporal_location || '';
+    form.location = data.location || '';
   }
 }
 
@@ -364,6 +372,7 @@ const fillFromWikidata = async () => {
     if (props.type === 'period') {
       data = await wikidataService.loadPeriod(form.qid);
       console.log('[EditModal] Données période reçues:', data);
+      directChildrenCount.value = data.children?.length?.toString() || '0';
     } else if (props.type === 'event') {
       data = await wikidataService.loadEvent(form.qid);
       console.log('[EditModal] Données événement reçues:', data);
@@ -410,7 +419,7 @@ const fillFromWikidata = async () => {
           form.endDate = temporalData.endDate;
         }
         if (temporalData.location) {
-          form.temporalLocation = temporalData.location;
+          form.location = temporalData.location;
         }
       }
 
@@ -478,16 +487,27 @@ onUnmounted(() => {
 .modal-form {
   width: 100%;
 }
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-lg) var(--spacing-xl);
-}
-.form-group {
-  margin-bottom: var(--spacing-md);
+.form-content {
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-md);
 }
+
+.form-row {
+  display: flex;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.form-group.full-width {
+  flex: 1 1 100%;
+}
+
 .form-group label {
   font-weight: 600;
   margin-bottom: var(--spacing-xs);
@@ -643,5 +663,12 @@ onUnmounted(() => {
 }
 .error-message button:hover {
   background-color: var(--color-neutral-100);
+}
+.children-count {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-light);
+  font-size: var(--font-size-sm);
+  margin-left: var(--spacing-sm);
 }
 </style> 

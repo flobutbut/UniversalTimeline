@@ -631,4 +631,15 @@ export class DatabaseQueryService {
       throw error;
     }
   }
+
+  // Supprimer une période
+  public async deletePeriod(periodId: string): Promise<void> {
+    try {
+      await axios.delete(`${API_BASE_URL}/periods/${periodId}`);
+      window.showToast('Période supprimée avec succès', 'success');
+    } catch (error: any) {
+      window.showToast('Erreur lors de la suppression de la période', 'error');
+      throw error;
+    }
+  }
 } 

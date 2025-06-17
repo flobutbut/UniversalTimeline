@@ -15,10 +15,19 @@
     <div class="finder-item-content">
       <slot>{{ label }}</slot>
     </div>
-    <div v-if="hasChildren" class="finder-item-chevron">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="9 18 15 12 9 6"></polyline>
-      </svg>
+    <div class="finder-item-actions">
+      <button 
+        v-if="itemId" 
+        class="action-button" 
+        @click.stop="handleEdit"
+      >
+        Edit
+      </button>
+      <div v-if="hasChildren" class="finder-item-chevron">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </div>
     </div>
   </div>
 </template>
@@ -35,9 +44,17 @@ const emit = defineEmits<{
   (e: 'click'): void;
   (e: 'dragstart', itemId: string): void;
   (e: 'drop', itemId: string): void;
+  (e: 'edit', itemId: string): void;
 }>();
 
 const isDroppable = ref(false);
+
+function handleEdit(event: MouseEvent) {
+  event.stopPropagation();
+  if (props.itemId) {
+    emit('edit', props.itemId);
+  }
+}
 
 function onDragStart(event: DragEvent) {
   if (props.itemId) {
@@ -86,6 +103,36 @@ function onDrop(event: DragEvent) {
   overflow: visible;
   text-overflow: ellipsis;
   display: block;
+}
+
+.finder-item-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.action-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.action-button:hover {
+  color: var(--color-primary-dark);
+}
+
+.finder-item.selected .action-button {
+  color: var(--color-neutral-0);
+}
+
+.finder-item.selected .action-button:hover {
+  color: var(--color-neutral-100);
 }
 
 .finder-item-chevron {

@@ -9,6 +9,10 @@
         :key="colIdx"
         tabindex="0"
         @keydown="(e) => handleKeyDown(e, colIdx)"
+        @dragover.prevent="onColumnDragOver(colIdx)"
+        @dragleave="onColumnDragLeave(colIdx)"
+        @drop.prevent="onColumnDrop(colIdx)"
+        :class="{ 'drag-over': dragOverColumnIdx === colIdx }"
       >
         <div class="finder-column-content">
           <FinderItem
@@ -21,27 +25,43 @@
             @click="handleSelect(item, colIdx)"
             @dragstart="onDragStart"
             @drop="onDrop"
+            @edit="handleEdit"
           />
         </div>
       </div>
     </div>
     <Toast ref="toast" />
+    <EditModal
+      v-if="showEditModal"
+      :is-open="showEditModal"
+      :type="'period'"
+      :mode="'edit'"
+      :data="selectedPeriod"
+      @close="closeEditModal"
+      @submit="handleEditSubmit"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { DatabaseViewService } from '@/services/DatabaseViewService';
+import { DatabaseQueryService } from '@/services/DatabaseQueryService';
 import FinderItem from './FinderItem.vue';
 import Toast from '@/components/Toast.vue';
+import EditModal from '@/views/DatabaseView/EditModal.vue';
 import type { ApiPeriod } from '@/types/geological';
 
 const databaseViewService = DatabaseViewService.getInstance();
+const databaseQueryService = DatabaseQueryService.getInstance();
 const loading = ref(false);
 const error = ref<string | null>(null);
 const toast = ref<InstanceType<typeof Toast> | null>(null);
 const selectedIds = ref<string[]>([]);
 const draggedItemId = ref<string | null>(null);
+const dragOverColumnIdx = ref<number | null>(null);
+const showEditModal = ref(false);
+const selectedPeriod = ref<ApiPeriod | null>(null);
 
 onMounted(async () => {
   loading.value = true;
@@ -64,17 +84,21 @@ function hasChildren(itemId: string): boolean {
 
 const columns = computed(() => {
   const cols: any[][] = [];
+  const usedIds = new Set<string>();
+  // 1. Racine : objets sans parent
   let currentLevel = allPeriods.value.filter(p => !p.hasParent);
+  currentLevel = currentLevel.filter(p => !usedIds.has(p.id));
+  currentLevel.forEach(p => usedIds.add(p.id));
   cols.push(currentLevel);
-  
+
   for (const id of selectedIds.value) {
     const selected = allPeriods.value.find(p => p.id === id);
     if (!selected) break;
-    
-    const children = allPeriods.value.filter(p => 
-      selected.children?.includes(p.id)
-    );
-    
+    // 2. Enfants : objets dont l'ID est dans le champ children du parent sélectionné
+    let children = allPeriods.value.filter(p => Array.isArray(selected.children) && selected.children.includes(p.id));
+    // On retire ceux déjà utilisés dans une colonne précédente
+    children = children.filter(p => !usedIds.has(p.id));
+    children.forEach(p => usedIds.add(p.id));
     if (children.length > 0) {
       cols.push(children);
       currentLevel = children;
@@ -225,38 +249,139 @@ function onDragOver(event: DragEvent) {
   event.preventDefault();
 }
 
-async function onDrop(targetItemId: string) {
-  if (!draggedItemId.value || !targetItemId) return;
+function isDescendant(childId: string, potentialAncestorId: string): boolean {
+  const all = allPeriods.value;
+  const child = all.find(p => p.id === childId);
+  if (!child || !Array.isArray(child.children)) return false;
+  if (child.children.includes(potentialAncestorId)) return true;
+  return child.children.some((id: string) => isDescendant(id, potentialAncestorId));
+}
+
+async function movePeriod(childId: string, newParentId: string | null) {
+  if (newParentId && isDescendant(childId, newParentId)) {
+    window?.showToast?.('Impossible de déplacer un parent dans un de ses propres descendants.', 'error');
+    console.warn('[movePeriod] Opération interdite : cycle détecté');
+    return;
+  }
+  const all = allPeriods.value;
+  const parentOrigin = all.find(p => Array.isArray(p.children) && p.children.includes(childId));
+  const updatedPeriods = [...allPeriods.value];
 
   try {
-    const targetPeriod = allPeriods.value.find(p => p.id === targetItemId);
-    const newChildren = [...(targetPeriod?.children || []), draggedItemId.value];
-    await databaseViewService.updateChildren(targetItemId, newChildren);
-    
-    const updatedPeriods = [...allPeriods.value];
-    const draggedPeriodIndex = updatedPeriods.findIndex(p => p.id === draggedItemId.value);
-    const targetPeriodIndex = updatedPeriods.findIndex(p => p.id === targetItemId);
-
-    if (draggedPeriodIndex !== -1 && targetPeriodIndex !== -1) {
-      const targetPeriod = updatedPeriods[targetPeriodIndex];
-      if (!targetPeriod.children) {
-        targetPeriod.children = [];
+    // 1. Retirer du parent d'origine
+    if (parentOrigin) {
+      const newChildren = parentOrigin.children.filter((id: string) => id !== childId);
+      await databaseViewService.updateChildren(parentOrigin.id, newChildren);
+      // Mise à jour locale immédiate
+      const idx = updatedPeriods.findIndex(p => p.id === parentOrigin.id);
+      if (idx !== -1) {
+        updatedPeriods[idx] = {
+          ...updatedPeriods[idx],
+          children: newChildren
+        };
       }
-      if (!targetPeriod.children.includes(draggedItemId.value)) {
-        targetPeriod.children.push(draggedItemId.value);
-      }
-      updatedPeriods[targetPeriodIndex] = targetPeriod;
-
-      const draggedPeriod = updatedPeriods[draggedPeriodIndex];
-      draggedPeriod.hasParent = true;
-      updatedPeriods[draggedPeriodIndex] = draggedPeriod;
-
-      databaseViewService.setPeriods([...updatedPeriods]);
     }
+    // 2. Ajouter au parent cible
+    if (newParentId) {
+      const parentTarget = all.find(p => p.id === newParentId);
+      if (parentTarget) {
+        const newChildren = Array.isArray(parentTarget.children) ? [...parentTarget.children] : [];
+        if (!newChildren.includes(childId)) {
+          newChildren.push(childId);
+          await databaseViewService.updateChildren(parentTarget.id, newChildren);
+          // Mise à jour locale immédiate
+          const idx = updatedPeriods.findIndex(p => p.id === newParentId);
+          if (idx !== -1) {
+            updatedPeriods[idx] = {
+              ...updatedPeriods[idx],
+              children: newChildren
+            };
+          }
+        }
+      }
+    }
+    // 3. Mettre à jour has_parent
+    const updated = await databaseViewService.updateHasParent(childId, !!newParentId);
+    console.log('[movePeriod] updateHasParent response:', updated);
+    // 4. Mettre à jour l'objet déplacé
+    const draggedIdx = updatedPeriods.findIndex(p => p.id === childId);
+    if (draggedIdx !== -1 && updated && typeof updated.has_parent !== 'undefined') {
+      updatedPeriods[draggedIdx] = {
+        ...updatedPeriods[draggedIdx],
+        hasParent: updated.has_parent
+      };
+    }
+    databaseViewService.setPeriods(updatedPeriods);
   } catch (error) {
-    console.error('[GraphView] Erreur lors du déplacement de la période:', error);
-  } finally {
-    draggedItemId.value = null;
+    console.error('[movePeriod] Erreur lors du déplacement:', error);
+  }
+}
+
+async function onDrop(targetItemId: string) {
+  if (!draggedItemId.value || !targetItemId) return;
+  await movePeriod(draggedItemId.value, targetItemId);
+  draggedItemId.value = null;
+}
+
+function onColumnDragOver(colIdx: number) {
+  if (draggedItemId.value) {
+    const originColIdx = columns.value.findIndex(col => col.some(item => item.id === draggedItemId.value));
+    if (colIdx !== originColIdx) {
+      dragOverColumnIdx.value = colIdx;
+    } else {
+      dragOverColumnIdx.value = null;
+    }
+  }
+}
+
+function onColumnDragLeave(colIdx: number) {
+  if (dragOverColumnIdx.value === colIdx) {
+    dragOverColumnIdx.value = null;
+  }
+}
+
+async function onColumnDrop(colIdx: number) {
+  if (!draggedItemId.value) return;
+  const originColIdx = columns.value.findIndex(col => col.some(item => item.id === draggedItemId.value));
+  if (colIdx === originColIdx) return;
+  let newParentId: string | null = null;
+  if (colIdx === 0) {
+    newParentId = null;
+  } else {
+    newParentId = selectedIds.value[colIdx - 1] || null;
+  }
+  await movePeriod(draggedItemId.value, newParentId);
+  dragOverColumnIdx.value = null;
+  draggedItemId.value = null;
+}
+
+function handleEdit(itemId: string) {
+  const period = allPeriods.value.find(p => p.id === itemId);
+  if (period) {
+    selectedPeriod.value = period;
+    showEditModal.value = true;
+  }
+}
+
+function closeEditModal() {
+  showEditModal.value = false;
+  selectedPeriod.value = null;
+}
+
+async function handleEditSubmit(formData: any) {
+  try {
+    if (!selectedPeriod.value) return;
+    
+    // Mise à jour de la période via le service de requête
+    await databaseQueryService.updatePeriod(selectedPeriod.value.id, formData);
+    
+    // Rechargement des données
+    await databaseViewService.loadListData();
+    closeEditModal();
+    window?.showToast?.('Période mise à jour avec succès', 'success');
+  } catch (error) {
+    console.error('[GraphView] Erreur lors de la mise à jour:', error);
+    window?.showToast?.('Erreur lors de la mise à jour de la période', 'error');
   }
 }
 
@@ -418,6 +543,10 @@ onMounted(() => {
 .finder-item-focused {
   outline: 2px solid var(--color-primary);
   background: var(--color-background-soft);
+}
+
+.finder-column.drag-over {
+  background: var(--color-primary-light);
 }
 </style>
 

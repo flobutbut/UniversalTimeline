@@ -746,3 +746,38 @@ La vue Graphique permet de visualiser les relations hiérarchiques entre les pé
   - un tableau `children` (jsonb) listant les identifiants de ses enfants directs
 - La navigation dans l'application (vue Finder) exploite ces champs pour charger dynamiquement les enfants et optimiser les performances.
 - Un script de maintenance permet de garantir la cohérence de la hiérarchie et d'automatiser la correction des incohérences éventuelles.
+
+## Gestion des relations parent/enfant
+
+- **Enfant** : champ `has_parent` (booléen)
+- **Parent** : champ `children` (tableau d'IDs)
+- Il n'y a plus de champ `parentId`.
+- Pour rattacher ou détacher une période, il faut mettre à jour le champ `children` du parent et le champ `has_parent` de l'enfant.
+
+## Gestion des dates dans Wikidata
+
+### Propriétés de date utilisées
+- `P580` (start time) : Date de début
+- `P582` (end time) : Date de fin
+- `P571` (inception) : Date de formation/création
+- `P585` (point in time) : Pour les événements ponctuels
+- `P1619` (earliest date) : Pour la date la plus ancienne
+- `P1620` (latest date) : Pour la date la plus récente
+
+### Ordre de priorité des dates
+1. Pour la date de début : earliestDate > formationDate > startDate > pointInTime
+2. Pour la date de fin : latestDate > endDate > TODAY
+
+## Gestion des conflits de Q-id
+
+### Comportement actuel
+- Lors de la création ou modification d'une période/événement avec un Q-id existant
+- Le système détecte automatiquement le conflit
+- L'élément existant est automatiquement supprimé
+- Un message de confirmation est affiché à l'utilisateur
+- La création/modification se poursuit normalement
+
+### Cas d'utilisation
+- Création d'une nouvelle période avec un Q-id existant
+- Modification d'une période existante avec un nouveau Q-id déjà utilisé
+- Import de données depuis Wikidata avec des Q-id en conflit

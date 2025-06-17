@@ -58,6 +58,21 @@ export class WikidataQueryService {
           ?item wdt:P571 ?formationDate.
         }
 
+        # Point dans le temps (P585)
+        OPTIONAL {
+          ?item wdt:P585 ?pointInTime.
+        }
+
+        # Date la plus ancienne (P1619)
+        OPTIONAL {
+          ?item wdt:P1619 ?earliestDate.
+        }
+
+        # Date la plus récente (P1620)
+        OPTIONAL {
+          ?item wdt:P1620 ?latestDate.
+        }
+
         # Start time avec localisations
         OPTIONAL {
           ?item p:P580 ?startStatement.
@@ -142,8 +157,8 @@ export class WikidataQueryService {
 
     // Créer les données temporelles avec les dates disponibles
     const temporalData: TemporalLocation[] = [{
-      startDate: binding.formationDate?.value || binding.startDate?.value || '',
-      endDate: binding.endDate?.value || 'TODAY',
+      startDate: binding.earliestDate?.value || binding.formationDate?.value || binding.startDate?.value || binding.pointInTime?.value || '',
+      endDate: binding.latestDate?.value || binding.endDate?.value || 'TODAY',
       location: binding.startLocationLabel?.value || binding.endLocationLabel?.value || "Globale"
     }];
 
