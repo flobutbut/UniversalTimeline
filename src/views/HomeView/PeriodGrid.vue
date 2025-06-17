@@ -3,7 +3,7 @@
     <div class="navigation-header">
       <BackButton 
         v-if="props.currentPeriod"
-        :period="props.parentPeriod || { id: 'root', label: 'Racine' }"
+        :period="props.parentPeriod || { id: 'root', label: { fr: 'Racine', en: 'Root' } }"
         @click="goBack"
       />
     </div>

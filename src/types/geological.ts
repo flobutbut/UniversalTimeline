@@ -29,7 +29,10 @@ export interface TemporalLocation {
 
 export interface PeriodData {
   id: string;
-  label: string;
+  label: {
+    fr: string;
+    en: string;
+  };
   temporalData: TemporalLocation[];
   hasChildren: boolean;
   isMainEon: boolean;
@@ -45,7 +48,10 @@ export interface PeriodData {
 export interface Period extends PeriodData {
   id: string;
   wikidata_id?: string;
-  label: string;
+  label: {
+    fr: string;
+    en: string;
+  };
   description: {
     fr: string;
     en: string;

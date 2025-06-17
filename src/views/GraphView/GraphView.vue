@@ -18,7 +18,7 @@
           <FinderItem
             v-for="(item, idx) in col"
             :key="item.id"
-            :label="typeof item.label === 'string' ? item.label : item.label?.fr || ''"
+            :label="item.label"
             :selected="selectedIds[colIdx] === item.id"
             :hasChildren="hasChildren(item.id)"
             :itemId="item.id"

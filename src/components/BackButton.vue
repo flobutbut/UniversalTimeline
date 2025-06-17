@@ -1,14 +1,16 @@
 <template>
   <button class="back-button" @click="emit('click')">
     <i class="fas fa-arrow-left"></i>
-    <span>{{ period.label }}</span>
+    <span>{{ period.label.fr }}</span>
   </button>
 </template>
 
 <script setup lang="ts">
+import type { MultilingualText } from '@/types/database';
+
 interface SimplePeriod {
   id: string;
-  label: string;
+  label: MultilingualText;
 }
 
 const props = defineProps<{

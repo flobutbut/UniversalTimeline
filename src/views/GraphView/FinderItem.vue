@@ -1,25 +1,25 @@
 <template>
   <div
     class="finder-item"
-    :class="{ selected, droppable: isDroppable }"
-    role="option"
-    :aria-selected="selected ? 'true' : 'false'"
-    @click="$emit('click')"
-    tabindex="0"
-    draggable="true"
-    @dragstart="onDragStart"
-    @dragover.prevent="onDragOver"
-    @dragleave="onDragLeave"
-    @drop.prevent="onDrop"
+    :class="{
+      'finder-item-selected': selected,
+      'finder-item-has-children': hasChildren
+    }"
+    :aria-selected="selected"
+    :draggable="true"
+    @dragstart="emit('dragstart', itemId)"
+    @dragover.prevent
+    @drop="emit('drop', itemId)"
+    @click="emit('click')"
   >
     <div class="finder-item-content">
-      <slot>{{ label }}</slot>
+      <slot>{{ label.fr }}</slot>
     </div>
     <div class="finder-item-actions">
-      <button 
-        v-if="itemId" 
-        class="action-button" 
-        @click.stop="handleEdit"
+      <button
+        v-if="itemId"
+        class="action-button"
+        @click.stop="emit('edit', itemId)"
       >
         Edit
       </button>
@@ -34,11 +34,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import type { MultilingualText } from '@/types/database';
+
 const props = defineProps<{
-  label: string,
-  selected?: boolean,
-  hasChildren?: boolean,
-  itemId?: string
+  label: MultilingualText;
+  selected: boolean;
+  hasChildren: boolean;
+  itemId: string;
 }>();
 const emit = defineEmits<{
   (e: 'click'): void;

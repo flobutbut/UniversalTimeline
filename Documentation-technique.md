@@ -833,3 +833,49 @@ environment:
 - Copier les scripts dans `/tmp/` avant de les exécuter
 - Vérifier les logs en cas d'erreur
 - Sauvegarder la base de données avant d'exécuter des scripts de modification
+
+## Gestion des Labels Multilingues
+
+### Types
+- Tous les labels dans l'application doivent utiliser le type `MultilingualText` défini dans `src/types/database.ts`
+- Le type `MultilingualText` est défini comme :
+```typescript
+interface MultilingualText {
+  fr: string;
+  en: string;
+}
+```
+
+### Règles d'implémentation
+1. **Composants**
+   - Les props de type `label` doivent toujours être de type `MultilingualText`
+   - L'affichage doit utiliser `label.fr` pour la version française
+   - Ne jamais passer directement une chaîne de caractères comme label
+
+2. **Services**
+   - Les services doivent toujours retourner des labels au format `MultilingualText`
+   - Les données importées de Wikidata doivent être converties en `MultilingualText`
+   - Les données de la base de données doivent être formatées en `MultilingualText`
+
+3. **API**
+   - Les routes API doivent accepter et retourner des labels au format `MultilingualText`
+   - Les données stockées en base doivent être converties en `MultilingualText` lors de la récupération
+
+### Exemples d'utilisation
+```typescript
+// Correct
+const label: MultilingualText = {
+  fr: "Paléogène",
+  en: "Paleogene"
+};
+
+// Incorrect
+const label: string = "Paléogène";
+```
+
+### Composants concernés
+- `FinderItem`
+- `PeriodCard`
+- `BackButton`
+- Tous les composants d'édition
+- Tous les composants d'affichage de périodes et d'événements

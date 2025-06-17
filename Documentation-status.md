@@ -409,3 +409,28 @@ Le projet est stable et prêt pour le nettoyage final avant d'autres évolutions
 - Un script de maintenance (`database/maintenance.sql`) permet de corriger et vérifier l'intégrité de ces champs.
 - Les requêtes de vérification utilisent désormais `label_fr` pour l'affichage.
 - Les informations de connexion sont documentées dans la documentation technique. 
+
+## État de la Gestion Multilingue
+
+### Composants mis à jour
+- [x] FinderItem
+- [x] PeriodCard
+- [x] BackButton
+- [x] GraphView
+- [x] DatabaseView
+
+### Services mis à jour
+- [x] DatabaseQueryService
+- [x] WikidataQueryService
+- [x] DatabaseImportService
+
+### Types mis à jour
+- [x] MultilingualText
+- [x] Period
+- [x] Event
+- [x] Category
+
+### Points d'attention
+- Vérifier que tous les nouveaux composants respectent le typage MultilingualText
+- S'assurer que les imports de Wikidata convertissent correctement les labels
+- Maintenir la cohérence des labels dans la base de données 

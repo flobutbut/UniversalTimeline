@@ -781,3 +781,23 @@ La vue Graphique permet de visualiser les relations hiérarchiques entre les pé
 - Création d'une nouvelle période avec un Q-id existant
 - Modification d'une période existante avec un nouveau Q-id déjà utilisé
 - Import de données depuis Wikidata avec des Q-id en conflit
+
+## Gestion Multilingue
+
+### Labels
+- Tous les labels dans l'application sont gérés en français et en anglais
+- L'interface utilisateur affiche par défaut les labels en français
+- Les données sont stockées avec leurs versions française et anglaise
+
+### Composants
+- Les composants d'affichage doivent toujours gérer les labels dans les deux langues
+- L'affichage par défaut est en français
+- Les composants d'édition doivent permettre la saisie dans les deux langues
+
+### Import de données
+- Les données importées de Wikidata sont automatiquement converties en format multilingue
+- Si une traduction n'est pas disponible, la version française est utilisée comme fallback
+
+### Base de données
+- Les labels sont stockés avec leurs versions française et anglaise
+- Les requêtes API retournent toujours les deux versions des labels

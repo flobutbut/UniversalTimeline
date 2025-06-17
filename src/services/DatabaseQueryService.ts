@@ -1,11 +1,11 @@
 import axios from 'axios';
-import type { Period, Event, Story, ListPeriod, ListEvent, ListStory } from '../types/database';
+import type { Period, Event, Story, ListPeriod, ListEvent, ListStory, MultilingualText } from '../types/database';
 
 const API_BASE_URL = '/api';
 
 interface Category {
   id: string;
-  label: string;
+  label: MultilingualText;
 }
 
 export class DatabaseQueryService {

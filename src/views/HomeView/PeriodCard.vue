@@ -14,7 +14,7 @@
       <div class="card-content">
         <div class="period-header">
           <div class="header-left">
-            <h3 class="period-title" :title="period.label">{{ period.label }}</h3>
+            <h3 class="period-title" :title="period.label.fr">{{ period.label.fr }}</h3>
           </div>
         </div>
 
