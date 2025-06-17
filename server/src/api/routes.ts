@@ -586,6 +586,16 @@ router.put('/periods/:id', async (req, res) => {
     // Si end_date est vide, utiliser "TODAY"
     const finalEndDate = end_date || 'TODAY';
 
+    // Vérification du format des données
+    console.log('[API] Vérification des données:');
+    console.log('- label:', label);
+    console.log('- description:', description);
+    console.log('- start_date:', start_date);
+    console.log('- end_date:', finalEndDate);
+    console.log('- children:', children);
+    console.log('- temporal_location:', temporal_location);
+    console.log('- wikidata_id:', wikidata_id);
+
     // Mise à jour de la période
     const updatePeriodQuery = `
       UPDATE periods.periods
@@ -596,7 +606,7 @@ router.put('/periods/:id', async (req, res) => {
         description_en = $4,
         start_date = NULLIF($5, ''),
         end_date = $6,
-        children = $7,
+        children = $7::jsonb,
         temporal_location = $8,
         wikidata_id = $9,
         updated_at = CURRENT_TIMESTAMP
@@ -604,32 +614,23 @@ router.put('/periods/:id', async (req, res) => {
       RETURNING *
     `;
 
-    console.log('[API] Requête SQL:', updatePeriodQuery);
-    console.log('[API] Paramètres:', [
+    const params = [
       label.fr,
       label.en || label.fr,
-      description?.fr,
-      description?.en || description?.fr,
+      description?.fr || null,
+      description?.en || description?.fr || null,
       start_date || null,
       finalEndDate,
-      children || [],
-      temporal_location,
+      JSON.stringify(children || []),
+      temporal_location || null,
       wikidata_id,
       id
-    ]);
+    ];
 
-    const result = await dbQuery(updatePeriodQuery, [
-      label.fr,
-      label.en || label.fr,
-      description?.fr,
-      description?.en || description?.fr,
-      start_date || null,
-      finalEndDate,
-      children || [],
-      temporal_location,
-      wikidata_id,
-      id
-    ]);
+    console.log('[API] Requête SQL:', updatePeriodQuery);
+    console.log('[API] Paramètres:', params);
+
+    const result = await dbQuery(updatePeriodQuery, params);
 
     if (result.rows.length === 0) {
       console.log('[API] Aucune période trouvée avec l\'ID:', id);
@@ -638,9 +639,14 @@ router.put('/periods/:id', async (req, res) => {
 
     console.log('[API] Période mise à jour:', result.rows[0]);
     res.json(result.rows[0]);
-  } catch (error) {
+  } catch (error: any) {
     console.error('[API] Erreur lors de la mise à jour de la période:', error);
-    res.status(500).json({ error: 'Erreur lors de la mise à jour de la période' });
+    console.error('[API] Stack trace:', error.stack);
+    res.status(500).json({ 
+      error: 'Erreur lors de la mise à jour de la période',
+      details: error.message,
+      stack: error.stack
+    });
   }
 });
 

@@ -192,6 +192,8 @@ export class DatabaseQueryService {
   // Mise à jour d'une période
   public async updatePeriod(id: string, data: any): Promise<any> {
     try {
+      console.log('[DatabaseQueryService] Données reçues pour la mise à jour:', data);
+      
       const payload = {
         wikidata_id: data.qid,
         label: { fr: data.title.fr, en: data.title.en },
@@ -199,14 +201,25 @@ export class DatabaseQueryService {
         start_date: data.startDate,
         end_date: data.endDate,
         children: data.children || [],
-        temporal_location: data.temporalLocation,
+        temporal_location: data.location,
         categories: data.categories
       };
+      
+      console.log('[DatabaseQueryService] Payload envoyé au serveur:', payload);
       const response = await axios.put(`${API_BASE_URL}/periods/${id}`, payload);
+      console.log('[DatabaseQueryService] Réponse du serveur:', response.data);
+      
       window.showToast('Période mise à jour avec succès', 'success');
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('[DatabaseQueryService] Erreur lors de la mise à jour de la période:', error);
+      if (error.response) {
+        console.error('[DatabaseQueryService] Détails de l\'erreur:', {
+          status: error.response.status,
+          data: error.response.data,
+          headers: error.response.headers
+        });
+      }
       window.showToast('Erreur lors de la mise à jour de la période', 'error');
       throw error;
     }

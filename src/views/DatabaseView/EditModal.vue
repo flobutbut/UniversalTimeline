@@ -308,8 +308,32 @@ const handleSubmit = async () => {
       end_date: form.endDate,
       location: form.location,
       author: form.author,
-      isPublic: form.isPublic
+      isPublic: form.isPublic,
+      children: [] as string[]
+    } as {
+      type: 'period' | 'event' | 'story';
+      label: string;
+      wikidata_id: string;
+      start_date: string;
+      end_date: string;
+      location: string;
+      author: string;
+      isPublic: boolean;
+      children: string[];
+      qid: string;
+      title: { fr: string; en: string };
+      description: { fr: string; en: string };
+      startDate: string;
+      endDate: string;
+      date: string;
+      parentId: string | null;
     };
+
+    // Conserver les enfants existants si nous sommes en mode édition
+    if (props.mode === 'edit' && props.data && Array.isArray(props.data.children)) {
+      formData.children = props.data.children;
+    }
+
     if ('id' in formData) {
       delete formData.id;
     }
