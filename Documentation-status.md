@@ -578,3 +578,14 @@ Le projet est stable et prêt pour le nettoyage final avant d'autres évolutions
 - Les sauvegardes de base de données sont maintenant plus robustes grâce aux UUIDs
 - La réplication de base de données est simplifiée
 - Les conflits d'IDs sont éliminés 
+
+## Dernières modifications
+- Correction de la gestion des relations entre périodes lors de la modification d'un Q-id Wikidata
+- Amélioration de la gestion des erreurs dans l'interface de modification
+- Ajout de logs pour faciliter le débogage
+- Optimisation de la synchronisation entre le frontend et le backend
+
+## Prochaines étapes
+- Tests approfondis de la gestion des relations
+- Amélioration de la validation des données
+- Optimisation des performances

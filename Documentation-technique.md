@@ -911,3 +911,24 @@ Les tables de liaison suivantes possèdent des contraintes d'unicité pour évit
 - `stories.story_periods` : Contrainte `story_periods_story_period_unique` sur `(story_id, period_id)`
 
 Ces contraintes permettent l'utilisation de la clause `ON CONFLICT` dans les requêtes d'ajout d'événements et de périodes aux stories.
+
+## Gestion des relations entre périodes
+
+### Mise à jour des relations
+- Lors de la modification d'une période, si le Q-id Wikidata change, le système met à jour automatiquement les relations
+- Le processus suit ces étapes :
+  1. Mise à jour des données de base de la période
+  2. Récupération de l'UUID de la nouvelle période via son Q-id Wikidata
+  3. Mise à jour des relations en utilisant les UUIDs internes
+  4. Rechargement des données pour refléter les changements
+
+### Routes API utilisées
+- `PATCH /periods/:id` : Mise à jour des données de base
+- `GET /periods/wikidata/:wikidataId` : Récupération d'une période par son Q-id Wikidata
+- `PATCH /periods/:id/children` : Mise à jour des enfants d'une période
+- `PATCH /periods/:id/has_parent` : Mise à jour du statut de parent
+
+### Gestion des erreurs
+- Vérification de l'existence de la période avant toute modification
+- Gestion des cas où le Q-id Wikidata n'existe pas
+- Messages d'erreur explicites pour guider l'utilisateur

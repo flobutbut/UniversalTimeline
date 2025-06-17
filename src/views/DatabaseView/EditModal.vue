@@ -310,23 +310,6 @@ const handleSubmit = async () => {
       author: form.author,
       isPublic: form.isPublic,
       children: [] as string[]
-    } as {
-      type: 'period' | 'event' | 'story';
-      label: string;
-      wikidata_id: string;
-      start_date: string;
-      end_date: string;
-      location: string;
-      author: string;
-      isPublic: boolean;
-      children: string[];
-      qid: string;
-      title: { fr: string; en: string };
-      description: { fr: string; en: string };
-      startDate: string;
-      endDate: string;
-      date: string;
-      parentId: string | null;
     };
 
     // Conserver les enfants existants si nous sommes en mode édition
@@ -337,7 +320,11 @@ const handleSubmit = async () => {
     if ('id' in formData) {
       delete formData.id;
     }
+
+    // Émettre l'événement submit avant de fermer la modale
     emit('submit', formData);
+    // Attendre un peu pour s'assurer que l'événement est traité
+    await new Promise(resolve => setTimeout(resolve, 100));
     closeModal();
   } catch (error) {
     window.showToast('Erreur lors de la soumission du formulaire', 'error');

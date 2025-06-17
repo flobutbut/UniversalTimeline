@@ -388,17 +388,29 @@ function closeEditModal() {
 
 async function handleEditSubmit(formData: any) {
   try {
-    if (!selectedPeriod.value) return;
+    console.log('[GraphView] Données reçues:', { formData, selectedPeriod: selectedPeriod.value });
+    
+    if (!selectedPeriod.value) {
+      throw new Error('Aucune période sélectionnée');
+    }
     
     const oldId = selectedPeriod.value.id;
-    const newId = formData.qid;
+    const newQid = formData.qid;
+    
+    console.log('[GraphView] IDs:', { oldId, newQid, currentWikidataId: selectedPeriod.value.wikidata_id });
     
     // Mise à jour de la période via le service de requête
     await databaseQueryService.updatePeriod(selectedPeriod.value.id, formData);
     
     // Si le Q-id a changé, mettre à jour les relations
-    if (oldId !== newId) {
-      await databaseQueryService.updatePeriodRelations(oldId, newId);
+    if (selectedPeriod.value.wikidata_id !== newQid) {
+      console.log('[GraphView] Q-id modifié, mise à jour des relations');
+      // Récupérer l'UUID de la nouvelle période
+      const newPeriod = await databaseQueryService.getPeriodByWikidataId(newQid);
+      if (!newPeriod) {
+        throw new Error('Nouvelle période non trouvée');
+      }
+      await databaseQueryService.updatePeriodRelations(oldId, newPeriod.id);
     }
     
     // Rechargement des données
@@ -407,7 +419,7 @@ async function handleEditSubmit(formData: any) {
     window?.showToast?.('Période mise à jour avec succès', 'success');
   } catch (error) {
     console.error('[GraphView] Erreur lors de la mise à jour:', error);
-    window?.showToast?.('Erreur lors de la mise à jour de la période', 'error');
+    window?.showToast?.(error instanceof Error ? error.message : 'Erreur lors de la mise à jour de la période', 'error');
   }
 }
 

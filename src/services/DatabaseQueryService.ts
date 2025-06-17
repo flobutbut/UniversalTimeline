@@ -231,9 +231,35 @@ export class DatabaseQueryService {
 
   async updatePeriodRelations(oldId: string, newId: string): Promise<void> {
     try {
-      await axios.put(`${API_BASE_URL}/periods/${oldId}/relations`, { newId });
+      // Récupérer l'UUID de la période à partir de son ID Wikidata
+      const oldPeriod = await this.getPeriodByWikidataId(oldId);
+      const newPeriod = await this.getPeriodByWikidataId(newId);
+
+      if (!oldPeriod || !newPeriod) {
+        throw new Error('Période non trouvée');
+      }
+
+      // Mettre à jour has_parent
+      await this.updateHasParent(oldPeriod.id, true);
+      
+      // Mettre à jour les enfants
+      const children = oldPeriod.children || [];
+      await this.updateChildren(newPeriod.id, children);
     } catch (error: any) {
       console.error(`[DatabaseQueryService] Erreur lors de la mise à jour des relations:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Récupère une période par son ID Wikidata
+   */
+  public async getPeriodByWikidataId(wikidataId: string): Promise<Period | null> {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/periods/wikidata/${wikidataId}`);
+      return response.data;
+    } catch (error) {
+      console.error('[DatabaseQueryService] Erreur lors de la récupération de la période par ID Wikidata:', error);
       throw error;
     }
   }

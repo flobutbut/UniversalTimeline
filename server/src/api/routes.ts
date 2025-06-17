@@ -969,4 +969,72 @@ router.patch('/periods/:id/has_parent', async (req, res) => {
   }
 });
 
+// Route pour obtenir une période par son ID Wikidata
+router.get('/periods/wikidata/:wikidataId', async (req, res) => {
+  try {
+    const { wikidataId } = req.params;
+    console.log(`[API] Récupération de la période avec l'ID Wikidata ${wikidataId}`);
+
+    const sqlQuery = `
+      SELECT 
+        p.id,
+        p.wikidata_id,
+        p.label_fr,
+        p.label_en,
+        p.description_fr,
+        p.description_en,
+        p.start_date,
+        p.end_date,
+        p.has_parent,
+        p.children,
+        p.temporal_location,
+        c.label_fr as category_label
+      FROM periods.periods p
+      LEFT JOIN categories.period_categories pc ON p.id = pc.period_id
+      LEFT JOIN categories.categories c ON pc.category_id = c.id
+      WHERE p.wikidata_id = $1
+    `;
+
+    const result = await dbQuery(sqlQuery, [wikidataId]);
+
+    if (result.rows.length === 0) {
+      console.log(`[API] Période avec l'ID Wikidata ${wikidataId} non trouvée`);
+      return res.status(404).json({ error: 'Période non trouvée' });
+    }
+
+    const period = {
+      id: result.rows[0].id,
+      wikidata_id: result.rows[0].wikidata_id,
+      label: {
+        fr: result.rows[0].label_fr,
+        en: result.rows[0].label_en || result.rows[0].label_fr
+      },
+      description: result.rows[0].description_fr ? {
+        fr: result.rows[0].description_fr,
+        en: result.rows[0].description_en || result.rows[0].description_fr
+      } : undefined,
+      startDate: result.rows[0].start_date,
+      endDate: result.rows[0].end_date,
+      hasParent: result.rows[0].has_parent,
+      children: result.rows[0].children || [],
+      temporalLocation: result.rows[0].temporal_location,
+      categories: result.rows[0].category_label ? [{
+        id: result.rows[0].category_id,
+        label: {
+          fr: result.rows[0].category_label,
+          en: result.rows[0].category_label
+        }
+      }] : [],
+      createdAt: result.rows[0].created_at,
+      updatedAt: result.rows[0].updated_at
+    };
+
+    console.log(`[API] Période avec l'ID Wikidata ${wikidataId} trouvée:`, period);
+    res.json(period);
+  } catch (error) {
+    console.error('[API] Erreur lors de la récupération de la période par ID Wikidata:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération de la période' });
+  }
+});
+
 export default router; 
