@@ -190,29 +190,33 @@ export class DatabaseQueryService {
   }
 
   // Mise à jour d'une période
-  public async updatePeriod(id: string, data: any): Promise<any> {
+  public async updatePeriod(periodId: string, data: any): Promise<Period> {
     try {
-      console.log('[DatabaseQueryService] Données reçues pour la mise à jour:', data);
-      
+      // Formatage des données pour correspondre à l'API
       const payload = {
         wikidata_id: data.qid,
-        label: { fr: data.title.fr, en: data.title.en },
-        description: { fr: data.description.fr, en: data.description.en },
+        label: {
+          fr: data.title.fr,
+          en: data.title.en
+        },
+        description: {
+          fr: data.description.fr,
+          en: data.description.en
+        },
         start_date: data.startDate,
         end_date: data.endDate,
         children: data.children || [],
         temporal_location: data.location,
         categories: data.categories
       };
-      
+
       console.log('[DatabaseQueryService] Payload envoyé au serveur:', payload);
-      const response = await axios.put(`${API_BASE_URL}/periods/${id}`, payload);
+      const response = await axios.put(`${API_BASE_URL}/periods/${periodId}`, payload);
       console.log('[DatabaseQueryService] Réponse du serveur:', response.data);
       
-      window.showToast('Période mise à jour avec succès', 'success');
       return response.data;
     } catch (error: any) {
-      console.error('[DatabaseQueryService] Erreur lors de la mise à jour de la période:', error);
+      console.error(`[DatabaseQueryService] Erreur lors de la mise à jour de la période:`, error);
       if (error.response) {
         console.error('[DatabaseQueryService] Détails de l\'erreur:', {
           status: error.response.status,
@@ -220,7 +224,15 @@ export class DatabaseQueryService {
           headers: error.response.headers
         });
       }
-      window.showToast('Erreur lors de la mise à jour de la période', 'error');
+      throw error;
+    }
+  }
+
+  async updatePeriodRelations(oldId: string, newId: string): Promise<void> {
+    try {
+      await axios.put(`${API_BASE_URL}/periods/${oldId}/relations`, { newId });
+    } catch (error: any) {
+      console.error(`[DatabaseQueryService] Erreur lors de la mise à jour des relations:`, error);
       throw error;
     }
   }

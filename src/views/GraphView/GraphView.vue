@@ -390,8 +390,16 @@ async function handleEditSubmit(formData: any) {
   try {
     if (!selectedPeriod.value) return;
     
+    const oldId = selectedPeriod.value.id;
+    const newId = formData.qid;
+    
     // Mise à jour de la période via le service de requête
     await databaseQueryService.updatePeriod(selectedPeriod.value.id, formData);
+    
+    // Si le Q-id a changé, mettre à jour les relations
+    if (oldId !== newId) {
+      await databaseQueryService.updatePeriodRelations(oldId, newId);
+    }
     
     // Rechargement des données
     await databaseViewService.loadListData();
