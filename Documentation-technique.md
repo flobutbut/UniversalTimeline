@@ -171,6 +171,18 @@ interface MultilingualText {
 - `ArrowIcon.vue` : Icône de flèche
 - `Favicon.vue` : Favicon
 
+### GraphView.vue
+- Gestion de l'affichage en colonnes
+- Gestion des sélections
+- Gestion du drag & drop
+- Gestion des modales d'édition et de création
+
+### FinderItem.vue
+- Affichage d'une période
+- Gestion du drag & drop
+- Gestion des actions (édition)
+- Indication visuelle des enfants (chevron)
+
 ## API Endpoints
 
 ### Périodes

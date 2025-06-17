@@ -7,30 +7,41 @@
         class="finder-column"
         v-for="(col, colIdx) in columns"
         :key="colIdx"
-        tabindex="0"
-        @keydown="(e) => handleKeyDown(e, colIdx)"
         @dragover.prevent="onColumnDragOver(colIdx)"
         @dragleave="onColumnDragLeave(colIdx)"
         @drop.prevent="onColumnDrop(colIdx)"
         :class="{ 'drag-over': dragOverColumnIdx === colIdx }"
       >
         <div class="finder-column-header">
-          <h2>{{ colIdx === 0 ? 'Périodes racines' : `Niveau ${colIdx + 1}` }}</h2>
+          <h2>
+            <template v-if="colIdx === 0">
+              Périodes racines
+            </template>
+            <template v-else>
+              {{ getParentLabel(colIdx) }}
+            </template>
+          </h2>
           <button class="action-button" @click="handleAddPeriod(colIdx)">Add</button>
         </div>
         <div class="finder-column-content">
-          <FinderItem
-            v-for="(item, idx) in col"
-            :key="item.id"
-            :label="item.label"
-            :selected="selectedIds[colIdx] === item.id"
-            :hasChildren="hasChildren(item.id)"
-            :itemId="item.id"
-            @click="handleSelect(item, colIdx)"
-            @dragstart="onDragStart"
-            @drop="onDrop"
-            @edit="handleEdit"
-          />
+          <template v-if="col.length > 0">
+            <FinderItem
+              v-for="(item, idx) in col"
+              :key="item.id"
+              :label="item.label"
+              :selected="selectedIds[colIdx] === item.id"
+              :hasChildren="true"
+              :hasActualChildren="hasChildren(item.id)"
+              :itemId="item.id"
+              @click="handleSelect(item, colIdx)"
+              @dragstart="onDragStart"
+              @drop="onDrop"
+              @edit="handleEdit"
+            />
+          </template>
+          <div v-else class="finder-empty-column">
+            Aucune période dans ce niveau
+          </div>
         </div>
       </div>
     </div>
@@ -113,105 +124,11 @@ const columns = computed(() => {
     // On retire ceux déjà utilisés dans une colonne précédente
     children = children.filter(p => !usedIds.has(p.id));
     children.forEach(p => usedIds.add(p.id));
-    if (children.length > 0) {
-      cols.push(children);
-      currentLevel = children;
-    } else {
-      break;
-    }
+    cols.push(children);
+    currentLevel = children;
   }
   return cols;
 });
-
-function handleKeyDown(event: KeyboardEvent, colIdx: number) {
-  const col = columns.value[colIdx];
-  if (!col) return;
-
-  const currentSelectedId = selectedIds.value[colIdx];
-  let currentIndex = currentSelectedId ? col.findIndex(item => item.id === currentSelectedId) : -1;
-  
-  if (currentIndex === -1) {
-    currentIndex = 0;
-    const firstItem = col[0];
-    if (firstItem) {
-      selectedIds.value = selectedIds.value.slice(0, colIdx);
-      selectedIds.value[colIdx] = firstItem.id;
-    }
-  }
-
-  if (event.key === 'ArrowDown') {
-    const newIndex = Math.min(currentIndex + 1, col.length - 1);
-    const newItem = col[newIndex];
-    if (newItem) {
-      selectedIds.value = selectedIds.value.slice(0, colIdx);
-      selectedIds.value[colIdx] = newItem.id;
-      nextTick(() => {
-        const colEl = document.querySelectorAll('.finder-column')[colIdx];
-        if (colEl) {
-          const items = colEl.querySelectorAll('.finder-item');
-          const selectedItem = Array.from(items).find(
-            el => el.getAttribute('aria-selected') === 'true'
-          );
-          if (selectedItem) (selectedItem as HTMLElement).focus();
-        }
-      });
-    }
-    event.preventDefault();
-  } else if (event.key === 'ArrowUp') {
-    const newIndex = Math.max(currentIndex - 1, 0);
-    const newItem = col[newIndex];
-    if (newItem) {
-      selectedIds.value = selectedIds.value.slice(0, colIdx);
-      selectedIds.value[colIdx] = newItem.id;
-      nextTick(() => {
-        const colEl = document.querySelectorAll('.finder-column')[colIdx];
-        if (colEl) {
-          const items = colEl.querySelectorAll('.finder-item');
-          const selectedItem = Array.from(items).find(
-            el => el.getAttribute('aria-selected') === 'true'
-          );
-          if (selectedItem) (selectedItem as HTMLElement).focus();
-        }
-      });
-    }
-    event.preventDefault();
-  } else if (event.key === 'Enter' || event.key === 'ArrowRight') {
-    const currentItem = col[currentIndex];
-    if (currentItem) {
-      selectedIds.value = selectedIds.value.slice(0, colIdx + 1);
-      selectedIds.value[colIdx] = currentItem.id;
-      if (event.key === 'ArrowRight' && hasChildren(currentItem.id)) {
-        nextTick(() => {
-          focusColumn(colIdx + 1);
-        });
-      }
-    }
-    event.preventDefault();
-  } else if (event.key === 'ArrowLeft') {
-    if (colIdx > 0) {
-      selectedIds.value = selectedIds.value.slice(0, colIdx);
-      focusColumn(colIdx - 1);
-    }
-    event.preventDefault();
-  }
-}
-
-function focusColumn(colIdx: number) {
-  nextTick(() => {
-    const col = document.querySelectorAll('.finder-column')[colIdx];
-    if (col) {
-      const items = col.querySelectorAll('.finder-item');
-      const selectedId = selectedIds.value[colIdx];
-      let selectedItem = Array.from(items).find(
-        el => el.getAttribute('aria-selected') === 'true'
-      );
-      if (!selectedItem && items.length > 0) {
-        selectedItem = items[0];
-      }
-      if (selectedItem) (selectedItem as HTMLElement).focus();
-    }
-  });
-}
 
 const handleSelect = async (period: ApiPeriod, colIdx: number) => {
   selectedIds.value = selectedIds.value.slice(0, colIdx);
@@ -482,9 +399,13 @@ async function handleAddSubmit(formData: any) {
   }
 }
 
-onMounted(() => {
-  focusColumn(0);
-});
+function getParentLabel(colIdx: number): string {
+  if (colIdx === 0) return 'Périodes racines';
+  const parentId = selectedIds.value[colIdx - 1];
+  if (!parentId) return `Niveau ${colIdx + 1}`;
+  const parent = allPeriods.value.find(p => p.id === parentId);
+  return parent ? parent.label.fr : `Niveau ${colIdx + 1}`;
+}
 </script>
 
 <style scoped>
@@ -521,12 +442,16 @@ onMounted(() => {
   max-width: 320px;
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
-  padding: var(--spacing-md) 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
   height: 100%;
   box-sizing: border-box;
+  outline: none;
+}
+
+.finder-column:focus {
+  outline: none;
 }
 
 .finder-column-header {
@@ -534,7 +459,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-sm);
-  padding: 0 var(--spacing-md) var(--spacing-sm);
+  padding: var(--spacing-md);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -675,6 +600,14 @@ onMounted(() => {
 
 .finder-column.drag-over {
   background: var(--color-primary-light);
+}
+
+.finder-empty-column {
+  padding: var(--spacing-md);
+  color: var(--color-text-light);
+  font-style: italic;
+  text-align: center;
+  opacity: 0.5;
 }
 </style>
 

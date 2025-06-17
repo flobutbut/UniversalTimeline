@@ -350,7 +350,6 @@ L'interface s'adapte à différentes tailles d'écran :
 - Focus visible sur les éléments interactifs
 - Structure sémantique HTML
 - Support des lecteurs d'écran
-- Navigation au clavier
 - Barre de défilement personnalisée et accessible
 
 ### Affichage des Périodes
@@ -369,7 +368,6 @@ L'interface s'adapte à différentes tailles d'écran :
 ### Accessibilité
 - Contraste optimisé pour la lisibilité
 - Support du mode clair/sombre
-- Navigation au clavier
 - Messages d'état clairs
 
 ## Performance
@@ -896,3 +894,20 @@ La vue Graphique permet de visualiser les relations hiérarchiques entre les pé
 - Suivi des créations/modifications
 - Logs des erreurs
 - Statistiques d'utilisation
+
+## Navigation dans l'arborescence
+
+### Navigation à la souris
+- Cliquer sur une période pour la sélectionner
+- Les périodes enfants apparaissent dans la colonne suivante
+- Cliquer sur une période dans une colonne enfant pour voir ses propres enfants
+- Le chevron (>) indique qu'une période a des enfants
+
+### Déplacement des périodes
+- Glisser-déposer une période vers une autre pour la déplacer
+- Glisser-déposer une période vers une colonne pour la déplacer à ce niveau
+- Impossible de déplacer un parent dans un de ses propres descendants
+
+### Actions disponibles
+- Bouton "Edit" : Modifier une période
+- Bouton "Add" : Ajouter une nouvelle période dans la colonne sélectionnée
