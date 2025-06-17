@@ -169,7 +169,7 @@ import { DatabaseQueryService } from '@/services/DatabaseQueryService';
 
 const databaseService = DatabaseViewService.getInstance();
 const queryService = DatabaseQueryService.getInstance();
-const fullStories = ref<Map<number, Story>>(new Map());
+const fullStories = ref<Map<string, Story>>(new Map());
 const loading = ref(false);
 const error = ref<string | null>(null);
 
@@ -437,7 +437,7 @@ async function loadInitialData() {
     await Promise.all(
       databaseService.getStories().map(async (story) => {
         try {
-          const fullStory = await databaseService.loadFullStory(story.id);
+          const fullStory = await databaseService.loadFullStory(story.id.toString());
           fullStories.value.set(story.id, fullStory);
         } catch (error) {
           console.error(`Erreur lors du chargement de la story ${story.id}:`, error);

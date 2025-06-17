@@ -801,3 +801,98 @@ La vue Graphique permet de visualiser les relations hiérarchiques entre les pé
 ### Base de données
 - Les labels sont stockés avec leurs versions française et anglaise
 - Les requêtes API retournent toujours les deux versions des labels
+
+## Gestion des identifiants
+
+### Système d'identification
+- Chaque entité (période, événement, catégorie, story) possède un identifiant unique (UUID)
+- Les UUIDs sont générés automatiquement lors de la création
+- Les IDs Wikidata (Q-id) sont conservés comme référence externe
+- Les relations entre entités utilisent les UUIDs
+
+### Avantages du système
+- Garantie d'unicité des identifiants
+- Pas de conflit lors de la création
+- Sécurité accrue
+- Facilité de réplication de base de données
+- Possibilité de modifier les noms/labels sans impact sur les relations
+
+### Cas d'utilisation
+
+#### Création d'une période
+1. L'utilisateur remplit le formulaire
+2. Le système génère un UUID
+3. La période est créée avec :
+   - UUID généré
+   - Q-id Wikidata
+   - Labels et descriptions
+   - Dates et localisation
+   - Relations (parent/enfant)
+
+#### Création d'un événement
+1. L'utilisateur remplit le formulaire
+2. Le système génère un UUID
+3. L'événement est créé avec :
+   - UUID généré
+   - Q-id Wikidata
+   - Labels et descriptions
+   - Date
+   - Catégories
+
+#### Création d'une story
+1. L'utilisateur remplit le formulaire
+2. Le système génère un UUID
+3. La story est créée avec :
+   - UUID généré
+   - Titre et description
+   - Auteur
+   - Visibilité
+   - Périodes et événements associés
+
+### Gestion des relations
+
+#### Relations parent/enfant
+- Une période peut avoir un parent
+- Une période peut avoir plusieurs enfants
+- Les relations sont gérées via les UUIDs
+- La modification d'une relation met à jour :
+  - Le champ `hasParent` de l'enfant
+  - Le champ `children` du parent
+
+#### Relations avec les catégories
+- Les périodes et événements peuvent avoir plusieurs catégories
+- Les catégories peuvent avoir un parent
+- Les relations utilisent les UUIDs
+- La modification des catégories met à jour les relations
+
+### Gestion des erreurs
+
+#### Conflits d'IDs
+- Les conflits d'UUIDs sont impossibles (génération unique)
+- Les conflits de Q-id Wikidata sont gérés :
+  - Vérification avant création
+  - Message d'erreur explicite
+  - Option de remplacement
+
+#### Erreurs de relation
+- Vérification de l'existence des UUIDs
+- Validation des relations parent/enfant
+- Messages d'erreur explicites
+- Rollback automatique en cas d'erreur
+
+### Maintenance
+
+#### Sauvegarde
+- Les sauvegardes incluent tous les UUIDs
+- Les relations sont préservées
+- La restauration est possible sans conflit
+
+#### Migration
+- Les anciens IDs sont convertis en UUIDs
+- Les relations sont préservées
+- Les données sont cohérentes
+
+#### Monitoring
+- Suivi des créations/modifications
+- Logs des erreurs
+- Statistiques d'utilisation

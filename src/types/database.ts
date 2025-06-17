@@ -1,6 +1,6 @@
 // Types pour les données de liste
 export interface ListPeriod {
-  id: string;
+  id: string; // UUID
   label: MultilingualText;
   startDate: string;
   endDate: string;
@@ -8,14 +8,14 @@ export interface ListPeriod {
 }
 
 export interface ListEvent {
-  id: string;
+  id: string; // UUID
   label: MultilingualText;
   date: string;
   categories: Category[];
 }
 
 export interface ListStory {
-  id: number;
+  id: string; // UUID
   title: MultilingualText;
   categories: Category[];
 }
@@ -27,21 +27,21 @@ export interface MultilingualText {
 }
 
 export interface Category {
-  id: string;
+  id: string; // UUID
   label: MultilingualText;
   description?: MultilingualText;
 }
 
 // Types pour les périodes
 export interface Period {
-  id: string;
+  id: string; // UUID
   wikidata_id?: string;
   label: MultilingualText;
   description?: MultilingualText;
   startDate: string; // Format ISO 8601
   endDate: string;   // Format ISO 8601
   hasParent: boolean;  // true si l'objet a des enfants, false si c'est une feuille
-  children: string[];  // Liste des IDs des enfants directs
+  children: string[];  // Liste des UUIDs des enfants
   temporalLocation: string;
   categories: Category[];
   createdAt: Date;
@@ -50,7 +50,7 @@ export interface Period {
 
 // Types pour les événements
 export interface Event {
-  id: string;
+  id: string; // UUID
   wikidata_id?: string;
   label: MultilingualText;
   description?: MultilingualText;
@@ -62,7 +62,7 @@ export interface Event {
 
 // Types pour les stories
 export interface Story {
-  id: number;
+  id: string; // UUID
   title: MultilingualText;
   description?: MultilingualText;
   author: string;
@@ -75,11 +75,11 @@ export interface Story {
 }
 
 export interface StoryElement {
-  id: number;
-  storyId: number;
+  id: string; // UUID
+  storyId: string; // UUID
   elementType: 'period' | 'event';
-  elementId: string;
-  parentId: string | null;
+  elementId: string; // UUID
+  parentId: string | null; // UUID
   createdAt: Date;
   updatedAt: Date;
 }
@@ -103,8 +103,8 @@ export interface CreateStoryRequest {
 
 export interface AddElementToStoryRequest {
   elementType: 'period' | 'event';
-  elementId: string;
-  parentId?: string | null;
+  elementId: string; // UUID
+  parentId?: string | null; // UUID
 }
 
 export interface UpdatePeriodParentRequest {

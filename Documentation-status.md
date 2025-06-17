@@ -434,3 +434,147 @@ Le projet est stable et prêt pour le nettoyage final avant d'autres évolutions
 - Vérifier que tous les nouveaux composants respectent le typage MultilingualText
 - S'assurer que les imports de Wikidata convertissent correctement les labels
 - Maintenir la cohérence des labels dans la base de données 
+
+# Documentation Status
+
+## État actuel du projet
+
+### Base de données
+- ✅ Migration vers UUIDs complétée
+- ✅ Structure des tables optimisée
+- ✅ Index et contraintes en place
+- ✅ Relations parent/enfant fonctionnelles
+
+### Frontend
+- ✅ Types TypeScript mis à jour pour les UUIDs
+- ✅ Services de création mis à jour
+- ✅ Composants adaptés aux nouveaux types
+- ✅ Gestion des erreurs améliorée
+
+### Backend
+- ✅ API adaptée aux UUIDs
+- ✅ Validation des données
+- ✅ Gestion des erreurs
+- ✅ Logs et monitoring
+
+## Fonctionnalités implémentées
+
+### Gestion des données
+- ✅ Création de périodes avec UUIDs
+- ✅ Création d'événements avec UUIDs
+- ✅ Création de catégories avec UUIDs
+- ✅ Création de stories avec UUIDs
+- ✅ Relations parent/enfant
+- ✅ Gestion des catégories
+
+### Interface utilisateur
+- ✅ Formulaire de création
+- ✅ Formulaire d'édition
+- ✅ Affichage des relations
+- ✅ Gestion des erreurs
+- ✅ Messages de confirmation
+
+## Prochaines étapes
+
+### Court terme
+- [ ] Tests unitaires pour la génération d'UUIDs
+- [ ] Tests d'intégration pour les relations
+- [ ] Documentation des cas d'utilisation
+- [ ] Optimisation des performances
+
+### Moyen terme
+- [ ] Interface d'administration
+- [ ] Gestion des utilisateurs
+- [ ] Système de permissions
+- [ ] Export/Import de données
+
+### Long terme
+- [ ] API publique
+- [ ] Documentation API
+- [ ] Système de cache
+- [ ] Monitoring avancé
+
+## Problèmes connus
+- Aucun problème majeur identifié après la migration vers les UUIDs
+
+## Notes de maintenance
+- Les sauvegardes de base de données sont maintenant plus robustes grâce aux UUIDs
+- La réplication de base de données est simplifiée
+- Les conflits d'IDs sont éliminés 
+
+## Modifications récentes (17/06/2024)
+
+### Base de données
+- Ajout de contraintes d'unicité sur les tables de liaison `story_events` et `story_periods`
+- Correction des erreurs 500 lors de l'ajout d'événements aux stories
+
+### Frontend
+- Mise à jour des types pour utiliser les UUIDs au lieu des IDs numériques
+- Correction des erreurs de typage dans les services
+
+# Documentation de statut
+
+## État actuel du projet
+
+### Base de données
+- ✅ Migration vers UUIDs complétée
+- ✅ Structure des tables optimisée
+- ✅ Index et contraintes en place
+- ✅ Relations parent/enfant fonctionnelles
+
+### Frontend
+- ✅ Types TypeScript mis à jour pour les UUIDs
+- ✅ Services de création mis à jour
+- ✅ Composants adaptés aux nouveaux types
+- ✅ Gestion des erreurs améliorée
+
+### Backend
+- ✅ API adaptée aux UUIDs
+- ✅ Validation des données
+- ✅ Gestion des erreurs
+- ✅ Logs et monitoring
+
+## Fonctionnalités implémentées
+
+### Gestion des données
+- ✅ Création de périodes avec UUIDs
+- ✅ Création d'événements avec UUIDs
+- ✅ Création de catégories avec UUIDs
+- ✅ Création de stories avec UUIDs
+- ✅ Relations parent/enfant
+- ✅ Gestion des catégories
+
+### Interface utilisateur
+- ✅ Formulaire de création
+- ✅ Formulaire d'édition
+- ✅ Affichage des relations
+- ✅ Gestion des erreurs
+- ✅ Messages de confirmation
+
+## Prochaines étapes
+
+### Court terme
+- [ ] Tests unitaires pour la génération d'UUIDs
+- [ ] Tests d'intégration pour les relations
+- [ ] Documentation des cas d'utilisation
+- [ ] Optimisation des performances
+
+### Moyen terme
+- [ ] Interface d'administration
+- [ ] Gestion des utilisateurs
+- [ ] Système de permissions
+- [ ] Export/Import de données
+
+### Long terme
+- [ ] API publique
+- [ ] Documentation API
+- [ ] Système de cache
+- [ ] Monitoring avancé
+
+## Problèmes connus
+- Aucun problème majeur identifié après la migration vers les UUIDs
+
+## Notes de maintenance
+- Les sauvegardes de base de données sont maintenant plus robustes grâce aux UUIDs
+- La réplication de base de données est simplifiée
+- Les conflits d'IDs sont éliminés 

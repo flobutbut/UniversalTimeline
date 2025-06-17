@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { Period, Event, Story, ListPeriod, ListEvent, ListStory, MultilingualText } from '../types/database';
+import { generateUUID } from '../utils/uuid';
 
 const API_BASE_URL = '/api';
 
@@ -167,7 +168,7 @@ export class DatabaseQueryService {
   public async createPeriod(data: any): Promise<any> {
     try {
       const payload = {
-        id: data.qid,
+        id: generateUUID(),
         wikidata_id: data.qid,
         label: { fr: data.title.fr, en: data.title.en },
         description: { fr: data.description.fr, en: data.description.en },
@@ -241,19 +242,17 @@ export class DatabaseQueryService {
   public async createEvent(data: any): Promise<any> {
     try {
       const payload = {
-        id: data.qid,
+        id: generateUUID(),
         wikidata_id: data.qid,
-        label: { fr: data.title.fr, en: data.title.en },
-        description: { fr: data.description.fr, en: data.description.en },
+        label: { fr: data.title, en: data.title },
+        description: { fr: data.description, en: data.description },
         date: data.date,
       };
       const response = await axios.post(`${API_BASE_URL}/events`, payload);
       window.showToast('Événement créé avec succès', 'success');
       return response.data;
     } catch (error: any) {
-      if (error?.response?.status === 409 || 
-          error?.response?.data?.code === '23505' || 
-          (error?.response?.data?.message && error.response.data.message.includes('duplicate'))) {
+      if (error?.response?.data?.code === '23505' || (error?.response?.data?.message && error.response.data.message.includes('duplicate'))) {
         window.showToast('Un événement avec ce Q-id existe déjà dans la base.', 'error');
       } else {
         window.showToast('Erreur lors de la création de l\'événement', 'error');
@@ -291,7 +290,7 @@ export class DatabaseQueryService {
     }
   }
 
-  public async getStory(storyId: number): Promise<Story> {
+  public async getStory(storyId: string): Promise<Story> {
     try {
       const response = await fetch(`/api/stories/${storyId}`);
       if (!response.ok) {
@@ -486,7 +485,7 @@ export class DatabaseQueryService {
     }
   }
 
-  public async updateStory(storyId: number, storyData: any): Promise<Story> {
+  public async updateStory(storyId: string, storyData: any): Promise<Story> {
     try {
       const response = await fetch(`/api/stories/${storyId}`, {
         method: 'PUT',
@@ -592,7 +591,7 @@ export class DatabaseQueryService {
     }
   }
 
-  public async getStoryEvents(storyId: number): Promise<Event[]> {
+  public async getStoryEvents(storyId: string): Promise<Event[]> {
     try {
       const response = await fetch(`/api/stories/${storyId}/events`);
       

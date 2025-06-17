@@ -132,7 +132,7 @@ export class DatabaseViewService {
     }
   }
 
-  public async loadFullStory(storyId: number): Promise<Story> {
+  public async loadFullStory(storyId: string): Promise<Story> {
     try {
       // Appel à l'API de détail pour récupérer toutes les infos de la story
       const story = await this.databaseQueryService.getStory(storyId);

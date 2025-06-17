@@ -75,14 +75,14 @@ Le projet est divisé en deux parties principales :
 
 ```typescript
 interface Period {
-  id: string;              // Identifiant unique
+  id: string;              // UUID unique
   wikidataId: string;      // Identifiant Wikidata
   label: MultilingualText; // Label multilingue
   description?: MultilingualText; // Description multilingue
   startDate: string;       // Date de début
   endDate: string;         // Date de fin
   hasParent: boolean;      // Indique si la période a un parent
-  children: string[];      // IDs des périodes enfants
+  children: string[];      // UUIDs des périodes enfants
   temporalLocation: string; // Localisation temporelle
   categories: Category[];   // Catégories associées
   createdAt: Date;         // Date de création
@@ -90,7 +90,7 @@ interface Period {
 }
 
 interface Event {
-  id: string;              // Identifiant unique
+  id: string;              // UUID unique
   wikidataId: string;      // Identifiant Wikidata
   label: MultilingualText; // Label multilingue
   description?: MultilingualText; // Description multilingue
@@ -101,10 +101,23 @@ interface Event {
 }
 
 interface Category {
-  id: string;              // Identifiant unique
+  id: string;              // UUID unique
   label: MultilingualText; // Label multilingue
   description?: MultilingualText; // Description multilingue
-  parentId?: string | null; // ID de la catégorie parente
+  parentId?: string | null; // UUID de la catégorie parente
+}
+
+interface Story {
+  id: string;              // UUID unique
+  title: MultilingualText; // Titre multilingue
+  description?: MultilingualText; // Description multilingue
+  author: string;          // Auteur
+  isPublic: boolean;       // Visibilité publique
+  categories: Category[];   // Catégories associées
+  periods: Period[];       // Périodes associées
+  events: Event[];         // Événements associés
+  createdAt: Date;         // Date de création
+  updatedAt: Date;         // Date de mise à jour
 }
 
 interface MultilingualText {
@@ -113,12 +126,21 @@ interface MultilingualText {
 }
 ```
 
-#### Gestion des relations parent/enfant
+### Gestion des IDs
+- Tous les IDs sont des UUIDs (Universally Unique Identifiers)
+- Génération via la fonction `generateUUID()` du module `uuid`
+- Avantages :
+  - Unicité garantie
+  - Pas de conflit lors de la création
+  - Sécurité accrue
+  - Facilité de réplication
+- Les IDs Wikidata (Q-id) sont conservés comme référence externe
+
+### Gestion des relations parent/enfant
 - **Enfant** : champ `hasParent` (boolean)
-- **Parent** : champ `children` (array d'IDs)
-- Il n'y a plus de champ `parentId`.
-- Pour rattacher/détacher une période, il faut mettre à jour le champ `children` du parent et le champ `hasParent` de l'enfant.
-- La mise à jour du champ `children` remplace complètement la liste (pas de fusion avec les enfants existants).
+- **Parent** : champ `children` (array d'UUIDs)
+- Pour rattacher/détacher une période, il faut mettre à jour le champ `children` du parent et le champ `hasParent` de l'enfant
+- La mise à jour du champ `children` remplace complètement la liste (pas de fusion avec les enfants existants)
 
 ## Services
 
@@ -879,3 +901,13 @@ const label: string = "Paléogène";
 - `BackButton`
 - Tous les composants d'édition
 - Tous les composants d'affichage de périodes et d'événements
+
+## Contraintes d'unicité
+
+### Tables de liaison
+Les tables de liaison suivantes possèdent des contraintes d'unicité pour éviter les doublons :
+
+- `stories.story_events` : Contrainte `story_events_story_event_unique` sur `(story_id, event_id)`
+- `stories.story_periods` : Contrainte `story_periods_story_period_unique` sur `(story_id, period_id)`
+
+Ces contraintes permettent l'utilisation de la clause `ON CONFLICT` dans les requêtes d'ajout d'événements et de périodes aux stories.

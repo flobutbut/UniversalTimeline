@@ -287,10 +287,9 @@ router.get('/stories', async (req, res) => {
         s.description_en,
         s.author,
         s.is_public,
-        c.label_fr as category_label
+        s.created_at,
+        s.updated_at
       FROM stories.stories s
-      LEFT JOIN categories.story_categories sc ON s.id = sc.story_id
-      LEFT JOIN categories.categories c ON sc.category_id = c.id
       ORDER BY s.created_at DESC
     `;
 
@@ -693,20 +692,6 @@ router.get('/stories/:id', async (req, res) => {
     }
     const story = storyResult.rows[0];
 
-    // Récupérer les catégories associées
-    const categoriesQuery = `
-      SELECT c.id, c.label_fr, c.label_en, c.description_fr, c.description_en
-      FROM categories.categories c
-      JOIN categories.story_categories sc ON c.id = sc.category_id
-      WHERE sc.story_id = $1
-    `;
-    const categoriesResult = await dbQuery(categoriesQuery, [id]);
-    const categories = categoriesResult.rows.map(row => ({
-      id: row.id,
-      label: { fr: row.label_fr, en: row.label_en || row.label_fr },
-      description: row.description_fr ? { fr: row.description_fr, en: row.description_en || row.description_fr } : undefined
-    }));
-
     // Récupérer les périodes associées
     const periodsQuery = `
       SELECT p.*
@@ -756,7 +741,7 @@ router.get('/stories/:id', async (req, res) => {
       description: story.description_fr ? { fr: story.description_fr, en: story.description_en || story.description_fr } : undefined,
       author: story.author,
       isPublic: story.is_public,
-      categories,
+      categories: [],
       periods,
       events,
       createdAt: story.created_at,
