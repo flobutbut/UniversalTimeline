@@ -87,6 +87,17 @@
             </div>
           </div>
 
+          <div class="form-row" v-if="type === 'event'">
+            <div class="form-group full-width">
+              <Input
+                v-model="form.date"
+                label="Date (brute)"
+                placeholder="Date brute (ex: 2024-06-18, -65 000 000, etc.)"
+                required
+              />
+            </div>
+          </div>
+
           <div class="form-row">
             <div class="form-group full-width">
               <Input
