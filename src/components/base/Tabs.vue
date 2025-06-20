@@ -19,17 +19,11 @@
 
 <script setup lang="ts" generic="T extends string">
 import { Icon } from '@iconify/vue';
-
-interface Tab {
-  label: string;
-  value: T;
-  icon?: string;
-  disabled?: boolean;
-}
+import type { Tab } from '@/types/global';
 
 defineProps<{
   modelValue: T;
-  tabs: Tab[];
+  tabs: Tab<T>[];
   vertical?: boolean;
 }>();
 

@@ -30,6 +30,14 @@ function updatePeriods(newPeriods: ListPeriod[]) {
   periods.value = newPeriods;
 }
 
+function updateEvents(newEvents: ListEvent[]) {
+  events.value = newEvents;
+}
+
+function updateStories(newStories: ListStory[]) {
+  stories.value = newStories;
+}
+
 function resetData() {
   periods.value = [];
   events.value = [];
@@ -46,6 +54,8 @@ export function useDatabaseDataStore() {
     error,
     loadInitialData,
     updatePeriods,
+    updateEvents,
+    updateStories,
     resetData
   };
 } 
