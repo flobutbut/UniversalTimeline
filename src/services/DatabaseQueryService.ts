@@ -602,7 +602,7 @@ export class DatabaseQueryService {
   }
 
   // Méthodes pour gérer les relations stories-périodes
-  public async addPeriodToStory(storyId: number, periodId: string): Promise<void> {
+  public async addPeriodToStory(storyId: string, periodId: string): Promise<void> {
     try {
       const response = await fetch(`/api/stories/${storyId}/periods/${periodId}`, {
         method: 'POST',
@@ -620,7 +620,7 @@ export class DatabaseQueryService {
     }
   }
 
-  public async removePeriodFromStory(storyId: number, periodId: string): Promise<void> {
+  public async removePeriodFromStory(storyId: string, periodId: string): Promise<void> {
     try {
       const response = await fetch(`/api/stories/${storyId}/periods/${periodId}`, {
         method: 'DELETE',
@@ -635,7 +635,7 @@ export class DatabaseQueryService {
     }
   }
 
-  public async getStoryPeriods(storyId: number): Promise<Period[]> {
+  public async getStoryPeriods(storyId: string): Promise<Period[]> {
     try {
       const response = await fetch(`/api/stories/${storyId}/periods`);
       
@@ -652,7 +652,7 @@ export class DatabaseQueryService {
   }
 
   // Méthodes pour gérer les relations stories-événements
-  public async addEventToStory(storyId: number, eventId: string): Promise<void> {
+  public async addEventToStory(storyId: string, eventId: string): Promise<void> {
     try {
       const response = await fetch(`/api/stories/${storyId}/events/${eventId}`, {
         method: 'POST',
@@ -670,7 +670,7 @@ export class DatabaseQueryService {
     }
   }
 
-  public async removeEventFromStory(storyId: number, eventId: string): Promise<void> {
+  public async removeEventFromStory(storyId: string, eventId: string): Promise<void> {
     try {
       const response = await fetch(`/api/stories/${storyId}/events/${eventId}`, {
         method: 'DELETE',

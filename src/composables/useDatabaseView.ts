@@ -183,14 +183,14 @@ export function useDatabaseView() {
 
     try {
       if (dragDropState.value.draggedItem.type === 'period') {
-        await queryService.addPeriodToStory(Number(selectedStory.value.id), dragDropState.value.draggedItem.data.id);
+        await queryService.addPeriodToStory(selectedStory.value.id, dragDropState.value.draggedItem.data.id);
         // Recharger les données de la story
         const updatedStory = await databaseService.loadFullStory(selectedStory.value.id);
         fullStories.value.set(selectedStory.value.id, updatedStory);
         selectedStory.value = updatedStory;
         window.showToast('Période ajoutée à la story avec succès', 'success');
       } else if (dragDropState.value.draggedItem.type === 'event') {
-        await queryService.addEventToStory(Number(selectedStory.value.id), dragDropState.value.draggedItem.data.id);
+        await queryService.addEventToStory(selectedStory.value.id, dragDropState.value.draggedItem.data.id);
         // Recharger les données de la story
         const updatedStory = await databaseService.loadFullStory(selectedStory.value.id);
         fullStories.value.set(selectedStory.value.id, updatedStory);

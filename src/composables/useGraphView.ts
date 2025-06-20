@@ -29,7 +29,8 @@ export function useGraphView() {
     periods,
     loading: sharedLoading,
     error: sharedError,
-    loadInitialData: sharedLoadInitialData
+    loadInitialData: sharedLoadInitialData,
+    updatePeriods: sharedUpdatePeriods
   } = useDatabaseDataStore();
 
   // États réactifs propres à la vue
@@ -124,24 +125,33 @@ export function useGraphView() {
 
         const updatedPeriods = [...allPeriods.value];
         childrenDetails.forEach((childData: ApiPeriod) => {
+          // Transformer ApiPeriod en ListPeriod
+          const listPeriod = {
+            id: childData.id,
+            label: childData.label,
+            startDate: childData.startDate,
+            endDate: childData.endDate,
+            categories: childData.categories || []
+          };
+          
           const existingIndex = updatedPeriods.findIndex(p => p.id === childData.id);
           if (existingIndex !== -1) {
             updatedPeriods[existingIndex] = {
               ...updatedPeriods[existingIndex],
-              ...childData,
-              label: childData.label,
-              hasParent: childData.hasParent
+              ...listPeriod,
+              hasParent: childData.hasParent,
+              children: childData.children || []
             };
           } else {
             updatedPeriods.push({
-              ...childData,
-              label: childData.label,
-              hasParent: childData.hasParent
+              ...listPeriod,
+              hasParent: childData.hasParent,
+              children: childData.children || []
             });
           }
         });
 
-        databaseViewService.setPeriods([...updatedPeriods]);
+        sharedUpdatePeriods([...updatedPeriods]);
       } catch (error) {
         console.error('[GraphView] Erreur lors du chargement des enfants:', error);
       }

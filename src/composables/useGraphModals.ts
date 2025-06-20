@@ -19,13 +19,19 @@ export function useGraphModals() {
     try {
       loading.value = true;
       
-      // Utiliser le service pour charger les données complètes
-      const fullPeriod = await databaseViewService.loadFullPeriod(itemId);
+      // Charger directement depuis l'API pour avoir toutes les données
+      const response = await fetch(`/api/periods/${itemId}`);
+      if (!response.ok) {
+        throw new Error(`Erreur lors du chargement de la période ${itemId}`);
+      }
+      
+      const periodData = await response.json();
+      
       // Convertir les dates en string si nécessaire
       selectedPeriod.value = {
-        ...fullPeriod,
-        createdAt: fullPeriod.createdAt?.toISOString(),
-        updatedAt: fullPeriod.updatedAt?.toISOString()
+        ...periodData,
+        createdAt: periodData.createdAt?.toISOString(),
+        updatedAt: periodData.updatedAt?.toISOString()
       };
       showEditModal.value = true;
     } catch (error: any) {

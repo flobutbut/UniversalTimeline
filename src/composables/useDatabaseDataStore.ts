@@ -26,6 +26,10 @@ async function loadInitialData() {
   }
 }
 
+function updatePeriods(newPeriods: ListPeriod[]) {
+  periods.value = newPeriods;
+}
+
 function resetData() {
   periods.value = [];
   events.value = [];
@@ -41,6 +45,7 @@ export function useDatabaseDataStore() {
     loading,
     error,
     loadInitialData,
+    updatePeriods,
     resetData
   };
 } 
