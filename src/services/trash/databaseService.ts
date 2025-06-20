@@ -4,7 +4,7 @@ import type {
   Event,
   CreateStoryRequest,
   Category
-} from '../types/database';
+} from '../../types/database';
 
 export interface DatabaseConfig {
   host: string;

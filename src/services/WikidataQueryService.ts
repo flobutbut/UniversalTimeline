@@ -224,7 +224,7 @@ export class WikidataQueryService {
     
     return {
       id: periodId,
-      label: binding.childLabel?.value || '',
+      label: { fr: binding.childLabel?.value || '', en: binding.childLabel?.value || '' },
       description: {
         fr: '',
         en: ''

@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import PeriodGrid from '../components/PeriodGrid.vue'
+import PeriodGrid from './HomeView/PeriodGrid.vue'
 import { WikidataQueryService, StoryService } from '../services'
 import type { Period } from '../types/geological'
 

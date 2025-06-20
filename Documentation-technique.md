@@ -14,6 +14,8 @@ src/
 │   └── ...
 ├── composables/         # Composables Vue 3 (logique métier réutilisable)
 │   ├── useEditModal.ts           # Gestion des formulaires d'édition
+│   ├── useDatabaseView.ts        # Gestion de la vue DatabaseView
+│   ├── useDatabaseSave.ts        # Gestion de la sauvegarde des données
 │   ├── useWikidataImport.ts      # Import des données Wikidata
 │   └── useParentChildManagement.ts # Gestion des relations parent/enfant
 ├── services/           # Services métier
@@ -65,6 +67,62 @@ interface EditModalState {
 }
 ```
 
+### useDatabaseView
+Gère l'état et la logique de la vue DatabaseView avec gestion des modales, recherche, drag & drop et sélection de stories.
+
+**Fonctionnalités :**
+- Gestion des états de chargement et d'erreur
+- Gestion des modales d'ajout et d'édition
+- Filtrage des données par recherche
+- Gestion du drag & drop pour associer des éléments aux stories
+- Sélection et chargement des détails des stories
+
+**Interface :**
+```typescript
+interface DatabaseViewState {
+  loading: boolean;
+  error: string | null;
+  loadingDetails: boolean;
+  loadingError: string | null;
+  loadingStoryDetails: boolean;
+}
+
+interface ModalState {
+  showAddModal: boolean;
+  showEditModal: boolean;
+  currentType: 'period' | 'event' | 'story';
+  currentItem: any;
+  currentMode: 'create' | 'edit';
+}
+
+interface SearchState {
+  periodSearch: string;
+  eventSearch: string;
+}
+
+interface DragDropState {
+  draggedItem: { type: 'period' | 'event', data: any } | null;
+  isDragOver: boolean;
+}
+```
+
+### useDatabaseSave
+Gère la logique de sauvegarde des données avec retry automatique et gestion des erreurs de connexion.
+
+**Fonctionnalités :**
+- Sauvegarde des périodes, événements et stories
+- Retry automatique en cas d'erreur de connexion
+- Mise à jour optimiste des listes locales
+- Gestion des erreurs et notifications
+
+**Interface :**
+```typescript
+interface SaveResult {
+  loading: boolean;
+  handleSave: (formData: any, type: 'period' | 'event' | 'story', mode: 'create' | 'edit', item: any) => Promise<boolean>;
+}
+```
+
 ### useWikidataImport
 Gère l'import et la transformation des données depuis Wikidata.
 
@@ -93,6 +151,96 @@ Gère les relations hiérarchiques entre les éléments.
 - Détection de conflits
 - Gestion des relations parent/enfant
 - Comptage des enfants
+
+### useGraphView
+Gère l'état et la logique de la vue GraphView avec gestion des colonnes, sélection et navigation hiérarchique.
+
+**Fonctionnalités :**
+- Gestion des états de chargement et d'erreur
+- Calcul des colonnes basé sur la sélection hiérarchique
+- Gestion de la sélection des périodes
+- Chargement des enfants des périodes sélectionnées
+- Navigation dans l'arborescence des périodes
+
+**Interface :**
+```typescript
+interface GraphViewState {
+  loading: boolean;
+  error: string | null;
+}
+
+interface ModalState {
+  showEditModal: boolean;
+  showAddModal: boolean;
+  selectedPeriod: ApiPeriod | null;
+  currentColumnIdx: number | null;
+}
+
+interface SelectionState {
+  selectedIds: string[];
+  draggedItemId: string | null;
+  dragOverColumnIdx: number | null;
+}
+```
+
+### useGraphDragDrop
+Gère le drag & drop des périodes dans la vue GraphView avec validation des relations hiérarchiques.
+
+**Fonctionnalités :**
+- Déplacement de périodes entre colonnes
+- Validation des cycles dans la hiérarchie
+- Mise à jour des relations parent/enfant
+- Gestion des états de drag & drop
+
+**Interface :**
+```typescript
+interface DragDropFunctions {
+  movePeriod: (childId: string, newParentId: string | null, allPeriods: any[], isDescendant: Function) => Promise<void>;
+  onDrop: (targetItemId: string, draggedItemId: string | null, allPeriods: any[], isDescendant: Function) => Promise<void>;
+  onColumnDrop: (colIdx: number, draggedItemId: string | null, selectedIds: string[], columns: any[][], allPeriods: any[], isDescendant: Function) => Promise<void>;
+}
+```
+
+### useGraphModals
+Gère les modales d'édition et d'ajout de périodes dans la vue GraphView.
+
+**Fonctionnalités :**
+- Ouverture et fermeture des modales d'édition et d'ajout
+- Chargement des données complètes des périodes
+- Soumission des formulaires avec gestion des relations
+- Gestion des erreurs et notifications
+
+**Interface :**
+```typescript
+interface GraphModalState {
+  showEditModal: boolean;
+  showAddModal: boolean;
+  selectedPeriod: ApiPeriod | null;
+  currentColumnIdx: number | null;
+  loading: boolean;
+}
+```
+
+### useHomeNavigation
+Gère la navigation hiérarchique dans HomeView avec gestion de la pile de navigation et chargement des périodes.
+
+**Fonctionnalités :**
+- Navigation hiérarchique dans les périodes géologiques
+- Gestion de la pile de navigation (parentStack)
+- Chargement des périodes depuis Wikidata
+- Retour à la racine avec chargement de la story Planète Terre
+- Gestion des états de chargement et d'erreur
+
+**Interface :**
+```typescript
+interface HomeNavigationState {
+  loading: boolean;
+  error: string | null;
+  parentStack: Period[];
+  currentPeriod: Period | null;
+  displayedPeriods: Period[];
+}
+```
 
 ## Services
 
@@ -217,89 +365,3 @@ interface Event {
   updatedAt: Date;
 }
 ```
-
-### MultilingualText
-```typescript
-interface MultilingualText {
-  fr: string;
-  en: string;
-}
-```
-
-## Gestion des erreurs
-
-### Stratégie de gestion
-1. **Validation côté client** : Utilisation d'EditFormValidator
-2. **Gestion des conflits** : ConflictResolutionService
-3. **Retry automatique** : Pour les requêtes Wikidata
-4. **Feedback utilisateur** : Messages d'erreur explicites
-
-### Logging
-- Logs structurés avec préfixes de contexte
-- Niveaux de log appropriés (info, warn, error)
-- Informations de débogage pour le développement
-
-## Performance
-
-### Optimisations
-- **Composables réutilisables** : Évite la duplication de code
-- **Validation centralisée** : Réduction des appels de validation
-- **Gestion d'état optimisée** : Utilisation de reactive() et computed()
-- **Services singleton** : Réduction de l'instanciation
-
-### Monitoring
-- Temps de réponse des requêtes
-- Utilisation mémoire des composables
-- Performance des validations
-
-## Sécurité
-
-### Validation des données
-- Validation côté client et serveur
-- Sanitisation des entrées utilisateur
-- Protection contre les injections SQL
-
-### Gestion des conflits
-- Détection automatique des doublons
-- Résolution sécurisée des conflits
-- Audit des modifications
-
-## Tests
-
-### Stratégie de test
-- Tests unitaires pour les composables
-- Tests d'intégration pour les services
-- Tests de validation pour les formulaires
-
-### Couverture
-- Logique métier des composables
-- Validation des données
-- Gestion des erreurs
-- Résolution des conflits
-
-## Stack Technique
-- Frontend :
-  - Vue.js 3 avec Composition API
-  - TypeScript
-  - Vite
-  - CSS modulaire
-- Backend :
-  - Node.js avec Express.js
-  - TypeScript
-  - PostgreSQL
-  - Docker
-- Outils :
-  - Yarn
-  - Docker Compose
-  - pgAdmin
-
-## Configuration
-- Frontend :
-  - Vite pour le bundling
-  - TypeScript strict
-  - CSS modulaire
-  - Tests avec Vitest
-- Backend :
-  - Express.js avec TypeScript
-  - PostgreSQL avec Docker
-  - Support multilingue (fr, en) 

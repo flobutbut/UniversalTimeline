@@ -1,6 +1,6 @@
 import axios from 'axios'
-import type { SearchResult } from './WikidataSearchService'
-import { DateFormatter } from '../utils/dateFormatter'
+import type { SearchResult } from '../WikidataSearchService'
+import { DateFormatter } from '../../utils/dateFormatter'
 
 export class DatabaseImportService {
   private static instance: DatabaseImportService

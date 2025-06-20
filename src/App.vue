@@ -6,7 +6,7 @@ import PeriodGrid from '@/views/HomeView/PeriodGrid.vue'
 import DatabaseView from '@/views/DatabaseView/DatabaseView.vue'
 import GraphView from '@/views/GraphView/GraphView.vue'
 import Toast from '@/components/Toast.vue'
-import { WikidataQueryService, StoryService, GraphViewService } from '@/services'
+import { WikidataQueryService, StoryService } from '@/services'
 import type { Period } from '@/types/geological'
 
 const route = useRoute()

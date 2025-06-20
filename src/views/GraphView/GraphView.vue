@@ -1,7 +1,7 @@
 <template>
   <div class="finder-root">
-    <div v-if="loading" class="finder-loading">Chargement...</div>
-    <div v-else-if="error" class="finder-error">{{ error }}</div>
+    <div v-if="state.loading" class="finder-loading">Chargement...</div>
+    <div v-else-if="state.error" class="finder-error">{{ state.error }}</div>
     <div v-else class="finder-columns">
       <div
         class="finder-column"
@@ -10,7 +10,7 @@
         @dragover.prevent="onColumnDragOver(colIdx)"
         @dragleave="onColumnDragLeave(colIdx)"
         @drop.prevent="onColumnDrop(colIdx)"
-        :class="{ 'drag-over': dragOverColumnIdx === colIdx }"
+        :class="{ 'drag-over': selectionState.dragOverColumnIdx === colIdx }"
       >
         <div class="finder-column-header">
           <h2>
@@ -29,7 +29,7 @@
               v-for="(item, idx) in col"
               :key="item.id"
               :label="item.label"
-              :selected="selectedIds[colIdx] === item.id"
+              :selected="selectionState.selectedIds[colIdx] === item.id"
               :hasChildren="true"
               :hasActualChildren="hasChildren(item.id)"
               :itemId="item.id"
@@ -67,345 +67,108 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue';
-import { DatabaseViewService } from '@/services/DatabaseViewService';
-import { DatabaseQueryService } from '@/services/DatabaseQueryService';
+import { onMounted } from 'vue';
 import FinderItem from './FinderItem.vue';
 import Toast from '@/components/Toast.vue';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
-import type { ApiPeriod } from '@/types/geological';
+import { useGraphView } from '@/composables/useGraphView';
+import { useGraphDragDrop } from '@/composables/useGraphDragDrop';
+import { useGraphModals } from '@/composables/useGraphModals';
 
-const databaseViewService = DatabaseViewService.getInstance();
-const databaseQueryService = DatabaseQueryService.getInstance();
-const loading = ref(false);
-const error = ref<string | null>(null);
-const toast = ref<InstanceType<typeof Toast> | null>(null);
-const selectedIds = ref<string[]>([]);
-const draggedItemId = ref<string | null>(null);
-const dragOverColumnIdx = ref<number | null>(null);
-const showEditModal = ref(false);
-const selectedPeriod = ref<ApiPeriod | null>(null);
-const showAddModal = ref(false);
-const currentColumnIdx = ref<number | null>(null);
+// Utilisation des composables
+const {
+  state,
+  selectionState,
+  allPeriods,
+  columns,
+  hasChildren,
+  getParentLabel,
+  isDescendant,
+  handleSelect,
+  loadInitialData
+} = useGraphView();
 
-onMounted(async () => {
-  loading.value = true;
-  error.value = null;
-  try {
-    await databaseViewService.loadListData();
-  } catch (e: any) {
-    error.value = e?.message || 'Erreur lors du chargement des périodes';
-  } finally {
-    loading.value = false;
-  }
-});
+const {
+  onDrop: dropHandler,
+  onColumnDrop: columnDropHandler
+} = useGraphDragDrop();
 
-const allPeriods = computed(() => databaseViewService.getPeriods());
+const {
+  showEditModal,
+  showAddModal,
+  selectedPeriod,
+  currentColumnIdx,
+  loading: modalLoading,
+  handleEdit,
+  closeEditModal,
+  handleEditSubmit,
+  handleAddPeriod: addPeriodHandler,
+  closeAddModal,
+  handleAddSubmit: addSubmitHandler
+} = useGraphModals();
 
-function hasChildren(itemId: string): boolean {
-  const period = allPeriods.value.find(p => p.id === itemId);
-  return period?.children?.length > 0;
-}
+// Fonctions de drag & drop
+const onDragStart = (itemId: string) => {
+  selectionState.draggedItemId = itemId;
+};
 
-const columns = computed(() => {
-  const cols: any[][] = [];
-  const usedIds = new Set<string>();
-  // 1. Racine : objets sans parent
-  let currentLevel = allPeriods.value.filter(p => !p.hasParent);
-  currentLevel = currentLevel.filter(p => !usedIds.has(p.id));
-  currentLevel.forEach(p => usedIds.add(p.id));
-  cols.push(currentLevel);
+const onDragOver = (event: DragEvent) => {
+  event.preventDefault();
+};
 
-  for (const id of selectedIds.value) {
-    const selected = allPeriods.value.find(p => p.id === id);
-    if (!selected) break;
-    // 2. Enfants : objets dont l'ID est dans le champ children du parent sélectionné
-    let children = allPeriods.value.filter(p => Array.isArray(selected.children) && selected.children.includes(p.id));
-    // On retire ceux déjà utilisés dans une colonne précédente
-    children = children.filter(p => !usedIds.has(p.id));
-    children.forEach(p => usedIds.add(p.id));
-    cols.push(children);
-    currentLevel = children;
-  }
-  return cols;
-});
-
-const handleSelect = async (period: ApiPeriod, colIdx: number) => {
-  selectedIds.value = selectedIds.value.slice(0, colIdx);
-  selectedIds.value[colIdx] = period.id;
-
-  if (period.children && period.children.length > 0) {
-    try {
-      const childrenDetails = await Promise.all(
-        period.children.map(async (childId: string) => {
-          const response = await fetch(`/api/periods/${childId}`);
-          if (!response.ok) {
-            throw new Error(`Erreur lors du chargement de la période ${childId}`);
-          }
-          return response.json() as Promise<ApiPeriod>;
-        })
-      );
-
-      const updatedPeriods = [...allPeriods.value];
-      childrenDetails.forEach((childData: ApiPeriod) => {
-        const existingIndex = updatedPeriods.findIndex(p => p.id === childData.id);
-        if (existingIndex !== -1) {
-          updatedPeriods[existingIndex] = {
-            ...updatedPeriods[existingIndex],
-            ...childData,
-            label: childData.label,
-            hasParent: childData.hasParent
-          };
-        } else {
-          updatedPeriods.push({
-            ...childData,
-            label: childData.label,
-            hasParent: childData.hasParent
-          });
-        }
-      });
-
-      databaseViewService.setPeriods([...updatedPeriods]);
-    } catch (error) {
-      console.error('[GraphView] Erreur lors du chargement des enfants:', error);
+const onColumnDragOver = (colIdx: number) => {
+  if (selectionState.draggedItemId) {
+    const originColIdx = columns.value.findIndex(col => col.some(item => item.id === selectionState.draggedItemId));
+    if (colIdx !== originColIdx) {
+      selectionState.dragOverColumnIdx = colIdx;
+    } else {
+      selectionState.dragOverColumnIdx = null;
     }
   }
 };
 
-function onDragStart(itemId: string) {
-  draggedItemId.value = itemId;
-}
-
-function onDragOver(event: DragEvent) {
-  event.preventDefault();
-}
-
-function isDescendant(childId: string, potentialAncestorId: string): boolean {
-  const all = allPeriods.value;
-  const child = all.find(p => p.id === childId);
-  if (!child || !Array.isArray(child.children)) return false;
-  if (child.children.includes(potentialAncestorId)) return true;
-  return child.children.some((id: string) => isDescendant(id, potentialAncestorId));
-}
-
-async function movePeriod(childId: string, newParentId: string | null) {
-  if (newParentId && isDescendant(childId, newParentId)) {
-    window?.showToast?.('Impossible de déplacer un parent dans un de ses propres descendants.', 'error');
-    console.warn('[movePeriod] Opération interdite : cycle détecté');
-    return;
+const onColumnDragLeave = (colIdx: number) => {
+  if (selectionState.dragOverColumnIdx === colIdx) {
+    selectionState.dragOverColumnIdx = null;
   }
-  const all = allPeriods.value;
-  const parentOrigin = all.find(p => Array.isArray(p.children) && p.children.includes(childId));
-  const updatedPeriods = [...allPeriods.value];
+};
 
-  try {
-    // 1. Retirer du parent d'origine
-    if (parentOrigin) {
-      const newChildren = parentOrigin.children.filter((id: string) => id !== childId);
-      await databaseViewService.updateChildren(parentOrigin.id, newChildren);
-      // Mise à jour locale immédiate
-      const idx = updatedPeriods.findIndex(p => p.id === parentOrigin.id);
-      if (idx !== -1) {
-        updatedPeriods[idx] = {
-          ...updatedPeriods[idx],
-          children: newChildren
-        };
-      }
-    }
-    // 2. Ajouter au parent cible
-    if (newParentId) {
-      const parentTarget = all.find(p => p.id === newParentId);
-      if (parentTarget) {
-        const newChildren = Array.isArray(parentTarget.children) ? [...parentTarget.children] : [];
-        if (!newChildren.includes(childId)) {
-          newChildren.push(childId);
-          await databaseViewService.updateChildren(parentTarget.id, newChildren);
-          // Mise à jour locale immédiate
-          const idx = updatedPeriods.findIndex(p => p.id === newParentId);
-          if (idx !== -1) {
-            updatedPeriods[idx] = {
-              ...updatedPeriods[idx],
-              children: newChildren
-            };
-          }
-        }
-      }
-    }
-    // 3. Mettre à jour has_parent
-    const updated = await databaseViewService.updateHasParent(childId, !!newParentId);
-    console.log('[movePeriod] updateHasParent response:', updated);
-    // 4. Mettre à jour l'objet déplacé
-    const draggedIdx = updatedPeriods.findIndex(p => p.id === childId);
-    if (draggedIdx !== -1 && updated && typeof updated.has_parent !== 'undefined') {
-      updatedPeriods[draggedIdx] = {
-        ...updatedPeriods[draggedIdx],
-        hasParent: updated.has_parent
-      };
-    }
-    databaseViewService.setPeriods(updatedPeriods);
-  } catch (error) {
-    console.error('[movePeriod] Erreur lors du déplacement:', error);
-  }
-}
+const onDrop = async (targetItemId: string) => {
+  await dropHandler(targetItemId, selectionState.draggedItemId, allPeriods.value, isDescendant);
+  selectionState.draggedItemId = null;
+};
 
-async function onDrop(targetItemId: string) {
-  if (!draggedItemId.value || !targetItemId) return;
-  await movePeriod(draggedItemId.value, targetItemId);
-  draggedItemId.value = null;
-}
+const onColumnDrop = async (colIdx: number) => {
+  await columnDropHandler(
+    colIdx, 
+    selectionState.draggedItemId, 
+    selectionState.selectedIds, 
+    columns.value, 
+    allPeriods.value, 
+    isDescendant
+  );
+  selectionState.dragOverColumnIdx = null;
+  selectionState.draggedItemId = null;
+};
 
-function onColumnDragOver(colIdx: number) {
-  if (draggedItemId.value) {
-    const originColIdx = columns.value.findIndex(col => col.some(item => item.id === draggedItemId.value));
-    if (colIdx !== originColIdx) {
-      dragOverColumnIdx.value = colIdx;
-    } else {
-      dragOverColumnIdx.value = null;
-    }
-  }
-}
-
-function onColumnDragLeave(colIdx: number) {
-  if (dragOverColumnIdx.value === colIdx) {
-    dragOverColumnIdx.value = null;
-  }
-}
-
-async function onColumnDrop(colIdx: number) {
-  if (!draggedItemId.value) return;
-  const originColIdx = columns.value.findIndex(col => col.some(item => item.id === draggedItemId.value));
-  if (colIdx === originColIdx) return;
-  let newParentId: string | null = null;
-  if (colIdx === 0) {
-    newParentId = null;
-  } else {
-    newParentId = selectedIds.value[colIdx - 1] || null;
-  }
-  await movePeriod(draggedItemId.value, newParentId);
-  dragOverColumnIdx.value = null;
-  draggedItemId.value = null;
-}
-
-async function handleEdit(itemId: string) {
-  try {
-    loading.value = true;
-    error.value = null;
-    
-    // Utiliser le service pour charger les données complètes
-    const fullPeriod = await databaseViewService.loadFullPeriod(itemId);
-    // Convertir les dates en string si nécessaire
-    selectedPeriod.value = {
-      ...fullPeriod,
-      createdAt: fullPeriod.createdAt?.toISOString(),
-      updatedAt: fullPeriod.updatedAt?.toISOString()
-    };
-    showEditModal.value = true;
-  } catch (error: any) {
-    console.error('[GraphView] Erreur lors du chargement de la période:', error);
-    if (error.message?.includes('404') || error.message?.includes('Not Found')) {
-      window?.showToast?.('La période n\'a pas été trouvée dans la base de données', 'error');
-    } else {
-      window?.showToast?.('Erreur lors du chargement de la période', 'error');
-    }
-  } finally {
-    loading.value = false;
-  }
-}
-
-function closeEditModal() {
-  showEditModal.value = false;
-  selectedPeriod.value = null;
-}
-
-async function handleEditSubmit(formData: any) {
-  try {
-    console.log('[GraphView] Données reçues:', { formData, selectedPeriod: selectedPeriod.value });
-    
-    if (!selectedPeriod.value) {
-      throw new Error('Aucune période sélectionnée');
-    }
-    
-    const oldId = selectedPeriod.value.id;
-    const newQid = formData.qid;
-    
-    console.log('[GraphView] IDs:', { oldId, newQid, currentWikidataId: selectedPeriod.value.wikidata_id });
-    
-    // Mise à jour de la période via le service de requête
-    await databaseQueryService.updatePeriod(selectedPeriod.value.id, formData);
-    
-    // Si le Q-id a changé, mettre à jour les relations
-    if (selectedPeriod.value.wikidata_id !== newQid) {
-      console.log('[GraphView] Q-id modifié, mise à jour des relations');
-      // Récupérer l'UUID de la nouvelle période
-      const newPeriod = await databaseQueryService.getPeriodByWikidataId(newQid);
-      if (!newPeriod) {
-        throw new Error('Nouvelle période non trouvée');
-      }
-      await databaseQueryService.updatePeriodRelations(oldId, newPeriod.id);
-    }
-    
-    // Rechargement des données
-    await databaseViewService.loadListData();
-    closeEditModal();
-    window?.showToast?.('Période mise à jour avec succès', 'success');
-  } catch (error) {
-    console.error('[GraphView] Erreur lors de la mise à jour:', error);
-    window?.showToast?.(error instanceof Error ? error.message : 'Erreur lors de la mise à jour de la période', 'error');
-  }
-}
-
-function handleAddPeriod(colIdx: number) {
+// Fonctions de modales avec validation
+const handleAddPeriod = (colIdx: number) => {
   // Vérifier si on a besoin d'un parent et s'il est sélectionné
-  if (colIdx > 0 && !selectedIds.value[colIdx - 1]) {
+  if (colIdx > 0 && !selectionState.selectedIds[colIdx - 1]) {
     window?.showToast?.('Veuillez sélectionner un parent avant d\'ajouter une période', 'error');
     return;
   }
-  currentColumnIdx.value = colIdx;
-  showAddModal.value = true;
-}
+  addPeriodHandler(colIdx);
+};
 
-function closeAddModal() {
-  showAddModal.value = false;
-  currentColumnIdx.value = null;
-}
+const handleAddSubmit = async (formData: any) => {
+  await addSubmitHandler(formData, selectionState.selectedIds);
+};
 
-async function handleAddSubmit(formData: any) {
-  try {
-    console.log('[GraphView] Données reçues du formulaire:', JSON.stringify(formData, null, 2));
-    
-    const newPeriod = await databaseQueryService.createPeriod(formData);
-    console.log('[GraphView] Nouvelle période créée ou période existante trouvée:', newPeriod);
-    
-    // Si on est dans une colonne autre que la première, on doit lier la période au parent
-    if (currentColumnIdx.value !== null && currentColumnIdx.value > 0) {
-      const parentId = selectedIds.value[currentColumnIdx.value - 1];
-      if (parentId) {
-        console.log('[GraphView] Liaison avec le parent:', parentId);
-        await movePeriod(newPeriod.id, parentId);
-      }
-    }
-    
-    // Rechargement des données
-    await databaseViewService.loadListData();
-    closeAddModal();
-    window?.showToast?.('Période ajoutée avec succès', 'success');
-  } catch (error: any) {
-    console.error('[GraphView] Erreur lors de la création:', error);
-    if (error.response?.data?.message) {
-      window?.showToast?.(error.response.data.message, 'error');
-    } else {
-      window?.showToast?.(error instanceof Error ? error.message : 'Erreur lors de la création de la période', 'error');
-    }
-  }
-}
-
-function getParentLabel(colIdx: number): string {
-  if (colIdx === 0) return 'Périodes racines';
-  const parentId = selectedIds.value[colIdx - 1];
-  if (!parentId) return `Niveau ${colIdx + 1}`;
-  const parent = allPeriods.value.find(p => p.id === parentId);
-  return parent ? parent.label.fr : `Niveau ${colIdx + 1}`;
-}
+// Charger les données au montage du composant
+onMounted(() => {
+  loadInitialData();
+});
 </script>
 
 <style scoped>

@@ -92,6 +92,7 @@ export class StoryService {
     return {
       id: storyId,
       label: binding.itemLabel?.value || '',
+      description: { fr: '', en: '' },
       temporalData: [{
         startDate: binding.startDate?.value,
         endDate: binding.endDate?.value,
