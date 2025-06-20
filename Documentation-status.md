@@ -627,80 +627,97 @@ Le projet est stable et prêt pour le nettoyage final avant d'autres évolutions
 
 ## État actuel du projet
 
-### ✅ Fonctionnalités implémentées et testées
+### ✅ Fonctionnalités complètement implémentées
 
-#### Composants principaux
-- **HomeView.vue** : Vue principale avec timeline et grille de périodes
-- **DatabaseView.vue** : Vue de gestion de base de données (REFACTORED ✅)
-- **GraphView.vue** : Vue graphique des relations hiérarchiques
-- **EditModal.vue** : Modal d'édition/création (REFACTORED ✅)
+#### Architecture et refactoring
+- **Refactoring complet** : Extraction de la logique métier dans des composables Vue 3
+- **Store partagé** : `useDatabaseDataStore` pour mutualiser le chargement des données
+- **Services nettoyés** : Suppression des services non utilisés (déplacés dans `trash/`)
+- **Types corrigés** : Correction des types `storyId` (string au lieu de number)
+- **Documentation technique** : Diagramme Mermaid des dépendances ajouté
 
-#### Composables Vue 3 (Nouveau ✅)
-- **useEditModal.ts** : Gestion des formulaires d'édition
-- **useWikidataImport.ts** : Import des données Wikidata
-- **useParentChildManagement.ts** : Gestion des relations parent/enfant
-- **useDatabaseView.ts** : Gestion de la vue DatabaseView (NOUVEAU ✅)
-- **useDatabaseSave.ts** : Gestion de la sauvegarde des données (NOUVEAU ✅)
-- **useGraphView.ts** : Gestion de la vue GraphView (NOUVEAU ✅)
-- **useGraphDragDrop.ts** : Gestion du drag & drop dans GraphView (NOUVEAU ✅)
-- **useGraphModals.ts** : Gestion des modales dans GraphView (NOUVEAU ✅)
-- **useHomeNavigation.ts** : Gestion de la navigation hiérarchique
+#### Vues principales
+- **HomeView** : Navigation hiérarchique dans les périodes géologiques
+- **DatabaseView** : Gestion des données avec filtrage des périodes racines uniquement
+- **GraphView** : Visualisation hiérarchique avec drag & drop fonctionnel
+
+#### Fonctionnalités avancées
+- **Import Wikidata** : Import de périodes et événements depuis Wikidata
+- **Gestion des conflits** : Service de résolution des conflits lors de l'import
+- **Drag & Drop** : Déplacement de périodes entre colonnes (GraphView) et vers les stories (DatabaseView)
+- **Modales d'édition** : Création et modification de périodes, événements, stories
+- **Recherche** : Filtrage en temps réel dans toutes les vues
+- **Validation** : Validation centralisée des formulaires
+
+#### Performance et UX
+- **Chargement optimisé** : Une seule requête pour DatabaseView et GraphView
+- **Mise à jour dynamique** : Rafraîchissement automatique après modifications
+- **Gestion d'erreurs** : Messages d'erreur et notifications utilisateur
+- **Interface responsive** : Design adaptatif et moderne
+
+### 🔄 Fonctionnalités en cours de développement
+
+#### Améliorations mineures
+- Optimisation des performances de chargement
+- Amélioration de l'interface utilisateur
+- Tests unitaires supplémentaires
+
+### 📋 Fonctionnalités planifiées
+
+#### Fonctionnalités avancées
+- Export des données
+- Gestion des permissions utilisateur
+- API REST complète
+- Tests d'intégration
+
+#### Améliorations UX
+- Mode sombre/clair
+- Animations et transitions
+- Interface mobile optimisée
+- Raccourcis clavier
+
+## Dernières modifications
+
+### Session actuelle (Refactoring et optimisations)
+- ✅ **Mutualisation du chargement** : DatabaseView et GraphView partagent maintenant le même store
+- ✅ **Corrections GraphView** : Modales d'édition fonctionnelles pour toutes les périodes
+- ✅ **Filtrage des périodes** : DatabaseView affiche seulement les périodes racines
+- ✅ **Mise à jour dynamique** : Vue qui se rafraîchit automatiquement après modifications
+- ✅ **Documentation** : Diagramme Mermaid des dépendances ajouté
+
+### Architecture technique
+
+#### Composables Vue 3
+- `useDatabaseDataStore` : Store partagé pour les données
+- `useDatabaseView` : Logique de la vue DatabaseView
+- `useGraphView` : Logique de la vue GraphView
+- `useGraphDragDrop` : Gestion du drag & drop
+- `useGraphModals` : Gestion des modales GraphView
+- `useHomeNavigation` : Navigation dans HomeView
+- `useWikidataImport` : Import depuis Wikidata
+- `useParentChildManagement` : Gestion des relations hiérarchiques
+- `useConflictResolution` : Résolution des conflits
+- `useDatabaseSave` : Sauvegarde des données
 
 #### Services
-- **DatabaseQueryService.ts** : Accès aux données PostgreSQL
-- **WikidataQueryService.ts** : Requêtes SPARQL vers Wikidata
-- **DatabaseViewService.ts** : Gestion de l'état des vues
-- **StoryService.ts** : Gestion des stories
-- **TimelineScalingService.ts** : Mise à l'échelle des timelines
-- **ConflictResolutionService.ts** : Gestion des conflits (NOUVEAU ✅)
-- **DatabaseImportService.ts** : Import de données
-- **DatabaseViewService.ts** : Service de vue de base de données
+- `DatabaseQueryService` : Accès aux données PostgreSQL
+- `WikidataQueryService` : Requêtes vers Wikidata
+- `StoryService` : Gestion des stories
+- `ConflictResolutionService` : Résolution des conflits
+- `TimelineScalingService` : Calculs de positionnement temporel
+- `WikidataSearchService` : Recherche dans Wikidata
 
-#### Validation et utilitaires
-- **EditFormValidator.ts** : Validation centralisée des formulaires (NOUVEAU ✅)
-- **dateFormatter.ts** : Formatage des dates
-- **uuid.ts** : Gestion des UUIDs
+## Prochaines étapes
 
-#### Composants spécialisés
-- **WikidataImportButton.vue** : Import Wikidata (NOUVEAU ✅)
-- **SearchBar.vue** : Barre de recherche
-- **DatabaseCard.vue** : Carte d'élément de base de données
-- **Toast.vue** : Notifications
+1. **Tests et validation** : Tester toutes les fonctionnalités après le refactoring
+2. **Optimisations** : Améliorer les performances si nécessaire
+3. **Documentation** : Compléter la documentation utilisateur
+4. **Déploiement** : Préparer le déploiement en production
 
-### 🔄 Refactoring en cours
+## Notes techniques
 
-#### DatabaseView.vue - TERMINÉ ✅
-**Avant :** Composant monolithique de 751 lignes avec logique métier mélangée
-**Après :** Composant simplifié utilisant des composables spécialisés
-
-**Extractions effectuées :**
-- `useDatabaseView.ts` : Gestion de l'état, modales, recherche, drag & drop
-- `useDatabaseSave.ts` : Logique de sauvegarde avec retry automatique
-
-**Bénéfices :**
-- Code plus maintenable et testable
-- Logique métier réutilisable
-- Séparation claire des responsabilités
-- Réduction de la complexité du composant principal
-
-### 📋 Prochaines étapes
-
-#### Refactoring des autres vues - TERMINÉ ✅
-1. **GraphView.vue** : ✅ Extraire la logique de gestion des colonnes et du drag & drop
-2. **HomeView.vue** : ✅ Maintenir l'indépendance, optimiser si nécessaire
-
-#### Améliorations possibles
-1. **Tests unitaires** : Ajouter des tests pour les nouveaux composables
-2. **Documentation** : Compléter la documentation des interfaces
-3. **Performance** : Optimiser les requêtes et la gestion d'état
-4. **Composants secondaires** : Analyser les autres composants pour d'éventuels refactorings
-
-### 🎉 Migration terminée avec succès !
-
-**Résumé de la migration :**
-- ✅ **4 composants principaux refactorisés** : EditModal, DatabaseView, GraphView, HomeView
-- ✅ **9 nouveaux composables créés** avec logique métier spécialisée
-- ✅ **2 nouveaux services** pour validation et résolution de conflits
-- ✅ **1 composant spécialisé** pour l'import Wikidata
-- ✅ **Réduction moyenne de 77%** de la complexité des composants principaux
-- ✅ **Documentation complète** mise à jour
+- **Framework** : Vue 3 avec Composition API
+- **Base de données** : PostgreSQL avec schémas multiples
+- **API** : Express.js avec routes REST
+- **Types** : TypeScript strict
+- **Architecture** : Modulaire avec séparation des responsabilités

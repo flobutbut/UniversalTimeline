@@ -11,7 +11,7 @@
     <div v-else class="columns">
       <div class="column">
         <div class="column-header">
-          <h2>Périodes</h2>
+          <h2>Périodes racines</h2>
           <div class="header-actions">
             <SearchBar
               v-model="searchState.periodSearch"

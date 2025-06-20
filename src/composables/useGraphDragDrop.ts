@@ -1,8 +1,10 @@
 import { ref } from 'vue';
+import { useDatabaseDataStore } from './useDatabaseDataStore';
 import { DatabaseViewService } from '@/services/DatabaseViewService';
 
 export function useGraphDragDrop() {
   const databaseViewService = DatabaseViewService.getInstance();
+  const { updatePeriods: sharedUpdatePeriods } = useDatabaseDataStore();
 
   // Fonction pour déplacer une période
   const movePeriod = async (
@@ -68,9 +70,16 @@ export function useGraphDragDrop() {
         };
       }
       
+      // 5. Mettre à jour le store partagé pour rafraîchir la vue
+      sharedUpdatePeriods(updatedPeriods);
+      
+      // 6. Mettre à jour aussi le service pour la cohérence
       databaseViewService.setPeriods(updatedPeriods);
+      
+      window?.showToast?.('Période déplacée avec succès', 'success');
     } catch (error) {
       console.error('[movePeriod] Erreur lors du déplacement:', error);
+      window?.showToast?.('Erreur lors du déplacement de la période', 'error');
     }
   };
 

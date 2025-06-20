@@ -1,459 +1,202 @@
 # Documentation Technique
 
-## Architecture
+## Architecture générale
 
-### Vue d'ensemble
-L'application utilise une architecture modulaire basée sur Vue 3 avec Composition API, TypeScript et des services spécialisés.
+### Vue 3 + TypeScript + Composition API
 
-### Diagramme des dépendances
-```mermaid
-graph LR
-  subgraph Vues
-    DatabaseViewVue[DatabaseView.vue]
-    GraphViewVue[GraphView.vue]
-    HomeViewVue[HomeView.vue]
-    EditModalVue[EditModal.vue]
-    PeriodGridVue[PeriodGrid.vue]
-  end
+L'application utilise Vue 3 avec la Composition API pour une meilleure organisation du code et une réutilisabilité accrue.
 
-  subgraph Composables
-    useDatabaseView
-    useDatabaseSave
-    useConflictResolution
-    useGraphView
-    useGraphDragDrop
-    useGraphModals
-    useHomeNavigation
-    useWikidataImport
-    useParentChildManagement
-    useDatabaseDataStore
-  end
+### Structure des données
 
-  subgraph Services
-    DatabaseViewService
-    DatabaseQueryService
-    WikidataQueryService
-    StoryService
-    ConflictResolutionService
-    WikidataSearchService
-    TimelineScalingService
-  end
-
-  %% Vues -> Composables
-  DatabaseViewVue --> useDatabaseView
-  DatabaseViewVue --> useDatabaseSave
-  DatabaseViewVue --> useConflictResolution
-
-  GraphViewVue --> useGraphView
-  GraphViewVue --> useGraphDragDrop
-  GraphViewVue --> useGraphModals
-
-  HomeViewVue --> useHomeNavigation
-  HomeViewVue --> useWikidataImport
-  HomeViewVue --> useParentChildManagement
-
-  EditModalVue --> useConflictResolution
-
-  PeriodGridVue --> TimelineScalingService
-
-  %% Composables internes
-  useDatabaseView --> useDatabaseDataStore
-  useGraphView --> useDatabaseDataStore
-  useDatabaseSave --> useDatabaseDataStore
-
-  %% Composables -> Services
-  useDatabaseView --> DatabaseViewService
-  useDatabaseView --> DatabaseQueryService
-
-  useGraphView --> DatabaseViewService
-  useGraphView --> DatabaseQueryService
-
-  useDatabaseSave --> DatabaseViewService
-  useDatabaseSave --> DatabaseQueryService
-
-  useGraphDragDrop --> DatabaseViewService
-
-  useGraphModals --> DatabaseViewService
-  useGraphModals --> DatabaseQueryService
-
-  useHomeNavigation --> WikidataQueryService
-  useHomeNavigation --> StoryService
-
-  useWikidataImport --> WikidataQueryService
-
-  useParentChildManagement --> DatabaseQueryService
-
-  useConflictResolution --> ConflictResolutionService
-  useConflictResolution --> DatabaseQueryService
-
-  %% Services internes
-  DatabaseViewService --> DatabaseQueryService
-  ConflictResolutionService --> DatabaseQueryService
-```
-
-**Légende :**
-- **Vues** : Composants Vue.js principaux de l'application
-- **Composables** : Logique métier réactive et réutilisable (Vue 3 Composition API)
-- **Services** : Services métier pour l'accès aux données et la logique pure
-- **Flèches** : Dépendances et flux de données
-
-### Structure des dossiers
-```
-src/
-├── components/          # Composants Vue réutilisables
-│   ├── base/           # Composants de base (Button, Input, etc.)
-│   ├── WikidataImportButton.vue  # Composant spécialisé pour l'import Wikidata
-│   └── ...
-├── composables/         # Composables Vue 3 (logique métier réutilisable)
-│   ├── useEditModal.ts           # Gestion des formulaires d'édition
-│   ├── useDatabaseView.ts        # Gestion de la vue DatabaseView
-│   ├── useDatabaseSave.ts        # Gestion de la sauvegarde des données
-│   ├── useWikidataImport.ts      # Import des données Wikidata
-│   └── useParentChildManagement.ts # Gestion des relations parent/enfant
-├── services/           # Services métier
-│   ├── DatabaseQueryService.ts   # Accès aux données de la base
-│   ├── WikidataQueryService.ts   # Requêtes vers Wikidata
-│   ├── ConflictResolutionService.ts # Gestion des conflits
-│   └── ...
-├── validators/         # Validation des données
-│   └── editFormValidators.ts     # Validation centralisée des formulaires
-├── types/              # Définitions TypeScript
-├── utils/              # Utilitaires
-└── views/              # Pages de l'application
+#### Store partagé `useDatabaseDataStore`
+```typescript
+// Store centralisé pour mutualiser le chargement des données
+const useDatabaseDataStore = () => {
+  const periods = ref<Period[]>([])
+  const events = ref<Event[]>([])
+  const stories = ref<Story[]>([])
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
+  
+  const loadData = async () => {
+    // Chargement unique partagé entre DatabaseView et GraphView
+  }
+  
+  return { periods, events, stories, isLoading, error, loadData }
+}
 ```
 
 ## Composables Vue 3
 
-### useEditModal
-Gère l'état et la logique des formulaires d'édition pour les périodes, événements et stories.
+### Gestion des données
+- **`useDatabaseDataStore`** : Store partagé pour mutualiser le chargement des données entre DatabaseView et GraphView
+- **`useDatabaseView`** : Logique de la vue DatabaseView avec filtrage des périodes racines
+- **`useGraphView`** : Logique de la vue GraphView avec gestion des colonnes dynamiques
+- **`useDatabaseSave`** : Sauvegarde des données avec retry automatique
 
-**Fonctionnalités :**
-- Gestion réactive du formulaire
-- Validation en temps réel
-- Préparation des données pour soumission
-- Gestion des états de chargement et d'erreur
+### Gestion des interactions
+- **`useGraphDragDrop`** : Gestion du drag & drop avec mise à jour du store partagé
+- **`useGraphModals`** : Gestion des modales GraphView avec chargement direct depuis l'API
+- **`useEditModal`** : Gestion des formulaires d'édition centralisée
+- **`useHomeNavigation`** : Navigation hiérarchique dans HomeView
 
-**Interface :**
-```typescript
-interface EditFormData {
-  qid: string;
-  title: { fr: string; en: string };
-  description: { fr: string; en: string };
-  startDate: string;
-  endDate: string;
-  date: string;
-  location: string;
-  author: string;
-  isPublic: boolean;
-  parentId: string | null;
-}
-
-interface EditModalState {
-  loading: boolean;
-  error: string | null;
-  isValid: boolean;
-  qidError: string;
-  qidExistsInBase: boolean;
-  existingItem: any;
-  directChildrenCount: string;
-}
-```
-
-### useDatabaseView
-Gère l'état et la logique de la vue DatabaseView avec gestion des modales, recherche, drag & drop et sélection de stories.
-
-**Fonctionnalités :**
-- Gestion des états de chargement et d'erreur
-- Gestion des modales d'ajout et d'édition
-- Filtrage des données par recherche
-- Gestion du drag & drop pour associer des éléments aux stories
-- Sélection et chargement des détails des stories
-
-**Interface :**
-```typescript
-interface DatabaseViewState {
-  loading: boolean;
-  error: string | null;
-  loadingDetails: boolean;
-  loadingError: string | null;
-  loadingStoryDetails: boolean;
-}
-
-interface ModalState {
-  showAddModal: boolean;
-  showEditModal: boolean;
-  currentType: 'period' | 'event' | 'story';
-  currentItem: any;
-  currentMode: 'create' | 'edit';
-}
-
-interface SearchState {
-  periodSearch: string;
-  eventSearch: string;
-}
-
-interface DragDropState {
-  draggedItem: { type: 'period' | 'event', data: any } | null;
-  isDragOver: boolean;
-}
-```
-
-### useDatabaseSave
-Gère la logique de sauvegarde des données avec retry automatique et gestion des erreurs de connexion.
-
-**Fonctionnalités :**
-- Sauvegarde des périodes, événements et stories
-- Retry automatique en cas d'erreur de connexion
-- Mise à jour optimiste des listes locales
-- Gestion des erreurs et notifications
-
-**Interface :**
-```typescript
-interface SaveResult {
-  loading: boolean;
-  handleSave: (formData: any, type: 'period' | 'event' | 'story', mode: 'create' | 'edit', item: any) => Promise<boolean>;
-}
-```
-
-### useWikidataImport
-Gère l'import et la transformation des données depuis Wikidata.
-
-**Fonctionnalités :**
-- Import de périodes et événements depuis Wikidata
-- Transformation des données pour le format de l'application
-- Gestion des erreurs d'import
-- Support multilingue
-
-**Interface :**
-```typescript
-interface WikidataData {
-  label: string | { fr?: string; en?: string };
-  description?: { fr: string; en: string };
-  date?: string;
-  temporalData?: TemporalLocation[];
-  children?: any[];
-}
-```
-
-### useParentChildManagement
-Gère les relations hiérarchiques entre les éléments.
-
-**Fonctionnalités :**
-- Validation des Q-ids
-- Détection de conflits
-- Gestion des relations parent/enfant
-- Comptage des enfants
-
-### useGraphView
-Gère l'état et la logique de la vue GraphView avec gestion des colonnes, sélection et navigation hiérarchique.
-
-**Fonctionnalités :**
-- Gestion des états de chargement et d'erreur
-- Calcul des colonnes basé sur la sélection hiérarchique
-- Gestion de la sélection des périodes
-- Chargement des enfants des périodes sélectionnées
-- Navigation dans l'arborescence des périodes
-
-**Interface :**
-```typescript
-interface GraphViewState {
-  loading: boolean;
-  error: string | null;
-}
-
-interface ModalState {
-  showEditModal: boolean;
-  showAddModal: boolean;
-  selectedPeriod: ApiPeriod | null;
-  currentColumnIdx: number | null;
-}
-
-interface SelectionState {
-  selectedIds: string[];
-  draggedItemId: string | null;
-  dragOverColumnIdx: number | null;
-}
-```
-
-### useGraphDragDrop
-Gère le drag & drop des périodes dans la vue GraphView avec validation des relations hiérarchiques.
-
-**Fonctionnalités :**
-- Déplacement de périodes entre colonnes
-- Validation des cycles dans la hiérarchie
-- Mise à jour des relations parent/enfant
-- Gestion des états de drag & drop
-
-**Interface :**
-```typescript
-interface DragDropFunctions {
-  movePeriod: (childId: string, newParentId: string | null, allPeriods: any[], isDescendant: Function) => Promise<void>;
-  onDrop: (targetItemId: string, draggedItemId: string | null, allPeriods: any[], isDescendant: Function) => Promise<void>;
-  onColumnDrop: (colIdx: number, draggedItemId: string | null, selectedIds: string[], columns: any[][], allPeriods: any[], isDescendant: Function) => Promise<void>;
-}
-```
-
-### useGraphModals
-Gère les modales d'édition et d'ajout de périodes dans la vue GraphView.
-
-**Fonctionnalités :**
-- Ouverture et fermeture des modales d'édition et d'ajout
-- Chargement des données complètes des périodes
-- Soumission des formulaires avec gestion des relations
-- Gestion des erreurs et notifications
-
-**Interface :**
-```typescript
-interface GraphModalState {
-  showEditModal: boolean;
-  showAddModal: boolean;
-  selectedPeriod: ApiPeriod | null;
-  currentColumnIdx: number | null;
-  loading: boolean;
-}
-```
-
-### useHomeNavigation
-Gère la navigation hiérarchique dans HomeView avec gestion de la pile de navigation et chargement des périodes.
-
-**Fonctionnalités :**
-- Navigation hiérarchique dans les périodes géologiques
-- Gestion de la pile de navigation (parentStack)
-- Chargement des périodes depuis Wikidata
-- Retour à la racine avec chargement de la story Planète Terre
-- Gestion des états de chargement et d'erreur
-
-**Interface :**
-```typescript
-interface HomeNavigationState {
-  loading: boolean;
-  error: string | null;
-  parentStack: Period[];
-  currentPeriod: Period | null;
-  displayedPeriods: Period[];
-}
-```
+### Import et gestion des conflits
+- **`useWikidataImport`** : Import des données depuis Wikidata
+- **`useParentChildManagement`** : Gestion des relations hiérarchiques
+- **`useConflictResolution`** : Résolution des conflits lors de l'import
 
 ## Services
 
-### DatabaseQueryService
-Service singleton pour l'accès aux données de la base PostgreSQL.
+### Accès aux données
+- **`DatabaseQueryService`** : Interface avec PostgreSQL
+- **`WikidataQueryService`** : Requêtes SPARQL vers Wikidata
+- **`WikidataSearchService`** : Recherche dans Wikidata
 
-**Méthodes principales :**
-- `getAllPeriods()` : Récupération de toutes les périodes
-- `getAllEvents()` : Récupération de tous les événements
-- `createPeriod(data)` : Création d'une période
-- `updatePeriod(id, data)` : Mise à jour d'une période
-- `deletePeriod(id)` : Suppression d'une période
-- `loadChildren(periodId)` : Chargement des enfants d'une période
+### Logique métier
+- **`StoryService`** : Gestion des stories
+- **`ConflictResolutionService`** : Résolution des conflits
+- **`TimelineScalingService`** : Calculs de positionnement temporel
 
-### WikidataQueryService
-Service pour les requêtes SPARQL vers Wikidata.
+## Diagramme des dépendances
 
-**Méthodes principales :**
-- `loadPeriod(periodId)` : Chargement d'une période depuis Wikidata
-- `loadEvent(eventId)` : Chargement d'un événement depuis Wikidata
-- `buildTemporalQuery(periodId)` : Construction des requêtes temporelles
+```mermaid
+graph TD
+    A[Vue Components] --> B[Composables]
+    B --> C[Services]
+    C --> D[Database]
+    C --> E[Wikidata API]
+    
+    A1[DatabaseView.vue] --> B1[useDatabaseView]
+    A2[GraphView.vue] --> B2[useGraphView]
+    A3[EditModal.vue] --> B3[useEditModal]
+    
+    B1 --> B4[useDatabaseDataStore]
+    B2 --> B4
+    B4 --> C1[DatabaseQueryService]
+    
+    B3 --> C2[ConflictResolutionService]
+    B3 --> C3[StoryService]
+    
+    B5[useWikidataImport] --> C4[WikidataQueryService]
+    B5 --> C2
+    
+    B6[useGraphDragDrop] --> B4
+    B7[useGraphModals] --> C1
+    
+    C1 --> D1[PostgreSQL]
+    C4 --> E1[Wikidata SPARQL]
+```
 
-### ConflictResolutionService
-Service pour la gestion des conflits lors de la création/édition.
+## Optimisations récentes
 
-**Fonctionnalités :**
-- Détection de conflits par Q-id
-- Résolution automatique des conflits
-- Stratégies de résolution personnalisées
-- Validation de cohérence des données
+### Mutualisation du chargement
+- **Store partagé** : `useDatabaseDataStore` évite les requêtes multiples
+- **Chargement unique** : DatabaseView et GraphView partagent les mêmes données
+- **Mise à jour dynamique** : Le store se met à jour automatiquement après modifications
 
-**Interface :**
+### Corrections GraphView
+- **Modales d'édition** : Chargement direct depuis l'API pour les périodes dynamiques
+- **Sous-périodes** : Affichage correct des enfants avec transformation des types
+- **Drag & Drop** : Mise à jour du store après déplacement
+
+### Filtrage des périodes
+- **DatabaseView** : Affichage des périodes racines uniquement (comme GraphView)
+- **Cohérence** : Même logique de filtrage entre les vues
+- **Performance** : Réduction du nombre d'éléments affichés
+
+## Types TypeScript
+
+### Types principaux
 ```typescript
-interface ConflictInfo {
-  hasConflict: boolean;
-  existingItem: any;
-  conflictType: 'period' | 'event' | 'story';
-  message: string;
+interface Period {
+  id: string
+  name: string
+  startDate: string
+  endDate: string
+  parentId?: string
+  children?: Period[]
 }
 
-interface ResolutionStrategy {
-  action: 'keep' | 'replace' | 'merge' | 'cancel';
-  message: string;
-  requiresConfirmation: boolean;
+interface Event {
+  id: string
+  name: string
+  date: string
+  storyId: string // Type corrigé : string au lieu de number
+}
+
+interface Story {
+  id: string
+  name: string
+  description?: string
 }
 ```
+
+### Corrections de types
+- **`storyId`** : Changé de `number` à `string` pour éviter les erreurs de conversion
+- **IDs** : Tous les IDs sont maintenant en `string` pour la cohérence
+- **Relations** : Types corrects pour les relations parent/enfant
 
 ## Validation
 
-### EditFormValidator
-Classe statique pour la validation centralisée des formulaires.
-
-**Méthodes :**
-- `validateQid(qid)` : Validation du format Q-id
-- `validateTitle(title)` : Validation des titres multilingues
-- `validateDescription(description)` : Validation des descriptions
-- `validateDate(date, fieldName)` : Validation des dates
-- `validatePeriod(data)` : Validation complète d'une période
-- `validateEvent(data)` : Validation complète d'un événement
-- `validateStory(data)` : Validation complète d'une story
-
-**Interface :**
+### Validation centralisée
 ```typescript
-interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
+// validators/editFormValidators.ts
+export const validatePeriod = (period: Partial<Period>): ValidationResult => {
+  // Validation des dates (non stricte)
+  // Validation des champs requis
 }
 ```
 
-## Composants
+### Gestion des erreurs
+- **Messages d'erreur** : Affichage utilisateur des erreurs de validation
+- **Retry automatique** : Tentatives de sauvegarde en cas d'échec
+- **Notifications** : Feedback utilisateur via composant Toast
 
-### WikidataImportButton
-Composant spécialisé pour l'import de données depuis Wikidata.
+## Performance
 
-**Props :**
-- `qid: string` : Q-id Wikidata à importer
-- `type: 'period' | 'event'` : Type d'élément à importer
+### Optimisations appliquées
+- **Store partagé** : Évite les requêtes multiples
+- **Chargement lazy** : Données chargées à la demande
+- **Mise à jour ciblée** : Seules les données modifiées sont rafraîchies
+- **Filtrage côté client** : Recherche en temps réel sans requêtes serveur
 
-**Events :**
-- `import-success(data)` : Import réussi
-- `import-error(error)` : Erreur d'import
+### Métriques
+- **Temps de chargement** : Réduit grâce au store partagé
+- **Mémoire** : Optimisée avec la suppression des services non utilisés
+- **Réactivité** : Interface plus fluide avec les mises à jour dynamiques
 
-### EditModal
-Composant principal pour l'édition et la création d'éléments.
+## Sécurité
 
-**Refactoring effectué :**
-- Extraction de la logique métier dans des composables
-- Utilisation des services de validation et de résolution de conflits
-- Simplification du code du composant
-- Amélioration de la maintenabilité
+### Validation des données
+- **Côté client** : Validation TypeScript et validators
+- **Côté serveur** : Validation des entrées API
+- **Sanitisation** : Nettoyage des données utilisateur
 
-## Types de données
+### Gestion des erreurs
+- **Try/catch** : Gestion robuste des erreurs
+- **Fallbacks** : Valeurs par défaut en cas d'échec
+- **Logging** : Traçabilité des erreurs
 
-### Period
-```typescript
-interface Period {
-  id: string;
-  wikidata_id?: string;
-  label: MultilingualText;
-  description?: MultilingualText;
-  startDate: string;
-  endDate: string;
-  hasParent: boolean;
-  children: string[];
-  temporalLocation: string;
-  categories: Category[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-```
+## Tests
 
-### Event
-```typescript
-interface Event {
-  id: string;
-  wikidata_id?: string;
-  label: MultilingualText;
-  description?: MultilingualText;
-  date: string;
-  categories: Category[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-```
+### Tests unitaires
+- **Composables** : Tests des logiques métier
+- **Services** : Tests des interactions avec les APIs
+- **Validators** : Tests de validation des données
+
+### Tests d'intégration
+- **Flux complet** : Tests des parcours utilisateur
+- **APIs** : Tests des endpoints
+- **Base de données** : Tests des requêtes
+
+## Déploiement
+
+### Configuration
+- **Docker** : Containerisation avec docker-compose
+- **Environnements** : Dev, staging, production
+- **Variables d'environnement** : Configuration externalisée
+
+### Monitoring
+- **Logs** : Centralisation des logs
+- **Métriques** : Monitoring des performances
+- **Alertes** : Notifications en cas de problème

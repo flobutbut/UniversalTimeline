@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { useDatabaseDataStore } from './useDatabaseDataStore';
 import { DatabaseViewService } from '@/services/DatabaseViewService';
 import { DatabaseQueryService } from '@/services/DatabaseQueryService';
 import type { ApiPeriod } from '@/types/geological';
@@ -6,6 +7,7 @@ import type { ApiPeriod } from '@/types/geological';
 export function useGraphModals() {
   const databaseViewService = DatabaseViewService.getInstance();
   const databaseQueryService = DatabaseQueryService.getInstance();
+  const { loadInitialData: sharedLoadInitialData } = useDatabaseDataStore();
 
   // États des modales
   const showEditModal = ref(false);
@@ -81,7 +83,7 @@ export function useGraphModals() {
       }
       
       // Rechargement des données
-      await databaseViewService.loadListData();
+      await sharedLoadInitialData();
       closeEditModal();
       window?.showToast?.('Période mise à jour avec succès', 'success');
     } catch (error) {
@@ -137,7 +139,7 @@ export function useGraphModals() {
       }
       
       // Rechargement des données
-      await databaseViewService.loadListData();
+      await sharedLoadInitialData();
       closeAddModal();
       window?.showToast?.('Période ajoutée avec succès', 'success');
     } catch (error: any) {

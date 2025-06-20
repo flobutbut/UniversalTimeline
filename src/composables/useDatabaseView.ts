@@ -75,7 +75,19 @@ export function useDatabaseView() {
   // Computed properties pour le filtrage
   const filteredPeriods = computed(() => {
     const searchLower = searchState.value.periodSearch.toLowerCase();
-    return periods.value.filter(period => {
+    
+    // Transformer les périodes comme dans DatabaseViewService.getPeriods()
+    const transformedPeriods = periods.value.map((p: any) => ({
+      ...p,
+      hasParent: typeof p.hasParent === 'boolean' ? p.hasParent : !!(p.parent_id),
+      children: Array.isArray(p.children) ? p.children : [],
+    }));
+    
+    // D'abord filtrer les périodes racines (sans parent)
+    const rootPeriods = transformedPeriods.filter(period => !period.hasParent);
+    
+    // Puis appliquer la recherche textuelle
+    return rootPeriods.filter(period => {
       const labelFr = period.label?.fr;
       return typeof labelFr === 'string' ? labelFr.toLowerCase().includes(searchLower) : false;
     });
