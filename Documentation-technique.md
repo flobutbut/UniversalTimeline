@@ -5,6 +5,98 @@
 ### Vue d'ensemble
 L'application utilise une architecture modulaire basée sur Vue 3 avec Composition API, TypeScript et des services spécialisés.
 
+### Diagramme des dépendances
+```mermaid
+graph LR
+  subgraph Vues
+    DatabaseViewVue[DatabaseView.vue]
+    GraphViewVue[GraphView.vue]
+    HomeViewVue[HomeView.vue]
+    EditModalVue[EditModal.vue]
+    PeriodGridVue[PeriodGrid.vue]
+  end
+
+  subgraph Composables
+    useDatabaseView
+    useDatabaseSave
+    useConflictResolution
+    useGraphView
+    useGraphDragDrop
+    useGraphModals
+    useHomeNavigation
+    useWikidataImport
+    useParentChildManagement
+    useDatabaseDataStore
+  end
+
+  subgraph Services
+    DatabaseViewService
+    DatabaseQueryService
+    WikidataQueryService
+    StoryService
+    ConflictResolutionService
+    WikidataSearchService
+    TimelineScalingService
+  end
+
+  %% Vues -> Composables
+  DatabaseViewVue --> useDatabaseView
+  DatabaseViewVue --> useDatabaseSave
+  DatabaseViewVue --> useConflictResolution
+
+  GraphViewVue --> useGraphView
+  GraphViewVue --> useGraphDragDrop
+  GraphViewVue --> useGraphModals
+
+  HomeViewVue --> useHomeNavigation
+  HomeViewVue --> useWikidataImport
+  HomeViewVue --> useParentChildManagement
+
+  EditModalVue --> useConflictResolution
+
+  PeriodGridVue --> TimelineScalingService
+
+  %% Composables internes
+  useDatabaseView --> useDatabaseDataStore
+  useGraphView --> useDatabaseDataStore
+  useDatabaseSave --> useDatabaseDataStore
+
+  %% Composables -> Services
+  useDatabaseView --> DatabaseViewService
+  useDatabaseView --> DatabaseQueryService
+
+  useGraphView --> DatabaseViewService
+  useGraphView --> DatabaseQueryService
+
+  useDatabaseSave --> DatabaseViewService
+  useDatabaseSave --> DatabaseQueryService
+
+  useGraphDragDrop --> DatabaseViewService
+
+  useGraphModals --> DatabaseViewService
+  useGraphModals --> DatabaseQueryService
+
+  useHomeNavigation --> WikidataQueryService
+  useHomeNavigation --> StoryService
+
+  useWikidataImport --> WikidataQueryService
+
+  useParentChildManagement --> DatabaseQueryService
+
+  useConflictResolution --> ConflictResolutionService
+  useConflictResolution --> DatabaseQueryService
+
+  %% Services internes
+  DatabaseViewService --> DatabaseQueryService
+  ConflictResolutionService --> DatabaseQueryService
+```
+
+**Légende :**
+- **Vues** : Composants Vue.js principaux de l'application
+- **Composables** : Logique métier réactive et réutilisable (Vue 3 Composition API)
+- **Services** : Services métier pour l'accès aux données et la logique pure
+- **Flèches** : Dépendances et flux de données
+
 ### Structure des dossiers
 ```
 src/
