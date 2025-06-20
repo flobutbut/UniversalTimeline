@@ -1,6 +1,7 @@
 # État du Projet
 
 ## Dernières Mises à Jour
+- **Refactoring du composant EditModal** : Extraction de la logique métier dans des composables réutilisables
 - Ajout des composants de base (Button, Input)
 - Amélioration de l'interface utilisateur
 - Correction de la gestion des Q-ids Wikidata
@@ -14,6 +15,7 @@
   - Système d'import manuel via barre de recherche
   - Import automatique lors de la sélection d'une période/événement
   - API REST pour l'accès aux données
+  - **Nouveau : Architecture modulaire avec composables Vue 3**
 - Performance optimisée via :
   - Requêtes SQL optimisées
   - Mise en cache des données fréquemment utilisées
@@ -57,6 +59,20 @@
 - 🔄 Support des événements sur la frise
 - 🔄 Gestion des superpositions d'événements
 
+### **Nouveaux Composables et Services (Refactoring EditModal)**
+
+#### Composables Vue 3
+- ✅ **useEditModal** : Gestion de l'état du formulaire d'édition
+- ✅ **useWikidataImport** : Import et transformation des données Wikidata
+- ✅ **useParentChildManagement** : Gestion des relations parent/enfant
+
+#### Services de Validation et Résolution
+- ✅ **EditFormValidator** : Validation centralisée des formulaires
+- ✅ **ConflictResolutionService** : Gestion des conflits lors de la création/édition
+
+#### Composants Spécialisés
+- ✅ **WikidataImportButton** : Composant dédié à l'import Wikidata
+
 ### Fonctionnalités Implémentées
 - ✅ Affichage de la liste des périodes géologiques
 - ✅ Navigation dans la hiérarchie des périodes avec period-click
@@ -81,6 +97,9 @@
 - ✅ Gestion des périodes et événements
 - ✅ Support multilingue
 - ✅ Validation des données
+- ✅ **Gestion modulaire des formulaires d'édition**
+- ✅ **Validation centralisée des données**
+- ✅ **Gestion améliorée des conflits**
 
 ### Fonctionnalités en Cours
 - 🔄 Implémentation de la barre de recherche globale
@@ -110,6 +129,7 @@
 - [x] Interface utilisateur pour la gestion des stories
 - [x] API backend pour les stories
 - [x] Intégration avec la base de données
+- [x] **Refactoring du composant EditModal avec architecture modulaire**
 
 ### Performance
 - Temps de chargement initial : < 2s
@@ -192,11 +212,32 @@
    - ✅ Relations entre les tables
    - ✅ Correction de la gestion des relations parent/enfant (fusion vs remplacement des enfants)
 
+5. **Architecture des composants**
+   - ✅ **Refactoring du composant EditModal**
+   - ✅ **Extraction de la logique métier dans des composables**
+   - ✅ **Centralisation de la validation**
+   - ✅ **Amélioration de la gestion des conflits**
+   - ✅ **Composants spécialisés et réutilisables**
+
 ### Relations parent/enfant
 - La relation parent/enfant est gérée uniquement via :
   - `has_parent` (booléen) sur l'enfant
   - `children` (array d'IDs) sur le parent
 - Il n'y a plus de champ `parentId` dans la base ou les types.
+
+### Architecture Modulaire (Nouveau)
+- **Composables Vue 3** :
+  - `useEditModal` : Gestion de l'état du formulaire
+  - `useWikidataImport` : Import des données Wikidata
+  - `useParentChildManagement` : Gestion des relations hiérarchiques
+
+- **Services de Validation** :
+  - `EditFormValidator` : Validation centralisée
+  - `ConflictResolutionService` : Gestion des conflits
+
+- **Composants Spécialisés** :
+  - `WikidataImportButton` : Import Wikidata
+  - `EditModal` : Interface utilisateur simplifiée
 
 ## Plan de Développement
 

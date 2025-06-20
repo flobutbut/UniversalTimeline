@@ -8,13 +8,13 @@
           'une story' 
         }}</h2>
       </div>
-      <div v-if="loading" class="loading-overlay">
+      <div v-if="editState.loading" class="loading-overlay">
         <div class="spinner"></div>
         <span>Chargement des données...</span>
       </div>
-      <div v-else-if="error" class="error-message">
+      <div v-else-if="editState.error" class="error-message">
         <i class="fas fa-exclamation-circle"></i>
-        <span>{{ error }}</span>
+        <span>{{ editState.error }}</span>
         <button @click="$emit('close')">Fermer</button>
       </div>
       <form v-else @submit.prevent="handleSubmit" class="modal-form">
@@ -25,7 +25,7 @@
                 v-model="form.qid"
                 label="Q-id Wikidata"
                 placeholder="Q12345"
-                :error="qidError"
+                :error="editState.qidError"
                 @blur="validateQid"
               />
             </div>
@@ -99,16 +99,15 @@
         </div>
         <div class="form-actions">
           <div class="left-actions">
-            <Button
+            <WikidataImportButton
               v-if="form.qid && type !== 'story'"
-              variant="secondary"
-              icon="fas fa-database"
-              @click="fillFromWikidata"
-            >
-              Remplir avec Wikidata
-            </Button>
+              :qid="form.qid"
+              :type="type"
+              @import-success="handleWikidataImportSuccess"
+              @import-error="handleWikidataImportError"
+            />
             <span v-if="type === 'period'" class="children-count">
-              {{ directChildrenCount }} sous-périodes
+              {{ editState.directChildrenCount }} sous-périodes
             </span>
           </div>
           <div class="right-actions">
@@ -116,7 +115,7 @@
             <Button
               variant="primary"
               type="submit"
-              :disabled="!isValid"
+              :disabled="!editState.isValid"
             >
               {{ mode === 'edit' ? 'Mettre à jour' : 'Créer' }}
             </Button>
@@ -128,18 +127,14 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch, toRefs, computed, onMounted, onUnmounted } from 'vue';
-import { DatabaseQueryService } from '@/services/DatabaseQueryService';
-import { WikidataQueryService } from '@/services/WikidataQueryService';
+import { watch, onMounted, onUnmounted } from 'vue';
+import { useEditModal } from '@/composables/useEditModal';
+import { useParentChildManagement } from '@/composables/useParentChildManagement';
+import { EditFormValidator } from '@/validators/editFormValidators';
+import { ConflictResolutionService } from '@/services/ConflictResolutionService';
 import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';
-import Switch from '@/components/base/Switch.vue';
-import type { Period, Event, Story } from '@/types/database';
-
-interface Category {
-  id: string;
-  label: string;
-}
+import WikidataImportButton from '@/components/WikidataImportButton.vue';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -155,117 +150,28 @@ const emit = defineEmits<{
   (e: 'submit', data: any): void;
 }>();
 
-const queryService = DatabaseQueryService.getInstance();
-const wikidataService = WikidataQueryService.getInstance();
+// Initialisation des composables
+const { form, state: editState, isValid, resetForm, updateForm, prepareSubmitData, setLoading, setError, setQidError, setQidExists, setChildrenCount } = useEditModal(props.type, props.mode, props.data);
 
-const modalType = ref<'period' | 'event' | 'story'>(props.type);
-const isCreateMode = ref<boolean>(props.mode === 'create');
-const open = ref<boolean>(props.isOpen);
+const { validateQid: validateQidParentChild, updateChildrenCount: updateChildrenCountParentChild } = useParentChildManagement();
 
-const form = reactive({
-  qid: props.data?.wikidata_id || '',
-  title: {
-    fr: props.data?.label?.fr || props.data?.title?.fr || '',
-    en: props.data?.label?.en || props.data?.title?.en || ''
-  },
-  description: {
-    fr: props.data?.description?.fr || '',
-    en: props.data?.description?.en || ''
-  },
-  startDate: props.data?.start_date || '',
-  endDate: props.data?.end_date || '',
-  date: props.data?.date || '',
-  location: props.data?.location || '',
-  author: props.data?.author || '',
-  isPublic: props.data?.isPublic || false,
-  parentId: props.data?.parent_id || null
-});
+const conflictService = ConflictResolutionService.getInstance();
 
-const qidExistsInBase = ref(false);
-const existingItem = ref<any>(null);
-const qidError = ref('');
-const directChildrenCount = ref('0');
-
-const isValid = computed(() => {
-  if (props.type !== 'story' && !form.qid) return false;
-  if (!form.title.fr) return false;
-  if (props.type === 'period') {
-    if (!form.startDate || !form.endDate) return false;
-  } else if (props.type === 'event') {
-    if (!form.date) return false;
-  }
-  return true;
-});
-
-watch(
-  () => props.data,
-  (val) => {
-    if (props.mode === 'edit' && val) {
-      form.qid = val.wikidata_id || '';
-      form.title.fr = val.label?.fr || val.title?.fr || '';
-      form.title.en = val.label?.en || val.title?.en || '';
-      form.description.fr = val.description?.fr || '';
-      form.description.en = val.description?.en || '';
-      form.date = val.date || '';
-      form.startDate = val.start_date || val.startDate || '';
-      form.endDate = val.end_date || val.endDate || '';
-      form.location = val.location || '';
-      qidExistsInBase.value = false;
-      existingItem.value = val;
-    } else {
-      form.qid = '';
-      form.title.fr = '';
-      form.title.en = '';
-      form.description.fr = '';
-      form.description.en = '';
-      form.date = '';
-      form.startDate = '';
-      form.endDate = '';
-      form.location = '';
-      qidExistsInBase.value = false;
-      existingItem.value = null;
-    }
-  },
-  { immediate: true }
-);
-
+// Validation du Q-id
 const validateQid = async () => {
-  if (!form.qid) {
-    qidError.value = 'Le Q-id est requis';
-    return;
-  }
+  if (props.type === 'story') return;
 
-  if (!form.qid.match(/^Q\d+$/)) {
-    qidError.value = 'Format de Q-id invalide';
-    return;
-  }
-
-  try {
-    const periods = await queryService.getAllPeriods();
-    const period = periods.find(p => p.wikidata_id === form.qid);
-    if (period) {
-      qidExistsInBase.value = true;
-      existingItem.value = period;
-      qidError.value = 'Ce Q-id existe déjà dans la base';
-    } else {
-      qidExistsInBase.value = false;
-      existingItem.value = null;
-      qidError.value = '';
-    }
-  } catch (error) {
-    qidExistsInBase.value = false;
-    existingItem.value = null;
-    qidError.value = '';
-  }
+  const validation = await validateQidParentChild(form.qid, props.type);
+  setQidError(validation.error);
+  setQidExists(validation.exists, validation.item);
 };
 
-const closeModal = () => {
-  open.value = false;
-  emit('close');
-}
-
+// Gestion de la soumission du formulaire
 const handleSubmit = async () => {
   try {
+    setLoading(true);
+    setError(null);
+
     console.log('[EditModal] État du formulaire avant soumission:', {
       qid: form.qid,
       title: form.title,
@@ -275,196 +181,131 @@ const handleSubmit = async () => {
       location: form.location
     });
 
-    if (props.type !== 'story' && (!form.qid || !form.qid.match(/^Q\d+$/))) {
-      window.showToast('Le Q-id doit commencer par Q suivi de chiffres', 'error');
+    // Validation du formulaire
+    const formData = prepareSubmitData();
+    const validation = EditFormValidator.validateForm(formData, props.type);
+    
+    if (!validation.isValid) {
+      setError(validation.errors.join(', '));
       return;
     }
 
-    let conflict = null;
-    if (props.type === 'event') {
-      try {
-        const existing = await queryService.getEventById(form.qid);
-        if (existing && existing.id !== props.data?.id) {
-          conflict = existing;
-        }
-      } catch (e) { /* Pas de conflit si non trouvé */ }
-    } else if (props.type === 'period') {
-      try {
-        const periods = await queryService.getAllPeriods();
-        const existing = periods.find(p => p.wikidata_id === form.qid);
-        if (existing && existing.id !== props.data?.id) {
-          conflict = existing;
-        }
-      } catch (e) { /* Pas de conflit si non trouvé */ }
-    }
-
-    if (conflict) {
-      if (props.type === 'event') {
-        await queryService.deleteEvent(conflict.id);
-        window.showToast('Un événement avec ce Q-id existait déjà. Il a été supprimé automatiquement.', 'error');
-      } else if (props.type === 'period') {
-        await queryService.deletePeriod(conflict.id);
-        window.showToast('Une période avec ce Q-id existait déjà. Elle a été supprimée automatiquement.', 'error');
+    // Validation du Q-id si nécessaire
+    if (props.type !== 'story') {
+      const qidValidation = EditFormValidator.validateQid(form.qid);
+      if (!qidValidation.isValid) {
+        setError(qidValidation.errors.join(', '));
+        return;
       }
     }
 
-    const formData = {
-      qid: form.qid,
-      title: {
-        fr: form.title.fr,
-        en: form.title.en || form.title.fr
-      },
-      description: {
-        fr: form.description.fr || null,
-        en: form.description.en || form.description.fr || null
-      },
-      startDate: form.startDate,
-      endDate: form.endDate,
-      temporalLocation: form.location || null,
-      children: []
-    };
-
-    // Conserver les enfants existants si nous sommes en mode édition
-    if (props.mode === 'edit' && props.data && Array.isArray(props.data.children)) {
-      formData.children = props.data.children;
+    // Détection et résolution des conflits
+    if (props.type !== 'story') {
+      const conflictInfo = await conflictService.detectConflict(form.qid, props.type, props.data?.id);
+      
+      if (conflictInfo.hasConflict) {
+        // Résolution automatique (comportement actuel)
+        const resolved = await conflictService.resolveConflictAutomatically(conflictInfo);
+        if (!resolved) {
+          setError('Impossible de résoudre le conflit');
+          return;
+        }
+      }
     }
 
     console.log('[EditModal] Données formatées pour l\'envoi:', JSON.stringify(formData, null, 2));
 
-    // Émettre l'événement submit avant de fermer la modale
+    // Émettre l'événement submit
     emit('submit', formData);
+    
     // Attendre un peu pour s'assurer que l'événement est traité
     await new Promise(resolve => setTimeout(resolve, 100));
     closeModal();
   } catch (error: any) {
     console.error('[EditModal] Erreur lors de la soumission:', error);
-    window.showToast('Erreur lors de la soumission du formulaire', 'error');
+    setError('Erreur lors de la soumission du formulaire');
+  } finally {
+    setLoading(false);
   }
-}
+};
 
-function close() {
+// Gestion de l'import Wikidata
+const handleWikidataImportSuccess = (data: any) => {
+  console.log('[EditModal] Import Wikidata réussi:', data);
+  
+  // Mise à jour du formulaire avec les données importées
+  if (data.title) {
+    form.title.fr = data.title.fr || '';
+    form.title.en = data.title.en || '';
+  }
+  
+  if (data.description) {
+    form.description.fr = data.description.fr || '';
+    form.description.en = data.description.en || '';
+  }
+  
+  if (data.startDate) form.startDate = data.startDate;
+  if (data.endDate) form.endDate = data.endDate;
+  if (data.date) form.date = data.date;
+  if (data.location) form.location = data.location;
+  
+  if (data.childrenCount) {
+    setChildrenCount(data.childrenCount);
+  }
+  
+  window.showToast('Données chargées depuis Wikidata', 'success');
+};
+
+const handleWikidataImportError = (error: string) => {
+  console.error('[EditModal] Erreur import Wikidata:', error);
+  window.showToast(error, 'error');
+};
+
+// Fermeture de la modale
+const closeModal = () => {
   emit('close');
-}
-
-const openModal = (type: 'period' | 'event' | 'story', mode: 'create' | 'edit', data?: any) => {
-  modalType.value = type;
-  isCreateMode.value = mode === 'create';
-  open.value = true;
-
-  form.qid = '';
-  form.title.fr = '';
-  form.title.en = '';
-  form.description.fr = '';
-  form.description.en = '';
-  form.date = '';
-  form.startDate = '';
-  form.endDate = '';
-  form.location = '';
-
-  if (mode === 'edit' && data) {
-    form.qid = data.wikidata_id || data.qid || data.wikidataId || '';
-    form.title.fr = data.label?.fr || data.title?.fr || '';
-    form.title.en = data.label?.en || data.title?.en || '';
-    form.description.fr = data.description?.fr || '';
-    form.description.en = data.description?.en || '';
-    form.date = data.date || '';
-    form.startDate = data.start_date || '';
-    form.endDate = data.end_date || '';
-    form.location = data.location || '';
-  }
-}
-
-const showError = (message: string) => {
-  window.showToast(message, 'error');
 };
 
-const showSuccess = (message: string) => {
-  window.showToast(message, 'success');
-};
-
-const fillFromWikidata = async () => {
-  if (!form.qid) {
-    showError('Veuillez entrer un Q-id Wikidata');
-    return;
-  }
-
-  try {
-    console.log('[EditModal] Début du chargement Wikidata pour Q-id:', form.qid);
-    let data;
-    if (props.type === 'period') {
-      data = await wikidataService.loadPeriod(form.qid);
-      console.log('[EditModal] Données période reçues:', data);
-      directChildrenCount.value = data.children?.length?.toString() || '0';
-    } else if (props.type === 'event') {
-      data = await wikidataService.loadEvent(form.qid);
-      console.log('[EditModal] Données événement reçues:', data);
-    } else {
-      showError('Type non supporté pour Wikidata');
-      return;
-    }
-
-    if (data) {
-      console.log('[EditModal] Traitement des données reçues');
-      
-      // Gestion des labels
-      if (typeof data.label === 'string') {
-        console.log('[EditModal] Label unique reçu:', data.label);
-        form.title.fr = data.label;
-        form.title.en = data.label;
-      } else if (typeof data.label === 'object' && data.label !== null) {
-        console.log('[EditModal] Labels reçus:', data.label);
-        form.title.fr = data.label.fr || '';
-        form.title.en = data.label.en || '';
-      }
-
-      // Gestion des descriptions
-      if (data.description) {
-        console.log('[EditModal] Descriptions reçues:', data.description);
-        form.description.fr = data.description.fr || '';
-        form.description.en = data.description.en || '';
-      }
-
-      // Gestion des dates
-      if (props.type === 'event') {
-        const eventData = data as { date?: string };
-        if (eventData.date) {
-          console.log('[EditModal] Date reçue:', eventData.date);
-          form.date = eventData.date;
-        }
-      } else if (props.type === 'period' && 'temporalData' in data && Array.isArray(data.temporalData) && data.temporalData.length > 0) {
-        console.log('[EditModal] Données temporelles reçues:', data.temporalData);
-        const temporalData = data.temporalData[0];
-        if (temporalData.startDate) {
-          form.startDate = temporalData.startDate;
-        }
-        if (temporalData.endDate) {
-          form.endDate = temporalData.endDate;
-        }
-        if (temporalData.location) {
-          form.location = temporalData.location;
-        }
-      }
-
-      console.log('[EditModal] État final du formulaire:', form);
-      showSuccess('Données chargées depuis Wikidata');
-    }
-  } catch (error) {
-    console.error('[EditModal] Erreur lors du chargement depuis Wikidata:', error);
-    showError('Erreur lors du chargement depuis Wikidata');
-  }
-};
-
+// Gestion des clics sur l'overlay
 const handleOverlayClick = (event: MouseEvent) => {
   if (event.target === event.currentTarget) {
     closeModal();
   }
 };
 
+// Gestion de la touche Escape
 const handleEscapeKey = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
     closeModal();
   }
 };
+
+// Surveillance des changements de données
+watch(
+  () => props.data,
+  (val) => {
+    updateForm(val);
+  },
+  { immediate: true }
+);
+
+// Surveillance des changements de mode
+watch(
+  () => props.mode,
+  () => {
+    if (props.mode === 'create') {
+      resetForm();
+    }
+  }
+);
+
+// Surveillance des changements de type
+watch(
+  () => props.type,
+  () => {
+    resetForm();
+  }
+);
 
 onMounted(() => {
   document.addEventListener('keydown', handleEscapeKey);
