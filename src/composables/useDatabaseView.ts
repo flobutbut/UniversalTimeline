@@ -333,7 +333,7 @@ export function useDatabaseView() {
   return {
     // États
     state,
-    modalState: modalState.value,
+    modalState,
     searchState: searchState.value,
     dragDropState: dragDropState.value,
     fullStories,

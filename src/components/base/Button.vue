@@ -21,7 +21,7 @@
 import { computed } from 'vue';
 
 interface Props {
-  variant?: 'primary' | 'secondary' | 'tertiary';
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'danger';
   type?: 'button' | 'submit' | 'reset';
   icon?: string;
   iconOnly?: boolean;
@@ -101,5 +101,15 @@ defineEmits<{
 
 .base-button__text {
   line-height: 1;
+}
+
+.base-button--danger {
+  background-color: var(--color-error);
+  color: white;
+  border: 1px solid var(--color-error);
+}
+
+.base-button--danger:hover:not(.base-button--disabled) {
+  background-color: var(--color-error-dark);
 }
 </style> 

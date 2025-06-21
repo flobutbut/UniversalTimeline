@@ -130,6 +130,14 @@
         
         <div class="modal-footer">
           <div class="footer-left">
+            <Button
+              v-if="mode === 'edit'"
+              variant="danger"
+              type="button"
+              @click="handleDelete"
+            >
+              Supprimer
+            </Button>
             <WikidataImportButton
               v-if="form.qid && type !== 'story'"
               :qid="form.qid"
@@ -178,17 +186,16 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'submit', data: any): void;
+  (e: 'delete'): void;
 }>();
 
 // Initialisation des composables
-const { form, state: editState, isValid, resetForm, updateForm, prepareSubmitData, setLoading, setError, setQidError, setQidExists, setChildrenCount } = useEditModal(props.type, props.mode, props.data);
-
-const { validateQid: validateQidParentChild, updateChildrenCount: updateChildrenCountParentChild } = useParentChildManagement();
+const { form, state: editState, isValid, resetForm, updateForm, prepareSubmitData, setQidError, setQidExists, setChildrenCount } = useEditModal(props.type, props.mode, props.data);
+const { validateQid: validateQidParentChild } = useParentChildManagement();
 
 // Validation du Q-id
 const validateQid = async () => {
   if (props.type === 'story') return;
-
   const validation = await validateQidParentChild(form.qid, props.type);
   setQidError(validation.error);
   setQidExists(validation.exists, validation.item);
@@ -206,30 +213,27 @@ const handleSubmit = () => {
   }
 };
 
+const handleDelete = () => {
+  emit('delete');
+};
+
 // Gestion de l'import Wikidata
 const handleWikidataImportSuccess = (data: any) => {
-  console.log('[EditModal] Import Wikidata réussi:', data);
-  
-  // Mise à jour du formulaire avec les données importées
   if (data.title) {
     form.title.fr = data.title.fr || '';
     form.title.en = data.title.en || '';
   }
-  
   if (data.description) {
     form.description.fr = data.description.fr || '';
     form.description.en = data.description.en || '';
   }
-  
   if (data.startDate) form.startDate = data.startDate;
   if (data.endDate) form.endDate = data.endDate;
   if (data.date) form.date = data.date;
   if (data.location) form.location = data.location;
-  
   if (data.childrenCount) {
     setChildrenCount(data.childrenCount);
   }
-  
   window.showToast('Données chargées depuis Wikidata', 'success');
 };
 
@@ -243,47 +247,25 @@ const closeModal = () => {
   emit('close');
 };
 
-// Gestion des clics sur l'overlay
+// Gestionnaires d'événements
 const handleOverlayClick = (event: MouseEvent) => {
   if (event.target === event.currentTarget) {
     closeModal();
   }
 };
 
-// Gestion de la touche Escape
 const handleEscapeKey = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
     closeModal();
   }
 };
 
-// Surveillance des changements de données
-watch(
-  () => props.data,
-  (val) => {
-    updateForm(val);
-  },
-  { immediate: true }
-);
+// Watchers
+watch(() => props.data, (val) => { updateForm(val); }, { immediate: true });
+watch(() => props.mode, () => { if (props.mode === 'create') { resetForm(); } });
+watch(() => props.type, () => { resetForm(); });
 
-// Surveillance des changements de mode
-watch(
-  () => props.mode,
-  () => {
-    if (props.mode === 'create') {
-      resetForm();
-    }
-  }
-);
-
-// Surveillance des changements de type
-watch(
-  () => props.type,
-  () => {
-    resetForm();
-  }
-);
-
+// Hooks de cycle de vie
 onMounted(() => {
   document.addEventListener('keydown', handleEscapeKey);
 });
@@ -333,22 +315,18 @@ onUnmounted(() => {
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-2xl);
 }
-
 .form-row {
   display: flex;
   gap: var(--spacing-md);
   width: 100%;
 }
-
 .form-group {
   flex: 1;
   min-width: 0;
 }
-
 .form-group.full-width {
   flex: 1 1 100%;
 }
-
 .form-group label {
   font-weight: 600;
   margin-bottom: var(--spacing-xs);
@@ -396,70 +374,12 @@ onUnmounted(() => {
   align-items: center;
   margin-top: var(--spacing-lg);
 }
-.footer-left {
+.footer-left, .footer-right {
   display: flex;
   gap: 10px;
   align-items: center;
 }
-.footer-right {
-  display: flex;
-  gap: 10px;
-}
-.wikidata-button {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9em;
-}
-.wikidata-button:hover {
-  background-color: #2980b9;
-}
-.wikidata-button i {
-  font-size: 1em;
-}
-.cancel-button {
-  background: none;
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-xl);
-  cursor: pointer;
-  font-size: var(--font-size-base);
-  transition: background var(--transition-fast);
-}
-.cancel-button:hover {
-  background: var(--color-surface-hover);
-}
-.submit-button {
-  background: var(--color-primary);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-xl);
-  font-weight: 600;
-  cursor: pointer;
-  font-size: var(--font-size-base);
-  transition: background var(--transition-fast);
-}
-.submit-button:hover {
-  background: var(--color-primary-dark);
-}
-@media (max-width: 900px) {
-  .modal-content {
-    min-width: 95vw;
-    padding: var(--spacing-lg);
-  }
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-}
-.loading-overlay {
+.loading-overlay, .error-message {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -482,31 +402,10 @@ onUnmounted(() => {
   }
 }
 .error-message {
-  padding: var(--spacing-md);
-  margin: var(--spacing-md) 0;
-  border-radius: var(--radius-md);
   background-color: var(--color-error);
   color: var(--color-neutral-0);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  align-items: center;
-}
-.error-message button {
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--color-neutral-0);
-  color: var(--color-error);
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-.error-message button:hover {
-  background-color: var(--color-neutral-100);
 }
 .children-count {
-  display: flex;
-  align-items: center;
   color: var(--color-text-light);
   font-size: var(--font-size-sm);
   margin-left: var(--spacing-sm);

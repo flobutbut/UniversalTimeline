@@ -160,6 +160,7 @@
       :error="state.loadingError"
       @close="closeEditModal"
       @submit="handleSave"
+      @delete="handleDelete"
     />
   </div>
 </template>
@@ -172,6 +173,7 @@ import EditModal from './EditModal.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import { useDatabaseView } from '@/composables/useDatabaseView';
 import { useDatabaseSave } from '@/composables/useDatabaseSave';
+import { useDatabaseDelete } from '@/composables/useDatabaseDelete';
 
 const databaseService = DatabaseViewService.getInstance();
 
@@ -201,22 +203,32 @@ const {
   handleDragLeave,
   selectStory,
   removePeriodFromStory,
-  removeEventFromStory
+  removeEventFromStory,
+  sharedLoading,
+  sharedError
 } = useDatabaseView();
 
 const { loading: saveLoading, handleSave: saveHandler } = useDatabaseSave();
+const { loading: deleteLoading, handleDelete: deleteHandler } = useDatabaseDelete();
 
-// Fonction de sauvegarde qui utilise le composable
 const handleSave = async (formData: any) => {
   const success = await saveHandler(
     formData, 
-    modalState.currentType, 
-    modalState.currentMode, 
-    modalState.currentItem
+    modalState.value.currentType, 
+    modalState.value.currentMode, 
+    modalState.value.currentItem
   );
   
   if (success) {
     closeAddModal();
+    closeEditModal();
+  }
+};
+
+const handleDelete = async () => {
+  console.log('[DatabaseView] handleDelete a été appelé.');
+  const success = await deleteHandler(modalState.value.currentItem, modalState.value.currentType);
+  if (success) {
     closeEditModal();
   }
 };

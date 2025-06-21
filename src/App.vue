@@ -6,6 +6,7 @@ import PeriodGrid from '@/views/HomeView/PeriodGrid.vue'
 import DatabaseView from '@/views/DatabaseView/DatabaseView.vue'
 import GraphView from '@/views/GraphView/GraphView.vue'
 import Toast from '@/components/Toast.vue'
+import ConfirmModal from '@/components/base/ConfirmModal.vue'
 import { WikidataQueryService, StoryService } from '@/services'
 import type { Period } from '@/types/geological'
 
@@ -35,6 +36,7 @@ const displayedPeriods = ref<Period[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 const toast = ref<InstanceType<typeof Toast> | null>(null)
+const confirmModal = ref<InstanceType<typeof ConfirmModal> | null>(null)
 
 const handlePeriodClick = async (period: Period) => {
   if (currentPeriod.value) {
@@ -142,6 +144,16 @@ window.toast = {
 
 // Pour la compatibilité ascendante, on garde window.showToast
 window.showToast = window.toast.show;
+
+// Exposer la modale de confirmation
+window.showConfirm = async (title: string, message: string): Promise<boolean> => {
+  if (confirmModal.value) {
+    return await confirmModal.value.show(title, message);
+  }
+  // Fallback au cas où la modale n'est pas prête
+  console.warn('ConfirmModal non trouvé, retour à window.confirm');
+  return window.confirm(`${title}\n${message}`);
+};
 </script>
 
 <template>
@@ -164,6 +176,7 @@ window.showToast = window.toast.show;
       <GraphView v-else />
     </main>
     <Toast ref="toast" />
+    <ConfirmModal ref="confirmModal" />
   </div>
 </template>
 

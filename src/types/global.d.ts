@@ -9,6 +9,7 @@ declare global {
   interface Window {
     showToast: (message: string, type?: 'info' | 'success' | 'error', duration?: number) => void;
     toast: ToastControls;
+    showConfirm: (title: string, message: string) => Promise<boolean>;
   }
 }
 

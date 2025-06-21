@@ -754,9 +754,17 @@ export class DatabaseQueryService {
   public async deletePeriod(periodId: string): Promise<void> {
     try {
       await axios.delete(`${API_BASE_URL}/periods/${periodId}`);
-      window.showToast('Période supprimée avec succès', 'success');
-    } catch (error: any) {
-      window.showToast('Erreur lors de la suppression de la période', 'error');
+    } catch (error) {
+      console.error(`[DatabaseQueryService] Erreur lors de la suppression de la période ${periodId}:`, error);
+      throw error;
+    }
+  }
+
+  public async deleteStory(storyId: string): Promise<void> {
+    try {
+      await axios.delete(`${API_BASE_URL}/stories/${storyId}`);
+    } catch (error) {
+      console.error(`[DatabaseQueryService] Erreur lors de la suppression de la story ${storyId}:`, error);
       throw error;
     }
   }
