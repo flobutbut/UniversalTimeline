@@ -31,6 +31,16 @@ async function loadInitialData() {
   }
 }
 
+// Fonction pour s'assurer que les données sont chargées (sans recharger si déjà en cache)
+async function ensureDataLoaded() {
+  if (!loaded || periods.value.length === 0) {
+    console.log('[DatabaseDataStore] Données non chargées, chargement nécessaire');
+    await loadInitialData();
+  } else {
+    console.log('[DatabaseDataStore] Données déjà en cache, pas de chargement');
+  }
+}
+
 function updatePeriods(newPeriods: ListPeriod[]) {
   periods.value = newPeriods;
 }
@@ -58,6 +68,7 @@ export function useDatabaseDataStore() {
     loading,
     error,
     loadInitialData,
+    ensureDataLoaded,
     updatePeriods,
     updateEvents,
     updateStories,

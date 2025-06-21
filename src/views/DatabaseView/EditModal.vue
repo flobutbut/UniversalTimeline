@@ -161,8 +161,6 @@
 import { watch, onMounted, onUnmounted } from 'vue';
 import { useEditModal } from '@/composables/useEditModal';
 import { useParentChildManagement } from '@/composables/useParentChildManagement';
-import { EditFormValidator } from '@/validators/editFormValidators';
-import { ConflictResolutionService } from '@/services/ConflictResolutionService';
 import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';
 import WikidataImportButton from '@/components/WikidataImportButton.vue';
@@ -187,8 +185,6 @@ const { form, state: editState, isValid, resetForm, updateForm, prepareSubmitDat
 
 const { validateQid: validateQidParentChild, updateChildrenCount: updateChildrenCountParentChild } = useParentChildManagement();
 
-const conflictService = ConflictResolutionService.getInstance();
-
 // Validation du Q-id
 const validateQid = async () => {
   if (props.type === 'story') return;
@@ -199,65 +195,14 @@ const validateQid = async () => {
 };
 
 // Gestion de la soumission du formulaire
-const handleSubmit = async () => {
+const handleSubmit = () => {
   try {
-    setLoading(true);
-    setError(null);
-
-    console.log('[EditModal] État du formulaire avant soumission:', {
-      qid: form.qid,
-      title: form.title,
-      description: form.description,
-      startDate: form.startDate,
-      endDate: form.endDate,
-      location: form.location
-    });
-
-    // Validation du formulaire
     const formData = prepareSubmitData();
-    const validation = EditFormValidator.validateForm(formData, props.type);
-    
-    if (!validation.isValid) {
-      setError(validation.errors.join(', '));
-      return;
-    }
-
-    // Validation du Q-id si nécessaire
-    if (props.type !== 'story') {
-      const qidValidation = EditFormValidator.validateQid(form.qid);
-      if (!qidValidation.isValid) {
-        setError(qidValidation.errors.join(', '));
-        return;
-      }
-    }
-
-    // Détection et résolution des conflits
-    if (props.type !== 'story') {
-      const conflictInfo = await conflictService.detectConflict(form.qid, props.type, props.data?.id);
-      
-      if (conflictInfo.hasConflict) {
-        // Résolution automatique (comportement actuel)
-        const resolved = await conflictService.resolveConflictAutomatically(conflictInfo);
-        if (!resolved) {
-          setError('Impossible de résoudre le conflit');
-          return;
-        }
-      }
-    }
-
-    console.log('[EditModal] Données formatées pour l\'envoi:', JSON.stringify(formData, null, 2));
-
-    // Émettre l'événement submit
     emit('submit', formData);
-    
-    // Attendre un peu pour s'assurer que l'événement est traité
-    await new Promise(resolve => setTimeout(resolve, 100));
     closeModal();
   } catch (error: any) {
-    console.error('[EditModal] Erreur lors de la soumission:', error);
-    setError('Erreur lors de la soumission du formulaire');
-  } finally {
-    setLoading(false);
+    console.error('[EditModal] Erreur lors de la préparation des données:', error);
+    window.showToast('Erreur lors de la préparation des données', 'error');
   }
 };
 

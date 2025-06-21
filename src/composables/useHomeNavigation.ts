@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import { WikidataQueryService, StoryService } from '@/services';
 import type { Period } from '@/types/geological';
+import { useDatabaseDataStore } from './useDatabaseDataStore';
 
 export interface HomeNavigationState {
   loading: boolean;
@@ -13,6 +14,7 @@ export interface HomeNavigationState {
 export function useHomeNavigation() {
   const timelineService = WikidataQueryService.getInstance();
   const storyService = StoryService.getInstance();
+  const { ensureDataLoaded: sharedEnsureDataLoaded } = useDatabaseDataStore();
 
   // États réactifs
   const state = ref<HomeNavigationState>({
@@ -96,28 +98,7 @@ export function useHomeNavigation() {
 
   // Fonction pour charger les données initiales
   const loadInitialData = async () => {
-    console.log(`[HomeView] Montage du composant - Chargement initial`);
-    state.value.loading = true;
-    state.value.error = null;
-    try {
-      const story = await storyService.loadPlanetEarth();
-      console.log('[HomeView] Story Planète Terre brute:', story);
-      // Si la story a des enfants, on les utilise
-      if (story.children && Array.isArray(story.children) && story.children.length > 0) {
-        state.value.displayedPeriods = story.children;
-      } else {
-        // Sinon, on charge les éons principaux (ou une autre racine)
-        const MAIN_EONS = ['Q104460', 'Q104168', 'Q104162', 'Q101313']; // IDs des éons principaux
-        const mainEons = await Promise.all(MAIN_EONS.map(id => timelineService.loadPeriod(id)));
-        state.value.displayedPeriods = mainEons.filter(Boolean);
-      }
-      console.log('displayedPeriods après fallback:', state.value.displayedPeriods);
-    } catch (e) {
-      console.error(`[HomeView] Erreur lors du chargement initial:`, e);
-      state.value.error = e instanceof Error ? e.message : 'Une erreur est survenue';
-    } finally {
-      state.value.loading = false;
-    }
+    await sharedEnsureDataLoaded();
   };
 
   return {

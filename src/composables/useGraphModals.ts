@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { useDatabaseDataStore } from './useDatabaseDataStore';
+import { useDatabaseSave } from './useDatabaseSave';
 import { DatabaseViewService } from '@/services/DatabaseViewService';
 import { DatabaseQueryService } from '@/services/DatabaseQueryService';
 import type { ApiPeriod } from '@/types/geological';
@@ -7,7 +8,8 @@ import type { ApiPeriod } from '@/types/geological';
 export function useGraphModals() {
   const databaseViewService = DatabaseViewService.getInstance();
   const databaseQueryService = DatabaseQueryService.getInstance();
-  const { loadInitialData: sharedLoadInitialData, updatePeriods: sharedUpdatePeriods } = useDatabaseDataStore();
+  const { updatePeriods: sharedUpdatePeriods } = useDatabaseDataStore();
+  const { handleSave: saveHandler } = useDatabaseSave();
 
   // États des modales
   const showEditModal = ref(false);
@@ -68,31 +70,23 @@ export function useGraphModals() {
       
       console.log('[GraphView] IDs:', { oldId, newQid, currentWikidataId: selectedPeriod.value.wikidata_id });
       
-      // Mise à jour de la période via le service de requête
-      await databaseQueryService.updatePeriod(selectedPeriod.value.id, formData);
+      // Utiliser useDatabaseSave pour la cohérence avec les autres vues
+      const success = await saveHandler(formData, 'period', 'edit', selectedPeriod.value);
       
-      // Si le Q-id a changé, mettre à jour les relations
-      if (selectedPeriod.value.wikidata_id !== newQid) {
-        console.log('[GraphView] Q-id modifié, mise à jour des relations');
-        // Récupérer l'UUID de la nouvelle période
-        const newPeriod = await databaseQueryService.getPeriodByWikidataId(newQid);
-        if (!newPeriod) {
-          throw new Error('Nouvelle période non trouvée');
+      if (success) {
+        // Si le Q-id a changé, mettre à jour les relations
+        if (selectedPeriod.value.wikidata_id !== newQid) {
+          console.log('[GraphView] Q-id modifié, mise à jour des relations');
+          // Récupérer l'UUID de la nouvelle période
+          const newPeriod = await databaseQueryService.getPeriodByWikidataId(newQid);
+          if (!newPeriod) {
+            throw new Error('Nouvelle période non trouvée');
+          }
+          await databaseQueryService.updatePeriodRelations(oldId, newPeriod.id);
         }
-        await databaseQueryService.updatePeriodRelations(oldId, newPeriod.id);
+        
+        closeEditModal();
       }
-      
-      // Mise à jour locale du store partagé pour éviter le rechargement
-      const { periods } = useDatabaseDataStore();
-      const updatedPeriods = periods.value.map(p => 
-        p.id === selectedPeriod.value?.id 
-          ? { ...p, label: formData.title, startDate: formData.startDate, endDate: formData.endDate }
-          : p
-      );
-      sharedUpdatePeriods(updatedPeriods);
-      
-      closeEditModal();
-      window?.showToast?.('Période mise à jour avec succès', 'success');
     } catch (error) {
       console.error('[GraphView] Erreur lors de la mise à jour:', error);
       window?.showToast?.(error instanceof Error ? error.message : 'Erreur lors de la mise à jour de la période', 'error');

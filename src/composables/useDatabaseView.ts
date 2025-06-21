@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useDatabaseDataStore } from './useDatabaseDataStore';
 import { DatabaseViewService } from '@/services/DatabaseViewService';
 import { DatabaseQueryService } from '@/services/DatabaseQueryService';
@@ -39,7 +39,8 @@ export function useDatabaseView() {
     stories,
     loading: sharedLoading,
     error: sharedError,
-    loadInitialData: sharedLoadInitialData
+    loadInitialData: sharedLoadInitialData,
+    ensureDataLoaded: sharedEnsureDataLoaded
   } = useDatabaseDataStore();
 
   // États réactifs propres à la vue
@@ -72,6 +73,11 @@ export function useDatabaseView() {
   const fullStories = ref<Map<string, Story>>(new Map());
   const selectedStory = ref<Story | null>(null);
 
+  // Synchroniser state.loading avec sharedLoading
+  watch(sharedLoading, (newValue) => {
+    state.value.loading = newValue;
+  }, { immediate: true });
+
   // Computed properties pour le filtrage
   const filteredPeriods = computed(() => {
     const searchLower = searchState.value.periodSearch.toLowerCase();
@@ -99,6 +105,10 @@ export function useDatabaseView() {
       const labelFr = event.label?.fr;
       return typeof labelFr === 'string' ? labelFr.toLowerCase().includes(searchLower) : false;
     });
+  });
+
+  const filteredStories = computed(() => {
+    return stories.value;
   });
 
   // Fonctions pour gérer les modales
@@ -149,13 +159,43 @@ export function useDatabaseView() {
       state.value.loadingDetails = true;
       state.value.loadingError = null;
       
-      // Charger les données complètes de l'élément
+      // Utiliser les données du store partagé au lieu de faire des appels API
       if (type === 'period') {
-        modalState.value.currentItem = await databaseService.loadFullPeriod(item.id);
+        const period = periods.value.find(p => p.id === item.id);
+        if (period) {
+          modalState.value.currentItem = {
+            ...period,
+            description: (period as any).description || { fr: '', en: '' },
+            categories: period.categories || []
+          };
+          state.value.loadingDetails = false;
+        } else {
+          throw new Error('Période non trouvée dans le store');
+        }
       } else if (type === 'event') {
-        modalState.value.currentItem = await databaseService.loadFullEvent(item.id);
+        const event = events.value.find(e => e.id === item.id);
+        if (event) {
+          modalState.value.currentItem = {
+            ...event,
+            description: (event as any).description || { fr: '', en: '' },
+            categories: event.categories || []
+          };
+          state.value.loadingDetails = false;
+        } else {
+          throw new Error('Événement non trouvé dans le store');
+        }
       } else if (type === 'story') {
-        modalState.value.currentItem = await databaseService.loadFullStory(item.id);
+        const story = stories.value.find(s => s.id === item.id);
+        if (story) {
+          modalState.value.currentItem = {
+            ...story,
+            description: (story as any).description || { fr: '', en: '' },
+            categories: story.categories || []
+          };
+          state.value.loadingDetails = false;
+        } else {
+          throw new Error('Story non trouvée dans le store');
+        }
       }
       modalState.value.showEditModal = true;
     } catch (error: any) {
@@ -166,7 +206,6 @@ export function useDatabaseView() {
         state.value.loadingError = 'Erreur lors du chargement des données';
         window.showToast('Erreur lors du chargement des données', 'error');
       }
-    } finally {
       state.value.loadingDetails = false;
     }
   };
@@ -178,7 +217,7 @@ export function useDatabaseView() {
 
   // Fonction pour charger les données initiales (utilise le store partagé)
   const loadInitialData = async () => {
-    await sharedLoadInitialData();
+    await sharedEnsureDataLoaded();
   };
 
   // Gestion du drag & drop
@@ -201,17 +240,27 @@ export function useDatabaseView() {
     try {
       if (dragDropState.value.draggedItem.type === 'period') {
         await queryService.addPeriodToStory(selectedStory.value.id, dragDropState.value.draggedItem.data.id);
-        // Recharger les données de la story
-        const updatedStory = await databaseService.loadFullStory(selectedStory.value.id);
-        fullStories.value.set(selectedStory.value.id, updatedStory);
+        // Mise à jour locale de la story sélectionnée
+        const updatedStory = { ...selectedStory.value };
+        if (!updatedStory.periods) updatedStory.periods = [];
+        const draggedItem = dragDropState.value.draggedItem;
+        if (draggedItem && !updatedStory.periods.find(p => p.id === draggedItem.data.id)) {
+          updatedStory.periods.push(draggedItem.data);
+        }
         selectedStory.value = updatedStory;
+        fullStories.value.set(selectedStory.value.id, updatedStory);
         window.showToast('Période ajoutée à la story avec succès', 'success');
       } else if (dragDropState.value.draggedItem.type === 'event') {
         await queryService.addEventToStory(selectedStory.value.id, dragDropState.value.draggedItem.data.id);
-        // Recharger les données de la story
-        const updatedStory = await databaseService.loadFullStory(selectedStory.value.id);
-        fullStories.value.set(selectedStory.value.id, updatedStory);
+        // Mise à jour locale de la story sélectionnée
+        const updatedStory = { ...selectedStory.value };
+        if (!updatedStory.events) updatedStory.events = [];
+        const draggedItem = dragDropState.value.draggedItem;
+        if (draggedItem && !updatedStory.events.find(e => e.id === draggedItem.data.id)) {
+          updatedStory.events.push(draggedItem.data);
+        }
         selectedStory.value = updatedStory;
+        fullStories.value.set(selectedStory.value.id, updatedStory);
         window.showToast('Événement ajouté à la story avec succès', 'success');
       }
     } catch (error) {
@@ -249,10 +298,13 @@ export function useDatabaseView() {
 
     try {
       await queryService.removePeriodFromStory(selectedStory.value.id, periodId);
-      // Recharger les données de la story
-      const updatedStory = await databaseService.loadFullStory(selectedStory.value.id);
-      fullStories.value.set(selectedStory.value.id, updatedStory);
+      // Mise à jour locale de la story sélectionnée
+      const updatedStory = { ...selectedStory.value };
+      if (updatedStory.periods) {
+        updatedStory.periods = updatedStory.periods.filter(p => p.id !== periodId);
+      }
       selectedStory.value = updatedStory;
+      fullStories.value.set(selectedStory.value.id, updatedStory);
       window.showToast('Période supprimée de la story avec succès', 'success');
     } catch (error) {
       window.showToast('Erreur lors de la suppression de la période de la story', 'error');
@@ -265,10 +317,13 @@ export function useDatabaseView() {
 
     try {
       await queryService.removeEventFromStory(selectedStory.value.id, eventId);
-      // Recharger les données de la story
-      const updatedStory = await databaseService.loadFullStory(selectedStory.value.id);
-      fullStories.value.set(selectedStory.value.id, updatedStory);
+      // Mise à jour locale de la story sélectionnée
+      const updatedStory = { ...selectedStory.value };
+      if (updatedStory.events) {
+        updatedStory.events = updatedStory.events.filter(e => e.id !== eventId);
+      }
       selectedStory.value = updatedStory;
+      fullStories.value.set(selectedStory.value.id, updatedStory);
       window.showToast('Événement supprimé de la story avec succès', 'success');
     } catch (error) {
       window.showToast('Erreur lors de la suppression de l\'événement de la story', 'error');
@@ -277,7 +332,7 @@ export function useDatabaseView() {
 
   return {
     // États
-    state: state.value,
+    state,
     modalState: modalState.value,
     searchState: searchState.value,
     dragDropState: dragDropState.value,
@@ -287,6 +342,7 @@ export function useDatabaseView() {
     // Computed
     filteredPeriods,
     filteredEvents,
+    filteredStories,
     
     // Fonctions modales
     handleAddPeriod,

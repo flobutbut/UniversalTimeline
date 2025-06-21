@@ -1,8 +1,14 @@
 // Types globaux pour l'application
 
 declare global {
+  interface ToastControls {
+    show: (message: string, type?: 'info' | 'success' | 'error', duration?: number) => void;
+    hide: () => void;
+  }
+  
   interface Window {
-    showToast: (message: string, type?: 'info' | 'success' | 'error') => void;
+    showToast: (message: string, type?: 'info' | 'success' | 'error', duration?: number) => void;
+    toast: ToastControls;
   }
 }
 

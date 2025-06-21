@@ -68,7 +68,7 @@
         </div>
         <div class="content">
           <DatabaseCard
-            v-for="story in databaseService.getStories()"
+            v-for="story in filteredStories"
             :key="story.id"
             type="story"
             :title="story.title.fr"
@@ -185,6 +185,7 @@ const {
   selectedStory,
   filteredPeriods,
   filteredEvents,
+  filteredStories,
   handleAddPeriod,
   handleAddEvent,
   handleAddStory,

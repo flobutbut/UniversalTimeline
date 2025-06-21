@@ -12,19 +12,36 @@ import { ref } from 'vue'
 const visible = ref(false)
 const message = ref('')
 const type = ref<'info' | 'success' | 'error'>('info')
+let timeoutId: number | null = null;
 
 const show = (msg: string, toastType: 'info' | 'success' | 'error' = 'info', duration: number = 3000) => {
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+    timeoutId = null;
+  }
+
   message.value = msg
   type.value = toastType
   visible.value = true
 
-  setTimeout(() => {
-    visible.value = false
-  }, duration)
+  if (duration > 0) {
+    timeoutId = window.setTimeout(() => {
+      visible.value = false
+    }, duration)
+  }
+}
+
+const hide = () => {
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+    timeoutId = null;
+  }
+  visible.value = false;
 }
 
 defineExpose({
-  show
+  show,
+  hide
 })
 </script>
 

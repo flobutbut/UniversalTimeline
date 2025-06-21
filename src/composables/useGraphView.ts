@@ -26,10 +26,13 @@ export function useGraphView() {
   const databaseViewService = DatabaseViewService.getInstance();
   const databaseQueryService = DatabaseQueryService.getInstance();
   const {
-    periods,
+    periods: sharedPeriods,
+    events: sharedEvents,
+    stories: sharedStories,
     loading: sharedLoading,
     error: sharedError,
     loadInitialData: sharedLoadInitialData,
+    ensureDataLoaded: sharedEnsureDataLoaded,
     updatePeriods: sharedUpdatePeriods
   } = useDatabaseDataStore();
 
@@ -54,7 +57,7 @@ export function useGraphView() {
 
   // Computed properties
   const allPeriods = computed(() =>
-    periods.value.map((p: any) => ({
+    sharedPeriods.value.map((p: any) => ({
       ...p,
       hasParent: typeof p.hasParent === 'boolean' ? p.hasParent : !!(p.parent_id),
       children: Array.isArray(p.children) ? p.children : [],
@@ -158,9 +161,9 @@ export function useGraphView() {
     }
   };
 
-  // Fonction de chargement (utilise le store partagé)
+  // Fonction pour charger les données initiales (utilise le store partagé)
   const loadInitialData = async () => {
-    await sharedLoadInitialData();
+    await sharedEnsureDataLoaded();
   };
 
   return {

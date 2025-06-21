@@ -131,12 +131,17 @@ onMounted(async () => {
 })
 
 // Exposer le toast pour qu'il soit accessible globalement
-const showToast = (message: string, type: 'info' | 'success' | 'error' = 'info') => {
-  toast.value?.show(message, type)
+window.toast = {
+  show: (message: string, type: 'info' | 'success' | 'error' = 'info', duration: number = 3000) => {
+    toast.value?.show(message, type, duration)
+  },
+  hide: () => {
+    toast.value?.hide()
+  }
 }
 
-// Exposer la fonction showToast globalement
-window.showToast = showToast
+// Pour la compatibilité ascendante, on garde window.showToast
+window.showToast = window.toast.show;
 </script>
 
 <template>
