@@ -19,7 +19,7 @@
       </div>
       <form v-else @submit.prevent="handleSubmit" class="modal-form">
         <div class="form-content">
-          <div class="form-row">
+          <div class="form-row" v-if="type !== 'story'">
             <div class="form-group full-width">
               <Input
                 v-model="form.qid"
@@ -98,7 +98,7 @@
             </div>
           </div>
 
-          <div class="form-row">
+          <div class="form-row" v-if="type !== 'story'">
             <div class="form-group full-width">
               <Input
                 v-model="form.location"
