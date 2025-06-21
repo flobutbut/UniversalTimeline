@@ -27,7 +27,7 @@ export class WikidataQueryService {
 
   private buildTemporalQuery(periodId: string): string {
     return `
-      SELECT ?item ?itemLabel ?itemDescriptionfr ?itemDescriptionen ?startDate ?endDate ?inceptionDate ?replacedByDate ?dissolvedDate WHERE {
+      SELECT ?item ?itemLabelFr ?itemLabelEn ?itemDescriptionfr ?itemDescriptionen ?startDate ?endDate ?inceptionDate ?replacedByDate ?dissolvedDate WHERE {
         VALUES ?item { wd:${periodId} }
 
         # Dates directes (P580/P582) - priorité haute
@@ -55,10 +55,9 @@ export class WikidataQueryService {
         # Date de dissolution/abolition (P576) - fallback pour endDate
         OPTIONAL { ?item wdt:P576 ?dissolvedDate. }
 
-        SERVICE wikibase:label { 
-          bd:serviceParam wikibase:language "fr,en".
-          ?item rdfs:label ?itemLabel.
-        }
+        # Labels multilingues
+        OPTIONAL { ?item rdfs:label ?itemLabelFr. FILTER(LANG(?itemLabelFr) = "fr") }
+        OPTIONAL { ?item rdfs:label ?itemLabelEn. FILTER(LANG(?itemLabelEn) = "en") }
         
         OPTIONAL {
           ?item schema:description ?itemDescriptionfr.
@@ -67,6 +66,11 @@ export class WikidataQueryService {
         OPTIONAL {
           ?item schema:description ?itemDescriptionen.
           FILTER(LANG(?itemDescriptionen) = "en")
+        }
+        
+        SERVICE wikibase:label { 
+          bd:serviceParam wikibase:language "fr,en".
+          ?item rdfs:label ?itemLabel.
         }
       }
     `;
@@ -141,8 +145,8 @@ export class WikidataQueryService {
 
     // Gestion des labels et descriptions
     const label = {
-      fr: binding.itemLabel?.value || '',
-      en: binding.itemLabel?.value || ''
+      fr: binding.itemLabelFr?.value || '',
+      en: binding.itemLabelEn?.value || ''
     };
     const description = {
       fr: binding.itemDescriptionfr?.value || '',
@@ -247,7 +251,8 @@ export class WikidataQueryService {
         // Extraire les dates des différents bindings
         let startDate = '';
         let endDate = '';
-        let itemLabel = '';
+        let itemLabelFr = '';
+        let itemLabelEn = '';
         let itemDescriptionFr = '';
         let itemDescriptionEn = '';
         let inceptionDate = '';
@@ -255,8 +260,11 @@ export class WikidataQueryService {
         let dissolvedDate = '';
         
         temporalResponse.data.results.bindings.forEach(binding => {
-          if (binding.itemLabel?.value && !itemLabel) {
-            itemLabel = binding.itemLabel.value;
+          if (binding.itemLabelFr?.value && !itemLabelFr) {
+            itemLabelFr = binding.itemLabelFr.value;
+          }
+          if (binding.itemLabelEn?.value && !itemLabelEn) {
+            itemLabelEn = binding.itemLabelEn.value;
           }
           if (binding.itemDescriptionfr?.value && !itemDescriptionFr) {
             itemDescriptionFr = binding.itemDescriptionfr.value;
@@ -312,14 +320,14 @@ export class WikidataQueryService {
           endDate = dissolvedDate;
         }
 
-        console.log('[WikidataQueryService] Dates extraites:', { startDate, endDate, inceptionDate, replacedByDate, dissolvedDate, itemLabel, itemDescriptionFr, itemDescriptionEn });
+        console.log('[WikidataQueryService] Dates extraites:', { startDate, endDate, inceptionDate, replacedByDate, dissolvedDate, itemLabelFr, itemLabelEn, itemDescriptionFr, itemDescriptionEn });
 
         // Créer la période avec les données extraites
         const period: Period = {
           id: periodId,
           label: {
-            fr: itemLabel,
-            en: itemLabel
+            fr: itemLabelFr,
+            en: itemLabelEn
           },
           description: {
             fr: itemDescriptionFr,
@@ -366,7 +374,8 @@ export class WikidataQueryService {
           // Extraire les dates de l'enfant
           let childStartDate = '';
           let childEndDate = '';
-          let childLabel = '';
+          let childLabelFr = '';
+          let childLabelEn = '';
           let childDescriptionFr = '';
           let childDescriptionEn = '';
           let childInceptionDate = '';
@@ -374,8 +383,11 @@ export class WikidataQueryService {
           let childDissolvedDate = '';
           
           childTemporalResponse.data.results.bindings.forEach(childBinding => {
-            if (childBinding.itemLabel?.value && !childLabel) {
-              childLabel = childBinding.itemLabel.value;
+            if (childBinding.itemLabelFr?.value && !childLabelFr) {
+              childLabelFr = childBinding.itemLabelFr.value;
+            }
+            if (childBinding.itemLabelEn?.value && !childLabelEn) {
+              childLabelEn = childBinding.itemLabelEn.value;
             }
             if (childBinding.itemDescriptionfr?.value && !childDescriptionFr) {
               childDescriptionFr = childBinding.itemDescriptionfr.value;
@@ -434,8 +446,8 @@ export class WikidataQueryService {
           return {
             id: childId,
             label: {
-              fr: childLabel,
-              en: childLabel
+              fr: childLabelFr,
+              en: childLabelEn
             },
             description: {
               fr: childDescriptionFr,
