@@ -108,8 +108,9 @@
             </div>
           </div>
         </div>
-        <div class="form-actions">
-          <div class="left-actions">
+        
+        <div class="modal-footer">
+          <div class="footer-left">
             <WikidataImportButton
               v-if="form.qid && type !== 'story'"
               :qid="form.qid"
@@ -121,7 +122,7 @@
               {{ editState.directChildrenCount }} sous-périodes
             </span>
           </div>
-          <div class="right-actions">
+          <div class="footer-right">
             <Button variant="secondary" @click="closeModal">Annuler</Button>
             <Button
               variant="primary"
@@ -365,6 +366,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  margin-bottom: var(--spacing-2xl);
 }
 
 .form-row {
@@ -423,19 +425,18 @@ onUnmounted(() => {
   box-sizing: border-box;
   display: block;
 }
-.form-actions {
+.modal-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--color-border);
 }
-.left-actions {
+.footer-left {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
-.right-actions {
+.footer-right {
   display: flex;
   gap: 10px;
 }
