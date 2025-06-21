@@ -118,11 +118,17 @@ export function useWikidataImport() {
     } else if (type === 'period' && data.temporalData && Array.isArray(data.temporalData) && data.temporalData.length > 0) {
       console.log('[useWikidataImport] Données temporelles reçues:', data.temporalData);
       const temporalData = data.temporalData[0];
+      console.log('[useWikidataImport] TemporalData[0]:', temporalData);
+      console.log('[useWikidataImport] startDate dans temporalData:', temporalData.startDate);
+      console.log('[useWikidataImport] endDate dans temporalData:', temporalData.endDate);
+      
       if (temporalData.startDate) {
         transformed.startDate = temporalData.startDate;
+        console.log('[useWikidataImport] startDate assigné:', transformed.startDate);
       }
       if (temporalData.endDate) {
         transformed.endDate = temporalData.endDate;
+        console.log('[useWikidataImport] endDate assigné:', transformed.endDate);
       }
       if (temporalData.location) {
         transformed.location = temporalData.location;

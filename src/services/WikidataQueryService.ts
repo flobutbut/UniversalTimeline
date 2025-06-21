@@ -27,92 +27,45 @@ export class WikidataQueryService {
 
   private buildTemporalQuery(periodId: string): string {
     return `
-      SELECT DISTINCT 
-        ?item 
-        ?itemLabelFr ?itemLabelEn
-        ?itemDescriptionFr ?itemDescriptionEn
-        ?startDate ?endDate ?formationDate
-        ?startLocationLabel ?endLocationLabel
-        (COUNT(DISTINCT ?child) AS ?childCount)
-      WHERE {
+      SELECT ?item ?itemLabel ?itemDescriptionfr ?itemDescriptionen ?startDate ?endDate ?inceptionDate ?replacedByDate WHERE {
         VALUES ?item { wd:${periodId} }
+
+        # Dates directes (P580/P582) - priorité haute
+        OPTIONAL { ?item wdt:P580 ?startDate. }
+        OPTIONAL { ?item wdt:P582 ?endDate. }
+
+        # Dates via qualificateurs de P31 (instance of) - fallback
+        OPTIONAL {
+          ?item p:P31 ?statement.
+          ?statement ps:P31 ?class.
+          OPTIONAL { ?statement pq:P580 ?startDateQualifier. }
+          OPTIONAL { ?statement pq:P582 ?endDateQualifier. }
+        }
+
+        # Date d'inception (P571) - fallback pour startDate
+        OPTIONAL { ?item wdt:P571 ?inceptionDate. }
+
+        # Date de remplacement (P1366 + P585) - fallback pour endDate
+        OPTIONAL {
+          ?item p:P1366 ?replacedByStatement.
+          ?replacedByStatement ps:P1366 ?replacedBy.
+          OPTIONAL { ?replacedByStatement pq:P585 ?replacedByDate. }
+        }
+
+        SERVICE wikibase:label { 
+          bd:serviceParam wikibase:language "fr,en".
+          ?item rdfs:label ?itemLabel.
+        }
         
-        # Labels en français
         OPTIONAL {
-          ?item rdfs:label ?itemLabelFr.
-          FILTER(LANG(?itemLabelFr) = "fr")
+          ?item schema:description ?itemDescriptionfr.
+          FILTER(LANG(?itemDescriptionfr) = "fr")
         }
-
-        # Labels en anglais
         OPTIONAL {
-          ?item rdfs:label ?itemLabelEn.
-          FILTER(LANG(?itemLabelEn) = "en")
-        }
-
-        # Descriptions en français
-        OPTIONAL {
-          ?item schema:description ?itemDescriptionFr.
-          FILTER(LANG(?itemDescriptionFr) = "fr")
-        }
-
-        # Descriptions en anglais
-        OPTIONAL {
-          ?item schema:description ?itemDescriptionEn.
-          FILTER(LANG(?itemDescriptionEn) = "en")
-        }
-
-        # Date de formation (P571)
-        OPTIONAL {
-          ?item wdt:P571 ?formationDate.
-        }
-
-        # Point dans le temps (P585)
-        OPTIONAL {
-          ?item wdt:P585 ?pointInTime.
-        }
-
-        # Date la plus ancienne (P1619)
-        OPTIONAL {
-          ?item wdt:P1619 ?earliestDate.
-        }
-
-        # Date la plus récente (P1620)
-        OPTIONAL {
-          ?item wdt:P1620 ?latestDate.
-        }
-
-        # Start time avec localisations
-        OPTIONAL {
-          ?item p:P580 ?startStatement.
-          ?startStatement ps:P580 ?startDate.
-          OPTIONAL {
-            ?startStatement pq:P518 ?startLocation.
-            SERVICE wikibase:label { 
-              bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
-              ?startLocation rdfs:label ?startLocationLabel.
-            }
-          }
-        }
-
-        # End time avec localisations
-        OPTIONAL {
-          ?item p:P582 ?endStatement.
-          ?endStatement ps:P582 ?endDate.
-          OPTIONAL {
-            ?endStatement pq:P518 ?endLocation.
-            SERVICE wikibase:label { 
-              bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
-              ?endLocation rdfs:label ?endLocationLabel.
-            }
-          }
-        }
-
-        # Enfants
-        OPTIONAL {
-          ?child wdt:P361 ?item.
+          ?item schema:description ?itemDescriptionen.
+          FILTER(LANG(?itemDescriptionen) = "en")
         }
       }
-      GROUP BY ?item ?itemLabelFr ?itemLabelEn ?itemDescriptionFr ?itemDescriptionEn ?startDate ?endDate ?formationDate ?startLocationLabel ?endLocationLabel
     `;
   }
 
@@ -163,27 +116,34 @@ export class WikidataQueryService {
     const periodId = binding.item.value.split('/').pop() || '';
     const locations = new Set<string>();
 
+    // Debug des dates
+    console.log('[WikidataQueryService] Debug des dates:');
+    console.log('  - startDate:', binding.startDate?.value);
+    console.log('  - endDate:', binding.endDate?.value);
+    console.log('  - startDate type:', typeof binding.startDate?.value);
+    console.log('  - startDate length:', binding.startDate?.value?.length);
+    console.log('  - startDate trimmed:', binding.startDate?.value?.trim());
+    console.log('  - endDate type:', typeof binding.endDate?.value);
+    console.log('  - endDate length:', binding.endDate?.value?.length);
+    console.log('  - endDate trimmed:', binding.endDate?.value?.trim());
+
     // Créer les données temporelles avec les dates disponibles
     const temporalData: TemporalLocation[] = [{
-      startDate: binding.earliestDate?.value || binding.formationDate?.value || binding.startDate?.value || binding.pointInTime?.value || '',
-      endDate: binding.latestDate?.value || binding.endDate?.value || 'TODAY',
-      location: binding.startLocationLabel?.value || binding.endLocationLabel?.value || "Globale"
+      startDate: (binding.startDate?.value && binding.startDate.value.trim() !== '') ? binding.startDate.value : '',
+      endDate: (binding.endDate?.value && binding.endDate.value.trim() !== '') ? binding.endDate.value : 'TODAY',
+      location: "Globale"
     }];
 
-    // Ajouter la localisation si elle existe
-    const location = binding.startLocationLabel?.value || binding.endLocationLabel?.value;
-    if (location) {
-      locations.add(location);
-    }
+    console.log('[WikidataQueryService] Date de fin finale:', temporalData[0].endDate);
 
     // Gestion des labels et descriptions
     const label = {
-      fr: binding.itemLabelFr?.value || '',
-      en: binding.itemLabelEn?.value || ''
+      fr: binding.itemLabel?.value || '',
+      en: binding.itemLabel?.value || ''
     };
     const description = {
-      fr: binding.itemDescriptionFr?.value || '',
-      en: binding.itemDescriptionEn?.value || ''
+      fr: binding.itemDescriptionfr?.value || '',
+      en: binding.itemDescriptionen?.value || ''
     };
 
     console.log('[WikidataQueryService] Données extraites:', {
@@ -205,7 +165,7 @@ export class WikidataQueryService {
       label,
       description,
       temporalData,
-      hasChildren: parseInt(binding.childCount?.value || '0') > 0,
+      hasChildren: false,
       isMainEon: this.isMainEon(periodId),
       categoryIds: [],
       categoryLabels: [],
@@ -281,25 +241,97 @@ export class WikidataQueryService {
           throw new Error(`Aucune donnée trouvée pour la période ${periodId}`);
         }
 
-        // Transformation et filtrage des périodes
-        const periods = temporalResponse.data.results.bindings
-          .map(binding => {
-            console.log('[WikidataQueryService] Binding à transformer:', binding);
-            return this.transformToPeriod(binding);
-          })
-          .filter((period): period is Period => period !== null);
+        // Extraire les dates des différents bindings
+        let startDate = '';
+        let endDate = '';
+        let itemLabel = '';
+        let itemDescriptionFr = '';
+        let itemDescriptionEn = '';
+        let inceptionDate = '';
+        let replacedByDate = '';
+        
+        temporalResponse.data.results.bindings.forEach(binding => {
+          if (binding.itemLabel?.value && !itemLabel) {
+            itemLabel = binding.itemLabel.value;
+          }
+          if (binding.itemDescriptionfr?.value && !itemDescriptionFr) {
+            itemDescriptionFr = binding.itemDescriptionfr.value;
+          }
+          if (binding.itemDescriptionen?.value && !itemDescriptionEn) {
+            itemDescriptionEn = binding.itemDescriptionen.value;
+          }
+          if (binding.inceptionDate?.value && !inceptionDate) {
+            inceptionDate = binding.inceptionDate.value;
+          }
+          if (binding.replacedByDate?.value && !replacedByDate) {
+            replacedByDate = binding.replacedByDate.value;
+          }
+          // Pour startDate, priorité aux dates directes (P580), puis qualificateurs, puis inception
+          if (binding.startDate?.value) {
+            if (!startDate || binding.startDate.value < startDate) {
+              startDate = binding.startDate.value;
+            }
+          }
+          if (binding.startDateQualifier?.value && !startDate) {
+            if (!startDate || binding.startDateQualifier.value < startDate) {
+              startDate = binding.startDateQualifier.value;
+            }
+          }
+          // Pour endDate, priorité aux dates directes (P582), puis qualificateurs
+          if (binding.endDate?.value) {
+            if (!endDate || binding.endDate.value > endDate) {
+              endDate = binding.endDate.value;
+            }
+          }
+          if (binding.endDateQualifier?.value && !endDate) {
+            if (!endDate || binding.endDateQualifier.value > endDate) {
+              endDate = binding.endDateQualifier.value;
+            }
+          }
+        });
 
-        console.log('[WikidataQueryService] Périodes transformées:', periods);
-
-        if (periods.length === 0) {
-          throw new Error(`Aucune période valide trouvée pour ${periodId}`);
+        // Utiliser inceptionDate comme fallback pour startDate si aucune date de début n'est trouvée
+        if (!startDate && inceptionDate) {
+          startDate = inceptionDate;
         }
 
-        // 2. Regrouper les périodes par localisation
-        const groupedPeriods = this.groupPeriodsByLocation(periods);
-        console.log('[WikidataQueryService] Périodes groupées:', groupedPeriods);
+        // Utiliser replacedByDate comme fallback pour endDate si aucune date de fin n'est trouvée
+        if (!endDate && replacedByDate) {
+          endDate = replacedByDate;
+        }
 
-        // 4. Charger les enfants
+        console.log('[WikidataQueryService] Dates extraites:', { startDate, endDate, inceptionDate, replacedByDate, itemLabel, itemDescriptionFr, itemDescriptionEn });
+
+        // Créer la période avec les données extraites
+        const period: Period = {
+          id: periodId,
+          label: {
+            fr: itemLabel,
+            en: itemLabel
+          },
+          description: {
+            fr: itemDescriptionFr,
+            en: itemDescriptionEn
+          },
+          temporalData: [{
+            startDate: startDate,
+            endDate: endDate || 'TODAY',
+            location: "Globale"
+          }],
+          hasChildren: false,
+          isMainEon: this.isMainEon(periodId),
+          categoryIds: [],
+          categoryLabels: [],
+          children: [],
+          loading: false,
+          childrenPreloaded: false,
+          locations: [],
+          directLocations: []
+        };
+
+        console.log('[WikidataQueryService] Période créée:', period);
+
+        // Charger les enfants
         const childrenResponse = await axios.get<WikidataResponse>(WIKIDATA_API_URL, {
           params: { query: this.buildChildrenQuery(periodId), format: 'json' },
           timeout: REQUEST_TIMEOUT,
@@ -319,29 +351,97 @@ export class WikidataQueryService {
             headers: { 'Accept': 'application/sparql-results+json' }
           });
 
-          // Transformer les données de l'enfant
-          const childPeriods = childTemporalResponse.data.results.bindings
-            .map(binding => this.transformToPeriod(binding))
-            .filter((period): period is Period => period !== null);
+          // Extraire les dates de l'enfant
+          let childStartDate = '';
+          let childEndDate = '';
+          let childLabel = '';
+          let childDescriptionFr = '';
+          let childDescriptionEn = '';
+          let childInceptionDate = '';
+          let childReplacedByDate = '';
+          
+          childTemporalResponse.data.results.bindings.forEach(childBinding => {
+            if (childBinding.itemLabel?.value && !childLabel) {
+              childLabel = childBinding.itemLabel.value;
+            }
+            if (childBinding.itemDescriptionfr?.value && !childDescriptionFr) {
+              childDescriptionFr = childBinding.itemDescriptionfr.value;
+            }
+            if (childBinding.itemDescriptionen?.value && !childDescriptionEn) {
+              childDescriptionEn = childBinding.itemDescriptionen.value;
+            }
+            if (childBinding.inceptionDate?.value && !childInceptionDate) {
+              childInceptionDate = childBinding.inceptionDate.value;
+            }
+            if (childBinding.replacedByDate?.value && !childReplacedByDate) {
+              childReplacedByDate = childBinding.replacedByDate.value;
+            }
+            // Pour startDate, priorité aux dates directes (P580), puis qualificateurs, puis inception
+            if (childBinding.startDate?.value) {
+              if (!childStartDate || childBinding.startDate.value < childStartDate) {
+                childStartDate = childBinding.startDate.value;
+              }
+            }
+            if (childBinding.startDateQualifier?.value && !childStartDate) {
+              if (!childStartDate || childBinding.startDateQualifier.value < childStartDate) {
+                childStartDate = childBinding.startDateQualifier.value;
+              }
+            }
+            // Pour endDate, priorité aux dates directes (P582), puis qualificateurs
+            if (childBinding.endDate?.value) {
+              if (!childEndDate || childBinding.endDate.value > childEndDate) {
+                childEndDate = childBinding.endDate.value;
+              }
+            }
+            if (childBinding.endDateQualifier?.value && !childEndDate) {
+              if (!childEndDate || childBinding.endDateQualifier.value > childEndDate) {
+                childEndDate = childBinding.endDateQualifier.value;
+              }
+            }
+          });
 
-          // Regrouper les périodes de l'enfant par localisation
-          const groupedChildPeriods = this.groupPeriodsByLocation(childPeriods);
+          // Utiliser inceptionDate comme fallback pour startDate si aucune date de début n'est trouvée
+          if (!childStartDate && childInceptionDate) {
+            childStartDate = childInceptionDate;
+          }
 
-          return groupedChildPeriods.map(period => ({
-            ...period,
+          // Utiliser replacedByDate comme fallback pour endDate si aucune date de fin n'est trouvée
+          if (!childEndDate && childReplacedByDate) {
+            childEndDate = childReplacedByDate;
+          }
+
+          return {
+            id: childId,
+            label: {
+              fr: childLabel,
+              en: childLabel
+            },
+            description: {
+              fr: childDescriptionFr,
+              en: childDescriptionEn
+            },
+            temporalData: [{
+              startDate: childStartDate,
+              endDate: childEndDate || 'TODAY',
+              location: "Globale"
+            }],
             hasChildren: parseInt(binding.childCount?.value || '0') > 0,
+            isMainEon: this.isMainEon(childId),
+            categoryIds: [],
+            categoryLabels: [],
             children: [],
             loading: false,
-            childrenPreloaded: false
-          }));
+            childrenPreloaded: false,
+            locations: [],
+            directLocations: []
+          };
         });
 
-        const childrenArrays = await Promise.all(childrenPromises);
-        const children = childrenArrays.flat();
+        const children = await Promise.all(childrenPromises);
 
         // 6. Retourner la période avec ses enfants
         const result = {
-          ...groupedPeriods[0],
+          ...period,
           children,
           childrenPreloaded: true
         };
