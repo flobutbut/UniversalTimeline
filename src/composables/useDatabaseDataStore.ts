@@ -10,10 +10,15 @@ const error = ref<string | null>(null);
 let loaded = false;
 
 async function loadInitialData() {
-  if (loaded) return;
+  if (loaded && periods.value.length > 0) {
+    console.log('[DatabaseDataStore] Données déjà chargées, pas de rechargement');
+    return;
+  }
+  
   loading.value = true;
   error.value = null;
   try {
+    console.log('[DatabaseDataStore] Chargement des données depuis l\'API');
     await DatabaseViewService.getInstance().loadListData();
     periods.value = DatabaseViewService.getInstance().getPeriods();
     events.value = DatabaseViewService.getInstance().getEvents();

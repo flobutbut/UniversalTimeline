@@ -82,8 +82,15 @@ export function useGraphModals() {
         await databaseQueryService.updatePeriodRelations(oldId, newPeriod.id);
       }
       
-      // Rechargement des données
-      await sharedLoadInitialData();
+      // Mise à jour locale du store partagé pour éviter le rechargement
+      const { periods } = useDatabaseDataStore();
+      const updatedPeriods = periods.value.map(p => 
+        p.id === selectedPeriod.value?.id 
+          ? { ...p, label: formData.title, startDate: formData.startDate, endDate: formData.endDate }
+          : p
+      );
+      sharedUpdatePeriods(updatedPeriods);
+      
       closeEditModal();
       window?.showToast?.('Période mise à jour avec succès', 'success');
     } catch (error) {
