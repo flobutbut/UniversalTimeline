@@ -27,7 +27,7 @@ export class WikidataQueryService {
 
   private buildTemporalQuery(periodId: string): string {
     return `
-      SELECT ?item ?itemLabel ?itemDescriptionfr ?itemDescriptionen ?startDate ?endDate ?inceptionDate ?replacedByDate WHERE {
+      SELECT ?item ?itemLabel ?itemDescriptionfr ?itemDescriptionen ?startDate ?endDate ?inceptionDate ?replacedByDate ?dissolvedDate WHERE {
         VALUES ?item { wd:${periodId} }
 
         # Dates directes (P580/P582) - priorité haute
@@ -51,6 +51,9 @@ export class WikidataQueryService {
           ?replacedByStatement ps:P1366 ?replacedBy.
           OPTIONAL { ?replacedByStatement pq:P585 ?replacedByDate. }
         }
+
+        # Date de dissolution/abolition (P576) - fallback pour endDate
+        OPTIONAL { ?item wdt:P576 ?dissolvedDate. }
 
         SERVICE wikibase:label { 
           bd:serviceParam wikibase:language "fr,en".
@@ -249,6 +252,7 @@ export class WikidataQueryService {
         let itemDescriptionEn = '';
         let inceptionDate = '';
         let replacedByDate = '';
+        let dissolvedDate = '';
         
         temporalResponse.data.results.bindings.forEach(binding => {
           if (binding.itemLabel?.value && !itemLabel) {
@@ -265,6 +269,9 @@ export class WikidataQueryService {
           }
           if (binding.replacedByDate?.value && !replacedByDate) {
             replacedByDate = binding.replacedByDate.value;
+          }
+          if (binding.dissolvedDate?.value && !dissolvedDate) {
+            dissolvedDate = binding.dissolvedDate.value;
           }
           // Pour startDate, priorité aux dates directes (P580), puis qualificateurs, puis inception
           if (binding.startDate?.value) {
@@ -300,7 +307,12 @@ export class WikidataQueryService {
           endDate = replacedByDate;
         }
 
-        console.log('[WikidataQueryService] Dates extraites:', { startDate, endDate, inceptionDate, replacedByDate, itemLabel, itemDescriptionFr, itemDescriptionEn });
+        // Utiliser dissolvedDate comme fallback pour endDate si aucune date de fin n'est trouvée
+        if (!endDate && dissolvedDate) {
+          endDate = dissolvedDate;
+        }
+
+        console.log('[WikidataQueryService] Dates extraites:', { startDate, endDate, inceptionDate, replacedByDate, dissolvedDate, itemLabel, itemDescriptionFr, itemDescriptionEn });
 
         // Créer la période avec les données extraites
         const period: Period = {
@@ -359,6 +371,7 @@ export class WikidataQueryService {
           let childDescriptionEn = '';
           let childInceptionDate = '';
           let childReplacedByDate = '';
+          let childDissolvedDate = '';
           
           childTemporalResponse.data.results.bindings.forEach(childBinding => {
             if (childBinding.itemLabel?.value && !childLabel) {
@@ -375,6 +388,9 @@ export class WikidataQueryService {
             }
             if (childBinding.replacedByDate?.value && !childReplacedByDate) {
               childReplacedByDate = childBinding.replacedByDate.value;
+            }
+            if (childBinding.dissolvedDate?.value && !childDissolvedDate) {
+              childDissolvedDate = childBinding.dissolvedDate.value;
             }
             // Pour startDate, priorité aux dates directes (P580), puis qualificateurs, puis inception
             if (childBinding.startDate?.value) {
@@ -408,6 +424,11 @@ export class WikidataQueryService {
           // Utiliser replacedByDate comme fallback pour endDate si aucune date de fin n'est trouvée
           if (!childEndDate && childReplacedByDate) {
             childEndDate = childReplacedByDate;
+          }
+
+          // Utiliser dissolvedDate comme fallback pour endDate si aucune date de fin n'est trouvée
+          if (!childEndDate && childDissolvedDate) {
+            childEndDate = childDissolvedDate;
           }
 
           return {

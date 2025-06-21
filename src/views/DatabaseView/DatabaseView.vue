@@ -79,7 +79,12 @@
           />
         </div>
       </div>
-      <div class="column">
+      <div class="column"
+        @dragover.prevent="handleDragOver"
+        @dragleave.prevent="handleDragLeave"
+        @drop.prevent="handleDrop"
+        :class="{ 'drag-over': dragDropState.isDragOver }"
+      >
         <div class="column-header">
           <h2>Détails de la Story</h2>
         </div>
@@ -87,12 +92,7 @@
           <div class="spinner"></div>
           <span>Chargement des détails...</span>
         </div>
-        <div v-else-if="selectedStory" class="content"
-          @dragover.prevent="handleDragOver"
-          @dragleave.prevent="handleDragLeave"
-          @drop.prevent="handleDrop"
-          :class="{ 'drag-over': dragDropState.isDragOver }"
-        >
+        <div v-else-if="selectedStory" class="content">
           <div class="story-details">
             <h3>{{ selectedStory.title.fr }}</h3>
             <p class="story-author">Auteur: {{ selectedStory.author }}</p>
@@ -111,7 +111,10 @@
                   :key="period.id"
                   class="story-item"
                 >
-                  {{ period.label.fr }}
+                  <span class="story-item-text">{{ period.label.fr }}</span>
+                  <button class="remove-button" @click.stop="removePeriodFromStory(period.id)" title="Supprimer de la story">
+                    Remove
+                  </button>
                 </div>
               </div>
               <p v-else class="no-items">Aucune période associée</p>
@@ -124,7 +127,10 @@
                   :key="event.id"
                   class="story-item"
                 >
-                  {{ event.label.fr }}
+                  <span class="story-item-text">{{ event.label.fr }}</span>
+                  <button class="remove-button" @click.stop="removeEventFromStory(event.id)" title="Supprimer de la story">
+                    Remove
+                  </button>
                 </div>
               </div>
               <p v-else class="no-items">Aucun événement associé</p>
@@ -192,7 +198,9 @@ const {
   handleDrop,
   handleDragOver,
   handleDragLeave,
-  selectStory
+  selectStory,
+  removePeriodFromStory,
+  removeEventFromStory
 } = useDatabaseView();
 
 const { loading: saveLoading, handleSave: saveHandler } = useDatabaseSave();
@@ -346,20 +354,38 @@ onMounted(() => {
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition: background-color var(--transition-fast);
+  position: relative;
 }
 
 .story-item:hover {
   background: var(--color-neutral-200);
 }
 
-.story-item i {
+.story-item .remove-button {
+  background: none;
+  border: none;
+  padding: 0;
   color: var(--color-error);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  margin-left: var(--spacing-xs);
 }
 
-.story-item:hover i {
+.story-item:hover .remove-button {
   opacity: 1;
+}
+
+.story-item .remove-button:hover {
+  color: var(--color-error-dark);
+}
+
+.story-item-text {
+  flex: 1;
+  cursor: default;
 }
 
 .story-details {
@@ -439,6 +465,30 @@ onMounted(() => {
   font-size: var(--font-size-sm);
   pointer-events: none;
   animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Feedback visuel pour le drop sur toute la colonne */
+.column.drag-over {
+  background-color: var(--color-primary-light);
+  border: 2px dashed var(--color-primary);
+  border-radius: var(--radius-md);
+  position: relative;
+}
+
+.column.drag-over::after {
+  content: 'Déposer ici pour ajouter à la story';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--color-primary);
+  color: var(--color-neutral-0);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  pointer-events: none;
+  animation: fadeIn 0.2s ease-in-out;
+  z-index: 10;
 }
 
 @keyframes fadeIn {

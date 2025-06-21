@@ -107,6 +107,25 @@
               />
             </div>
           </div>
+
+          <div class="form-row" v-if="type === 'story'">
+            <div class="form-group">
+              <Input
+                v-model="form.author"
+                label="Auteur"
+                placeholder="Nom de l'auteur"
+              />
+            </div>
+            <div class="form-group">
+              <div class="switch-group">
+                <label class="switch-label">Mode public</label>
+                <Switch
+                  v-model="form.isPublic"
+                  :checked="form.isPublic"
+                />
+              </div>
+            </div>
+          </div>
         </div>
         
         <div class="modal-footer">
@@ -147,6 +166,7 @@ import { ConflictResolutionService } from '@/services/ConflictResolutionService'
 import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';
 import WikidataImportButton from '@/components/WikidataImportButton.vue';
+import Switch from '@/components/base/Switch.vue';
 
 const props = defineProps<{
   isOpen: boolean;

@@ -7,7 +7,7 @@ import type { ApiPeriod } from '@/types/geological';
 export function useGraphModals() {
   const databaseViewService = DatabaseViewService.getInstance();
   const databaseQueryService = DatabaseQueryService.getInstance();
-  const { loadInitialData: sharedLoadInitialData } = useDatabaseDataStore();
+  const { loadInitialData: sharedLoadInitialData, updatePeriods: sharedUpdatePeriods } = useDatabaseDataStore();
 
   // États des modales
   const showEditModal = ref(false);
@@ -119,27 +119,77 @@ export function useGraphModals() {
       const newPeriod = await databaseQueryService.createPeriod(formData);
       console.log('[GraphView] Nouvelle période créée ou période existante trouvée:', newPeriod);
       
+      // Créer l'objet période pour le store partagé
+      const periodForStore = {
+        id: newPeriod.id,
+        label: { fr: formData.title.fr, en: formData.title.en },
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        hasParent: false, // Par défaut, sera mis à jour si nécessaire
+        children: [] as string[],
+        categories: []
+      };
+
       // Si on est dans une colonne autre que la première, on doit lier la période au parent
       if (currentColumnIdx.value !== null && currentColumnIdx.value > 0) {
         const parentId = selectedIds[currentColumnIdx.value - 1];
         if (parentId) {
           console.log('[GraphView] Liaison avec le parent:', parentId);
-          // Utiliser le service pour déplacer la période
-          const allPeriods = databaseViewService.getPeriods();
-          const parentTarget = allPeriods.find(p => p.id === parentId);
-          if (parentTarget) {
-            const newChildren = Array.isArray(parentTarget.children) ? [...parentTarget.children] : [];
+          
+          // Mettre à jour le store partagé de manière transparente
+          const { periods } = useDatabaseDataStore();
+          const updatedPeriods = [...periods.value];
+          
+          // Ajouter la nouvelle période
+          updatedPeriods.push(periodForStore);
+          
+          // Mettre à jour le parent
+          const parentIndex = updatedPeriods.findIndex(p => p.id === parentId);
+          if (parentIndex !== -1) {
+            const parent = updatedPeriods[parentIndex];
+            // Cast pour accéder aux propriétés children et hasParent
+            const parentWithChildren = parent as any;
+            const newChildren = Array.isArray(parentWithChildren.children) ? [...parentWithChildren.children] : [];
             if (!newChildren.includes(newPeriod.id)) {
               newChildren.push(newPeriod.id);
-              await databaseViewService.updateChildren(parentTarget.id, newChildren);
-              await databaseViewService.updateHasParent(newPeriod.id, true);
+              updatedPeriods[parentIndex] = {
+                ...parent,
+                children: newChildren
+              } as any;
             }
           }
+          
+          // Mettre à jour hasParent pour la nouvelle période
+          const newPeriodIndex = updatedPeriods.findIndex(p => p.id === newPeriod.id);
+          if (newPeriodIndex !== -1) {
+            updatedPeriods[newPeriodIndex] = {
+              ...updatedPeriods[newPeriodIndex],
+              hasParent: true
+            } as any;
+          }
+          
+          // Mettre à jour le store partagé
+          sharedUpdatePeriods(updatedPeriods);
+          
+          // Mettre à jour aussi le service pour la cohérence
+          databaseViewService.setPeriods(updatedPeriods);
+          
+          // Mettre à jour la base de données
+          const parentWithChildren = updatedPeriods.find(p => p.id === parentId) as any;
+          const newChildren = Array.isArray(parentWithChildren?.children) ? parentWithChildren.children : [];
+          await databaseViewService.updateChildren(parentId, newChildren);
+          await databaseViewService.updateHasParent(newPeriod.id, true);
         }
+      } else {
+        // Ajouter simplement la nouvelle période au store partagé
+        const { periods } = useDatabaseDataStore();
+        const updatedPeriods = [...periods.value, periodForStore as any];
+        sharedUpdatePeriods(updatedPeriods);
+        
+        // Mettre à jour aussi le service pour la cohérence
+        databaseViewService.setPeriods(updatedPeriods);
       }
       
-      // Rechargement des données
-      await sharedLoadInitialData();
       closeAddModal();
       window?.showToast?.('Période ajoutée avec succès', 'success');
     } catch (error: any) {

@@ -191,7 +191,12 @@ export function useDatabaseView() {
 
   const handleDrop = async (event: DragEvent) => {
     dragDropState.value.isDragOver = false;
-    if (!dragDropState.value.draggedItem || !selectedStory.value) return;
+    if (!dragDropState.value.draggedItem) return;
+
+    if (!selectedStory.value) {
+      window.showToast('Veuillez sélectionner une story avant de déposer un élément', 'error');
+      return;
+    }
 
     try {
       if (dragDropState.value.draggedItem.type === 'period') {
@@ -215,7 +220,7 @@ export function useDatabaseView() {
   };
 
   const handleDragOver = (event: DragEvent) => {
-    if (selectedStory.value) {
+    if (dragDropState.value.draggedItem) {
       dragDropState.value.isDragOver = true;
     }
   };
@@ -235,6 +240,38 @@ export function useDatabaseView() {
       selectedStory.value = null;
     } finally {
       state.value.loadingStoryDetails = false;
+    }
+  };
+
+  // Fonction pour supprimer une période de la story
+  const removePeriodFromStory = async (periodId: string) => {
+    if (!selectedStory.value) return;
+
+    try {
+      await queryService.removePeriodFromStory(selectedStory.value.id, periodId);
+      // Recharger les données de la story
+      const updatedStory = await databaseService.loadFullStory(selectedStory.value.id);
+      fullStories.value.set(selectedStory.value.id, updatedStory);
+      selectedStory.value = updatedStory;
+      window.showToast('Période supprimée de la story avec succès', 'success');
+    } catch (error) {
+      window.showToast('Erreur lors de la suppression de la période de la story', 'error');
+    }
+  };
+
+  // Fonction pour supprimer un événement de la story
+  const removeEventFromStory = async (eventId: string) => {
+    if (!selectedStory.value) return;
+
+    try {
+      await queryService.removeEventFromStory(selectedStory.value.id, eventId);
+      // Recharger les données de la story
+      const updatedStory = await databaseService.loadFullStory(selectedStory.value.id);
+      fullStories.value.set(selectedStory.value.id, updatedStory);
+      selectedStory.value = updatedStory;
+      window.showToast('Événement supprimé de la story avec succès', 'success');
+    } catch (error) {
+      window.showToast('Erreur lors de la suppression de l\'événement de la story', 'error');
     }
   };
 
@@ -273,6 +310,10 @@ export function useDatabaseView() {
     
     // Fonctions story
     selectStory,
+    
+    // Fonctions de suppression
+    removePeriodFromStory,
+    removeEventFromStory,
     
     // Accès direct au loading et error partagés
     sharedLoading,
