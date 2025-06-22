@@ -68,13 +68,7 @@ export class DatabaseQueryService {
           fr: event.description.fr || event.description_fr || event.description,
           en: event.description.en || event.description_en || event.description_fr || event.description
         } : undefined,
-        categories: event.categories || event.category ? [{
-          id: event.category?.id || event.category_id,
-          label: {
-            fr: event.category?.label?.fr || event.category_label || event.category,
-            en: event.category?.label?.en || event.category_label || event.category
-          }
-        }] : [],
+        categories: event.categories || [],
         createdAt: new Date(event.created_at || Date.now()),
         updatedAt: new Date(event.updated_at || Date.now())
       }));
@@ -111,13 +105,7 @@ export class DatabaseQueryService {
         hasParent: period.has_parent,
         children: period.children || [],
         temporalLocation: period.temporal_location,
-        categories: period.category_label ? [{
-          id: period.category_id,
-          label: {
-            fr: period.category_label,
-            en: period.category_label
-          }
-        }] : [],
+        categories: period.categories || [],
         createdAt: new Date(period.created_at || Date.now()),
         updatedAt: new Date(period.updated_at || Date.now())
       }));
@@ -481,13 +469,7 @@ export class DatabaseQueryService {
         endDate: period.end_date,
         hasParent: period.has_parent || false,
         children: period.children || [],
-        categories: period.category_label ? [{
-          id: period.category_id,
-          label: {
-            fr: period.category_label,
-            en: period.category_label
-          }
-        }] : [],
+        categories: period.categories || [],
         createdAt: period.created_at ? new Date(period.created_at) : new Date(),
         updatedAt: period.updated_at ? new Date(period.updated_at) : new Date()
       }));
@@ -515,13 +497,7 @@ export class DatabaseQueryService {
         },
         date: event.date,
         description: event.description || { fr: event.description_fr || '', en: event.description_en || event.description_fr || '' },
-        categories: event.categories || event.category ? [{
-          id: event.category?.id || event.category_id,
-          label: {
-            fr: event.category?.label?.fr || event.category_label || event.category,
-            en: event.category?.label?.en || event.category_label || event.category
-          }
-        }] : []
+        categories: event.categories || []
       }));
       return formattedEvents;
     } catch (error) {
@@ -545,6 +521,12 @@ export class DatabaseQueryService {
           fr: story.title_fr,
           en: story.title_en || story.title_fr
         },
+        description: story.description_fr ? {
+          fr: story.description_fr,
+          en: story.description_en || story.description_fr
+        } : undefined,
+        author: story.author,
+        isPublic: story.is_public,
         categories: story.categories || [],
         createdAt: new Date(story.created_at || Date.now()),
         updatedAt: new Date(story.updated_at || Date.now())

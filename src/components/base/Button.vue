@@ -59,7 +59,7 @@ defineEmits<{
 
 .base-button--primary {
   background-color: var(--color-primary);
-  color: white;
+  color: var(--color-text-white);
 }
 
 .base-button--primary:hover:not(.base-button--disabled) {
@@ -105,7 +105,7 @@ defineEmits<{
 
 .base-button--danger {
   background-color: var(--color-error);
-  color: white;
+  color: var(--color-text-white);
   border: 1px solid var(--color-error);
 }
 

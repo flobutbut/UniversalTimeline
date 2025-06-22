@@ -439,7 +439,7 @@ watch(() => props.modelValue, () => {
   gap: var(--spacing-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
   background-color: var(--color-primary-light);
-  color: var(--color-primary-dark);
+  color: var(--color-text-white);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-sm);
   font-weight: 500;
@@ -448,7 +448,7 @@ watch(() => props.modelValue, () => {
 .base-select__remove-item {
   background: none;
   border: none;
-  color: var(--color-primary-dark);
+  color: var(--color-text-white);
   cursor: pointer;
   font-size: var(--font-size-sm);
   font-weight: bold;

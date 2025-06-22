@@ -105,8 +105,9 @@ router.get('/periods', async (req, res) => {
         p.has_parent,
         p.children,
         p.temporal_location,
-        c.label_fr as category_label,
-        c.id as category_id
+        c.id as category_id,
+        c.label_fr as category_label_fr,
+        c.label_en as category_label_en
       FROM periods.periods p
       LEFT JOIN categories.period_categories pc ON p.id = pc.period_id
       LEFT JOIN categories.categories c ON pc.category_id = c.id
@@ -114,21 +115,39 @@ router.get('/periods', async (req, res) => {
       ORDER BY p.start_date
     `);
 
-    const periods = result.rows.map(row => ({
-      id: row.id,
-      wikidata_id: row.wikidata_id,
-      label_fr: row.label_fr,
-      label_en: row.label_en,
-      description_fr: row.description_fr,
-      description_en: row.description_en,
-      start_date: row.start_date,
-      end_date: row.end_date,
-      has_parent: row.has_parent,
-      children: row.children || [],
-      temporal_location: row.temporal_location,
-      category_label: row.category_label,
-      category_id: row.category_id
-    }));
+    // Grouper les périodes avec leurs catégories
+    const periodsMap = new Map();
+    result.rows.forEach(row => {
+      if (!periodsMap.has(row.id)) {
+        periodsMap.set(row.id, {
+          id: row.id,
+          wikidata_id: row.wikidata_id,
+          label_fr: row.label_fr,
+          label_en: row.label_en,
+          description_fr: row.description_fr,
+          description_en: row.description_en,
+          start_date: row.start_date,
+          end_date: row.end_date,
+          has_parent: row.has_parent,
+          children: row.children || [],
+          temporal_location: row.temporal_location,
+          categories: []
+        });
+      }
+      
+      if (row.category_id) {
+        const period = periodsMap.get(row.id);
+        period.categories.push({
+          id: row.category_id,
+          label: {
+            fr: row.category_label_fr,
+            en: row.category_label_en || row.category_label_fr
+          }
+        });
+      }
+    });
+
+    const periods = Array.from(periodsMap.values());
 
     res.json(periods);
   } catch (error) {
@@ -153,7 +172,8 @@ router.get('/events', async (req, res) => {
         e.created_at,
         e.updated_at,
         c.id as category_id,
-        c.label_fr as category_label
+        c.label_fr as category_label_fr,
+        c.label_en as category_label_en
       FROM events.events e
       LEFT JOIN categories.event_categories ec ON e.id = ec.event_id
       LEFT JOIN categories.categories c ON ec.category_id = c.id
@@ -165,44 +185,69 @@ router.get('/events', async (req, res) => {
     
     // Récupérer les dates depuis Wikidata uniquement pour les événements qui n'en ont pas
     console.log('[API] Début de la récupération des dates depuis Wikidata');
+    
+    // Grouper les événements avec leurs catégories
+    const eventsMap = new Map();
+    result.rows.forEach(row => {
+      if (!eventsMap.has(row.id)) {
+        eventsMap.set(row.id, {
+          id: row.id,
+          wikidata_id: row.wikidata_id,
+          label_fr: row.label_fr,
+          label_en: row.label_en,
+          description_fr: row.description_fr,
+          description_en: row.description_en,
+          date: row.date,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          categories: []
+        });
+      }
+      
+      if (row.category_id) {
+        const event = eventsMap.get(row.id);
+        event.categories.push({
+          id: row.category_id,
+          label: {
+            fr: row.category_label_fr,
+            en: row.category_label_en || row.category_label_fr
+          }
+        });
+      }
+    });
+    
     const eventsWithDates = await Promise.all(
-      result.rows.map(async (row: any) => {
-        console.log(`[API] Traitement de l'événement ${row.id} (Wikidata ID: ${row.wikidata_id})`);
-        let date = row.date;
+      Array.from(eventsMap.values()).map(async (eventData: any) => {
+        console.log(`[API] Traitement de l'événement ${eventData.id} (Wikidata ID: ${eventData.wikidata_id})`);
+        let date = eventData.date;
         
         // Si pas de date en base, on la récupère depuis Wikidata
-        if (!date && row.wikidata_id) {
-          date = await getEventDateFromWikidata(row.wikidata_id);
+        if (!date && eventData.wikidata_id) {
+          date = await getEventDateFromWikidata(eventData.wikidata_id);
           // Mettre à jour la date en base de données
           if (date) {
             await dbQuery(
               'UPDATE events.events SET date = $1 WHERE id = $2',
-              [date, row.id]
+              [date, eventData.id]
             );
           }
         }
 
         const event = {
-          id: row.id,
-          wikidata_id: row.wikidata_id,
+          id: eventData.id,
+          wikidata_id: eventData.wikidata_id,
           label: {
-            fr: row.label_fr,
-            en: row.label_en || row.label_fr
+            fr: eventData.label_fr,
+            en: eventData.label_en || eventData.label_fr
           },
           date: date || 'Date inconnue',
-          description: row.description_fr ? {
-            fr: row.description_fr,
-            en: row.description_en || row.description_fr
+          description: eventData.description_fr ? {
+            fr: eventData.description_fr,
+            en: eventData.description_en || eventData.description_fr
           } : undefined,
-          categories: row.category_label ? [{
-            id: row.category_id,
-            label: {
-              fr: row.category_label,
-              en: row.category_label
-            }
-          }] : [],
-          createdAt: row.created_at,
-          updatedAt: row.updated_at
+          categories: eventData.categories,
+          createdAt: eventData.created_at,
+          updatedAt: eventData.updated_at
         };
         return event;
       })
@@ -288,13 +333,50 @@ router.get('/stories', async (req, res) => {
         s.author,
         s.is_public,
         s.created_at,
-        s.updated_at
+        s.updated_at,
+        c.id as category_id,
+        c.label_fr as category_label_fr,
+        c.label_en as category_label_en
       FROM stories.stories s
+      LEFT JOIN categories.story_categories sc ON s.id = sc.story_id
+      LEFT JOIN categories.categories c ON sc.category_id = c.id
       ORDER BY s.created_at DESC
     `;
 
     const result = await dbQuery(sqlQuery);
-    res.json(result.rows);
+    
+    // Grouper les stories avec leurs catégories
+    const storiesMap = new Map();
+    result.rows.forEach(row => {
+      if (!storiesMap.has(row.id)) {
+        storiesMap.set(row.id, {
+          id: row.id,
+          title_fr: row.title_fr,
+          title_en: row.title_en,
+          description_fr: row.description_fr,
+          description_en: row.description_en,
+          author: row.author,
+          is_public: row.is_public,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          categories: []
+        });
+      }
+      
+      if (row.category_id) {
+        const story = storiesMap.get(row.id);
+        story.categories.push({
+          id: row.category_id,
+          label: {
+            fr: row.category_label_fr,
+            en: row.category_label_en || row.category_label_fr
+          }
+        });
+      }
+    });
+
+    const stories = Array.from(storiesMap.values());
+    res.json(stories);
   } catch (error) {
     console.error('Erreur lors de la récupération des stories:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des stories' });
@@ -721,47 +803,123 @@ router.get('/stories/:id', async (req, res) => {
     }
     const story = storyResult.rows[0];
 
-    // Récupérer les périodes associées
+    // Récupérer les catégories de la story
+    const storyCategoriesQuery = `
+      SELECT 
+        c.id,
+        c.label_fr,
+        c.label_en,
+        c.description_fr,
+        c.description_en
+      FROM categories.categories c
+      JOIN categories.story_categories sc ON c.id = sc.category_id
+      WHERE sc.story_id = $1
+      ORDER BY c.label_fr
+    `;
+    const storyCategoriesResult = await dbQuery(storyCategoriesQuery, [id]);
+    const storyCategories = storyCategoriesResult.rows.map(cat => ({
+      id: cat.id,
+      label: {
+        fr: cat.label_fr,
+        en: cat.label_en || cat.label_fr
+      },
+      description: cat.description_fr ? {
+        fr: cat.description_fr,
+        en: cat.description_en || cat.description_fr
+      } : undefined
+    }));
+
+    // Récupérer les périodes associées avec leurs catégories
     const periodsQuery = `
-      SELECT p.*
+      SELECT 
+        p.*,
+        c.id as category_id,
+        c.label_fr as category_label_fr,
+        c.label_en as category_label_en
       FROM periods.periods p
       JOIN stories.story_periods sp ON p.id = sp.period_id
+      LEFT JOIN categories.period_categories pc ON p.id = pc.period_id
+      LEFT JOIN categories.categories c ON pc.category_id = c.id
       WHERE sp.story_id = $1
       ORDER BY p.start_date
     `;
     const periodsResult = await dbQuery(periodsQuery, [id]);
-    const periods = periodsResult.rows.map(row => ({
-      id: row.id,
-      label: { fr: row.label_fr, en: row.label_en || row.label_fr },
-      description: row.description_fr ? { fr: row.description_fr, en: row.description_en || row.description_fr } : undefined,
-      startDate: row.start_date,
-      endDate: row.end_date,
-      hasParent: row.has_parent,
-      children: row.children || [],
-      temporalLocation: row.temporal_location,
-      categories: [],
-      createdAt: row.created_at,
-      updatedAt: row.updated_at
-    }));
+    
+    // Grouper les périodes avec leurs catégories
+    const periodsMap = new Map();
+    periodsResult.rows.forEach(row => {
+      if (!periodsMap.has(row.id)) {
+        periodsMap.set(row.id, {
+          id: row.id,
+          label: { fr: row.label_fr, en: row.label_en || row.label_fr },
+          description: row.description_fr ? { fr: row.description_fr, en: row.description_en || row.description_fr } : undefined,
+          startDate: row.start_date,
+          endDate: row.end_date,
+          hasParent: row.has_parent,
+          children: row.children || [],
+          temporalLocation: row.temporal_location,
+          categories: [],
+          createdAt: row.created_at,
+          updatedAt: row.updated_at
+        });
+      }
+      
+      if (row.category_id) {
+        const period = periodsMap.get(row.id);
+        period.categories.push({
+          id: row.category_id,
+          label: {
+            fr: row.category_label_fr,
+            en: row.category_label_en || row.category_label_fr
+          }
+        });
+      }
+    });
+    const periods = Array.from(periodsMap.values());
 
-    // Récupérer les événements associés
+    // Récupérer les événements associés avec leurs catégories
     const eventsQuery = `
-      SELECT e.*
+      SELECT 
+        e.*,
+        c.id as category_id,
+        c.label_fr as category_label_fr,
+        c.label_en as category_label_en
       FROM events.events e
       JOIN stories.story_events se ON e.id = se.event_id
+      LEFT JOIN categories.event_categories ec ON e.id = ec.event_id
+      LEFT JOIN categories.categories c ON ec.category_id = c.id
       WHERE se.story_id = $1
       ORDER BY e.date
     `;
     const eventsResult = await dbQuery(eventsQuery, [id]);
-    const events = eventsResult.rows.map(row => ({
-      id: row.id,
-      label: { fr: row.label_fr, en: row.label_en || row.label_fr },
-      description: row.description_fr ? { fr: row.description_fr, en: row.description_en || row.description_fr } : undefined,
-      date: row.date,
-      categories: [],
-      createdAt: row.created_at,
-      updatedAt: row.updated_at
-    }));
+    
+    // Grouper les événements avec leurs catégories
+    const eventsMap = new Map();
+    eventsResult.rows.forEach(row => {
+      if (!eventsMap.has(row.id)) {
+        eventsMap.set(row.id, {
+          id: row.id,
+          label: { fr: row.label_fr, en: row.label_en || row.label_fr },
+          description: row.description_fr ? { fr: row.description_fr, en: row.description_en || row.description_fr } : undefined,
+          date: row.date,
+          categories: [],
+          createdAt: row.created_at,
+          updatedAt: row.updated_at
+        });
+      }
+      
+      if (row.category_id) {
+        const event = eventsMap.get(row.id);
+        event.categories.push({
+          id: row.category_id,
+          label: {
+            fr: row.category_label_fr,
+            en: row.category_label_en || row.category_label_fr
+          }
+        });
+      }
+    });
+    const events = Array.from(eventsMap.values());
 
     // Construction de l'objet final
     const storyData = {
@@ -770,7 +928,7 @@ router.get('/stories/:id', async (req, res) => {
       description: story.description_fr ? { fr: story.description_fr, en: story.description_en || story.description_fr } : undefined,
       author: story.author,
       isPublic: story.is_public,
-      categories: [],
+      categories: storyCategories,
       periods,
       events,
       createdAt: story.created_at,

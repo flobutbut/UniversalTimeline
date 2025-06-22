@@ -131,6 +131,13 @@ Le projet est **stable et fonctionnel** avec toutes les fonctionnalités princip
 
 ### Corrections Récentes (2025-06-22)
 - **Format des catégories** : Correction du format d'envoi des catégories au backend
-  - Le frontend filtre maintenant automatiquement les valeurs `null`/`undefined`
+  - Le frontend filtre maintenant automatiquement les valeurs `null`/undefined`
   - Transformation des IDs en objets `{ id: string }` pour compatibilité backend
-  - Résolution du problème d'insertion des catégories dans les tables de liaison 
+  - Résolution du problème d'insertion des catégories dans les tables de liaison
+- **Chargement des catégories** : Correction du chargement des catégories dans la modale d'édition
+  - Correction des routes API `/periods`, `/events` et `/stories` pour gérer les catégories multiples
+  - Correction des services frontend `getListPeriods()`, `getListEvents()` et `getListStories()`
+  - Les catégories sont maintenant pré-remplies dans la modale d'édition
+- **Données stories** : Ajout du préchargement de l'auteur et du statut public/privé
+  - L'auteur et le statut `isPublic` sont maintenant chargés et affichés dans la modale
+  - Correction de la route `/stories` pour inclure les catégories 
