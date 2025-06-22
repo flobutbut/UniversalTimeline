@@ -1,202 +1,252 @@
 # Documentation Technique
 
-## Architecture générale
+## Architecture
 
-### Vue 3 + TypeScript + Composition API
+### Stack Technologique
+- **Frontend** : Vue 3 + TypeScript + Composition API
+- **Backend** : Node.js + Express + TypeScript
+- **Base de données** : PostgreSQL avec Prisma ORM
+- **Build** : Vite
+- **Tests** : Vitest
+- **Containerisation** : Docker
 
-L'application utilise Vue 3 avec la Composition API pour une meilleure organisation du code et une réutilisabilité accrue.
-
-### Structure des données
-
-#### Store partagé `useDatabaseDataStore`
-```typescript
-// Store centralisé pour mutualiser le chargement des données
-const useDatabaseDataStore = () => {
-  const periods = ref<Period[]>([])
-  const events = ref<Event[]>([])
-  const stories = ref<Story[]>([])
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
-  
-  const loadData = async () => {
-    // Chargement unique partagé entre DatabaseView et GraphView
-  }
-  
-  return { periods, events, stories, isLoading, error, loadData }
-}
+### Structure du Projet
+```
+api_Wikidata/
+├── src/                    # Frontend Vue 3
+│   ├── components/         # Composants réutilisables
+│   ├── composables/        # Logique métier Vue 3
+│   ├── services/          # Services d'API et métier
+│   ├── types/             # Types TypeScript
+│   └── views/             # Pages de l'application
+├── server/                # Backend Express
+│   ├── src/
+│   │   ├── api/           # Routes API
+│   │   └── services/      # Services métier
+│   └── prisma/            # Schéma et migrations DB
+└── database/              # Scripts SQL et migrations
 ```
 
 ## Composables Vue 3
 
-### Gestion des données
-- **`useDatabaseDataStore`** : Store partagé pour mutualiser le chargement des données entre DatabaseView et GraphView
-- **`useDatabaseView`** : Logique de la vue DatabaseView avec filtrage des périodes racines
-- **`useGraphView`** : Logique de la vue GraphView avec gestion des colonnes dynamiques
-- **`useDatabaseSave`** : Sauvegarde des données avec retry automatique
+### Gestion des Données
+- **`useDatabaseDataStore`** : Store partagé pour mutualiser le chargement des données
+- **`useDatabaseView`** : Logique de la vue DatabaseView avec filtrage
+- **`useGraphView`** : Logique de la vue GraphView avec colonnes dynamiques
+- **`useDatabaseSave`** : Sauvegarde avec retry automatique
+- **`useDatabaseDelete`** : Suppression des données
 
-### Gestion des interactions
-- **`useGraphDragDrop`** : Gestion du drag & drop avec mise à jour du store partagé
-- **`useGraphModals`** : Gestion des modales GraphView avec chargement direct depuis l'API
-- **`useEditModal`** : Gestion des formulaires d'édition centralisée
-- **`useHomeNavigation`** : Navigation hiérarchique dans HomeView
+### Gestion des Interactions
+- **`useGraphDragDrop`** : Drag & drop avec validation des cycles
+- **`useGraphModals`** : Gestion des modales GraphView
+- **`useEditModal`** : Formulaires d'édition centralisés
+- **`useHomeNavigation`** : Navigation hiérarchique HomeView
 
-### Import et gestion des conflits
-- **`useWikidataImport`** : Import des données depuis Wikidata
-- **`useParentChildManagement`** : Gestion des relations hiérarchiques
-- **`useConflictResolution`** : Résolution des conflits lors de l'import
+### Import et Métier
+- **`useWikidataImport`** : Import depuis Wikidata
+- **`useParentChildManagement`** : Relations hiérarchiques
+- **`useConflictResolution`** : Résolution des conflits
 
 ## Services
 
-### Accès aux données
-- **`DatabaseQueryService`** : Interface avec PostgreSQL
-- **`WikidataQueryService`** : Requêtes SPARQL vers Wikidata
-- **`WikidataSearchService`** : Recherche dans Wikidata
+### Accès aux Données
+- **`DatabaseQueryService`** : Interface PostgreSQL
+- **`WikidataQueryService`** : Requêtes SPARQL Wikidata
+- **`WikidataSearchService`** : Recherche Wikidata
+- **`DatabaseViewService`** : Service spécialisé pour DatabaseView
 
-### Logique métier
+### Logique Métier
 - **`StoryService`** : Gestion des stories
 - **`ConflictResolutionService`** : Résolution des conflits
 - **`TimelineScalingService`** : Calculs de positionnement temporel
 
-## Diagramme des dépendances
+## Diagramme des Dépendances
 
 ```mermaid
 graph TD
+    %% Composants Vue
     A[Vue Components] --> B[Composables]
-    B --> C[Services]
-    C --> D[Database]
-    C --> E[Wikidata API]
-    
     A1[DatabaseView.vue] --> B1[useDatabaseView]
     A2[GraphView.vue] --> B2[useGraphView]
     A3[EditModal.vue] --> B3[useEditModal]
+    A4[HomeView.vue] --> B4[useHomeNavigation]
     
-    B1 --> B4[useDatabaseDataStore]
-    B2 --> B4
-    B4 --> C1[DatabaseQueryService]
+    %% Composables
+    B1 --> B5[useDatabaseDataStore]
+    B2 --> B5
+    B3 --> B6[useWikidataImport]
+    B3 --> B7[useParentChildManagement]
+    B4 --> B5
+    B8[useDatabaseSave] --> B5
+    B9[useDatabaseDelete] --> B5
     
-    B3 --> C2[ConflictResolutionService]
-    B3 --> C3[StoryService]
+    %% Services
+    B5 --> C1[DatabaseQueryService]
+    B6 --> C2[WikidataQueryService]
+    B6 --> C3[ConflictResolutionService]
+    B7 --> C3
+    B1 --> C4[DatabaseViewService]
     
-    B5[useWikidataImport] --> C4[WikidataQueryService]
-    B5 --> C2
+    %% Drag & Drop et Modales
+    B10[useGraphDragDrop] --> B5
+    B11[useGraphModals] --> C1
     
-    B6[useGraphDragDrop] --> B4
-    B7[useGraphModals] --> C1
-    
+    %% Base de données et APIs externes
     C1 --> D1[PostgreSQL]
-    C4 --> E1[Wikidata SPARQL]
+    C2 --> E1[Wikidata SPARQL]
+    
+    %% Styles
+    classDef component fill:#e1f5fe
+    classDef composable fill:#f3e5f5
+    classDef service fill:#e8f5e8
+    classDef database fill:#fff3e0
+    
+    class A,A1,A2,A3,A4 component
+    class B,B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11 composable
+    class C1,C2,C3,C4 service
+    class D1,E1 database
 ```
 
-## Optimisations récentes
+## Types Principaux
 
-### Mutualisation du chargement
-- **Store partagé** : `useDatabaseDataStore` évite les requêtes multiples
-- **Chargement unique** : DatabaseView et GraphView partagent les mêmes données
-- **Mise à jour dynamique** : Le store se met à jour automatiquement après modifications
-
-### Corrections GraphView
-- **Modales d'édition** : Chargement direct depuis l'API pour les périodes dynamiques
-- **Sous-périodes** : Affichage correct des enfants avec transformation des types
-- **Drag & Drop** : Mise à jour du store après déplacement
-
-### Filtrage des périodes
-- **DatabaseView** : Affichage des périodes racines uniquement (comme GraphView)
-- **Cohérence** : Même logique de filtrage entre les vues
-- **Performance** : Réduction du nombre d'éléments affichés
-
-## Types TypeScript
-
-### Types principaux
 ```typescript
 interface Period {
   id: string
-  name: string
+  wikidata_id?: string
+  label: MultilingualText
+  description?: MultilingualText
   startDate: string
   endDate: string
-  parentId?: string
-  children?: Period[]
+  hasParent: boolean
+  children: string[]
+  temporalLocation: string
+  categories: Category[]
 }
 
 interface Event {
   id: string
-  name: string
+  wikidata_id?: string
+  label: MultilingualText
+  description?: MultilingualText
   date: string
-  storyId: string // Type corrigé : string au lieu de number
+  categories: Category[]
 }
 
 interface Story {
   id: string
-  name: string
-  description?: string
+  title: MultilingualText
+  description?: MultilingualText
+  author: string
+  isPublic: boolean
+  categories: Category[]
+  periods: Period[]
+  events: Event[]
+}
+
+interface MultilingualText {
+  fr: string
+  en: string
+}
+
+interface Category {
+  id: string
+  label: MultilingualText
+  description?: MultilingualText
 }
 ```
 
-### Corrections de types
-- **`storyId`** : Changé de `number` à `string` pour éviter les erreurs de conversion
-- **IDs** : Tous les IDs sont maintenant en `string` pour la cohérence
-- **Relations** : Types corrects pour les relations parent/enfant
+## Base de Données
 
-## Validation
+### Schéma Prisma
+- **Events** : Événements avec support Wikidata
+- **Periods** : Périodes géologiques avec hiérarchie (tables PostgreSQL)
+- **Stories** : Histoires/narratives (tables PostgreSQL)
+- **Categories** : Catégorisation des éléments
+- **Relations** : Parent/enfant entre périodes
 
-### Validation centralisée
-```typescript
-// validators/editFormValidators.ts
-export const validatePeriod = (period: Partial<Period>): ValidationResult => {
-  // Validation des dates (non stricte)
-  // Validation des champs requis
-}
-```
+### Migrations
+- Support UUID pour tous les IDs
+- Contraintes d'intégrité référentielle
+- Index optimisés pour les requêtes
+- Support multilingue (fr, en)
 
-### Gestion des erreurs
-- **Messages d'erreur** : Affichage utilisateur des erreurs de validation
-- **Retry automatique** : Tentatives de sauvegarde en cas d'échec
-- **Notifications** : Feedback utilisateur via composant Toast
+## API Endpoints
+
+### Périodes
+- `GET /api/periods` : Liste des périodes racines
+- `GET /api/periods/:id` : Détails d'une période
+- `POST /api/periods` : Création d'une période
+- `PUT /api/periods/:id` : Modification d'une période
+- `GET /api/periods/wikidata/:wikidataId` : Recherche par Wikidata ID
+
+### Événements
+- `GET /api/events` : Liste des événements
+- `POST /api/events` : Création d'un événement
+- `PUT /api/events/:id` : Modification d'un événement
+- `DELETE /api/events/:id` : Suppression d'un événement
+
+### Stories
+- `GET /api/stories` : Liste des stories
+- `GET /api/stories/:id` : Détails d'une story
+- `POST /api/stories` : Création d'une story
+- `DELETE /api/stories/:id` : Suppression d'une story
+- `GET /api/stories/:storyId/periods` : Périodes d'une story
+- `GET /api/stories/:storyId/events` : Événements d'une story
+- `POST /api/stories/:storyId/periods/:periodId` : Ajouter période à story
+- `POST /api/stories/:storyId/events/:eventId` : Ajouter événement à story
+- `DELETE /api/stories/:storyId/periods/:periodId` : Retirer période de story
+- `DELETE /api/stories/:storyId/events/:eventId` : Retirer événement de story
+
+### Catégories
+- `GET /api/categories` : Liste des catégories
 
 ## Performance
 
-### Optimisations appliquées
+### Optimisations
 - **Store partagé** : Évite les requêtes multiples
-- **Chargement lazy** : Données chargées à la demande
-- **Mise à jour ciblée** : Seules les données modifiées sont rafraîchies
-- **Filtrage côté client** : Recherche en temps réel sans requêtes serveur
+- **Chargement lazy** : Données à la demande
+- **Mise à jour ciblée** : Rafraîchissement sélectif
+- **Filtrage client** : Recherche temps réel
 
 ### Métriques
-- **Temps de chargement** : Réduit grâce au store partagé
-- **Mémoire** : Optimisée avec la suppression des services non utilisés
-- **Réactivité** : Interface plus fluide avec les mises à jour dynamiques
-
-## Sécurité
-
-### Validation des données
-- **Côté client** : Validation TypeScript et validators
-- **Côté serveur** : Validation des entrées API
-- **Sanitisation** : Nettoyage des données utilisateur
-
-### Gestion des erreurs
-- **Try/catch** : Gestion robuste des erreurs
-- **Fallbacks** : Valeurs par défaut en cas d'échec
-- **Logging** : Traçabilité des erreurs
+- Chargement initial : < 2s
+- Navigation : < 1s
+- Recherche : < 500ms
+- Import Wikidata : < 1s
 
 ## Tests
 
-### Tests unitaires
-- **Composables** : Tests des logiques métier
-- **Services** : Tests des interactions avec les APIs
-- **Validators** : Tests de validation des données
+### Tests Unitaires
+- Composables Vue 3
+- Services métier
+- Validateurs
+- Utilitaires
 
-### Tests d'intégration
-- **Flux complet** : Tests des parcours utilisateur
-- **APIs** : Tests des endpoints
-- **Base de données** : Tests des requêtes
+### Tests d'Intégration
+- Flux utilisateur complets
+- Endpoints API
+- Requêtes base de données
 
 ## Déploiement
 
-### Configuration
-- **Docker** : Containerisation avec docker-compose
-- **Environnements** : Dev, staging, production
-- **Variables d'environnement** : Configuration externalisée
+### Docker
+```bash
+docker-compose up -d
+```
 
-### Monitoring
-- **Logs** : Centralisation des logs
-- **Métriques** : Monitoring des performances
-- **Alertes** : Notifications en cas de problème
+### Variables d'Environnement
+- `DATABASE_URL` : Connexion PostgreSQL
+- `NODE_ENV` : Environnement (dev/prod)
+- `PORT` : Port du serveur
+
+## Sécurité
+
+### Validation
+- Validation côté client (TypeScript + validators)
+- Validation côté serveur (API)
+- Sanitisation des entrées utilisateur
+
+### Gestion d'Erreurs
+- Try/catch robuste
+- Fallbacks en cas d'échec
+- Logging structuré

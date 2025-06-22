@@ -1,101 +1,120 @@
-# Documentation des Bases de Données
+# Documentation Base de Données et Serveur
 
-## Structure de la Base de Données
+## Architecture
 
-### Base de Données Principale (wikidata_db)
+### Stack Technologique
+- **Base de données** : PostgreSQL avec schémas multiples
+- **Backend** : Node.js + Express + TypeScript
+- **ORM** : Prisma (pour Events) + requêtes SQL directes
+- **API** : REST avec support multilingue
+- **Containerisation** : Docker avec docker-compose
 
-La base de données est organisée en schémas distincts pour une meilleure organisation logique des données.
+### Structure du Projet
+```
+api_Wikidata/
+├── server/                # Backend Express
+│   ├── src/
+│   │   ├── api/           # Routes et configuration DB
+│   │   │   ├── database.ts    # Configuration PostgreSQL
+│   │   │   └── routes.ts      # Routes de l'API
+│   │   └── types/        # Types TypeScript
+│   └── prisma/            # Schéma Prisma (Events)
+├── database/              # Scripts SQL et migrations
+│   ├── init-all.sql       # Initialisation complète
+│   ├── migrations/        # Migrations PostgreSQL
+│   └── backups/           # Sauvegardes
+└── docker-compose.yml     # Configuration Docker
+```
+
+## Base de Données PostgreSQL
+
+### Schémas et Tables
 
 #### Schéma `categories`
+```sql
+CREATE TABLE categories (
+    id VARCHAR(255) PRIMARY KEY,
+    label_fr TEXT NOT NULL,
+    label_en TEXT NOT NULL,
+    description_fr TEXT,
+    description_en TEXT,
+    parent_id VARCHAR(255) REFERENCES categories(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-##### Table `categories`
-- **Description** : Stocke les informations sur les catégories
-- **Port** : 5432
-- **Utilisateur** : wikidata_user
-- **Mot de passe** : wikidata_password
-
-| Colonne | Type | Description |
-|---------|------|-------------|
-| id | VARCHAR(255) | Identifiant unique de la catégorie |
-| label_fr | TEXT | Label en français |
-| label_en | TEXT | Label en anglais |
-| description_fr | TEXT | Description en français |
-| description_en | TEXT | Description en anglais |
-| parent_id | VARCHAR(255) | ID de la catégorie parente |
-| created_at | TIMESTAMP | Date de création |
-| updated_at | TIMESTAMP | Date de mise à jour |
-
-##### Tables de Liaison
-- **Description** : Tables de liaison entre catégories et autres entités
-
-| Table | Description | Colonnes |
-|-------|-------------|-----------|
-| period_categories | Lie les périodes aux catégories | period_id, category_id |
-| event_categories | Lie les événements aux catégories | event_id, category_id |
-| story_categories | Lie les stories aux catégories | story_id, category_id |
+-- Tables de liaison
+CREATE TABLE period_categories (period_id VARCHAR(255), category_id VARCHAR(255));
+CREATE TABLE event_categories (event_id VARCHAR(255), category_id VARCHAR(255));
+CREATE TABLE story_categories (story_id INTEGER, category_id VARCHAR(255));
+```
 
 #### Schéma `periods`
-
-##### Table `periods`
-- **Description** : Stocke les informations sur les périodes
-
-| Colonne | Type | Description |
-|---------|------|-------------|
-| id | VARCHAR(255) | Identifiant unique de la période |
-| wikidata_id | VARCHAR(255) | Identifiant Wikidata (QID) |
-| label_fr | TEXT | Label en français |
-| label_en | TEXT | Label en anglais |
-| description_fr | TEXT | Description en français |
-| description_en | TEXT | Description en anglais |
-| start_date | TIMESTAMP | Date de début (format ISO 8601) |
-| end_date | TIMESTAMP | Date de fin (format ISO 8601) |
-| has_parent | BOOLEAN | Indique si la période a des enfants |
-| children | JSONB | Liste des IDs des enfants directs |
-| temporal_location | VARCHAR(255) | Localisation temporelle |
-| created_at | TIMESTAMP | Date de création |
-| updated_at | TIMESTAMP | Date de mise à jour |
+```sql
+CREATE TABLE periods (
+    id VARCHAR(255) PRIMARY KEY,
+    wikidata_id VARCHAR(255) UNIQUE NOT NULL,
+    label_fr TEXT NOT NULL,
+    label_en TEXT NOT NULL,
+    description_fr TEXT,
+    description_en TEXT,
+    start_date TIMESTAMP,
+    end_date TIMESTAMP,
+    parent_id VARCHAR(255) REFERENCES periods(id),
+    temporal_location VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
 #### Schéma `events`
-
-##### Table `events`
-- **Description** : Stocke les informations sur les événements
-
-| Colonne | Type | Description |
-|---------|------|-------------|
-| id | VARCHAR(255) | Identifiant unique de l'événement |
-| wikidata_id | VARCHAR(255) | Identifiant Wikidata (QID) |
-| label_fr | TEXT | Label en français |
-| label_en | TEXT | Label en anglais |
-| description_fr | TEXT | Description en français |
-| description_en | TEXT | Description en anglais |
-| date | TIMESTAMP | Date de l'événement (format ISO 8601) |
-| created_at | TIMESTAMP | Date de création |
-| updated_at | TIMESTAMP | Date de mise à jour |
+```sql
+CREATE TABLE events (
+    id VARCHAR(255) PRIMARY KEY,
+    wikidata_id VARCHAR(255) UNIQUE NOT NULL,
+    label_fr TEXT NOT NULL,
+    label_en TEXT NOT NULL,
+    description_fr TEXT,
+    description_en TEXT,
+    date TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
 #### Schéma `stories`
+```sql
+CREATE TABLE stories (
+    id SERIAL PRIMARY KEY,
+    title_fr TEXT NOT NULL,
+    title_en TEXT NOT NULL,
+    description_fr TEXT,
+    description_en TEXT,
+    author VARCHAR(255) NOT NULL,
+    is_public BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-##### Table `stories`
-- **Description** : Stocke les informations sur les stories créées par les utilisateurs
+-- Tables de liaison
+CREATE TABLE story_periods (story_id INTEGER, period_id VARCHAR(255));
+CREATE TABLE story_events (story_id INTEGER, event_id VARCHAR(255));
+```
 
-| Colonne | Type | Description |
-|---------|------|-------------|
-| id | SERIAL | Identifiant unique de la story |
-| title_fr | TEXT | Titre en français |
-| title_en | TEXT | Titre en anglais |
-| description_fr | TEXT | Description en français |
-| description_en | TEXT | Description en anglais |
-| author | VARCHAR(255) | Auteur de la story |
-| is_public | BOOLEAN | Visibilité de la story |
-| created_at | TIMESTAMP | Date de création |
-| updated_at | TIMESTAMP | Date de mise à jour |
-
-##### Tables de Liaison
-- **Description** : Tables de liaison entre stories et autres entités
-
-| Table | Description | Colonnes |
-|-------|-------------|-----------|
-| story_periods | Lie les stories aux périodes | story_id, period_id |
-| story_events | Lie les stories aux événements | story_id, event_id |
+### Schéma Prisma (Events)
+```prisma
+model Event {
+  id          String   @id @default(uuid())
+  wikidataId  String?
+  label       String
+  date        String?
+  description String?
+  category    String?
+  source      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+```
 
 ## Types TypeScript
 
@@ -118,15 +137,15 @@ interface Category {
 ```typescript
 interface Period {
   id: string;
-  wikidataId: string;
+  wikidata_id?: string;
   label: MultilingualText;
   description?: MultilingualText;
   startDate: string; // Format ISO 8601
   endDate: string;   // Format ISO 8601
-  parentId: string | null;
+  hasParent: boolean;
+  children: string[];
   temporalLocation: string;
   categories: Category[];
-  children: Period[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -136,7 +155,7 @@ interface Period {
 ```typescript
 interface Event {
   id: string;
-  wikidataId: string;
+  wikidata_id?: string;
   label: MultilingualText;
   description?: MultilingualText;
   date: string;      // Format ISO 8601
@@ -149,7 +168,7 @@ interface Event {
 ### Types pour les Stories
 ```typescript
 interface Story {
-  id: number;
+  id: string;
   title: MultilingualText;
   description?: MultilingualText;
   author: string;
@@ -162,41 +181,163 @@ interface Story {
 }
 ```
 
-## Contraintes et Indexes
+## API Endpoints
 
-### Schéma Categories
-- Index sur `categories(id)`
-- Index sur `categories(parent_id)` pour la hiérarchie des catégories
-- Index sur les tables de liaison :
-  - `period_categories(period_id, category_id)`
-  - `event_categories(event_id, category_id)`
-  - `story_categories(story_id, category_id)`
-- Contrainte de clé étrangère sur `parent_id` pour la hiérarchie
+### Périodes
+- `GET /api/periods` : Liste des périodes racines
+- `GET /api/periods/:id` : Détails d'une période
+- `POST /api/periods` : Création d'une période
+- `PUT /api/periods/:id` : Modification d'une période
+- `GET /api/periods/wikidata/:wikidataId` : Recherche par Wikidata ID
 
-### Schéma Periods
-- Index sur `periods(id)`
-- Index sur `periods(wikidata_id)`
-- Index sur `periods(parent_id)`
-- Index sur `periods(start_date)` et `periods(end_date)`
-- Contrainte UNIQUE sur `wikidata_id`
+### Événements
+- `GET /api/events` : Liste des événements
+- `POST /api/events` : Création d'un événement
+- `PUT /api/events/:id` : Modification d'un événement
+- `DELETE /api/events/:id` : Suppression d'un événement
 
-### Schéma Events
-- Index sur `events(id)`
-- Index sur `events(wikidata_id)`
-- Index sur `events(date)`
-- Contrainte UNIQUE sur `wikidata_id`
+### Stories
+- `GET /api/stories` : Liste des stories
+- `GET /api/stories/:id` : Détails d'une story
+- `POST /api/stories` : Création d'une story
+- `DELETE /api/stories/:id` : Suppression d'une story
+- `GET /api/stories/:storyId/periods` : Périodes d'une story
+- `GET /api/stories/:storyId/events` : Événements d'une story
+- `POST /api/stories/:storyId/periods/:periodId` : Ajouter période à story
+- `POST /api/stories/:storyId/events/:eventId` : Ajouter événement à story
+- `DELETE /api/stories/:storyId/periods/:periodId` : Retirer période de story
+- `DELETE /api/stories/:storyId/events/:eventId` : Retirer événement de story
 
-### Schéma Stories
-- Index sur `story_periods(story_id, period_id)`
-- Index sur `story_events(story_id, event_id)`
+### Catégories
+- `GET /api/categories` : Liste des catégories
 
-## Notes d'Utilisation
+## Configuration
 
-1. Toutes les dates sont stockées au format ISO 8601 pour une meilleure manipulation
-2. La hiérarchie des périodes est gérée via le champ `parent_id`
-3. La hiérarchie des catégories est gérée via le champ `parent_id` dans la table `categories`
-4. Les stories peuvent contenir à la fois des périodes et des événements
-5. Toutes les entités (périodes, événements, stories) peuvent appartenir à plusieurs catégories
-6. Toutes les tables incluent des timestamps de création et de mise à jour
-7. Les identifiants Wikidata (QID) sont stockés dans le champ `wikidata_id` et doivent être uniques
-8. La base de données utilise des schémas distincts pour une meilleure organisation logique des données 
+### Base de Données
+```typescript
+// server/src/api/database.ts
+import { Pool } from 'pg';
+
+const pool = new Pool({
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '5432'),
+  database: process.env.DB_NAME || 'wikidata_db',
+  user: process.env.DB_USER || 'wikidata_user',
+  password: process.env.DB_PASSWORD || 'wikidata_password',
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
+```
+
+### Variables d'Environnement
+```bash
+DATABASE_URL=postgresql://wikidata_user:wikidata_password@localhost:5432/wikidata_db
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=wikidata_db
+DB_USER=wikidata_user
+DB_PASSWORD=wikidata_password
+NODE_ENV=development
+PORT=3000
+```
+
+## Index et Performance
+
+### Index Principaux
+```sql
+-- Categories
+CREATE INDEX idx_categories_parent_id ON categories.categories(parent_id);
+
+-- Periods
+CREATE INDEX idx_periods_parent_id ON periods.periods(parent_id);
+CREATE INDEX idx_periods_dates ON periods.periods(start_date, end_date);
+CREATE INDEX idx_periods_wikidata_id ON periods.periods(wikidata_id);
+
+-- Events
+CREATE INDEX idx_events_date ON events.events(date);
+CREATE INDEX idx_events_wikidata_id ON events.events(wikidata_id);
+
+-- Tables de liaison
+CREATE INDEX idx_period_categories ON categories.period_categories(period_id, category_id);
+CREATE INDEX idx_event_categories ON categories.event_categories(event_id, category_id);
+CREATE INDEX idx_story_categories ON categories.story_categories(story_id, category_id);
+CREATE INDEX idx_story_periods ON stories.story_periods(story_id, period_id);
+CREATE INDEX idx_story_events ON stories.story_events(story_id, event_id);
+```
+
+### Optimisations
+- **Pool de connexions** : Maximum 20 connexions simultanées
+- **Index composites** : Pour les requêtes de jointure
+- **Contraintes d'intégrité** : Clés étrangères et UNIQUE
+- **Triggers** : Mise à jour automatique des timestamps
+
+## Scripts et Migrations
+
+### Initialisation
+```bash
+# Initialisation complète de la base de données
+docker exec -i wikidata_db psql -U wikidata_user -d wikidata_db < database/init-all.sql
+
+# Import des données
+./database/import_data.sh
+
+# Migrations
+./database/migrate_to_iso8602.sh
+```
+
+### Sauvegardes
+```bash
+# Sauvegarde automatique
+docker exec wikidata_db pg_dump -U wikidata_user wikidata_db > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Restauration
+docker exec -i wikidata_db psql -U wikidata_user -d wikidata_db < backup_file.sql
+```
+
+## Fonctionnalités Spéciales
+
+### Intégration Wikidata
+- **Récupération automatique des dates** : Pour les événements sans date
+- **Rate limiting** : Délais entre requêtes Wikidata
+- **Retry automatique** : En cas d'erreur 429 (rate limit)
+- **Cache** : Évite les requêtes répétées
+
+### Support Multilingue
+- **Labels et descriptions** : Français et anglais
+- **Détection automatique** : Langue de recherche
+- **Fallback** : Anglais si français non disponible
+
+### Gestion des Erreurs
+- **Validation des données** : Côté client et serveur
+- **Logs structurés** : Traçabilité complète
+- **Retry automatique** : Pour les opérations critiques
+- **Fallbacks** : Valeurs par défaut en cas d'échec
+
+## Sécurité
+
+### Base de Données
+- **Utilisateur dédié** : Permissions minimales
+- **Validation des entrées** : Protection contre les injections SQL
+- **Contraintes d'intégrité** : Cohérence des données
+- **Sauvegardes régulières** : Récupération en cas de problème
+
+### API
+- **Validation des entrées** : Sanitisation des données
+- **Gestion des erreurs** : Messages d'erreur appropriés
+- **Rate limiting** : Protection contre les abus
+- **CORS configuré** : Sécurité des requêtes cross-origin
+
+## Monitoring
+
+### Métriques
+- **Temps de réponse** : < 100ms pour les requêtes simples
+- **Connexions DB** : Monitoring du pool de connexions
+- **Requêtes Wikidata** : Suivi des timeouts et erreurs
+- **Utilisation mémoire** : Surveillance des fuites
+
+### Logs
+- **Requêtes API** : Traçabilité complète
+- **Erreurs DB** : Logs détaillés des erreurs
+- **Requêtes Wikidata** : Suivi des performances
+- **Opérations critiques** : Création, modification, suppression 
