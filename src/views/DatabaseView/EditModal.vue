@@ -20,13 +20,24 @@
       <form v-else @submit.prevent="handleSubmit" class="modal-form">
         <div class="form-content">
           <div class="form-row" v-if="type !== 'story'">
-            <div class="form-group full-width">
+            <div class="form-group">
               <Input
                 v-model="form.qid"
                 label="Q-id Wikidata"
                 placeholder="Q12345"
                 :error="editState.qidError"
                 @blur="validateQid"
+              />
+            </div>
+            <div class="form-group">
+              <BaseSelect
+                v-model="form.categories"
+                :options="editState.categories.map(cat => ({ value: cat.id, label: cat.label }))"
+                label="Catégories"
+                placeholder="Sélectionner des catégories"
+                :multiple="true"
+                :loading="editState.categoriesLoading"
+                :disabled="editState.categoriesLoading"
               />
             </div>
           </div>
@@ -126,6 +137,20 @@
               </div>
             </div>
           </div>
+
+          <div class="form-row" v-if="type === 'story'">
+            <div class="form-group full-width">
+              <BaseSelect
+                v-model="form.categories"
+                :options="editState.categories.map(cat => ({ value: cat.id, label: cat.label }))"
+                label="Catégories"
+                placeholder="Sélectionner des catégories"
+                :multiple="true"
+                :loading="editState.categoriesLoading"
+                :disabled="editState.categoriesLoading"
+              />
+            </div>
+          </div>
         </div>
         
         <div class="modal-footer">
@@ -173,6 +198,7 @@ import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';
 import WikidataImportButton from '@/components/WikidataImportButton.vue';
 import Switch from '@/components/base/Switch.vue';
+import BaseSelect from '@/components/base/Select.vue';
 
 const props = defineProps<{
   isOpen: boolean;

@@ -15,6 +15,7 @@
 api_Wikidata/
 ├── src/                    # Frontend Vue 3
 │   ├── components/         # Composants réutilisables
+│   │   └── base/          # Composants de base (Button, Input, Select, etc.)
 │   ├── composables/        # Logique métier Vue 3
 │   ├── services/          # Services d'API et métier
 │   ├── types/             # Types TypeScript
@@ -26,6 +27,76 @@ api_Wikidata/
 │   └── prisma/            # Schéma et migrations DB
 └── database/              # Scripts SQL et migrations
 ```
+
+### Composants de Base
+
+#### Select Component
+Composant de sélection avec autocomplétion qui suit le design system de l'application.
+
+**Fonctionnalités :**
+- ✅ Sélection simple et multiple
+- ✅ Autocomplétion avec recherche
+- ✅ Navigation au clavier (flèches, Entrée, Échap)
+- ✅ Support des états d'erreur et d'aide
+- ✅ Accessibilité (ARIA)
+- ✅ Design responsive
+- ✅ Thème sombre/clair
+- ✅ Transitions fluides
+
+**Utilisation :**
+```vue
+<script setup>
+import BaseSelect from '@/components/base/Select.vue';
+
+const selectedValue = ref(null);
+const options = [
+  { value: 'fr', label: 'France' },
+  { value: 'us', label: 'États-Unis' }
+];
+</script>
+
+<template>
+  <!-- Sélection simple -->
+  <BaseSelect
+    v-model="selectedValue"
+    :options="options"
+    label="Choisir un pays"
+    placeholder="Sélectionner un pays"
+  />
+  
+  <!-- Sélection multiple -->
+  <BaseSelect
+    v-model="multipleValues"
+    :options="options"
+    :multiple="true"
+    label="Choisir plusieurs pays"
+  />
+</template>
+```
+
+**Props principales :**
+- `modelValue` : Valeur(s) sélectionnée(s)
+- `options` : Liste des options (interface `SelectOption`)
+- `multiple` : Mode sélection multiple (défaut: `false`)
+- `searchable` : Activer la recherche (défaut: `true`)
+- `label`, `placeholder`, `error`, `hint` : Interface utilisateur
+- `required`, `disabled` : États du champ
+
+**Interface SelectOption :**
+```typescript
+interface SelectOption {
+  value: string | number;
+  label: string;
+  disabled?: boolean;
+}
+```
+
+**Navigation au clavier :**
+- **Flèche bas** : Ouvrir le dropdown / Naviguer vers le bas
+- **Flèche haut** : Naviguer vers le haut
+- **Entrée/Espace** : Sélectionner l'option surlignée
+- **Échap** : Fermer le dropdown
+- **Tab** : Fermer le dropdown et passer au champ suivant
 
 ## Composables Vue 3
 
@@ -164,13 +235,71 @@ interface Category {
 - **Categories** : Catégorisation des éléments
 - **Relations** : Parent/enfant entre périodes
 
+### Tables de Liaison des Catégories
+```sql
+-- Tables de liaison many-to-many pour les catégories
+CREATE TABLE period_categories (
+    period_id VARCHAR(255) NOT NULL,
+    category_id VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (period_id, category_id),
+    FOREIGN KEY (period_id) REFERENCES periods(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories.categories(id) ON DELETE CASCADE
+);
+
+CREATE TABLE event_categories (
+    event_id VARCHAR(255) NOT NULL,
+    category_id VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (event_id, category_id),
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories.categories(id) ON DELETE CASCADE
+);
+
+CREATE TABLE story_categories (
+    story_id INTEGER NOT NULL,
+    category_id VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (story_id, category_id),
+    FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories.categories(id) ON DELETE CASCADE
+);
+```
+
+### Catégories par Défaut
+Le système inclut 18 catégories prédéfinies :
+- Cosmologie, Astrophysique, Physique Théorique
+- Biologie Évolutive, Paléontologie, Physique des Particules
+- Géologie, Chimie, Botanique
+- Histoire et Civilisations, Anthropologie et Archéologie
+- Technologie et Innovations, Religion et Philosophie
+- Art et Culture, Économie, Océanographie
+- Microbiologie, Écologie
+
 ### Migrations
 - Support UUID pour tous les IDs
 - Contraintes d'intégrité référentielle
 - Index optimisés pour les requêtes
 - Support multilingue (fr, en)
+- **Tables de liaison catégories** : Relations many-to-many
+- **Cascade DELETE** : Suppression automatique des relations
 
 ## API Endpoints
+
+### Format des Données
+
+#### Catégories
+Les catégories sont envoyées au backend sous forme d'objets avec la propriété `id` :
+```typescript
+// Format correct pour les catégories
+categories: [
+  { id: "5599cb7b-8a28-42ff-a300-d159b5e22b78" },
+  { id: "7a8b9c0d-1e2f-3g4h-5i6j-7k8l9m0n1o2p" }
+]
+
+// Le frontend filtre automatiquement les valeurs null/undefined
+// et transforme les IDs en objets { id: ... }
+```
 
 ### Périodes
 - `GET /api/periods` : Liste des périodes racines

@@ -1,5 +1,6 @@
 import { reactive, ref, computed, watch } from 'vue';
 import type { Period, Event, Story } from '@/types/database';
+import { CategoryService, type Category } from '@/services/CategoryService';
 
 export interface EditFormData {
   qid: string;
@@ -18,6 +19,7 @@ export interface EditFormData {
   author: string;
   isPublic: boolean;
   parentId: string | null;
+  categories: string[]; // IDs des catégories sélectionnées
 }
 
 export interface EditModalState {
@@ -28,6 +30,8 @@ export interface EditModalState {
   qidExistsInBase: boolean;
   existingItem: any;
   directChildrenCount: string;
+  categories: Category[];
+  categoriesLoading: boolean;
 }
 
 export function useEditModal(
@@ -35,6 +39,8 @@ export function useEditModal(
   mode: 'create' | 'edit',
   initialData?: any
 ) {
+  const categoryService = CategoryService.getInstance();
+
   const form = reactive<EditFormData>({
     qid: initialData?.wikidata_id || '',
     title: {
@@ -51,7 +57,8 @@ export function useEditModal(
     location: initialData?.location || '',
     author: initialData?.author || '',
     isPublic: initialData?.isPublic || false,
-    parentId: initialData?.parent_id || null
+    parentId: initialData?.parent_id || null,
+    categories: initialData?.categories?.map((cat: any) => cat.id) || []
   });
 
   const state = reactive<EditModalState>({
@@ -61,8 +68,25 @@ export function useEditModal(
     qidError: '',
     qidExistsInBase: false,
     existingItem: null,
-    directChildrenCount: '0'
+    directChildrenCount: '0',
+    categories: [],
+    categoriesLoading: false
   });
+
+  // Charger les catégories disponibles
+  const loadCategories = async () => {
+    try {
+      state.categoriesLoading = true;
+      state.categories = await categoryService.getCategories();
+    } catch (error) {
+      console.error('[useEditModal] Erreur lors du chargement des catégories:', error);
+    } finally {
+      state.categoriesLoading = false;
+    }
+  };
+
+  // Charger les catégories au montage
+  loadCategories();
 
   // Validation du formulaire
   const isValid = computed(() => {
@@ -95,6 +119,7 @@ export function useEditModal(
     form.author = '';
     form.isPublic = false;
     form.parentId = null;
+    form.categories = [];
     
     state.qidError = '';
     state.qidExistsInBase = false;
@@ -117,6 +142,7 @@ export function useEditModal(
       form.author = data.author || '';
       form.isPublic = data.isPublic || false;
       form.parentId = data.parent_id || null;
+      form.categories = data.categories?.map((cat: any) => cat.id) || [];
       
       state.qidExistsInBase = false;
       state.existingItem = data;
@@ -143,7 +169,10 @@ export function useEditModal(
       temporalLocation: form.location || null,
       author: form.author,
       isPublic: form.isPublic,
-      children: []
+      children: [],
+      categories: form.categories
+        .filter(Boolean) // Filtrer les valeurs null/undefined
+        .map(id => ({ id })) // Transformer les IDs en objets { id: ... }
     };
 
     // Conserver les enfants existants si nous sommes en mode édition
@@ -189,6 +218,7 @@ export function useEditModal(
     setError,
     setQidError,
     setQidExists,
-    setChildrenCount
+    setChildrenCount,
+    loadCategories
   };
 } 

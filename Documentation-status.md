@@ -127,4 +127,10 @@
 - **Diagrammes** : Mermaid pour les dépendances
 
 ## État Actuel
-Le projet est **stable et fonctionnel** avec toutes les fonctionnalités principales implémentées. L'architecture modulaire permet une maintenance facile et des évolutions futures. 
+Le projet est **stable et fonctionnel** avec toutes les fonctionnalités principales implémentées. L'architecture modulaire permet une maintenance facile et des évolutions futures.
+
+### Corrections Récentes (2025-06-22)
+- **Format des catégories** : Correction du format d'envoi des catégories au backend
+  - Le frontend filtre maintenant automatiquement les valeurs `null`/`undefined`
+  - Transformation des IDs en objets `{ id: string }` pour compatibilité backend
+  - Résolution du problème d'insertion des catégories dans les tables de liaison 

@@ -567,7 +567,7 @@ router.put('/events/:id', async (req, res) => {
 router.put('/periods/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { label, description, start_date, end_date, children, temporal_location, wikidata_id } = req.body;
+    const { label, description, start_date, end_date, children, temporal_location, wikidata_id, categories } = req.body;
 
     console.log(`[API] Mise à jour de la période ${id} avec les données:`, req.body);
 
@@ -594,6 +594,7 @@ router.put('/periods/:id', async (req, res) => {
     console.log('- children:', children);
     console.log('- temporal_location:', temporal_location);
     console.log('- wikidata_id:', wikidata_id);
+    console.log('- categories:', categories);
 
     // Mise à jour de la période
     const updatePeriodQuery = `
@@ -637,6 +638,34 @@ router.put('/periods/:id', async (req, res) => {
     }
 
     console.log('[API] Période mise à jour:', result.rows[0]);
+
+    // Mise à jour des catégories
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      console.log('[API] Mise à jour des catégories:', categories);
+      
+      // Supprimer les anciennes catégories
+      await dbQuery('DELETE FROM categories.period_categories WHERE period_id = $1', [id]);
+
+      // Filtrer les catégories valides (avec un ID)
+      const validCategories = categories.filter(cat => cat && cat.id);
+      
+      if (validCategories.length > 0) {
+        // Ajouter les nouvelles catégories
+        const categoryValues = validCategories.map((_, index) => `($1, $${index + 2})`).join(',');
+        const categoryParams = [id, ...validCategories.map(cat => cat.id)];
+        
+        const insertCategoryQuery = `
+          INSERT INTO categories.period_categories (period_id, category_id)
+          VALUES ${categoryValues}
+        `;
+        
+        console.log('[API] Requête SQL pour les catégories:', insertCategoryQuery);
+        console.log('[API] Paramètres des catégories:', categoryParams);
+        
+        await dbQuery(insertCategoryQuery, categoryParams);
+      }
+    }
+
     res.json(result.rows[0]);
   } catch (error: any) {
     console.error('[API] Erreur lors de la mise à jour de la période:', error);
@@ -774,6 +803,101 @@ router.delete('/stories/:id', async (req, res) => {
   }
 });
 
+// Route pour mettre à jour une story
+router.put('/stories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, author, isPublic, categories } = req.body;
+
+    console.log(`[API] Mise à jour de la story ${id} avec les données:`, req.body);
+
+    // Validation des données requises
+    if (!title || !title.fr) {
+      console.error('[API] title.fr manquant dans les données');
+      return res.status(400).json({ error: 'title.fr est requis' });
+    }
+
+    if (!author) {
+      console.error('[API] author manquant dans les données');
+      return res.status(400).json({ error: 'author est requis' });
+    }
+
+    // Mise à jour de la story
+    const updateStoryQuery = `
+      UPDATE stories.stories
+      SET 
+        title_fr = $1,
+        title_en = $2,
+        description_fr = $3,
+        description_en = $4,
+        author = $5,
+        is_public = $6,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $7
+      RETURNING *
+    `;
+
+    const params = [
+      title.fr,
+      title.en || title.fr,
+      description?.fr || null,
+      description?.en || description?.fr || null,
+      author,
+      isPublic !== undefined ? isPublic : true,
+      id
+    ];
+
+    console.log('[API] Requête SQL:', updateStoryQuery);
+    console.log('[API] Paramètres:', params);
+
+    const result = await dbQuery(updateStoryQuery, params);
+
+    if (result.rows.length === 0) {
+      console.log('[API] Aucune story trouvée avec l\'ID:', id);
+      return res.status(404).json({ error: 'Story non trouvée' });
+    }
+
+    console.log('[API] Story mise à jour:', result.rows[0]);
+
+    // Mise à jour des catégories
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      console.log('[API] Mise à jour des catégories:', categories);
+      
+      // Supprimer les anciennes catégories
+      await dbQuery('DELETE FROM categories.story_categories WHERE story_id = $1', [id]);
+
+      // Filtrer les catégories valides (avec un ID)
+      const validCategories = categories.filter(cat => cat && cat.id);
+      
+      if (validCategories.length > 0) {
+        // Ajouter les nouvelles catégories
+        const categoryValues = validCategories.map((_, index) => `($1, $${index + 2})`).join(',');
+        const categoryParams = [id, ...validCategories.map(cat => cat.id)];
+        
+        const insertCategoryQuery = `
+          INSERT INTO categories.story_categories (story_id, category_id)
+          VALUES ${categoryValues}
+        `;
+        
+        console.log('[API] Requête SQL pour les catégories:', insertCategoryQuery);
+        console.log('[API] Paramètres des catégories:', categoryParams);
+        
+        await dbQuery(insertCategoryQuery, categoryParams);
+      }
+    }
+
+    res.json(result.rows[0]);
+  } catch (error: any) {
+    console.error('[API] Erreur lors de la mise à jour de la story:', error);
+    console.error('[API] Stack trace:', error.stack);
+    res.status(500).json({ 
+      error: 'Erreur lors de la mise à jour de la story',
+      details: error.message,
+      stack: error.stack
+    });
+  }
+});
+
 // Route pour créer une période
 router.post('/periods', async (req, res) => {
   try {
@@ -836,7 +960,8 @@ router.get('/periods/:id', async (req, res) => {
     const { id } = req.params;
     console.log(`[API] Récupération de la période ${id}`);
 
-    const sqlQuery = `
+    // Récupérer la période
+    const periodQuery = `
       SELECT 
         p.id,
         p.wikidata_id,
@@ -849,45 +974,67 @@ router.get('/periods/:id', async (req, res) => {
         p.has_parent,
         p.children,
         p.temporal_location,
-        c.label_fr as category_label
+        p.created_at,
+        p.updated_at
       FROM periods.periods p
-      LEFT JOIN categories.period_categories pc ON p.id = pc.period_id
-      LEFT JOIN categories.categories c ON pc.category_id = c.id
       WHERE p.id = $1
     `;
 
-    const result = await dbQuery(sqlQuery, [id]);
+    const periodResult = await dbQuery(periodQuery, [id]);
 
-    if (result.rows.length === 0) {
+    if (periodResult.rows.length === 0) {
       console.log(`[API] Période ${id} non trouvée`);
       return res.status(404).json({ error: 'Période non trouvée' });
     }
 
-    const period = {
-      id: result.rows[0].id,
-      wikidata_id: result.rows[0].wikidata_id,
+    const periodData = periodResult.rows[0];
+
+    // Récupérer les catégories
+    const categoriesQuery = `
+      SELECT 
+        c.id,
+        c.label_fr,
+        c.label_en,
+        c.description_fr,
+        c.description_en
+      FROM categories.categories c
+      JOIN categories.period_categories pc ON c.id = pc.category_id
+      WHERE pc.period_id = $1
+      ORDER BY c.label_fr
+    `;
+
+    const categoriesResult = await dbQuery(categoriesQuery, [id]);
+    const categories = categoriesResult.rows.map(cat => ({
+      id: cat.id,
       label: {
-        fr: result.rows[0].label_fr,
-        en: result.rows[0].label_en || result.rows[0].label_fr
+        fr: cat.label_fr,
+        en: cat.label_en || cat.label_fr
       },
-      description: result.rows[0].description_fr ? {
-        fr: result.rows[0].description_fr,
-        en: result.rows[0].description_en || result.rows[0].description_fr
+      description: cat.description_fr ? {
+        fr: cat.description_fr,
+        en: cat.description_en || cat.description_fr
+      } : undefined
+    }));
+
+    const period = {
+      id: periodData.id,
+      wikidata_id: periodData.wikidata_id,
+      label: {
+        fr: periodData.label_fr,
+        en: periodData.label_en || periodData.label_fr
+      },
+      description: periodData.description_fr ? {
+        fr: periodData.description_fr,
+        en: periodData.description_en || periodData.description_fr
       } : undefined,
-      startDate: result.rows[0].start_date,
-      endDate: result.rows[0].end_date,
-      hasParent: result.rows[0].has_parent,
-      children: result.rows[0].children || [],
-      temporalLocation: result.rows[0].temporal_location,
-      categories: result.rows[0].category_label ? [{
-        id: result.rows[0].category_id,
-        label: {
-          fr: result.rows[0].category_label,
-          en: result.rows[0].category_label
-        }
-      }] : [],
-      createdAt: result.rows[0].created_at,
-      updatedAt: result.rows[0].updated_at
+      startDate: periodData.start_date,
+      endDate: periodData.end_date,
+      hasParent: periodData.has_parent,
+      children: periodData.children || [],
+      temporalLocation: periodData.temporal_location,
+      categories,
+      createdAt: periodData.created_at,
+      updatedAt: periodData.updated_at
     };
 
     console.log(`[API] Période ${id} trouvée:`, period);
@@ -975,7 +1122,8 @@ router.get('/periods/wikidata/:wikidataId', async (req, res) => {
     const { wikidataId } = req.params;
     console.log(`[API] Récupération de la période avec l'ID Wikidata ${wikidataId}`);
 
-    const sqlQuery = `
+    // Récupérer la période
+    const periodQuery = `
       SELECT 
         p.id,
         p.wikidata_id,
@@ -988,51 +1136,73 @@ router.get('/periods/wikidata/:wikidataId', async (req, res) => {
         p.has_parent,
         p.children,
         p.temporal_location,
-        c.label_fr as category_label
+        p.created_at,
+        p.updated_at
       FROM periods.periods p
-      LEFT JOIN categories.period_categories pc ON p.id = pc.period_id
-      LEFT JOIN categories.categories c ON pc.category_id = c.id
       WHERE p.wikidata_id = $1
     `;
 
-    const result = await dbQuery(sqlQuery, [wikidataId]);
+    const periodResult = await dbQuery(periodQuery, [wikidataId]);
 
-    if (result.rows.length === 0) {
+    if (periodResult.rows.length === 0) {
       console.log(`[API] Période avec l'ID Wikidata ${wikidataId} non trouvée`);
       return res.status(404).json({ error: 'Période non trouvée' });
     }
 
-    const period = {
-      id: result.rows[0].id,
-      wikidata_id: result.rows[0].wikidata_id,
+    const periodData = periodResult.rows[0];
+
+    // Récupérer les catégories
+    const categoriesQuery = `
+      SELECT 
+        c.id,
+        c.label_fr,
+        c.label_en,
+        c.description_fr,
+        c.description_en
+      FROM categories.categories c
+      JOIN categories.period_categories pc ON c.id = pc.category_id
+      WHERE pc.period_id = $1
+      ORDER BY c.label_fr
+    `;
+
+    const categoriesResult = await dbQuery(categoriesQuery, [periodData.id]);
+    const categories = categoriesResult.rows.map(cat => ({
+      id: cat.id,
       label: {
-        fr: result.rows[0].label_fr,
-        en: result.rows[0].label_en || result.rows[0].label_fr
+        fr: cat.label_fr,
+        en: cat.label_en || cat.label_fr
       },
-      description: result.rows[0].description_fr ? {
-        fr: result.rows[0].description_fr,
-        en: result.rows[0].description_en || result.rows[0].description_fr
+      description: cat.description_fr ? {
+        fr: cat.description_fr,
+        en: cat.description_en || cat.description_fr
+      } : undefined
+    }));
+
+    const period = {
+      id: periodData.id,
+      wikidata_id: periodData.wikidata_id,
+      label: {
+        fr: periodData.label_fr,
+        en: periodData.label_en || periodData.label_fr
+      },
+      description: periodData.description_fr ? {
+        fr: periodData.description_fr,
+        en: periodData.description_en || periodData.description_fr
       } : undefined,
-      startDate: result.rows[0].start_date,
-      endDate: result.rows[0].end_date,
-      hasParent: result.rows[0].has_parent,
-      children: result.rows[0].children || [],
-      temporalLocation: result.rows[0].temporal_location,
-      categories: result.rows[0].category_label ? [{
-        id: result.rows[0].category_id,
-        label: {
-          fr: result.rows[0].category_label,
-          en: result.rows[0].category_label
-        }
-      }] : [],
-      createdAt: result.rows[0].created_at,
-      updatedAt: result.rows[0].updated_at
+      startDate: periodData.start_date,
+      endDate: periodData.end_date,
+      hasParent: periodData.has_parent,
+      children: periodData.children || [],
+      temporalLocation: periodData.temporal_location,
+      categories,
+      createdAt: periodData.created_at,
+      updatedAt: periodData.updated_at
     };
 
     console.log(`[API] Période avec l'ID Wikidata ${wikidataId} trouvée:`, period);
     res.json(period);
   } catch (error) {
-    console.error('[API] Erreur lors de la récupération de la période par ID Wikidata:', error);
+    console.error('[API] Erreur lors de la récupération de la période par Wikidata ID:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération de la période' });
   }
 });
