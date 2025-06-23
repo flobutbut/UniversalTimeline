@@ -130,10 +130,12 @@
             <div class="form-group">
               <div class="switch-group">
                 <label class="switch-label">Mode public</label>
+
                 <Switch
                   v-model="form.isPublic"
                   :checked="form.isPublic"
                 />
+
               </div>
             </div>
           </div>
@@ -435,5 +437,20 @@ onUnmounted(() => {
   color: var(--color-text-light);
   font-size: var(--font-size-sm);
   margin-left: var(--spacing-sm);
+}
+
+.switch-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 38px 0 var(--spacing-sm) 0;
+  height: 48px;
+}
+
+.switch-label {
+  font-weight: 600;
+  color: var(--color-text);
+  margin-right: var(--spacing-md);
+  font-size: var(--font-size-base);
 }
 </style> 

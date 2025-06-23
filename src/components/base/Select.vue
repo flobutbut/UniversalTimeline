@@ -9,7 +9,10 @@
       <div 
         ref="triggerRef"
         class="base-select__trigger"
-        :class="{ 'base-select__trigger--disabled': disabled }"
+        :class="{ 
+          'base-select__trigger--disabled': disabled, 
+          'base-select__trigger--with-tags': multiple && selectedItems.length > 0 
+        }"
         @click="toggleDropdown"
         @keydown="handleKeydown"
         tabindex="0"
@@ -408,6 +411,12 @@ watch(() => props.modelValue, () => {
   background-color: var(--color-surface-hover);
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+.base-select__trigger--with-tags {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  min-height: 48px;
 }
 
 .base-select__value {
