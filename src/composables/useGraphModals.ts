@@ -23,20 +23,28 @@ export function useGraphModals() {
     try {
       loading.value = true;
       
-      // Charger directement depuis l'API pour avoir toutes les données
-      const response = await fetch(`/api/periods/${itemId}`);
-      if (!response.ok) {
-        throw new Error(`Erreur lors du chargement de la période ${itemId}`);
+      // S'assurer que les données sont chargées dans le store
+      const { periods, ensureDataLoaded } = useDatabaseDataStore();
+      await ensureDataLoaded();
+      
+      const period = periods.value.find(p => p.id === itemId);
+      
+      if (!period) {
+        throw new Error(`Période ${itemId} non trouvée dans le store`);
       }
       
-      const periodData = await response.json();
-      
-      // Convertir les dates en string si nécessaire
+      // Formater les données comme dans useDatabaseView
       selectedPeriod.value = {
-        ...periodData,
-        createdAt: periodData.createdAt?.toISOString(),
-        updatedAt: periodData.updatedAt?.toISOString()
+        ...period,
+        description: (period as any).description || { fr: '', en: '' },
+        categories: period.categories || [],
+        hasParent: (period as any).hasParent || false,
+        children: (period as any).children || [],
+        temporalLocation: (period as any).temporalLocation || '',
+        createdAt: (period as any).createdAt || new Date().toISOString(),
+        updatedAt: (period as any).updatedAt || new Date().toISOString()
       };
+      
       showEditModal.value = true;
     } catch (error: any) {
       console.error('[GraphView] Erreur lors du chargement de la période:', error);
