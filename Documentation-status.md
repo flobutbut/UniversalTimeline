@@ -151,4 +151,19 @@ Le projet est **stable et fonctionnel** avec toutes les fonctionnalités princip
     - Colonne 0 (racines) : `hasParent: false` → Période apparaît dans la colonne 0
     - Colonne 1+ (enfants) : `hasParent: true` → Période apparaît dans la colonne correspondante
   - **Utilisation de `useParentChildManagement`** : Gestion correcte des relations parent-enfant
-  - **Réactivité** : Les colonnes se mettent à jour automatiquement grâce au store partagé 
+  - **Réactivité** : Les colonnes se mettent à jour automatiquement grâce au store partagé
+
+### Ajouts Récentes (2025-06-25)
+- **Système de sauvegarde et restauration** : Scripts automatisés pour la base de données
+  - **Script de sauvegarde** : `database/backup_database.sh` avec nommage automatique et personnalisé
+  - **Script de restauration** : `database/restore_database.sh` avec confirmation et vérifications
+  - **Documentation complète** : `database/README_backup.md` avec guide d'utilisation
+  - **Fonctionnalités** :
+    - ✅ Sauvegarde complète avec structure et données PostgreSQL
+    - ✅ Vérification de l'état des conteneurs Docker
+    - ✅ Nommage automatique avec timestamp
+    - ✅ Support des noms personnalisés pour les sauvegardes importantes
+    - ✅ Demande de confirmation avant restauration
+    - ✅ Affichage des informations détaillées (taille, date, emplacement)
+    - ✅ Liste des sauvegardes disponibles
+  - **Bonnes pratiques** : Sauvegardes régulières avant déploiements et modifications importantes 
