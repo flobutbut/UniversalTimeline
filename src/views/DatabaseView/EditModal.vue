@@ -444,7 +444,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 8px;
   padding: 38px 0 var(--spacing-sm) 0;
-  height: 48px;
+  min-height: 44px;
 }
 
 .switch-label {

@@ -140,4 +140,15 @@ Le projet est **stable et fonctionnel** avec toutes les fonctionnalités princip
   - Les catégories sont maintenant pré-remplies dans la modale d'édition
 - **Données stories** : Ajout du préchargement de l'auteur et du statut public/privé
   - L'auteur et le statut `isPublic` sont maintenant chargés et affichés dans la modale
-  - Correction de la route `/stories` pour inclure les catégories 
+  - Correction de la route `/stories` pour inclure les catégories
+
+### Corrections Récentes (2025-06-24)
+- **Ajout dynamique dans GraphView** : Correction de l'ajout de périodes dans les colonnes appropriées
+  - **Problème résolu** : Les périodes s'ajoutaient toujours dans la colonne racine au lieu de la colonne correspondante
+  - **Cause identifiée** : `useDatabaseSave` ajoutait les périodes sans les propriétés `hasParent` et `children` nécessaires
+  - **Solution implémentée** : Création manuelle avec les bonnes propriétés dès le départ
+  - **Fonctionnement** : 
+    - Colonne 0 (racines) : `hasParent: false` → Période apparaît dans la colonne 0
+    - Colonne 1+ (enfants) : `hasParent: true` → Période apparaît dans la colonne correspondante
+  - **Utilisation de `useParentChildManagement`** : Gestion correcte des relations parent-enfant
+  - **Réactivité** : Les colonnes se mettent à jour automatiquement grâce au store partagé 
