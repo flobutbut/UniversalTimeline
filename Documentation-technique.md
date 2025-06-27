@@ -130,6 +130,7 @@ interface SelectOption {
 - **`StoryService`** : Gestion des stories
 - **`ConflictResolutionService`** : Résolution des conflits
 - **`TimelineScalingService`** : Calculs de positionnement temporel
+- **`DateConversionService`** : Conversion de dates entre formats temporels
 
 ## Diagramme des Dépendances
 
@@ -379,3 +380,42 @@ docker-compose up -d
 - Try/catch robuste
 - Fallbacks en cas d'échec
 - Logging structuré
+
+## Service de Conversion de Dates
+
+### Fonctionnalités
+Le `DateConversionService` gère la conversion entre différents formats temporels :
+
+- **Format ISO8601** : `-3600000000-01-01T00:00:00Z` (dates très anciennes)
+- **Format Moderne** : `18 avril 1923` (dates récentes)
+- **Format BCE** : `800 BCE`, `-800` (dates historiques)
+- **Format Géologique** : `4 Ma`, `4.5 Ga`, `40 ka` (dates préhistoriques)
+
+### API Principale
+```typescript
+// Conversion simple
+const result = DateConversionService.convertDate('4 Ma');
+// Retourne: { iso8601: '-4000000-01-01T00:00:00Z', geological: '4.00 Ma', ... }
+
+// Conversion de plage
+const range = DateConversionService.convertDateRange('4 Ma', '2 Ma');
+// Retourne: { start: ..., end: ..., duration: { years: 2000000, geological: '2.00 Ma' } }
+
+// Formatage contextuel
+const display = DateConversionService.formatForDisplay('4 Ma', 'timeline');
+// Retourne: '4.00 Ma'
+```
+
+### Composable Vue 3
+```typescript
+const { convertedDate, convertDate, formatForDisplay } = useDateConversion({
+  defaultLocale: 'fr-FR',
+  defaultPrecision: 'year'
+});
+```
+
+### Seuils Géologiques
+- **Ga (Giga-années)** : ≥ 1 000 000 000 ans
+- **Ma (Méga-années)** : ≥ 1 000 000 ans  
+- **ka (kilo-années)** : ≥ 1 000 ans
+- **ans** : < 1 000 ans

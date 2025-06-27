@@ -4,4 +4,5 @@ export * from './WikidataQueryService';
 export * from './StoryService';
 export * from './ConflictResolutionService';
 export * from './TimelineScalingService';
-export * from './WikidataSearchService'; 
+export * from './WikidataSearchService';
+export * from './DateConversionService'; 

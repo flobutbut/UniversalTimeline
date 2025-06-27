@@ -37,6 +37,7 @@
 - **`useWikidataImport`** : Import depuis Wikidata
 - **`useParentChildManagement`** : Relations hiérarchiques
 - **`useConflictResolution`** : Résolution des conflits
+- **`useDateConversion`** : Conversion de dates avec interface réactive
 
 ### Services
 - **`DatabaseQueryService`** : Interface PostgreSQL
@@ -46,6 +47,7 @@
 - **`StoryService`** : Gestion des stories
 - **`ConflictResolutionService`** : Résolution des conflits
 - **`TimelineScalingService`** : Calculs de positionnement temporel
+- **`DateConversionService`** : Conversion de dates entre formats temporels
 
 ### Fonctionnalités Avancées
 - **Import Wikidata** : Import de périodes et événements depuis Wikidata
@@ -166,4 +168,25 @@ Le projet est **stable et fonctionnel** avec toutes les fonctionnalités princip
     - ✅ Demande de confirmation avant restauration
     - ✅ Affichage des informations détaillées (taille, date, emplacement)
     - ✅ Liste des sauvegardes disponibles
-  - **Bonnes pratiques** : Sauvegardes régulières avant déploiements et modifications importantes 
+  - **Bonnes pratiques** : Sauvegardes régulières avant déploiements et modifications importantes
+
+### Ajouts Récentes (2025-06-26)
+- **Service de conversion de dates** : Gestion complète des formats temporels
+  - **Service principal** : `DateConversionService` avec API complète
+  - **Composable Vue 3** : `useDateConversion` pour utilisation réactive
+  - **Composant de démonstration** : `DateConverter.vue` pour tester les conversions
+  - **Formats supportés** :
+    - ✅ **ISO8601** : `-3600000000-01-01T00:00:00Z` (dates très anciennes)
+    - ✅ **Moderne** : `18 avril 1923` (dates récentes)
+    - ✅ **BCE** : `800 BCE`, `-800` (dates historiques)
+    - ✅ **Géologique** : `4 Ma`, `4.5 Ga`, `40 ka` (dates préhistoriques)
+  - **Fonctionnalités** :
+    - ✅ Détection automatique du format d'entrée
+    - ✅ Conversion bidirectionnelle entre tous les formats
+    - ✅ Gestion des plages de dates avec calcul de durée
+    - ✅ Formatage contextuel (timeline, détail, recherche)
+    - ✅ Validation des dates et gestion d'erreurs
+    - ✅ Support multilingue (français par défaut)
+  - **Tests complets** : Suite de tests unitaires avec Vitest
+  - **Documentation** : README détaillé avec exemples d'utilisation
+  - **Intégration** : Export dans l'index des services pour utilisation globale 

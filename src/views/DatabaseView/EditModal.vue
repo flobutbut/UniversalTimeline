@@ -83,17 +83,37 @@
             <div class="form-group">
               <Input
                 v-model="form.startDate"
-                label="Date de début"
-                placeholder="Date brute"
+                label="Date de début (ISO, brute)"
+                placeholder="Date ISO ou brute"
                 required
+                @blur="syncFormattedFromISO('startDate')"
+                @keyup.enter="syncFormattedFromISO('startDate')"
+              />
+              <Input
+                v-model="formattedStartDate"
+                label="Date formatée (moderne/géologique)"
+                placeholder="Date formatée"
+                class="date-formatted-input"
+                @blur="syncISOFromFormatted('startDate')"
+                @keyup.enter="syncISOFromFormatted('startDate')"
               />
             </div>
             <div class="form-group">
               <Input
                 v-model="form.endDate"
-                label="Date de fin"
-                placeholder="Date brute"
+                label="Date de fin (ISO, brute)"
+                placeholder="Date ISO ou brute"
                 required
+                @blur="syncFormattedFromISO('endDate')"
+                @keyup.enter="syncFormattedFromISO('endDate')"
+              />
+              <Input
+                v-model="formattedEndDate"
+                label="Date formatée (moderne/géologique)"
+                placeholder="Date formatée"
+                class="date-formatted-input"
+                @blur="syncISOFromFormatted('endDate')"
+                @keyup.enter="syncISOFromFormatted('endDate')"
               />
             </div>
           </div>
@@ -102,9 +122,19 @@
             <div class="form-group full-width">
               <Input
                 v-model="form.date"
-                label="Date (brute)"
-                placeholder="Date brute (ex: 2024-06-18, -65 000 000, etc.)"
+                label="Date (ISO, brute)"
+                placeholder="Date ISO ou brute (ex: 2024-06-18, -65 000 000, etc.)"
                 required
+                @blur="syncFormattedFromISO('date')"
+                @keyup.enter="syncFormattedFromISO('date')"
+              />
+              <Input
+                v-model="formattedEventDate"
+                label="Date formatée (moderne/géologique)"
+                placeholder="Date formatée"
+                class="date-formatted-input"
+                @blur="syncISOFromFormatted('date')"
+                @keyup.enter="syncISOFromFormatted('date')"
               />
             </div>
           </div>
@@ -193,9 +223,10 @@
 </template>
 
 <script setup lang="ts">
-import { watch, onMounted, onUnmounted } from 'vue';
+import { watch, onMounted, onUnmounted, ref } from 'vue';
 import { useEditModal } from '@/composables/useEditModal';
 import { useParentChildManagement } from '@/composables/useParentChildManagement';
+import { useDateConversion } from '@/composables/useDateConversion';
 import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';
 import WikidataImportButton from '@/components/WikidataImportButton.vue';
@@ -220,6 +251,38 @@ const emit = defineEmits<{
 // Initialisation des composables
 const { form, state: editState, isValid, resetForm, updateForm, prepareSubmitData, setQidError, setQidExists, setChildrenCount } = useEditModal(props.type, props.mode, props.data);
 const { validateQid: validateQidParentChild } = useParentChildManagement();
+const {
+  quickConvert,
+  toISO8601
+} = useDateConversion({ defaultLocale: 'fr-FR', defaultPrecision: 'year' });
+
+// Champs réactifs pour la date formatée
+const formattedStartDate = ref(quickConvert.toModern(form.startDate) || quickConvert.toGeological(form.startDate));
+const formattedEndDate = ref(quickConvert.toModern(form.endDate) || quickConvert.toGeological(form.endDate));
+const formattedEventDate = ref(quickConvert.toModern(form.date) || quickConvert.toGeological(form.date));
+
+// On retire les watchers de synchronisation automatique
+// On ajoute des handlers pour la conversion au blur ou sur Entrée
+
+function syncFormattedFromISO(field: 'startDate' | 'endDate' | 'date') {
+  if (field === 'startDate') {
+    formattedStartDate.value = quickConvert.toModern(form.startDate) || quickConvert.toGeological(form.startDate);
+  } else if (field === 'endDate') {
+    formattedEndDate.value = quickConvert.toModern(form.endDate) || quickConvert.toGeological(form.endDate);
+  } else if (field === 'date') {
+    formattedEventDate.value = quickConvert.toModern(form.date) || quickConvert.toGeological(form.date);
+  }
+}
+
+function syncISOFromFormatted(field: 'startDate' | 'endDate' | 'date') {
+  if (field === 'startDate') {
+    form.startDate = toISO8601(formattedStartDate.value);
+  } else if (field === 'endDate') {
+    form.endDate = toISO8601(formattedEndDate.value);
+  } else if (field === 'date') {
+    form.date = toISO8601(formattedEventDate.value);
+  }
+}
 
 // Validation du Q-id
 const validateQid = async () => {
@@ -452,5 +515,11 @@ onUnmounted(() => {
   color: var(--color-text);
   margin-right: var(--spacing-md);
   font-size: var(--font-size-base);
+}
+
+.date-formatted-input {
+  margin-top: 0.25rem;
+  font-size: 0.98em;
+  color: var(--color-text-light);
 }
 </style> 
