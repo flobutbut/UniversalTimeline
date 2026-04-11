@@ -4,7 +4,7 @@
  */
 
 import { ref, computed, readonly } from 'vue';
-import { DateConversionService, type DateConversionOptions, type ConvertedDate, type DateRange } from '@/services/DateConversionService';
+import { DateConversionService, type DateConversionOptions, type ConvertedDate } from '@/services/DateConversionService';
 
 export interface UseDateConversionOptions {
   defaultLocale?: string;

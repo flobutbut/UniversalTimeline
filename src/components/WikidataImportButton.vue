@@ -2,18 +2,21 @@
   <Button
     variant="secondary"
     icon="fas fa-database"
-    :disabled="!qid || state.loading"
+    :disabled="!qid || isLoading"
     @click="handleImport"
   >
-    <span v-if="state.loading">Chargement...</span>
+    <span v-if="isLoading">Chargement...</span>
     <span v-else>Remplir avec Wikidata</span>
   </Button>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 import Button from '@/components/base/Button.vue';
 import { useWikidataImport } from '@/composables/useWikidataImport';
+import {
+  WIKIDATA_IMPORT_QID_REQUIRED_MSG,
+  wikidataImportErrorMessage,
+} from '@/lib/wikidataImportButtonHelpers';
 
 interface Props {
   qid: string;
@@ -28,20 +31,20 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const { state, importAndTransform } = useWikidataImport();
+const { isLoading, importAndTransform } = useWikidataImport();
 
 const handleImport = async () => {
   if (!props.qid) {
-    emit('import-error', 'Q-id requis pour l\'import');
+    emit('import-error', WIKIDATA_IMPORT_QID_REQUIRED_MSG);
     return;
   }
 
   try {
     const transformedData = await importAndTransform(props.qid, props.type);
     emit('import-success', transformedData);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[WikidataImportButton] Erreur lors de l\'import:', error);
-    emit('import-error', error.message || 'Erreur lors de l\'import depuis Wikidata');
+    emit('import-error', wikidataImportErrorMessage(error));
   }
 };
 </script>

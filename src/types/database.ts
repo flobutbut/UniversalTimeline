@@ -5,6 +5,18 @@ export interface ListPeriod {
   startDate: string;
   endDate: string;
   categories: Category[];
+  /** Champs enrichis (API mapToPeriod, finder, enfants Wikidata virtuels) */
+  parentId?: string | null;
+  hasParent?: boolean;
+  hasChildren?: boolean;
+  wikidata_id?: string;
+  startYearsBP?: number;
+  endYearsBP?: number;
+  description?: MultilingualText;
+  children?: string[];
+  temporalLocation?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ListEvent {
@@ -12,12 +24,18 @@ export interface ListEvent {
   label: MultilingualText;
   date: string;
   categories: Category[];
+  dateYearsBP?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ListStory {
   id: string; // UUID
   title: MultilingualText;
   categories: Category[];
+  /** Borne temporelle agrégée (liste stories) : min / max sur périodes + dates d’événements. */
+  startDate?: string;
+  endDate?: string;
 }
 
 // Types communs

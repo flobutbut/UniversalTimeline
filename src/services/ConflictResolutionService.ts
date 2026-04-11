@@ -1,4 +1,5 @@
-import { DatabaseQueryService } from './DatabaseQueryService';
+import { PeriodApiService } from './PeriodApiService';
+import { EventApiService } from './EventApiService';
 
 export interface ConflictInfo {
   hasConflict: boolean;
@@ -15,10 +16,12 @@ export interface ResolutionStrategy {
 
 export class ConflictResolutionService {
   private static instance: ConflictResolutionService;
-  private queryService: DatabaseQueryService;
+  private periodService: PeriodApiService;
+  private eventService: EventApiService;
 
   private constructor() {
-    this.queryService = DatabaseQueryService.getInstance();
+    this.periodService = PeriodApiService.getInstance();
+    this.eventService = EventApiService.getInstance();
   }
 
   public static getInstance(): ConflictResolutionService {
@@ -31,7 +34,7 @@ export class ConflictResolutionService {
   // Détection de conflit pour une période
   async detectPeriodConflict(qid: string, currentItemId?: string): Promise<ConflictInfo> {
     try {
-      const periods = await this.queryService.getAllPeriods();
+      const periods = await this.periodService.getAllPeriods();
       const existingPeriod = periods.find(p => p.wikidata_id === qid);
 
       if (!existingPeriod) {
@@ -70,7 +73,7 @@ export class ConflictResolutionService {
     try {
       let existingEvent = null;
       try {
-        existingEvent = await this.queryService.getEventById(qid);
+        existingEvent = await this.eventService.getEventById(qid);
       } catch (e) {
         // L'événement n'existe pas
       }
@@ -136,10 +139,10 @@ export class ConflictResolutionService {
       console.log('[ConflictResolutionService] Résolution automatique du conflit:', conflictInfo);
 
       if (conflictInfo.conflictType === 'period') {
-        await this.queryService.deletePeriod(conflictInfo.existingItem.id);
+        await this.periodService.deletePeriod(conflictInfo.existingItem.id);
         console.log('[ConflictResolutionService] Période existante supprimée automatiquement');
       } else if (conflictInfo.conflictType === 'event') {
-        await this.queryService.deleteEvent(conflictInfo.existingItem.id);
+        await this.eventService.deleteEvent(conflictInfo.existingItem.id);
         console.log('[ConflictResolutionService] Événement existant supprimé automatiquement');
       }
 
@@ -162,9 +165,9 @@ export class ConflictResolutionService {
       switch (strategy.action) {
         case 'replace':
           if (conflictInfo.conflictType === 'period') {
-            await this.queryService.deletePeriod(conflictInfo.existingItem.id);
+            await this.periodService.deletePeriod(conflictInfo.existingItem.id);
           } else if (conflictInfo.conflictType === 'event') {
-            await this.queryService.deleteEvent(conflictInfo.existingItem.id);
+            await this.eventService.deleteEvent(conflictInfo.existingItem.id);
           }
           break;
 

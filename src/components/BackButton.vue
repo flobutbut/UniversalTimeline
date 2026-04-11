@@ -13,7 +13,7 @@ interface SimplePeriod {
   label: MultilingualText;
 }
 
-const props = defineProps<{
+defineProps<{
   period: SimplePeriod;
 }>();
 

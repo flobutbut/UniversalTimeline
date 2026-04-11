@@ -10,7 +10,7 @@
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "server": "NODE_OPTIONS='--loader ts-node/esm' ts-node --esm server/index.ts"
+    "server": "yarn --cwd server dev"
   },
   "dependencies": {
     "@iconify/vue": "^5.0.0",
@@ -27,6 +27,7 @@
     "lodash-es": "^4.17.21",
     "lucide-vue-next": "^0.486.0",
     "pg": "^8.14.1",
+    "pinia": "^3.0.4",
     "uuid": "^11.1.0",
     "vue": "^3.5.13",
     "vue-router": "4"

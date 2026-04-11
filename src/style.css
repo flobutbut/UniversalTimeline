@@ -1,5 +1,6 @@
 @import './styles/variables.css';
 @import './styles/base.css';
+@import './styles/finder-column-layout.css';
 
 /* Styles spécifiques à l'application */
 .app-container {

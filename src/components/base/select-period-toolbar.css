@@ -1,0 +1,215 @@
+/**
+ * Styles du Select en mode period (barre d’outils type vue Événements).
+ * Préfixe : .select--period-toolbar sur la racine du SelectShell.
+ */
+
+.select--period-toolbar {
+  position: relative;
+}
+
+.select--period-toolbar button.base-select__trigger {
+  font: inherit;
+  font-family: var(--font-family-base);
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: left;
+}
+
+/* Trigger, valeur, chevron : alignés sur select-field-shared.css (import SelectShell). */
+
+.select--period-toolbar .base-select__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: var(--z-index-dropdown);
+  margin-top: var(--spacing-xs);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  max-height: 300px;
+  overflow: hidden;
+}
+
+.select--period-toolbar .base-select__dropdown--tall {
+  max-height: min(70vh, 520px);
+}
+
+.select--period-toolbar .base-select__dropdown--tall .base-select__options {
+  max-height: min(55vh, 400px);
+}
+
+.select--period-toolbar .base-select__search-wrapper {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.select--period-toolbar .base-select__search-wrapper--toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.select--period-toolbar .base-select__search-wrapper--toolbar .base-select__search {
+  flex: 1;
+  min-width: 140px;
+}
+
+.select--period-toolbar .base-select__search {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.select--period-toolbar .base-select__search:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.select--period-toolbar.base-select--compact .base-select__search-wrapper {
+  padding: var(--spacing-sm);
+}
+
+.select--period-toolbar.base-select--compact .base-select__search {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.select--period-toolbar .base-select__options {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.select--period-toolbar .base-select__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+.select--period-toolbar.base-select--compact .base-select__option {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+}
+
+.select--period-toolbar .base-select__option:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.select--period-toolbar .base-select__option--highlighted {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.select--period-toolbar .base-select__option--selected {
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.select--period-toolbar .base-select__option--selected:hover {
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.select--period-toolbar .base-select__option-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.select--period-toolbar .base-select__option-text--wrap {
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.select--period-toolbar .base-select__option-check {
+  flex-shrink: 0;
+  width: 1.1em;
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  text-align: center;
+}
+
+.select--period-toolbar .base-select__option-check--hidden {
+  visibility: hidden;
+}
+
+.select--period-toolbar .base-select__option-chevron-next {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: -4px -4px -4px 0;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-light);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  cursor: pointer;
+}
+
+.select--period-toolbar .base-select__option-chevron-next:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+}
+
+.select--period-toolbar .base-select__option--selected .base-select__option-chevron-next {
+  color: var(--color-primary);
+}
+
+.select--period-toolbar .select-period__level-item {
+  border-bottom: 1px solid var(--color-border-light);
+  font-weight: 600;
+  color: var(--color-text-light);
+}
+
+.select--period-toolbar .select-period__level-back {
+  flex-shrink: 0;
+  width: 1.1em;
+  color: var(--color-text-light);
+}
+
+.select--period-toolbar .select-period__level-item:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.select--period-toolbar .base-select__no-results {
+  padding: var(--spacing-lg);
+  text-align: center;
+  color: var(--color-text-light);
+  font-size: var(--font-size-sm);
+}
+
+.select--period-toolbar .base-select__options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.select--period-toolbar .base-select__options::-webkit-scrollbar-track {
+  background: var(--color-surface-hover);
+  border-radius: var(--radius-sm);
+}
+
+.select--period-toolbar .base-select__options::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.select--period-toolbar .base-select__options::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-dark);
+}

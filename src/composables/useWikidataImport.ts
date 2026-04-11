@@ -1,11 +1,7 @@
-import { ref } from 'vue';
 import { WikidataQueryService } from '@/services/WikidataQueryService';
+import { mapWikidataClassesToCategories } from '@/services/WikidataCategoryMapper';
 import type { TemporalLocation } from '@/types/geological';
-
-export interface WikidataImportState {
-  loading: boolean;
-  error: string | null;
-}
+import { useLoadingState } from './useLoadingState';
 
 export interface WikidataData {
   label: string | { fr?: string; en?: string };
@@ -16,165 +12,86 @@ export interface WikidataData {
 }
 
 export function useWikidataImport() {
-  const state = ref<WikidataImportState>({
-    loading: false,
-    error: null
-  });
-
+  const { isLoading, error, execute } = useLoadingState();
   const wikidataService = WikidataQueryService.getInstance();
 
-  // Import d'une période depuis Wikidata
   const importPeriod = async (qid: string): Promise<WikidataData | null> => {
-    if (!qid) {
-      throw new Error('Q-id requis pour l\'import');
-    }
-
-    state.value.loading = true;
-    state.value.error = null;
-
-    try {
-      console.log('[useWikidataImport] Début du chargement Wikidata pour Q-id:', qid);
-      
+    if (!qid) throw new Error('Q-id requis pour l\'import');
+    return execute(async () => {
       const data = await wikidataService.loadPeriod(qid);
-      console.log('[useWikidataImport] Données période reçues:', data);
-
-      if (!data) {
-        throw new Error('Aucune donnée trouvée pour ce Q-id');
-      }
-
+      if (!data) throw new Error('Aucune donnée trouvée pour ce Q-id');
       return data;
-    } catch (error: any) {
-      console.error('[useWikidataImport] Erreur lors du chargement depuis Wikidata:', error);
-      state.value.error = error.message || 'Erreur lors du chargement depuis Wikidata';
-      throw error;
-    } finally {
-      state.value.loading = false;
-    }
+    });
   };
 
-  // Import d'un événement depuis Wikidata
   const importEvent = async (qid: string): Promise<WikidataData | null> => {
-    if (!qid) {
-      throw new Error('Q-id requis pour l\'import');
-    }
-
-    state.value.loading = true;
-    state.value.error = null;
-
-    try {
-      console.log('[useWikidataImport] Début du chargement Wikidata pour événement Q-id:', qid);
-      
+    if (!qid) throw new Error('Q-id requis pour l\'import');
+    return execute(async () => {
       const data = await wikidataService.loadEvent(qid);
-      console.log('[useWikidataImport] Données événement reçues:', data);
-
-      if (!data) {
-        throw new Error('Aucune donnée trouvée pour ce Q-id');
-      }
-
+      if (!data) throw new Error('Aucune donnée trouvée pour ce Q-id');
       return data;
-    } catch (error: any) {
-      console.error('[useWikidataImport] Erreur lors du chargement depuis Wikidata:', error);
-      state.value.error = error.message || 'Erreur lors du chargement depuis Wikidata';
-      throw error;
-    } finally {
-      state.value.loading = false;
-    }
+    });
   };
 
-  // Transformation des données Wikidata pour le formulaire
   const transformWikidataData = (data: WikidataData, type: 'period' | 'event') => {
     const transformed: any = {};
 
-    // Gestion des labels
     if (typeof data.label === 'string') {
-      console.log('[useWikidataImport] Label unique reçu:', data.label);
-      transformed.title = {
-        fr: data.label,
-        en: data.label
-      };
+      transformed.title = { fr: data.label, en: data.label };
     } else if (typeof data.label === 'object' && data.label !== null) {
-      console.log('[useWikidataImport] Labels reçus:', data.label);
-      transformed.title = {
-        fr: data.label.fr || '',
-        en: data.label.en || ''
-      };
+      transformed.title = { fr: data.label.fr || '', en: data.label.en || '' };
     }
 
-    // Gestion des descriptions
     if (data.description) {
-      console.log('[useWikidataImport] Descriptions reçues:', data.description);
-      transformed.description = {
-        fr: data.description.fr || '',
-        en: data.description.en || ''
-      };
+      transformed.description = { fr: data.description.fr || '', en: data.description.en || '' };
     }
 
-    // Gestion des dates selon le type
     if (type === 'event') {
-      if (data.date) {
-        console.log('[useWikidataImport] Date reçue:', data.date);
-        transformed.date = data.date;
-      }
-    } else if (type === 'period' && data.temporalData && Array.isArray(data.temporalData) && data.temporalData.length > 0) {
-      console.log('[useWikidataImport] Données temporelles reçues:', data.temporalData);
+      if (data.date) transformed.date = data.date;
+    } else if (type === 'period' && data.temporalData?.length) {
       const temporalData = data.temporalData[0];
-      console.log('[useWikidataImport] TemporalData[0]:', temporalData);
-      console.log('[useWikidataImport] startDate dans temporalData:', temporalData.startDate);
-      console.log('[useWikidataImport] endDate dans temporalData:', temporalData.endDate);
-      
-      if (temporalData.startDate) {
-        transformed.startDate = temporalData.startDate;
-        console.log('[useWikidataImport] startDate assigné:', transformed.startDate);
-      }
-      if (temporalData.endDate) {
-        transformed.endDate = temporalData.endDate;
-        console.log('[useWikidataImport] endDate assigné:', transformed.endDate);
-      }
-      if (temporalData.location) {
-        transformed.location = temporalData.location;
-      }
+      if (temporalData.startDate) transformed.startDate = temporalData.startDate;
+      if (temporalData.endDate) transformed.endDate = temporalData.endDate;
+      if (temporalData.location) transformed.location = temporalData.location;
     }
 
-    // Gestion des enfants pour les périodes
     if (type === 'period' && data.children) {
       transformed.childrenCount = data.children.length.toString();
     }
 
-    console.log('[useWikidataImport] Données transformées:', transformed);
     return transformed;
   };
 
-  // Import et transformation complète
   const importAndTransform = async (qid: string, type: 'period' | 'event'): Promise<any> => {
-    let data: WikidataData | null = null;
+    const importFn = type === 'period' ? importPeriod : type === 'event' ? importEvent : null;
+    if (!importFn) throw new Error('Type non supporté pour Wikidata');
 
-    if (type === 'period') {
-      data = await importPeriod(qid);
-    } else if (type === 'event') {
-      data = await importEvent(qid);
-    } else {
-      throw new Error('Type non supporté pour Wikidata');
+    // Requêtes en parallèle : données + classes pour catégories
+    const [data, wikidataClasses] = await Promise.all([
+      importFn(qid),
+      wikidataService.getEntityClasses(qid),
+    ]);
+
+    if (!data) throw new Error('Aucune donnée trouvée');
+
+    const transformed = transformWikidataData(data, type);
+
+    // Catégories suggérées — format attendu par EditModal (objects {id, label})
+    // On ne fournit que les IDs ici ; EditModal les réconciliera avec la liste complète
+    const suggestedCategoryIds = mapWikidataClassesToCategories(wikidataClasses);
+    if (suggestedCategoryIds.length > 0) {
+      transformed.suggestedCategoryIds = suggestedCategoryIds;
     }
 
-    if (!data) {
-      throw new Error('Aucune donnée trouvée');
-    }
-
-    return transformWikidataData(data, type);
-  };
-
-  // Réinitialisation de l'état
-  const resetState = () => {
-    state.value.loading = false;
-    state.value.error = null;
+    return transformed;
   };
 
   return {
-    state: state.value,
+    isLoading,
+    error,
     importPeriod,
     importEvent,
     transformWikidataData,
     importAndTransform,
-    resetState
   };
-} 
+}

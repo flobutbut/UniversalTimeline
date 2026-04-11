@@ -53,11 +53,11 @@ defineExpose({ show });
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--overlay-scrim-strong);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3000; /* Plus haut que la modale d'édition */
+  z-index: var(--z-index-modal-nested); /* Plus haut que la modale d'édition */
 }
 
 .modal-content {

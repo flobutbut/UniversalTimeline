@@ -1,15 +1,20 @@
-import { ref } from 'vue';
-import { DatabaseQueryService } from '@/services/DatabaseQueryService';
-import { useDatabaseDataStore } from './useDatabaseDataStore';
+import { storeToRefs } from 'pinia';
+import { useDataStore } from '@/stores/useDataStore';
+import { PeriodApiService } from '@/services/PeriodApiService';
+import { EventApiService } from '@/services/EventApiService';
+import { StoryApiService } from '@/services/StoryApiService';
+import { useToast } from './useToast';
+import { useLoadingState } from './useLoadingState';
 
 export function useDatabaseDelete() {
-  const queryService = DatabaseQueryService.getInstance();
-  const { periods, events, stories, updatePeriods, updateEvents, updateStories } = useDatabaseDataStore();
-  const loading = ref(false);
+  const dataStore = useDataStore();
+  const { periods, events, stories } = storeToRefs(dataStore);
+  const toast = useToast();
+  const { isLoading: loading, execute } = useLoadingState();
 
   const handleDelete = async (item: any, type: 'period' | 'event' | 'story') => {
     if (!item) {
-      window.toast.show('Aucun élément à supprimer', 'error');
+      toast.show('Aucun élément à supprimer', 'error');
       return false;
     }
 
@@ -17,52 +22,35 @@ export function useDatabaseDelete() {
       'Confirmation de suppression',
       `Êtes-vous sûr de vouloir supprimer "${item.label?.fr || item.title?.fr}" ? Cette action est irréversible.`
     );
+    if (!confirmed) return false;
 
-    if (!confirmed) {
-      return false;
-    }
+    toast.show('Suppression en cours...', 'info', 0);
 
-    window.toast.show('Suppression en cours...', 'info', 0);
-    loading.value = true;
-
-    try {
-      let success = false;
+    const result = await execute(async () => {
       if (type === 'period') {
-        await queryService.deletePeriod(item.id);
-        const newPeriods = periods.value.filter(p => p.id !== item.id);
-        updatePeriods(newPeriods);
-        success = true;
+        await PeriodApiService.getInstance().deletePeriod(item.id);
+        dataStore.updatePeriods(periods.value.filter(p => p.id !== item.id));
       } else if (type === 'event') {
-        await queryService.deleteEvent(item.id);
-        const newEvents = events.value.filter(e => e.id !== item.id);
-        updateEvents(newEvents);
-        success = true;
+        await EventApiService.getInstance().deleteEvent(item.id);
+        dataStore.updateEvents(events.value.filter(e => e.id !== item.id));
       } else if (type === 'story') {
-        await queryService.deleteStory(item.id);
-        const newStories = stories.value.filter(s => s.id !== item.id);
-        updateStories(newStories);
-        success = true;
-      }
-
-      if (success) {
-        window.toast.hide();
-        window.showToast('Élément supprimé avec succès', 'success');
+        await StoryApiService.getInstance().deleteStory(item.id);
+        dataStore.updateStories(stories.value.filter(s => s.id !== item.id));
       } else {
         throw new Error("Type d'élément non reconnu");
       }
-
       return true;
-    } catch (error: any) {
-        window.toast.hide();
-        window.showToast(error.message || 'Erreur lors de la suppression', 'error');
-        return false;
-    } finally {
-      loading.value = false;
+    });
+
+    toast.hide();
+    if (result) {
+      toast.show('Élément supprimé avec succès', 'success');
+      return true;
+    } else {
+      toast.show('Erreur lors de la suppression', 'error');
+      return false;
     }
   };
 
-  return {
-    loading,
-    handleDelete,
-  };
-} 
+  return { loading, handleDelete };
+}

@@ -48,16 +48,16 @@ defineExpose({
 <style scoped>
 .toast {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: calc(var(--spacing-lg) + var(--spacing-xs));
+  right: calc(var(--spacing-lg) + var(--spacing-xs));
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--radius-md);
-  color: var(--color-neutral-0);
+  color: var(--color-text-white);
   font-size: var(--font-size-sm);
   z-index: var(--z-index-tooltip);
   box-shadow: var(--shadow-lg);
-  min-width: 200px;
-  max-width: 400px;
+  min-width: calc(var(--spacing-xs) * 50);
+  max-width: calc(var(--spacing-xs) * 100);
 }
 
 .toast.info {

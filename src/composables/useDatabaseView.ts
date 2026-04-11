@@ -1,8 +1,10 @@
 import { ref, computed, watch } from 'vue';
-import { useDatabaseDataStore } from './useDatabaseDataStore';
-import { DatabaseViewService } from '@/services/DatabaseViewService';
-import { DatabaseQueryService } from '@/services/DatabaseQueryService';
-import type { Event, Period, Story, ListPeriod, ListEvent, ListStory } from '@/types/database';
+import { storeToRefs } from 'pinia';
+import { useDataStore } from '@/stores/useDataStore';
+import { StoryApiService } from '@/services/StoryApiService';
+import { useToast } from './useToast';
+import type { Event, Story, ListPeriod, ListEvent, ListStory } from '@/types/database';
+import { temporalBoundsFromStoryDetail } from '@/utils/storyTemporalBounds';
 
 export interface DatabaseViewState {
   loading: boolean;
@@ -31,25 +33,16 @@ export interface DragDropState {
 }
 
 export function useDatabaseView() {
-  const databaseService = DatabaseViewService.getInstance();
-  const queryService = DatabaseQueryService.getInstance();
-  const {
-    periods,
-    events,
-    stories,
-    loading: sharedLoading,
-    error: sharedError,
-    loadInitialData: sharedLoadInitialData,
-    ensureDataLoaded: sharedEnsureDataLoaded
-  } = useDatabaseDataStore();
+  const dataStore = useDataStore();
+  const { periods, events, stories, loading: sharedLoading, error: sharedError } = storeToRefs(dataStore);
+  const toast = useToast();
 
-  // États réactifs propres à la vue
   const state = ref<DatabaseViewState>({
     loading: false,
     error: null,
     loadingDetails: false,
     loadingError: null,
-    loadingStoryDetails: false
+    loadingStoryDetails: false,
   });
 
   const modalState = ref<ModalState>({
@@ -57,322 +50,256 @@ export function useDatabaseView() {
     showEditModal: false,
     currentType: 'period',
     currentItem: null,
-    currentMode: 'create'
+    currentMode: 'create',
   });
 
-  const searchState = ref<SearchState>({
-    periodSearch: '',
-    eventSearch: ''
-  });
-
-  const dragDropState = ref<DragDropState>({
-    draggedItem: null,
-    isDragOver: false
-  });
-
-  const fullStories = ref<Map<string, Story>>(new Map());
+  const searchState = ref<SearchState>({ periodSearch: '', eventSearch: '' });
+  const dragDropState = ref<DragDropState>({ draggedItem: null, isDragOver: false });
   const selectedStory = ref<Story | null>(null);
 
-  // Synchroniser state.loading avec sharedLoading
-  watch(sharedLoading, (newValue) => {
-    state.value.loading = newValue;
-  }, { immediate: true });
+  watch(sharedLoading, v => { state.value.loading = v; }, { immediate: true });
 
-  // Computed properties pour le filtrage
+  // Computed
   const filteredPeriods = computed(() => {
     const searchLower = searchState.value.periodSearch.toLowerCase();
-    
-    // Transformer les périodes comme dans DatabaseViewService.getPeriods()
-    const transformedPeriods = periods.value.map((p: any) => ({
+    const transformed = periods.value.map((p: any) => ({
       ...p,
       hasParent: typeof p.hasParent === 'boolean' ? p.hasParent : !!(p.parent_id),
       children: Array.isArray(p.children) ? p.children : [],
     }));
-    
-    // D'abord filtrer les périodes racines (sans parent)
-    const rootPeriods = transformedPeriods.filter(period => !period.hasParent);
-    
-    // Puis appliquer la recherche textuelle
-    return rootPeriods.filter(period => {
-      const labelFr = period.label?.fr;
-      return typeof labelFr === 'string' ? labelFr.toLowerCase().includes(searchLower) : false;
-    });
+    return transformed
+      .filter(p => !p.hasParent)
+      .filter(p => {
+        const label = p.label?.fr;
+        return typeof label === 'string' ? label.toLowerCase().includes(searchLower) : false;
+      });
   });
 
   const filteredEvents = computed(() => {
     const searchLower = searchState.value.eventSearch.toLowerCase();
-    return events.value.filter(event => {
-      const labelFr = event.label?.fr;
-      return typeof labelFr === 'string' ? labelFr.toLowerCase().includes(searchLower) : false;
+    return events.value.filter(e => {
+      const label = e.label?.fr;
+      return typeof label === 'string' ? label.toLowerCase().includes(searchLower) : false;
     });
   });
 
-  const filteredStories = computed(() => {
-    return stories.value;
-  });
+  const filteredStories = computed(() => stories.value);
 
-  // Fonctions pour gérer les modales
-  const handleAddPeriod = () => {
-    modalState.value.currentType = 'period';
-    modalState.value.currentMode = 'create';
-    modalState.value.showAddModal = true;
-  };
-
-  const handleAddEvent = () => {
-    modalState.value.currentType = 'event';
-    modalState.value.currentMode = 'create';
-    modalState.value.showAddModal = true;
-  };
-
-  const handleAddStory = () => {
-    modalState.value.currentType = 'story';
-    modalState.value.currentMode = 'create';
-    modalState.value.showAddModal = true;
-  };
-
-  const handleEditPeriod = (period: ListPeriod) => {
-    openEditModal('period', period);
-  };
-
-  const handleEditEvent = (event: ListEvent) => {
-    openEditModal('event', event);
-  };
-
-  const handleEditStory = (story: ListStory) => {
-    openEditModal('story', story);
-  };
-
-  const closeAddModal = () => {
-    modalState.value.showAddModal = false;
-    modalState.value.currentItem = null;
-  };
+  // Modales
+  const handleAddPeriod = () => { modalState.value = { ...modalState.value, currentType: 'period', currentMode: 'create', showAddModal: true }; };
+  const handleAddEvent = () => { modalState.value = { ...modalState.value, currentType: 'event', currentMode: 'create', showAddModal: true }; };
+  const handleAddStory = () => { modalState.value = { ...modalState.value, currentType: 'story', currentMode: 'create', showAddModal: true }; };
+  const handleEditPeriod = (period: ListPeriod) => openEditModal('period', period);
+  const handleEditEvent = (event: ListEvent) => openEditModal('event', event);
+  const handleEditStory = (story: ListStory) => openEditModal('story', story);
+  const closeAddModal = () => { modalState.value.showAddModal = false; modalState.value.currentItem = null; };
+  const closeEditModal = () => { modalState.value.showEditModal = false; modalState.value.currentItem = null; };
 
   const openEditModal = async (type: 'period' | 'event' | 'story', item: any) => {
-    // Fermer d'abord la modale d'ajout si elle est ouverte
-    if (modalState.value.showAddModal) {
-      closeAddModal();
-    }
+    if (modalState.value.showAddModal) closeAddModal();
     modalState.value.currentType = type;
     modalState.value.currentMode = 'edit';
-    
+
     try {
       state.value.loadingDetails = true;
       state.value.loadingError = null;
-      
-      // Utiliser les données du store partagé au lieu de faire des appels API
+
       if (type === 'period') {
         const period = periods.value.find(p => p.id === item.id);
-        if (period) {
-          modalState.value.currentItem = {
-            ...period,
-            description: (period as any).description || { fr: '', en: '' },
-            categories: period.categories || []
-          };
-          state.value.loadingDetails = false;
-        } else {
-          throw new Error('Période non trouvée dans le store');
-        }
+        if (!period) throw new Error('Période non trouvée dans le store');
+        modalState.value.currentItem = { ...period, description: (period as any).description || { fr: '', en: '' }, categories: period.categories || [] };
       } else if (type === 'event') {
         const event = events.value.find(e => e.id === item.id);
-        if (event) {
-          modalState.value.currentItem = {
-            ...event,
-            description: (event as any).description || { fr: '', en: '' },
-            categories: event.categories || []
-          };
-          state.value.loadingDetails = false;
-        } else {
-          throw new Error('Événement non trouvé dans le store');
-        }
+        if (!event) throw new Error('Événement non trouvé dans le store');
+        modalState.value.currentItem = { ...event, description: (event as any).description || { fr: '', en: '' }, categories: event.categories || [] };
       } else if (type === 'story') {
         const story = stories.value.find(s => s.id === item.id);
-        if (story) {
-          modalState.value.currentItem = {
-            ...story,
-            description: (story as any).description || { fr: '', en: '' },
-            categories: story.categories || []
-          };
-          state.value.loadingDetails = false;
-        } else {
-          throw new Error('Story non trouvée dans le store');
-        }
+        if (!story) throw new Error('Story non trouvée dans le store');
+        modalState.value.currentItem = { ...story, description: (story as any).description || { fr: '', en: '' }, categories: story.categories || [] };
       }
+
+      state.value.loadingDetails = false;
       modalState.value.showEditModal = true;
     } catch (error: any) {
-      if (error.message?.includes('404') || error.message?.includes('Not Found')) {
-        state.value.loadingError = 'L\'élément n\'a pas été trouvé dans la base de données';
-        window.showToast('L\'élément n\'a pas été trouvé dans la base de données', 'error');
-      } else {
-        state.value.loadingError = 'Erreur lors du chargement des données';
-        window.showToast('Erreur lors du chargement des données', 'error');
-      }
+      state.value.loadingError = 'Erreur lors du chargement des données';
       state.value.loadingDetails = false;
+      toast.show(error.message?.includes('404') ? 'L\'élément n\'a pas été trouvé' : 'Erreur lors du chargement des données', 'error');
     }
   };
 
-  const closeEditModal = () => {
-    modalState.value.showEditModal = false;
-    modalState.value.currentItem = null;
-  };
+  function patchStoryBoundsInList(storyId: string, bounds: { start?: string; end?: string }) {
+    const list = stories.value;
+    const idx = list.findIndex((s) => s.id === storyId);
+    if (idx < 0) return;
+    const next = [...list];
+    next[idx] = {
+      ...list[idx],
+      startDate: bounds.start,
+      endDate: bounds.end,
+    };
+    dataStore.updateStories(next);
+  }
 
-  // Fonction pour charger les données initiales (utilise le store partagé)
+  async function mergeStoriesTemporalBoundsFromApi() {
+    const rows = await StoryApiService.getInstance().getStoriesTemporalBounds();
+    if (!rows.length) return;
+    const byId = new Map(rows.map((r) => [r.story_id, r]));
+    dataStore.updateStories(
+      stories.value.map((s) => {
+        const r = byId.get(s.id);
+        if (!r) return s;
+        const sd = r.start_date != null && String(r.start_date).trim() !== '' ? String(r.start_date).trim() : s.startDate;
+        const ed = r.end_date != null && String(r.end_date).trim() !== '' ? String(r.end_date).trim() : s.endDate;
+        return { ...s, startDate: sd, endDate: ed };
+      })
+    );
+  }
+
   const loadInitialData = async () => {
-    await sharedEnsureDataLoaded();
+    await dataStore.ensureDataLoaded();
+    await dataStore.ensureEventsLoaded();
+    await dataStore.ensureStoriesLoaded(true);
+    try {
+      await mergeStoriesTemporalBoundsFromApi();
+    } catch (e) {
+      console.warn('[useDatabaseView] mergeStoriesTemporalBoundsFromApi', e);
+    }
   };
 
-  // Gestion du drag & drop
+  watch(
+    selectedStory,
+    (s) => {
+      if (!s?.id) return;
+      patchStoryBoundsInList(s.id, temporalBoundsFromStoryDetail(s));
+    },
+    { deep: true }
+  );
+
+  // Drag & Drop
   const handleDragStart = (event: DragEvent, type: 'period' | 'event', item: any) => {
     dragDropState.value.draggedItem = { type, data: item };
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = 'move';
-    }
+    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDrop = async (event: DragEvent) => {
+  const handleDrop = async (_event: DragEvent) => {
     dragDropState.value.isDragOver = false;
     if (!dragDropState.value.draggedItem) return;
-
     if (!selectedStory.value) {
-      window.showToast('Veuillez sélectionner une story avant de déposer un élément', 'error');
+      toast.show('Veuillez sélectionner une story avant de déposer un élément', 'error');
       return;
     }
 
+    const storyService = StoryApiService.getInstance();
+    const draggedItem = dragDropState.value.draggedItem;
+
     try {
-      if (dragDropState.value.draggedItem.type === 'period') {
-        await queryService.addPeriodToStory(selectedStory.value.id, dragDropState.value.draggedItem.data.id);
-        // Mise à jour locale de la story sélectionnée
-        const updatedStory = { ...selectedStory.value };
-        if (!updatedStory.periods) updatedStory.periods = [];
-        const draggedItem = dragDropState.value.draggedItem;
-        if (draggedItem && !updatedStory.periods.find(p => p.id === draggedItem.data.id)) {
-          updatedStory.periods.push(draggedItem.data);
-        }
-        selectedStory.value = updatedStory;
-        fullStories.value.set(selectedStory.value.id, updatedStory);
-        window.showToast('Période ajoutée à la story avec succès', 'success');
-      } else if (dragDropState.value.draggedItem.type === 'event') {
-        await queryService.addEventToStory(selectedStory.value.id, dragDropState.value.draggedItem.data.id);
-        // Mise à jour locale de la story sélectionnée
-        const updatedStory = { ...selectedStory.value };
-        if (!updatedStory.events) updatedStory.events = [];
-        const draggedItem = dragDropState.value.draggedItem;
-        if (draggedItem && !updatedStory.events.find(e => e.id === draggedItem.data.id)) {
-          updatedStory.events.push(draggedItem.data);
-        }
-        selectedStory.value = updatedStory;
-        fullStories.value.set(selectedStory.value.id, updatedStory);
-        window.showToast('Événement ajouté à la story avec succès', 'success');
+      if (draggedItem.type === 'period') {
+        await storyService.addPeriodToStory(selectedStory.value.id, draggedItem.data.id);
+        const updated = { ...selectedStory.value, periods: [...(selectedStory.value.periods || [])] };
+        if (!updated.periods.find((p: any) => p.id === draggedItem.data.id)) updated.periods.push(draggedItem.data);
+        selectedStory.value = updated;
+        toast.show('Période ajoutée à la story avec succès', 'success');
+      } else {
+        await storyService.addEventToStory(selectedStory.value.id, draggedItem.data.id);
+        const updated = { ...selectedStory.value, events: [...(selectedStory.value.events || [])] };
+        if (!updated.events.find((e: any) => e.id === draggedItem.data.id)) updated.events.push(draggedItem.data);
+        selectedStory.value = updated;
+        toast.show('Événement ajouté à la story avec succès', 'success');
       }
-    } catch (error) {
-      window.showToast('Erreur lors de l\'ajout de l\'élément à la story', 'error');
+    } catch {
+      toast.show('Erreur lors de l\'ajout de l\'élément à la story', 'error');
     }
   };
 
-  const handleDragOver = (event: DragEvent) => {
-    if (dragDropState.value.draggedItem) {
-      dragDropState.value.isDragOver = true;
-    }
-  };
+  const handleDragOver = (_event: DragEvent) => { if (dragDropState.value.draggedItem) dragDropState.value.isDragOver = true; };
+  const handleDragLeave = (_event: DragEvent) => { dragDropState.value.isDragOver = false; };
 
-  const handleDragLeave = (event: DragEvent) => {
-    dragDropState.value.isDragOver = false;
-  };
-
-  // Fonction pour sélectionner une story
   const selectStory = async (story: ListStory) => {
     try {
       state.value.loadingStoryDetails = true;
-      const fullStory = await databaseService.loadFullStory(story.id);
-      selectedStory.value = fullStory;
-    } catch (error) {
-      window.showToast('Erreur lors du chargement des détails de la story', 'error');
+      selectedStory.value = await StoryApiService.getInstance().getStory(story.id);
+    } catch {
+      toast.show('Erreur lors du chargement des détails de la story', 'error');
       selectedStory.value = null;
     } finally {
       state.value.loadingStoryDetails = false;
     }
   };
 
-  // Fonction pour supprimer une période de la story
   const removePeriodFromStory = async (periodId: string) => {
     if (!selectedStory.value) return;
-
     try {
-      await queryService.removePeriodFromStory(selectedStory.value.id, periodId);
-      // Mise à jour locale de la story sélectionnée
-      const updatedStory = { ...selectedStory.value };
-      if (updatedStory.periods) {
-        updatedStory.periods = updatedStory.periods.filter(p => p.id !== periodId);
-      }
-      selectedStory.value = updatedStory;
-      fullStories.value.set(selectedStory.value.id, updatedStory);
-      window.showToast('Période supprimée de la story avec succès', 'success');
-    } catch (error) {
-      window.showToast('Erreur lors de la suppression de la période de la story', 'error');
+      await StoryApiService.getInstance().removePeriodFromStory(selectedStory.value.id, periodId);
+      selectedStory.value = { ...selectedStory.value, periods: selectedStory.value.periods?.filter((p: any) => p.id !== periodId) };
+      toast.show('Période supprimée de la story', 'success');
+    } catch {
+      toast.show('Erreur lors de la suppression de la période', 'error');
     }
   };
 
-  // Fonction pour supprimer un événement de la story
   const removeEventFromStory = async (eventId: string) => {
     if (!selectedStory.value) return;
-
     try {
-      await queryService.removeEventFromStory(selectedStory.value.id, eventId);
-      // Mise à jour locale de la story sélectionnée
-      const updatedStory = { ...selectedStory.value };
-      if (updatedStory.events) {
-        updatedStory.events = updatedStory.events.filter(e => e.id !== eventId);
-      }
-      selectedStory.value = updatedStory;
-      fullStories.value.set(selectedStory.value.id, updatedStory);
-      window.showToast('Événement supprimé de la story avec succès', 'success');
-    } catch (error) {
-      window.showToast('Erreur lors de la suppression de l\'événement de la story', 'error');
+      await StoryApiService.getInstance().removeEventFromStory(selectedStory.value.id, eventId);
+      selectedStory.value = { ...selectedStory.value, events: selectedStory.value.events?.filter((e: any) => e.id !== eventId) };
+      toast.show('Événement supprimé de la story', 'success');
+    } catch {
+      toast.show('Erreur lors de la suppression de l\'événement', 'error');
     }
+  };
+
+  const addPeriodsToStory = async (periodIds: string[]) => {
+    const story = selectedStory.value;
+    if (!story) return;
+    const storyService = StoryApiService.getInstance();
+    let added = 0;
+    for (const id of periodIds) {
+      try {
+        await storyService.addPeriodToStory(story.id, id);
+        added++;
+      } catch {
+        // continue les autres
+      }
+    }
+    if (added > 0) {
+      selectedStory.value = await storyService.getStory(story.id);
+      toast.show(`${added} période(s) ajoutée(s) à la story`, 'success');
+    } else {
+      toast.show('Erreur lors de l\'ajout des périodes', 'error');
+    }
+  };
+
+  const addEventsToStory = async (eventIds: string[]) => {
+    let story = selectedStory.value;
+    if (!story) return;
+    const storyService = StoryApiService.getInstance();
+    let added = 0;
+    for (const id of eventIds) {
+      try {
+        await storyService.addEventToStory(story.id, id);
+        const event = events.value.find(e => e.id === id);
+        if (event && !story.events?.find((e: any) => e.id === id)) {
+          story = { ...story, events: [...(story.events || []), event as Event] };
+          selectedStory.value = story;
+        }
+        added++;
+      } catch {
+        // continue les autres
+      }
+    }
+    if (added > 0) toast.show(`${added} événement(s) ajouté(s) à la story`, 'success');
+    else toast.show('Erreur lors de l\'ajout des événements', 'error');
   };
 
   return {
-    // États
-    state,
-    modalState,
-    searchState: searchState.value,
-    dragDropState: dragDropState.value,
-    fullStories,
-    selectedStory,
-    
-    // Computed
-    filteredPeriods,
-    filteredEvents,
-    filteredStories,
-    
-    // Fonctions modales
-    handleAddPeriod,
-    handleAddEvent,
-    handleAddStory,
-    handleEditPeriod,
-    handleEditEvent,
-    handleEditStory,
-    closeAddModal,
-    closeEditModal,
-    openEditModal,
-    
-    // Fonctions données
+    state, modalState, searchState: searchState.value, dragDropState: dragDropState.value, selectedStory,
+    filteredPeriods, filteredEvents, filteredStories,
+    handleAddPeriod, handleAddEvent, handleAddStory,
+    handleEditPeriod, handleEditEvent, handleEditStory,
+    closeAddModal, closeEditModal, openEditModal,
     loadInitialData,
-    
-    // Fonctions drag & drop
-    handleDragStart,
-    handleDrop,
-    handleDragOver,
-    handleDragLeave,
-    
-    // Fonctions story
-    selectStory,
-    
-    // Fonctions de suppression
-    removePeriodFromStory,
-    removeEventFromStory,
-    
-    // Accès direct au loading et error partagés
-    sharedLoading,
-    sharedError
+    handleDragStart, handleDrop, handleDragOver, handleDragLeave,
+    selectStory, removePeriodFromStory, removeEventFromStory, addPeriodsToStory, addEventsToStory,
+    sharedLoading, sharedError,
   };
-} 
+}

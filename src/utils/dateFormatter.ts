@@ -130,9 +130,10 @@ export class DateFormatter {
 
       let years: number;
 
-      // Extraction de l'année depuis la chaîne ISO
+      // Extraction de l'année depuis une date ISO / Wikidata (éviter split('-')[1] = mois pour 1990-05-01T…Z)
       if (dateString.includes('T') && dateString.endsWith('Z')) {
-        years = Math.abs(parseInt(dateString.split('-')[1] || dateString.split('T')[0]));
+        const datePart = dateString.split('T')[0];
+        years = Math.abs(parseInt(datePart.replace(/^\+/, ''), 10));
       }
       else if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
         years = Math.abs(parseInt(dateString.split('-')[0]));
@@ -196,7 +197,7 @@ export class DateFormatter {
   /**
    * Formate une date selon le format demandé
    */
-  static format(date: string, type: 'geological' | 'recent' = 'geological'): string {
+  static format(date: string): string {
     // Si la date est déjà formatée avec Ga, Ma, ka ou ans, on la retourne telle quelle
     if (date.endsWith(' Ga') || date.endsWith(' Ma') || date.endsWith(' ka') || date.endsWith(' ans')) {
       return date;
@@ -667,8 +668,7 @@ export class DateFormatter {
    */
   public static formatForDisplay(
     date: string,
-    type: 'period' | 'event',
-    format: 'geological' | 'french' = 'geological'
+    type: 'period' | 'event'
   ): FormattedDateResult {
     try {
       const processedDate = this.processDate(date);

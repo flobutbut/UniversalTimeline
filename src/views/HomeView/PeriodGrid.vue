@@ -1,50 +1,52 @@
 <template>
   <div class="period-grid">
-    <div class="navigation-header">
-      <BackButton 
-        v-if="props.currentPeriod"
-        :period="props.parentPeriod || { id: 'root', label: { fr: 'Racine', en: 'Root' } }"
-        @click="goBack"
-      />
-    </div>
-    <div v-if="loading" class="loading-container">
+    <!-- On masque le spinner quand une animation FLIP est en cours :
+         les anciennes périodes sont encore valides, on les garde visibles. -->
+    <div v-if="loading && !flipFrom" class="loading-container">
       <i class="fas fa-spinner fa-spin"></i>
       <span>Chargement de la timeline...</span>
     </div>
     <div v-else-if="error" class="error-message">
       {{ error }}
-      <button @click="retryLoading">Réessayer</button>
     </div>
-    <div v-else-if="periods.length === 0" class="empty-message">
+    <div v-else-if="!loading && periods.length === 0" class="empty-message">
       Aucune période à afficher
     </div>
     <div v-else class="timeline-container">
       <div class="periods-container">
-        <div
-          v-for="(periods, rowIndex) in periodsByRow"
-          :key="rowIndex"
-          class="period-row"
-        >
+        <PeriodCard
+          v-if="props.currentPeriod"
+          ref="parentBarRef"
+          variant="parent"
+          :period="props.currentPeriod"
+          :is-selected="false"
+          @back="goBack"
+        />
+        <div class="period-row" :style="{ height: `${periodRowHeight}px` }">
           <PeriodCard
-            v-for="period in periods"
+            v-for="(period, i) in sortedPeriods"
             :key="period.id"
+            :ref="(el: any) => setPeriodRef(el, period.id)"
             :period="period"
             :is-selected="false"
-            :loading="loadingPeriods[period.id]"
-            class="timeline-card"
-            :style="getPeriodStyles(period)"
-            @click="selectPeriod(period)"
+            class="timeline-card period-grid__period-position"
+            :style="{ ...getPeriodCssVars(period), '--enter-delay': `${i * 25}ms` }"
+            @select="selectPeriod"
+            @mouseenter="hoveredPeriodId = period.id"
+            @mouseleave="hoveredPeriodId = null"
           />
         </div>
       </div>
       <div class="timeline-line"></div>
-      <div class="events-container">
+      <div class="events-container" @click="selectedEvent = null">
         <EventCard
           v-for="event in events"
           :key="event.id"
           :event="event"
           :is-selected="selectedEvent?.id === event.id"
+          :is-category-active="isCategoryActive(event)"
           :card-style="getEventStyles(event)"
+          :align="getEventAlign(event)"
           @click="selectEvent(event)"
         />
       </div>
@@ -53,166 +55,264 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
-import type { Period, Event } from '@/types/geological';
-import { TimelineScalingService, WikidataQueryService, DatabaseQueryService } from '@/services';
-import { MAIN_EONS } from '@/types/geological';
+import { ref, computed, watch, nextTick } from 'vue';
+import type { ListPeriod, ListEvent } from '@/types/database';
+import { useTimelineScaling } from '@/composables/useTimelineScaling';
+import {
+  timelineEventCardAlign,
+  timelineFocusTransform,
+  unwrapTemplateRefToHTMLElement,
+} from '@/lib/timelinePeriodGridHelpers';
 import PeriodCard from './PeriodCard.vue';
-import BackButton from '@/components/BackButton.vue';
 import EventCard from './EventCard.vue';
 
 const props = defineProps<{
-  periods: Period[];
+  periods: ListPeriod[];
+  events: ListEvent[];
   loading: boolean;
-  parentPeriod: Period | null;
-  currentPeriod: Period | null;
+  parentPeriod: ListPeriod | null;
+  currentPeriod: ListPeriod | null;
 }>();
 
 const emit = defineEmits<{
-  (e: 'period-click', period: Period): void;
-  (e: 'event-click', event: Event): void;
+  (e: 'period-click', period: ListPeriod): void;
   (e: 'go-back'): void;
 }>();
 
-const scalingService = new TimelineScalingService();
-const timelineService = WikidataQueryService.getInstance();
-const databaseService = DatabaseQueryService.getInstance();
-const totalDuration = ref(0);
-const startYears = ref(0);
+const { updateFromPeriods, getPeriodLayoutStyle, getEventLayoutStyle } = useTimelineScaling();
+
 const error = ref<string | null>(null);
-const loadingPeriods = ref<Record<string, boolean>>({});
-const currentPeriods = ref<Period[]>(props.periods);
-const events = ref<Event[]>([]);
-const selectedEvent = ref<Event | null>(null);
-const ligneHeight = 48; // hauteur d'une ligne de période
+const selectedEvent = ref<ListEvent | null>(null);
+const hoveredPeriodId = ref<string | null>(null);
+/** Hauteur d'un couloir : hauteur carte période (52px) + marge entre couloirs (4px) */
+const ligneHeight = 56;
+/** Largeur visuelle minimale (en %) accordée à la période survolée */
+const MIN_HOVER_PCT = 8;
 
-// Préparation multi-lignes
-const numberOfRows = 1; // Pour l'instant, une seule ligne
-const periodsByRow = computed(() => {
-  // Pour l'instant, une seule ligne
-  return [currentPeriods.value];
-});
+// ─── FLIP animation ────────────────────────────────────────────────────────────
 
-// Fonction pour extraire la date de début d'une période
-const getStartDate = (period: Period): number => {
-  const startDate = period.temporalData[0]?.startDate;
-  if (!startDate) return 0;
-  
-  // Convertir la date en nombre (en millions d'années)
-  const match = startDate.match(/(\d+(?:\.\d+)?)/);
-  return match ? parseFloat(match[1]) : 0;
-};
+/** Ref vers la barre parent (PeriodCard variant="parent"). */
+const parentBarRef = ref<any>(null);
+/** Rect de la carte cliquée, capturé avant la navigation. */
+const flipFrom = ref<DOMRect | null>(null);
+/** Map id → élément DOM des cartes de période. */
+const periodElMap = new Map<string, HTMLElement>();
 
-// Fonction pour trier les périodes chronologiquement
-const sortPeriods = (periods: Period[]): Period[] => {
-  return [...periods].sort((a, b) => {
-    const dateA = getStartDate(a);
-    const dateB = getStartDate(b);
-    return dateB - dateA; // Tri décroissant (du plus récent au plus ancien)
-  });
-};
+function setPeriodRef(el: unknown, id: string) {
+  const domEl = unwrapTemplateRefToHTMLElement(el);
+  if (domEl) periodElMap.set(id, domEl);
+  else periodElMap.delete(id);
+}
 
-// Trier les périodes chronologiquement
-const sortedPeriods = computed(() => {
-  return sortPeriods(currentPeriods.value);
-});
+/**
+ * FLIP : on attend que loading repasse à false ET que currentPeriod soit défini.
+ * C'est seulement à ce moment que le DOM affiche la barre parent.
+ */
+watch(
+  [() => props.currentPeriod, () => props.loading],
+  async ([newPeriod, isLoading]) => {
+    // Le FLIP n'a de sens que quand le DOM est visible (loading terminé)
+    if (!newPeriod || isLoading || !flipFrom.value) return;
+    const from = flipFrom.value;
 
-// Calculer les durées et positions quand les périodes changent
-const updateTimelineScaling = () => {
-  try {
-    totalDuration.value = scalingService.calculateTotalDuration(currentPeriods.value);
-    if (currentPeriods.value.length > 0) {
-      // Utiliser la date de début de la période la plus récente comme référence
-      startYears.value = Math.max(...currentPeriods.value.map(p => 
-        scalingService.convertDateToYearsBeforePresent(p.temporalData[0]?.startDate || '0 ans')
-      ));
+    await nextTick();
+
+    const parentEl: HTMLElement | null =
+      (parentBarRef.value?.$el as HTMLElement) ?? parentBarRef.value ?? null;
+    if (!parentEl) { flipFrom.value = null; return; }
+
+    const to = parentEl.getBoundingClientRect();
+    if (to.width === 0) { flipFrom.value = null; return; }
+
+    const dx     = from.left  - to.left;
+    const dy     = from.top   - to.top;
+    const scaleX = from.width / to.width;
+    const scaleY = from.height / to.height;
+
+    const PHASE1 = 260; // montée verticale
+    const PHASE2 = 340; // expansion horizontale
+
+    // ── Phase 1 : snap à la position de départ ────────────────────────────
+    parentEl.style.transition = 'none';
+    parentEl.style.transformOrigin = 'top left';
+    // Position complète de la carte (lieu + taille)
+    parentEl.style.transform = `translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
+
+    void parentEl.getBoundingClientRect(); // force reflow
+
+    // ── Phase 1 : animer uniquement la translation Y (monter vers la barre) ──
+    // On garde scaleX et dx constants — seul dy et scaleY s'animent
+    parentEl.style.transition = `transform ${PHASE1}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+    parentEl.style.transform = `translate(${dx}px, 0px) scale(${scaleX}, 1)`;
+
+    // ── Phase 2 : une fois en position verticale, expansion horizontale ────
+    setTimeout(() => {
+      if (!parentEl) return;
+      parentEl.style.transition = `transform ${PHASE2}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+      parentEl.style.transform = 'none';
+    }, PHASE1);
+
+    setTimeout(() => {
+      if (parentEl) {
+        parentEl.style.transition = '';
+        parentEl.style.transform = '';
+        parentEl.style.transformOrigin = '';
+      }
+      flipFrom.value = null;
+    }, PHASE1 + PHASE2 + 20);
+  },
+  { flush: 'post' }
+);
+
+// ─── Tri et lanes ─────────────────────────────────────────────────────────────
+
+const sortedPeriods = computed(() =>
+  [...props.periods].sort((a, b) => (b.startYearsBP ?? 0) - (a.startYearsBP ?? 0))
+);
+
+const laneMap = computed((): Map<string, number> => {
+  const result = new Map<string, number>();
+  const laneMinEnds: number[] = [];
+
+  const allBP = sortedPeriods.value.flatMap(p => [p.startYearsBP ?? 0, p.endYearsBP ?? 0]);
+  const span = allBP.length ? Math.max(...allBP) - Math.min(...allBP) : 0;
+  const tolerance = span * 0.001;
+
+  for (const period of sortedPeriods.value) {
+    const startBP = period.startYearsBP ?? 0;
+    const endBP   = period.endYearsBP   ?? 0;
+
+    let assigned = -1;
+    for (let lane = 0; lane < laneMinEnds.length; lane++) {
+      if (laneMinEnds[lane] >= startBP - tolerance) {
+        assigned = lane;
+        break;
+      }
     }
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Erreur lors du calcul des positions';
+
+    if (assigned === -1) {
+      assigned = laneMinEnds.length;
+      laneMinEnds.push(endBP);
+    } else {
+      laneMinEnds[assigned] = Math.min(laneMinEnds[assigned], endBP);
+    }
+
+    result.set(period.id, assigned);
   }
-};
 
-// Surveiller les changements de périodes
-watch(() => currentPeriods.value, updateTimelineScaling, { immediate: true });
-
-// Surveiller les changements des props
-watch(() => props.periods, (newPeriods) => {
-  currentPeriods.value = newPeriods;
-}, { immediate: true });
-
-// Charger tous les événements au démarrage
-onMounted(async () => {
-  updateTimelineScaling();
-  try {
-    console.log('[PeriodGrid] Chargement initial des événements');
-    const eventsData = await databaseService.getAllEvents();
-    console.log(`[PeriodGrid] ${eventsData.length} événements chargés`);
-    events.value = eventsData;
-  } catch (err) {
-    console.error('[PeriodGrid] Erreur lors du chargement des événements:', err);
-    error.value = err instanceof Error ? err.message : 'Erreur lors du chargement des événements';
-  }
+  return result;
 });
 
-const getPeriodStyles = (period: Period) => {
-  const row = (period as any).row ?? 0; // par défaut sur la première ligne
-  const baseStyles = scalingService.calculatePeriodStyles(period, totalDuration.value, startYears.value);
+const numLanes = computed(() =>
+  laneMap.value.size === 0 ? 1 : Math.max(...laneMap.value.values()) + 1
+);
+
+const periodRowHeight = computed(() => numLanes.value * ligneHeight);
+
+watch(
+  [sortedPeriods, () => props.currentPeriod],
+  ([p]) => {
+    try { updateFromPeriods(p as any[], props.currentPeriod as any ?? undefined); }
+    catch (e) { error.value = e instanceof Error ? e.message : 'Erreur de calcul'; }
+  },
+  { immediate: true }
+);
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
+const rawLayouts = computed(() => {
+  const map = new Map<string, { left: number; width: number; top: number }>();
+  for (const period of sortedPeriods.value) {
+    const s = getPeriodLayoutStyle(period as any, {
+      row: laneMap.value.get(period.id) ?? 0,
+      rowHeight: ligneHeight,
+    });
+    map.set(period.id, {
+      left:  parseFloat(s.left as string),
+      width: parseFloat(s.width as string),
+      top:   parseFloat(s.top  as string),
+    });
+  }
+  return map;
+});
+
+const getPeriodCssVars = (period: ListPeriod): Record<string, string> => {
+  const raw = rawLayouts.value.get(period.id);
+  if (!raw) return {};
+  const { left, width, top } = raw;
+
+  if (hoveredPeriodId.value) {
+    const hov = rawLayouts.value.get(hoveredPeriodId.value);
+    if (hov && hov.width < MIN_HOVER_PCT) {
+      const t1 = hov.left;
+      const t2 = hov.left + hov.width;
+      const newLeft  = timelineFocusTransform(left, t1, t2, MIN_HOVER_PCT);
+      const newRight = timelineFocusTransform(left + width, t1, t2, MIN_HOVER_PCT);
+      return {
+        '--period-left': `${newLeft}%`,
+        '--period-width': `${Math.max(0, newRight - newLeft)}%`,
+        '--period-top': `${top}px`,
+        '--period-z': String(period.id === hoveredPeriodId.value ? 2 : 1),
+      };
+    }
+  }
+
   return {
-    ...baseStyles,
-    position: 'absolute',
-    top: `${row * ligneHeight}px`,
+    '--period-left': `${left}%`,
+    '--period-width': `${width}%`,
+    '--period-top': `${top}px`,
   };
 };
 
-// Calculer les styles pour un événement
-const getEventStyles = (event: Event) => {
-  const position = scalingService.calculateRelativePosition(
-    event.date,
-    totalDuration.value,
-    startYears.value
-  );
-  
-  return {
-    width: '100px', // Largeur fixe pour les événements
-    left: `${position}%`
-  };
+const getEventRawLeft = (event: ListEvent): number => {
+  const base = getEventLayoutStyle((event as any).date ?? '');
+  return parseFloat(base.left as string);
 };
 
-// Sélectionner un événement
-const selectEvent = (event: Event) => {
-  selectedEvent.value = event;
-  emit('event-click', event);
+const getEventAlign = (event: ListEvent): 'start' | 'center' | 'end' =>
+  timelineEventCardAlign(getEventRawLeft(event));
+
+const getEventStyles = (event: ListEvent): { width: string; left: string } => {
+  const base = getEventLayoutStyle((event as any).date ?? '');
+  const rawLeft = parseFloat(String(base.left));
+
+  if (hoveredPeriodId.value) {
+    const hov = rawLayouts.value.get(hoveredPeriodId.value);
+    if (hov && hov.width < MIN_HOVER_PCT) {
+      const t1 = hov.left;
+      const t2 = hov.left + hov.width;
+      return {
+        width: String(base.width),
+        left: `${timelineFocusTransform(rawLeft, t1, t2, MIN_HOVER_PCT)}%`,
+      };
+    }
+  }
+
+  return { width: String(base.width), left: String(base.left) };
 };
 
-// Fonction pour sélectionner une période
-const selectPeriod = (period: Period) => {
-  console.log(`[PeriodGrid] Sélection de la période ${period.id}`);
+// ─── Actions ──────────────────────────────────────────────────────────────────
+
+const selectPeriod = (period: ListPeriod) => {
+  // Capturer la position de la carte avant la navigation (pour le FLIP)
+  const el = periodElMap.get(period.id);
+  if (el) flipFrom.value = el.getBoundingClientRect();
   emit('period-click', period);
 };
 
-const goBack = () => {
-  emit('go-back')
-}
+const selectEvent = (event: ListEvent) => {
+  selectedEvent.value = selectedEvent.value?.id === event.id ? null : event;
+};
 
-const retryLoading = async () => {
-  if (props.parentPeriod) {
-    await selectPeriod(props.parentPeriod);
-  } else {
-    // Recharger les périodes initiales
-    try {
-      const mainEons = await Promise.all([
-        timelineService.loadPeriod(MAIN_EONS.PHANEROZOIC),
-        timelineService.loadPeriod(MAIN_EONS.PROTEROZOIC),
-        timelineService.loadPeriod(MAIN_EONS.ARCHEAN),
-        timelineService.loadPeriod(MAIN_EONS.HADEAN)
-      ]);
-      currentPeriods.value = mainEons[0].children || [];
-      emit('period-click', mainEons[0]); // On émet la première période comme référence
-    } catch (err) {
-      console.error('[Timeline] Erreur lors du rechargement:', err);
-      error.value = err instanceof Error ? err.message : 'Erreur lors du rechargement';
-    }
-  }
+const isCategoryActive = (event: ListEvent): boolean => {
+  if (!selectedEvent.value || selectedEvent.value.id === event.id) return false;
+  const selectedIds = new Set(selectedEvent.value.categories.map(c => c.id));
+  return event.categories.some(c => selectedIds.has(c.id));
+};
+
+const goBack = () => {
+  flipFrom.value = null; // pas de FLIP sur le retour
+  emit('go-back');
 };
 </script>
 
@@ -228,12 +328,6 @@ const retryLoading = async () => {
   background-color: var(--color-background);
 }
 
-.navigation-header {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -245,10 +339,8 @@ const retryLoading = async () => {
 
 .error-message {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-md);
   height: 100%;
   color: var(--color-error);
 }
@@ -266,43 +358,63 @@ const retryLoading = async () => {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background-color: var(--color-surface);
 }
 
 .periods-container {
   flex: 1 1 0;
   position: relative;
   width: 100%;
-  background: var(--color-surface);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  gap: calc(var(--spacing-xs) / 2);
 }
 
 .period-row {
   position: relative;
   width: 100%;
-  height: 64px;
+  overflow: hidden;
 }
 
 .timeline-line {
-  height: 2px;
+  height: calc(var(--spacing-xs) / 2);
   width: 100%;
   background: var(--color-border-dark);
   position: relative;
-  z-index: 2;
-  margin: 2px 0;
+  z-index: var(--z-index-period-row-band);
+  margin: calc(var(--spacing-xs) / 2) 0;
 }
 
 .events-container {
   flex: 1 1 0;
   position: relative;
   width: 100%;
-  background: var(--color-surface);
+}
+
+/* ─── Cartes de période : entrée en fondu décalé ──────────────────────────── */
+
+.period-grid__period-position {
+  position: absolute;
+  left: var(--period-left);
+  width: var(--period-width);
+  top: var(--period-top);
+  z-index: var(--period-z, auto);
 }
 
 .timeline-card {
-  position: relative;
-  transition: all var(--transition-fast);
+  transition: left 0.18s ease, width 0.18s ease;
+  animation: card-enter 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation-delay: var(--enter-delay, 0ms);
 }
-</style> 
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

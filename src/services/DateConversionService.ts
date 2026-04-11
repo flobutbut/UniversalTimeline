@@ -227,8 +227,6 @@ export class DateConversionService {
       };
     }
 
-    const day = parseInt(match[1]);
-    const month = this.getMonthNumber(match[2]);
     const year = parseInt(match[3]);
     
     const isBCE = year < 0;
@@ -369,9 +367,15 @@ export class DateConversionService {
 
     // Si on a le jour et le mois, on les utilise
     if (parsed.day && parsed.month) {
-      // On construit une date JS pour le formatage localisé
-      const year = parsed.isBCE ? -parsed.years : parsed.years;
-      const date = new Date(Date.UTC(year, parsed.month - 1, parsed.day));
+      // On construit une date JS pour le formatage localisé (années CE 0–99 : pas Date.UTC(y) seul → 1900+y)
+      let date: Date;
+      if (!parsed.isBCE && parsed.years < 100) {
+        date = new Date(Date.UTC(2000, parsed.month - 1, parsed.day));
+        date.setUTCFullYear(parsed.years);
+      } else {
+        const year = parsed.isBCE ? -parsed.years : parsed.years;
+        date = new Date(Date.UTC(year, parsed.month - 1, parsed.day));
+      }
       return date.toLocaleDateString(options.locale, {
         year: 'numeric',
         month: 'long',
@@ -381,6 +385,15 @@ export class DateConversionService {
 
     // Sinon, on affiche juste l'année
     const year = parsed.isBCE ? -parsed.years : parsed.years;
+    if (!parsed.isBCE && parsed.years < 100) {
+      const d = new Date(2000, 0, 1);
+      d.setFullYear(parsed.years);
+      return d.toLocaleDateString(options.locale, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
     return new Date(year, 0, 1).toLocaleDateString(options.locale, {
       year: 'numeric',
       month: 'long',

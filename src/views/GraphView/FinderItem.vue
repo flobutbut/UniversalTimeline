@@ -3,7 +3,8 @@
     class="finder-item"
     :class="{
       'selected': selected,
-      'finder-item-has-children': hasChildren
+      'finder-item-has-children': hasChildren && !wikidataOnly,
+      'finder-item-wikidata-children': hasChildren && wikidataOnly
     }"
     :aria-selected="selected"
     tabindex="0"
@@ -15,28 +16,38 @@
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
-    <div
-      class="finder-item-content"
-      ref="contentRef"
-    >
-      <slot>{{ label.fr }}</slot>
+    <div class="finder-item-content" ref="contentRef">
+      <div class="finder-item-text">
+        <div
+          class="finder-item-title"
+          :class="{ 'finder-item-label-wikidata': wikidataOnly }"
+        >
+          <slot>{{ label.fr }}</slot>
+        </div>
+        <div class="finder-item-dates">
+          <span v-if="categories && categories.length" class="finder-item-category">{{ categories[0].label.fr }}</span>
+          <span v-if="categories && categories.length" class="finder-item-date-sep"> · </span>
+          {{ dateSubtitle }}
+        </div>
+      </div>
     </div>
     <div class="finder-item-actions">
       <button
         v-if="itemId"
-        class="action-button edit-button"
+        class="action-button row-action-button"
         ref="editBtnRef"
-        @click.stop="emit('edit', itemId)"
-        v-show="showEdit"
+        type="button"
+        @click.stop="onRowActionClick"
+        v-show="showRowAction"
       >
-        Edit
+        {{ wikidataOnly ? 'Add' : 'Edit' }}
       </button>
       <div class="finder-item-chevron">
         <ChevronIcon
           :width="16"
           :height="16"
-          :color="selected ? 'var(--color-neutral-0)' : 'var(--color-text-light)'"
-          :style="{ opacity: hasActualChildren ? 1 : 0.3 }"
+          :color="selected ? 'var(--color-text-white)' : 'var(--color-text-light)'"
+          :style="{ opacity: chevronOpacity }"
         />
       </div>
     </div>
@@ -44,75 +55,66 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import type { MultilingualText } from '@/types/database';
+import { computed, ref, watch } from 'vue';
+import type { MultilingualText, Category } from '@/types/database';
+import { formatFinderItemDateRangeSubtitle } from '@/lib/finderItemDateLabels';
 import ChevronIcon from '@/components/icons/ChevronIcon.vue';
 
 const props = defineProps<{
   label: MultilingualText;
   selected: boolean;
+  /** Sous-périodes possibles (API, Wikidata ou déjà chargées dans le store). */
   hasChildren: boolean;
+  /** Ligne non persistée (id `wikidata:…`) : style distinct de l'enregistrement PostgreSQL. */
+  wikidataOnly?: boolean;
   itemId: string;
-  hasActualChildren?: boolean;
+  startDate?: string;
+  endDate?: string;
+  categories?: Category[];
 }>();
+
+const dateSubtitle = computed(() =>
+  formatFinderItemDateRangeSubtitle(props.startDate, props.endDate)
+);
+
+const chevronOpacity = computed(() => {
+  if (!props.hasChildren) return 0.3;
+  if (props.selected) return 1;
+  if (props.wikidataOnly) return 0.55;
+  return 1;
+});
 
 const emit = defineEmits<{
   (e: 'click'): void;
   (e: 'dragstart', itemId: string): void;
   (e: 'drop', itemId: string): void;
   (e: 'edit', itemId: string): void;
+  (e: 'add', itemId: string): void;
 }>();
 
-const isDroppable = ref(false);
-const showEdit = ref(false);
+function onRowActionClick() {
+  if (props.wikidataOnly) emit('add', props.itemId);
+  else emit('edit', props.itemId);
+}
+
+const showRowAction = ref(false);
 const editBtnRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
 
 function handleMouseEnter() {
-  showEdit.value = true;
+  showRowAction.value = true;
 }
 function handleMouseLeave() {
-  showEdit.value = props.selected;
+  showRowAction.value = props.selected;
 }
 
 watch(
   () => props.selected,
   (val) => {
-    showEdit.value = val;
+    showRowAction.value = val;
   },
   { immediate: true }
 );
-
-function handleEdit(event: MouseEvent) {
-  event.stopPropagation();
-  if (props.itemId) {
-    emit('edit', props.itemId);
-  }
-}
-
-function onDragStart(event: DragEvent) {
-  if (props.itemId) {
-    event.dataTransfer?.setData('text/plain', props.itemId);
-    emit('dragstart', props.itemId);
-  }
-}
-
-function onDragOver(event: DragEvent) {
-  event.preventDefault();
-  isDroppable.value = true;
-}
-
-function onDragLeave(event: DragEvent) {
-  isDroppable.value = false;
-}
-
-function onDrop(event: DragEvent) {
-  event.preventDefault();
-  isDroppable.value = false;
-  if (props.itemId) {
-    emit('drop', props.itemId);
-  }
-}
 </script>
 
 <style scoped>
@@ -130,20 +132,56 @@ function onDrop(event: DragEvent) {
   display: flex;
   align-items: center;
   background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border-light);
+  border: none;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Séparateurs entre lignes : bordure haute (pas basse) pour pouvoir retirer celle au-dessus de la sélection. */
+.finder-item:not(:first-child) {
+  border-top: 1px solid var(--color-border-light);
 }
 
 .finder-item-content {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   padding: 0 !important;
   margin: 0 !important;
   margin-right: var(--spacing-sm);
+}
+
+.finder-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.finder-item-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.finder-item-dates {
+  font-size: var(--font-size-xs);
+  line-height: 1.25;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.finder-item.selected .finder-item-dates {
+  color: color-mix(in srgb, var(--color-text-white) 82%, transparent);
+}
+
+.finder-item-label-wikidata {
+  color: var(--color-wikidata-label);
+}
+
+.finder-item.selected .finder-item-label-wikidata {
+  color: var(--color-wikidata-label-on-primary);
 }
 
 .finder-item-actions {
@@ -171,21 +209,21 @@ function onDrop(event: DragEvent) {
   color: var(--color-primary-dark);
 }
 
-.edit-button {
+.row-action-button {
   visibility: hidden;
 }
 
-.finder-item:hover .edit-button,
-.finder-item.selected .edit-button {
+.finder-item:hover .row-action-button,
+.finder-item.selected .row-action-button {
   visibility: visible;
 }
 
 .finder-item.selected .action-button {
-  color: var(--color-neutral-0);
+  color: var(--color-text-white);
 }
 
 .finder-item.selected .action-button:hover {
-  color: var(--color-neutral-100);
+  color: color-mix(in srgb, var(--color-text-white) 88%, transparent);
 }
 
 .finder-item:hover,
@@ -194,8 +232,17 @@ function onDrop(event: DragEvent) {
 }
 
 .finder-item.selected {
+  border: none;
+  box-shadow: none;
   background: var(--color-primary);
-  color: var(--color-neutral-0);
+  color: var(--color-text-white);
+}
+
+/* Clic = focus (tabindex) : pas de contour sur la sélection */
+.finder-item.selected:focus,
+.finder-item.selected:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .finder-item:hover .finder-item-chevron,
@@ -203,24 +250,34 @@ function onDrop(event: DragEvent) {
   opacity: 1;
 }
 
-.finder-item:focus {
+/* Anneau clavier seulement si non sélectionné */
+.finder-item:focus-visible:not(.selected) {
   outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
-.finder-item.selected:focus {
-  outline: 2px solid var(--color-neutral-0);
+.finder-item:focus:not(:focus-visible):not(.selected) {
+  outline: none;
 }
 
-.finder-item.has-children {
-  border-left: 3px solid var(--color-primary);
+/* Barre gauche : enregistrement en base (enfants côté API / BDD). */
+.finder-item-has-children {
+  border-left: calc(var(--radius-md) / 2) solid var(--color-primary);
 }
 
-.finder-item.selected.has-children {
-  border-left: 3px solid var(--color-neutral-0);
+/* Hiérarchie connue uniquement via Wikidata (pas encore de ligne PostgreSQL). */
+.finder-item-wikidata-children {
+  border-left: calc(var(--radius-md) / 2) solid var(--color-text-secondary);
+}
+
+.finder-item.selected.finder-item-has-children,
+.finder-item.selected.finder-item-wikidata-children {
+  border-left: none;
+  padding-left: calc(var(--spacing-md) + 3px);
 }
 
 .finder-item.selected .finder-item-chevron {
-  color: var(--color-neutral-0);
+  color: var(--color-text-white);
   opacity: 1;
 }
 
@@ -229,6 +286,6 @@ function onDrop(event: DragEvent) {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 4px;
+  margin-left: var(--spacing-xs);
 }
 </style> 

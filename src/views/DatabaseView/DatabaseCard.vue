@@ -11,7 +11,7 @@
     <div class="card-header">
       <div class="title-row">
         <h3>{{ title }}</h3>
-        <button class="action-button" @click.stop="handleEdit">Edit</button>
+        <button class="action-button" @click.stop="$emit('edit')">Edit</button>
       </div>
     </div>
     <div class="card-content">
@@ -21,21 +21,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
 interface Props {
   type: 'period' | 'event' | 'story';
   title: string;
   selected?: boolean;
 }
 
-const props = defineProps<Props>();
-const emit = defineEmits(['edit']);
-
-const handleEdit = () => {
-  console.log('[DatabaseCard] Émission de l\'événement edit');
-  emit('edit');
-};
+defineProps<Props>();
+defineEmits<{ (e: 'edit'): void }>();
 </script>
 
 <style scoped>
@@ -96,15 +89,15 @@ const handleEdit = () => {
 }
 
 .is-period {
-  border-left: 4px solid var(--color-period);
+  border-left: var(--spacing-xs) solid var(--color-period);
 }
 
 .is-event {
-  border-left: 4px solid var(--color-event);
+  border-left: var(--spacing-xs) solid var(--color-event);
 }
 
 .is-story {
-  border-left: 4px solid var(--color-story);
+  border-left: var(--spacing-xs) solid var(--color-story);
 }
 
 .database-card--selected {
@@ -119,11 +112,11 @@ const handleEdit = () => {
 }
 
 .database-card--selected .action-button {
-  color: var(--color-neutral-0);
+  color: var(--color-primary-dark);
 }
 
 .database-card--selected .action-button:hover {
-  color: var(--color-neutral-100);
+  color: var(--color-primary);
 }
 
 .database-card--story {

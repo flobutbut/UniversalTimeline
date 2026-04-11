@@ -1,94 +1,147 @@
+/**
+ * Design tokens — neutres désaturés (zinc / gris neutre), accents légèrement adoucis.
+ *
+ * Hiérarchie des fonds (même logique en clair et sombre) :
+ *   --color-background     → zone app / marges (PeriodGrid externe, body)
+ *   --color-surface        → barres chrome (header, champs) — le plus « papier » en clair
+ *   --color-card           → cartes / barres de période (bordure + ombre pour le contraste)
+ */
+
 :root {
-  /* Neutral Colors */
+  color-scheme: light;
+
+  /* Neutres clair — faible saturation, pas de cyan sur les fonds */
   --color-neutral-0:   #ffffff;
-  --color-neutral-50:  #f8fafc;
-  --color-neutral-100: #fafeff;
-  --color-neutral-200: #f5faff;
-  --color-neutral-300: #e8f0f9;
-  --color-neutral-400: #d5e1eb;
-  --color-neutral-500: #94a3b8;
-  --color-neutral-600: #64748b;
-  --color-neutral-700: #475569;
-  --color-neutral-800: #1e293b;
-  --color-neutral-900: #0f172a;
+  --color-neutral-50:  #fafafa;
+  --color-neutral-100: #f4f4f5;
+  --color-neutral-200: #e4e4e7;
+  --color-neutral-300: #d4d4d8;
+  --color-neutral-400: #b8b8c2;
+  --color-neutral-500: #71717a;
+  --color-neutral-600: #52525b;
+  --color-neutral-700: #3f3f46;
+  --color-neutral-800: #27272a;
+  --color-neutral-900: #18181b;
 
-  /* Brand & Accent Colors */
-  --color-primary: #2196f3;
-  --color-primary-dark: #1976d2;
-  --color-primary-light: #bbdefb;
-  --color-success: #4caf50;
-  --color-success-light: #e8f5e9;
-  --color-error: #f44336;
-  --color-error-light: #ffebee;
-  --color-warning: #ff9800;
-  --color-warning-light: #fff3e0;
+  /* Marque — bleu désaturé aligné sur les gris zinc.
+     #4476af → 4.71:1 sur blanc : passe WCAG AA pour le texte (liens, tags, focus).
+     primary-button (#265985) réservé aux fonds pleins : label blanc à 7.37:1 (WCAG AAA). */
+  --color-primary: #4476af;
+  --color-primary-dark: #34608f;
+  --color-primary-light: #d4e3f0;
+  /* Boutons pleins (label blanc) */
+  --color-primary-button: #265985;
+  --color-primary-button-hover: #1c466f;
 
-  /* Semantic Aliases */
-  --color-background: var(--color-neutral-300);
+  --color-success: #3d9256;
+  --color-success-light: #e8f1eb;
+  --color-error: #c94a4a;
+  --color-error-light: #f8eaea;
+  --color-error-dark: #9a3030;
+  /* Rouge plus saturé que l’erreur UI : complément du bleu primaire (finder, lignes Wikidata) */
+  --color-wikidata-label: #d4193d;
+  --color-wikidata-label-on-primary: #ff9aad;
+  --color-warning: #b8832a;
+  --color-warning-light: #f7f0e4;
+
+  /* Sémantique */
+  --color-background: var(--color-neutral-100);
   --color-surface: var(--color-neutral-0);
   --color-surface-hover: var(--color-neutral-50);
-  --color-card: var(--color-neutral-300);
-  --color-card-hover: var(--color-neutral-400);
-  --color-border: var(--color-neutral-400);
-  --color-border-light: var(--color-neutral-300);
-  --color-border-dark: var(--color-neutral-700);
+  --color-card: var(--color-neutral-0);
+  --color-card-hover: var(--color-neutral-50);
+  --color-border: var(--color-neutral-300);
+  --color-border-light: var(--color-neutral-200);
+  --color-border-dark: var(--color-neutral-500);
+  --color-border-darker: var(--color-neutral-800);
+
   --color-text: var(--color-neutral-800);
   --color-text-light: var(--color-neutral-600);
-  --color-text-white: var(--color-neutral-0);
+  --color-text-secondary: var(--color-neutral-500);
+  --color-text-white: #ffffff;
+  --color-heading: var(--color-neutral-900);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --color-background-soft: var(--color-neutral-50);
+  --color-background-mute: var(--color-neutral-100);
+  --color-error-bg: #f5e8e8;
 
-  /* Spacing */
+  /* Cartes base de données (bandeau latéral) */
+  --color-period: #5080b0;
+  /* Timeline story : barres des périodes racines (tinte verte, distinct du bleu période) */
+  --color-period-root: #3f8f6f;
+  --color-event: #b87256;
+  --color-story: #7d6f9e;
+
+  /* Assombrissement sur fond primaire (boutons / lignes sélectionnées) — inchangé clair/sombre */
+  --color-on-primary-shade: color-mix(in srgb, #000000 12%, transparent);
+  --color-on-primary-shade-strong: color-mix(in srgb, #000000 15%, transparent);
+
+  /* Ombres — légère teinte neutre, un peu plus douces */
+  --shadow-sm: 0 1px 2px rgb(24 24 27 / 0.06);
+  --shadow-md: 0 4px 10px rgb(24 24 27 / 0.08);
+  --shadow-lg: 0 10px 24px rgb(24 24 27 / 0.1);
+  --shadow-xl: 0 20px 40px rgb(24 24 27 / 0.12);
+
+  /* Voiles modales (indépendants des neutres sémantiques clair/sombre) */
+  --overlay-scrim: color-mix(in srgb, #0f0f0f 60%, transparent);
+  --overlay-scrim-strong: color-mix(in srgb, #0f0f0f 65%, transparent);
+
+  /* Référence typo (13px) — les tailles dérivées sont en px fixes (pas de calc). */
   --base-font-size: 13px;
-  --base-line-height: 1.69;
+  /* Hauteur de ligne en px entiers (repère ~13px : tight ≈1.4, normal ≈1.69, etc.). */
+  --base-line-height: 22px;
+  /* Grille d’espacement 8px — échelle en px fixes. */
   --base-spacing: 8px;
-  --spacing-xs: calc(var(--base-spacing) * 0.5);
-  --spacing-sm: var(--base-spacing);
-  --spacing-md: calc(var(--base-spacing) * 1.5);
-  --spacing-lg: calc(var(--base-spacing) * 2);
-  --spacing-xl: calc(var(--base-spacing) * 3);
-  --spacing-2xl: calc(var(--base-spacing) * 4);
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
 
-  /* Typography */
   --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  --font-size-xs: calc(var(--base-font-size) * 0.75);
-  --font-size-sm: calc(var(--base-font-size) * 0.875);
-  --font-size-base: var(--base-font-size);
-  --font-size-lg: calc(var(--base-font-size) * 1.125);
-  --font-size-xl: calc(var(--base-font-size) * 1.25);
-  --font-size-2xl: calc(var(--base-font-size) * 1.5);
-  --font-size-3xl: calc(var(--base-font-size) * 1.875);
+  --font-size-xs: 10px;
+  --font-size-sm: 11px;
+  --font-size-base: 13px;
+  --font-size-lg: 15px;
+  --font-size-xl: 16px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
 
-  /* Line Heights */
-  --line-height-tight: 1.4;
-  --line-height-normal: 1.69;
-  --line-height-relaxed: 1.85;
-  --line-height-loose: 2.15;
+  --line-height-tight: 18px;
+  --line-height-normal: 22px;
+  --line-height-relaxed: 24px;
+  --line-height-loose: 28px;
 
-  /* Border Radius */
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
   --radius-xl: 12px;
 
-  /* Transitions */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
   --transition-slow: 350ms ease;
 
-  /* Z-index */
   --z-index-dropdown: 1000;
   --z-index-sticky: 1020;
   --z-index-fixed: 1030;
   --z-index-modal: 1040;
   --z-index-popover: 1050;
   --z-index-tooltip: 1060;
+  --z-index-modal-nested: 3000;
+  --z-index-search-layer: 9000;
+  --z-index-timeline-item: 10;
+  --z-index-period-row-band: 2;
+  --z-index-local-bump: 1;
 
-  /* Breakpoints */
+  --font-family-heading: 'Lora', Georgia, 'Times New Roman', serif;
+  --font-family-mono: 'Courier New', Courier, ui-monospace, monospace;
+
+  --radius-pill: 999px;
+
+  --color-asset-vue-green: #41b883;
+  --color-asset-vue-blue: #35495e;
+
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
@@ -96,33 +149,38 @@
   --breakpoint-2xl: 1536px;
 }
 
-/* Dark Theme */
 [data-theme="dark"] {
-  /* Neutral Colors */
-  --color-neutral-0:   #1a2436;
-  --color-neutral-50:  #2a3445;
-  --color-neutral-100: #3d4757;
-  --color-neutral-200: #525c6d;
-  --color-neutral-300: #6b7484;
-  --color-neutral-400: #94a3b8;
-  --color-neutral-500: #cbd5e1;
-  --color-neutral-600: #e2e8f0;
-  --color-neutral-700: #f1f5f9;
-  --color-neutral-800: #f8fafc;
-  --color-neutral-900: #ffffff;
+  color-scheme: dark;
 
-  /* Brand & Accent Colors */
-  --color-primary: #3b82f6;
-  --color-primary-light: #60a5fa;
-  --color-primary-dark: #2563eb;
-  --color-success: #22c55e;
-  --color-success-light: #e8f5e9;
-  --color-error: #ef4444;
-  --color-error-light: #ffebee;
-  --color-warning: #f59e0b;
-  --color-warning-light: #fff3e0;
+  /* Neutres sombre — même famille que le clair, pas d’inversion 0/900 (0 = le plus sombre) */
+  --color-neutral-0:   #121213;
+  --color-neutral-50:  #18181a;
+  --color-neutral-100: #222224;
+  --color-neutral-200: #2d2d30;
+  --color-neutral-300: #3f3f44;
+  --color-neutral-400: #5a5a62;
+  --color-neutral-500: #787882;
+  --color-neutral-600: #a1a1aa;
+  --color-neutral-700: #c8c8d0;
+  --color-neutral-800: #e4e4e9;
+  --color-neutral-900: #f4f4f6;
 
-  /* Semantic Aliases */
+  --color-primary: #7aa3d4;
+  --color-primary-dark: #5d89c4;
+  --color-primary-light: #2a3545;
+  --color-primary-button: #2563eb;
+  --color-primary-button-hover: #1d4ed8;
+
+  --color-success: #5cb87a;
+  --color-success-light: #1a2a1f;
+  --color-error: #e07070;
+  --color-error-light: #2a1c1c;
+  --color-error-dark: #fca5a5;
+  --color-wikidata-label: #ff5c7a;
+  --color-wikidata-label-on-primary: #ffd0dc;
+  --color-warning: #d4a04a;
+  --color-warning-light: #2a2318;
+
   --color-background: var(--color-neutral-50);
   --color-surface: var(--color-neutral-0);
   --color-surface-hover: var(--color-neutral-100);
@@ -131,14 +189,28 @@
   --color-border: var(--color-neutral-200);
   --color-border-light: var(--color-neutral-100);
   --color-border-dark: var(--color-neutral-400);
-  --color-border-darker: var(--color-neutral-900);
+  --color-border-darker: var(--color-neutral-800);
+
   --color-text: var(--color-neutral-800);
   --color-text-light: var(--color-neutral-600);
-  --color-text-white: var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-500);
+  --color-text-white: #ffffff;
+  --color-heading: var(--color-neutral-900);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4);
-} 
+  --color-background-soft: var(--color-neutral-100);
+  --color-background-mute: var(--color-neutral-50);
+  --color-error-bg: #2a1818;
+
+  --color-period: #7aa3d4;
+  --color-period-root: #5dbe96;
+  --color-event: #c99580;
+  --color-story: #9d8fc4;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 28px rgb(0 0 0 / 0.45);
+  --shadow-xl: 0 24px 48px rgb(0 0 0 / 0.5);
+
+  --overlay-scrim: color-mix(in srgb, #000000 70%, transparent);
+  --overlay-scrim-strong: color-mix(in srgb, #000000 75%, transparent);
+}

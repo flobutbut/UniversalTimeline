@@ -34,8 +34,8 @@ defineEmits<{
 
 .switch__button {
   position: relative;
-  width: 44px;
-  height: 24px;
+  width: calc(var(--spacing-sm) * 4 + var(--spacing-xs) * 3);
+  height: var(--spacing-xl);
   padding: 0;
   border: none;
   background: none;
@@ -50,19 +50,19 @@ defineEmits<{
   right: 0;
   bottom: 0;
   background-color: var(--color-surface-hover);
-  border-radius: 12px;
+  border-radius: calc(var(--radius-lg) + var(--spacing-xs));
   transition: background-color var(--transition-fast);
 }
 
 .switch__thumb {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
+  top: calc(var(--spacing-xs) / 2);
+  left: calc(var(--spacing-xs) / 2);
+  width: calc(var(--spacing-lg) + var(--spacing-xs));
+  height: calc(var(--spacing-lg) + var(--spacing-xs));
   background-color: var(--color-surface);
   border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   transition: transform var(--transition-fast);
 }
 
@@ -71,7 +71,7 @@ defineEmits<{
 }
 
 .switch--checked .switch__thumb {
-  transform: translateX(20px);
+  transform: translateX(calc(var(--spacing-lg) + var(--spacing-xs)));
 }
 
 .switch__label {

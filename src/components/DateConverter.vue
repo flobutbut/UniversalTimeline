@@ -128,10 +128,8 @@ import BaseButton from '@/components/base/Button.vue';
 // Utilisation du composable
 const {
   convertedDate,
-  isLoading,
   error,
   convertDate,
-  formatForDisplay
 } = useDateConversion({
   defaultLocale: 'fr-FR',
   defaultPrecision: 'year',
@@ -266,7 +264,7 @@ onMounted(() => {
 
 <style scoped>
 .date-converter {
-  max-width: 1200px;
+  max-width: calc(var(--spacing-xs) * 300);
   margin: 0 auto;
   padding: 2rem;
 }
@@ -292,7 +290,7 @@ onMounted(() => {
 .conversion-card {
   background: var(--color-background-soft);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 1rem;
 }
 
@@ -305,7 +303,7 @@ onMounted(() => {
 }
 
 .date-value {
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-family-mono);
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--color-text);
@@ -315,7 +313,7 @@ onMounted(() => {
 
 .details-section {
   background: var(--color-background-mute);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 1rem;
 }
 
@@ -344,7 +342,7 @@ onMounted(() => {
 .error-section {
   background: var(--color-error-bg);
   border: 1px solid var(--color-error);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 1rem;
   margin-bottom: 2rem;
 }
@@ -367,7 +365,7 @@ onMounted(() => {
 .example-card {
   background: var(--color-background-soft);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -384,7 +382,7 @@ onMounted(() => {
 }
 
 .example-input {
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-family-mono);
   font-size: 0.9rem;
   color: var(--color-text-light);
   margin: 0.25rem 0;

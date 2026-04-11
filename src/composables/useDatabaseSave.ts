@@ -1,52 +1,57 @@
-import { ref } from 'vue';
-import { DatabaseQueryService } from '@/services/DatabaseQueryService';
-import { DatabaseViewService } from '@/services/DatabaseViewService';
-import { useDatabaseDataStore } from './useDatabaseDataStore';
+import { storeToRefs } from 'pinia';
+import { useDataStore } from '@/stores/useDataStore';
+import { PeriodApiService } from '@/services/PeriodApiService';
+import { EventApiService } from '@/services/EventApiService';
+import { StoryApiService } from '@/services/StoryApiService';
 import { EditFormValidator } from '@/validators/editFormValidators';
 import { ConflictResolutionService } from '@/services/ConflictResolutionService';
+import { useToast } from './useToast';
+import { useLoadingState } from './useLoadingState';
 
 export function useDatabaseSave() {
-  const queryService = DatabaseQueryService.getInstance();
-  const databaseViewService = DatabaseViewService.getInstance();
+  const dataStore = useDataStore();
+  const { periods, events, stories } = storeToRefs(dataStore);
   const conflictService = ConflictResolutionService.getInstance();
-  const { updatePeriods, updateEvents, updateStories } = useDatabaseDataStore();
-  const loading = ref(false);
+  const toast = useToast();
+  const { isLoading: loading } = useLoadingState();
 
   const handleSave = async (formData: any, currentType: 'period' | 'event' | 'story', currentMode: 'create' | 'edit', currentItem: any) => {
-    // Afficher un toast de chargement persistant
-    window.toast.show('Sauvegarde en cours...', 'info', 0);
+    toast.show('Sauvegarde en cours...', 'info', 0);
 
     try {
       loading.value = true;
 
-      // 1. Validation des données
+      // 1. Validation
       const validation = EditFormValidator.validateForm(formData, currentType);
       if (!validation.isValid) {
-        window.showToast(validation.errors.join(', '), 'error');
+        toast.hide();
+        toast.show(validation.errors.join(', '), 'error');
         return false;
       }
       if (currentType !== 'story') {
         const qidValidation = EditFormValidator.validateQid(formData.qid);
         if (!qidValidation.isValid) {
-          window.showToast(qidValidation.errors.join(', '), 'error');
+          toast.hide();
+          toast.show(qidValidation.errors.join(', '), 'error');
           return false;
         }
       }
 
-      // 2. Détection et résolution des conflits (en mode édition)
+      // 2. Détection et résolution des conflits (mode édition uniquement)
       if (currentType !== 'story' && currentMode === 'edit') {
         const conflictInfo = await conflictService.detectConflict(formData.qid, currentType, currentItem?.id);
         if (conflictInfo.hasConflict) {
           const resolved = await conflictService.resolveConflictAutomatically(conflictInfo);
           if (!resolved) {
-            window.showToast('Impossible de résoudre le conflit', 'error');
+            toast.hide();
+            toast.show('Impossible de résoudre le conflit', 'error');
             return false;
           }
         }
       }
 
-      // 3. Opération de sauvegarde
-      let updatedItem;
+      // 3. Sauvegarde avec retry sur erreurs réseau
+      let updatedItem: any;
       let retryCount = 0;
       const maxRetries = 3;
 
@@ -57,10 +62,7 @@ export function useDatabaseSave() {
           } catch (error: any) {
             if (error.message?.includes('ECONNRESET') || error.message?.includes('socket hang up')) {
               retryCount++;
-              if (retryCount === maxRetries) {
-                throw error;
-              }
-              // Attendre un peu avant de réessayer
+              if (retryCount === maxRetries) throw error;
               await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
               continue;
             }
@@ -70,134 +72,59 @@ export function useDatabaseSave() {
       };
 
       if (currentType === 'period') {
+        const periodService = PeriodApiService.getInstance();
         if (currentMode === 'edit' && currentItem) {
-          const itemId = currentItem.id;
-          updatedItem = await executeWithRetry(() => 
-            queryService.updatePeriod(itemId, formData)
-          );
-          // Mettre à jour uniquement la période modifiée dans le store partagé
-          const { periods } = useDatabaseDataStore();
-          const updatedPeriods = [...periods.value];
-          const index = updatedPeriods.findIndex(p => p.id === itemId);
-          if (index !== -1) {
-            updatedPeriods[index] = {
-              ...updatedPeriods[index],
-              label: { fr: formData.title.fr, en: formData.title.en },
-              startDate: formData.startDate,
-              endDate: formData.endDate,
-              categories: updatedPeriods[index].categories
-            };
-            updatePeriods(updatedPeriods);
-            // Synchroniser aussi DatabaseViewService
-            databaseViewService.setPeriods(updatedPeriods);
+          updatedItem = await executeWithRetry(() => periodService.updatePeriod(currentItem.id, formData));
+          const idx = periods.value.findIndex(p => p.id === currentItem.id);
+          if (idx !== -1) {
+            const updated = [...periods.value];
+            updated[idx] = { ...updated[idx], label: { fr: formData.title.fr, en: formData.title.en }, startDate: formData.startDate, endDate: formData.endDate };
+            dataStore.updatePeriods(updated);
           }
         } else {
-          updatedItem = await executeWithRetry(() => 
-            queryService.createPeriod(formData)
-          );
-          // Ajouter la nouvelle période au store partagé
-          const { periods } = useDatabaseDataStore();
-          const updatedPeriods = [...periods.value];
-          updatedPeriods.push({
-            id: updatedItem.id,
-            label: { fr: formData.title.fr, en: formData.title.en },
-            startDate: formData.startDate,
-            endDate: formData.endDate,
-            categories: []
-          });
-          updatePeriods(updatedPeriods);
-          // Synchroniser aussi DatabaseViewService
-          databaseViewService.setPeriods(updatedPeriods);
+          updatedItem = await executeWithRetry(() => periodService.createPeriod(formData));
+          dataStore.updatePeriods([...periods.value, { id: updatedItem.id, label: { fr: formData.title.fr, en: formData.title.en }, startDate: formData.startDate, endDate: formData.endDate, categories: [] }]);
         }
       } else if (currentType === 'event') {
+        const eventService = EventApiService.getInstance();
         if (currentMode === 'edit' && currentItem) {
-          const itemId = currentItem.id;
-          updatedItem = await executeWithRetry(() => 
-            queryService.updateEvent(itemId, formData)
-          );
-          // Mettre à jour uniquement l'événement modifié dans le store partagé
-          const { events } = useDatabaseDataStore();
-          const updatedEvents = [...events.value];
-          const index = updatedEvents.findIndex(e => e.id === itemId);
-          if (index !== -1) {
-            updatedEvents[index] = {
-              ...updatedEvents[index],
-              label: { fr: formData.title.fr, en: formData.title.en },
-              date: formData.date,
-              categories: updatedEvents[index].categories
-            };
-            updateEvents(updatedEvents);
-            // Synchroniser aussi DatabaseViewService
-            databaseViewService.setEvents(updatedEvents);
+          updatedItem = await executeWithRetry(() => eventService.updateEvent(currentItem.id, formData));
+          const idx = events.value.findIndex(e => e.id === currentItem.id);
+          if (idx !== -1) {
+            const updated = [...events.value];
+            updated[idx] = { ...updated[idx], label: { fr: formData.title.fr, en: formData.title.en }, date: formData.date };
+            dataStore.updateEvents(updated);
           }
         } else {
-          updatedItem = await executeWithRetry(() => 
-            queryService.createEvent(formData)
-          );
-          // Ajouter le nouvel événement au store partagé
-          const { events } = useDatabaseDataStore();
-          const updatedEvents = [...events.value];
-          updatedEvents.push({
-            id: updatedItem.id,
-            label: { fr: formData.title.fr, en: formData.title.en },
-            date: formData.date,
-            categories: []
-          });
-          updateEvents(updatedEvents);
-          // Synchroniser aussi DatabaseViewService
-          databaseViewService.setEvents(updatedEvents);
+          updatedItem = await executeWithRetry(() => eventService.createEvent(formData));
+          dataStore.updateEvents([...events.value, { id: updatedItem.id, label: { fr: formData.title.fr, en: formData.title.en }, date: formData.date, categories: [] }]);
         }
       } else if (currentType === 'story') {
+        const storyService = StoryApiService.getInstance();
         if (currentMode === 'edit' && currentItem) {
-          const itemId = currentItem.id;
-          updatedItem = await executeWithRetry(() => 
-            queryService.updateStory(itemId, formData)
-          );
-          // Mettre à jour uniquement la story modifiée dans le store partagé
-          const { stories } = useDatabaseDataStore();
-          const updatedStories = [...stories.value];
-          const index = updatedStories.findIndex(s => s.id === itemId);
-          if (index !== -1) {
-            updatedStories[index] = {
-              ...updatedStories[index],
-              title: { fr: formData.title.fr, en: formData.title.en },
-              categories: updatedStories[index].categories
-            };
-            updateStories(updatedStories);
-            // Synchroniser aussi DatabaseViewService
-            databaseViewService.setStories(updatedStories);
+          updatedItem = await executeWithRetry(() => storyService.updateStory(currentItem.id, formData));
+          const idx = stories.value.findIndex(s => s.id === currentItem.id);
+          if (idx !== -1) {
+            const updated = [...stories.value];
+            updated[idx] = { ...updated[idx], title: { fr: formData.title.fr, en: formData.title.en } };
+            dataStore.updateStories(updated);
           }
         } else {
-          updatedItem = await executeWithRetry(() => 
-            queryService.createStory(formData)
-          );
-          // Ajouter la nouvelle story au store partagé
-          const { stories } = useDatabaseDataStore();
-          const updatedStories = [...stories.value];
-          updatedStories.push({
-            id: updatedItem.id,
-            title: { fr: formData.title.fr, en: formData.title.en },
-            categories: []
-          });
-          updateStories(updatedStories);
-          // Synchroniser aussi DatabaseViewService
-          databaseViewService.setStories(updatedStories);
+          updatedItem = await executeWithRetry(() => storyService.createStory(formData));
+          dataStore.updateStories([...stories.value, { id: updatedItem.id, title: { fr: formData.title.fr, en: formData.title.en }, categories: [] }]);
         }
       }
 
-      // Masquer le toast de chargement et afficher le succès
-      window.toast.hide();
-      window.showToast('Données mises à jour avec succès', 'success');
+      toast.hide();
+      toast.show('Données mises à jour avec succès', 'success');
       return true;
     } catch (error: any) {
       console.error('Erreur lors de la sauvegarde:', error);
-
-      // Masquer le toast de chargement et afficher l'erreur
-      window.toast.hide();
+      toast.hide();
       if (error.message?.includes('ECONNRESET') || error.message?.includes('socket hang up')) {
-        window.showToast('Erreur de connexion. Veuillez réessayer.', 'error');
+        toast.show('Erreur de connexion. Veuillez réessayer.', 'error');
       } else {
-        window.showToast('Erreur lors de la sauvegarde des données', 'error');
+        toast.show(error.response?.data?.message || error.message || 'Erreur lors de la sauvegarde des données', 'error');
       }
       return false;
     } finally {
@@ -205,8 +132,5 @@ export function useDatabaseSave() {
     }
   };
 
-  return {
-    loading,
-    handleSave
-  };
-} 
+  return { loading, handleSave };
+}

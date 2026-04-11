@@ -8,138 +8,45 @@
       <i class="fas fa-exclamation-circle"></i>
       <span>{{ state.error }}</span>
     </div>
-    <div v-else class="columns">
-      <div class="column">
-        <div class="column-header">
-          <h2>Périodes racines</h2>
-          <div class="header-actions">
-            <SearchBar
-              v-model="searchState.periodSearch"
-              placeholder="Rechercher une période..."
-              :minified="true"
-              :naked="true"
-            />
-            <button class="action-button" @click="handleAddPeriod">Add</button>
-          </div>
-        </div>
-        <div class="content">
-          <DatabaseCard
-            v-for="period in filteredPeriods"
-            :key="period.id"
-            type="period"
-            :title="period.label.fr"
-            :categories="period.categories"
-            draggable="true"
-            @dragstart="handleDragStart($event, 'period', period)"
-            @edit="handleEditPeriod(period)"
-          />
-        </div>
-      </div>
-      <div class="column">
-        <div class="column-header">
-          <h2>Événements</h2>
-          <div class="header-actions">
-            <SearchBar
-              v-model="searchState.eventSearch"
-              placeholder="Rechercher un événement..."
-              :minified="true"
-              :naked="true"
-            />
-            <button class="action-button" @click="handleAddEvent">Add</button>
-          </div>
-        </div>
-        <div class="content">
-          <DatabaseCard
-            v-for="event in filteredEvents"
-            :key="event.id"
-            type="event"
-            :title="event.label.fr"
-            :categories="event.categories"
-            draggable="true"
-            @dragstart="handleDragStart($event, 'event', event)"
-            @edit="handleEditEvent(event)"
-          />
-        </div>
-      </div>
-      <div class="column">
-        <div class="column-header">
-          <h2>Stories</h2>
-          <button class="action-button" @click="handleAddStory">Add</button>
-        </div>
-        <div class="content">
-          <DatabaseCard
-            v-for="story in filteredStories"
-            :key="story.id"
-            type="story"
-            :title="story.title.fr"
-            :categories="story.categories"
-            :selected="selectedStory?.id === story.id"
-            @edit="handleEditStory(story)"
-            @click="selectStory(story)"
-          />
-        </div>
-      </div>
-      <div class="column"
-        @dragover.prevent="handleDragOver"
-        @dragleave.prevent="handleDragLeave"
-        @drop.prevent="handleDrop"
-        :class="{ 'drag-over': dragDropState.isDragOver }"
-      >
-        <div class="column-header">
-          <h2>Détails de la Story</h2>
-        </div>
-        <div v-if="state.loadingStoryDetails" class="loading-details">
-          <div class="spinner"></div>
-          <span>Chargement des détails...</span>
-        </div>
-        <div v-else-if="selectedStory" class="content">
-          <div class="story-details">
-            <h3>{{ selectedStory.title.fr }}</h3>
-            <p class="story-author">Auteur: {{ selectedStory.author }}</p>
-            <p class="story-visibility">
-              Visibilité: {{ selectedStory.isPublic ? 'Publique' : 'Privée' }}
-            </p>
-            <div class="story-description">
-              <h4>Description</h4>
-              <p>{{ selectedStory.description?.fr || 'Aucune description' }}</p>
-            </div>
-            <div class="story-periods">
-              <h4>Périodes associées</h4>
-              <div v-if="selectedStory.periods?.length" class="story-items">
-                <div
-                  v-for="period in selectedStory.periods"
-                  :key="period.id"
-                  class="story-item"
-                >
-                  <span class="story-item-text">{{ period.label.fr }}</span>
-                  <button class="remove-button" @click.stop="removePeriodFromStory(period.id)" title="Supprimer de la story">
-                    Remove
-                  </button>
-                </div>
-              </div>
-              <p v-else class="no-items">Aucune période associée</p>
-            </div>
-            <div class="story-events">
-              <h4>Événements associés</h4>
-              <div v-if="selectedStory.events?.length" class="story-items">
-                <div
-                  v-for="event in selectedStory.events"
-                  :key="event.id"
-                  class="story-item"
-                >
-                  <span class="story-item-text">{{ event.label.fr }}</span>
-                  <button class="remove-button" @click.stop="removeEventFromStory(event.id)" title="Supprimer de la story">
-                    Remove
-                  </button>
-                </div>
-              </div>
-              <p v-else class="no-items">Aucun événement associé</p>
+    <div v-else class="database-columns-layout">
+      <div class="finder-columns">
+        <div class="finder-column">
+          <div class="finder-column-header">
+            <h2>Stories</h2>
+            <div class="database-story-header-actions">
+              <button type="button" class="action-button" @click="handleAddStory">Ajouter</button>
+              <button
+                v-if="selectedStory"
+                type="button"
+                class="action-button"
+                @click="onEditSelectedStory"
+              >
+                Modifier
+              </button>
             </div>
           </div>
+          <div class="finder-column-content database-story-tabs-wrap">
+            <template v-if="filteredStories.length > 0">
+              <Tabs
+                :model-value="selectedStoryTabId"
+                :tabs="storyTabs"
+                vertical
+                @update:model-value="onStoryTabSelect"
+              />
+            </template>
+            <div v-else class="finder-empty-column">Aucune story</div>
+          </div>
         </div>
-        <div v-else class="no-selection">
-          <p>Sélectionnez une story pour voir ses détails</p>
-        </div>
+      </div>
+      <div class="database-story-detail-wrap">
+        <StoryDetailPanel
+          :story="selectedStory"
+          :loading="state.loadingStoryDetails"
+          @remove-period="removePeriodFromStory"
+          @remove-event="removeEventFromStory"
+          @add-periods="addPeriodsToStory"
+          @add-events="addEventsToStory"
+        />
       </div>
     </div>
     <EditModal
@@ -166,50 +73,59 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { DatabaseViewService } from '@/services/DatabaseViewService';
-import DatabaseCard from './DatabaseCard.vue';
+import { computed, onMounted } from 'vue';
 import EditModal from './EditModal.vue';
-import SearchBar from '@/components/SearchBar.vue';
+import StoryDetailPanel from './StoryDetailPanel.vue';
+import Tabs from '@/components/base/Tabs.vue';
 import { useDatabaseView } from '@/composables/useDatabaseView';
+import type { ListStory } from '@/types/database';
+import type { Tab } from '@/types/global';
+import { formatStoryListDateRangeSublabel } from '@/lib/formatTemporalBoundLabel';
+import { findById } from '@/lib/collectionUtils';
 import { useDatabaseSave } from '@/composables/useDatabaseSave';
 import { useDatabaseDelete } from '@/composables/useDatabaseDelete';
-
-const databaseService = DatabaseViewService.getInstance();
 
 // Utilisation des composables
 const {
   state,
   modalState,
-  searchState,
-  dragDropState,
-  fullStories,
   selectedStory,
-  filteredPeriods,
-  filteredEvents,
   filteredStories,
-  handleAddPeriod,
-  handleAddEvent,
   handleAddStory,
-  handleEditPeriod,
-  handleEditEvent,
   handleEditStory,
   closeAddModal,
   closeEditModal,
   loadInitialData,
-  handleDragStart,
-  handleDrop,
-  handleDragOver,
-  handleDragLeave,
   selectStory,
   removePeriodFromStory,
   removeEventFromStory,
-  sharedLoading,
-  sharedError
+  addPeriodsToStory,
+  addEventsToStory,
 } = useDatabaseView();
 
-const { loading: saveLoading, handleSave: saveHandler } = useDatabaseSave();
-const { loading: deleteLoading, handleDelete: deleteHandler } = useDatabaseDelete();
+const storyTabs = computed<Tab<string>[]>(() =>
+  filteredStories.value.map((s: ListStory) => ({
+    label: s.title?.fr || s.title?.en || 'Sans titre',
+    value: s.id,
+    sublabel: formatStoryListDateRangeSublabel(s),
+  }))
+);
+
+const selectedStoryTabId = computed(() => selectedStory.value?.id ?? '');
+
+function onStoryTabSelect(id: string) {
+  const story = findById(filteredStories.value, id);
+  if (story) selectStory(story);
+}
+
+function onEditSelectedStory() {
+  if (!selectedStory.value) return;
+  const listStory = findById(filteredStories.value, selectedStory.value.id);
+  if (listStory) handleEditStory(listStory);
+}
+
+const { handleSave: saveHandler } = useDatabaseSave();
+const { handleDelete: deleteHandler } = useDatabaseDelete();
 
 const handleSave = async (formData: any) => {
   const success = await saveHandler(
@@ -241,8 +157,10 @@ onMounted(() => {
 
 <style scoped>
 .database-view {
-  padding: var(--spacing-md);
+  box-sizing: border-box;
+  padding: 0;
   height: 100%;
+  background-color: var(--color-neutral-0);
 }
 
 .loading, .error {
@@ -257,46 +175,34 @@ onMounted(() => {
   color: var(--color-error);
 }
 
-.columns {
+/* Grille : colonne stories (même gabarit que la vue Périodes) + panneau détail */
+.database-columns-layout {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-md);
+  grid-template-columns: 300px 1fr;
+  gap: 0;
   height: 100%;
+  min-height: 0;
 }
 
-.column {
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md);
-  overflow-y: auto;
+/* Surcharges grille stories : pas de scroll horizontal sur la colonne finder */
+.database-columns-layout .finder-columns {
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
-.column h2 {
-  margin-bottom: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
-  font-size: var(--font-size-lg);
-  color: var(--color-text);
-}
-
-.content {
+.database-story-header-actions {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.column-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
-  border-bottom: 1px solid var(--color-border);
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
 }
 
-.column-header h2 {
-  font-size: var(--font-size-lg);
-  color: var(--color-text);
-  margin: 0;
+.database-story-tabs-wrap {
+  min-height: 0;
+}
+
+.database-story-tabs-wrap :deep(.tabs.tabs--vertical) {
+  width: 100%;
 }
 
 .action-button {
@@ -309,209 +215,19 @@ onMounted(() => {
   transition: color var(--transition-fast);
   text-decoration: none;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .action-button:hover {
   color: var(--color-primary-dark);
 }
 
-.header-actions {
-  display: flex;
-  gap: var(--spacing-sm);
-  align-items: center;
-}
-
-.search-input {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-  width: 200px;
-  transition: border-color var(--transition-fast);
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.story-content {
-  padding: var(--spacing-sm);
-}
-
-.story-periods,
-.story-events {
-  margin-bottom: var(--spacing-sm);
-}
-
-.story-periods h3,
-.story-events h3 {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-light);
-  margin-bottom: var(--spacing-xs);
-}
-
-.story-items {
+.database-story-detail-wrap {
+  min-height: 0;
+  overflow: hidden;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
 }
 
-.story-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--color-neutral-100);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-  position: relative;
-}
-
-.story-item:hover {
-  background: var(--color-neutral-200);
-}
-
-.story-item .remove-button {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--color-error);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: color var(--transition-fast);
-  text-decoration: none;
-  white-space: nowrap;
-  opacity: 0;
-  margin-left: var(--spacing-xs);
-}
-
-.story-item:hover .remove-button {
-  opacity: 1;
-}
-
-.story-item .remove-button:hover {
-  color: var(--color-error-dark);
-}
-
-.story-item-text {
-  flex: 1;
-  cursor: default;
-}
-
-.story-details {
-  padding: var(--spacing-md);
-}
-
-.story-details h3 {
-  font-size: var(--font-size-lg);
-  color: var(--color-text);
-  margin-bottom: var(--spacing-sm);
-}
-
-.story-author,
-.story-visibility {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-light);
-  margin-bottom: var(--spacing-xs);
-}
-
-.story-description {
-  margin: var(--spacing-md) 0;
-}
-
-.story-description h4,
-.story-periods h4,
-.story-events h4 {
-  font-size: var(--font-size-md);
-  color: var(--color-text);
-  margin-bottom: var(--spacing-sm);
-}
-
-.no-items {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-light);
-  font-style: italic;
-}
-
-.no-selection {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  color: var(--color-text-light);
-  font-style: italic;
-}
-
-.loading-details {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--color-text-light);
-}
-
-.loading-details .spinner {
-  margin-bottom: var(--spacing-sm);
-}
-
-.content.drag-over {
-  background-color: var(--color-primary-light);
-  border: 2px dashed var(--color-primary);
-  border-radius: var(--radius-md);
-  position: relative;
-}
-
-.content.drag-over::after {
-  content: 'Déposer ici';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: var(--color-primary);
-  color: var(--color-neutral-0);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-  pointer-events: none;
-  animation: fadeIn 0.2s ease-in-out;
-}
-
-/* Feedback visuel pour le drop sur toute la colonne */
-.column.drag-over {
-  background-color: var(--color-primary-light);
-  border: 2px dashed var(--color-primary);
-  border-radius: var(--radius-md);
-  position: relative;
-}
-
-.column.drag-over::after {
-  content: 'Déposer ici pour ajouter à la story';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: var(--color-primary);
-  color: var(--color-neutral-0);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-  pointer-events: none;
-  animation: fadeIn 0.2s ease-in-out;
-  z-index: 10;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
 </style> 

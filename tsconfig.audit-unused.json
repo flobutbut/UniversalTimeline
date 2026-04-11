@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "composite": false
+  },
+  "exclude": ["src/**/__tests__/**", "src/**/*.test.ts"]
+}

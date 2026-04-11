@@ -1,36 +1,30 @@
 <template>
-  <div 
-    class="period-card" 
-    :class="{ 
-      'selected': isSelected,
-      'loading': loading,
-      'has-children': period.hasChildren,
-      'main-eon': period.isMainEon
-    }"
+  <div
+    class="period-card"
+    :class="[
+      `period-card--${variant}`,
+      {
+        selected: isSelected,
+        loading,
+        'has-children': period.hasChildren,
+        'period-card--leaf': variant === 'timeline' && !period.hasChildren,
+      },
+    ]"
     :data-period-id="period.id"
     @click="handleClick"
   >
     <div class="main-container">
+      <span v-if="variant === 'parent'" class="period-card__parent-arrow" aria-hidden="true">←</span>
       <div class="card-content">
         <div class="period-header">
-          <div class="header-left">
-            <h3 class="period-title" :title="period.label.fr">{{ period.label.fr }}</h3>
-          </div>
+          <h3 class="period-title" :title="period.label.fr">{{ period.label.fr }}</h3>
+          <span
+            v-if="variant === 'timeline' && !period.hasChildren"
+            class="period-info period-header__no-children"
+          >no childs</span>
         </div>
-
-        <div class="period-footer">
-          <div class="footer-left">
-            <div v-if="hasTemporalData" class="period-info">
-              <span v-if="firstTemporalData.startDate">{{ formatDate(firstTemporalData.startDate) }}</span>
-              <span v-if="firstTemporalData.startDate && firstTemporalData.endDate"> - </span>
-              <span v-if="firstTemporalData.endDate">{{ formatDate(firstTemporalData.endDate) }}</span>
-              <span v-if="firstTemporalData.location" class="location-separator">•</span>
-              <span v-if="firstTemporalData.location" class="period-location">
-                <i class="fas fa-map-marker-alt"></i>
-                {{ firstTemporalData.location }}
-              </span>
-            </div>
-          </div>
+        <div class="period-footer" v-if="period.startDate || period.endDate">
+          <div class="period-info">{{ periodDateRange }}</div>
         </div>
       </div>
     </div>
@@ -41,94 +35,98 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
-import { DateFormatter } from '@/utils/dateFormatter';
-import type { Period } from '@/types/geological';
+import { computed } from 'vue';
+import { formatTemporalBoundLabel } from '@/lib/formatTemporalBoundLabel';
+import { getPeriodCardClickIntent } from '@/lib/periodCardClickIntent';
+import type { ListPeriod } from '@/types/database';
 
-const props = defineProps<{
-  period: Period;
-  isSelected: boolean;
-  loading?: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    period: ListPeriod;
+    isSelected: boolean;
+    loading?: boolean;
+    /** `timeline` : segment sur la frise ; `parent` : barre pleine largeur (retour niveau supérieur) */
+    variant?: 'timeline' | 'parent';
+  }>(),
+  { variant: 'timeline' }
+);
 
 const emit = defineEmits<{
-  (e: 'select', period: Period): void;
+  (e: 'select', period: ListPeriod): void;
+  (e: 'back'): void;
 }>();
 
-// Computed properties pour la nouvelle structure
-const hasTemporalData = computed(() => {
-  return props.period.temporalData && props.period.temporalData.length > 0;
+const periodDateRange = computed(() => {
+  const s = props.period.startDate ? formatTemporalBoundLabel(props.period.startDate) : null;
+  const e = props.period.endDate ? formatTemporalBoundLabel(props.period.endDate) : null;
+  if (s && e) return `de ${s} à ${e}`;
+  if (s) return `à partir de ${s}`;
+  if (e) return `jusqu'à ${e}`;
+  return '';
 });
-
-const firstTemporalData = computed(() => {
-  return props.period.temporalData[0] || { startDate: undefined, endDate: undefined };
-});
-
-// Formatage des dates
-const formatDate = (date: string): string => {
-  return DateFormatter.format(date, 'geological');
-};
-
-// Surveiller les changements d'état de chargement
-watch(() => props.loading, (newValue) => {
-  // Suppression du log
-});
-
-// Surveiller la sélection
-watch(() => props.isSelected, (newValue) => {
-  // Suppression du log
-});
-
-// Ajout des logs dans le composant
-watch(() => props.period, (newPeriod) => {
-  // Suppression du log
-}, { immediate: true });
 
 const handleClick = () => {
-  console.log('[PeriodCard] Click sur la période:', {
-    id: props.period.id,
-    label: props.period.label,
-    hasChildren: props.period.hasChildren
-  });
-  emit('select', props.period);
+  const intent = getPeriodCardClickIntent(props.variant, props.period);
+  if (intent === 'back') emit('back');
+  else if (intent === 'select') emit('select', props.period);
 };
 </script>
 
 <style scoped>
-.period-card {
+/* timeline : boîte de layout (left / width % inchangés), transparente, gouttière 1px + 1px */
+.period-card--timeline {
   background: transparent;
-  padding: 1px 1px;
+  padding-block: 0;
+  padding-inline: 1px;
+  height: calc(var(--spacing-2xl) + var(--spacing-lg) + var(--spacing-xs));
+  flex: 0 0 auto;
+}
+
+/* parent : même principe que timeline — enveloppe transparente, 1px de gouttière latérale */
+.period-card--parent {
+  width: 100%;
+  height: auto;
+  min-height: calc(var(--spacing-2xl) + var(--spacing-lg) + var(--spacing-xs));
+  background: transparent;
+  padding-block: 0;
+  padding-inline: 1px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.period-card {
   cursor: pointer;
   color: var(--color-text);
-  height: 64px;
   box-sizing: border-box;
   position: relative;
-  flex: 0 0 auto;
   border: none;
-  box-shadow: none;
+}
+
+.period-card--timeline.period-card--leaf {
+  cursor: default;
+}
+
+.period-card--timeline.period-card--leaf:hover .main-container {
+  background: var(--color-card);
+  box-shadow: var(--shadow-sm);
 }
 
 .main-container {
   background: var(--color-card);
+  border: none;
   border-radius: var(--radius-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-xs) var(--spacing-sm);
   height: 100%;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
-  transition: transform var(--transition-normal);
+  transition: box-shadow var(--transition-normal), background-color var(--transition-normal);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Layout mobile (par défaut) */
-@media (max-width: 768px) {
-  .period-card {
-    width: 100%;
-  }
-}
-
-/* Layout desktop (timeline) */
 @media (min-width: 769px) {
-  .period-card {
-    min-width: 4px;
+  .period-card--timeline {
+    min-width: var(--spacing-xs);
     max-width: 100%;
   }
 }
@@ -139,30 +137,52 @@ const handleClick = () => {
   flex-direction: column;
   justify-content: center;
   gap: 0;
+  min-width: 0;
 }
 
-.period-card:hover .main-container {
+.period-card--parent .main-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.period-card--parent .card-content {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+
+.period-card__parent-arrow {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-light);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.period-card--timeline:hover .main-container {
   background: var(--color-card-hover);
-  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.period-card--parent:hover .main-container {
+  background: var(--color-card-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .period-card.selected .main-container {
   background: var(--color-primary);
-  color: var(--color-neutral-0);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-white);
 }
 
 .period-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-  margin-bottom: 0;
-}
-
-.header-left {
-  flex: 1;
-  text-align: left;
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--spacing-xs);
   min-width: 0;
+  flex-shrink: 0;
 }
 
 .period-title {
@@ -170,76 +190,50 @@ const handleClick = () => {
   font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text);
-  text-align: left;
   line-height: var(--line-height-normal);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
+}
+
+.period-header__no-children {
+  flex-shrink: 0;
+  font-weight: 400;
 }
 
 .period-card.selected .period-title {
-  color: var(--color-neutral-0);
+  color: var(--color-text-white);
 }
 
 .period-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   flex-shrink: 0;
-  margin-top: -4px;
-}
-
-.footer-left {
-  flex: 1;
-  text-align: left;
-  min-width: 0;
 }
 
 .period-info {
   font-size: var(--font-size-sm);
   color: var(--color-text-light);
-  text-align: left;
   line-height: var(--line-height-normal);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
 }
 
 .period-card.selected .period-info {
-  color: var(--color-neutral-0);
-}
-
-.location-separator {
-  color: var(--color-neutral-400);
-}
-
-.period-location {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.period-location i {
-  font-size: var(--font-size-sm);
+  color: color-mix(in srgb, var(--color-text-white) 92%, transparent);
 }
 
 .loading-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: color-mix(in srgb, var(--color-card) 88%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  z-index: var(--z-index-local-bump);
   border-radius: var(--radius-sm);
   pointer-events: none;
-  width: 100%;
-  height: 100%;
 }
 
 .spinner {
@@ -249,16 +243,13 @@ const handleClick = () => {
   transform: translate(-50%, -50%);
   width: 24px;
   height: 24px;
-  border: 3px solid rgba(33, 150, 243, 0.1);
+  border: 3px solid color-mix(in srgb, var(--color-primary) 14%, transparent);
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin: 0;
-  padding: 0;
 }
 
 @keyframes spin {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
-</style> 
+</style>

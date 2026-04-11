@@ -10,16 +10,16 @@ import { ChevronRight } from 'lucide-vue-next';
 
 <style scoped>
 .arrow-icon {
-  color: #2196f3;
+  color: var(--color-primary);
   font-size: 1.2em;
-  margin-left: 8px;
+  margin-left: var(--spacing-sm);
   opacity: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: calc(var(--base-font-size) * var(--line-height-normal));
-  height: calc(var(--base-font-size) * var(--line-height-normal));
-  background-color: rgba(33, 150, 243, 0.1);
+  width: var(--line-height-normal);
+  height: var(--line-height-normal);
+  background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
   border-radius: 50%;
   padding: 0;
   line-height: 0;
@@ -27,9 +27,9 @@ import { ChevronRight } from 'lucide-vue-next';
 }
 
 .icon {
-  width: calc(var(--base-font-size) * var(--line-height-normal));
-  height: calc(var(--base-font-size) * var(--line-height-normal));
-  color: #2196f3;
+  width: var(--line-height-normal);
+  height: var(--line-height-normal);
+  color: var(--color-primary);
   display: block;
   line-height: 0;
   margin: 0;

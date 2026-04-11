@@ -1,0 +1,155 @@
+/**
+ * Styles partagés du « champ select » : trigger, valeur, chevron.
+ * Utilisé par Select.vue (tous modes, via SelectShell) — y compris le mode period ;
+ * select-period-toolbar.css ne redéfinit pas le trigger (hors reset `button`).
+ */
+
+.base-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.base-select__trigger:hover:not(.base-select__trigger--disabled) {
+  border-color: var(--color-border-dark);
+}
+
+.base-select__trigger:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.base-select--compact .base-select__trigger {
+  min-height: 36px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.base-select--compact .base-select__value {
+  font-size: var(--font-size-sm);
+}
+
+.base-select__trigger--disabled {
+  background-color: var(--color-surface-hover);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.base-select__trigger--with-tags {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  min-height: 48px;
+}
+
+.base-select__value {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-height: 20px;
+  padding-right: var(--spacing-sm);
+}
+
+.base-select__placeholder {
+  color: var(--color-text-light);
+  opacity: 0.7;
+}
+
+.base-select__selected-text {
+  color: var(--color-text);
+}
+
+.base-select__selected-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.base-select__selected-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 2px var(--spacing-sm);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.base-select__remove-item {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color var(--transition-fast);
+  opacity: 0.7;
+}
+
+.base-select__remove-item:hover {
+  opacity: 1;
+  background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.base-select__indicators {
+  display: flex;
+  align-items: center;
+  margin-left: var(--spacing-md);
+}
+
+.base-select__arrow {
+  display: block;
+  flex-shrink: 0;
+  color: var(--color-text-light);
+  transition: transform var(--transition-fast);
+}
+
+.base-select__arrow--open {
+  transform: rotate(180deg);
+}
+
+.base-select__loading {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  animation: select-field-spin 1s linear infinite;
+}
+
+@keyframes select-field-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.base-select--error .base-select__trigger {
+  border-color: var(--color-error);
+}
+
+.base-select--error .base-select__trigger:focus {
+  box-shadow: 0 0 0 2px var(--color-error-light);
+}
+
+/* Select mode period : anneau quand le panneau est ouvert (sans focus). */
+.base-select--trigger-open-ring.base-select--open:not(.base-select--error) .base-select__trigger {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}

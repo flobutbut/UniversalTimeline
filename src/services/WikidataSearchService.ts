@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { DateFormatter } from '../utils/dateFormatter';
-import type { FormattedPersonDate, FormattedPeriodDate, FormattedEventDate } from '../utils/dateFormatter';
 
 interface WikidataBinding {
   item?: { value: string };
@@ -12,12 +11,6 @@ interface WikidataBinding {
   endLocationLabel?: { value: string };
   birthPlace?: { value: string }; // Lieu de naissance
   deathPlace?: { value: string }; // Lieu de décès
-}
-
-interface WikidataResponse {
-  results: {
-    bindings: WikidataBinding[];
-  };
 }
 
 export interface SearchResult {
@@ -32,40 +25,6 @@ export interface SearchResult {
   endLocation: string;
 }
 
-interface WikidataEntity {
-  entities: {
-    [key: string]: {
-      claims: {
-        P580?: Array<{ // date de début
-          mainsnak: {
-            datavalue?: {
-              value: {
-                time: string
-                precision: number
-              }
-            }
-          }
-        }>
-        P582?: Array<{ // date de fin
-          mainsnak: {
-            datavalue?: {
-              value: {
-                time: string
-                precision: number
-              }
-            }
-          }
-        }>
-      }
-      descriptions?: {
-        fr?: {
-          value: string
-        }
-      }
-    }
-  }
-}
-
 interface WikidataSearchOptions {
   language?: string;
   type?: 'period' | 'event' | 'both';
@@ -76,12 +35,7 @@ export class WikidataSearchService {
   private readonly WIKIDATA_API_URL = 'https://www.wikidata.org/w/api.php'
   private readonly CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
   private searchCache: Map<string, { results: SearchResult[]; timestamp: number }> = new Map()
-  private readonly MAX_RETRIES = 3
-  private readonly RETRY_DELAY = 1000 // 1 seconde
   private readonly REQUEST_TIMEOUT = 10000 // 10 secondes
-  private readonly DEBOUNCE_DELAY = 300 // 300ms
-  private searchTimeout: NodeJS.Timeout | null = null
-  private currentSearchPromise: Promise<SearchResult[]> | null = null
   private isSearching = false
 
   private constructor() {}
@@ -91,23 +45,6 @@ export class WikidataSearchService {
       WikidataSearchService.instance = new WikidataSearchService()
     }
     return WikidataSearchService.instance
-  }
-
-  private async retryOperation<T>(operation: () => Promise<T>): Promise<T> {
-    let lastError: Error | undefined;
-    
-    for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
-      try {
-        return await operation();
-      } catch (error) {
-        lastError = error instanceof Error ? error : new Error('Unknown error');
-        if (attempt < this.MAX_RETRIES) {
-          await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY));
-        }
-      }
-    }
-    
-    throw lastError;
   }
 
   public async search(query: string, options: WikidataSearchOptions = {}): Promise<SearchResult[]> {
@@ -171,7 +108,6 @@ export class WikidataSearchService {
           const startClaim = claims.P580?.[0]?.mainsnak?.datavalue?.value; // Début période
           const endClaim = claims.P582?.[0]?.mainsnak?.datavalue?.value;   // Fin période
           const pointInTimeClaim = claims.P585?.[0]?.mainsnak?.datavalue?.value; // Date événement
-          const instanceOf = claims.P31?.[0]?.mainsnak?.datavalue?.value?.id;    // Type d'entité
 
           // Filtrer selon le type demandé
           if (type === 'period') {

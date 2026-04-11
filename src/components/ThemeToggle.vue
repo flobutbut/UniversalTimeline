@@ -44,29 +44,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+import {
+  applyDocumentTheme,
+  getStoredOrPreferredTheme,
+  hasUserChosenTheme,
+  type DocumentTheme,
+} from '@/composables/useDocumentTheme';
 
 const isDark = ref(false);
 
+const setTheme = (theme: DocumentTheme) => {
+  isDark.value = theme === 'dark';
+  applyDocumentTheme(theme);
+};
+
 const toggleTheme = () => {
-  isDark.value = !isDark.value;
-  document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light');
-  localStorage.setItem('theme', isDark.value ? 'dark' : 'light');
+  setTheme(isDark.value ? 'light' : 'dark');
+};
+
+let mediaQuery: MediaQueryList | null = null;
+const onSystemThemeChange = () => {
+  if (hasUserChosenTheme() || !mediaQuery) return;
+  setTheme(mediaQuery.matches ? 'dark' : 'light');
 };
 
 onMounted(() => {
-  const savedTheme = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  
-  isDark.value = savedTheme === 'dark' || (!savedTheme && prefersDark);
-  document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light');
+  setTheme(getStoredOrPreferredTheme());
+  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  if (mediaQuery.addEventListener) {
+    mediaQuery.addEventListener('change', onSystemThemeChange);
+  } else {
+    mediaQuery.addListener(onSystemThemeChange);
+  }
 });
 
-// Surveiller les changements de préférence système
-watch(() => window.matchMedia('(prefers-color-scheme: dark)').matches, (isDarkMode) => {
-  if (!localStorage.getItem('theme')) {
-    isDark.value = isDarkMode;
-    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+onUnmounted(() => {
+  if (!mediaQuery) return;
+  if (mediaQuery.removeEventListener) {
+    mediaQuery.removeEventListener('change', onSystemThemeChange);
+  } else {
+    mediaQuery.removeListener(onSystemThemeChange);
   }
 });
 </script>
@@ -76,8 +94,8 @@ watch(() => window.matchMedia('(prefers-color-scheme: dark)').matches, (isDarkMo
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: calc(var(--spacing-sm) * 5);
+  height: calc(var(--spacing-sm) * 5);
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);

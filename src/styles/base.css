@@ -5,10 +5,7 @@
   box-sizing: border-box;
 }
 
-/* Transition de thème */
-:root {
-  color-scheme: light dark;
-}
+/* color-scheme défini dans variables.css (clair / sombre) */
 
 /* Transition douce pour les changements de thème */
 body {
@@ -103,10 +100,17 @@ input:focus, select:focus, textarea:focus {
   background-color: var(--color-surface);
 }
 
-/* Focus styles */
-:focus {
+/* Focus styles — uniquement sur les éléments interactifs natifs */
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+input:focus-visible {
+  outline: none;
 }
 
 /* Utility classes */
@@ -175,18 +179,7 @@ input:focus, select:focus, textarea:focus {
   .lg\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
 }
 
-/* Dark mode specific styles */
-[data-theme="dark"] {
-  /* Amélioration du contraste pour le mode sombre */
-  --color-primary: #60a5fa;
-  --color-primary-dark: #3b82f6;
-  
-  /* Ajustement des ombres pour le mode sombre */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4);
-}
+/* Dark mode: shadow overrides are defined in variables.css */
 
 /* Styles pour les éléments de formulaire en mode sombre */
 [data-theme="dark"] input,

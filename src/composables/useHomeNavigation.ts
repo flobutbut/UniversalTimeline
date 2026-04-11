@@ -1,114 +1,115 @@
 import { ref } from 'vue';
-import { WikidataQueryService, StoryService } from '@/services';
-import type { Period } from '@/types/geological';
-import { useDatabaseDataStore } from './useDatabaseDataStore';
+import { storeToRefs } from 'pinia';
+import { useDataStore } from '@/stores/useDataStore';
+import type { ListPeriod, ListEvent } from '@/types/database';
 
-export interface HomeNavigationState {
-  loading: boolean;
-  error: string | null;
-  parentStack: Period[];
-  currentPeriod: Period | null;
-  displayedPeriods: Period[];
-}
+/** ID de la story "Univers moderne" utilisée comme point d'entrée de la timeline. */
+const ENTRY_STORY_ID = '1';
 
 export function useHomeNavigation() {
-  const timelineService = WikidataQueryService.getInstance();
-  const storyService = StoryService.getInstance();
-  const { ensureDataLoaded: sharedEnsureDataLoaded } = useDatabaseDataStore();
+  const dataStore = useDataStore();
+  const { periods, events } = storeToRefs(dataStore);
 
-  // États réactifs
-  const state = ref<HomeNavigationState>({
-    loading: false,
-    error: null,
-    parentStack: [],
-    currentPeriod: null,
-    displayedPeriods: []
-  });
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+  const parentStack = ref<ListPeriod[]>([]);
+  const currentPeriod = ref<ListPeriod | null>(null);
+  const displayedPeriods = ref<ListPeriod[]>([]);
+  const storyEvents = ref<ListEvent[]>([]);
 
-  // Fonction pour charger une période
-  const loadPeriod = async (periodId: string) => {
-    console.log(`[HomeView] Chargement de la période:`, periodId);
-    state.value.loading = true;
-    state.value.error = null;
+  /**
+   * Filtre les événements du store global selon les bornes temporelles de la période.
+   * Utilise dateYearsBP pour la comparaison — cohérent avec startYearsBP/endYearsBP.
+   */
+  function eventsForPeriod(period: ListPeriod | null): ListEvent[] {
+    if (!period) return [];
+    const start = period.startYearsBP ?? Infinity;
+    const end   = period.endYearsBP   ?? 0;
+    return events.value.filter(e => {
+      const bp = e.dateYearsBP ?? 0;
+      return bp <= start && bp >= end;
+    });
+  }
+
+  // ─── Chargement initial ────────────────────────────────────────────────────
+
+  const loadInitialData = async () => {
+    loading.value = true;
+    error.value = null;
     try {
-      const period = await timelineService.loadPeriod(periodId);
-      console.log(`[HomeView] Période chargée:`, {
-        id: period.id,
-        label: period.label,
-        childrenCount: period.children.length,
-        children: period.children.map(child => ({
-          id: child.id,
-          label: child.label
-        }))
+      // 1. Charger tous les événements en parallèle (non-bloquant pour l'affichage)
+      dataStore.ensureEventsLoaded().then(() => {
+        storyEvents.value = eventsForPeriod(currentPeriod.value);
       });
-      state.value.displayedPeriods = period.children;
-    } catch (e) {
-      console.error(`[HomeView] Erreur lors du chargement de la période:`, e);
-      state.value.error = e instanceof Error ? e.message : 'Une erreur est survenue';
-    } finally {
-      state.value.loading = false;
-    }
-  };
 
-  // Fonction pour gérer le clic sur une période
-  const handlePeriodClick = async (period: Period) => {
-    if (state.value.currentPeriod) {
-      state.value.parentStack.push(state.value.currentPeriod);
-    }
-    state.value.currentPeriod = period;
-    await loadPeriod(period.id);
-  };
+      // 2. Récupérer les périodes de la story "Univers moderne"
+      const storyPeriods = await dataStore.ensureStoryPeriodsLoaded(ENTRY_STORY_ID);
 
-  // Fonction pour retourner en arrière
-  const goBack = async () => {
-    if (state.value.parentStack.length === 0) {
-      // Retour à la racine
-      console.log(`[HomeView] Retour à la racine - Chargement de la story Planète Terre`);
-      state.value.loading = true;
-      state.value.error = null;
-      try {
-        const story = await storyService.loadPlanetEarth();
-        console.log('[HomeView] Story Planète Terre brute:', story);
-        console.log(`[HomeView] Story Planète Terre chargée:`, {
-          id: story.id,
-          label: story.label,
-          childrenCount: story.children ? story.children.length : 'undefined',
-          children: story.children ? story.children.map(child => ({
-            id: child.id,
-            label: child.label
-          })) : 'undefined'
-        });
-        state.value.displayedPeriods = story.children;
-        state.value.currentPeriod = null;
-        state.value.parentStack = [];
-      } catch (e) {
-        console.error(`[HomeView] Erreur lors du chargement de la story:`, e);
-        state.value.error = e instanceof Error ? e.message : 'Une erreur est survenue';
-      } finally {
-        state.value.loading = false;
+      if (storyPeriods.length === 0) {
+        // Fallback : afficher les périodes racines
+        await dataStore.ensureRootsLoaded();
+        displayedPeriods.value = dataStore.rootPeriods ?? [];
+        return;
       }
+
+      // 3. Utiliser la première période de la story comme contexte parent
+      //    (ex. "Terre") et afficher ses enfants directs
+      const entryPeriod = storyPeriods[0];
+      currentPeriod.value = entryPeriod;
+      displayedPeriods.value = await dataStore.ensureChildrenLoaded(entryPeriod.id);
+      storyEvents.value = eventsForPeriod(currentPeriod.value);
+    } catch (e: any) {
+      error.value = e?.message || 'Erreur lors du chargement initial';
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  // ─── Navigation ────────────────────────────────────────────────────────────
+
+  const handlePeriodClick = async (period: ListPeriod) => {
+    if (!period.hasChildren) return;
+
+    if (currentPeriod.value) {
+      parentStack.value.push(currentPeriod.value);
+    }
+    currentPeriod.value = period;
+    loading.value = true;
+    error.value = null;
+    try {
+      displayedPeriods.value = await dataStore.ensureChildrenLoaded(period.id);
+      storyEvents.value = eventsForPeriod(period);
+    } catch (e: any) {
+      error.value = e?.message || 'Erreur lors du chargement';
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const goBack = async () => {
+    const parent = parentStack.value.pop();
+    if (!parent) {
+      // Retour à la racine : recharger l'état initial
+      parentStack.value = [];
+      currentPeriod.value = null;
+      await loadInitialData();
       return;
     }
-    const parent = state.value.parentStack.pop();
-    if (parent) {
-      state.value.currentPeriod = parent;
-      await loadPeriod(parent.id);
-    }
-  };
-
-  // Fonction pour charger les données initiales
-  const loadInitialData = async () => {
-    await sharedEnsureDataLoaded();
+    currentPeriod.value = parent;
+    // Les enfants sont déjà dans le store
+    displayedPeriods.value = periods.value.filter(p => p.parentId === parent.id);
+    storyEvents.value = eventsForPeriod(parent);
   };
 
   return {
-    // États
-    state: state.value,
-    
-    // Fonctions de navigation
+    loading,
+    error,
+    parentStack,
+    currentPeriod,
+    displayedPeriods,
+    storyEvents,
+    loadInitialData,
     handlePeriodClick,
     goBack,
-    loadPeriod,
-    loadInitialData
   };
-} 
+}

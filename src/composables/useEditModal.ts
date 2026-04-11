@@ -1,5 +1,4 @@
-import { reactive, ref, computed, watch } from 'vue';
-import type { Period, Event, Story } from '@/types/database';
+import { reactive, computed, watch } from 'vue';
 import { CategoryService, type Category } from '@/services/CategoryService';
 
 export interface EditFormData {
@@ -42,7 +41,7 @@ export function useEditModal(
   const categoryService = CategoryService.getInstance();
 
   const form = reactive<EditFormData>({
-    qid: initialData?.wikidata_id || '',
+    qid: initialData?.wikidata_id || initialData?.qid || '',
     title: {
       fr: initialData?.label?.fr || initialData?.title?.fr || '',
       en: initialData?.label?.en || initialData?.title?.en || ''
@@ -51,8 +50,8 @@ export function useEditModal(
       fr: initialData?.description?.fr || '',
       en: initialData?.description?.en || ''
     },
-    startDate: initialData?.start_date || '',
-    endDate: initialData?.end_date || '',
+    startDate: initialData?.start_date || initialData?.startDate || '',
+    endDate: initialData?.end_date || initialData?.endDate || '',
     date: initialData?.date || '',
     location: initialData?.location || '',
     author: initialData?.author || '',
@@ -127,60 +126,62 @@ export function useEditModal(
     state.directChildrenCount = '0';
   };
 
+  function applyDataToForm(data: any) {
+    form.qid = data.wikidata_id || data.qid || '';
+    form.title.fr = data.label?.fr || data.title?.fr || '';
+    form.title.en = data.label?.en || data.title?.en || '';
+    form.description.fr = data.description?.fr || '';
+    form.description.en = data.description?.en || '';
+    form.date = data.date || '';
+    form.startDate = data.start_date || data.startDate || '';
+    form.endDate = data.end_date || data.endDate || '';
+    form.location = data.location || data.temporalLocation || '';
+    form.author = data.author || '';
+    form.isPublic = data.isPublic || false;
+    form.parentId = data.parent_id || data.parentId || null;
+    form.categories = data.categories?.map((cat: any) => cat.id) || [];
+  }
+
   // Mise à jour du formulaire avec de nouvelles données
   const updateForm = (data: any) => {
-    if (mode === 'edit' && data) {
-      form.qid = data.wikidata_id || '';
-      form.title.fr = data.label?.fr || data.title?.fr || '';
-      form.title.en = data.label?.en || data.title?.en || '';
-      form.description.fr = data.description?.fr || '';
-      form.description.en = data.description?.en || '';
-      form.date = data.date || '';
-      form.startDate = data.start_date || data.startDate || '';
-      form.endDate = data.end_date || data.endDate || '';
-      form.location = data.location || '';
-      form.author = data.author || '';
-      form.isPublic = data.isPublic || false;
-      form.parentId = data.parent_id || null;
-      form.categories = data.categories?.map((cat: any) => cat.id) || [];
-      
+    if (!data) {
+      if (mode === 'create') resetForm();
+      return;
+    }
+    if (mode === 'edit') {
+      applyDataToForm(data);
       state.qidExistsInBase = false;
       state.existingItem = data;
-    } else {
-      resetForm();
+    } else if (mode === 'create') {
+      applyDataToForm(data);
+      state.qidExistsInBase = false;
+      state.existingItem = null;
     }
   };
 
   // Préparation des données pour soumission
   const prepareSubmitData = () => {
-    const formData = {
+    return {
       qid: form.qid,
       title: {
         fr: form.title.fr,
-        en: form.title.en || form.title.fr
+        en: form.title.en || form.title.fr,
       },
       description: {
         fr: form.description.fr || null,
-        en: form.description.en || form.description.fr || null
+        en: form.description.en || form.description.fr || null,
       },
       startDate: form.startDate,
       endDate: form.endDate,
       date: form.date,
-      temporalLocation: form.location || null,
+      location: form.location || null,
       author: form.author,
       isPublic: form.isPublic,
-      children: [],
+      parentId: form.parentId,
       categories: form.categories
-        .filter(Boolean) // Filtrer les valeurs null/undefined
-        .map(id => ({ id })) // Transformer les IDs en objets { id: ... }
+        .filter(Boolean)
+        .map((id: string) => ({ id })),
     };
-
-    // Conserver les enfants existants si nous sommes en mode édition
-    if (mode === 'edit' && initialData && Array.isArray(initialData.children)) {
-      formData.children = initialData.children;
-    }
-
-    return formData;
   };
 
   // Gestion des états de chargement

@@ -31,6 +31,14 @@ node_modules
 dist
 dist-ssr
 *.local
+*.tsbuildinfo
+
+# Lockfile dupliqué (ex. copie OS « fichier 2 ») — Yarn ne le lit pas
+yarn 2.lock
+
+# Artefacts tsc (vite.config compilé)
+vite.config.js
+vite.config.d.ts
 
 # Testing
 coverage

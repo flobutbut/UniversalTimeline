@@ -13,6 +13,21 @@ const router = createRouter({
       path: '/database',
       name: 'database',
       component: DatabaseView
+    },
+    {
+      path: '/graph',
+      name: 'graph',
+      component: () => null
+    },
+    {
+      path: '/events',
+      name: 'events',
+      component: () => null
+    },
+    {
+      path: '/design-system',
+      name: 'design-system',
+      component: () => null
     }
   ]
 });

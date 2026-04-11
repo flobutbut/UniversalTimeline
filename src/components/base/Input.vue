@@ -1,11 +1,13 @@
 <template>
-  <div class="base-input" :class="{ 'base-input--error': error }">
+  <div
+    class="base-input"
+    :class="{ 'base-input--error': error, 'base-input--compact': compact }"
+  >
     <label v-if="label" :for="id" class="base-input__label">
       {{ label }}
       <span v-if="required" class="base-input__required">*</span>
     </label>
     <div class="base-input__wrapper">
-      <i v-if="icon" :class="icon" class="base-input__icon"></i>
       <textarea
         v-if="type === 'textarea'"
         :id="id"
@@ -38,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { generateDomUid } from '@/utils/generateDomUid';
 
 interface Props {
   modelValue: string;
@@ -47,18 +49,20 @@ interface Props {
   placeholder?: string;
   error?: string;
   hint?: string;
-  icon?: string;
   required?: boolean;
   disabled?: boolean;
   id?: string;
+  /** Champ plus bas (barres d’outils, filtres) */
+  compact?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   type: 'text',
   placeholder: '',
   required: false,
   disabled: false,
-  id: () => `input-${Math.random().toString(36).substr(2, 9)}`
+  compact: false,
+  id: () => generateDomUid('input')
 });
 
 defineEmits<{
@@ -95,17 +99,10 @@ defineEmits<{
   align-items: center;
 }
 
-.base-input__icon {
-  position: absolute;
-  left: var(--spacing-md);
-  color: var(--color-text-light);
-  font-size: 1.1em;
-}
 
 .base-input__field {
   width: 100%;
   padding: var(--spacing-md) var(--spacing-lg);
-  padding-left: v-bind('icon ? "calc(var(--spacing-lg) * 2 + 16px)" : "var(--spacing-lg)"');
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
@@ -123,6 +120,13 @@ defineEmits<{
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.base-input--compact .base-input__field {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  min-height: calc(var(--spacing-sm) * 9 / 2);
+  box-sizing: border-box;
 }
 
 .base-input__field:disabled {
@@ -152,7 +156,7 @@ defineEmits<{
 /* Style spécifique pour les textareas */
 .base-input__field[type="textarea"],
 .base-input__field[type="textarea"]:focus {
-  min-height: 120px;
+  min-height: calc(var(--spacing-sm) * 15);
   resize: vertical;
   line-height: 1.5;
   padding-top: var(--spacing-md);

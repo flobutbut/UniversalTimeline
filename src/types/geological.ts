@@ -48,6 +48,9 @@ export interface PeriodData {
 export interface Period extends PeriodData {
   id: string;
   wikidata_id?: string;
+  /** Optionnel : précalcul pour la timeline / tri (années avant présent). */
+  startYearsBP?: number;
+  endYearsBP?: number;
   label: {
     fr: string;
     en: string;
@@ -142,29 +145,4 @@ export interface Event {
   updatedAt?: Date;
 }
 
-export interface ApiPeriod {
-  id: string;
-  wikidata_id?: string;
-  label: {
-    fr: string;
-    en: string;
-  };
-  description?: {
-    fr: string;
-    en: string;
-  };
-  startDate: string;
-  endDate: string;
-  hasParent: boolean;
-  children: string[];
-  temporalLocation?: string;
-  categories?: Array<{
-    id: string;
-    label: {
-      fr: string;
-      en: string;
-    };
-  }>;
-  createdAt?: string;
-  updatedAt?: string;
-} 
+// ApiPeriod supprimé — utiliser Period depuis '@/types/database' à la place

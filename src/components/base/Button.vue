@@ -4,13 +4,18 @@
       'base-button',
       `base-button--${variant}`,
       { 'base-button--icon-only': iconOnly },
+      { 'base-button--sm': size === 'sm' },
       { 'base-button--disabled': disabled }
     ]"
     :disabled="disabled"
     :type="type"
     @click="$emit('click', $event)"
   >
-    <i v-if="icon" :class="icon" class="base-button__icon"></i>
+    <span v-if="$slots.icon || icon" class="base-button__leading">
+      <slot name="icon">
+        <i v-if="icon" :class="icon" class="base-button__icon"></i>
+      </slot>
+    </span>
     <span v-if="!iconOnly" class="base-button__text">
       <slot></slot>
     </span>
@@ -18,19 +23,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-
 interface Props {
   variant?: 'primary' | 'secondary' | 'tertiary' | 'danger';
   type?: 'button' | 'submit' | 'reset';
+  size?: 'md' | 'sm';
   icon?: string;
   iconOnly?: boolean;
   disabled?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   variant: 'primary',
   type: 'button',
+  size: 'md',
   icon: '',
   iconOnly: false,
   disabled: false
@@ -46,8 +51,8 @@ defineEmits<{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   font-weight: 500;
@@ -58,12 +63,12 @@ defineEmits<{
 }
 
 .base-button--primary {
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-button, var(--color-primary-dark));
   color: var(--color-text-white);
 }
 
 .base-button--primary:hover:not(.base-button--disabled) {
-  background-color: var(--color-primary-dark);
+  background-color: var(--color-primary-button-hover, var(--color-primary-dark));
 }
 
 .base-button--secondary {
@@ -79,7 +84,7 @@ defineEmits<{
 .base-button--tertiary {
   background-color: transparent;
   color: var(--color-primary);
-  padding: 4px 8px;
+  padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 .base-button--tertiary:hover:not(.base-button--disabled) {
@@ -87,7 +92,26 @@ defineEmits<{
 }
 
 .base-button--icon-only {
-  padding: 8px;
+  padding: var(--spacing-sm);
+}
+
+.base-button--sm {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  min-height: calc(var(--spacing-sm) * 9 / 2);
+}
+
+.base-button--sm.base-button--icon-only {
+  padding: calc((var(--spacing-sm) + var(--spacing-xs)) / 2);
+  min-width: calc(var(--spacing-sm) * 9 / 2);
+  min-height: calc(var(--spacing-sm) * 9 / 2);
+}
+
+.base-button__leading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
 }
 
 .base-button--disabled {

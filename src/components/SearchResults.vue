@@ -26,10 +26,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { SearchResult } from '../services/WikidataSearchService'
+import { ref } from 'vue';
+import type { SearchResult } from '../services/WikidataSearchService';
+import { useToast } from '@/composables/useToast';
+import {
+  searchResultSavedToastMessage,
+  searchResultSelectionToastMessage,
+  searchResultWikidataOpenedToastMessage,
+  wikidataEntityWikiUrl,
+} from '@/lib/wikidataSearchResultUi';
 
-const props = defineProps<{
+defineProps<{
   results: SearchResult[]
 }>()
 
@@ -39,20 +46,22 @@ const emit = defineEmits<{
 }>()
 
 const selectedIndex = ref(-1)
+const toast = useToast()
 
 const handleSelect = (result: SearchResult) => {
-  window.showToast(`Sélection de ${result.label}`, 'info')
-}
+  emit('select', result);
+  toast.show(searchResultSelectionToastMessage(result.label), 'info');
+};
 
 const handleSave = (result: SearchResult) => {
-  emit('save', result)
-  window.showToast(`${result.label} sauvegardé`, 'success')
-}
+  emit('save', result);
+  toast.show(searchResultSavedToastMessage(result.label), 'success');
+};
 
 const openWikidata = (id: string) => {
-  window.open(`https://www.wikidata.org/wiki/${id}`, '_blank')
-  window.showToast('Ouverture de Wikidata dans un nouvel onglet', 'info')
-}
+  window.open(wikidataEntityWikiUrl(id), '_blank');
+  toast.show(searchResultWikidataOpenedToastMessage(), 'info');
+};
 </script>
 
 <style scoped>
@@ -62,11 +71,11 @@ const openWikidata = (id: string) => {
   left: 0;
   right: 0;
   margin-top: var(--spacing-xs);
-  background-color: var(--color-neutral-0);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  max-height: 400px;
+  max-height: calc(var(--spacing-sm) * 50);
   overflow-y: auto;
   z-index: var(--z-index-dropdown);
 }
@@ -79,7 +88,7 @@ const openWikidata = (id: string) => {
   cursor: pointer;
   transition: background-color var(--transition-fast);
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-neutral-0);
+  background-color: var(--color-surface);
 }
 
 .result-item:last-child {

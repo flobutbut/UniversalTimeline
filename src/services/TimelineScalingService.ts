@@ -1,91 +1,98 @@
-import type { Period } from '../types/geological';
-import { DateFormatter } from '../utils/dateFormatter';
+import { DateService } from './DateService'
+
+/**
+ * Élément minimal requis par le service de scaling.
+ * PeriodApiService.mapToPeriod() expose startYearsBP et endYearsBP,
+ * mais on accepte aussi les anciens objets avec startDate/endDate comme fallback.
+ */
+export interface ScalablePeriod {
+  startYearsBP?: number
+  endYearsBP?: number
+  startDate?: string
+  endDate?: string
+  // Accès legacy via temporalData (HomeView)
+  temporalData?: Array<{ startDate?: string; endDate?: string }>
+}
+
+function getStartYBP(p: ScalablePeriod): number {
+  if (p.startYearsBP != null) return p.startYearsBP
+  const raw = p.startDate ?? p.temporalData?.[0]?.startDate ?? ''
+  return DateService.toYearsBP(raw)
+}
+
+function getEndYBP(p: ScalablePeriod): number {
+  if (p.endYearsBP != null) return p.endYearsBP
+  const raw = p.endDate ?? p.temporalData?.[0]?.endDate ?? 'NOW'
+  return DateService.toYearsBP(raw)
+}
 
 export class TimelineScalingService {
   /**
-   * Convertit une date en années avant aujourd'hui
+   * Durée totale couverte par un ensemble de périodes enfants.
+   * Prend la période parente si disponible pour être robuste aux enfants
+   * avec des dates manquantes.
    */
-  convertDateToYearsBeforePresent(dateStr: string): number {
-    // Si c'est une date ISO
-    if (dateStr.includes('T')) {
-      const match = dateStr.match(/(-?\d+)-/);
-      if (match) {
-        return Math.abs(parseInt(match[1]));
-      }
+  calculateTotalDuration(periods: ScalablePeriod[], parent?: ScalablePeriod): number {
+    if (parent) {
+      const parentStart = getStartYBP(parent)
+      const parentEnd   = getEndYBP(parent)
+      return Math.max(0, parentStart - parentEnd)
     }
 
-    // Si c'est une date géologique
-    const match = dateStr.match(/(\d+(?:\.\d+)?)\s*ans/);
-    if (match) {
-      return parseFloat(match[1]);
-    }
+    if (periods.length === 0) return 0
 
-    return 0;
+    const starts = periods.map(getStartYBP)
+    const ends   = periods.map(getEndYBP)
+    const maxStart = Math.max(...starts)
+    const minEnd   = Math.min(...ends)
+    return Math.max(0, maxStart - minEnd)
   }
 
   /**
-   * Calcule la durée totale en années entre la première période et aujourd'hui/dernière date
+   * Calcule la position relative (0–100%) d'une date dans la fenêtre temporelle.
+   *   0% = bord gauche (date la plus ancienne = startYears)
+   * 100% = bord droit (aujourd'hui ou fin de la période parente)
    */
-  calculateTotalDuration(periods: Period[]): number {
-    if (periods.length === 0) return 0;
-
-    // Trier les périodes par date de début (la plus récente en premier)
-    const sortedPeriods = [...periods].sort((a, b) => {
-      const aStart = this.convertDateToYearsBeforePresent(a.temporalData[0]?.startDate || '0 ans');
-      const bStart = this.convertDateToYearsBeforePresent(b.temporalData[0]?.startDate || '0 ans');
-      return bStart - aStart;
-    });
-
-    // Prendre la date de début de la première période (la plus récente)
-    const firstPeriodStart = this.convertDateToYearsBeforePresent(sortedPeriods[0].temporalData[0]?.startDate || '0 ans');
-    
-    // Prendre la date de fin de la dernière période (la plus ancienne)
-    const lastPeriodEnd = this.convertDateToYearsBeforePresent(sortedPeriods[sortedPeriods.length - 1].temporalData[0]?.endDate || '0 ans');
-
-    // Calculer la durée totale
-    return firstPeriodStart - lastPeriodEnd;
+  calculateRelativePosition(
+    dateYBP: number,
+    totalDuration: number,
+    windowStartYBP: number
+  ): number {
+    if (totalDuration === 0) return 0
+    const position = ((windowStartYBP - dateYBP) / totalDuration) * 100
+    return Math.max(0, Math.min(100, position))
   }
 
   /**
-   * Calcule la position relative (0-100%) d'une date par rapport à la durée totale
+   * Largeur relative (0–100%) d'une période dans la fenêtre temporelle.
    */
-  calculateRelativePosition(dateString: string, totalDuration: number, startYears: number): number {
-    if (totalDuration === 0) return 0;
-    
-    const dateYears = this.convertDateToYearsBeforePresent(dateString);
-    const position = ((startYears - dateYears) / totalDuration) * 100;
-    return Math.max(0, Math.min(100, position));
+  calculatePeriodWidth(period: ScalablePeriod, totalDuration: number): number {
+    if (totalDuration === 0) return 0
+    const start = getStartYBP(period)
+    const end   = getEndYBP(period)
+    const duration = Math.max(0, start - end)
+    return Math.min(100, (duration / totalDuration) * 100)
   }
 
   /**
-   * Calcule la largeur relative (0-100%) d'une période par rapport à la durée totale
+   * Styles CSS (left + width) pour positionner une période sur la frise.
    */
-  calculatePeriodWidth(period: Period, totalDuration: number): number {
-    if (totalDuration === 0) return 0;
-    
-    const startYears = this.convertDateToYearsBeforePresent(period.temporalData[0]?.startDate || '0 ans');
-    const endYears = this.convertDateToYearsBeforePresent(period.temporalData[0]?.endDate || '0 ans');
-    const periodDuration = startYears - endYears;
-    return (periodDuration / totalDuration) * 100;
+  calculatePeriodStyles(
+    period: ScalablePeriod,
+    totalDuration: number,
+    windowStartYBP: number
+  ): { width: string; left: string } {
+    const left  = this.calculateRelativePosition(getStartYBP(period), totalDuration, windowStartYBP)
+    const width = Math.min(this.calculatePeriodWidth(period, totalDuration), 100 - left)
+    return { width: `${width}%`, left: `${left}%` }
   }
 
   /**
-   * Calcule les styles CSS pour une période
+   * Fenêtre de départ : le point le plus ancien parmi les périodes affichées.
    */
-  calculatePeriodStyles(period: Period, totalDuration: number, startYears: number): {
-    width: string;
-    left: string;
-  } {
-    const width = this.calculatePeriodWidth(period, totalDuration);
-    const left = this.calculateRelativePosition(
-      period.temporalData[0]?.startDate || '0 ans',
-      totalDuration,
-      startYears
-    );
-
-    return {
-      width: `${width}%`,
-      left: `${left}%`
-    };
+  getWindowStart(periods: ScalablePeriod[], parent?: ScalablePeriod): number {
+    if (parent) return getStartYBP(parent)
+    if (periods.length === 0) return 0
+    return Math.max(...periods.map(getStartYBP))
   }
 }

@@ -1,6 +1,3 @@
-import type { Period as GeologicalPeriod } from './geological';
-import type { Period as DatabasePeriod } from './database';
-
 // Version unifiée pour le graph
 export interface GraphPeriod {
   id: string;

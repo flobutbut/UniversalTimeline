@@ -1,232 +1,200 @@
 <template>
-  <div v-if="isOpen" class="modal-overlay" @click="handleOverlayClick">
-    <div class="modal-content" @click.stop>
-      <div class="modal-header">
-        <h2>{{ mode === 'edit' ? 'Modifier' : 'Créer' }} {{ 
-          type === 'period' ? 'une période' : 
-          type === 'event' ? 'un événement' : 
-          'une story' 
-        }}</h2>
-      </div>
-      <div v-if="editState.loading" class="loading-overlay">
-        <div class="spinner"></div>
-        <span>Chargement des données...</span>
-      </div>
-      <div v-else-if="editState.error" class="error-message">
-        <i class="fas fa-exclamation-circle"></i>
-        <span>{{ editState.error }}</span>
-        <button @click="$emit('close')">Fermer</button>
-      </div>
-      <form v-else @submit.prevent="handleSubmit" class="modal-form">
-        <div class="form-content">
-          <div class="form-row" v-if="type !== 'story'">
-            <div class="form-group">
-              <Input
-                v-model="form.qid"
-                label="Q-id Wikidata"
-                placeholder="Q12345"
-                :error="editState.qidError"
-                @blur="validateQid"
-              />
-            </div>
-            <div class="form-group">
-              <BaseSelect
-                v-model="form.categories"
-                :options="editState.categories.map(cat => ({ value: cat.id, label: cat.label }))"
-                label="Catégories"
-                placeholder="Sélectionner des catégories"
-                :multiple="true"
-                :loading="editState.categoriesLoading"
-                :disabled="editState.categoriesLoading"
-              />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <Input
-                v-model="form.title.fr"
-                label="Titre (Français)"
-                placeholder="Titre en français"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <Input
-                v-model="form.title.en"
-                label="Titre (Anglais)"
-                placeholder="Title in English"
-              />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <Input
-                v-model="form.description.fr"
-                label="Description (Français)"
-                placeholder="Description en français"
-                type="textarea"
-              />
-            </div>
-            <div class="form-group">
-              <Input
-                v-model="form.description.en"
-                label="Description (Anglais)"
-                placeholder="Description in English"
-                type="textarea"
-              />
-            </div>
-          </div>
-
-          <div class="form-row" v-if="type === 'period'">
-            <div class="form-group">
-              <Input
-                v-model="form.startDate"
-                label="Date de début (ISO, brute)"
-                placeholder="Date ISO ou brute"
-                required
-                @blur="syncFormattedFromISO('startDate')"
-                @keyup.enter="syncFormattedFromISO('startDate')"
-              />
-              <Input
-                v-model="formattedStartDate"
-                label="Date formatée (moderne/géologique)"
-                placeholder="Date formatée"
-                class="date-formatted-input"
-                @blur="syncISOFromFormatted('startDate')"
-                @keyup.enter="syncISOFromFormatted('startDate')"
-              />
-            </div>
-            <div class="form-group">
-              <Input
-                v-model="form.endDate"
-                label="Date de fin (ISO, brute)"
-                placeholder="Date ISO ou brute"
-                required
-                @blur="syncFormattedFromISO('endDate')"
-                @keyup.enter="syncFormattedFromISO('endDate')"
-              />
-              <Input
-                v-model="formattedEndDate"
-                label="Date formatée (moderne/géologique)"
-                placeholder="Date formatée"
-                class="date-formatted-input"
-                @blur="syncISOFromFormatted('endDate')"
-                @keyup.enter="syncISOFromFormatted('endDate')"
-              />
-            </div>
-          </div>
-
-          <div class="form-row" v-if="type === 'event'">
-            <div class="form-group full-width">
-              <Input
-                v-model="form.date"
-                label="Date (ISO, brute)"
-                placeholder="Date ISO ou brute (ex: 2024-06-18, -65 000 000, etc.)"
-                required
-                @blur="syncFormattedFromISO('date')"
-                @keyup.enter="syncFormattedFromISO('date')"
-              />
-              <Input
-                v-model="formattedEventDate"
-                label="Date formatée (moderne/géologique)"
-                placeholder="Date formatée"
-                class="date-formatted-input"
-                @blur="syncISOFromFormatted('date')"
-                @keyup.enter="syncISOFromFormatted('date')"
-              />
-            </div>
-          </div>
-
-          <div class="form-row" v-if="type !== 'story'">
-            <div class="form-group full-width">
-              <Input
-                v-model="form.location"
-                label="Temporal location"
-                placeholder="Ex: Europe, France, Paris..."
-              />
-            </div>
-          </div>
-
-          <div class="form-row" v-if="type === 'story'">
-            <div class="form-group">
-              <Input
-                v-model="form.author"
-                label="Auteur"
-                placeholder="Nom de l'auteur"
-              />
-            </div>
-            <div class="form-group">
-              <div class="switch-group">
-                <label class="switch-label">Mode public</label>
-
-                <Switch
-                  v-model="form.isPublic"
-                  :checked="form.isPublic"
-                />
-
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row" v-if="type === 'story'">
-            <div class="form-group full-width">
-              <BaseSelect
-                v-model="form.categories"
-                :options="editState.categories.map(cat => ({ value: cat.id, label: cat.label }))"
-                label="Catégories"
-                placeholder="Sélectionner des catégories"
-                :multiple="true"
-                :loading="editState.categoriesLoading"
-                :disabled="editState.categoriesLoading"
-              />
-            </div>
-          </div>
-        </div>
-        
-        <div class="modal-footer">
-          <div class="footer-left">
-            <Button
-              v-if="mode === 'edit'"
-              variant="danger"
-              type="button"
-              @click="handleDelete"
-            >
-              Supprimer
-            </Button>
-            <WikidataImportButton
-              v-if="form.qid && type !== 'story'"
-              :qid="form.qid"
-              :type="type"
-              @import-success="handleWikidataImportSuccess"
-              @import-error="handleWikidataImportError"
-            />
-            <span v-if="type === 'period'" class="children-count">
-              {{ editState.directChildrenCount }} sous-périodes
-            </span>
-          </div>
-          <div class="footer-right">
-            <Button variant="secondary" @click="closeModal">Annuler</Button>
-            <Button
-              variant="primary"
-              type="submit"
-              :disabled="!editState.isValid"
-            >
-              {{ mode === 'edit' ? 'Mettre à jour' : 'Créer' }}
-            </Button>
-          </div>
-        </div>
-      </form>
+  <ModalShell :title="modalTitle" height="auto" @close="closeModal">
+    <div v-if="editState.loading" class="loading-overlay">
+      <div class="spinner"></div>
+      <span>Chargement des données...</span>
     </div>
-  </div>
+    <div v-else-if="editState.error" class="error-message">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>{{ editState.error }}</span>
+      <button @click="closeModal">Fermer</button>
+    </div>
+    <form v-else ref="formEl" @submit.prevent="handleSubmit" class="modal-form">
+      <div class="form-content">
+        <div class="form-row" v-if="type !== 'story'">
+          <div class="form-group">
+            <Input
+              v-model="form.qid"
+              label="Q-id Wikidata"
+              placeholder="Q12345"
+              :error="editState.qidError"
+              @blur="validateQid"
+            />
+          </div>
+          <div class="form-group">
+            <BaseSelect
+              v-model="form.categories"
+              :options="editState.categories.map(cat => ({ value: cat.id, label: cat.label }))"
+              label="Catégories"
+              placeholder="Sélectionner des catégories"
+              :multiple="true"
+              :loading="editState.categoriesLoading"
+              :disabled="editState.categoriesLoading"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <Input
+              v-model="form.title.fr"
+              label="Titre (Français)"
+              placeholder="Titre en français"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <Input
+              v-model="form.title.en"
+              label="Titre (Anglais)"
+              placeholder="Title in English"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <Input
+              v-model="form.description.fr"
+              label="Description (Français)"
+              placeholder="Description en français"
+              type="textarea"
+            />
+          </div>
+          <div class="form-group">
+            <Input
+              v-model="form.description.en"
+              label="Description (Anglais)"
+              placeholder="Description in English"
+              type="textarea"
+            />
+          </div>
+        </div>
+
+        <div class="form-row" v-if="type === 'period'">
+          <div class="form-group">
+            <Input
+              v-model="form.startDate"
+              label="Date de début"
+              placeholder="G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32"
+              required
+              @blur="refreshDisplay('startDate')"
+            />
+            <span class="date-preview">{{ displayStart }}</span>
+          </div>
+          <div class="form-group">
+            <Input
+              v-model="form.endDate"
+              label="Date de fin (vide = aujourd'hui)"
+              placeholder="G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32 · NOW"
+              @blur="refreshDisplay('endDate')"
+            />
+            <span class="date-preview">{{ displayEnd }}</span>
+          </div>
+        </div>
+
+        <div class="form-row" v-if="type === 'event'">
+          <div class="form-group full-width">
+            <Input
+              v-model="form.date"
+              label="Date"
+              placeholder="G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32"
+              required
+              @blur="refreshDisplay('date')"
+            />
+            <span class="date-preview">{{ displayEvent }}</span>
+          </div>
+        </div>
+
+        <div class="form-row" v-if="type !== 'story'">
+          <div class="form-group full-width">
+            <Input
+              v-model="form.location"
+              label="Temporal location"
+              placeholder="Ex: Europe, France, Paris..."
+            />
+          </div>
+        </div>
+
+        <div class="form-row" v-if="type === 'story'">
+          <div class="form-group">
+            <Input
+              v-model="form.author"
+              label="Auteur"
+              placeholder="Nom de l'auteur"
+            />
+          </div>
+          <div class="form-group">
+            <div class="switch-group">
+              <label class="switch-label">Mode public</label>
+              <Switch v-model="form.isPublic" :checked="form.isPublic" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row" v-if="type === 'story'">
+          <div class="form-group full-width">
+            <BaseSelect
+              v-model="form.categories"
+              :options="editState.categories.map(cat => ({ value: cat.id, label: cat.label }))"
+              label="Catégories"
+              placeholder="Sélectionner des catégories"
+              :multiple="true"
+              :loading="editState.categoriesLoading"
+              :disabled="editState.categoriesLoading"
+            />
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Footer gauche : actions secondaires -->
+    <template #footer-left>
+      <Button
+        v-if="mode === 'edit'"
+        variant="danger"
+        type="button"
+        @click="handleDelete"
+      >
+        Supprimer
+      </Button>
+      <WikidataImportButton
+        v-if="form.qid && type !== 'story'"
+        :qid="form.qid"
+        :type="type"
+        @import-success="handleWikidataImportSuccess"
+        @import-error="handleWikidataImportError"
+      />
+      <span v-if="type === 'period'" class="children-count">
+        {{ editState.directChildrenCount }} sous-périodes
+      </span>
+    </template>
+
+    <!-- Footer droit : validation -->
+    <template #footer-right>
+      <Button
+        variant="primary"
+        type="button"
+        :disabled="!editState.isValid"
+        @click="handleSubmit"
+      >
+        {{ mode === 'edit' ? 'Mettre à jour' : 'Créer' }}
+      </Button>
+    </template>
+  </ModalShell>
 </template>
 
 <script setup lang="ts">
-import { watch, onMounted, onUnmounted, ref } from 'vue';
+import { watch, ref, computed } from 'vue';
 import { useEditModal } from '@/composables/useEditModal';
 import { useParentChildManagement } from '@/composables/useParentChildManagement';
-import { useDateConversion } from '@/composables/useDateConversion';
+import { useToast } from '@/composables/useToast';
+import { DateService } from '@/services/DateService';
+import {
+  applyWikidataImportPayloadToFormDraft,
+  type WikidataImportPayload,
+} from '@/lib/wikidataImportFormMerge';
+import ModalShell from '@/components/base/ModalShell.vue';
 import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';
 import WikidataImportButton from '@/components/WikidataImportButton.vue';
@@ -248,41 +216,39 @@ const emit = defineEmits<{
   (e: 'delete'): void;
 }>();
 
+const modalTitle = computed(() => {
+  const action = props.mode === 'edit' ? 'Modifier' : 'Créer';
+  const subject = props.type === 'period' ? 'une période'
+                : props.type === 'event'  ? 'un événement'
+                : 'une story';
+  return `${action} ${subject}`;
+});
+
 // Initialisation des composables
-const { form, state: editState, isValid, resetForm, updateForm, prepareSubmitData, setQidError, setQidExists, setChildrenCount } = useEditModal(props.type, props.mode, props.data);
+const { form, state: editState, resetForm, updateForm, prepareSubmitData, setQidError, setQidExists, setChildrenCount } = useEditModal(props.type, props.mode, props.data);
 const { validateQid: validateQidParentChild } = useParentChildManagement();
-const {
-  quickConvert,
-  toISO8601
-} = useDateConversion({ defaultLocale: 'fr-FR', defaultPrecision: 'year' });
+const toast = useToast();
 
-// Champs réactifs pour la date formatée
-const formattedStartDate = ref(quickConvert.toModern(form.startDate) || quickConvert.toGeological(form.startDate));
-const formattedEndDate = ref(quickConvert.toModern(form.endDate) || quickConvert.toGeological(form.endDate));
-const formattedEventDate = ref(quickConvert.toModern(form.date) || quickConvert.toGeological(form.date));
+// Previews calculés à partir du format de stockage
+const displayStart = ref('');
+const displayEnd   = ref('');
+const displayEvent = ref('');
 
-// On retire les watchers de synchronisation automatique
-// On ajoute des handlers pour la conversion au blur ou sur Entrée
-
-function syncFormattedFromISO(field: 'startDate' | 'endDate' | 'date') {
-  if (field === 'startDate') {
-    formattedStartDate.value = quickConvert.toModern(form.startDate) || quickConvert.toGeological(form.startDate);
-  } else if (field === 'endDate') {
-    formattedEndDate.value = quickConvert.toModern(form.endDate) || quickConvert.toGeological(form.endDate);
-  } else if (field === 'date') {
-    formattedEventDate.value = quickConvert.toModern(form.date) || quickConvert.toGeological(form.date);
-  }
+function refreshDisplay(field: 'startDate' | 'endDate' | 'date') {
+  const raw = field === 'startDate' ? form.startDate
+            : field === 'endDate'   ? form.endDate
+            : form.date;
+  if (!raw) { (field === 'startDate' ? displayStart : field === 'endDate' ? displayEnd : displayEvent).value = ''; return; }
+  const preview = DateService.format(DateService.parse(raw));
+  if (field === 'startDate') displayStart.value = preview;
+  else if (field === 'endDate') displayEnd.value = preview;
+  else displayEvent.value = preview;
 }
 
-function syncISOFromFormatted(field: 'startDate' | 'endDate' | 'date') {
-  if (field === 'startDate') {
-    form.startDate = toISO8601(formattedStartDate.value);
-  } else if (field === 'endDate') {
-    form.endDate = toISO8601(formattedEndDate.value);
-  } else if (field === 'date') {
-    form.date = toISO8601(formattedEventDate.value);
-  }
-}
+// Initialiser les previews quand les données arrivent
+watch(() => form.startDate, (v) => { if (v) displayStart.value = DateService.format(DateService.parse(v)); }, { immediate: true });
+watch(() => form.endDate,   (v) => { if (v) displayEnd.value   = DateService.format(DateService.parse(v)); }, { immediate: true });
+watch(() => form.date,      (v) => { if (v) displayEvent.value = DateService.format(DateService.parse(v)); }, { immediate: true });
 
 // Validation du Q-id
 const validateQid = async () => {
@@ -300,7 +266,7 @@ const handleSubmit = () => {
     closeModal();
   } catch (error: any) {
     console.error('[EditModal] Erreur lors de la préparation des données:', error);
-    window.showToast('Erreur lors de la préparation des données', 'error');
+    toast.show('Erreur lors de la préparation des données', 'error');
   }
 };
 
@@ -309,120 +275,65 @@ const handleDelete = () => {
 };
 
 // Gestion de l'import Wikidata
-const handleWikidataImportSuccess = (data: any) => {
-  if (data.title) {
-    form.title.fr = data.title.fr || '';
-    form.title.en = data.title.en || '';
-  }
-  if (data.description) {
-    form.description.fr = data.description.fr || '';
-    form.description.en = data.description.en || '';
-  }
-  if (data.startDate) form.startDate = data.startDate;
-  if (data.endDate) form.endDate = data.endDate;
-  if (data.date) form.date = data.date;
-  if (data.location) form.location = data.location;
-  if (data.childrenCount) {
-    setChildrenCount(data.childrenCount);
-  }
-  window.showToast('Données chargées depuis Wikidata', 'success');
+const handleWikidataImportSuccess = (data: WikidataImportPayload) => {
+  applyWikidataImportPayloadToFormDraft(form, data, {
+    availableCategoryIds: new Set(editState.categories.map((c: any) => c.id)),
+    onChildrenCount: (n) => setChildrenCount(String(n)),
+  });
+  toast.show('Données chargées depuis Wikidata', 'success');
 };
 
 const handleWikidataImportError = (error: string) => {
   console.error('[EditModal] Erreur import Wikidata:', error);
-  window.showToast(error, 'error');
+  toast.show(error, 'error');
 };
 
-// Fermeture de la modale
 const closeModal = () => {
   emit('close');
 };
 
-// Gestionnaires d'événements
-const handleOverlayClick = (event: MouseEvent) => {
-  if (event.target === event.currentTarget) {
-    closeModal();
-  }
-};
-
-const handleEscapeKey = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
-    closeModal();
-  }
-};
-
 // Watchers
 watch(() => props.data, (val) => { updateForm(val); }, { immediate: true });
-watch(() => props.mode, () => { if (props.mode === 'create') { resetForm(); } });
+watch(() => props.mode, () => {
+  if (props.mode === 'create' && (props.data === undefined || props.data === null)) {
+    resetForm();
+  }
+});
 watch(() => props.type, () => { resetForm(); });
-
-// Hooks de cycle de vie
-onMounted(() => {
-  document.addEventListener('keydown', handleEscapeKey);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleEscapeKey);
-});
 </script>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-.modal-content {
-  background: var(--color-surface);
-  color: var(--color-text);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl) var(--spacing-2xl);
-  min-width: 700px;
-  max-width: 90vw;
-  box-shadow: var(--shadow-xl);
-  position: relative;
-}
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-.modal-title {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  color: var(--color-text);
-}
 .modal-form {
   width: 100%;
 }
+
 .form-content {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-2xl);
 }
+
 .form-row {
   display: flex;
   gap: var(--spacing-md);
   width: 100%;
 }
+
 .form-group {
   flex: 1;
   min-width: 0;
 }
+
 .form-group.full-width {
   flex: 1 1 100%;
 }
+
 .form-group label {
   font-weight: 600;
   margin-bottom: var(--spacing-xs);
   color: var(--color-text);
 }
+
 .form-group input,
 .form-group textarea {
   background: var(--color-surface);
@@ -434,13 +345,15 @@ onUnmounted(() => {
   width: 100%;
   transition: border-color var(--transition-fast);
 }
+
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: var(--color-primary);
 }
+
 .form-group textarea {
-  min-height: 120px;
+  min-height: calc(var(--spacing-sm) * 15);
   resize: vertical;
   line-height: 1.5;
   font-family: inherit;
@@ -452,25 +365,17 @@ onUnmounted(() => {
   display: block;
   box-sizing: border-box;
 }
+
 .form-group input {
-  height: 40px;
-  line-height: 40px;
+  height: calc(var(--spacing-sm) * 5);
+  line-height: calc(var(--spacing-sm) * 5);
   padding: 0 var(--spacing-sm);
   box-sizing: border-box;
   display: block;
 }
-.modal-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: var(--spacing-lg);
-}
-.footer-left, .footer-right {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-.loading-overlay, .error-message {
+
+.loading-overlay,
+.error-message {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -479,23 +384,25 @@ onUnmounted(() => {
   padding: var(--spacing-xl);
   color: var(--color-text);
 }
+
 .spinner {
-  width: 40px;
-  height: 40px;
+  width: calc(var(--spacing-sm) * 5);
+  height: calc(var(--spacing-sm) * 5);
   border: 4px solid var(--color-border);
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
+
 .error-message {
   background-color: var(--color-error);
-  color: var(--color-neutral-0);
+  color: var(--color-text-white);
 }
+
 .children-count {
   color: var(--color-text-light);
   font-size: var(--font-size-sm);
@@ -505,8 +412,8 @@ onUnmounted(() => {
 .switch-group {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 38px 0 var(--spacing-sm) 0;
+  gap: var(--spacing-sm);
+  padding: calc(var(--spacing-2xl) + var(--spacing-md) / 2) 0 var(--spacing-sm) 0;
   min-height: 44px;
 }
 
@@ -517,9 +424,12 @@ onUnmounted(() => {
   font-size: var(--font-size-base);
 }
 
-.date-formatted-input {
+.date-preview {
+  display: block;
   margin-top: 0.25rem;
-  font-size: 0.98em;
+  font-size: 0.9em;
   color: var(--color-text-light);
+  font-style: italic;
+  min-height: 1.2em;
 }
-</style> 
+</style>
