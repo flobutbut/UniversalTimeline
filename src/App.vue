@@ -27,7 +27,7 @@ const pathForView = (view: typeof currentView.value): string => {
     case 'graph': return '/graph'
     case 'events': return '/events'
     case 'designSystem': return '/design-system'
-    default: return '/'
+    default: return '/timeline'
   }
 }
 

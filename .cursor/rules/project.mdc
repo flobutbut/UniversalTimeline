@@ -1,0 +1,8 @@
+---
+name: project-rules
+description: Charge les règles et conventions de ce projet
+alwaysApply: true
+---
+
+@CLAUDE.md
+@.agent/CONVENTIONS.md

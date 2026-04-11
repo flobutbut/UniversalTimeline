@@ -1,33 +1,37 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import DatabaseView from '@/views/DatabaseView/DatabaseView.vue';
+import { AppRouteShell } from './AppRouteShell';
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: () => null // La vue par défaut est gérée dans App.vue
+      redirect: '/timeline',
+    },
+    {
+      path: '/timeline',
+      name: 'timeline',
+      component: AppRouteShell,
     },
     {
       path: '/database',
       name: 'database',
-      component: DatabaseView
+      component: AppRouteShell,
     },
     {
       path: '/graph',
       name: 'graph',
-      component: () => null
+      component: AppRouteShell,
     },
     {
       path: '/events',
       name: 'events',
-      component: () => null
+      component: AppRouteShell,
     },
     {
       path: '/design-system',
       name: 'design-system',
-      component: () => null
+      component: AppRouteShell,
     }
   ]
 });
