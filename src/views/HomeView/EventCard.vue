@@ -16,54 +16,32 @@
     <div class="event-vertical-line"></div>
 
     <!-- Bulle d'info décalée selon l'alignement -->
-    <div class="event-info-box" @keydown="onStoriesKeydown">
+    <div class="event-info-box">
       <div class="event-label">{{ displayLabel }}</div>
       <div class="event-date">{{ displayDate }}</div>
+      <!-- Au survol seulement : la sélection liste directement ces frises -->
+      <div v-if="!isSelected && otherStoryCount" class="event-meta">Présent dans {{ otherStoryCount }} {{ otherStoryCount > 1 ? 'autres frises' : 'autre frise' }}</div>
       <p v-if="isSelected && event.description" class="event-description">{{ event.description.fr || event.description.en }}</p>
-      <div v-if="suggestionsLoading" role="status">Chargement des frises…</div>
-      <div v-else-if="suggestionsError" role="alert">
+      <div v-if="suggestionsLoading" class="event-meta" role="status">Chargement des frises…</div>
+      <div v-else-if="suggestionsError" class="event-meta event-meta--error" role="alert">
         {{ suggestionsError }} <button type="button" @click.stop="$emit('retry-suggestions')">Réessayer</button>
       </div>
-      <div v-else-if="isSelected && !storySuggestions.length" class="event-date">Aucune frise liée</div>
-
-      <!-- Chevron stories : visible seulement si des suggestions existent -->
-      <template v-if="storySuggestions.length > 0">
-        <button
-          class="event-stories-trigger"
-          ref="storiesTrigger"
-          type="button"
-          :aria-expanded="storiesExpanded"
-          :aria-controls="storiesExpanded ? storiesId : undefined"
-          @click.stop="storiesExpanded = !storiesExpanded"
-        >
-          <span>{{ storySuggestions.length === 1 ? 'Continuer' : 'Explorer en détail' }}</span>
-          <svg
-            class="event-stories-chevron"
-            :class="{ 'is-open': storiesExpanded }"
-            width="12" height="12" viewBox="0 0 12 12" fill="none"
-            aria-hidden="true"
-          >
-            <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div v-if="storiesExpanded" :id="storiesId" class="event-stories-list">
-          <button
-            v-for="s in storySuggestions"
-            :key="s.id"
-            class="event-story-item"
-            type="button"
-            @click.stop="$emit('story-select', s.id)"
-          >
-            {{ s.title?.fr || s.title?.en }}
-          </button>
-        </div>
-      </template>
+      <!-- Autres frises contenant l'événement : listées directement, rien s'il n'y en a pas -->
+      <section v-if="storySuggestions.length > 0" class="event-stories" aria-label="Autres frises contenant cet événement">
+        <ul class="event-stories-list">
+          <li v-for="s in storySuggestions" :key="s.id">
+            <button class="event-story-item" type="button" @click.stop="$emit('story-select', s.id)">
+              {{ s.title?.fr || s.title?.en }}
+            </button>
+          </li>
+        </ul>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, useId } from 'vue';
+import { computed } from 'vue';
 import type { ListEvent, StorySuggestion } from '@/types/database';
 import { DateService } from '@/services/DateService';
 
@@ -79,10 +57,12 @@ const props = withDefaults(
       left: string;
     };
     storySuggestions?: StorySuggestion[];
+    /** Autres frises lisibles contenant l'événement ; null tant que le nombre est inconnu. */
+    otherStoryCount?: number | null;
     suggestionsLoading?: boolean;
     suggestionsError?: string | null;
   }>(),
-  { storySuggestions: () => [], suggestionsLoading: false, suggestionsError: null }
+  { storySuggestions: () => [], otherStoryCount: null, suggestionsLoading: false, suggestionsError: null }
 );
 
 defineEmits<{
@@ -90,21 +70,6 @@ defineEmits<{
   (e: 'story-select', storyId: string): void;
   (e: 'retry-suggestions'): void;
 }>();
-
-const storiesExpanded = ref(false);
-const storiesId = useId();
-const storiesTrigger = ref<HTMLButtonElement>();
-function onStoriesKeydown(event: KeyboardEvent) {
-  if (event.key !== 'Escape' || !storiesExpanded.value) return;
-  event.preventDefault(); event.stopPropagation();
-  storiesExpanded.value = false;
-  storiesTrigger.value?.focus();
-}
-
-// Referme le panneau quand l'event est désélectionné
-watch(() => props.isSelected, (val) => {
-  if (!val) storiesExpanded.value = false;
-});
 
 const displayLabel = computed(() => {
   const raw = props.event.label as unknown;
@@ -124,7 +89,15 @@ const displayDate = computed(() => {
 </script>
 
 <style scoped>
-.event-description { white-space: pre-wrap; overflow-wrap: anywhere; margin: var(--spacing-sm) 0; }
+/* Deux tailles seulement : le titre (base, gras) et tout le reste (sm). */
+.event-description {
+  margin: var(--spacing-sm) 0 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-small);
+  color: var(--color-text-light);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .event-card.event-card--undated { position: relative; top: auto; height: auto; width: auto; pointer-events: auto; margin-top: var(--spacing-sm); }
 .event-undated-trigger { border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-text); padding: var(--spacing-xs) var(--spacing-sm); cursor: pointer; }
 .event-card--undated .event-vertical-line { display: none; }
@@ -249,58 +222,58 @@ const displayDate = computed(() => {
 }
 
 .event-label {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text);
   white-space: normal;
   overflow-wrap: break-word;
-  line-height: var(--line-height-normal);
+  line-height: var(--line-height-body);
+}
+
+.event-date,
+.event-meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  line-height: var(--line-height-small);
 }
 
 .event-date {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-light);
-  margin-top: 0;
-  line-height: var(--line-height-normal);
+  margin-top: 2px;
 }
 
-/* ─── Stories trigger ──────────────────────────────────────────────────────── */
+.event-meta {
+  margin-top: var(--spacing-xs);
+}
 
-.event-stories-trigger {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  margin-top: var(--spacing-sm);
-  padding: var(--spacing-xs) 0;
-  border: none;
+.event-meta--error {
+  color: var(--color-error);
+}
+
+.event-meta button {
+  padding: 0;
+  border: 0;
   background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
   cursor: pointer;
-  color: var(--color-primary);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  width: 100%;
-  text-align: left;
+}
+
+/* ─── Autres frises ─────────────────────────────────────────────────────────── */
+
+.event-stories {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
   border-top: 1px solid var(--color-border);
-}
-
-.event-stories-trigger:hover {
-  color: var(--color-primary-dark);
-}
-
-.event-stories-chevron {
-  flex-shrink: 0;
-  transition: transform var(--transition-fast);
-}
-
-.event-stories-chevron.is-open {
-  transform: rotate(180deg);
 }
 
 .event-stories-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin-top: var(--spacing-xs);
+  margin: 0 calc(var(--spacing-sm) * -1);
+  padding: 0;
+  list-style: none;
 }
 
 .event-story-item {
@@ -310,15 +283,16 @@ const displayDate = computed(() => {
   border: none;
   background: none;
   text-align: left;
-  font-size: var(--font-size-xs);
-  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: background-color var(--transition-fast);
 }
 
-.event-story-item:hover {
+.event-story-item:hover,
+.event-story-item:focus-visible {
   background-color: var(--color-neutral-100);
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
 }
 </style>

@@ -107,6 +107,7 @@
           :is-category-active="isCategoryActive(event)"
           :card-style="getEventStyles(event)"
           :align="getEventAlign(event)"
+          :other-story-count="otherStoryCount(event.id)"
           :story-suggestions="selectedEvent?.id === event.id ? eventStorySuggestions : []"
           :suggestions-loading="selectedEvent?.id === event.id && eventSuggestionsLoading"
           :suggestions-error="selectedEvent?.id === event.id ? eventSuggestionsError : null"
@@ -129,6 +130,8 @@ import { listEventYearsBP } from '@/lib/listEventTableHelpers';
 import { useTimelineScaling } from '@/composables/useTimelineScaling';
 import { StoryApiService } from '@/services/StoryApiService';
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
+import { useDataStore } from '@/stores/useDataStore';
+import { loadEventStorySuggestions } from '@/lib/eventStorySuggestions';
 import { usePeriodFlip } from '@/composables/usePeriodFlip';
 import { useTimelinePeriodTooltip } from '@/composables/useTimelinePeriodTooltip';
 import { useTimelinePeriodExpansion } from '@/composables/useTimelinePeriodExpansion';
@@ -175,9 +178,27 @@ const { byPeriod: associatedByPeriod, loading: associationsLoading, error: assoc
 );
 const { results: eventStorySuggestions, loading: eventSuggestionsLoading, error: eventSuggestionsError, retry: retryEventSuggestions } = useDebouncedSearch(
   () => selectedEvent.value?.id ?? '',
-  (id, signal) => StoryApiService.getInstance().getSuggestions(props.currentStoryId, [], [id], { signal }),
+  (id, signal) => {
+    const api = StoryApiService.getInstance();
+    return loadEventStorySuggestions(props.currentStoryId, id, {
+      anchored: () => api.getSuggestions(props.currentStoryId, [], [id], { signal }),
+      memberships: () => api.getMemberships('event', { signal }),
+      stories: async () => { const dataStore = useDataStore(); await dataStore.ensureStoriesLoaded(); return dataStore.stories; },
+    });
+  },
   { delayMs: 0, minLength: 1, criteria: () => props.currentStoryId, enabled: () => active.value && !props.loading },
 );
+/** Frises lisibles de chaque événement, lues une fois par frise pour le survol. */
+const { results: eventMemberships, loading: membershipsLoading, error: membershipsError } = useDebouncedSearch(
+  () => props.currentStoryId || 'catalogue',
+  async (_key, signal) => [...await StoryApiService.getInstance().getMemberships('event', { signal })],
+  { delayMs: 0, minLength: 1, enabled: () => active.value && props.events.length > 0 },
+);
+const membershipsByEvent = computed(() => new Map(eventMemberships.value));
+/** null tant que le nombre est inconnu : une lecture en cours ou échouée n'est pas « aucune frise ». */
+const otherStoryCount = (id: string) => membershipsLoading.value || membershipsError.value
+  ? null
+  : (membershipsByEvent.value.get(id) ?? []).filter(storyId => storyId !== props.currentStoryId).length;
 // ─── FLIP animation ────────────────────────────────────────────────────────────
 
 /** Ref vers la barre parent (PeriodCard variant="parent"). */
