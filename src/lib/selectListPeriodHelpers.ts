@@ -16,7 +16,7 @@ export function formatSelectListPeriodLine(p: ListPeriod): string {
   return `${p.label.fr} (de ${start} à ${end})`;
 }
 
-/** Chaîne d’ids racine → feuille pour une période sélectionnée. */
+/** Chaîne d'ids racine → feuille pour une période sélectionnée. */
 export function buildPeriodAncestorPathFromLeaf(
   id: string,
   periodById: (id: string) => ListPeriod | null | undefined
@@ -36,19 +36,5 @@ export function listPeriodShowsDrillChevron(period: ListPeriod, allPeriods: List
   return allPeriods.some((c) => c.parentId === period.id);
 }
 
-export interface SelectListOptionLike {
-  value: string | number;
-  disabled?: boolean;
-}
-
-export function isSelectListOptionSelected(
-  option: SelectListOptionLike,
-  multiple: boolean,
-  modelValue: string | number | (string | number)[] | null
-): boolean {
-  if (multiple) {
-    const values = Array.isArray(modelValue) ? modelValue : [];
-    return values.includes(option.value);
-  }
-  return modelValue === option.value;
-}
+// Compatibility for the historical Select 2.vue, pending its separate cleanup.
+export { isSelectListOptionSelected } from './selectOptions';

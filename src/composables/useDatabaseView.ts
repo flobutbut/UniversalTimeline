@@ -1,10 +1,16 @@
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useDataStore } from '@/stores/useDataStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { EventApiService } from '@/services/EventApiService';
+import { PeriodApiService } from '@/services/PeriodApiService';
 import { StoryApiService } from '@/services/StoryApiService';
+import { mutationErrorMessage } from '@/lib/mutationErrorMessage';
 import { useToast } from './useToast';
-import type { Event, Story, ListPeriod, ListEvent, ListStory } from '@/types/database';
-import { temporalBoundsFromStoryDetail } from '@/utils/storyTemporalBounds';
+import type { Story, StoryAnchor, ListPeriod, ListEvent, ListStory } from '@/types/database';
+import { useLatestRequest } from './useLatestRequest';
+import { collectStoryPeriodSubtreeIds } from '@/lib/storyPeriodFinderColumns';
+import type { EditableItem } from '@/types/editForm';
 
 export interface DatabaseViewState {
   loading: boolean;
@@ -12,13 +18,14 @@ export interface DatabaseViewState {
   loadingDetails: boolean;
   loadingError: string | null;
   loadingStoryDetails: boolean;
+  storyError: string | null;
 }
 
 export interface ModalState {
   showAddModal: boolean;
   showEditModal: boolean;
   currentType: 'period' | 'event' | 'story';
-  currentItem: any;
+  currentItem: EditableItem | null;
   currentMode: 'create' | 'edit';
 }
 
@@ -28,7 +35,7 @@ export interface SearchState {
 }
 
 export interface DragDropState {
-  draggedItem: { type: 'period' | 'event', data: any } | null;
+  draggedItem: { type: 'period' | 'event', data: { id: string } } | null;
   isDragOver: boolean;
 }
 
@@ -43,6 +50,7 @@ export function useDatabaseView() {
     loadingDetails: false,
     loadingError: null,
     loadingStoryDetails: false,
+    storyError: null,
   });
 
   const modalState = ref<ModalState>({
@@ -57,14 +65,19 @@ export function useDatabaseView() {
   const dragDropState = ref<DragDropState>({ draggedItem: null, isDragOver: false });
   const selectedStory = ref<Story | null>(null);
 
-  watch(sharedLoading, v => { state.value.loading = v; }, { immediate: true });
+  const selectedStoryId = ref<string | null>(null);
+  const relationsBusy = ref(false);
+  const initialRequests = useLatestRequest();
+  const detailRequests = useLatestRequest();
+  const retryRequests = useLatestRequest();
+  const editRequests = useLatestRequest();
 
   // Computed
   const filteredPeriods = computed(() => {
     const searchLower = searchState.value.periodSearch.toLowerCase();
-    const transformed = periods.value.map((p: any) => ({
+    const transformed = periods.value.map(p => ({
       ...p,
-      hasParent: typeof p.hasParent === 'boolean' ? p.hasParent : !!(p.parent_id),
+      hasParent: typeof p.hasParent === 'boolean' ? p.hasParent : !!p.parentId,
       children: Array.isArray(p.children) ? p.children : [],
     }));
     return transformed
@@ -83,19 +96,21 @@ export function useDatabaseView() {
     });
   });
 
-  const filteredStories = computed(() => stories.value);
+  const auth = useAuthStore();
+  const filteredStories = computed(() => stories.value.filter(auth.ownsStory));
 
   // Modales
-  const handleAddPeriod = () => { modalState.value = { ...modalState.value, currentType: 'period', currentMode: 'create', showAddModal: true }; };
-  const handleAddEvent = () => { modalState.value = { ...modalState.value, currentType: 'event', currentMode: 'create', showAddModal: true }; };
-  const handleAddStory = () => { modalState.value = { ...modalState.value, currentType: 'story', currentMode: 'create', showAddModal: true }; };
+  const handleAddPeriod = () => { closeEditModal(); modalState.value = { ...modalState.value, currentType: 'period', currentMode: 'create', showAddModal: true }; };
+  const handleAddEvent = () => { closeEditModal(); modalState.value = { ...modalState.value, currentType: 'event', currentMode: 'create', showAddModal: true }; };
+  const handleAddStory = () => { closeEditModal(); modalState.value = { ...modalState.value, currentType: 'story', currentMode: 'create', showAddModal: true }; };
   const handleEditPeriod = (period: ListPeriod) => openEditModal('period', period);
   const handleEditEvent = (event: ListEvent) => openEditModal('event', event);
   const handleEditStory = (story: ListStory) => openEditModal('story', story);
   const closeAddModal = () => { modalState.value.showAddModal = false; modalState.value.currentItem = null; };
-  const closeEditModal = () => { modalState.value.showEditModal = false; modalState.value.currentItem = null; };
+  const closeEditModal = () => { editRequests.cancel(); state.value.loadingDetails = false; modalState.value.showEditModal = false; modalState.value.currentItem = null; };
 
-  const openEditModal = async (type: 'period' | 'event' | 'story', item: any) => {
+  const openEditModal = async (type: 'period' | 'event' | 'story', item: { id: string }) => {
+    const isCurrent = editRequests.begin();
     if (modalState.value.showAddModal) closeAddModal();
     modalState.value.currentType = type;
     modalState.value.currentMode = 'edit';
@@ -105,201 +120,231 @@ export function useDatabaseView() {
       state.value.loadingError = null;
 
       if (type === 'period') {
-        const period = periods.value.find(p => p.id === item.id);
-        if (!period) throw new Error('Période non trouvée dans le store');
-        modalState.value.currentItem = { ...period, description: (period as any).description || { fr: '', en: '' }, categories: period.categories || [] };
+        const period = await PeriodApiService.getInstance().getPeriod(item.id);
+        if (!isCurrent()) return;
+        modalState.value.currentItem = { ...period, description: period.description || { fr: '', en: '' }, categories: period.categories || [] };
       } else if (type === 'event') {
-        const event = events.value.find(e => e.id === item.id);
+        const event = events.value.find(e => e.id === item.id) ?? (await EventApiService.getInstance().getListEvents()).find(event => event.id === item.id);
+        if (!isCurrent()) return;
         if (!event) throw new Error('Événement non trouvé dans le store');
-        modalState.value.currentItem = { ...event, description: (event as any).description || { fr: '', en: '' }, categories: event.categories || [] };
+        modalState.value.currentItem = { ...event, description: event.description || { fr: '', en: '' }, categories: event.categories || [] };
       } else if (type === 'story') {
         const story = stories.value.find(s => s.id === item.id);
-        if (!story) throw new Error('Story non trouvée dans le store');
-        modalState.value.currentItem = { ...story, description: (story as any).description || { fr: '', en: '' }, categories: story.categories || [] };
+        if (!story) throw new Error('Frise non trouvée dans le store');
+        modalState.value.currentItem = { ...story, description: story.description || { fr: '', en: '' }, categories: story.categories || [] };
       }
 
       state.value.loadingDetails = false;
       modalState.value.showEditModal = true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      if (!isCurrent()) return;
       state.value.loadingError = 'Erreur lors du chargement des données';
       state.value.loadingDetails = false;
-      toast.show(error.message?.includes('404') ? 'L\'élément n\'a pas été trouvé' : 'Erreur lors du chargement des données', 'error');
+      toast.show(error instanceof Error && error.message.includes('404') ? 'L\'élément n\'a pas été trouvé' : 'Erreur lors du chargement des données', 'error');
     }
   };
-
-  function patchStoryBoundsInList(storyId: string, bounds: { start?: string; end?: string }) {
-    const list = stories.value;
-    const idx = list.findIndex((s) => s.id === storyId);
-    if (idx < 0) return;
-    const next = [...list];
-    next[idx] = {
-      ...list[idx],
-      startDate: bounds.start,
-      endDate: bounds.end,
-    };
-    dataStore.updateStories(next);
-  }
-
-  async function mergeStoriesTemporalBoundsFromApi() {
-    const rows = await StoryApiService.getInstance().getStoriesTemporalBounds();
-    if (!rows.length) return;
-    const byId = new Map(rows.map((r) => [r.story_id, r]));
-    dataStore.updateStories(
-      stories.value.map((s) => {
-        const r = byId.get(s.id);
-        if (!r) return s;
-        const sd = r.start_date != null && String(r.start_date).trim() !== '' ? String(r.start_date).trim() : s.startDate;
-        const ed = r.end_date != null && String(r.end_date).trim() !== '' ? String(r.end_date).trim() : s.endDate;
-        return { ...s, startDate: sd, endDate: ed };
-      })
-    );
-  }
 
   const loadInitialData = async () => {
-    await dataStore.ensureDataLoaded();
-    await dataStore.ensureEventsLoaded();
-    await dataStore.ensureStoriesLoaded(true);
+    const isCurrent = initialRequests.begin();
+    state.value.loading = true;
+    state.value.error = null;
     try {
-      await mergeStoriesTemporalBoundsFromApi();
-    } catch (e) {
-      console.warn('[useDatabaseView] mergeStoriesTemporalBoundsFromApi', e);
+      await Promise.all([dataStore.ensureRootsLoaded(), dataStore.ensureEventsLoaded(), dataStore.ensureStoriesLoaded()]);
+    } catch (cause) {
+      if (isCurrent()) state.value.error = cause instanceof Error ? cause.message : 'Erreur lors du chargement des données';
+    } finally {
+      if (isCurrent()) state.value.loading = false;
     }
   };
 
-  watch(
-    selectedStory,
-    (s) => {
-      if (!s?.id) return;
-      patchStoryBoundsInList(s.id, temporalBoundsFromStoryDetail(s));
-    },
-    { deep: true }
-  );
+  const selectStory = async (story: ListStory) => {
+    closeEditModal();
+    const isCurrent = detailRequests.begin();
+    selectedStoryId.value = story.id;
+    selectedStory.value = null;
+    state.value.storyError = null;
+    state.value.loadingStoryDetails = true;
+    try {
+      const detail = await dataStore.ensureStoryLoaded(story.id);
+      if (isCurrent()) selectedStory.value = detail;
+    } catch (cause) {
+      if (isCurrent()) state.value.storyError = cause instanceof Error ? cause.message : 'Erreur lors du chargement de la frise';
+    } finally {
+      if (isCurrent()) state.value.loadingStoryDetails = false;
+    }
+  };
 
-  // Drag & Drop
-  const handleDragStart = (event: DragEvent, type: 'period' | 'event', item: any) => {
+  const retryStory = async () => {
+    const story = stories.value.find(s => s.id === selectedStoryId.value);
+    if (!story) return;
+    const isCurrent = retryRequests.begin();
+    try {
+      await Promise.all([
+        selectedStory.value?.id === story.id ? refreshSelectedStory(story.id) : selectStory(story),
+        dataStore.ensureStoriesLoaded(),
+      ]);
+    } catch {
+      if (isCurrent() && selectedStoryId.value === story.id) state.value.storyError = 'Impossible de recharger les données de la frise. Réessayez le chargement.';
+    }
+  };
+
+  // Refresh the selected record without clearing the panel's navigation state.
+  const refreshSelectedStory = async (storyId: string) => {
+    if (selectedStoryId.value !== storyId) return;
+    const isCurrent = detailRequests.begin();
+    state.value.storyError = null;
+    try {
+      const detail = await dataStore.ensureStoryLoaded(storyId);
+      if (isCurrent() && selectedStoryId.value === storyId) selectedStory.value = detail;
+    } finally {
+      if (isCurrent()) state.value.loadingStoryDetails = false;
+    }
+  };
+
+  const clearStorySelection = () => {
+    closeEditModal();
+    detailRequests.cancel();
+    retryRequests.cancel();
+    selectedStoryId.value = null;
+    selectedStory.value = null;
+    state.value.loadingStoryDetails = false;
+    state.value.storyError = null;
+  };
+
+  // Capture the target before awaiting: changing tabs must never mutate another story.
+  const mutateAssociations = async (kind: 'period' | 'event', ids: string[], remove = false, parentPeriodId?: string | null) => {
+    const storyId = selectedStory.value?.id;
+    if (!storyId || relationsBusy.value || !ids.length) return;
+    const service = StoryApiService.getInstance();
+    relationsBusy.value = true;
+    let committed = false;
+    try {
+      await service.changeAssociations(storyId, kind, ids, remove, ...(parentPeriodId !== undefined ? [parentPeriodId] : []));
+      committed = true;
+      dataStore.invalidateStory(storyId);
+      await Promise.all([
+        dataStore.ensureStoriesLoaded(),
+        refreshSelectedStory(storyId),
+      ]);
+      const total = new Set(ids).size;
+      toast.show(`${total} association(s) ${remove ? 'retirée(s)' : 'ajoutée(s)'}`, 'success');
+    } catch (cause) {
+      dataStore.invalidateStory(storyId);
+      const message = committed
+        ? 'Associations enregistrées ; impossible de recharger les données. Réessayez le chargement.'
+        : mutationErrorMessage(cause, 'Impossible de modifier les associations de la frise.');
+      toast.show(message, 'error');
+      if (selectedStoryId.value === storyId) state.value.storyError = message;
+    } finally {
+      relationsBusy.value = false;
+    }
+  };
+
+  const handleDragStart = (event: DragEvent, type: 'period' | 'event', item: { id: string }) => {
     dragDropState.value.draggedItem = { type, data: item };
     if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
   };
-
   const handleDrop = async (_event: DragEvent) => {
     dragDropState.value.isDragOver = false;
-    if (!dragDropState.value.draggedItem) return;
+    const item = dragDropState.value.draggedItem;
+    dragDropState.value.draggedItem = null;
+    if (!item) return;
     if (!selectedStory.value) {
-      toast.show('Veuillez sélectionner une story avant de déposer un élément', 'error');
+      toast.show('Veuillez sélectionner une frise avant de déposer un élément', 'error');
       return;
     }
-
-    const storyService = StoryApiService.getInstance();
-    const draggedItem = dragDropState.value.draggedItem;
-
-    try {
-      if (draggedItem.type === 'period') {
-        await storyService.addPeriodToStory(selectedStory.value.id, draggedItem.data.id);
-        const updated = { ...selectedStory.value, periods: [...(selectedStory.value.periods || [])] };
-        if (!updated.periods.find((p: any) => p.id === draggedItem.data.id)) updated.periods.push(draggedItem.data);
-        selectedStory.value = updated;
-        toast.show('Période ajoutée à la story avec succès', 'success');
-      } else {
-        await storyService.addEventToStory(selectedStory.value.id, draggedItem.data.id);
-        const updated = { ...selectedStory.value, events: [...(selectedStory.value.events || [])] };
-        if (!updated.events.find((e: any) => e.id === draggedItem.data.id)) updated.events.push(draggedItem.data);
-        selectedStory.value = updated;
-        toast.show('Événement ajouté à la story avec succès', 'success');
-      }
-    } catch {
-      toast.show('Erreur lors de l\'ajout de l\'élément à la story', 'error');
-    }
+    await mutateAssociations(item.type, [item.data.id]);
   };
-
   const handleDragOver = (_event: DragEvent) => { if (dragDropState.value.draggedItem) dragDropState.value.isDragOver = true; };
   const handleDragLeave = (_event: DragEvent) => { dragDropState.value.isDragOver = false; };
-
-  const selectStory = async (story: ListStory) => {
+  const removePeriodFromStory = (id: string) => mutateAssociations('period', collectStoryPeriodSubtreeIds(selectedStory.value?.periods ?? [], id), true);
+  const changeRootPeriod = async (periodId: string) => {
+    const storyId = selectedStory.value?.id;
+    if (!storyId || relationsBusy.value) return;
+    relationsBusy.value = true;
+    let committed = false;
     try {
-      state.value.loadingStoryDetails = true;
-      selectedStory.value = await StoryApiService.getInstance().getStory(story.id);
-    } catch {
-      toast.show('Erreur lors du chargement des détails de la story', 'error');
-      selectedStory.value = null;
+      await StoryApiService.getInstance().changeRootPeriod(storyId, periodId);
+      committed = true;
+      dataStore.invalidateStory(storyId);
+      await Promise.all([dataStore.ensureStoriesLoaded(), refreshSelectedStory(storyId)]);
+      toast.show('Racine de la frise modifiée', 'success');
+    } catch (cause) {
+      dataStore.invalidateStory(storyId);
+      const message = committed ? 'Racine enregistrée ; impossible de recharger la frise. Réessayez le chargement.'
+        : mutationErrorMessage(cause, 'Impossible de changer la racine de la frise.');
+      if (selectedStoryId.value === storyId) state.value.storyError = message;
+      toast.show(message, 'error');
+    } finally { relationsBusy.value = false; }
+  };
+  const removeEventFromStory = (id: string) => mutateAssociations('event', [id], true);
+  const addPeriodsToStory = (ids: string[], parentPeriodId?: string | null) => mutateAssociations('period', ids, false, parentPeriodId);
+  const addEventsToStory = (ids: string[]) => mutateAssociations('event', ids);
+
+  // Related-story actions share the same captured target and refresh rules as period/event links.
+  const mutateRelatedStories = async (operation: (parentId: string) => Promise<string>) => {
+    const parentId = selectedStory.value?.id;
+    if (!parentId || relationsBusy.value) return;
+    relationsBusy.value = true;
+    let committed = false;
+    try {
+      const message = await operation(parentId);
+      committed = true;
+      dataStore.invalidateStories();
+      await Promise.all([
+        dataStore.ensureStoriesLoaded(),
+        refreshSelectedStory(parentId),
+      ]);
+      toast.show(message, 'success');
+    } catch (cause) {
+      dataStore.invalidateStories();
+      const message = committed ? 'Relations enregistrées ; impossible de recharger les données. Réessayez le chargement.'
+        : mutationErrorMessage(cause, 'Impossible de modifier les relations de la frise.');
+      toast.show(message, 'error');
+      if (selectedStoryId.value === parentId) state.value.storyError = message;
     } finally {
-      state.value.loadingStoryDetails = false;
+      relationsBusy.value = false;
     }
   };
 
-  const removePeriodFromStory = async (periodId: string) => {
-    if (!selectedStory.value) return;
-    try {
-      await StoryApiService.getInstance().removePeriodFromStory(selectedStory.value.id, periodId);
-      selectedStory.value = { ...selectedStory.value, periods: selectedStory.value.periods?.filter((p: any) => p.id !== periodId) };
-      toast.show('Période supprimée de la story', 'success');
-    } catch {
-      toast.show('Erreur lors de la suppression de la période', 'error');
-    }
-  };
-
-  const removeEventFromStory = async (eventId: string) => {
-    if (!selectedStory.value) return;
-    try {
-      await StoryApiService.getInstance().removeEventFromStory(selectedStory.value.id, eventId);
-      selectedStory.value = { ...selectedStory.value, events: selectedStory.value.events?.filter((e: any) => e.id !== eventId) };
-      toast.show('Événement supprimé de la story', 'success');
-    } catch {
-      toast.show('Erreur lors de la suppression de l\'événement', 'error');
-    }
-  };
-
-  const addPeriodsToStory = async (periodIds: string[]) => {
-    const story = selectedStory.value;
-    if (!story) return;
-    const storyService = StoryApiService.getInstance();
-    let added = 0;
-    for (const id of periodIds) {
-      try {
-        await storyService.addPeriodToStory(story.id, id);
-        added++;
-      } catch {
-        // continue les autres
-      }
-    }
-    if (added > 0) {
-      selectedStory.value = await storyService.getStory(story.id);
-      toast.show(`${added} période(s) ajoutée(s) à la story`, 'success');
-    } else {
-      toast.show('Erreur lors de l\'ajout des périodes', 'error');
-    }
-  };
-
-  const addEventsToStory = async (eventIds: string[]) => {
-    let story = selectedStory.value;
-    if (!story) return;
-    const storyService = StoryApiService.getInstance();
-    let added = 0;
-    for (const id of eventIds) {
-      try {
-        await storyService.addEventToStory(story.id, id);
-        const event = events.value.find(e => e.id === id);
-        if (event && !story.events?.find((e: any) => e.id === id)) {
-          story = { ...story, events: [...(story.events || []), event as Event] };
-          selectedStory.value = story;
-        }
-        added++;
-      } catch {
-        // continue les autres
-      }
-    }
-    if (added > 0) toast.show(`${added} événement(s) ajouté(s) à la story`, 'success');
-    else toast.show('Erreur lors de l\'ajout des événements', 'error');
-  };
+  const addChildStoriesToStory = (childIds: string[], anchor?: StoryAnchor) => mutateRelatedStories(async parentId => {
+    const ids = [...new Set(childIds)];
+    const service = StoryApiService.getInstance();
+    if (anchor) await service.linkChildStories(parentId, ids, anchor);
+    else await service.linkChildStories(parentId, ids);
+    return `${ids.length} frise(s) rattachée(s)`;
+  });
+  const removeChildStoryFromStory = (childId: string) => mutateRelatedStories(async parentId => {
+    await StoryApiService.getInstance().unlinkChildStory(parentId, childId);
+    return 'Frise détachée';
+  });
+  const addEventAnchorToStory = (childId: string, eventId: string) => mutateRelatedStories(async () => {
+    await StoryApiService.getInstance().addAnchor(childId, { type: 'event', id: eventId });
+    return 'Ancre ajoutée';
+  });
+  const removeEventAnchorFromStory = (childId: string, eventId: string) => mutateRelatedStories(async () => {
+    await StoryApiService.getInstance().removeAnchor(childId, { type: 'event', id: eventId });
+    return 'Ancre retirée';
+  });
 
   return {
     state, modalState, searchState: searchState.value, dragDropState: dragDropState.value, selectedStory,
-    filteredPeriods, filteredEvents, filteredStories,
+    filteredPeriods, filteredEvents, filteredStories, selectedStoryId, relationsBusy, retryStory, clearStorySelection,
     handleAddPeriod, handleAddEvent, handleAddStory,
     handleEditPeriod, handleEditEvent, handleEditStory,
     closeAddModal, closeEditModal, openEditModal,
     loadInitialData,
     handleDragStart, handleDrop, handleDragOver, handleDragLeave,
-    selectStory, removePeriodFromStory, removeEventFromStory, addPeriodsToStory, addEventsToStory,
+    selectStory,
+    removePeriodFromStory,
+    changeRootPeriod,
+    removeEventFromStory,
+    addPeriodsToStory,
+    addEventsToStory,
+    addChildStoriesToStory,
+    removeChildStoryFromStory,
+    addEventAnchorToStory,
+    removeEventAnchorFromStory,
     sharedLoading, sharedError,
   };
 }

@@ -1,4 +1,4 @@
-/** Étire les positions % autour de l’intervalle [t1, t2] pour garder une largeur min (timeline). */
+/** Étire les positions % autour de l'intervalle [t1, t2] pour garder une largeur min (timeline). */
 export function timelineFocusTransform(val: number, t1: number, t2: number, minPct: number): number {
   const w = t2 - t1;
   if (w <= 0) return val;

@@ -1,15 +1,14 @@
 <template>
-  <div class="period-grid">
-    <!-- On masque le spinner quand une animation FLIP est en cours :
-         les anciennes périodes sont encore valides, on les garde visibles. -->
-    <div v-if="loading && !flipFrom" class="loading-container">
-      <i class="fas fa-spinner fa-spin"></i>
+  <div class="period-grid" :aria-busy="loading || undefined">
+    <!-- Garder le niveau courant affiché pendant une navigation ou une recherche de stories. -->
+    <div v-if="loading && !currentPeriod && periods.length === 0 && events.length === 0" class="loading-container">
+      <Icon icon="mdi:loading" class="spin" />
       <span>Chargement de la timeline...</span>
     </div>
     <div v-else-if="error" class="error-message">
       {{ error }}
     </div>
-    <div v-else-if="!loading && periods.length === 0" class="empty-message">
+    <div v-else-if="!loading && !currentPeriod && periods.length === 0 && events.length === 0" class="empty-message">
       Aucune période à afficher
     </div>
     <div v-else class="timeline-container">
@@ -21,8 +20,14 @@
           :period="props.currentPeriod"
           :is-selected="false"
           @back="goBack"
-        />
-        <div class="period-row" :style="{ height: `${periodRowHeight}px` }">
+        >
+          <template #title-actions>
+            <AssociatedStoriesBadge v-if="props.currentPeriod" :story-id="currentStoryId" :period-id="props.currentPeriod.id" :period-label="props.currentPeriod.label.fr || props.currentPeriod.label.en"
+              :stories="associatedByPeriod.get(props.currentPeriod.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
+              @retry="retryAssociations" @select="emit('story-select', $event)" />
+          </template>
+        </PeriodCard>
+        <div ref="periodRowRef" class="period-row" :style="{ height: `${periodRowHeight}px` }">
           <PeriodCard
             v-for="(period, i) in sortedPeriods"
             :key="period.id"
@@ -30,24 +35,84 @@
             :period="period"
             :is-selected="false"
             class="timeline-card period-grid__period-position"
+            :expanded="activePeriodId === period.id"
+            :wrap-content="activePeriodId === period.id && wrapContent"
             :style="{ ...getPeriodCssVars(period), '--enter-delay': `${i * 25}ms` }"
             @select="selectPeriod"
-            @mouseenter="hoveredPeriodId = period.id"
-            @mouseleave="hoveredPeriodId = null"
-          />
+            :aria-describedby="tooltipPeriod?.id === period.id ? tooltipId : undefined"
+            @mouseenter="periodDetails.enter(period.id)"
+            @mousemove="periodDetails.move(period.id)"
+            @mouseleave="periodDetails.leave(period.id)"
+            @focusin="periodDetails.focus(period.id)"
+            @focusout="periodDetails.blur(period.id)"
+            @keydown.esc.stop="periodDetails.reset()"
+          >
+            <template #title-actions>
+              <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
+                :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
+                @retry="retryAssociations" @select="emit('story-select', $event)" />
+            </template>
+          </PeriodCard>
         </div>
       </div>
       <div class="timeline-line"></div>
+      <div v-if="undatedPeriods.length" class="period-grid__undated">
+        <span>Dates non déterminées</span>
+        <span v-for="period in undatedPeriods" :key="`p:${period.id}`" class="period-grid__undated-item">
+          <button type="button" @click="selectPeriod(period)">{{ period.label.fr }}</button>
+          <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
+            :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
+            @retry="retryAssociations" @select="emit('story-select', $event)" />
+        </span>
+      </div>
+      <Teleport to="body">
+        <div
+          v-if="tooltipPeriod"
+          :id="tooltipId"
+          ref="tooltipElement"
+          role="tooltip"
+          class="period-grid__tooltip"
+          :style="tooltipStyle"
+          @mouseenter="periodDetails.enterTooltip"
+          @mouseleave="periodDetails.leaveTooltip"
+        >
+          <strong>{{ tooltipPeriod.label.fr || tooltipPeriod.label.en }}</strong>
+          <span v-if="tooltipDateRange">{{ tooltipDateRange }}</span>
+        </div>
+        <template v-if="props.storySuggestions.length > 0 && dropdownRect">
+          <div class="story-dropdown-backdrop" @click="goBack" />
+          <div class="story-dropdown" :style="dropdownStyle">
+            <p class="story-dropdown__label">Explorer en détail</p>
+            <button
+              v-for="s in props.storySuggestions"
+              :key="s.id"
+              class="story-dropdown__item"
+              @click="emit('story-select', s.id)"
+            >
+              <span class="story-dropdown__item-title">{{ s.title.fr }}</span>
+              <span v-if="s.description" class="story-dropdown__item-desc">{{ s.description.fr }}</span>
+              <span class="story-dropdown__item-arrow" aria-hidden="true">→</span>
+            </button>
+          </div>
+        </template>
+      </Teleport>
       <div class="events-container" @click="selectedEvent = null">
+        <span v-if="undatedEvents.length" class="period-grid__undated-label">Événements sans date déterminée</span>
         <EventCard
           v-for="event in events"
           :key="event.id"
           :event="event"
+          :undated="listEventYearsBP(event) === null"
           :is-selected="selectedEvent?.id === event.id"
           :is-category-active="isCategoryActive(event)"
           :card-style="getEventStyles(event)"
           :align="getEventAlign(event)"
-          @click="selectEvent(event)"
+          :story-suggestions="selectedEvent?.id === event.id ? eventStorySuggestions : []"
+          :suggestions-loading="selectedEvent?.id === event.id && eventSuggestionsLoading"
+          :suggestions-error="selectedEvent?.id === event.id ? eventSuggestionsError : null"
+          @retry-suggestions="retryEventSuggestions"
+          @click="(ev: MouseEvent) => selectEvent(event, ev)"
+          @story-select="(id: string) => emit('story-select', id)"
         />
       </div>
     </div>
@@ -55,9 +120,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
-import type { ListPeriod, ListEvent } from '@/types/database';
+import { ref, computed, watch, onActivated, onDeactivated } from 'vue';
+import { Icon } from '@iconify/vue';
+import type { ListPeriod, ListEvent, StorySuggestion } from '@/types/database';
+import { compareYearsOldestFirst } from '@temporal';
+import { periodCoordinates } from '@/services/TimelineScalingService';
+import { listEventYearsBP } from '@/lib/listEventTableHelpers';
 import { useTimelineScaling } from '@/composables/useTimelineScaling';
+import { StoryApiService } from '@/services/StoryApiService';
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
+import { usePeriodFlip } from '@/composables/usePeriodFlip';
+import { useTimelinePeriodTooltip } from '@/composables/useTimelinePeriodTooltip';
+import { useTimelinePeriodExpansion } from '@/composables/useTimelinePeriodExpansion';
+import { formatPeriodDateRange } from '@/lib/formatTemporalBoundLabel';
 import {
   timelineEventCardAlign,
   timelineFocusTransform,
@@ -65,38 +140,51 @@ import {
 } from '@/lib/timelinePeriodGridHelpers';
 import PeriodCard from './PeriodCard.vue';
 import EventCard from './EventCard.vue';
+import AssociatedStoriesBadge from './AssociatedStoriesBadge.vue';
+import { useTimelineAssociatedStories } from '@/composables/useTimelineAssociatedStories';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   periods: ListPeriod[];
   events: ListEvent[];
   loading: boolean;
   parentPeriod: ListPeriod | null;
   currentPeriod: ListPeriod | null;
-}>();
+  /** Bornes de la story courante : cadre fixe quand aucun currentPeriod n'est actif. */
+  storyBounds?: { startYearsBP?: number; endYearsBP?: number } | null;
+  storySuggestions: StorySuggestion[];
+  currentStoryId: string;
+  /** Infobulle conservée pour réutilisation, désactivée dans la timeline. */
+  periodTooltips?: boolean;
+}>(), { periodTooltips: false });
 
 const emit = defineEmits<{
   (e: 'period-click', period: ListPeriod): void;
+  (e: 'event-click', event: ListEvent): void;
   (e: 'go-back'): void;
+  (e: 'story-select', storyId: string): void;
 }>();
 
 const { updateFromPeriods, getPeriodLayoutStyle, getEventLayoutStyle } = useTimelineScaling();
 
 const error = ref<string | null>(null);
 const selectedEvent = ref<ListEvent | null>(null);
-const hoveredPeriodId = ref<string | null>(null);
-/** Hauteur d'un couloir : hauteur carte période (52px) + marge entre couloirs (4px) */
-const ligneHeight = 56;
-/** Largeur visuelle minimale (en %) accordée à la période survolée */
-const MIN_HOVER_PCT = 8;
-
+/** Suggestions de stories pour l'événement actuellement sélectionné. */
+const active = ref(true);
+const { byPeriod: associatedByPeriod, loading: associationsLoading, error: associationsError, retry: retryAssociations } = useTimelineAssociatedStories(
+  () => props.currentStoryId, () => active.value && (!!props.currentPeriod || props.periods.length > 0),
+);
+const { results: eventStorySuggestions, loading: eventSuggestionsLoading, error: eventSuggestionsError, retry: retryEventSuggestions } = useDebouncedSearch(
+  () => selectedEvent.value?.id ?? '',
+  (id, signal) => StoryApiService.getInstance().getSuggestions(props.currentStoryId, [], [id], { signal }),
+  { delayMs: 0, minLength: 1, criteria: () => props.currentStoryId, enabled: () => active.value && !props.loading },
+);
 // ─── FLIP animation ────────────────────────────────────────────────────────────
 
 /** Ref vers la barre parent (PeriodCard variant="parent"). */
 const parentBarRef = ref<any>(null);
-/** Rect de la carte cliquée, capturé avant la navigation. */
-const flipFrom = ref<DOMRect | null>(null);
 /** Map id → élément DOM des cartes de période. */
 const periodElMap = new Map<string, HTMLElement>();
+const periodRowRef = ref<HTMLElement | null>(null);
 
 function setPeriodRef(el: unknown, id: string) {
   const domEl = unwrapTemplateRefToHTMLElement(el);
@@ -104,83 +192,46 @@ function setPeriodRef(el: unknown, id: string) {
   else periodElMap.delete(id);
 }
 
-/**
- * FLIP : on attend que loading repasse à false ET que currentPeriod soit défini.
- * C'est seulement à ce moment que le DOM affiche la barre parent.
- */
-watch(
-  [() => props.currentPeriod, () => props.loading],
-  async ([newPeriod, isLoading]) => {
-    // Le FLIP n'a de sens que quand le DOM est visible (loading terminé)
-    if (!newPeriod || isLoading || !flipFrom.value) return;
-    const from = flipFrom.value;
+const periodDetails = useTimelinePeriodTooltip(
+  () => props.periods,
+  id => periodElMap.get(id) ?? null,
+  () => props.periodTooltips && active.value && !props.loading,
+);
+const { period: tooltipPeriod, tooltipId, tooltipElement, tooltipStyle } = periodDetails;
+const activePeriodId = computed(() => active.value && !props.loading && props.periods.some(p => p.id === periodDetails.activeId.value)
+  ? periodDetails.activeId.value : null);
+const { minimumPct, laneHeight, wrapContent } = useTimelinePeriodExpansion(
+  () => activePeriodId.value,
+  id => periodElMap.get(id) ?? null,
+  periodRowRef,
+);
+const tooltipDateRange = computed(() => tooltipPeriod.value ? formatPeriodDateRange(tooltipPeriod.value) : '');
 
-    await nextTick();
-
-    const parentEl: HTMLElement | null =
-      (parentBarRef.value?.$el as HTMLElement) ?? parentBarRef.value ?? null;
-    if (!parentEl) { flipFrom.value = null; return; }
-
-    const to = parentEl.getBoundingClientRect();
-    if (to.width === 0) { flipFrom.value = null; return; }
-
-    const dx     = from.left  - to.left;
-    const dy     = from.top   - to.top;
-    const scaleX = from.width / to.width;
-    const scaleY = from.height / to.height;
-
-    const PHASE1 = 260; // montée verticale
-    const PHASE2 = 340; // expansion horizontale
-
-    // ── Phase 1 : snap à la position de départ ────────────────────────────
-    parentEl.style.transition = 'none';
-    parentEl.style.transformOrigin = 'top left';
-    // Position complète de la carte (lieu + taille)
-    parentEl.style.transform = `translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
-
-    void parentEl.getBoundingClientRect(); // force reflow
-
-    // ── Phase 1 : animer uniquement la translation Y (monter vers la barre) ──
-    // On garde scaleX et dx constants — seul dy et scaleY s'animent
-    parentEl.style.transition = `transform ${PHASE1}ms cubic-bezier(0.4, 0, 0.2, 1)`;
-    parentEl.style.transform = `translate(${dx}px, 0px) scale(${scaleX}, 1)`;
-
-    // ── Phase 2 : une fois en position verticale, expansion horizontale ────
-    setTimeout(() => {
-      if (!parentEl) return;
-      parentEl.style.transition = `transform ${PHASE2}ms cubic-bezier(0.4, 0, 0.2, 1)`;
-      parentEl.style.transform = 'none';
-    }, PHASE1);
-
-    setTimeout(() => {
-      if (parentEl) {
-        parentEl.style.transition = '';
-        parentEl.style.transform = '';
-        parentEl.style.transformOrigin = '';
-      }
-      flipFrom.value = null;
-    }, PHASE1 + PHASE2 + 20);
-  },
-  { flush: 'post' }
+const periodFlip = usePeriodFlip(
+  () => props.currentPeriod?.id,
+  () => props.loading,
+  () => unwrapTemplateRefToHTMLElement(parentBarRef.value),
 );
 
 // ─── Tri et lanes ─────────────────────────────────────────────────────────────
 
-const sortedPeriods = computed(() =>
-  [...props.periods].sort((a, b) => (b.startYearsBP ?? 0) - (a.startYearsBP ?? 0))
-);
+const periodRows = computed(() => props.periods.map(p => ({ p, ...periodCoordinates(p) })));
+const datedPeriodRows = computed(() => periodRows.value.flatMap(({p,start,end}) => start !== null && end !== null ? [{p,start,end}] : []));
+const undatedPeriods = computed(() => periodRows.value.filter(row => row.start === null || row.end === null).map(row => row.p));
+const undatedEvents = computed(() => props.events.filter(e => listEventYearsBP(e) === null));
+const sortedPeriods = computed(() => [...datedPeriodRows.value].sort((a,b) => compareYearsOldestFirst(a.start,b.start)).map(row => row.p));
 
 const laneMap = computed((): Map<string, number> => {
   const result = new Map<string, number>();
   const laneMinEnds: number[] = [];
 
-  const allBP = sortedPeriods.value.flatMap(p => [p.startYearsBP ?? 0, p.endYearsBP ?? 0]);
+  const allBP = datedPeriodRows.value.flatMap(row => [row.start, row.end]);
   const span = allBP.length ? Math.max(...allBP) - Math.min(...allBP) : 0;
   const tolerance = span * 0.001;
 
   for (const period of sortedPeriods.value) {
-    const startBP = period.startYearsBP ?? 0;
-    const endBP   = period.endYearsBP   ?? 0;
+    const { start: startBP, end: endBP } = periodCoordinates(period);
+    if (startBP === null || endBP === null) continue;
 
     let assigned = -1;
     for (let lane = 0; lane < laneMinEnds.length; lane++) {
@@ -207,12 +258,15 @@ const numLanes = computed(() =>
   laneMap.value.size === 0 ? 1 : Math.max(...laneMap.value.values()) + 1
 );
 
-const periodRowHeight = computed(() => numLanes.value * ligneHeight);
+const periodRowHeight = computed(() => numLanes.value * laneHeight.value);
 
 watch(
-  [sortedPeriods, () => props.currentPeriod],
+  [sortedPeriods, () => props.currentPeriod, () => props.storyBounds],
   ([p]) => {
-    try { updateFromPeriods(p as any[], props.currentPeriod as any ?? undefined); }
+    // currentPeriod définit la fenêtre quand on navigue dans une période ;
+    // sinon on utilise les bornes de la story pour cadrer toute la frise.
+    const framingPeriod = props.currentPeriod ?? props.storyBounds ?? undefined;
+    try { updateFromPeriods(p, framingPeriod); }
     catch (e) { error.value = e instanceof Error ? e.message : 'Erreur de calcul'; }
   },
   { immediate: true }
@@ -223,9 +277,9 @@ watch(
 const rawLayouts = computed(() => {
   const map = new Map<string, { left: number; width: number; top: number }>();
   for (const period of sortedPeriods.value) {
-    const s = getPeriodLayoutStyle(period as any, {
+    const s = getPeriodLayoutStyle(period, {
       row: laneMap.value.get(period.id) ?? 0,
-      rowHeight: ligneHeight,
+      rowHeight: laneHeight.value,
     });
     map.set(period.id, {
       left:  parseFloat(s.left as string),
@@ -241,18 +295,18 @@ const getPeriodCssVars = (period: ListPeriod): Record<string, string> => {
   if (!raw) return {};
   const { left, width, top } = raw;
 
-  if (hoveredPeriodId.value) {
-    const hov = rawLayouts.value.get(hoveredPeriodId.value);
-    if (hov && hov.width < MIN_HOVER_PCT) {
+  if (activePeriodId.value) {
+    const hov = rawLayouts.value.get(activePeriodId.value);
+    if (hov && hov.width < minimumPct.value) {
       const t1 = hov.left;
       const t2 = hov.left + hov.width;
-      const newLeft  = timelineFocusTransform(left, t1, t2, MIN_HOVER_PCT);
-      const newRight = timelineFocusTransform(left + width, t1, t2, MIN_HOVER_PCT);
+      const newLeft  = timelineFocusTransform(left, t1, t2, minimumPct.value);
+      const newRight = timelineFocusTransform(left + width, t1, t2, minimumPct.value);
       return {
         '--period-left': `${newLeft}%`,
         '--period-width': `${Math.max(0, newRight - newLeft)}%`,
         '--period-top': `${top}px`,
-        '--period-z': String(period.id === hoveredPeriodId.value ? 2 : 1),
+        '--period-z': String(period.id === activePeriodId.value ? 2 : 1),
       };
     }
   }
@@ -265,7 +319,7 @@ const getPeriodCssVars = (period: ListPeriod): Record<string, string> => {
 };
 
 const getEventRawLeft = (event: ListEvent): number => {
-  const base = getEventLayoutStyle((event as any).date ?? '');
+  const base = getEventLayoutStyle(event.date);
   return parseFloat(base.left as string);
 };
 
@@ -273,17 +327,17 @@ const getEventAlign = (event: ListEvent): 'start' | 'center' | 'end' =>
   timelineEventCardAlign(getEventRawLeft(event));
 
 const getEventStyles = (event: ListEvent): { width: string; left: string } => {
-  const base = getEventLayoutStyle((event as any).date ?? '');
+  const base = getEventLayoutStyle(event.date);
   const rawLeft = parseFloat(String(base.left));
 
-  if (hoveredPeriodId.value) {
-    const hov = rawLayouts.value.get(hoveredPeriodId.value);
-    if (hov && hov.width < MIN_HOVER_PCT) {
+  if (activePeriodId.value) {
+    const hov = rawLayouts.value.get(activePeriodId.value);
+    if (hov && hov.width < minimumPct.value) {
       const t1 = hov.left;
       const t2 = hov.left + hov.width;
       return {
         width: String(base.width),
-        left: `${timelineFocusTransform(rawLeft, t1, t2, MIN_HOVER_PCT)}%`,
+        left: `${timelineFocusTransform(rawLeft, t1, t2, minimumPct.value)}%`,
       };
     }
   }
@@ -291,18 +345,62 @@ const getEventStyles = (event: ListEvent): { width: string; left: string } => {
   return { width: String(base.width), left: String(base.left) };
 };
 
+// ─── Dropdown suggestions ─────────────────────────────────────────────────────
+
+/** Rect de la carte qui a ouvert le dropdown (pour le positionner). */
+const dropdownRect = ref<DOMRect | null>(null);
+
+const dropdownStyle = computed(() => {
+  if (!dropdownRect.value) return {};
+  const rect = dropdownRect.value;
+  const center = rect.left + rect.width / 2;
+  return {
+    top: `${rect.bottom + 8}px`,
+    left: `${center}px`,
+    transform: 'translateX(-50%)',
+  };
+});
+
+watch(() => props.storySuggestions, (val) => {
+  if (val.length === 0) dropdownRect.value = null;
+});
+
 // ─── Actions ──────────────────────────────────────────────────────────────────
 
 const selectPeriod = (period: ListPeriod) => {
-  // Capturer la position de la carte avant la navigation (pour le FLIP)
+  periodDetails.dismiss();
   const el = periodElMap.get(period.id);
-  if (el) flipFrom.value = el.getBoundingClientRect();
+  const rect = el ? el.getBoundingClientRect() : null;
+  periodFlip.prepare(period, el ?? null);
+  dropdownRect.value = rect;
   emit('period-click', period);
 };
 
-const selectEvent = (event: ListEvent) => {
-  selectedEvent.value = selectedEvent.value?.id === event.id ? null : event;
+const selectEvent = (event: ListEvent, nativeEvt?: MouseEvent) => {
+  const isDeselecting = selectedEvent.value?.id === event.id;
+  selectedEvent.value = isDeselecting ? null : event;
+  if (!isDeselecting) {
+    if (nativeEvt) {
+      const target = (nativeEvt.currentTarget ?? nativeEvt.target) as HTMLElement | null;
+      if (target) dropdownRect.value = target.getBoundingClientRect();
+    }
+    emit('event-click', event);
+  }
 };
+
+watch([() => props.currentStoryId, () => props.currentPeriod?.id], () => { selectedEvent.value = null; }, { flush: 'sync' });
+watch(() => props.events, events => {
+  if (selectedEvent.value && !events.some(event => event.id === selectedEvent.value!.id)) selectedEvent.value = null;
+});
+
+onActivated(() => { active.value = true; });
+onDeactivated(() => {
+  active.value = false;
+  dropdownRect.value = null;
+  selectedEvent.value = null;
+  periodDetails.reset();
+  periodFlip.cancel();
+});
 
 const isCategoryActive = (event: ListEvent): boolean => {
   if (!selectedEvent.value || selectedEvent.value.id === event.id) return false;
@@ -311,12 +409,38 @@ const isCategoryActive = (event: ListEvent): boolean => {
 };
 
 const goBack = () => {
-  flipFrom.value = null; // pas de FLIP sur le retour
+  periodDetails.reset();
+  periodFlip.cancel();
   emit('go-back');
 };
 </script>
 
 <style scoped>
+.period-grid__undated-item { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
+.period-grid__tooltip {
+  position: fixed;
+  z-index: var(--z-index-tooltip);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  width: max-content;
+  max-width: min(360px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--font-size-sm);
+}
+
+.period-grid__undated { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); margin: var(--spacing-md) 0; }
+.period-grid__undated button { color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); padding: var(--spacing-xs) var(--spacing-sm); cursor: pointer; }
+
 .period-grid {
   height: 100%;
   width: 100%;
@@ -357,6 +481,7 @@ const goBack = () => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
   width: 100%;
 }
 
@@ -416,5 +541,90 @@ const goBack = () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+</style>
+
+<style>
+/* Styles globaux pour le dropdown (en dehors du scoped car rendu dans body via Teleport) */
+
+.story-dropdown-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.story-dropdown {
+  position: fixed;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 200px;
+  max-width: 320px;
+  padding: 8px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  animation: dropdown-enter 0.18s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.story-dropdown__label {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin: 0 0 4px 4px;
+}
+
+.story-dropdown__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 32px 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  transition: background 0.12s;
+}
+
+.story-dropdown__item:hover {
+  background: var(--color-background-secondary, rgba(255,255,255,0.06));
+}
+
+.story-dropdown__item-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.story-dropdown__item-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.story-dropdown__item-arrow {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.12s, transform 0.12s;
+}
+
+.story-dropdown__item:hover .story-dropdown__item-arrow {
+  opacity: 1;
+  transform: translateY(-50%) translateX(3px);
+}
+
+@keyframes dropdown-enter {
+  from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 </style>

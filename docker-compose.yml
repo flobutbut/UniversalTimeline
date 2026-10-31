@@ -1,56 +1,23 @@
-version: '3.8'
-
 services:
-  # Base de données principale
-  wikidata_db:
-    image: postgres:15
-    container_name: wikidata_db
-    environment:
-      POSTGRES_DB: wikidata_db
-      POSTGRES_USER: wikidata_user
-      POSTGRES_PASSWORD: wikidata_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./database/init-all.sql:/docker-entrypoint-initdb.d/init-all.sql
-      - wikidata_data:/var/lib/postgresql/data
-    networks:
-      - wikidata_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U wikidata_user -d wikidata_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-  # Serveur API
   server:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: api_server
+    env_file:
+      - ./server/.env
     environment:
-      DATABASE_URL: postgresql://wikidata_user:wikidata_password@wikidata_db:5432/wikidata_db
-      NODE_ENV: development
+      HOST: 0.0.0.0
+      NODE_ENV: production
       PORT: 3000
     ports:
-      - "3000:3000"
-    volumes:
-      - ./server:/app
-      - /app/node_modules
-    depends_on:
-      wikidata_db:
-        condition: service_healthy
-    networks:
-      - wikidata_network
+      - "127.0.0.1:3000:3000"
     restart: unless-stopped
-    command: ["npm", "run", "dev"]
-
-volumes:
-  wikidata_data:
-    name: wikidata_data
-
-networks:
-  wikidata_network:
-    name: wikidata_network
-    driver: bridge 
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 20s

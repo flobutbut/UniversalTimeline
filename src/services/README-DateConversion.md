@@ -1,217 +1,30 @@
-# Service de Conversion de Dates
+# Domaine temporel partagé
 
-Ce service permet de convertir des dates entre différents formats temporels, incluant les dates très anciennes (géologiques) et les dates modernes.
+La source unique est `server/src/shared/temporal.ts`. Elle est pure et sans dépendance : l’API la compile avec ses sources habituelles, y compris dans Docker ; le frontend importe exactement le même fichier via l’alias `@temporal` de Vite, Vitest et TypeScript. Aucun second parser, paquet ou fichier généré à synchroniser.
 
-## Formats Supportés
+`DateService` est seulement l’adaptateur d’affichage français/anglais. `DateConversionService`, `useDateConversion`, `DateFormatter` et l’ancienne copie backend ont été retirés au lot 24. Les tests de leurs familles d’entrées utiles ont été migrés vers `server/test/temporal.test.ts` ; leurs anciens objets de sortie, options et conversions de stockage sans consommateur ne font plus partie de l’API du projet.
 
-### 1. Format ISO8601
-- **Format**: `-3600000000-01-01T00:00:00Z`
-- **Exemple**: `-4000000-01-01T00:00:00Z` (4 millions d'années)
-- **Utilisation**: Format standard pour les dates très anciennes
+## Interprétation
 
-### 2. Format Moderne
-- **Format**: `18 avril 1923`
-- **Exemple**: `15 janvier 2024`
-- **Utilisation**: Dates récentes en français
+- G/M/K/A (ex. `G4.6`, `M65`, `K11.7`, `A230`) et géologique historique (`4.5 Ga`, `65 Ma`, `40 ka`, `40000 ans`, virgule décimale et suffixes ago/avant/BP).
+- Année, année-mois, date ISO, timestamps avec secondes/fraction/fuseau et timestamps PostgreSQL avec espace. Les dates sans fuseau sont interprétées en UTC ; le parseur contrôle jours/mois/années bissextiles, sans normalisation silencieuse des dates impossibles.
+- Dates françaises textuelles ou JJ/MM/AAAA, mois anglais, années BCE explicites et anciens encodages annuels G/H/M. Pas de conversion automatique de langage naturel ambigu.
+- `NOW`/`TODAY`, insensibles à la casse, sont les seuls tokens de présent. Une chaîne vide, une expression inconnue ou une date impossible a une coordonnée indéterminée (`null`), jamais le nombre zéro.
+- Les nombres BP calculés suivent la convention historique du projet : années avant l’instant courant fourni, à 365,25 jours par an, pas l’époque scientifique 1950. Une date future a une valeur négative. Pour les années Wikidata hors de la plage de Date, on garde une approximation à l’année plutôt qu’une fausse précision civile.
+- Les bornes numériques explicites d’un enregistrement importé restent prioritaires lorsqu’elles sont finies et que le texte n’est pas explicitement non interprétable. NOW/TODAY vaut toujours 0. Ce lot ne réécrit ni les textes ni les colonnes numériques déjà présentes en base et ne déduit pas une époque différente pour des données historiques.
 
-### 3. Format BCE (Before Common Era)
-- **Format**: `800 BCE`, `-800`, `800 avant J.-C.`
-- **Exemple**: `800 BCE`, `-500`
-- **Utilisation**: Dates historiques avant notre ère
+## Précision et limites de provenance
 
-### 4. Format Géologique
-- **Format**: `4 Ma`, `4.5 Ga`, `40 ka`, `40000 ans`
-- **Exemples**: 
-  - `4 Ma` = 4 millions d'années
-  - `4.5 Ga` = 4.5 milliards d'années
-  - `40 ka` = 40 milliers d'années
-- **Utilisation**: Dates géologiques et préhistoriques
+L’ISO utilise la numérotation astronomique, avec année zéro ; un libellé explicite `800 BCE` devient donc l’année ISO -0799. Les chaînes ISO signées sont interprétées telles quelles. Wikibase JSON et les littéraux RDF n’utilisent pas la même numérotation BCE ; une chaîne seule ne fournit ni ce contexte ni le modèle calendaire. Les imports doivent conserver leur provenance s’ils ajoutent ultérieurement précision/calendrier. Un timestamp Wikibase comportant des champs 00 non spécifiés est conservé comme texte non positionnable, plutôt que transformé artificiellement en 1er janvier.
 
-## Utilisation
+Référence : [format officiel des temps Wikibase](https://doc.wikimedia.org/Wikibase/master/php/docs_topics_json.html#time). Le schéma actuel ne transporte pas de modèle julien ou de précision Wikibase séparée ; le parseur n’invente pas ces métadonnées.
 
-### Service Direct
+## Fonctions
 
-```typescript
-import { DateConversionService } from '@/services/DateConversionService';
+`parseTemporal` retourne un résultat typé (âge, calendrier, présent ou inconnu), avec texte conservé et précision déclarée. `yearsBeforePresent` fournit number ou null ; `resolveYearsBeforePresent` applique la priorité des colonnes importées. `periodDateErrors` contrôle les bornes connues, sur l’interface et avant SQL : début strictement antérieur à fin. Les expressions historiques non reconnues restent enregistrables sans coordonnée inventée. Une date calendaire reconnue mais impossible est refusée.
 
-// Conversion simple
-const result = DateConversionService.convertDate('4 Ma');
-console.log(result.geological); // "4.00 Ma"
-console.log(result.iso8601);    // "-4000000-01-01T00:00:00Z"
-console.log(result.modern);     // "4.00 Ma" (car trop ancien pour format moderne)
+`temporalBounds` agrège une seule fois les candidats, avec le même instant de référence pour toute la liste. Le calcul des bornes de stories dans l’API et l’interface le réutilise. Tri et filtres distinguent les coordonnées nulles ; une frise conserve les éléments non positionnables dans une zone séparée et accessible, avec les mêmes actions de consultation et de navigation.
 
-// Conversion avec options
-const result2 = DateConversionService.convertDate('18 avril 1923', {
-  inputFormat: 'modern',
-  outputFormat: 'iso8601',
-  locale: 'fr-FR'
-});
+Les formulaires conservent le texte saisi. Les aperçus sont des valeurs calculées, ne réécrivent pas le brouillon et s’effacent dès que le champ est effacé. Aucun appel de sauvegarde n’est relancé automatiquement.
 
-// Conversion de plage
-const range = DateConversionService.convertDateRange('4 Ma', '2 Ma');
-console.log(range.duration?.geological); // "2.00 Ma"
-```
-
-### Composable Vue 3
-
-```vue
-<script setup>
-import { useDateConversion } from '@/composables/useDateConversion';
-
-const {
-  convertedDate,
-  isLoading,
-  error,
-  convertDate,
-  formatForDisplay,
-  fromISO8601,
-  toISO8601
-} = useDateConversion({
-  defaultLocale: 'fr-FR',
-  defaultPrecision: 'year',
-  includeTime: false
-});
-
-// Conversion automatique
-convertDate('800 BCE');
-
-// Utilisation des propriétés réactives
-console.log(convertedDate.value?.geological); // "800 BCE"
-console.log(convertedDate.value?.years);      // 800
-</script>
-
-<template>
-  <div v-if="convertedDate && convertedDate.isValid">
-    <p>Format moderne: {{ convertedDate.modern }}</p>
-    <p>Format géologique: {{ convertedDate.geological }}</p>
-    <p>Années: {{ convertedDate.years }}</p>
-  </div>
-  
-  <div v-if="error" class="error">
-    {{ error }}
-  </div>
-</template>
-```
-
-## API du Service
-
-### `DateConversionService.convertDate(dateString, options?)`
-
-Convertit une date vers tous les formats supportés.
-
-**Paramètres :**
-- `dateString`: Chaîne de date à convertir
-- `options`: Options de conversion (optionnel)
-
-**Retourne :**
-```typescript
-interface ConvertedDate {
-  original: string;
-  iso8601: string;
-  modern: string;
-  bce: string;
-  geological: string;
-  years: number;
-  yearsFromNow: number;
-  isBCE: boolean;
-  precision: string;
-  isValid: boolean;
-  error?: string;
-}
-```
-
-### `DateConversionService.convertDateRange(startDate, endDate, options?)`
-
-Convertit une plage de dates.
-
-**Retourne :**
-```typescript
-interface DateRange {
-  start: ConvertedDate;
-  end: ConvertedDate;
-  duration?: {
-    years: number;
-    geological: string;
-    modern: string;
-  };
-}
-```
-
-### `DateConversionService.formatForDisplay(dateString, context?)`
-
-Formate une date pour l'affichage selon le contexte.
-
-**Contextes disponibles :**
-- `'timeline'`: Format compact pour les timelines
-- `'detail'`: Format détaillé avec toutes les informations
-- `'search'`: Format pour la recherche
-
-## Options de Conversion
-
-```typescript
-interface DateConversionOptions {
-  inputFormat?: 'iso8601' | 'modern' | 'bce' | 'geological' | 'auto';
-  outputFormat?: 'iso8601' | 'modern' | 'bce' | 'geological' | 'years';
-  precision?: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second';
-  locale?: string;
-  includeTime?: boolean;
-}
-```
-
-## Seuils Géologiques
-
-Le service utilise les seuils suivants pour déterminer le format d'affichage :
-
-- **Ga (Giga-années)**: ≥ 1 000 000 000 ans
-- **Ma (Méga-années)**: ≥ 1 000 000 ans
-- **ka (kilo-années)**: ≥ 1 000 ans
-- **ans**: < 1 000 ans
-
-## Exemples d'Utilisation
-
-### Conversion ISO8601 → Géologique
-```typescript
-const result = DateConversionService.convertDate('-4000000-01-01T00:00:00Z');
-console.log(result.geological); // "4.00 Ma"
-```
-
-### Conversion BCE → Moderne
-```typescript
-const result = DateConversionService.convertDate('800 BCE');
-console.log(result.modern); // "800 BCE" (car trop ancien pour format moderne)
-```
-
-### Conversion Géologique → ISO8601
-```typescript
-const result = DateConversionService.convertDate('4 Ma');
-console.log(result.iso8601); // "-4000000-01-01T00:00:00Z"
-```
-
-### Formatage pour Timeline
-```typescript
-const display = DateConversionService.formatForDisplay('4 Ma', 'timeline');
-console.log(display); // "4.00 Ma"
-```
-
-## Tests
-
-Le service inclut une suite de tests complète dans `src/services/__tests__/DateConversionService.test.ts`.
-
-Pour exécuter les tests :
-```bash
-yarn test DateConversionService
-```
-
-## Intégration avec l'Application
-
-Le service est intégré dans l'application via :
-
-1. **Service direct** : Pour les conversions programmatiques
-2. **Composable Vue** : Pour l'utilisation dans les composants Vue
-3. **Composant de démonstration** : `DateConverter.vue` pour tester les conversions
-
-## Limitations
-
-- Les dates très anciennes (> 5 milliards d'années) sont rejetées
-- La précision est limitée à l'année pour les dates géologiques
-- Le format moderne n'est utilisé que pour les dates récentes (< 1 million d'années) 
+Tests : `yarn test --run` ; intégrations locales avec `yarn --cwd server test:atomic` et le socket/base jetables documentés dans SUIVI-AUDIT. Ne jamais exécuter une écriture de test sur Supabase.

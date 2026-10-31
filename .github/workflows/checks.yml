@@ -1,0 +1,23 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22.23.1'
+          package-manager-cache: false
+      - name: Verify clean installation, builds, audits, PostgreSQL 17 and test restore
+        run: node scripts/check-clean.mjs

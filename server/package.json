@@ -3,28 +3,33 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/src/index.js",
-    "update-dates": "NODE_OPTIONS='--loader ts-node/esm' ts-node src/scripts/updateDates.ts"
+    "dev": "node --import tsx --watch src/index.ts",
+    "dev:tsx-watch": "tsx watch src/index.ts",
+    "build": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && tsc",
+    "start": "node dist/index.js",
+    "test:hierarchy": "yarn build && node --test test/periodHierarchy.postgres.mjs",
+    "test:deletion": "yarn build && node --test test/periodDeletion.postgres.mjs",
+    "test:privileges": "node --test test/functionPrivileges.postgres.mjs",
+    "test:atomic": "yarn build && node --experimental-test-module-mocks --test test/atomicWrites.postgres.mjs"
   },
   "dependencies": {
-    "@prisma/client": "^6.5.0",
-    "axios": "^1.8.4",
+    "@supabase/supabase-js": "2.118.0",
     "cors": "^2.8.5",
     "dotenv": "^17.4.0",
-    "express": "^4.18.2",
+    "express": "4.22.3",
     "pg": "^8.11.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
-    "@types/node": "^20.11.24",
+    "@types/node": "^22.13.13",
     "@types/pg": "^8.11.2",
-    "esbuild": "^0.25.5",
-    "prisma": "^6.5.0",
-    "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
     "typescript": "^5.3.3"
-  }
+  },
+  "engines": {
+    "node": ">=22.23.1",
+    "yarn": "1.22.x"
+  },
+  "packageManager": "yarn@1.22.22"
 }

@@ -2,14 +2,15 @@
   <div
     ref="rootRef"
     class="base-select"
+    @focusout="handleFocusOut"
     :class="{
       'base-select--error': error,
       'base-select--open': open,
-      'base-select--compact': compact,
+      'base-select--sm': size === 'sm' || compact,
       'base-select--trigger-open-ring': highlightOpenTrigger,
     }"
   >
-    <label v-if="label" :for="id" class="base-select__label">
+    <label v-if="label" :id="id ? `${id}-label` : undefined" :for="id" class="base-select__label">
       {{ label }}
       <span v-if="required" class="base-select__required">*</span>
     </label>
@@ -23,15 +24,18 @@
           ref="dropdownRef"
           class="base-select__dropdown"
           :class="[dropdownClass, { 'base-select__dropdown--unbounded': unboundedDropdown }]"
+          :id="dropdownId"
           :role="dropdownRole ?? undefined"
+          :aria-label="dropdownLabel"
+          :aria-multiselectable="dropdownRole === 'listbox' ? dropdownMultiple : undefined"
         >
           <slot name="dropdown" />
         </div>
       </Transition>
     </div>
 
-    <span v-if="error" class="base-select__error">{{ error }}</span>
-    <span v-if="hint" class="base-select__hint">{{ hint }}</span>
+    <span v-if="error" :id="id ? `${id}-error` : undefined" class="base-select__error">{{ error }}</span>
+    <span v-if="hint" :id="id ? `${id}-hint` : undefined" class="base-select__hint">{{ hint }}</span>
   </div>
 </template>
 
@@ -45,6 +49,7 @@ withDefaults(
     error?: string;
     hint?: string;
     required?: boolean;
+    size?: 'md' | 'sm';
     compact?: boolean;
     id?: string;
     /** Classes supplémentaires sur le panneau (ex. panneau période plus large). */
@@ -53,7 +58,10 @@ withDefaults(
     unboundedDropdown?: boolean;
     /** Rôle ARIA du panneau ; laisser vide si non pertinent (p.ex. navigation colonnes). */
     dropdownRole?: string | null;
-    /** Anneau primaire sur le trigger quand le panneau est ouvert (ex. Select mode period). */
+    dropdownId?: string;
+    dropdownLabel?: string;
+    dropdownMultiple?: boolean;
+    /** Anneau primaire sur le trigger quand le panneau est ouvert. */
     highlightOpenTrigger?: boolean;
   }>(),
   {
@@ -71,6 +79,9 @@ const emit = defineEmits<{
 
 const rootRef = ref<HTMLElement | null>(null);
 const dropdownRef = ref<HTMLElement | null>(null);
+function handleFocusOut(event: FocusEvent) {
+  if (event.relatedTarget instanceof Node && !rootRef.value?.contains(event.relatedTarget)) open.value = false;
+}
 
 const handleClickOutside = (event: Event) => {
   const target = event.target as Node;
@@ -81,6 +92,9 @@ const handleClickOutside = (event: Event) => {
 
 const handleGlobalKeydown = (event: KeyboardEvent) => {
   if (shouldDismissOpenSelectOnKeydown(open.value, event)) {
+    if (!rootRef.value?.contains(document.activeElement) && !(event.target instanceof Node && rootRef.value?.contains(event.target))) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
     open.value = false;
     emit('escape');
   }
@@ -179,3 +193,4 @@ defineExpose({
 </style>
 
 <style src="./select-field-shared.css"></style>
+<style src="./select-options-shared.css"></style>

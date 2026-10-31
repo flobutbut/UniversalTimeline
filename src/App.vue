@@ -1,74 +1,46 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterView } from 'vue-router'
 import Header from '@/components/Header.vue'
-import HomeView from '@/views/HomeView.vue'
-import DatabaseView from '@/views/DatabaseView/DatabaseView.vue'
-import PeriodsView from '@/views/GraphView/Periods.vue'
-import EventsView from '@/views/EventsView/EventsView.vue'
-import DesignSystemView from '@/views/DesignSystemView/DesignSystemView.vue'
-import Toast from '@/components/Toast.vue'
-import ConfirmModal from '@/components/base/ConfirmModal.vue'
-const route = useRoute()
-const router = useRouter()
-const currentView = ref<'timeline' | 'database' | 'graph' | 'events' | 'designSystem'>('timeline')
+import UiFeedbackHost from '@/components/UiFeedbackHost.vue'
+import { useAppNavigation } from '@/composables/useAppNavigation'
+import { useAuthStore } from '@/stores/useAuthStore'
+import { computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUiStore } from '@/stores/useUiStore'
+import { canUseWorkspace } from '@/router/access'
 
-watch(() => route.path, (newPath) => {
-  if (newPath === '/database') currentView.value = 'database'
-  else if (newPath === '/graph') currentView.value = 'graph'
-  else if (newPath === '/events') currentView.value = 'events'
-  else if (newPath === '/design-system') currentView.value = 'designSystem'
-  else currentView.value = 'timeline'
-}, { immediate: true })
+const { currentView, loading, error, navigate, selectSearch, retry } = useAppNavigation()
+const auth = useAuthStore(); const router = useRouter(); const ui = useUiStore()
+const allowed = computed(() => router.currentRoute.value.meta.public === true || (canUseWorkspace(auth) && (!router.currentRoute.value.meta.admin || auth.isAdmin)))
+const isLanding = computed(() => router.currentRoute.value.meta.landing === true)
+watch([() => auth.identityVersion, allowed], () => {
+  ui.reset()
+  if (!allowed.value) void router.replace(canUseWorkspace(auth) ? { name: 'forbidden' } : { name: 'login', query: { redirect: router.currentRoute.value.fullPath } })
+})
 
-const pathForView = (view: typeof currentView.value): string => {
-  switch (view) {
-    case 'database': return '/database'
-    case 'graph': return '/graph'
-    case 'events': return '/events'
-    case 'designSystem': return '/design-system'
-    default: return '/timeline'
-  }
-}
-
-const handleViewChange = (view: typeof currentView.value) => {
-  currentView.value = view
-  router.push(pathForView(view))
-}
-
-const toast = ref<InstanceType<typeof Toast> | null>(null)
-const confirmModal = ref<InstanceType<typeof ConfirmModal> | null>(null)
-
-window.toast = {
-  show: (message: string, type: 'info' | 'success' | 'error' = 'info', duration = 3000) => {
-    toast.value?.show(message, type, duration)
-  },
-  hide: () => { toast.value?.hide() }
-}
-window.showToast = window.toast.show
-
-window.showConfirm = async (title: string, message: string): Promise<boolean> => {
-  if (confirmModal.value) return await confirmModal.value.show(title, message)
-  return window.confirm(`${title}\n${message}`)
-}
 </script>
 
 <template>
-  <div class="app">
+  <div class="app" :class="{ 'app--landing': isLanding }">
+    <a class="skip-link" href="#main-content">Aller au contenu</a>
     <Header
+      v-if="!isLanding"
       :current-view="currentView"
-      @change-view="handleViewChange"
+      @change-view="navigate"
+      @select-search="selectSearch"
     />
-    <main class="main-content">
-      <!-- v-show : garde l’instance (état useHomeNavigation) en changeant de vue -->
-      <HomeView v-show="currentView === 'timeline'" />
-      <DatabaseView v-if="currentView === 'database'" />
-      <PeriodsView v-else-if="currentView === 'graph'" />
-      <EventsView v-else-if="currentView === 'events'" />
-      <DesignSystemView v-else-if="currentView === 'designSystem'" />
+    <div v-if="loading" class="navigation-status" role="status">Chargement de la page…</div>
+    <div v-if="error" class="navigation-status" role="alert">
+      {{ error }} <button type="button" @click="retry">Réessayer</button>
+    </div>
+    <main id="main-content" class="main-content" tabindex="-1" :aria-busy="loading">
+      <RouterView v-if="allowed" v-slot="{ Component, route: activeRoute }">
+        <KeepAlive :key="auth.identityVersion" include="HomeView" :max="1">
+          <component :is="Component" :key="activeRoute.name" />
+        </KeepAlive>
+      </RouterView>
     </main>
-    <Toast ref="toast" />
-    <ConfirmModal ref="confirmModal" />
+    <UiFeedbackHost />
   </div>
 </template>
 
@@ -76,6 +48,8 @@ window.showConfirm = async (title: string, message: string): Promise<boolean> =>
 .app {
   min-height: 100vh;
   height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -83,7 +57,16 @@ window.showConfirm = async (title: string, message: string): Promise<boolean> =>
   color: var(--color-text);
 }
 
+.skip-link { position: fixed; top: var(--spacing-sm); left: var(--spacing-sm); transform: translateY(-200%); z-index: var(--z-index-search-layer); background: var(--color-surface); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); }
+.skip-link:focus { transform: none; }
+
+.navigation-status {
+  flex-shrink: 0;
+  padding: var(--spacing-sm) var(--spacing-lg);
+}
+
 .main-content {
+  min-width: 0;
   flex: 1;
   width: 100%;
   display: flex;
@@ -99,6 +82,8 @@ window.showConfirm = async (title: string, message: string): Promise<boolean> =>
   height: 100%;
   min-height: 0;
 }
+
+.app--landing .main-content { background: var(--color-background); }
 
 :global(body) {
   margin: 0;

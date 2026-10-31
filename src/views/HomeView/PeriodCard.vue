@@ -8,20 +8,25 @@
         loading,
         'has-children': period.hasChildren,
         'period-card--leaf': variant === 'timeline' && !period.hasChildren,
+        'period-card--expanded': expanded,
+        'period-card--wrap': wrapContent,
       },
     ]"
     :data-period-id="period.id"
+    :aria-disabled="loading || undefined"
     @click="handleClick"
+    @keydown.enter.self.prevent="handleClick"
+    @keydown.space.self.prevent="handleClick"
   >
     <div class="main-container">
       <span v-if="variant === 'parent'" class="period-card__parent-arrow" aria-hidden="true">←</span>
       <div class="card-content">
         <div class="period-header">
-          <h3 class="period-title" :title="period.label.fr">{{ period.label.fr }}</h3>
-          <span
-            v-if="variant === 'timeline' && !period.hasChildren"
-            class="period-info period-header__no-children"
-          >no childs</span>
+          <h3 class="period-title" :aria-label="period.label.fr">
+            <button type="button" class="period-card__title-action" :disabled="loading" :aria-label="variant === 'parent' ? `Revenir depuis ${period.label.fr}` : period.label.fr"
+              :aria-describedby="typeof $attrs['aria-describedby'] === 'string' ? $attrs['aria-describedby'] : undefined" @click.stop="handleClick">{{ period.label.fr }}</button>
+          </h3>
+          <slot name="title-actions" />
         </div>
         <div class="period-footer" v-if="period.startDate || period.endDate">
           <div class="period-info">{{ periodDateRange }}</div>
@@ -36,8 +41,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { formatTemporalBoundLabel } from '@/lib/formatTemporalBoundLabel';
-import { getPeriodCardClickIntent } from '@/lib/periodCardClickIntent';
+import { formatPeriodDateRange } from '@/lib/formatTemporalBoundLabel';
 import type { ListPeriod } from '@/types/database';
 
 const props = withDefaults(
@@ -47,6 +51,8 @@ const props = withDefaults(
     loading?: boolean;
     /** `timeline` : segment sur la frise ; `parent` : barre pleine largeur (retour niveau supérieur) */
     variant?: 'timeline' | 'parent';
+    expanded?: boolean;
+    wrapContent?: boolean;
   }>(),
   { variant: 'timeline' }
 );
@@ -56,19 +62,12 @@ const emit = defineEmits<{
   (e: 'back'): void;
 }>();
 
-const periodDateRange = computed(() => {
-  const s = props.period.startDate ? formatTemporalBoundLabel(props.period.startDate) : null;
-  const e = props.period.endDate ? formatTemporalBoundLabel(props.period.endDate) : null;
-  if (s && e) return `de ${s} à ${e}`;
-  if (s) return `à partir de ${s}`;
-  if (e) return `jusqu'à ${e}`;
-  return '';
-});
+const periodDateRange = computed(() => formatPeriodDateRange(props.period));
 
 const handleClick = () => {
-  const intent = getPeriodCardClickIntent(props.variant, props.period);
-  if (intent === 'back') emit('back');
-  else if (intent === 'select') emit('select', props.period);
+  if (props.loading) return;
+  if (props.variant === 'parent') emit('back');
+  else emit('select', props.period);
 };
 </script>
 
@@ -198,10 +197,9 @@ const handleClick = () => {
   min-width: 0;
 }
 
-.period-header__no-children {
-  flex-shrink: 0;
-  font-weight: 400;
-}
+.period-title { flex: 0 1 auto; }
+.period-card__title-action { display: block; max-width: 100%; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: inherit; font: inherit; line-height: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; cursor: pointer; }
+.period-card__title-action:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
 
 .period-card.selected .period-title {
   color: var(--color-text-white);
@@ -222,6 +220,27 @@ const handleClick = () => {
 
 .period-card.selected .period-info {
   color: color-mix(in srgb, var(--color-text-white) 92%, transparent);
+}
+
+/* Repli réservé aux textes dépassant toute la frise, après l'élargissement. */
+.period-card--wrap {
+  height: auto;
+  min-height: calc(var(--spacing-2xl) + var(--spacing-lg) + var(--spacing-xs));
+}
+
+.period-card--wrap .main-container,
+.period-card--wrap .card-content {
+  height: auto;
+}
+
+.period-card--wrap .main-container {
+  min-height: inherit;
+}
+
+.period-card--wrap .period-title,
+.period-card--wrap .period-info {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .loading-overlay {

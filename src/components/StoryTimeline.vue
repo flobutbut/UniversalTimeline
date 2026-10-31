@@ -1,6 +1,6 @@
 <template>
-  <div v-if="hasItems" class="story-timeline" @click.self="emit('deselect')">
-    <div class="story-timeline__track" ref="trackRef" :style="{ height: trackHeight + 'px' }" @click.self="emit('deselect')">
+  <div v-if="hasItems" class="story-timeline" :class="{ 'story-timeline--compact': compact }" @click.self="emit('deselect')">
+    <div v-if="bounds" class="story-timeline__track" ref="trackRef" :style="{ height: trackHeight + 'px' }" @click.self="emit('deselect')">
       <!-- Axe -->
       <div class="story-timeline__axis" />
 
@@ -8,6 +8,7 @@
       <div
         v-for="p in positionedPeriods"
         :key="p.id"
+        :data-period-id="p.id"
         class="story-timeline__period-bar"
         :class="{
           'story-timeline__period-bar--root': p.isRoot,
@@ -16,7 +17,7 @@
         :style="{
           '--story-period-left': p.left + '%',
           '--story-period-width': Math.max(p.width, 0.5) + '%',
-          '--story-period-top': p.row * ROW_STEP + ROW_OFFSET + 'px',
+          '--story-period-top': p.row * (compact ? 10 : ROW_STEP) + (compact ? 0 : ROW_OFFSET) + 'px',
         }"
         @click="emit('select-period', p.id)"
         @mouseenter="showTooltip($event, p.label, p.detail)"
@@ -37,9 +38,15 @@
     </div>
 
     <!-- Labels bornes -->
-    <div class="story-timeline__foot">
+    <div v-if="bounds && !compact" class="story-timeline__foot">
       <span class="story-timeline__label">{{ startLabel }}</span>
       <span class="story-timeline__label">{{ endLabel }}</span>
+    </div>
+
+    <div v-if="undatedPeriods.length || undatedEvents.length" class="story-timeline__undated">
+      <span>Dates non déterminées</span>
+      <button v-for="p in undatedPeriods" :key="`p:${p.id}`" type="button" @click="emit('select-period', p.id)">{{ p.label?.fr || p.id }}</button>
+      <button v-for="e in undatedEvents" :key="`e:${e.id}`" type="button" @click="emit('select-event', e.id)">{{ typeof e.label === 'string' ? e.label : e.label?.fr || e.id }}</button>
     </div>
 
     <!-- Tooltip -->
@@ -58,7 +65,8 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { DateService } from '@/services/DateService';
+import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
+import { resolveYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
 import {
   formatStoryTimelineBoundLabel,
   formatStoryTimelinePeriodDetail,
@@ -69,16 +77,21 @@ interface InPeriod {
   label?: { fr: string; en: string };
   startDate?: string;
   endDate?: string;
+  startYearsBP?: number;
+  endYearsBP?: number;
   parentId?: string | null;
+  storyParentId?: string | null;
 }
 
 interface InEvent {
   id: string;
   label?: { fr: string; en: string } | string;
   date?: string;
+  dateYearsBP?: number;
 }
 
 const props = defineProps<{
+  compact?: boolean;
   periods?: InPeriod[];
   events?: InEvent[];
   selectedPeriodId?: string | null;
@@ -116,18 +129,21 @@ function hideTooltip() {
 
 // ─── Bornes globales ──────────────────────────────────────────────────────────
 
+const coordinates = computed(() => {
+  const now = Date.now();
+  return {
+    periods: (props.periods ?? []).map(p => ({ p, start: resolveYearsBeforePresent(p.startDate, p.startYearsBP, now), end: resolveYearsBeforePresent(p.endDate, p.endYearsBP, now) })),
+    events: (props.events ?? []).map(e => ({ e, date: resolveYearsBeforePresent(e.date, e.dateYearsBP, now) })),
+  };
+});
+const datedPeriods = computed(() => coordinates.value.periods.flatMap(({p, start, end}) => start !== null && end !== null ? [{...p, startYbp:start, endYbp:end}] : []));
+const datedEvents = computed(() => coordinates.value.events.flatMap(({e, date}) => date !== null ? [{...e, dateYbp:date}] : []));
+const undatedPeriods = computed(() => coordinates.value.periods.filter(row => row.start === null || row.end === null).map(row => row.p));
+const undatedEvents = computed(() => coordinates.value.events.filter(row => row.date === null).map(row => row.e));
 const bounds = computed(() => {
-  const ybps: number[] = [];
-  for (const p of props.periods ?? []) {
-    if (p.startDate) ybps.push(DateService.toYearsBP(p.startDate));
-    if (p.endDate)   ybps.push(DateService.toYearsBP(p.endDate));
-  }
-  for (const e of props.events ?? []) {
-    if (e.date) ybps.push(DateService.toYearsBP(e.date));
-  }
-  if (ybps.length === 0) return null;
-  const min = Math.min(...ybps);
-  const max = Math.max(...ybps);
+  const ybps = [...datedPeriods.value.flatMap(p => [p.startYbp, p.endYbp]), ...datedEvents.value.map(e => e.dateYbp)];
+  if (!ybps.length) return null;
+  const min = Math.min(...ybps), max = Math.max(...ybps);
   return { min, max, range: max - min };
 });
 
@@ -151,14 +167,14 @@ interface PosPeriod { id: string; label: string; detail: string; left: number; w
 const positionedPeriods = computed<PosPeriod[]>(() => {
   const b = bounds.value;
   if (!b) return [];
-  const { min, max } = b;
 
-  const periods = props.periods ?? [];
+  const periods = datedPeriods.value;
   const periodIds = new Set(periods.map(p => p.id));
 
-  function toPos(p: InPeriod, isRoot: boolean): PosPeriod {
-    const sYbp = p.startDate ? DateService.toYearsBP(p.startDate) : max;
-    const eYbp = p.endDate   ? DateService.toYearsBP(p.endDate)   : min;
+  type DatedPeriod = typeof periods[number];
+  function toPos(p: DatedPeriod, isRoot: boolean): PosPeriod {
+    const sYbp = p.startYbp;
+    const eYbp = p.endYbp;
     const ancientYbp = Math.max(sYbp, eYbp);
     const recentYbp  = Math.min(sYbp, eYbp);
     return {
@@ -174,15 +190,16 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
   }
 
   // Construction de l'arbre dans le contexte de la story
-  const childrenMap = new Map<string, InPeriod[]>();
-  const roots: InPeriod[] = [];
+  const childrenMap = new Map<string, DatedPeriod[]>();
+  const roots: DatedPeriod[] = [];
   for (const p of periods) {
-    if (!p.parentId || !periodIds.has(p.parentId)) {
+    const parentId = getStoryPeriodParentId(p);
+    if (!parentId || !periodIds.has(parentId)) {
       roots.push(p);
     } else {
-      const arr = childrenMap.get(p.parentId) ?? [];
+      const arr = childrenMap.get(parentId) ?? [];
       arr.push(p);
-      childrenMap.set(p.parentId, arr);
+      childrenMap.set(parentId, arr);
     }
   }
 
@@ -193,7 +210,7 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
   let rowCursor = 0;
   let firstGroup = true;
 
-  function traverse(p: InPeriod, isRoot: boolean) {
+  function traverse(p: DatedPeriod, isRoot: boolean) {
     if (isRoot && !firstGroup) rowCursor += GROUP_GAP;
     if (isRoot) firstGroup = false;
     const pos = toPos(p, isRoot);
@@ -203,8 +220,8 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
     const children = (childrenMap.get(p.id) ?? [])
       .slice()
       .sort((a, b_) => {
-        const aYbp = a.startDate ? DateService.toYearsBP(a.startDate) : 0;
-        const bYbp = b_.startDate ? DateService.toYearsBP(b_.startDate) : 0;
+        const aYbp = a.startYbp;
+        const bYbp = b_.startYbp;
         return bYbp - aYbp;
       });
     for (const child of children) traverse(child, false);
@@ -213,12 +230,22 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
   roots
     .slice()
     .sort((a, b_) => {
-      const aYbp = a.startDate ? DateService.toYearsBP(a.startDate) : 0;
-      const bYbp = b_.startDate ? DateService.toYearsBP(b_.startDate) : 0;
+      const aYbp = a.startYbp;
+      const bYbp = b_.startYbp;
       return bYbp - aYbp;
     })
     .forEach(r => traverse(r, true));
 
+  if (props.compact) {
+    const laneEnds = [-1, -1];
+    for (const period of [...ordered].sort((a, b) => a.left - b.left)) {
+      if (period.isRoot) { period.row = 0; continue; }
+      const free = laneEnds.findIndex(end => end <= period.left);
+      const lane = free >= 0 ? free : laneEnds[0] <= laneEnds[1] ? 0 : 1;
+      period.row = lane + 1;
+      laneEnds[lane] = period.left + period.width;
+    }
+  }
   return ordered;
 });
 
@@ -229,8 +256,8 @@ interface PosEvent { id: string; label: string; detail: string; left: number }
 const positionedEvents = computed<PosEvent[]>(() => {
   const b = bounds.value;
   if (!b) return [];
-  return (props.events ?? []).map(e => {
-    const ybp = e.date ? DateService.toYearsBP(e.date) : b.min;
+  return datedEvents.value.map(e => {
+    const ybp = e.dateYbp;
     const label = typeof e.label === 'string' ? e.label : (e.label?.fr ?? '');
     const detail = e.date ? formatStoryTimelineBoundLabel(e.date) : '';
     return { id: e.id, label, detail, left: toLeft(ybp) };
@@ -242,37 +269,28 @@ const positionedEvents = computed<PosEvent[]>(() => {
 const trackHeight = computed(() => {
   const pp = positionedPeriods.value;
   const maxRow = pp.length === 0 ? 0 : Math.max(...pp.map(p => p.row));
-  return ROW_OFFSET + (maxRow + 1) * ROW_STEP + 8;
+  return props.compact ? 42 : Math.max(68, ROW_OFFSET + (maxRow + 1) * ROW_STEP + 8);
 });
 
 // ─── Labels bornes ────────────────────────────────────────────────────────────
 
-const startLabel = computed(() => {
-  const b = bounds.value;
-  if (!b) return '';
-  const all: string[] = [
-    ...(props.periods ?? []).flatMap(p => [p.startDate, p.endDate].filter(Boolean) as string[]),
-    ...(props.events ?? []).map(e => e.date).filter(Boolean) as string[],
-  ];
-  const oldest = all.sort((a, z) => DateService.toYearsBP(z) - DateService.toYearsBP(a))[0];
-  return oldest ? formatStoryTimelineBoundLabel(oldest) : '';
+const boundLabels = computed(() => {
+  const rows = [
+    ...datedPeriods.value.flatMap(p => [{raw:p.startDate!, value:p.startYbp}, {raw:p.endDate!, value:p.endYbp}]),
+    ...datedEvents.value.map(e => ({raw:e.date!, value:e.dateYbp})),
+  ].sort((a,b) => compareYearsOldestFirst(a.value,b.value));
+  return { start: rows[0]?.raw, end: rows[rows.length - 1]?.raw };
 });
-
-const endLabel = computed(() => {
-  const b = bounds.value;
-  if (!b) return '';
-  const all: string[] = [
-    ...(props.periods ?? []).flatMap(p => [p.startDate, p.endDate].filter(Boolean) as string[]),
-    ...(props.events ?? []).map(e => e.date).filter(Boolean) as string[],
-  ];
-  const newest = all.sort((a, z) => DateService.toYearsBP(a) - DateService.toYearsBP(z))[0];
-  return newest ? formatStoryTimelineBoundLabel(newest) : '';
-});
+const startLabel = computed(() => boundLabels.value.start ? formatStoryTimelineBoundLabel(boundLabels.value.start) : '');
+const endLabel = computed(() => boundLabels.value.end ? formatStoryTimelineBoundLabel(boundLabels.value.end) : '');
 
 const trackRef = ref<HTMLElement | null>(null);
 </script>
 
 <style scoped>
+.story-timeline__undated { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); margin-top: var(--spacing-sm); }
+.story-timeline__undated button { color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); padding: var(--spacing-xs) var(--spacing-sm); cursor: pointer; }
+
 .story-timeline {
   padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
   border-bottom: 1px solid var(--color-border);
@@ -393,4 +411,16 @@ const trackRef = ref<HTMLElement | null>(null);
   opacity: 0.75;
   line-height: 1.3;
 }
+</style>
+
+<style scoped>
+.story-timeline { padding-top: 16px; background: var(--color-background); }
+.story-timeline__label { line-height: 16px; }
+.story-timeline--compact { margin-top: auto; padding: 0; width: 100%; height: 48px; border: 0; overflow: hidden; background: transparent; pointer-events: none; }
+.story-timeline--compact .story-timeline__track { max-height: 40px; }
+.story-timeline--compact .story-timeline__axis { display: none; }
+.story-timeline--compact .story-timeline__period-bar { height: 8px; border-radius: 2px; }
+.story-timeline--compact .story-timeline__period-bar--root { height: 10px; }
+.story-timeline--compact .story-timeline__event-marker { width: 5px; height: 5px; bottom: -3px; }
+.story-timeline--compact .story-timeline__undated { display: none; }
 </style>

@@ -1,52 +1,20 @@
 <template>
-  <Transition name="toast">
-    <div v-if="visible" class="toast" :class="type">
-      {{ message }}
+  <Teleport to="body"><Transition name="toast">
+    <div v-if="notification" :key="notification.id" class="toast" :class="notification.type"
+      :role="notification.type === 'error' ? 'alert' : 'status'" aria-atomic="true" data-ui-feedback>
+      {{ notification.message }}
     </div>
-  </Transition>
+  </Transition></Teleport>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
-const visible = ref(false)
-const message = ref('')
-const type = ref<'info' | 'success' | 'error'>('info')
-let timeoutId: number | null = null;
-
-const show = (msg: string, toastType: 'info' | 'success' | 'error' = 'info', duration: number = 3000) => {
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-    timeoutId = null;
-  }
-
-  message.value = msg
-  type.value = toastType
-  visible.value = true
-
-  if (duration > 0) {
-    timeoutId = window.setTimeout(() => {
-      visible.value = false
-    }, duration)
-  }
-}
-
-const hide = () => {
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-    timeoutId = null;
-  }
-  visible.value = false;
-}
-
-defineExpose({
-  show,
-  hide
-})
+import type { Notification } from '@/stores/useUiStore';
+defineProps<{ notification: Notification | null }>();
 </script>
 
 <style scoped>
 .toast {
+  box-sizing: border-box;
   position: fixed;
   bottom: calc(var(--spacing-lg) + var(--spacing-xs));
   right: calc(var(--spacing-lg) + var(--spacing-xs));
@@ -57,7 +25,7 @@ defineExpose({
   z-index: var(--z-index-tooltip);
   box-shadow: var(--shadow-lg);
   min-width: calc(var(--spacing-xs) * 50);
-  max-width: calc(var(--spacing-xs) * 100);
+  max-width: min(calc(var(--spacing-xs) * 100), calc(100vw - 48px));
 }
 
 .toast.info {
@@ -82,4 +50,4 @@ defineExpose({
   transform: translateY(100%);
   opacity: 0;
 }
-</style> 
+</style>

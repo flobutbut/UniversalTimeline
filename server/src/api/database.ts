@@ -1,52 +1,53 @@
-import pkg from 'pg';
+import pkg, { type QueryResultRow } from 'pg';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'node:url';
+import { createDatabaseConfig } from '../config/database.js';
+import { runInTransaction, type TransactionClient } from './transaction.js';
+import { applyPrincipal, principalContext } from '../auth/context.js';
+import { checkAccessSchema } from '../auth/preflight.js';
 
-dotenv.config();
+dotenv.config({ path: fileURLToPath(new URL('../../.env', import.meta.url)), quiet: true });
 
 const { Pool } = pkg;
 
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  user: process.env.DB_USER || 'wikidata_user',
-  password: process.env.DB_PASSWORD || 'wikidata_password',
-  database: process.env.DB_NAME || 'wikidata_db',
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+const pool = new Pool(createDatabaseConfig());
+
+pool.on('error', () => {
+  console.error('[Database] Connexion inactive interrompue');
 });
 
 export async function testConnection() {
   try {
-    const client = await pool.connect();
-    console.log('[Database] Connexion à la base de données établie');
-    client.release();
+    await pool.query('SELECT 1');
+    if (process.env.AUTH_ENABLED === 'true') await runInTransaction(pool, async client => {
+      await checkAccessSchema(client);
+      // Verify that this connection can actually assume both restricted roles.
+      await client.query('SET LOCAL ROLE anon');
+      await client.query('SELECT 1');
+      await client.query('SET LOCAL ROLE authenticated');
+      await client.query('SELECT 1');
+    });
     return true;
   } catch (error) {
-    console.error('[Database] Erreur de connexion à la base de données:', error);
-    return false;
+    throw new Error('Connexion Supabase impossible : vérifiez DATABASE_URL, le réseau et le certificat TLS.');
   }
 }
 
-export async function query(text: string, params?: any[]) {
-  try {
-    const result = await pool.query(text, params);
-    return result;
-  } catch (error) {
-    console.error('[Database] Erreur lors de l\'exécution de la requête:', error);
-    throw error;
-  }
+export async function query<Row extends QueryResultRow = QueryResultRow>(text: string, params?: unknown[]) {
+  if (principalContext.getStore()) return withTransaction(client => client.query<Row>(text, params));
+  if (process.env.AUTH_ENABLED === 'true') throw new Error('Contexte de connexion requis pour les données.');
+  return pool.query<Row>(text, params);
 }
 
-export async function getClient() {
-  const client = await pool.connect();
-  return client;
+export function withTransaction<T>(operation: (client: TransactionClient) => Promise<T>): Promise<T> {
+  const principal = principalContext.getStore();
+  if (!principal && process.env.AUTH_ENABLED === 'true') return Promise.reject(new Error('Contexte de connexion requis pour les données.'));
+  return runInTransaction(pool, async client => {
+    if (principal) await applyPrincipal(client, principal);
+    return operation(client);
+  });
 }
 
 export async function closePool() {
   await pool.end();
-}
-
-export { pool };
-
-export interface DatabaseRow {
-  [key: string]: any;
 }

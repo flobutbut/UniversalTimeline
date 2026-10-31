@@ -1,37 +1,43 @@
 <template>
-  <div class="search-input-wrap" :class="{ 'search-input-wrap--focused': focused }">
-    <Icon icon="mdi:magnify" class="search-input-wrap__icon" />
+  <div class="search-input-wrap" :class="{ 'search-input-wrap--xs': size === 'xs' }">
+    <DesignIcon name="search" class="search-input-wrap__icon" />
     <input
+      type="search"
+      :aria-label="placeholder || 'Rechercher'"
       :value="modelValue"
       class="search-input-wrap__field"
       :placeholder="placeholder"
+      :disabled="disabled"
       v-bind="$attrs"
       ref="fieldRef"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-      @focus="focused = true"
-      @blur="focused = false"
     />
     <button
       v-if="modelValue"
       class="search-input-wrap__clear"
       type="button"
-      @click="$emit('update:modelValue', '')"
+      aria-label="Effacer la recherche"
+      :disabled="disabled"
+      @click="clear"
     >
-      <Icon icon="mdi:close" />
+      <DesignIcon name="close" />
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Icon } from '@iconify/vue';
+import DesignIcon from './DesignIcon.vue';
 
-defineProps<{ modelValue: string; placeholder?: string }>();
-defineEmits<{ (e: 'update:modelValue', v: string): void }>();
+defineProps<{ modelValue: string; placeholder?: string; size?: 'sm' | 'xs'; disabled?: boolean }>();
+const emit = defineEmits<{ (e: 'update:modelValue', v: string): void }>();
 defineOptions({ inheritAttrs: false });
 
-const focused = ref(false);
 const fieldRef = ref<HTMLInputElement | null>(null);
+function clear() {
+  emit('update:modelValue', '');
+  fieldRef.value?.focus();
+}
 defineExpose({
   focus: () => fieldRef.value?.focus(),
   blur: () => fieldRef.value?.blur(),
@@ -42,20 +48,25 @@ defineExpose({
 .search-input-wrap {
   display: flex;
   align-items: center;
-  gap: calc((var(--spacing-sm) + var(--spacing-xs)) / 2);
-  height: calc(var(--spacing-sm) * 4);
-  padding: 0 8px;
+  gap: var(--spacing-sm);
+  height: var(--field-height-md);
+  padding: 0 var(--spacing-sm);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   transition: border-color var(--transition-fast);
   overflow: hidden;
   width: 100%;
   box-sizing: border-box;
 }
 
-.search-input-wrap--focused {
-  border-color: var(--color-primary);
+.search-input-wrap--xs {
+  height: var(--field-height-sm);
+}
+
+.search-input-wrap:focus-within {
+  border-color: var(--color-border-focus);
+  box-shadow: inset 0 0 0 1px var(--color-border-focus);
 }
 
 .search-input-wrap__icon {
@@ -81,6 +92,8 @@ defineExpose({
   color: var(--color-text-light);
 }
 
+.search-input-wrap__field::-webkit-search-cancel-button { -webkit-appearance: none; }
+
 .search-input-wrap__clear {
   display: flex;
   align-items: center;
@@ -89,12 +102,17 @@ defineExpose({
   padding: 0;
   color: var(--color-text-light);
   cursor: pointer;
-  width: var(--font-size-lg);
-  height: var(--font-size-lg);
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
 }
 
 .search-input-wrap__clear:hover {
   color: var(--color-text);
 }
+</style>
+
+<style scoped>
+.search-input-wrap__field { line-height: var(--line-height-small); }
+.search-input-wrap:has(input:disabled) { background: var(--color-interaction-disabled); opacity: .5; }
 </style>

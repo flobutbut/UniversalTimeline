@@ -1,5 +1,5 @@
 /**
- * Remonte les ancêtres d’une période jusqu’à la racine.
+ * Remonte les ancêtres d'une période jusqu'à la racine.
  * Retourne `[racineId, …, parentId, targetId]`.
  */
 export async function buildPeriodIdAncestorChain(
@@ -8,29 +8,26 @@ export async function buildPeriodIdAncestorChain(
     getPeriodFromStore: (id: string) => { parentId?: string | null } | undefined;
     fetchPeriodFromApi: (id: string) => Promise<{ parentId?: string | null } | null | undefined>;
     maxDepth?: number;
+    /** Stops a caller's abandoned navigation without cancelling shared store reads. */
+    isCurrent?: () => boolean;
   }
 ): Promise<string[]> {
-  const path: string[] = [targetId];
+  const path: string[] = [];
+  const visited = new Set<string>();
   let currentId = targetId;
-  const maxDepth = options.maxDepth ?? 12;
+  const maxDepth = options.maxDepth ?? 100;
 
   for (let i = 0; i < maxDepth; i++) {
-    const inStore = options.getPeriodFromStore(currentId);
-    let parentId: string | null | undefined = inStore?.parentId ?? null;
-
-    if (!inStore) {
-      try {
-        const fetched = await options.fetchPeriodFromApi(currentId);
-        parentId = fetched?.parentId ?? null;
-      } catch {
-        break;
-      }
-    }
-
-    if (!parentId) break;
-    path.unshift(parentId);
+    if (options.isCurrent && !options.isCurrent()) return [];
+    if (visited.has(currentId)) throw new Error('Le chemin de cette période contient un cycle.');
+    visited.add(currentId);
+    const period = options.getPeriodFromStore(currentId) ?? await options.fetchPeriodFromApi(currentId);
+    if (options.isCurrent && !options.isCurrent()) return [];
+    if (!period) throw new Error('Une période du chemin est introuvable.');
+    path.unshift(currentId);
+    const parentId = period.parentId;
+    if (!parentId) return path;
     currentId = parentId;
   }
-
-  return path;
+  throw new Error('Le chemin de cette période dépasse la profondeur autorisée.');
 }

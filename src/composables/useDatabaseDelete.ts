@@ -5,31 +5,34 @@ import { EventApiService } from '@/services/EventApiService';
 import { StoryApiService } from '@/services/StoryApiService';
 import { useToast } from './useToast';
 import { useLoadingState } from './useLoadingState';
+import { useConfirm } from './useConfirm';
 
 export function useDatabaseDelete() {
   const dataStore = useDataStore();
-  const { periods, events, stories } = storeToRefs(dataStore);
+  const { events, stories } = storeToRefs(dataStore);
   const toast = useToast();
-  const { isLoading: loading, execute } = useLoadingState();
+  const confirm = useConfirm();
+  const { isLoading: loading } = useLoadingState();
 
   const handleDelete = async (item: any, type: 'period' | 'event' | 'story') => {
+    if (loading.value) return false;
     if (!item) {
       toast.show('Aucun élément à supprimer', 'error');
       return false;
     }
 
-    const confirmed = await window.showConfirm(
-      'Confirmation de suppression',
-      `Êtes-vous sûr de vouloir supprimer "${item.label?.fr || item.title?.fr}" ? Cette action est irréversible.`
-    );
-    if (!confirmed) return false;
-
-    toast.show('Suppression en cours...', 'info', 0);
-
-    const result = await execute(async () => {
+    loading.value = true;
+    try {
+      const policy = type === 'period' ? ' Seules les périodes sans sous-période et sans lien vers une frise peuvent être supprimées.' : '';
+      const confirmed = await confirm(
+        'Confirmation de suppression',
+        `Êtes-vous sûr de vouloir supprimer "${item.label?.fr || item.title?.fr}" ? Cette action est irréversible.${policy}`
+      );
+      if (!confirmed) return false;
+      toast.show('Suppression en cours...', 'info', 0);
       if (type === 'period') {
-        await PeriodApiService.getInstance().deletePeriod(item.id);
-        dataStore.updatePeriods(periods.value.filter(p => p.id !== item.id));
+        const deleted = await PeriodApiService.getInstance().deletePeriod(item.id);
+        dataStore.removeDeletedPeriod(deleted);
       } else if (type === 'event') {
         await EventApiService.getInstance().deleteEvent(item.id);
         dataStore.updateEvents(events.value.filter(e => e.id !== item.id));
@@ -39,16 +42,15 @@ export function useDatabaseDelete() {
       } else {
         throw new Error("Type d'élément non reconnu");
       }
-      return true;
-    });
-
-    toast.hide();
-    if (result) {
+      toast.hide();
       toast.show('Élément supprimé avec succès', 'success');
       return true;
-    } else {
-      toast.show('Erreur lors de la suppression', 'error');
+    } catch (error: any) {
+      toast.hide();
+      toast.show(error?.response?.data?.error || error?.message || 'Erreur lors de la suppression', 'error');
       return false;
+    } finally {
+      loading.value = false;
     }
   };
 

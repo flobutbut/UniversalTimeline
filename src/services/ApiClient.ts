@@ -1,8 +1,15 @@
 import axios, { type AxiosRequestConfig } from 'axios';
+import { authService } from './AuthService';
 
 const instance = axios.create({
   baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
+});
+instance.interceptors.request.use(async config => {
+  if (config.baseURL !== '/api' || !config.url?.startsWith('/') || config.url.startsWith('//')) throw new Error('Un chemin API local est requis.');
+  const token = await authService.getAccessToken();
+  if (token) config.headers.set('Authorization', `Bearer ${token}`);
+  return config;
 });
 
 export const apiClient = {

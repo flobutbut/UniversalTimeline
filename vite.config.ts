@@ -7,10 +7,14 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
+      '@': path.resolve(__dirname, './src'),
+      '@temporal': path.resolve(__dirname, './server/src/shared/temporal.ts')
     }
   },
   server: {
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
     proxy: {
       '/api/wikidata': {
         target: 'https://query.wikidata.org',
@@ -29,7 +33,7 @@ export default defineConfig({
         }
       },
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://127.0.0.1:3000',
         changeOrigin: true,
         configure: (proxy) => {
           proxy.on('error', (err: Error) => {

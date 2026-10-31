@@ -5,16 +5,17 @@
       `base-button--${variant}`,
       { 'base-button--icon-only': iconOnly },
       { 'base-button--sm': size === 'sm' },
-      { 'base-button--disabled': disabled }
+      { 'base-button--xs': size === 'xs' },
+      { 'base-button--disabled': disabled },
+      { 'base-button--toggled': pressed }
     ]"
     :disabled="disabled"
     :type="type"
+    :aria-pressed="pressed === undefined ? undefined : pressed"
     @click="$emit('click', $event)"
   >
-    <span v-if="$slots.icon || icon" class="base-button__leading">
-      <slot name="icon">
-        <i v-if="icon" :class="icon" class="base-button__icon"></i>
-      </slot>
+    <span v-if="$slots.icon" class="base-button__leading">
+      <slot name="icon" />
     </span>
     <span v-if="!iconOnly" class="base-button__text">
       <slot></slot>
@@ -24,21 +25,21 @@
 
 <script setup lang="ts">
 interface Props {
-  variant?: 'primary' | 'secondary' | 'tertiary' | 'danger';
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'danger';
   type?: 'button' | 'submit' | 'reset';
-  size?: 'md' | 'sm';
-  icon?: string;
+  size?: 'md' | 'sm' | 'xs';
   iconOnly?: boolean;
   disabled?: boolean;
+  pressed?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
   variant: 'primary',
   type: 'button',
   size: 'md',
-  icon: '',
   iconOnly: false,
-  disabled: false
+  disabled: false,
+  pressed: undefined
 });
 
 defineEmits<{
@@ -48,92 +49,31 @@ defineEmits<{
 
 <style scoped>
 .base-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  border: none;
-  outline: none;
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  box-sizing: border-box; gap: 0; padding: 8px; min-height: var(--field-height-lg);
+  border: 1px solid transparent; border-radius: var(--radius-md);
+  font-size: var(--font-size-base); font-weight: 400; line-height: var(--line-height-body);
+  cursor: pointer; transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
-
-.base-button--primary {
-  background-color: var(--color-primary-button, var(--color-primary-dark));
-  color: var(--color-text-white);
-}
-
-.base-button--primary:hover:not(.base-button--disabled) {
-  background-color: var(--color-primary-button-hover, var(--color-primary-dark));
-}
-
-.base-button--secondary {
-  background-color: transparent;
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-}
-
-.base-button--secondary:hover:not(.base-button--disabled) {
-  background-color: var(--color-surface-hover);
-}
-
-.base-button--tertiary {
-  background-color: transparent;
-  color: var(--color-primary);
-  padding: var(--spacing-xs) var(--spacing-sm);
-}
-
-.base-button--tertiary:hover:not(.base-button--disabled) {
-  background-color: var(--color-surface-hover);
-}
-
-.base-button--icon-only {
-  padding: var(--spacing-sm);
-}
-
-.base-button--sm {
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: var(--font-size-sm);
-  min-height: calc(var(--spacing-sm) * 9 / 2);
-}
-
-.base-button--sm.base-button--icon-only {
-  padding: calc((var(--spacing-sm) + var(--spacing-xs)) / 2);
-  min-width: calc(var(--spacing-sm) * 9 / 2);
-  min-height: calc(var(--spacing-sm) * 9 / 2);
-}
-
-.base-button__leading {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 0;
-}
-
-.base-button--disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.base-button__icon {
-  font-size: 1.1em;
-}
-
-.base-button__text {
-  line-height: 1;
-}
-
-.base-button--danger {
-  background-color: var(--color-error);
-  color: var(--color-text-white);
-  border: 1px solid var(--color-error);
-}
-
-.base-button--danger:hover:not(.base-button--disabled) {
-  background-color: var(--color-error-dark);
-}
-</style> 
+.base-button__text { padding: 1px 8px; line-height: var(--line-height-small); white-space: nowrap; }
+.base-button__leading { display: inline-flex; align-items: center; justify-content: center; line-height: 0; }
+.base-button--primary { background: var(--color-action-primary-default); border-color: var(--color-action-primary-default); color: var(--color-text-on-accent); }
+.base-button--primary:hover:not(:disabled) { background: var(--color-action-primary-hover); border-color: var(--color-action-primary-hover); }
+.base-button--secondary { background: transparent; border-color: var(--color-border-focus); color: var(--color-text-link); }
+.base-button--tertiary { background: transparent; border-color: var(--color-border-default); color: var(--color-text-primary); }
+.base-button--ghost { background: transparent; color: var(--color-text-secondary); }
+.base-button--secondary:hover:not(:disabled), .base-button--tertiary:hover:not(:disabled), .base-button--ghost:hover:not(:disabled) { background: var(--color-interaction-hover); }
+.base-button--danger { background: var(--color-action-danger-default); border-color: var(--color-action-danger-default); color: var(--color-text-on-accent); }
+.base-button--danger:hover:not(:disabled) { background: var(--color-action-danger-hover); border-color: var(--color-action-danger-hover); }
+.base-button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
+.base-button--sm { min-height: var(--field-height-md); height: var(--field-height-md); font-size: var(--font-size-sm); }
+.base-button--xs { min-height: var(--control-height-xs); height: var(--control-height-xs); padding: 4px; font-size: var(--font-size-sm); }
+.base-button--xs .base-button__text { padding-inline: 6px; }
+.base-button--icon-only { padding: 0; width: var(--field-height-lg); min-width: var(--field-height-lg); }
+.base-button--sm.base-button--icon-only { width: var(--field-height-md); min-width: var(--field-height-md); }
+.base-button--xs.base-button--icon-only { width: var(--control-height-xs); min-width: var(--control-height-xs); }
+.base-button--toggled { background: var(--color-interaction-selected); border-color: var(--color-border-focus); color: var(--color-text-on-selected); }
+.base-button--primary.base-button--toggled { background: var(--color-action-primary-pressed); border-color: var(--color-action-primary-pressed); color: var(--color-text-on-accent); }
+.base-button--danger.base-button--toggled { background: var(--color-status-error-background); border-color: var(--color-status-error-foreground); color: var(--color-status-error-foreground); }
+.base-button:disabled { background: var(--color-interaction-disabled); border-color: var(--color-border-default); color: var(--color-text-disabled); opacity: .5; cursor: not-allowed; }
+</style>

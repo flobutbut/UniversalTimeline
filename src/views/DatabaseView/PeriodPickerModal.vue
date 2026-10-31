@@ -1,6 +1,8 @@
 <template>
   <ModalShell title="Sélectionner des périodes" @close="$emit('close')">
 
+    <div v-if="loading" role="status">Chargement…</div>
+    <div v-if="loadError" role="alert">{{ loadError }} <button type="button" :disabled="loading" @click="retryLoad">Réessayer</button></div>
     <!-- Barre de recherche -->
     <div class="ppm-search">
       <SearchInput ref="searchInputRef" v-model="search" placeholder="Rechercher une période…" autocomplete="off" />
@@ -50,7 +52,7 @@
             />
           </template>
           <div v-else class="ppm-empty">
-            {{ colIdx === 0 ? 'Chargement…' : 'Aucune sous-période' }}
+            {{ loading ? 'Chargement…' : loadError ? '' : colIdx === 0 ? 'Aucune période' : 'Aucune sous-période' }}
           </div>
         </div>
       </div>
@@ -68,6 +70,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick, defineComponent, h } from 'vue';
+import { useLatestRequest } from '@/composables/useLatestRequest';
 import { useDataStore } from '@/stores/useDataStore';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { buildPeriodIdAncestorChain } from '@/lib/periodAncestorChain';
@@ -129,6 +132,24 @@ const emit = defineEmits<{
 // ─── État ─────────────────────────────────────────────────────────────────────
 
 const dataStore = useDataStore();
+const loading = ref(false);
+const loadError = ref<string | null>(null);
+const requests = useLatestRequest();
+let retry: () => Promise<void>;
+const retryLoad = () => retry();
+async function load(action: (isCurrent: () => boolean) => Promise<void>) {
+  const isCurrent = requests.begin();
+  retry = () => load(action);
+  loading.value = true;
+  loadError.value = null;
+  try {
+    await action(isCurrent);
+  } catch (cause) {
+    if (isCurrent()) loadError.value = cause instanceof Error ? cause.message : 'Erreur de chargement';
+  } finally {
+    if (isCurrent()) loading.value = false;
+  }
+}
 const search = ref('');
 const selectedParentIds = ref<string[]>([]);
 const checkedIds = ref(new Set<string>());
@@ -179,16 +200,14 @@ watch(
 
 // ─── Interactions ─────────────────────────────────────────────────────────────
 
-const handleItemClick = async (period: ListPeriod, colIdx: number) => {
+const handleItemClick = (period: ListPeriod, colIdx: number) => load(async isCurrent => {
   if (!isSearching.value) {
     selectedParentIds.value = selectedParentIds.value.slice(0, colIdx);
     selectedParentIds.value[colIdx] = period.id;
   }
-  if (period.hasChildren) {
-    const loaded = dataStore.periods.some(p => p.parentId === period.id);
-    if (!loaded) await dataStore.ensureChildrenLoaded(period.id);
-  }
-};
+  if (period.hasChildren) await dataStore.ensureChildrenLoaded(period.id);
+  if (!isCurrent()) return;
+});
 
 const toggleCheck = (id: string) => {
   if (props.alreadyInStory.includes(id)) return;
@@ -202,8 +221,9 @@ const confirm = () => emit('confirm', [...checkedIds.value]);
 // Réinitialiser la navigation quand la recherche change
 watch(isSearching, () => { selectedParentIds.value = []; });
 
-onMounted(async () => {
+const loadInitialData = () => load(async isCurrent => {
   await dataStore.ensureRootsLoaded();
+  if (!isCurrent()) return;
   if (props.initialPeriodId) {
     const path = await buildPeriodIdAncestorChain(props.initialPeriodId, {
       getPeriodFromStore: (id) => dataStore.periods.find((p) => p.id === id),
@@ -211,19 +231,23 @@ onMounted(async () => {
         try {
           const fetched = await PeriodApiService.getInstance().getPeriod(id);
           return { parentId: (fetched as { parentId?: string | null } | null)?.parentId ?? null };
-        } catch {
-          return null;
+        } catch (cause: any) {
+          if (cause?.response?.status === 404) return null;
+          throw cause;
         }
       },
     });
     // Charger les enfants de chaque niveau (du haut vers le bas)
     for (const id of path) {
       await dataStore.ensureChildrenLoaded(id);
+      if (!isCurrent()) return;
     }
+    if (!isCurrent()) return;
     selectedParentIds.value = path;
   }
-  searchInputRef.value?.focus();
+  if (isCurrent()) searchInputRef.value?.focus();
 });
+onMounted(loadInitialData);
 </script>
 
 <style scoped>

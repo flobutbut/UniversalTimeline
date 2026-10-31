@@ -11,6 +11,7 @@
     <!-- Liste des événements -->
     <div class="event-list">
       <div v-if="loading" class="empty">Chargement…</div>
+      <div v-else-if="loadError" role="alert">{{ loadError }} <button type="button" @click="loadData">Réessayer</button></div>
       <template v-else>
         <div
           v-for="event in filteredEvents"
@@ -50,9 +51,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useLatestRequest } from '@/composables/useLatestRequest';
 import { useDataStore } from '@/stores/useDataStore';
 import { DateService } from '@/services/DateService';
-import { formatEventPickerListDate, listEventYearsBPFallbackToDate } from '@/lib/listEventTableHelpers';
+import { formatEventPickerListDate, listEventYearsBP } from '@/lib/listEventTableHelpers';
 import { getStoryPeriodBoundaryYearsBP } from '@/lib/storyPeriodBoundaryYbp';
 import ModalShell from '@/components/base/ModalShell.vue';
 import SearchInput from '@/components/base/SearchInput.vue';
@@ -72,26 +74,24 @@ const emit = defineEmits<{
 const dataStore = useDataStore();
 const search = ref('');
 const loading = ref(false);
+const loadError = ref<string | null>(null);
+const requests = useLatestRequest();
 const checkedIds = ref(new Set<string>());
 
 // ── Fenêtre temporelle ────────────────────────────────────────────────────────
 
 const dateRange = computed(() => {
   if (!props.storyPeriods.length) return null;
-  const oldest = Math.max(
-    ...props.storyPeriods.map((p) => getStoryPeriodBoundaryYearsBP(p as Record<string, unknown>, 'start'))
-  );
-  const newest = Math.min(
-    ...props.storyPeriods.map((p) => getStoryPeriodBoundaryYearsBP(p as Record<string, unknown>, 'end'))
-  );
-  if (oldest === 0) return null;
-  return { oldest, newest };
+  const starts = props.storyPeriods.map(p => getStoryPeriodBoundaryYearsBP(p, 'start')).filter((v): v is number => v !== null);
+  const ends = props.storyPeriods.map(p => getStoryPeriodBoundaryYearsBP(p, 'end')).filter((v): v is number => v !== null);
+  if (!starts.length || !ends.length) return null;
+  return { oldest: Math.max(...starts), newest: Math.min(...ends) };
 });
 
 const rangeLabel = computed(() => {
   if (!dateRange.value) return '';
   const start = DateService.formatGeological(dateRange.value.oldest);
-  const end = dateRange.value.newest <= 80 ? "Aujourd'hui" : DateService.formatGeological(dateRange.value.newest);
+  const end = dateRange.value.newest === 0 ? "Aujourd'hui" : DateService.formatGeological(dateRange.value.newest);
   return `${start} → ${end}`;
 });
 
@@ -102,8 +102,8 @@ const filteredEvents = computed(() => {
   return dataStore.events.filter((e: any) => {
     if (q && !e.label.fr.toLowerCase().includes(q)) return false;
     if (dateRange.value) {
-      const ybp = listEventYearsBPFallbackToDate(e);
-      if (ybp > dateRange.value.oldest || ybp < dateRange.value.newest) return false;
+      const ybp = listEventYearsBP(e);
+      if (ybp === null || ybp > dateRange.value.oldest || ybp < dateRange.value.newest) return false;
     }
     return true;
   });
@@ -120,13 +120,20 @@ const toggle = (id: string) => {
 
 const confirm = () => emit('confirm', [...checkedIds.value]);
 
-onMounted(async () => {
-  if (dataStore.events.length === 0) {
-    loading.value = true;
+const loadData = async () => {
+  const isCurrent = requests.begin();
+  loading.value = true;
+  loadError.value = null;
+  try {
     await dataStore.ensureEventsLoaded();
-    loading.value = false;
+  } catch (cause) {
+    if (isCurrent()) loadError.value = cause instanceof Error ? cause.message : 'Erreur de chargement';
+  } finally {
+    if (isCurrent()) loading.value = false;
   }
-});
+};
+onMounted(loadData);
+
 </script>
 
 <style scoped>

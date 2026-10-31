@@ -1,133 +1,92 @@
 <template>
-  <div class="gs">
+  <div ref="rootRef" class="gs search-bar" @focusin="onFocus" @focusout="onBlur">
     <SearchInput
       ref="searchRef"
       v-model="query"
-      placeholder="Rechercher…"
+      placeholder="Rechercher une frise…"
+      aria-label="Rechercher une frise par titre, période ou événement"
       autocomplete="off"
-      @focus="focused = true"
+      role="combobox"
+      aria-autocomplete="list"
+      :aria-expanded="dropdownVisible && hasResults"
+      :aria-controls="dropdownVisible && hasResults ? listId : undefined"
+      :aria-activedescendant="activeId"
+      @focus="onFocus"
       @blur="onBlur"
-      @input="onInput"
-      @keydown.escape.prevent="clear"
+      @keydown.escape.prevent="dismiss"
       @keydown.down.prevent="move(1)"
       @keydown.up.prevent="move(-1)"
       @keydown.enter.prevent="confirm"
     />
 
-    <div v-if="focused && query.trim().length >= 2" class="gs__dropdown">
-      <div v-if="loading && !hasResults" class="gs__status">
-        <span class="gs__spinner" /> Recherche…
+    <div v-if="dropdownVisible" class="gs__dropdown">
+      <div v-if="loading" class="gs__status" role="status">Recherche de frises…</div>
+      <div v-else-if="error" class="gs__status" role="alert">
+        {{ error }} <button type="button" @mousedown.prevent @click="retrySource">Réessayer</button>
       </div>
-      <div v-else-if="!hasResults && !loading" class="gs__status">Aucun résultat</div>
-      <template v-else>
-        <template v-if="localHits.length">
-          <div class="gs__section">Base de données</div>
-          <button
-            v-for="(hit, i) in localHits" :key="hit.id"
-            class="gs__item" :class="{ 'gs__item--active': cursor === i }"
-            @mousedown.prevent @click="selectHit(hit)"
-          >
-            <span class="gs__badge" :class="`gs__badge--${hit.type}`">{{ searchHitTypeFrLabel(hit.type) }}</span>
-            <span class="gs__label">{{ typeof hit.label === 'object' ? hit.label.fr : hit.label }}</span>
-            <span class="gs__date">{{ hit.dateLabel }}</span>
-          </button>
-        </template>
-        <template v-if="wikidataHits.length">
-          <div class="gs__section">Wikidata <span v-if="loadingWd" class="gs__spinner gs__spinner--sm" /></div>
-          <button
-            v-for="(hit, i) in wikidataHits" :key="hit.id"
-            class="gs__item" :class="{ 'gs__item--active': cursor === localHits.length + i }"
-            @mousedown.prevent @click="selectHit(hit)"
-          >
-            <span class="gs__badge" :class="`gs__badge--${hit.type}`">{{ searchHitTypeFrLabel(hit.type) }}</span>
-            <span class="gs__label gs__label--wd">{{ hit.label }}</span>
-            <span class="gs__date">{{ hit.dateLabel }}</span>
-          </button>
-        </template>
-      </template>
+      <div v-if="hasResults" :id="listId" role="listbox" aria-label="Frises trouvées">
+        <div class="gs__section" aria-hidden="true">Frises</div>
+        <button v-for="(hit, i) in allHits" :key="hit.id" :id="optionId(i)" type="button" role="option" tabindex="-1" :aria-selected="cursor === i" class="gs__item" :class="{ 'gs__item--active': cursor === i }" @mousedown.prevent @click="selectHit(hit)">
+          <Icon icon="mdi:timeline-text-outline" class="gs__icon" aria-hidden="true" />
+          <ItemSummary class="gs__content" :title="hit.label.fr || hit.label.en" :description="hit.description.fr || hit.description.en">
+            <template v-if="hit.match" #meta>
+              <span class="gs__match" :class="`gs__match--${hit.match.type}`">
+                <span class="gs__match-type"><Icon :icon="hit.match.type === 'event' ? 'mdi:circle-small' : 'mdi:minus'" aria-hidden="true" />{{ hit.match.type === 'event' ? 'Événement' : 'Période' }}</span>
+                <span aria-hidden="true">·</span>
+                <span class="gs__match-label">{{ hit.match.label.fr || hit.match.label.en }}</span>
+              </span>
+            </template>
+          </ItemSummary>
+        </button>
+      </div>
+      <div v-if="!loading && !error && !hasResults" class="gs__status" role="status">Aucune frise trouvée. Essayez un autre mot-clé.</div>
+      <span class="sr-only" role="status">{{ hasResults ? `${allHits.length} ${allHits.length === 1 ? 'frise' : 'frises'}. Utilisez les flèches puis Entrée pour choisir.` : '' }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onScopeDispose } from 'vue';
 import SearchInput from './base/SearchInput.vue';
-import { SearchApiService, type SearchHit } from '@/services/SearchApiService';
-import { moveListCursor, searchHitTypeFrLabel } from '@/lib/searchHitDisplay';
+import ItemSummary from './base/ItemSummary.vue';
+import { Icon } from '@iconify/vue';
+import { SearchApiService, type StorySearchResult } from '@/services/SearchApiService';
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
+import { useSuggestionNavigation } from '@/composables/useSuggestionNavigation';
 
-const emit = defineEmits<{ (e: 'select', hit: SearchHit): void }>();
-
+const emit = defineEmits<{ (e: 'select', hit: StorySearchResult): void }>();
+const rootRef = ref<HTMLElement | null>(null);
 const query = ref('');
 const focused = ref(false);
-const cursor = ref(-1);
-const loading = ref(false);
-const loadingWd = ref(false);
-const localHits = ref<SearchHit[]>([]);
-const wikidataHits = ref<SearchHit[]>([]);
 const searchRef = ref<{ focus: () => void; blur: () => void } | null>(null);
-
-const hasResults = computed(() => localHits.value.length + wikidataHits.value.length > 0);
-const allHits = computed(() => [...localHits.value, ...wikidataHits.value]);
-
 const service = SearchApiService.getInstance();
-let dbTimer: ReturnType<typeof setTimeout> | null = null;
-let wdTimer: ReturnType<typeof setTimeout> | null = null;
-
-function onInput() {
-  const q = query.value.trim();
-  cursor.value = -1;
-  localHits.value = [];
-  wikidataHits.value = [];
-  if (dbTimer) clearTimeout(dbTimer);
-  if (wdTimer) clearTimeout(wdTimer);
-  if (q.length < 2) { loading.value = false; return; }
-
-  loading.value = true;
-  loadingWd.value = true;
-
-  dbTimer = setTimeout(async () => {
-    try { localHits.value = await service.searchLocal(q); }
-    catch { /* */ } finally { loading.value = false; }
-  }, 250);
-
-  wdTimer = setTimeout(async () => {
-    try {
-      const wd = await service.searchWikidata(q);
-      const ids = new Set(localHits.value.map(h => (h as any).wikidataId).filter(Boolean));
-      wikidataHits.value = wd.filter(h => !ids.has(h.id));
-    } catch { /* */ } finally { loadingWd.value = false; }
-  }, 600);
-}
-
-function move(dir: 1 | -1) {
-  cursor.value = moveListCursor(cursor.value, dir, allHits.value.length);
-}
-
-function confirm() {
-  if (cursor.value >= 0 && allHits.value[cursor.value]) selectHit(allHits.value[cursor.value]);
-}
-
-function selectHit(hit: SearchHit) {
-  emit('select', hit);
-  clear();
-}
-
-function clear() {
-  query.value = '';
-  localHits.value = [];
-  wikidataHits.value = [];
-  cursor.value = -1;
-  focused.value = false;
-  searchRef.value?.blur();
-}
-
+const { results: allHits, loading, error, retry } = useDebouncedSearch(
+  () => query.value, (q, signal) => service.searchStories(q, { signal }), { delayMs: 250, enabled: () => focused.value },
+);
+const hasResults = computed(() => allHits.value.length > 0);
+const dropdownVisible = computed(() => focused.value && query.value.trim().length >= 2);
+const { listId, optionId, cursor, activeId, move, reset, current } = useSuggestionNavigation(() => allHits.value, () => dropdownVisible.value);
+let blurTimer: ReturnType<typeof setTimeout> | undefined;
+function onFocus() { clearTimeout(blurTimer); focused.value = true; }
 function onBlur() {
-  setTimeout(() => { focused.value = false; }, 150);
+  clearTimeout(blurTimer);
+  blurTimer = setTimeout(() => {
+    if (!rootRef.value?.contains(document.activeElement)) focused.value = false;
+  }, 150);
+}
+onScopeDispose(() => clearTimeout(blurTimer));
+function confirm() { const hit = current(); if (hit) selectHit(hit); }
+function retrySource() { searchRef.value?.focus(); return retry(); }
+function dismiss() { query.value = ''; reset(); focused.value = false; }
+function selectHit(hit: StorySearchResult) { emit('select', hit); clear(); }
+function clear() {
+  query.value = ''; reset(); focused.value = false;
+  searchRef.value?.focus();
 }
 </script>
 
 <style scoped>
-.gs {
+.gs.search-bar {
   position: relative;
   width: 100%;
 }
@@ -176,7 +135,7 @@ function onBlur() {
 
 .gs__item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-sm);
   width: 100%;
   padding: calc(var(--spacing-sm) - 1px) var(--spacing-md);
@@ -190,38 +149,16 @@ function onBlur() {
 .gs__item:last-child { border-bottom: none; }
 .gs__item--active, .gs__item:hover { background: var(--color-surface-hover); }
 
-.gs__badge {
-  flex-shrink: 0;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 1px calc(var(--spacing-xs) + 1px);
-  border-radius: calc(var(--radius-md) / 2);
-  background: color-mix(in srgb, var(--color-period) 15%, transparent);
-  color: var(--color-period);
-}
-.gs__badge--event {
-  background: color-mix(in srgb, var(--color-event) 15%, transparent);
-  color: var(--color-event);
-}
+.gs__icon { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 1px; color: var(--color-story); }
+.gs__content { flex: 1; min-width: 0; }
+.gs__match { display: inline-flex; align-items: center; gap: var(--spacing-xs); min-width: 0; color: var(--color-text-secondary); }
+.gs__match-type { display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; font-size: var(--font-size-xs); color: var(--color-period); }
+.gs__match--event .gs__match-type { color: var(--color-event); }
+.gs__match-type svg { width: 14px; height: 14px; }
+.gs__match-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.gs__label {
-  flex: 1;
-  min-width: 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.gs__label--wd { color: var(--color-wikidata-label); }
-
-.gs__date {
-  flex-shrink: 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-light);
-  white-space: nowrap;
+@media (max-width: 480px) {
+  .gs__status { flex-wrap: wrap; }
 }
 
 .gs__spinner {

@@ -1,15 +1,10 @@
+import { resolveYearsBeforePresent } from '@temporal';
 import { DateService } from '@/services/DateService';
 import type { ListEvent } from '@/types/database';
 
-/** Années BP pour tri / filtre (champ enrichi ou calcul depuis la date). */
-export function listEventYearsBP(e: Pick<ListEvent, 'date' | 'dateYearsBP'>): number {
-  return e.dateYearsBP != null ? Number(e.dateYearsBP) : DateService.toYearsBP(e.date ?? '');
-}
-
-/** Si `dateYearsBP` est absent ou ≤ 0, recalcul depuis `date` (ex. filtre picker). */
-export function listEventYearsBPFallbackToDate(e: Pick<ListEvent, 'date' | 'dateYearsBP'>): number {
-  if (e.dateYearsBP != null && Number(e.dateYearsBP) > 0) return Number(e.dateYearsBP);
-  return DateService.toYearsBP(e.date ?? '');
+/** Unknown dates stay null for filtering/sorting; both event pickers share this conversion. */
+export function listEventYearsBP(e: Pick<ListEvent, 'date' | 'dateYearsBP'>): number | null {
+  return resolveYearsBeforePresent(e.date, e.dateYearsBP);
 }
 
 /** Clé de tri stable sur les libellés de catégories (FR). */
@@ -29,7 +24,7 @@ export function listEventUpdatedTimestampMs(e: Pick<ListEvent, 'updatedAt'>): nu
   return Number.isNaN(t) ? 0 : t;
 }
 
-/** Date d’événement affichée (liste / table). `whenEmpty` : libellé si chaîne vide. */
+/** Date d'événement affichée (liste / table). `whenEmpty` : libellé si chaîne vide. */
 export function formatEventListDateForDisplay(raw: string, whenEmpty = '—'): string {
   if (!raw) return whenEmpty;
   return DateService.format(DateService.parse(raw));

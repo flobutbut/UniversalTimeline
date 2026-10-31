@@ -16,8 +16,11 @@ export interface WikidataImportPayload {
   endDate?: string;
   date?: string;
   location?: string;
-  childrenCount?: number;
+  childrenCount?: number | null;
   suggestedCategoryIds?: string[];
+  /** Q-id parent (P361 « partie de ») — résolu côté UI vers un id base si possible. */
+  parentWikidataId?: string;
+  warnings?: string[];
 }
 
 export function mergeSuggestedCategoriesFromWikidata(
@@ -31,13 +34,13 @@ export function mergeSuggestedCategoriesFromWikidata(
   return [...new Set([...current, ...matched])];
 }
 
-/** Applique les champs reconnus d’un import Wikidata au brouillon (mutation). */
+/** Applique les champs reconnus d'un import Wikidata au brouillon (mutation). */
 export function applyWikidataImportPayloadToFormDraft(
   form: WikidataImportFormDraft,
   data: WikidataImportPayload,
   ctx: {
     availableCategoryIds: ReadonlySet<string>;
-    onChildrenCount?: (count: number) => void;
+    onChildrenCount?: (count: number | null) => void;
   }
 ): void {
   if (data.title) {
@@ -52,7 +55,7 @@ export function applyWikidataImportPayloadToFormDraft(
   if (data.endDate) form.endDate = data.endDate;
   if (data.date) form.date = data.date;
   if (data.location) form.location = data.location;
-  if (data.childrenCount && ctx.onChildrenCount) {
+  if (data.childrenCount !== undefined && ctx.onChildrenCount) {
     ctx.onChildrenCount(data.childrenCount);
   }
   const merged = mergeSuggestedCategoriesFromWikidata(

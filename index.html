@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Universal Timeline</title>
+    <title>Universal Timeline — Voir le temps autrement</title>
+    <meta name="description" content="Prenez la mesure du temps. Explorez des frises chronologiques alimentées par Wikidata et créez vos propres frises, publiques ou privées, pour apprendre, enseigner et partager." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,5 +13,17 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
+    <script>
+      if (location.hash.includes('figmacapture=')) {
+        document.documentElement.dataset.figmaCapture = 'true';
+        const style = document.createElement('style');
+        style.textContent = 'html[data-figma-capture] body:has(.landing-page),html[data-figma-capture] body:has(.landing-page) #app,html[data-figma-capture] body:has(.landing-page) .app,html[data-figma-capture] body:has(.landing-page) .main-content,html[data-figma-capture] .landing-page {height:auto!important;min-height:0!important;overflow:visible!important;}';
+        document.head.appendChild(style);
+        const script = document.createElement('script');
+        script.src = 'https://mcp.figma.com/mcp/html-to-design/capture.js';
+        script.async = true;
+        document.head.appendChild(script);
+      }
+    </script>
   </body>
 </html>

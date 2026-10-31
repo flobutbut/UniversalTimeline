@@ -1,35 +1,10 @@
 import { apiClient } from './ApiClient';
 import { buildNewEntityCoreFields } from '@/lib/buildNewEntityCoreFields';
-import { DateService } from './DateService';
+import { mapToEvent } from './entityMappers';
+import type { EventDto, EventFormPayload } from '@/types/api';
 import type { Event, ListEvent } from '../types/database';
 
-function mapToEvent(e: any): any {
-  const date = e.date || '';
-  return {
-    id: e.id,
-    wikidata_id: e.wikidata_id || '',
-    label: {
-      fr: e.label?.fr ?? e.label_fr ?? '',
-      en: e.label?.en ?? e.label_en ?? e.label?.fr ?? e.label_fr ?? '',
-    },
-    description: e.description
-      ? { fr: e.description.fr || e.description_fr || '', en: e.description.en || e.description_en || e.description.fr || '' }
-      : { fr: e.description_fr || '', en: e.description_en || e.description_fr || '' },
-    date,
-    dateYearsBP: e.date_years_bp != null
-      ? Number(e.date_years_bp)
-      : DateService.toYearsBP(date),
-    categories: e.categories || [],
-    createdAt: parseOptionalDate(e.created_at ?? e.createdAt) ?? new Date(),
-    updatedAt: parseOptionalDate(e.updated_at ?? e.updatedAt) ?? new Date(),
-  };
-}
-
-function parseOptionalDate(v: unknown): Date | undefined {
-  if (v == null || v === '') return undefined;
-  const d = v instanceof Date ? v : new Date(v as string);
-  return Number.isNaN(d.getTime()) ? undefined : d;
-}
+export { mapToEvent } from './entityMappers';
 
 export class EventApiService {
   private static instance: EventApiService;
@@ -44,51 +19,40 @@ export class EventApiService {
   }
 
   async getListEvents(): Promise<ListEvent[]> {
-    const data = await apiClient.get<any[]>('/events');
+    const data = await apiClient.get<EventDto[]>('/events');
     return data.map(mapToEvent);
   }
 
-  async getAllEvents(): Promise<Event[]> {
-    const data = await apiClient.get<any[]>('/events');
+  async getStoryListEvents(storyId: string): Promise<ListEvent[]> {
+    const data = await apiClient.get<EventDto[]>(`/stories/${storyId}/events`);
     return data.map(mapToEvent);
   }
 
-  async getEvent(eventId: string): Promise<Event> {
-    const data = await apiClient.get<any>(`/events/${eventId}`);
-    return mapToEvent(data);
-  }
-
-  async getEventsByPeriod(periodId: string): Promise<Event[]> {
-    const data = await apiClient.get<any[]>(`/periods/${periodId}/events`);
-    return data.map(mapToEvent);
-  }
-
-  async getEventById(qid: string): Promise<Event> {
+  async getEventById(qid: string): Promise<Event | null> {
     if (!qid.match(/^Q\d+$/)) throw new Error('Format de Q-id invalide');
-    const events = await apiClient.get<any[]>('/events');
-    const found = events.find((e: any) => e.wikidata_id === qid || e.id === qid);
-    if (!found) throw new Error('Événement non trouvé');
-    return mapToEvent(found);
+    const events = await apiClient.get<EventDto[]>('/events');
+    const found = events.find((e) => e.wikidata_id === qid || e.id === qid);
+    return found ? mapToEvent(found) : null;
   }
 
-  async createEvent(formData: any): Promise<any> {
+  async createEvent(formData: EventFormPayload): Promise<Event> {
     const payload = {
       ...buildNewEntityCoreFields(formData),
       date: formData.date,
       categories: formData.categories || [],
     };
-    return apiClient.post('/events', payload);
+    return mapToEvent(await apiClient.post<EventDto>('/events', payload));
   }
 
-  async updateEvent(eventId: string, formData: any): Promise<any> {
+  async updateEvent(eventId: string, formData: EventFormPayload): Promise<Event> {
     const payload = {
       wikidata_id: formData.qid,
       label: { fr: formData.title.fr, en: formData.title.en },
-      description: { fr: formData.description.fr, en: formData.description.en },
+      description: { fr: formData.description?.fr ?? '', en: formData.description?.en ?? formData.description?.fr ?? '' },
       date: formData.date,
       categories: formData.categories,
     };
-    return apiClient.put(`/events/${eventId}`, payload);
+    return mapToEvent(await apiClient.put<EventDto>(`/events/${eventId}`, payload));
   }
 
   async deleteEvent(eventId: string): Promise<void> {

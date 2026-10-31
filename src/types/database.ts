@@ -1,12 +1,14 @@
 // Types pour les données de liste
 export interface ListPeriod {
-  id: string; // UUID
+  id: string; // Identifiant texte historique ou UUID.
   label: MultilingualText;
   startDate: string;
   endDate: string;
   categories: Category[];
   /** Champs enrichis (API mapToPeriod, finder, enfants Wikidata virtuels) */
   parentId?: string | null;
+  /** Parent inside this frise; undefined means catalogue hierarchy. */
+  storyParentId?: string | null;
   hasParent?: boolean;
   hasChildren?: boolean;
   wikidata_id?: string;
@@ -20,22 +22,39 @@ export interface ListPeriod {
 }
 
 export interface ListEvent {
-  id: string; // UUID
+  id: string; // Identifiant texte historique ou UUID.
   label: MultilingualText;
   date: string;
   categories: Category[];
   dateYearsBP?: number;
   createdAt?: Date;
   updatedAt?: Date;
+  wikidata_id?: string;
+  description?: MultilingualText;
 }
 
 export interface ListStory {
-  id: string; // UUID
+  id: string; // Entier PostgreSQL normalisé en chaîne par le mapper.
+  ownerUserId?: string | null;
   title: MultilingualText;
   categories: Category[];
-  /** Borne temporelle agrégée (liste stories) : min / max sur périodes + dates d’événements. */
+  /** Borne temporelle agrégée (liste stories) : min / max sur périodes + dates d'événements. */
   startDate?: string;
   endDate?: string;
+}
+
+/** Ancre d'une story enfant (période ou événement déclencheur). */
+export interface StoryAnchor {
+  type: 'period' | 'event';
+  id: string;
+}
+
+/** Story enfant suggérée quand l'utilisateur atteint une période/événement ancre. */
+export interface StorySuggestion {
+  id: string;
+  title: MultilingualText;
+  description?: MultilingualText;
+  parentStoryId: string | null;
 }
 
 // Types communs
@@ -45,69 +64,43 @@ export interface MultilingualText {
 }
 
 export interface Category {
-  id: string; // UUID
+  id: string; // Identifiant varchar du catalogue.
   label: MultilingualText;
   description?: MultilingualText;
 }
 
 // Types pour les périodes
-export interface Period {
-  id: string; // UUID
-  wikidata_id?: string;
-  label: MultilingualText;
-  description?: MultilingualText;
-  startDate: string; // Format ISO 8601
-  endDate: string;   // Format ISO 8601
-  hasParent: boolean;  // true si l'objet a des enfants, false si c'est une feuille
-  children: string[];  // Liste des UUIDs des enfants
+export interface Period extends ListPeriod {
+  hasParent: boolean;
+  children: string[];  // Identifiants du catalogue des enfants.
   temporalLocation: string;
-  categories: Category[];
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 // Types pour les événements
-export interface Event {
-  id: string; // UUID
-  wikidata_id?: string;
-  label: MultilingualText;
-  description?: MultilingualText;
-  date: string;      // Format ISO 8601
-  categories: Category[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type Event = ListEvent;
 
 // Types pour les stories
-export interface Story {
-  id: string; // UUID
+export interface ChildStorySummary {
+  id: string;
   title: MultilingualText;
+  anchors: StoryAnchor[];
+}
+
+export interface StorySummary extends ListStory {
+  previewPeriods?: Period[];
+  previewEvents?: Event[];
   description?: MultilingualText;
   author: string;
   isPublic: boolean;
-  categories: Category[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Story extends StorySummary {
   periods: Period[];
   events: Event[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface StoryElement {
-  id: string; // UUID
-  storyId: string; // UUID
-  elementType: 'period' | 'event';
-  elementId: string; // UUID
-  parentId: string | null; // UUID
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface StoryAnnotation {
-  id: number;
-  elementId: number;
-  content: MultilingualText;
-  createdAt: Date;
-  updatedAt: Date;
+  /** Stories enfants ancrées à des périodes de cette story. */
+  childStories?: ChildStorySummary[];
 }
 
 // Types pour les requêtes
@@ -130,6 +123,11 @@ export interface UpdatePeriodParentRequest {
   newParentId: string | null;
 }
 
+export interface DeletePeriodResult {
+  id: string;
+  parent: { id: string; hasChildren: boolean } | null;
+}
+
 export interface AddAnnotationRequest {
   content: MultilingualText;
-} 
+}

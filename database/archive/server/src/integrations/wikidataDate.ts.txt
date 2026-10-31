@@ -1,0 +1,28 @@
+import { ReadFailure, readOperation, retryAfterMilliseconds } from '../shared/readOperation.js';
+
+/** Historical maintenance reader. No SQL or recursion; failures are not an absent date. */
+export async function getEventDateFromWikidata(wikidataId: string, options: { signal?: AbortSignal } = {}): Promise<string | null> {
+  const id = wikidataId.trim().toUpperCase();
+  if (!/^Q[1-9]\d*$/.test(id)) throw new Error('Q-id Wikidata invalide.');
+  const query = `SELECT ?date WHERE {
+    wd:${id} ?prop ?date.
+    FILTER(?prop IN (wdt:P580, wdt:P582, wdt:P585, wdt:P571, wdt:P576, wdt:P569, wdt:P570, wdt:P1619, wdt:P1620))
+  } ORDER BY ?date LIMIT 1`;
+  return readOperation(async signal => {
+    let response: Response;
+    try {
+      response = await fetch(`https://query.wikidata.org/sparql?${new URLSearchParams({ query, format: 'json' })}`, {
+        signal, headers: { 'User-Agent': 'UniversalTimeline/1.0 (https://github.com/flobutbut/UniversalTimeline)', Accept: 'application/sparql-results+json' },
+      });
+    } catch (error) { if (signal.aborted) throw error; throw new ReadFailure('Wikidata est indisponible.', true); }
+    if (!response.ok) throw new ReadFailure('Wikidata est indisponible.', response.status === 429 || response.status === 408 || response.status >= 500, retryAfterMilliseconds(response.headers.get('Retry-After')));
+    const data: unknown = await response.json();
+    const result = data as { error?: unknown; results?: { bindings?: unknown } } | null;
+    const bindings = result?.results?.bindings;
+    if (result?.error || !Array.isArray(bindings)) throw new ReadFailure('Réponse Wikidata invalide.');
+    if (!bindings.length) return null;
+    const date = bindings[0]?.date?.value;
+    if (typeof date !== 'string' || !date) throw new ReadFailure('Réponse Wikidata invalide.');
+    return date;
+  }, { signal: options.signal, timeoutMs: 30000 });
+}

@@ -4,7 +4,7 @@ import { generateUUID } from '@/utils/uuid';
 export type NewEntityFormCore = {
   qid?: string | null;
   title: { fr: string; en?: string };
-  description?: { fr?: string; en?: string } | null;
+  description?: { fr?: string | null; en?: string | null } | null;
 };
 
 /** Champs communs aux POST `/events` et `/periods` : id, wikidata_id, label et description bilingues. */

@@ -4,10 +4,20 @@ function formatBoundParsed(s: string): string {
   return DateService.formatBound(DateService.parse(s));
 }
 
-/** Libellé d’une borne temporelle pour affichage (alias NOW/TODAY → « aujourd’hui », sinon formatBound). */
+/** Missing bound stays unknown; explicit NOW/TODAY is formatted as the present. */
 export function formatTemporalBoundLabel(raw: string | undefined): string {
-  if (!raw || raw === 'NOW' || raw === 'TODAY') return "aujourd'hui";
+  if (!raw?.trim()) return '—';
   return formatBoundParsed(raw);
+}
+
+/** Intervalle complet partagé par les cartes de période et leurs infobulles. */
+export function formatPeriodDateRange(period: { startDate?: string; endDate?: string }): string {
+  const start = period.startDate ? formatTemporalBoundLabel(period.startDate) : null;
+  const end = period.endDate ? formatTemporalBoundLabel(period.endDate) : null;
+  if (start && end) return `de ${start} à ${end}`;
+  if (start) return `à partir de ${start}`;
+  if (end) return `jusqu'à ${end}`;
+  return '';
 }
 
 /** Recherche locale : absence de date → chaîne vide ; sinon formatBound (NOW/TODAY suivent le parseur). */
@@ -16,7 +26,7 @@ export function formatSearchResultDateBound(raw?: string): string {
   return formatBoundParsed(raw);
 }
 
-/** Liste stories : absence → null ; TODAY (insensible à la casse) / NOW → « aujourd’hui ». */
+/** Liste stories : absence → null ; TODAY (insensible à la casse) / NOW → « aujourd'hui ». */
 export function formatStoryListTemporalBound(raw: string | undefined): string | null {
   if (raw == null || String(raw).trim() === '') return null;
   const t = String(raw).trim();
@@ -24,7 +34,7 @@ export function formatStoryListTemporalBound(raw: string | undefined): string | 
   return formatBoundParsed(t);
 }
 
-/** Sous-titre d’intervalle pour un onglet story (liste). */
+/** Sous-titre d'intervalle pour un onglet story (liste). */
 export function formatStoryListDateRangeSublabel(s: {
   startDate?: string;
   endDate?: string;
@@ -37,7 +47,7 @@ export function formatStoryListDateRangeSublabel(s: {
   return `jusqu'à ${b}`;
 }
 
-/** Libellé date d’un événement dans le panneau story (absence → tiret cadratin). */
+/** Libellé date d'un événement dans le panneau story (absence → tiret cadratin). */
 export function formatStoryEventDateLabel(event: { date?: string }): string {
   const d = event.date ?? '';
   if (!d) return '—';

@@ -1,7 +1,6 @@
 /**
  * Styles partagés du « champ select » : trigger, valeur, chevron.
- * Utilisé par Select.vue (tous modes, via SelectShell) — y compris le mode period ;
- * select-period-toolbar.css ne redéfinit pas le trigger (hors reset `button`).
+ * Utilisé par Select et PeriodSelect via SelectShell.
  */
 
 .base-select__trigger {
@@ -9,7 +8,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: 44px;
+  min-height: var(--field-height-lg);
   padding: var(--spacing-md) var(--spacing-lg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -28,12 +27,14 @@
   box-shadow: 0 0 0 2px var(--color-primary-light);
 }
 
-.base-select--compact .base-select__trigger {
-  min-height: 36px;
+.base-select__trigger:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+.base-select--sm .base-select__trigger {
+  min-height: var(--field-height-md);
   padding: var(--spacing-xs) var(--spacing-sm);
 }
 
-.base-select--compact .base-select__value {
+.base-select--sm .base-select__value {
   font-size: var(--font-size-sm);
 }
 
@@ -44,9 +45,9 @@
 }
 
 .base-select__trigger--with-tags {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  min-height: 48px;
+  padding-top: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
+  min-height: calc(var(--field-height-lg) + var(--spacing-xs));
 }
 
 .base-select__value {
@@ -77,7 +78,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
-  padding: 2px var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
   background: color-mix(in srgb, var(--color-primary) 12%, transparent);
   color: var(--color-primary);
   border-radius: var(--radius-sm);
@@ -148,7 +149,7 @@
   box-shadow: 0 0 0 2px var(--color-error-light);
 }
 
-/* Select mode period : anneau quand le panneau est ouvert (sans focus). */
+/* Anneau optionnel quand le panneau est ouvert (sans focus). */
 .base-select--trigger-open-ring.base-select--open:not(.base-select--error) .base-select__trigger {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px var(--color-primary-light);

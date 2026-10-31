@@ -1,52 +1,27 @@
 <template>
-  <Transition name="confirm-modal">
-    <div v-if="isOpen" class="modal-overlay" @click="handleCancel">
-      <div class="modal-content" @click.stop>
-        <h3 class="modal-title">{{ title }}</h3>
-        <p class="modal-message">{{ message }}</p>
+  <Teleport to="body">
+    <div class="modal-overlay" @click.self="$emit('cancel')">
+      <div ref="dialog" class="modal-content" role="alertdialog" aria-modal="true" :aria-labelledby="`${id}-title`" :aria-describedby="`${id}-message`" tabindex="-1" @click.stop>
+        <h3 :id="`${id}-title`" class="modal-title">{{ title }}</h3>
+        <p :id="`${id}-message`" class="modal-message">{{ message }}</p>
         <div class="modal-footer">
-          <Button variant="secondary" @click="handleCancel">Annuler</Button>
-          <Button variant="danger" @click="handleConfirm">Confirmer</Button>
+          <Button variant="secondary" @click="$emit('cancel')">Annuler</Button>
+          <Button variant="danger" @click="$emit('confirm')">Confirmer</Button>
         </div>
       </div>
     </div>
-  </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import Button from './Button.vue';
+import { useDialog } from '@/composables/useDialog';
 
-const isOpen = ref(false);
-const title = ref('');
-const message = ref('');
-
-let resolvePromise: (value: boolean) => void;
-
-const show = (newTitle: string, newMessage: string): Promise<boolean> => {
-  title.value = newTitle;
-  message.value = newMessage;
-  isOpen.value = true;
-  return new Promise((resolve) => {
-    resolvePromise = resolve;
-  });
-};
-
-const handleConfirm = () => {
-  isOpen.value = false;
-  if (resolvePromise) {
-    resolvePromise(true);
-  }
-};
-
-const handleCancel = () => {
-  isOpen.value = false;
-  if (resolvePromise) {
-    resolvePromise(false);
-  }
-};
-
-defineExpose({ show });
+defineProps<{ title: string; message: string }>();
+const emit = defineEmits<{ confirm: []; cancel: [] }>();
+const dialog = ref<HTMLElement>();
+const { dialogId: id } = useDialog(dialog, { close: () => emit('cancel') });
 </script>
 
 <style scoped>
@@ -61,6 +36,7 @@ defineExpose({ show });
 }
 
 .modal-content {
+  box-sizing: border-box;
   background: var(--color-surface);
   color: var(--color-text);
   border-radius: var(--radius-lg);
@@ -89,13 +65,4 @@ defineExpose({ show });
   gap: var(--spacing-md);
 }
 
-.confirm-modal-enter-active,
-.confirm-modal-leave-active {
-  transition: opacity var(--transition-fast);
-}
-
-.confirm-modal-enter-from,
-.confirm-modal-leave-to {
-  opacity: 0;
-}
-</style> 
+</style>

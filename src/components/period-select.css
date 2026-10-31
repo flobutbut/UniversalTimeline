@@ -1,0 +1,69 @@
+.period-select button.base-select__trigger {
+  font: inherit;
+  font-family: var(--font-family-base);
+  appearance: none;
+  text-align: left;
+}
+.period-select__summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.period-select .period-select__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+.period-select__toolbar .base-select__search {
+  flex: 1;
+  min-width: 140px;
+  box-sizing: border-box;
+}
+.period-select__back {
+  border-bottom: 1px solid var(--color-border-light);
+  font-weight: 600;
+  color: var(--color-text-light);
+}
+.period-select__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: min(55vh, 400px);
+}
+.period-select__list .base-select__option {
+  box-sizing: border-box;
+}
+.period-select__choose {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+  line-height: 1.35;
+}
+.period-select__drill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-light);
+  cursor: pointer;
+}
+.period-select__drill:hover {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+}

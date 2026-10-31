@@ -1,12 +1,13 @@
-type ToastType = 'success' | 'error' | 'info';
+import { useUiStore, type ToastType } from '@/stores/useUiStore';
 
 export function useToast() {
+  const ui = useUiStore();
   const show = (message: string, type: ToastType = 'info', duration?: number) => {
-    window.toast?.show(message, type, duration);
+    ui.notify(message, type, duration);
   };
 
   const hide = () => {
-    window.toast?.hide();
+    ui.hideNotification();
   };
 
   return { show, hide };

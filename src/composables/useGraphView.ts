@@ -1,49 +1,13 @@
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useDataStore } from '@/stores/useDataStore';
 import { WikidataQueryService } from '@/services/WikidataQueryService';
-import { DateService } from '@/services/DateService';
 import type { ListPeriod } from '@/types/database';
 import type { Period as GeologicalPeriod } from '@/types/geological';
-
-/** Extrait un Q-id canonique (accepte URL Wikidata, espaces, casse). */
-export function normalizeWikidataQId(raw?: string | null): string | null {
-  if (raw == null || typeof raw !== 'string') return null;
-  const s = raw.trim();
-  if (/^Q[1-9]\d*$/i.test(s)) return s.toUpperCase();
-  const fromUrl = s.match(/\/entity\/(Q[1-9]\d*)/i);
-  if (fromUrl) return fromUrl[1].toUpperCase();
-  const word = s.match(/\b(Q[1-9]\d*)\b/i);
-  return word ? word[1].toUpperCase() : null;
-}
-
-/** Mappe un enfant géologique Wikidata vers une entrée finder (non persistée, id préfixé `wikidata:`). */
-export function mapWikidataGeologicalChildToListPeriod(
-  child: GeologicalPeriod,
-  parentDbId: string
-): ListPeriod {
-  const startDate = child.temporalData[0]?.startDate ?? '';
-  const endDate = child.temporalData[0]?.endDate ?? '';
-  const qid = child.id;
-  return {
-    id: `wikidata:${qid}`,
-    wikidata_id: qid,
-    label: child.label,
-    description: child.description,
-    startDate,
-    endDate,
-    startYearsBP: DateService.toYearsBP(startDate),
-    endYearsBP: DateService.toYearsBP(endDate),
-    parentId: parentDbId,
-    hasParent: true,
-    hasChildren: child.hasChildren,
-    children: [],
-    categories: [],
-    temporalLocation: 'Globale',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-}
+import { isPeriodDescendant } from '@/lib/periodHierarchy';
+import { useLatestRequest } from './useLatestRequest';
+import { normalizeWikidataQId, mapWikidataGeologicalChildToListPeriod } from '@/lib/wikidataPeriodSuggestions';
+export { normalizeWikidataQId, mapWikidataGeologicalChildToListPeriod } from '@/lib/wikidataPeriodSuggestions';
 
 export interface GraphViewState {
   loading: boolean;
@@ -70,13 +34,23 @@ export function useGraphView() {
   const state = ref<GraphViewState>({ loading: false, error: null });
   const modalState = ref<ModalState>({ showEditModal: false, showAddModal: false, selectedPeriod: null, currentColumnIdx: null });
   const selectionState = ref<SelectionState>({ selectedIds: [], draggedItemId: null, dragOverColumnIdx: null });
-  /** Colonne (index) dont la liste d’enfants est en cours de chargement (API puis Wikidata). */
+  /** Colonne (index) dont la liste d'enfants est en cours de chargement (API puis Wikidata). */
   const loadingChildrenColumnIndex = ref<number | null>(null);
-  /** Incrémenté à chaque `handleSelect` qui lance un fetch ; évite qu’un `finally` obsolète enlève le chargement. */
-  const childrenFetchSeq = ref(0);
+  // Only the latest navigation may publish suggestions or change the column status.
+  const childRequests = useLatestRequest();
+  const initialRequests = useLatestRequest();
+  const childrenError = ref<{ column: number; message: string } | null>(null);
+  let retryChildren: () => Promise<void> = async () => {};
+  const retryChildrenLoad = () => retryChildren();
 
   // Tous les périodes chargées (racines + enfants chargés à la demande)
   const allPeriods = computed(() => sharedPeriods.value);
+
+  watch(sharedPeriods, periods => {
+    const ids = new Set(periods.map(period => period.id));
+    const missing = selectionState.value.selectedIds.findIndex(id => !ids.has(id));
+    if (missing >= 0) selectionState.value.selectedIds = selectionState.value.selectedIds.slice(0, missing);
+  });
 
   // Colonne 0 = racines, colonnes suivantes = enfants du sélectionné
   const columns = computed(() => {
@@ -111,110 +85,74 @@ export function useGraphView() {
     return parent ? parent.label.fr : `Niveau ${colIdx + 1}`;
   };
 
+  function addSuggestions(rows: GeologicalPeriod[], parentId: string) {
+    const existingIds = new Set(allPeriods.value.map(p => p.id));
+    const existingQids = new Set(allPeriods.value.map(p => p.wikidata_id).filter(Boolean));
+    const toAdd = rows.map(c => mapWikidataGeologicalChildToListPeriod(c, parentId))
+      .filter(c => !existingIds.has(c.id) && !existingQids.has(c.wikidata_id ?? ''));
+    if (toAdd.length) dataStore.addPeriodSuggestions(toAdd);
+  }
+
   const handleSelect = async (period: ListPeriod, colIdx: number) => {
-    // Tronquer la sélection à ce niveau et sélectionner cette période
+    const isCurrent = childRequests.begin();
     selectionState.value.selectedIds = selectionState.value.selectedIds.slice(0, colIdx);
     selectionState.value.selectedIds[colIdx] = period.id;
-
-    const alreadyLoaded = allPeriods.value.some(p => p.parentId === period.id);
-    if (alreadyLoaded) return;
-
-    const willFetchChildren =
-      period.hasChildren || normalizeWikidataQId(period.wikidata_id) != null;
-    const targetColIdx = colIdx + 1;
-    const fetchSeq = ++childrenFetchSeq.value;
-    if (willFetchChildren) {
-      loadingChildrenColumnIndex.value = targetColIdx;
-    }
-
+    const column = colIdx + 1;
+    retryChildren = () => handleSelect(period, colIdx);
+    childrenError.value = null;
+    loadingChildrenColumnIndex.value = column;
     try {
-      // Charger les enfants DB via le store (dédupliqué, mis en cache)
-      if (period.hasChildren) {
-        try {
-          await dataStore.ensureChildrenLoaded(period.id);
-        } catch (error) {
-          console.error('[GraphView] Erreur lors du chargement des enfants (API):', error);
-        }
+      if (!period.id.startsWith('wikidata:')) await dataStore.ensureChildrenLoaded(period.id);
+      if (!isCurrent() || !dataStore.periodById(period.id)) return;
+      const qid = normalizeWikidataQId(period.wikidata_id);
+      if (!dataStore.childrenOf(period.id).length && qid) {
+        const rows = await WikidataQueryService.getInstance().loadPeriodChildrenByWikidataId(qid);
+        if (isCurrent() && dataStore.periodById(period.id)) addSuggestions(rows, period.id);
       }
-
-      // Fallback Wikidata si aucun enfant en base
-      const parentQid = normalizeWikidataQId(period.wikidata_id);
-      const hasDbChildren = allPeriods.value.some(p => p.parentId === period.id);
-      if (!hasDbChildren && parentQid) {
-        try {
-          const geoChildren = await WikidataQueryService.getInstance().loadPeriodChildrenByWikidataId(
-            parentQid
-          );
-          const newChildren = geoChildren.map(c => mapWikidataGeologicalChildToListPeriod(c, period.id));
-          const existingIds = new Set(allPeriods.value.map(p => p.id));
-          const existingWikidataIds = new Set(
-            allPeriods.value.map(p => p.wikidata_id).filter(Boolean)
-          );
-          const toAdd = newChildren.filter(c =>
-            !existingIds.has(c.id) && !existingWikidataIds.has(c.wikidata_id ?? '')
-          );
-          if (toAdd.length > 0) {
-            dataStore.updatePeriods([...allPeriods.value, ...toAdd]);
-          }
-        } catch (error) {
-          console.error('[GraphView] Erreur lors du chargement des enfants (Wikidata):', error);
-        }
-      }
+    } catch (cause) {
+      if (isCurrent()) childrenError.value = { column, message: cause instanceof Error ? cause.message : 'Erreur de chargement' };
     } finally {
-      if (willFetchChildren && fetchSeq === childrenFetchSeq.value) {
-        loadingChildrenColumnIndex.value = null;
-      }
+      if (isCurrent()) loadingChildrenColumnIndex.value = null;
     }
   };
 
-  // Vérifie récursivement si childId est un descendant de potentialAncestorId (via parent_id)
-  const isDescendant = (childId: string, potentialAncestorId: string): boolean => {
-    const child = allPeriods.value.find(p => p.id === childId);
-    if (!child || child.parentId == null || child.parentId === '') return false;
-    if (child.parentId === potentialAncestorId) return true;
-    return isDescendant(child.parentId, potentialAncestorId);
-  };
+  const isDescendant = (childId: string, potentialAncestorId: string): boolean =>
+    isPeriodDescendant(allPeriods.value, childId, potentialAncestorId);
 
-  /**
-   * Enrichit manuellement une colonne avec les enfants Wikidata, même si des enfants
-   * sont déjà présents en base. Appelé via un bouton explicite dans l'UI.
-   */
-  const enrichColumnWithWikidata = async (parentPeriod: ListPeriod, colIdx: number) => {
-    const parentQid = normalizeWikidataQId(parentPeriod.wikidata_id);
-    if (!parentQid) return;
-
-    const targetColIdx = colIdx + 1;
-    const fetchSeq = ++childrenFetchSeq.value;
-    loadingChildrenColumnIndex.value = targetColIdx;
-
+  const enrichColumnWithWikidata = async (parent: ListPeriod, column: number) => {
+    const qid = normalizeWikidataQId(parent.wikidata_id);
+    if (!qid) return;
+    const isCurrent = childRequests.begin();
+    retryChildren = () => enrichColumnWithWikidata(parent, column);
+    childrenError.value = null;
+    loadingChildrenColumnIndex.value = column;
     try {
-      const geoChildren = await WikidataQueryService.getInstance().loadPeriodChildrenByWikidataId(parentQid);
-      const newChildren = geoChildren.map(c => mapWikidataGeologicalChildToListPeriod(c, parentPeriod.id));
-      const existingIds = new Set(allPeriods.value.map(p => p.id));
-      const existingWikidataIds = new Set(
-        allPeriods.value.map(p => p.wikidata_id).filter(Boolean)
-      );
-      const toAdd = newChildren.filter(c =>
-        !existingIds.has(c.id) && !existingWikidataIds.has(c.wikidata_id ?? '')
-      );
-      if (toAdd.length > 0) {
-        dataStore.updatePeriods([...allPeriods.value, ...toAdd]);
-      }
-    } catch (error) {
-      console.error('[GraphView] Erreur enrichissement Wikidata:', error);
+      const rows = await WikidataQueryService.getInstance().loadPeriodChildrenByWikidataId(qid);
+      if (isCurrent() && dataStore.periodById(parent.id)) addSuggestions(rows, parent.id);
+    } catch (cause) {
+      if (isCurrent()) childrenError.value = { column, message: cause instanceof Error ? cause.message : 'Erreur de chargement Wikidata' };
     } finally {
-      if (fetchSeq === childrenFetchSeq.value) {
-        loadingChildrenColumnIndex.value = null;
-      }
+      if (isCurrent()) loadingChildrenColumnIndex.value = null;
     }
   };
 
-  const loadInitialData = () => dataStore.ensureDataLoaded();
+  const loadInitialData = async () => {
+    const isCurrent = initialRequests.begin();
+    state.value.loading = true;
+    state.value.error = null;
+    try {
+      await dataStore.ensureRootsLoaded();
+    } catch (cause) {
+      if (isCurrent()) state.value.error = cause instanceof Error ? cause.message : 'Erreur de chargement des périodes';
+    } finally {
+      if (isCurrent()) state.value.loading = false;
+    }
+  };
 
   return {
     state: state.value, modalState: modalState.value, selectionState: selectionState.value,
     allPeriods, columns,
-    loadingChildrenColumnIndex,
+    loadingChildrenColumnIndex, childrenError, retryChildrenLoad,
     hasChildren, getParentLabel, isDescendant, handleSelect,
     enrichColumnWithWikidata,
     loadInitialData,

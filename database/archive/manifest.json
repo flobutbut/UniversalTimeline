@@ -1,0 +1,242 @@
+[
+  {
+    "source": "database/add_children_columns.sql",
+    "archive": "database/archive/database/add_children_columns.sql.txt",
+    "sha256": "306cf2a3a542308ea068cee17595cd1d51b6276c7fa38b2354c41c8a4318131f",
+    "bytes": 853
+  },
+  {
+    "source": "database/backup_database.sh",
+    "archive": "database/archive/database/backup_database.sh.txt",
+    "sha256": "ae396326091b25d0cb96718a067d713d4c4e408ba01acfaa341d20698e6d960b",
+    "bytes": 1669
+  },
+  {
+    "source": "database/backups/backup_20250617_140644.sql",
+    "archive": "database/archive/database/backups/backup_20250617_140644.sql.txt",
+    "sha256": "861ba73f977427371e6c74fddc504cfd5b20d67a1f6302091f8613a858453fd4",
+    "bytes": 42454
+  },
+  {
+    "source": "database/backups/backup_20250617_141704.sql",
+    "archive": "database/archive/database/backups/backup_20250617_141704.sql.txt",
+    "sha256": "861ba73f977427371e6c74fddc504cfd5b20d67a1f6302091f8613a858453fd4",
+    "bytes": 42454
+  },
+  {
+    "source": "database/backups/backup_20250625_000045.sql",
+    "archive": "database/archive/database/backups/backup_20250625_000045.sql.txt",
+    "sha256": "331a3e4634beb94de00bc80c5de4861b046492e4e6fb7f464e40e18085c2aaec",
+    "bytes": 76304
+  },
+  {
+    "source": "database/backups/backup_test_script_20250625_000138.sql",
+    "archive": "database/archive/database/backups/backup_test_script_20250625_000138.sql.txt",
+    "sha256": "19ea1ec6504bffde7048982a8dee98af262655416c5a64045f2b19b9bb1abdf7",
+    "bytes": 76304
+  },
+  {
+    "source": "database/examples/category_queries.sql",
+    "archive": "database/archive/database/examples/category_queries.sql.txt",
+    "sha256": "2755e5799d19b305276b118f368ed1aa1345aa39558dc3aaffc1622e89454231",
+    "bytes": 3369
+  },
+  {
+    "source": "database/import_data.sh",
+    "archive": "database/archive/database/import_data.sh.txt",
+    "sha256": "ea686bd65bf64230f2f1d6e23da90e2e4e018b5a31474f592a53372e46e8ab26",
+    "bytes": 188
+  },
+  {
+    "source": "database/import_data.sql",
+    "archive": "database/archive/database/import_data.sql.txt",
+    "sha256": "54089853c0a2d59330d121b16df287bcd161a5b18f949075e45e14d93fc4a589",
+    "bytes": 12628
+  },
+  {
+    "source": "database/init-all.sql",
+    "archive": "database/archive/database/init-all.sql.txt",
+    "sha256": "10c61daeed00a87e6479492bedcc605ae3b8582dc658c5614b07d3cfe97a627a",
+    "bytes": 12404
+  },
+  {
+    "source": "database/init-pgadmin.sh",
+    "archive": "database/archive/database/init-pgadmin.sh.txt",
+    "sha256": "0a34efbf6b814e178476096b4d7ee0e0b384423cc55ecf24965db0309d20ab35",
+    "bytes": 330
+  },
+  {
+    "source": "database/list_backups.sh",
+    "archive": "database/archive/database/list_backups.sh.txt",
+    "sha256": "3524cf0dc9fbbf1e44aeacf36863479e7f8f96d1d7c387a7ae77338d7a06828b",
+    "bytes": 2942
+  },
+  {
+    "source": "database/maintenance.sql",
+    "archive": "database/archive/database/maintenance.sql.txt",
+    "sha256": "2269201b46bb3003de6fcf58d4572099d88cea83d9a36416761aa56376db820f",
+    "bytes": 4529
+  },
+  {
+    "source": "database/migrate_to_iso8602.sh",
+    "archive": "database/archive/database/migrate_to_iso8602.sh.txt",
+    "sha256": "16a10dc1a75e362b755a85dec398dcff51924c4c97b44ec4fe155703b07f0cda",
+    "bytes": 231
+  },
+  {
+    "source": "database/migrate_to_iso8602.sql",
+    "archive": "database/archive/database/migrate_to_iso8602.sql.txt",
+    "sha256": "399b2f9a1131693bf21a3193b886d99b56d91c57376d3ea5f10daf9f127d1293",
+    "bytes": 1602
+  },
+  {
+    "source": "database/migrations/001_migrate_to_uuid.sql",
+    "archive": "database/archive/database/migrations/001_migrate_to_uuid.sql.txt",
+    "sha256": "5d3d00c5c0220106cea93b1f943127eeb1e5c5ecfef721ae9604888795a8c1c2",
+    "bytes": 5214
+  },
+  {
+    "source": "database/migrations/001_migrate_to_uuid_rollback.sql",
+    "archive": "database/archive/database/migrations/001_migrate_to_uuid_rollback.sql.txt",
+    "sha256": "402e219c5947770687696f9c1c5f5ec369eac00c4b744cd16cfea810f779b669",
+    "bytes": 4934
+  },
+  {
+    "source": "database/migrations/20250617_add_category_relations.sql",
+    "archive": "database/archive/database/migrations/20250617_add_category_relations.sql.txt",
+    "sha256": "91cec6d1d856d8f5a8e0c2bd89c226b2d7e7f375766f9e99ab436600239439b2",
+    "bytes": 2317
+  },
+  {
+    "source": "database/migrations/20250617_add_unique_constraints.sql",
+    "archive": "database/archive/database/migrations/20250617_add_unique_constraints.sql.txt",
+    "sha256": "cf202134b0dd6133645fdb952da5f7ba60e58b23f0cd1857f1129a10f3124dfc",
+    "bytes": 548
+  },
+  {
+    "source": "database/migrations/20250617_cleanup_orphaned_data.sql",
+    "archive": "database/archive/database/migrations/20250617_cleanup_orphaned_data.sql.txt",
+    "sha256": "6c980afbb95ef5e102c36e2d616d0190f1b75de2b66849bb5d25e5ca918f8de5",
+    "bytes": 495
+  },
+  {
+    "source": "database/migrations/20250617_convert_stories_to_uuid.sql",
+    "archive": "database/archive/database/migrations/20250617_convert_stories_to_uuid.sql.txt",
+    "sha256": "c4ec15615f79d580b90e4aa909787aeefa9572f78cd0eb8e855c2055b0cc8488",
+    "bytes": 1668
+  },
+  {
+    "source": "database/migrations/20250617_convert_to_uuid.sql",
+    "archive": "database/archive/database/migrations/20250617_convert_to_uuid.sql.txt",
+    "sha256": "a214132a60726a78c548f3ea310424d72e9d822ac314840d69fcf5c20b0219ca",
+    "bytes": 3533
+  },
+  {
+    "source": "database/migrations/20250617_insert_default_categories.sql",
+    "archive": "database/archive/database/migrations/20250617_insert_default_categories.sql.txt",
+    "sha256": "b7fe5e2179f0d2a6d67ebb1ae977791c69513142e46955040e0db07cde77e44f",
+    "bytes": 2757
+  },
+  {
+    "source": "database/migrations/20250617_mapping_and_update.sql",
+    "archive": "database/archive/database/migrations/20250617_mapping_and_update.sql.txt",
+    "sha256": "204e8297857ca8b275dda1d6ab1357c433087ce65f5e53f28bac01799b6c9ec2",
+    "bytes": 3036
+  },
+  {
+    "source": "database/migrations/20260412_story_related_stories.sql",
+    "archive": "database/archive/database/migrations/20260412_story_related_stories.sql.txt",
+    "sha256": "c6bddce23f3cdda361f27716ad9e487fd39eeb367b17a110a6e2cb6a2fccde61",
+    "bytes": 795
+  },
+  {
+    "source": "database/migrations/backup_20250617_140011.sql",
+    "archive": "database/archive/database/migrations/backup_20250617_140011.sql.txt",
+    "sha256": "50555dda0f3aaf614176ed0e5f03320a2b5cab0838adffc3fd0108b5e0a3ec2d",
+    "bytes": 40319
+  },
+  {
+    "source": "database/migrations/run_migration.sh",
+    "archive": "database/archive/database/migrations/run_migration.sh.txt",
+    "sha256": "172ff3ca8a2505621ebb19c5cf50d0e2a69a84b05375ae2a38206a10547c2ae1",
+    "bytes": 1415
+  },
+  {
+    "source": "database/patch_trigger_maintain_periods.sql",
+    "archive": "database/archive/database/patch_trigger_maintain_periods.sql.txt",
+    "sha256": "4d538ed8aa43aa0f0885411c725fa8bad97e279c2380e8bdc89e7fefefbf95c2",
+    "bytes": 1520
+  },
+  {
+    "source": "database/remove_has_parent_constraint.sql",
+    "archive": "database/archive/database/remove_has_parent_constraint.sql.txt",
+    "sha256": "0b0caa6d6f70b8f24a92ebfaa68eb3a484325713ac1da2e4c6191526edd915f5",
+    "bytes": 121
+  },
+  {
+    "source": "database/remove_parent_id.sql",
+    "archive": "database/archive/database/remove_parent_id.sql.txt",
+    "sha256": "24f9456557399f08e0e3239aeb1c7f22d4cafba1c02c0e414b19a107f00ec563",
+    "bytes": 1421
+  },
+  {
+    "source": "database/restore_database.sh",
+    "archive": "database/archive/database/restore_database.sh.txt",
+    "sha256": "59f723b9ab50d0d423dc3061ab6c60f0675b8d3f7bf8f94feb9c088c97946d0a",
+    "bytes": 2592
+  },
+  {
+    "source": "database/run_category_migration.sh",
+    "archive": "database/archive/database/run_category_migration.sh.txt",
+    "sha256": "a21fdb8dbcb76fb8d57f2cf45339e540cc1e11ed3d3f5e3ba4764cf59d182621",
+    "bytes": 1968
+  },
+  {
+    "source": "database/supabase-init.sql",
+    "archive": "database/archive/database/supabase-init.sql.txt",
+    "sha256": "595f4e831062fa1895ec307c9e561cdbf4505a385ed30c5c8a37c8c5accaa2a1",
+    "bytes": 39620
+  },
+  {
+    "source": "server/prisma/migrations/20240607-fix-event-date-string/migration.sql",
+    "archive": "database/archive/server/prisma/migrations/20240607-fix-event-date-string/migration.sql.txt",
+    "sha256": "8365ee0d971d37bc4e118f39aceafaeacb1e30fec5a4e87090bc0a0c0992955f",
+    "bytes": 169
+  },
+  {
+    "source": "server/prisma/migrations/20240607-fix-periods-date-string/migration.sql",
+    "archive": "database/archive/server/prisma/migrations/20240607-fix-periods-date-string/migration.sql.txt",
+    "sha256": "fe1124c90db4141c6a94a5d1f453c8224c82f1ab8895cc87257574c0802030e2",
+    "bytes": 258
+  },
+  {
+    "source": "server/prisma/migrations/20260405-add-years-bp/migration.sql",
+    "archive": "database/archive/server/prisma/migrations/20260405-add-years-bp/migration.sql.txt",
+    "sha256": "0fdce37cb2fc66e2e15fb5a1424734617ff74fb011b1f8bee15c1599c3dd6922",
+    "bytes": 3644
+  },
+  {
+    "source": "server/prisma/schema.prisma",
+    "archive": "database/archive/server/prisma/schema.prisma.txt",
+    "sha256": "dd562acab895f9648096829a9e5cb7f1e07f21137d0e47904b4b86605ddfa66b",
+    "bytes": 396
+  },
+  {
+    "source": "server/src/integrations/wikidataDate.ts",
+    "archive": "database/archive/server/src/integrations/wikidataDate.ts.txt",
+    "sha256": "3f055aad3c17277e4a17ac7fbcf7f048f15248d3683c94712c659e7cf470ae5c",
+    "bytes": 1889
+  },
+  {
+    "source": "server/src/scripts/updateDates.ts",
+    "archive": "database/archive/server/src/scripts/updateDates.ts.txt",
+    "sha256": "98d8c7562ac19d25552a70c54ef5e0b92e2dbafcfdbd7c0a56e33d8820a48cdb",
+    "bytes": 2276
+  },
+  {
+    "source": "server/test/wikidataReader.test.ts",
+    "archive": "database/archive/server/test/wikidataReader.test.ts.txt",
+    "sha256": "2f688aeb251ba9e0234e32aba6c3941e9bc279c7b98b94fba4c4aec547d45e0d",
+    "bytes": 3359
+  }
+]

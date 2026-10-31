@@ -1,0 +1,14 @@
+-- Liaisons many-to-many entre stories (côté « story source » → stories liées).
+-- Colonnes alignées sur public.stories.id : INTEGER (SERIAL) sur les dépôts actuels.
+-- Si votre stories.id est UUID, remplacez INTEGER par UUID avant d’exécuter ce script.
+
+CREATE TABLE IF NOT EXISTS public.story_related_stories (
+  story_id INTEGER NOT NULL REFERENCES public.stories(id) ON DELETE CASCADE,
+  related_story_id INTEGER NOT NULL REFERENCES public.stories(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (story_id, related_story_id),
+  CONSTRAINT story_related_stories_no_self CHECK (story_id <> related_story_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_story_related_stories_related
+  ON public.story_related_stories(related_story_id);

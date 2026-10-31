@@ -1,6 +1,7 @@
 <template>
   <div
     class="tabs"
+    ref="root"
     :class="{
       'tabs--vertical': vertical,
       'tabs--underline': variant === 'underline',
@@ -15,13 +16,16 @@
         'tab-button--disabled': tab.disabled,
       }"
       @click="!tab.disabled && $emit('update:modelValue', tab.value)"
+      @keydown="onKeydown($event, tab.value)"
+      type="button"
+      :aria-current="modelValue === tab.value ? 'true' : undefined"
       :disabled="tab.disabled"
     >
-      <Icon v-if="tab.icon" :icon="tab.icon" class="tab-button__icon" />
-      <span class="tab-button__stack">
-        <span class="tab-button__label">{{ tab.label }}</span>
-        <span v-if="tab.sublabel" class="tab-button__sublabel">{{ tab.sublabel }}</span>
-      </span>
+      <Icon v-if="tab.icon" :icon="tab.icon" class="tab-button__icon" aria-hidden="true" />
+      <ItemSummary class="tab-button__stack">
+        <template #title><span class="tab-button__label">{{ tab.label }}</span></template>
+        <template v-if="tab.sublabel" #details><span class="tab-button__sublabel">{{ tab.sublabel }}</span></template>
+      </ItemSummary>
       <span v-if="tab.count !== undefined" class="tab-button__count">{{ tab.count }}</span>
     </button>
   </div>
@@ -29,9 +33,11 @@
 
 <script setup lang="ts" generic="T extends string">
 import { Icon } from '@iconify/vue';
+import { ref, nextTick } from 'vue';
 import type { Tab } from '@/types/global';
+import ItemSummary from './ItemSummary.vue';
 
-defineProps<{
+const props = defineProps<{
   modelValue: T;
   tabs: Tab<T>[];
   vertical?: boolean;
@@ -39,9 +45,22 @@ defineProps<{
   variant?: 'pill' | 'underline';
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'update:modelValue', value: T): void;
 }>();
+const root = ref<HTMLElement>();
+function onKeydown(event: KeyboardEvent, value: T) {
+  const forward = props.vertical ? 'ArrowDown' : 'ArrowRight';
+  const backward = props.vertical ? 'ArrowUp' : 'ArrowLeft';
+  if (![forward, backward, 'Home', 'End'].includes(event.key)) return;
+  const enabled = props.tabs.filter(tab => !tab.disabled);
+  if (!enabled.length) return;
+  event.preventDefault();
+  const current = enabled.findIndex(tab => tab.value === value);
+  const index = event.key === 'Home' ? 0 : event.key === 'End' ? enabled.length - 1 : (current + (event.key === forward ? 1 : -1) + enabled.length) % enabled.length;
+  emit('update:modelValue', enabled[index].value);
+  void nextTick(() => root.value?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')[index]?.focus());
+}
 </script>
 
 <style scoped>
@@ -121,7 +140,8 @@ defineEmits<{
 }
 
 .tabs--vertical .tab-button--active:focus-visible {
-  outline: none;
+  outline: 2px solid var(--color-text-white);
+  outline-offset: -3px;
   box-shadow: none;
 }
 
@@ -248,7 +268,7 @@ defineEmits<{
   color: var(--color-primary);
 }
 
-@media (max-width: var(--breakpoint-md)) {
+@media (max-width: 768px) {
   .tabs:not(.tabs--vertical) {
     width: 100%;
     justify-content: center;
@@ -259,4 +279,14 @@ defineEmits<{
     font-size: var(--font-size-xs);
   }
 }
-</style> 
+</style>
+
+<style scoped>
+.tab-button, .tabs--underline .tab-button { font-weight: 400; line-height: var(--line-height-small); }
+.tabs--vertical .tab-button { min-height: 54px; font-size: var(--font-size-sm); }
+.tabs--vertical .tab-button__label { font-weight: 600; line-height: var(--line-height-small); }
+.tabs--vertical .tab-button__sublabel { font-size: var(--font-size-xs); line-height: var(--line-height-micro); }
+.tabs--vertical .tab-button--active, .tabs--vertical .tab-button--active:hover:not(:disabled) { background: var(--color-interaction-selected); color: var(--color-text-on-selected); }
+.tabs--vertical .tab-button--active .tab-button__sublabel { color: var(--color-text-on-selected); }
+.tabs--vertical .tab-button--active:focus-visible { outline-color: var(--color-border-focus); }
+</style>

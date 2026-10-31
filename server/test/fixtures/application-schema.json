@@ -1,0 +1,957 @@
+{
+  "tables": [
+    {
+      "name": "categories",
+      "columns": [
+        {
+          "name": "id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "parent_id",
+          "type": "character varying",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "label_fr",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "label_en",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "description_fr",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "description_en",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": "now()",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": "now()",
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "categories_parent_id_fkey",
+          "definition": "FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL",
+          "kind": "f"
+        },
+        {
+          "name": "categories_pkey",
+          "definition": "PRIMARY KEY (id)",
+          "kind": "p"
+        }
+      ],
+      "indexes": [],
+      "triggers": [
+        "CREATE TRIGGER trg_categories_updated_at BEFORE UPDATE ON categories FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      ],
+      "rls": true
+    },
+    {
+      "name": "event_categories",
+      "columns": [
+        {
+          "name": "event_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "category_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "event_categories_category_id_fkey",
+          "definition": "FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "event_categories_event_id_fkey",
+          "definition": "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "event_categories_pkey",
+          "definition": "PRIMARY KEY (event_id, category_id)",
+          "kind": "p"
+        }
+      ],
+      "indexes": [],
+      "triggers": [],
+      "rls": true
+    },
+    {
+      "name": "events",
+      "columns": [
+        {
+          "name": "id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "wikidata_id",
+          "type": "character varying",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "label_fr",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "label_en",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "description_fr",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "description_en",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "date",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "date_years_bp",
+          "type": "numeric",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": "now()",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": "now()",
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "events_pkey",
+          "definition": "PRIMARY KEY (id)",
+          "kind": "p"
+        },
+        {
+          "name": "events_wikidata_id_key",
+          "definition": "UNIQUE (wikidata_id)",
+          "kind": "u"
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_events_date_years_bp ON public.events USING btree (date_years_bp DESC NULLS LAST)"
+      ],
+      "triggers": [
+        "CREATE TRIGGER trg_events_updated_at BEFORE UPDATE ON events FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      ],
+      "rls": true
+    },
+    {
+      "name": "period_categories",
+      "columns": [
+        {
+          "name": "period_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "category_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "period_categories_category_id_fkey",
+          "definition": "FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "period_categories_period_id_fkey",
+          "definition": "FOREIGN KEY (period_id) REFERENCES periods(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "period_categories_pkey",
+          "definition": "PRIMARY KEY (period_id, category_id)",
+          "kind": "p"
+        }
+      ],
+      "indexes": [],
+      "triggers": [],
+      "rls": true
+    },
+    {
+      "name": "periods",
+      "columns": [
+        {
+          "name": "id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "parent_id",
+          "type": "character varying",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "wikidata_id",
+          "type": "character varying",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "label_fr",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "label_en",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "description_fr",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "description_en",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "start_date",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "end_date",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "start_years_bp",
+          "type": "numeric",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "end_years_bp",
+          "type": "numeric",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "color",
+          "type": "character varying",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "image_url",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": "now()",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": "now()",
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "periods_parent_id_fkey",
+          "definition": "FOREIGN KEY (parent_id) REFERENCES periods(id) ON DELETE SET NULL",
+          "kind": "f"
+        },
+        {
+          "name": "periods_pkey",
+          "definition": "PRIMARY KEY (id)",
+          "kind": "p"
+        },
+        {
+          "name": "periods_wikidata_id_key",
+          "definition": "UNIQUE (wikidata_id)",
+          "kind": "u"
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_periods_end_years_bp ON public.periods USING btree (end_years_bp)",
+        "CREATE INDEX idx_periods_parent_id ON public.periods USING btree (parent_id)",
+        "CREATE INDEX idx_periods_start_years_bp ON public.periods USING btree (start_years_bp DESC NULLS LAST)"
+      ],
+      "triggers": [
+        "CREATE TRIGGER trg_periods_updated_at BEFORE UPDATE ON periods FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      ],
+      "rls": true
+    },
+    {
+      "name": "stories",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "a"
+        },
+        {
+          "name": "title_fr",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "title_en",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "description_fr",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "description_en",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "author",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "is_public",
+          "type": "boolean",
+          "notNull": false,
+          "default": "false",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": "now()",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": "now()",
+          "identity": ""
+        },
+        {
+          "name": "parent_story_id",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "owner_user_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": "auth.uid()",
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "stories_id_owner_unique",
+          "definition": "UNIQUE (id, owner_user_id)",
+          "kind": "u"
+        },
+        {
+          "name": "stories_owner_user_id_fkey",
+          "definition": "FOREIGN KEY (owner_user_id) REFERENCES auth.users(id) ON DELETE RESTRICT",
+          "kind": "f"
+        },
+        {
+          "name": "stories_parent_same_owner",
+          "definition": "FOREIGN KEY (parent_story_id, owner_user_id) REFERENCES stories(id, owner_user_id)",
+          "kind": "f"
+        },
+        {
+          "name": "stories_parent_story_id_fkey",
+          "definition": "FOREIGN KEY (parent_story_id) REFERENCES stories(id)",
+          "kind": "f"
+        },
+        {
+          "name": "stories_pkey",
+          "definition": "PRIMARY KEY (id)",
+          "kind": "p"
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_stories_is_public ON public.stories USING btree (is_public)",
+        "CREATE INDEX idx_stories_parent_story_id ON public.stories USING btree (parent_story_id)",
+        "CREATE INDEX stories_owner_user_id_idx ON public.stories USING btree (owner_user_id)"
+      ],
+      "triggers": [
+        "CREATE TRIGGER trg_stories_updated_at BEFORE UPDATE ON stories FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      ],
+      "rls": true
+    },
+    {
+      "name": "story_anchors",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "notNull": true,
+          "default": "nextval('story_anchors_id_seq'::regclass)",
+          "identity": ""
+        },
+        {
+          "name": "story_id",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "anchor_type",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "anchor_id",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "story_anchors_anchor_type_check",
+          "definition": "CHECK (anchor_type = ANY (ARRAY['period'::text, 'event'::text]))",
+          "kind": "c"
+        },
+        {
+          "name": "story_anchors_pkey",
+          "definition": "PRIMARY KEY (id)",
+          "kind": "p"
+        },
+        {
+          "name": "story_anchors_story_id_anchor_type_anchor_id_key",
+          "definition": "UNIQUE (story_id, anchor_type, anchor_id)",
+          "kind": "u"
+        },
+        {
+          "name": "story_anchors_story_id_fkey",
+          "definition": "FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE",
+          "kind": "f"
+        }
+      ],
+      "indexes": [],
+      "triggers": [],
+      "rls": true
+    },
+    {
+      "name": "story_categories",
+      "columns": [
+        {
+          "name": "story_id",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "category_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "story_categories_category_id_fkey",
+          "definition": "FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "story_categories_pkey",
+          "definition": "PRIMARY KEY (story_id, category_id)",
+          "kind": "p"
+        },
+        {
+          "name": "story_categories_story_id_fkey",
+          "definition": "FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE",
+          "kind": "f"
+        }
+      ],
+      "indexes": [],
+      "triggers": [],
+      "rls": true
+    },
+    {
+      "name": "story_events",
+      "columns": [
+        {
+          "name": "story_id",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "event_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "story_events_event_id_fkey",
+          "definition": "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "story_events_pkey",
+          "definition": "PRIMARY KEY (story_id, event_id)",
+          "kind": "p"
+        },
+        {
+          "name": "story_events_story_id_fkey",
+          "definition": "FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE",
+          "kind": "f"
+        }
+      ],
+      "indexes": [],
+      "triggers": [],
+      "rls": true
+    },
+    {
+      "name": "story_periods",
+      "columns": [
+        {
+          "name": "story_id",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "period_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "parent_period_id",
+          "type": "character varying",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "parent_override",
+          "type": "boolean",
+          "notNull": true,
+          "default": "false",
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "story_periods_no_self_parent",
+          "definition": "CHECK (parent_period_id::text IS DISTINCT FROM period_id::text)",
+          "kind": "c"
+        },
+        {
+          "name": "story_periods_parent_override_check",
+          "definition": "CHECK (parent_period_id IS NULL OR parent_override)",
+          "kind": "c"
+        },
+        {
+          "name": "story_periods_parent_period_id_fkey",
+          "definition": "FOREIGN KEY (parent_period_id) REFERENCES periods(id) ON DELETE RESTRICT",
+          "kind": "f"
+        },
+        {
+          "name": "story_periods_period_id_fkey",
+          "definition": "FOREIGN KEY (period_id) REFERENCES periods(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "story_periods_pkey",
+          "definition": "PRIMARY KEY (story_id, period_id)",
+          "kind": "p"
+        },
+        {
+          "name": "story_periods_story_id_fkey",
+          "definition": "FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE",
+          "kind": "f"
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX story_periods_parent_period_id_idx ON public.story_periods USING btree (parent_period_id, story_id)"
+      ],
+      "triggers": [],
+      "rls": true
+    }
+  ],
+  "policies": [
+    {
+      "table": "categories",
+      "name": "ut_read_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "true",
+      "check": null
+    },
+    {
+      "table": "event_categories",
+      "name": "ut_read_event_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "true",
+      "check": null
+    },
+    {
+      "table": "event_categories",
+      "name": "ut_write_event_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "ALL",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "events",
+      "name": "ut_read_events",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "true",
+      "check": null
+    },
+    {
+      "table": "events",
+      "name": "ut_write_events",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "ALL",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "period_categories",
+      "name": "ut_read_period_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "true",
+      "check": null
+    },
+    {
+      "table": "period_categories",
+      "name": "ut_write_period_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "ALL",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "periods",
+      "name": "ut_read_periods",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "true",
+      "check": null
+    },
+    {
+      "table": "periods",
+      "name": "ut_write_periods",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "ALL",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "stories",
+      "name": "ut_delete_stories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "((( SELECT auth.uid() AS uid) = owner_user_id) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": null
+    },
+    {
+      "table": "stories",
+      "name": "ut_insert_stories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
+      "check": "((( SELECT auth.uid() AS uid) = owner_user_id) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "stories",
+      "name": "ut_read_stories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "((is_public IS TRUE) OR (( SELECT auth.uid() AS uid) = owner_user_id))",
+      "check": null
+    },
+    {
+      "table": "stories",
+      "name": "ut_update_stories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "UPDATE",
+      "using": "((( SELECT auth.uid() AS uid) = owner_user_id) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) = owner_user_id) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "story_anchors",
+      "name": "ut_read_story_anchors",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "(EXISTS ( SELECT 1\n   FROM stories s\n  WHERE (s.id = story_anchors.story_id)))",
+      "check": null
+    },
+    {
+      "table": "story_anchors",
+      "name": "ut_write_story_anchors",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "ALL",
+      "using": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_anchors.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_anchors.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "story_categories",
+      "name": "ut_read_story_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "(EXISTS ( SELECT 1\n   FROM stories s\n  WHERE (s.id = story_categories.story_id)))",
+      "check": null
+    },
+    {
+      "table": "story_categories",
+      "name": "ut_write_story_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "ALL",
+      "using": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_categories.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_categories.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "story_events",
+      "name": "ut_read_story_events",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "(EXISTS ( SELECT 1\n   FROM stories s\n  WHERE (s.id = story_events.story_id)))",
+      "check": null
+    },
+    {
+      "table": "story_events",
+      "name": "ut_write_story_events",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "ALL",
+      "using": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_events.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_events.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "story_periods",
+      "name": "ut_read_story_periods",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "(EXISTS ( SELECT 1\n   FROM stories s\n  WHERE (s.id = story_periods.story_id)))",
+      "check": null
+    },
+    {
+      "table": "story_periods",
+      "name": "ut_write_story_periods",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "ALL",
+      "using": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_periods.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_periods.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    }
+  ]
+}

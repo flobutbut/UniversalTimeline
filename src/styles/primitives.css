@@ -1,0 +1,48 @@
+/* Figma · Couleurs / Primitives — immutable in both themes. */
+:root {
+  --palette-neutral-0: #ffffff;
+  --palette-neutral-50: #fafafa;
+  --palette-neutral-100: #f4f4f5;
+  --palette-neutral-200: #e4e4e7;
+  --palette-neutral-300: #d4d4d8;
+  --palette-neutral-400: #a1a1aa;
+  --palette-neutral-500: #71717a;
+  --palette-neutral-600: #52525b;
+  --palette-neutral-700: #3f3f46;
+  --palette-neutral-800: #27272a;
+  --palette-neutral-850: #222224;
+  --palette-neutral-900: #18181b;
+  --palette-neutral-950: #121213;
+  --palette-blue-100: #d4e3f0;
+  --palette-blue-300: #7aa3d4;
+  --palette-blue-400: #5d89c4;
+  --palette-blue-500: #5080b0;
+  --palette-blue-600: #4476af;
+  --palette-blue-700: #34608f;
+  --palette-blue-800: #265985;
+  --palette-blue-900: #1c466f;
+  --palette-blue-950: #2a3545;
+  --palette-green-50: #e8f1eb;
+  --palette-green-400: #5dbe96;
+  --palette-green-500: #5cb87a;
+  --palette-red-50: #f8eaea;
+  --palette-red-300: #fca5a5;
+  --palette-red-400: #e07070;
+  --palette-red-600: #c94a4a;
+  --palette-red-700: #9a3030;
+  --palette-red-950: #2a1c1c;
+  --palette-amber-50: #f7f0e4;
+  --palette-amber-400: #d4a04a;
+  --palette-amber-700: #855d1c;
+  --palette-amber-950: #2a2318;
+  --palette-green-600: #3f8f6f;
+  --palette-copper-400: #c99580;
+  --palette-copper-600: #b87256;
+  --palette-purple-400: #9d8fc4;
+  --palette-purple-600: #7d6f9e;
+  --palette-alpha-black-60: rgb(0 0 0 / 60%);
+  --palette-alpha-black-70: rgb(0 0 0 / 70%);
+  --palette-green-700: #28643f;
+  --palette-green-950: #1a2a1f;
+}
+

@@ -6,9 +6,8 @@
         <div class="events-toolbar-search">
           <SearchInput v-model="search" placeholder="Rechercher un événement…" />
         </div>
-        <Select
+        <PeriodSelect
           v-model="selectedPeriodId"
-          mode="period"
           compact
           class="period-filter"
         />
@@ -18,67 +17,92 @@
             :options="categorySelectOptions"
             placeholder="Toutes les catégories"
             :searchable="categorySelectOptions.length > 10"
-            compact
+            size="sm"
           />
         </div>
       </div>
       <Button variant="primary" size="sm" @click="openCreateModal">+ Ajouter un événement</Button>
     </div>
 
+    <p class="table-scroll-hint">Faites défiler le tableau horizontalement pour voir toutes les colonnes.</p>
+    <div v-if="targetLoading || targetError" :role="targetError ? 'alert' : 'status'">
+      {{ targetError || 'Ouverture du résultat…' }}
+      <button v-if="targetError" type="button" @click="retryTarget">Réessayer</button>
+      <button type="button" @click="cancelTarget">Annuler</button>
+    </div>
+    <p v-if="storyLinks.error.value" role="alert" class="links-error">
+      Frises des événements indisponibles : {{ storyLinks.error.value }}
+      <button type="button" @click="storyLinks.load">Réessayer</button>
+    </p>
     <!-- Table -->
-    <div class="table-wrap">
-      <div v-if="loading" class="empty">Chargement…</div>
+    <div class="table-wrap" role="region" aria-label="Tableau des événements" tabindex="0">
+      <div v-if="loading" class="empty" role="status">Chargement…</div>
+      <div v-else-if="loadError" role="alert">{{ loadError }} <button type="button" @click="loadData">Réessayer</button></div>
       <template v-else>
-        <div class="events-view__table-columns" :style="gridColumnVars">
-        <div class="table-header">
-          <div class="th-cell col-label th-sortable" @click="toggleSort('label')">
+        <div class="events-view__table-columns" :style="gridColumnVars" role="table" aria-label="Événements">
+        <div class="table-header" role="row">
+          <div class="th-cell col-label" role="columnheader" :aria-sort="sortState('label')">
+            <button type="button" class="th-sortable" @click="toggleSort('label')" aria-label="Trier par nom">
             <span class="th-title">Nom</span>
             <span v-if="sortColumn === 'label'" class="sort-indicator" aria-hidden="true">{{
               sortDir === 'asc' ? '▲' : '▼'
             }}</span>
+            </button>
             <div
               class="resize-handle"
-              title="Redimensionner"
+              role="separator" aria-orientation="vertical" aria-label="Largeur de la colonne Nom" tabindex="0"
+              :aria-valuenow="colWidths.label" :aria-valuemin="COL_MIN.label" :aria-valuemax="COL_MAX.label"
+              @keydown="resizeWithKeyboard('label', $event)"
               @mousedown.stop.prevent="startResize('label', $event)"
               @click.stop
             />
           </div>
-          <div class="th-cell col-date th-sortable" @click="toggleSort('date')">
+          <div class="th-cell col-date" role="columnheader" :aria-sort="sortState('date')">
+            <button type="button" class="th-sortable" @click="toggleSort('date')" aria-label="Trier par date">
             <span class="th-title">Date</span>
             <span v-if="sortColumn === 'date'" class="sort-indicator" aria-hidden="true">{{
               sortDir === 'asc' ? '▲' : '▼'
             }}</span>
+            </button>
             <div
               class="resize-handle"
-              title="Redimensionner"
+              role="separator" aria-orientation="vertical" aria-label="Largeur de la colonne Date" tabindex="0"
+              :aria-valuenow="colWidths.date" :aria-valuemin="COL_MIN.date" :aria-valuemax="COL_MAX.date"
+              @keydown="resizeWithKeyboard('date', $event)"
               @mousedown.stop.prevent="startResize('date', $event)"
               @click.stop
             />
           </div>
-          <div class="th-cell col-categories th-sortable th-cell--no-handle" @click="toggleSort('categories')">
+          <div class="th-cell col-categories th-cell--no-handle" role="columnheader" :aria-sort="sortState('categories')">
+            <button type="button" class="th-sortable" @click="toggleSort('categories')" aria-label="Trier par catégories">
             <span class="th-title">Catégories</span>
             <span v-if="sortColumn === 'categories'" class="sort-indicator" aria-hidden="true">{{
               sortDir === 'asc' ? '▲' : '▼'
             }}</span>
+            </button>
           </div>
-          <div class="th-cell col-updated th-sortable th-cell--no-handle" @click="toggleSort('updated')">
+          <div class="th-cell col-stories th-cell--no-handle" role="columnheader">Frises</div>
+          <div class="th-cell col-updated th-cell--no-handle" role="columnheader" :aria-sort="sortState('updated')">
+            <button type="button" class="th-sortable" @click="toggleSort('updated')" aria-label="Trier par modification">
             <span class="th-title">Modifié</span>
             <span v-if="sortColumn === 'updated'" class="sort-indicator" aria-hidden="true">{{
               sortDir === 'asc' ? '▲' : '▼'
             }}</span>
+            </button>
           </div>
-          <div class="th-cell col-actions th-cell--no-handle" />
+          <div class="th-cell col-actions th-cell--no-handle" role="columnheader">Actions</div>
         </div>
-        <div class="table-body">
-          <div v-if="displayEvents.length === 0" class="empty">Aucun événement trouvé</div>
+        <div class="table-body" role="rowgroup">
+          <div v-if="displayEvents.length === 0" class="empty" role="row"><span role="cell" aria-colspan="6">Aucun événement trouvé</span></div>
           <div
             v-for="event in displayEvents"
             :key="event.id"
             class="table-row"
+            role="row"
           >
-            <span class="col-label">{{ event.label.fr }}</span>
-            <span class="col-date">{{ formatEventListDateForDisplay(event.date) }}</span>
-            <span class="col-categories">
+            <span class="col-label" role="cell">{{ event.label.fr }}</span>
+            <span class="col-date" role="cell">{{ formatEventListDateForDisplay(event.date) }}</span>
+            <span class="col-categories" role="cell">
               <span
                 v-for="cat in event.categories"
                 :key="cat.id"
@@ -87,9 +111,22 @@
                 {{ cat.label.fr }}
               </span>
             </span>
-            <span class="col-updated">{{ formatListEventLastEditFr(event) }}</span>
-            <span class="col-actions">
-              <Button variant="tertiary" size="sm" @click="openEditModal(event)">Modifier</Button>
+            <span class="col-stories" role="cell">
+              <span v-if="storyLinks.loading.value" class="col-stories__state">…</span>
+              <span v-else-if="storyLinks.error.value" class="col-stories__state">—</span>
+              <template v-else>
+                <RouterLink
+                  v-for="story in storiesOf(event.id)"
+                  :key="story.id"
+                  :to="{ path: '/timeline', query: { story: story.id } }"
+                  class="story-tag"
+                >{{ story.title }}</RouterLink>
+                <span v-if="!storiesOf(event.id).length" class="col-stories__state">Aucune</span>
+              </template>
+            </span>
+            <span class="col-updated" role="cell">{{ formatListEventLastEditFr(event) }}</span>
+            <span class="col-actions" role="cell">
+              <Button variant="tertiary" size="sm" :aria-label="`Modifier ${event.label.fr}`" @click="openEditModal(event)">Modifier</Button>
             </span>
           </div>
         </div>
@@ -103,21 +140,46 @@
       :isOpen="modalState.show"
       type="event"
       :mode="modalState.mode"
-      :data="modalState.item"
+      :data="modalState.mode === 'create' ? creationDraft : modalState.item"
+      :loading="saveLoading || deleteLoading"
+      :error="saveError"
       @close="closeModal"
       @submit="handleSave"
       @delete="handleDelete"
-    />
+    >
+      <template v-if="modalState.mode === 'edit' && modalState.item" #after-form>
+        <StoryMembershipField
+          :story-ids="storyLinks.storyIdsOf(modalState.item.id)"
+          :stories="stories"
+          :owns-story="auth.ownsStory"
+          empty-text="Cet événement n’appartient à aucune frise visible."
+          :loading="storyLinks.loading.value"
+          :load-error="storyLinks.error.value"
+          :pending="storyLinks.pending.value"
+          :change-error="storyLinks.changeError.value"
+          @retry="storyLinks.load"
+          @add="id => storyLinks.change(modalState.item!.id, id, false)"
+          @remove="id => storyLinks.change(modalState.item!.id, id, true)"
+        />
+      </template>
+    </EditModal>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { EditFormSubmission, EditInitialData } from '@/types/editForm';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useLatestRequest } from '@/composables/useLatestRequest';
+import { useSearchTarget } from '@/composables/useSearchTarget';
 import { useDataStore } from '@/stores/useDataStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useStoryLinks } from '@/composables/useStoryLinks';
+import StoryMembershipField from '@/components/StoryMembershipField.vue';
 import { useDatabaseSave } from '@/composables/useDatabaseSave';
 import { useDatabaseDelete } from '@/composables/useDatabaseDelete';
-import { DateService } from '@/services/DateService';
+import { compareYearsOldestFirst } from '@temporal';
+import { periodCoordinates } from '@/services/TimelineScalingService';
 import {
   formatEventListDateForDisplay,
   formatListEventLastEditFr,
@@ -128,18 +190,27 @@ import {
 import EditModal from '@/views/DatabaseView/EditModal.vue';
 import Button from '@/components/base/Button.vue';
 import Select from '@/components/base/Select.vue';
+import PeriodSelect from '@/components/PeriodSelect.vue';
 import SearchInput from '@/components/base/SearchInput.vue';
 import type { ListEvent } from '@/types/database';
 
 // ── Store ──────────────────────────────────────────────────────────────────────
 
 const dataStore = useDataStore();
-const { events, periods } = storeToRefs(dataStore);
+const auth = useAuthStore();
+const { events, periods, stories } = storeToRefs(dataStore);
+const storyLinks = useStoryLinks('event');
+const storiesOf = (eventId: string) => storyLinks.storyIdsOf(eventId).map(id => ({
+  id, title: dataStore.storyById(id)?.title.fr || `Frise ${id}`,
+}));
 const loading = ref(false);
+const loadError = ref<string | null>(null);
+const requests = useLatestRequest();
 
 const ACTION_COL_PX = 88;
 const UPDATED_COL_PX = 150;
 const CATEGORIES_MIN_PX = 120;
+const STORIES_MIN_PX = 160;
 const COL_MIN = { label: 140, date: 100 } as const;
 const COL_MAX = { label: 720, date: 280 } as const;
 
@@ -153,12 +224,20 @@ const sortDir = ref<'asc' | 'desc'>('asc');
 
 const eventsViewGridCols = computed(
   () =>
-    `${colWidths.value.label}px ${colWidths.value.date}px minmax(${CATEGORIES_MIN_PX}px, 1fr) ${UPDATED_COL_PX}px ${ACTION_COL_PX}px`,
+    `${colWidths.value.label}px ${colWidths.value.date}px minmax(${CATEGORIES_MIN_PX}px, 1fr) minmax(${STORIES_MIN_PX}px, 1fr) ${UPDATED_COL_PX}px ${ACTION_COL_PX}px`,
 );
 
 const gridColumnVars = computed(() => ({
   '--events-view-grid-cols': eventsViewGridCols.value,
+  minWidth: `calc(${colWidths.value.label + colWidths.value.date + CATEGORIES_MIN_PX + STORIES_MIN_PX + UPDATED_COL_PX + ACTION_COL_PX}px + var(--spacing-sm) * 5 + var(--spacing-md) * 2)`,
 }));
+const sortState = (column: SortColumn) => sortColumn.value === column ? sortDir.value === 'asc' ? 'ascending' : 'descending' : undefined;
+function resizeWithKeyboard(column: ResizableCol, event: KeyboardEvent) {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+  event.preventDefault();
+  const value = event.key === 'Home' ? COL_MIN[column] : event.key === 'End' ? COL_MAX[column] : colWidths.value[column] + (event.key === 'ArrowRight' ? 10 : -10);
+  colWidths.value = { ...colWidths.value, [column]: Math.min(COL_MAX[column], Math.max(COL_MIN[column], value)) };
+}
 
 function toggleSort(col: SortColumn) {
   if (sortColumn.value === col) {
@@ -182,6 +261,7 @@ const displayEvents = computed(() => {
     } else if (col === 'date') {
       const ya = listEventYearsBP(a);
       const yb = listEventYearsBP(b);
+      if (ya === null || yb === null) return compareYearsOldestFirst(ya, yb);
       cmp = yb - ya;
     } else if (col === 'categories') {
       cmp = listEventCategoriesSortKey(a).localeCompare(listEventCategoriesSortKey(b), 'fr', {
@@ -234,7 +314,7 @@ const availableCategories = computed(() => {
   const map = new Map<string, { id: string; label: { fr: string; en: string } }>();
   for (const e of events.value) {
     for (const cat of e.categories ?? []) {
-      if (!map.has(cat.id)) map.set(cat.id, cat as any);
+      if (!map.has(cat.id)) map.set(cat.id, cat);
     }
   }
   return [...map.values()].sort((a, b) => a.label.fr.localeCompare(b.label.fr));
@@ -254,23 +334,21 @@ const selectedPeriod = computed(() =>
 const filteredEvents = computed(() => {
   const q = search.value.trim().toLowerCase();
 
-  return events.value.filter((e: any) => {
+  return events.value.filter(e => {
     // Filtre texte
     if (q && !e.label.fr.toLowerCase().includes(q)) return false;
 
     // Filtre catégorie
     if (selectedCategoryId.value) {
-      if (!e.categories?.some((c: any) => c.id === selectedCategoryId.value)) return false;
+      if (!e.categories?.some(c => c.id === selectedCategoryId.value)) return false;
     }
 
     // Filtre période
     if (selectedPeriod.value) {
       const p = selectedPeriod.value;
-      const startYBP = p.startYearsBP ?? DateService.toYearsBP(p.startDate);
-      const endYBP = p.endYearsBP != null ? p.endYearsBP
-                   : (p.endDate && p.endDate !== 'NOW' ? DateService.toYearsBP(p.endDate) : 0);
+      const { start: startYBP, end: endYBP } = periodCoordinates(p);
       const eventYBP = listEventYearsBP(e);
-      if (eventYBP > startYBP || eventYBP < endYBP) return false;
+      if (startYBP === null || endYBP === null || eventYBP === null || eventYBP > startYBP || eventYBP < endYBP) return false;
     }
 
     return true;
@@ -282,22 +360,28 @@ const filteredEvents = computed(() => {
 const modalState = ref<{
   show: boolean;
   mode: 'create' | 'edit';
-  item: any;
+  item: ListEvent | null;
 }>({ show: false, mode: 'create', item: null });
+const creationDraft = ref<EditInitialData | null>(null);
 
 const openCreateModal = () => {
+  cancelTarget();
+  creationDraft.value = null;
+  saveError.value = null;
   modalState.value = { show: true, mode: 'create', item: null };
 };
 
 const openEditModal = (event: ListEvent) => {
+  cancelTarget();
+  saveError.value = null;
   const full = events.value.find(e => e.id === event.id);
   modalState.value = {
     show: true,
     mode: 'edit',
     item: {
       ...(full ?? event),
-      description: (full as any)?.description ?? { fr: '', en: '' },
-      categories: (full as any)?.categories ?? [],
+      description: full?.description ?? { fr: '', en: '' },
+      categories: full?.categories ?? [],
     },
   };
 };
@@ -305,37 +389,69 @@ const openEditModal = (event: ListEvent) => {
 const closeModal = () => {
   modalState.value.show = false;
   modalState.value.item = null;
+  creationDraft.value = null;
 };
 
 // ── Sauvegarde / suppression ───────────────────────────────────────────────────
 
-const { handleSave: saveHandler } = useDatabaseSave();
-const { handleDelete: deleteHandler } = useDatabaseDelete();
+const { handleSave: saveHandler, loading: saveLoading, error: saveError } = useDatabaseSave();
+const { handleDelete: deleteHandler, loading: deleteLoading } = useDatabaseDelete();
 
-const handleSave = async (formData: any) => {
+const initialized = ref(false);
+const { loading: targetLoading, error: targetError, retry: retryTarget, cancel: cancelTarget } = useSearchTarget(
+  'event', () => initialized.value && !loading.value && !loadError.value,
+  async (target, isCurrent) => {
+    saveError.value = null;
+    if (target.kind === 'wikidata') {
+      creationDraft.value = { wikidata_id: target.qid };
+      modalState.value = { show: true, mode: 'create', item: null };
+    } else {
+      let event = dataStore.eventById(target.id);
+      if (!event) {
+        await dataStore.ensureEventsLoaded(true);
+        if (!isCurrent()) return;
+        event = dataStore.eventById(target.id);
+      }
+      if (!event) throw new Error('Événement introuvable dans le catalogue.');
+      modalState.value = { show: true, mode: 'edit', item: event };
+    }
+  }, closeModal,
+);
+
+const handleSave = async (formData: EditFormSubmission) => {
+  if (saveLoading.value || deleteLoading.value) return;
   const success = await saveHandler(formData, 'event', modalState.value.mode, modalState.value.item);
   if (success) closeModal();
 };
 
 const handleDelete = async () => {
+  if (saveLoading.value || deleteLoading.value) return;
   const success = await deleteHandler(modalState.value.item, 'event');
   if (success) closeModal();
 };
 
 // ── Init ───────────────────────────────────────────────────────────────────────
 
-onMounted(async () => {
+const loadData = async () => {
+  const isCurrent = requests.begin();
   loading.value = true;
-  await Promise.all([
-    dataStore.ensureEventsLoaded(),
-    dataStore.ensureRootsLoaded(),
-  ]);
-  loading.value = false;
-});
+  loadError.value = null;
+  try {
+    await Promise.all([dataStore.ensureEventsLoaded(), dataStore.ensureRootsLoaded()]);
+  } catch (cause) {
+    if (isCurrent()) loadError.value = cause instanceof Error ? cause.message : 'Erreur de chargement';
+  } finally {
+    if (isCurrent()) loading.value = false;
+    if (isCurrent()) initialized.value = true;
+  }
+};
+onMounted(() => { void loadData(); void storyLinks.load(); });
+
 </script>
 
 <style scoped>
 .events-view {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -389,7 +505,7 @@ onMounted(async () => {
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .events-view__table-columns {
@@ -434,6 +550,12 @@ onMounted(async () => {
 }
 
 .th-sortable {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
   gap: calc((var(--spacing-sm) + var(--spacing-xs)) / 2);
 }
@@ -477,6 +599,16 @@ onMounted(async () => {
 .table-body {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-width: 1200px) {
+  .toolbar, .filters { flex-wrap: wrap; }
+  .filters { flex-basis: 100%; }
+  .events-toolbar-search, .events-toolbar-select, .period-filter { flex: 1 1 180px; width: auto; min-width: 0; max-width: none; }
+}
+@media (max-width: 480px) {
+  .events-toolbar-search, .events-toolbar-select, .period-filter { flex-basis: 100%; }
 }
 
 .table-row {
@@ -535,6 +667,45 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
+.col-stories {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.story-tag {
+  flex-shrink: 0;
+  padding: 1px calc(var(--spacing-md) / 2);
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.story-tag:hover,
+.story-tag:focus-visible {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.col-stories__state {
+  color: var(--color-text-light);
+  font-size: var(--font-size-xs);
+}
+
+.links-error {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+}
+
 .col-actions {
   display: flex;
   justify-content: flex-end;
@@ -545,9 +716,14 @@ onMounted(async () => {
   transition: opacity var(--transition-fast);
 }
 
-.table-row:hover .col-actions :deep(.base-button) {
+.table-row:hover .col-actions :deep(.base-button),
+.table-row:focus-within .col-actions :deep(.base-button) {
   opacity: 1;
 }
+
+.table-scroll-hint { display: none; margin: 0; font-size: var(--font-size-xs); color: var(--color-text-light); }
+@media (max-width: 1024px) { .table-scroll-hint { display: block; } }
+@media (hover: none) { .col-actions :deep(.base-button) { opacity: 1; } }
 
 .empty {
   padding: var(--spacing-2xl);

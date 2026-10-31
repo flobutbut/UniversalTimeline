@@ -1,61 +1,41 @@
-import express from 'express';
-import cors from 'cors';
-import { testConnection } from './api/database.js';
+import type { Server } from 'node:http';
+import { testConnection, closePool } from './api/database.js';
 import routes from './api/routes.js';
+import { logServerError } from './api/errors.js';
+import { createApp } from './app.js';
+import { createShutdown } from './runtime/shutdown.js';
+import { configuredAccessMiddleware } from './auth/config.js';
 
-console.log('Démarrage du serveur...');
-
-const app = express();
 const port = process.env.PORT || 3000;
+const host = process.env.HOST || '127.0.0.1';
+let httpServer: Server | undefined;
+const lifecycle = createShutdown({ server: () => httpServer, closePool, exit: code => { process.exit(code); } });
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Routes
-app.use('/api', routes);
-
-// Route de test
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+process.on('SIGINT', () => { void lifecycle.shutdown('SIGINT'); });
+process.on('SIGTERM', () => { void lifecycle.shutdown('SIGTERM'); });
+process.on('unhandledRejection', reason => {
+  logServerError('unhandled_rejection', reason);
+  void lifecycle.shutdown('unhandledRejection', 1);
+});
+process.on('uncaughtException', error => {
+  logServerError('uncaught_exception', error);
+  void lifecycle.shutdown('uncaughtException', 1);
 });
 
-// Gestion des erreurs
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Une erreur est survenue sur le serveur' });
-});
-
-// Gestion des promesses non gérées
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Promesse non gérée rejetée:', reason);
-  if (reason instanceof Error) {
-    console.error(`Message d'erreur: ${reason.message}`);
-    console.error(`Stack trace: ${reason.stack}`);
-  }
-});
-
-process.on('uncaughtException', (error) => {
-  console.error('Exception non gérée:', error);
-  if (error instanceof Error) {
-    console.error(`Message d'erreur: ${error.message}`);
-    console.error(`Stack trace: ${error.stack}`);
-  }
-});
-
-// Démarrage du serveur
-const startServer = async () => {
+async function startServer() {
   try {
-    // Tester la connexion à la base de données
+    const app = createApp({ routes, healthcheck: testConnection, isStopping: lifecycle.isStopping, frontendOrigin: process.env.FRONTEND_ORIGIN, access: configuredAccessMiddleware() });
     await testConnection();
-    
-    app.listen(port, () => {
-      console.log(`Serveur démarré sur le port ${port}`);
+    httpServer = app.listen(Number(port), host, () => {
+      console.log(JSON.stringify({ event: 'server_started', host, port: Number(port) }));
+    });
+    httpServer.on('error', error => {
+      logServerError('http_server_failed', error);
+      void lifecycle.shutdown('listenError', 1);
     });
   } catch (error) {
-    console.error('Erreur lors du démarrage du serveur:', error);
-    process.exit(1);
+    logServerError('startup_failed', error);
+    await lifecycle.shutdown('startupError', 1);
   }
-};
-
-startServer(); 
+}
+void startServer();

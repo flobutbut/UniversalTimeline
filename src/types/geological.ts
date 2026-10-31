@@ -1,148 +1,26 @@
-// Types pour les éons principaux
-export const MAIN_EONS = {
-  HADEAN: 'Q104460',
-  ARCHEAN: 'Q104168',
-  PROTEROZOIC: 'Q104162',
-  PHANEROZOIC: 'Q101313'
-} as const;
-
-// Story principale
-export const MAIN_STORY = {
-  PLANET_EARTH: 'Q2' // Q2 est l'ID Wikidata pour la Terre
-} as const;
-
-// Types pour les catégories de périodes
-export const PERIOD_CATEGORIES = {
-  EON: 'Q23387',           // éon
-  ERA: 'Q3253162',         // ère
-  PERIOD: 'Q186081',       // période
-  EPOCH: 'Q11514315',      // époque
-  AGE: 'Q47018901'         // âge
-} as const;
-
-// Version complète d'une période
+/** Public Wikidata period summaries; application entities live in database.ts. */
 export interface TemporalLocation {
   startDate?: string;
   endDate?: string;
   location: string;
 }
 
-export interface PeriodData {
+export interface Period {
   id: string;
-  label: {
-    fr: string;
-    en: string;
-  };
+  label: { fr: string; en: string };
+  description: { fr: string; en: string };
   temporalData: TemporalLocation[];
   hasChildren: boolean;
-  isMainEon: boolean;
-  categoryIds: string[];
-  categoryLabels: string[];
-  children: PeriodData[];
-  loading: boolean;
-  childrenPreloaded: boolean;
-  locations: string[];
-  directLocations: string[];
-}
-
-export interface Period extends PeriodData {
-  id: string;
-  wikidata_id?: string;
-  /** Optionnel : précalcul pour la timeline / tri (années avant présent). */
-  startYearsBP?: number;
-  endYearsBP?: number;
-  label: {
-    fr: string;
-    en: string;
-  };
-  description: {
-    fr: string;
-    en: string;
-  };
-  temporalData: TemporalLocation[];
-  hasChildren: boolean;
-  isMainEon: boolean;
-  categoryIds: string[];
-  categoryLabels: string[];
   children: Period[];
-  loading: boolean;
   childrenPreloaded: boolean;
-  locations: string[];
-  directLocations: string[];
 }
 
-// Types pour les réponses Wikidata
+export interface WikidataValue {
+  value: string;
+  type?: string;
+  datatype?: string;
+  'xml:lang'?: string;
+}
 export interface WikidataBinding {
-  item?: { value: string };
-  itemLabelFr?: { value: string };
-  itemLabelEn?: { value: string };
-  itemDescriptionFr?: { value: string };
-  itemDescriptionEn?: { value: string };
-  startDate?: { value: string };
-  endDate?: { value: string };
-  startLocationLabel?: { value: string };
-  endLocationLabel?: { value: string };
-  childCount?: { value: string };
-  child?: { value: string };
-  childLabel?: { value: string };
-  description?: { value: string };
-  date?: { value: string };
-  [key: string]: any;
+  [variable: string]: WikidataValue | undefined;
 }
-
-export interface WikidataResult {
-  bindings: {
-    item: WikidataBinding;
-    itemLabel: WikidataBinding;
-    startDate?: WikidataBinding;
-    endDate?: WikidataBinding;
-    categoryId?: WikidataBinding;
-    categoryLabel?: WikidataBinding;
-    location?: WikidataBinding;
-    locationLabel?: WikidataBinding;
-    hasChildren?: WikidataBinding;
-  }[];
-}
-
-export interface WikidataResponse {
-  results: {
-    bindings: WikidataBinding[];
-  };
-}
-
-// Options pour les requêtes
-export interface QueryOptions {
-  limit?: number;
-  offset?: number;
-  language?: string;
-  parentId?: string;
-  categoryId?: string;
-  languages?: string[];
-}
-
-export interface Event {
-  id: string;
-  wikidata_id?: string;
-  label: {
-    fr: string;
-    en: string;
-  };
-  description?: {
-    fr: string;
-    en: string;
-  };
-  date: string;
-  categories?: Array<{
-    id: string;
-    label: {
-      fr: string;
-      en: string;
-    };
-  }>;
-  location?: string;
-  source?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-// ApiPeriod supprimé — utiliser Period depuis '@/types/database' à la place

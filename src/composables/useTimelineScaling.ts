@@ -51,7 +51,7 @@ export function useTimelineScaling() {
    * Position horizontale d'un événement sur la même échelle que les périodes.
    */
   const getEventLayoutStyle = (date: string, cardWidth = '0px') => {
-    const dateYBP = DateService.toYearsBP(date);
+    const dateYBP = DateService.tryToYearsBP(date);
     const positionPct = scalingService.calculateRelativePosition(
       dateYBP,
       totalDuration.value,
@@ -63,24 +63,11 @@ export function useTimelineScaling() {
     };
   };
 
-  /**
-   * Tri chronologique décroissant (plus ancien en premier à gauche).
-   */
-  const sortPeriodsByStartDesc = (periods: ScalablePeriod[]): ScalablePeriod[] => {
-    return [...periods].sort((a, b) => {
-      const aY = a.startYearsBP ?? DateService.toYearsBP(a.temporalData?.[0]?.startDate ?? a.startDate ?? '');
-      const bY = b.startYearsBP ?? DateService.toYearsBP(b.temporalData?.[0]?.startDate ?? b.startDate ?? '');
-      return bY - aY;
-    });
-  };
-
   return {
     totalDuration: readonly(totalDuration),
     startYears: readonly(startYears),
     updateFromPeriods,
     getPeriodLayoutStyle,
     getEventLayoutStyle,
-    sortPeriodsByStartDesc,
-    convertDateToYearsBeforePresent: (dateStr: string) => DateService.toYearsBP(dateStr),
   };
 }

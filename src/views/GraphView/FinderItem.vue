@@ -2,47 +2,49 @@
   <div
     class="finder-item"
     :class="{
-      'selected': selected,
+      selected,
       'finder-item-has-children': hasChildren && !wikidataOnly,
-      'finder-item-wikidata-children': hasChildren && wikidataOnly
+      'finder-item-wikidata-children': hasChildren && wikidataOnly,
+      'finder-item--external-catalog': isExternalCatalog,
     }"
-    :aria-selected="selected"
-    tabindex="0"
-    :draggable="true"
-    @dragstart="emit('dragstart', itemId)"
+    :draggable="isDraggable"
+    @dragstart="onDragStart"
     @dragover.prevent
     @drop="emit('drop', itemId)"
     @click="emit('click')"
-    @mouseenter="handleMouseEnter"
-    @mouseleave="handleMouseLeave"
   >
-    <div class="finder-item-content" ref="contentRef">
-      <div class="finder-item-text">
-        <div
+    <button ref="contentButton" type="button" class="finder-item-content" :aria-label="label.fr" :aria-current="selected ? 'true' : undefined" @click.stop="emit('click')">
+      <ItemSummary class="finder-item-text">
+        <template #title><span
           class="finder-item-title"
           :class="{ 'finder-item-label-wikidata': wikidataOnly }"
         >
           <slot>{{ label.fr }}</slot>
-        </div>
-        <div class="finder-item-dates">
+        </span></template>
+        <template #details><span class="finder-item-dates">
           <span v-if="categories && categories.length" class="finder-item-category">{{ categories[0].label.fr }}</span>
           <span v-if="categories && categories.length" class="finder-item-date-sep"> · </span>
           {{ dateSubtitle }}
-        </div>
+        </span></template>
+      </ItemSummary>
+    </button>
+    <div
+      class="finder-item-actions"
+      :class="{ 'finder-item-actions--slot-trailing': hideChevron }"
+    >
+      <div v-if="$slots.actions" class="finder-item-actions__slot">
+        <slot name="actions" />
       </div>
-    </div>
-    <div class="finder-item-actions">
       <button
-        v-if="itemId"
+        v-if="itemId && !hideRowAction"
         class="action-button row-action-button"
-        ref="editBtnRef"
         type="button"
         @click.stop="onRowActionClick"
-        v-show="showRowAction"
+        :aria-label="`${wikidataOnly ? 'Ajouter' : 'Modifier'} ${label.fr}`"
       >
         {{ wikidataOnly ? 'Add' : 'Edit' }}
       </button>
-      <div class="finder-item-chevron">
+      <div v-if="!hideChevron" class="finder-item-chevron">
         <ChevronIcon
           :width="16"
           :height="16"
@@ -55,14 +57,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+/**
+ * Ligne finder unique : tout passe par les props / le slot `#actions` (retirer, ajouter, etc.).
+ * Ex. story — périodes : `hide-row-action`, slot actions, `is-external-catalog`, `hide-chevron` si pas de drilldown ;
+ * story — événements : `hide-chevron`, `date-subtitle-override`, slot actions.
+ */
+import { computed, ref, watchPostEffect } from 'vue';
 import type { MultilingualText, Category } from '@/types/database';
 import { formatFinderItemDateRangeSubtitle } from '@/lib/finderItemDateLabels';
 import ChevronIcon from '@/components/icons/ChevronIcon.vue';
+import ItemSummary from '@/components/base/ItemSummary.vue';
 
 const props = defineProps<{
   label: MultilingualText;
   selected: boolean;
+  focusRequested?: boolean;
   /** Sous-périodes possibles (API, Wikidata ou déjà chargées dans le store). */
   hasChildren: boolean;
   /** Ligne non persistée (id `wikidata:…`) : style distinct de l'enregistrement PostgreSQL. */
@@ -71,11 +80,32 @@ const props = defineProps<{
   startDate?: string;
   endDate?: string;
   categories?: Category[];
+  /** Désactive le drag HTML5 (ex. périodes d'une story en mode colonnes). */
+  draggable?: boolean;
+  /** Masque le bouton Edit / Add en fin de ligne. */
+  hideRowAction?: boolean;
+  /** Masque le chevron (ex. liste d'événements avec actions custom). */
+  hideChevron?: boolean;
+  /** Sous-titre dates : remplace le calcul à partir de startDate / endDate. */
+  dateSubtitleOverride?: string;
+  /**
+   * Ligne « catalogue » hors périmètre story (ex. période globale affichée en finder) :
+   * libellés / dates atténués jusqu'au survol.
+   */
+  isExternalCatalog?: boolean;
 }>();
 
-const dateSubtitle = computed(() =>
-  formatFinderItemDateRangeSubtitle(props.startDate, props.endDate)
-);
+const isDraggable = computed(() => props.draggable !== false);
+
+const dateSubtitle = computed(() => {
+  const o = props.dateSubtitleOverride;
+  if (o !== undefined && String(o).trim() !== '') return o;
+  return formatFinderItemDateRangeSubtitle(props.startDate, props.endDate);
+});
+const contentButton = ref<HTMLButtonElement | null>(null);
+watchPostEffect(() => {
+  if (props.focusRequested && props.selected) contentButton.value?.focus();
+});
 
 const chevronOpacity = computed(() => {
   if (!props.hasChildren) return 0.3;
@@ -92,29 +122,19 @@ const emit = defineEmits<{
   (e: 'add', itemId: string): void;
 }>();
 
+function onDragStart(e: DragEvent) {
+  if (!isDraggable.value) {
+    e.preventDefault();
+    return;
+  }
+  emit('dragstart', props.itemId);
+}
+
 function onRowActionClick() {
   if (props.wikidataOnly) emit('add', props.itemId);
   else emit('edit', props.itemId);
 }
 
-const showRowAction = ref(false);
-const editBtnRef = ref<HTMLElement | null>(null);
-const contentRef = ref<HTMLElement | null>(null);
-
-function handleMouseEnter() {
-  showRowAction.value = true;
-}
-function handleMouseLeave() {
-  showRowAction.value = props.selected;
-}
-
-watch(
-  () => props.selected,
-  (val) => {
-    showRowAction.value = val;
-  },
-  { immediate: true }
-);
 </script>
 
 <style scoped>
@@ -125,7 +145,7 @@ watch(
   color: var(--color-text);
   transition: all 0.2s ease;
   font-size: var(--font-size-base);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
   outline: none;
   min-height: auto;
   height: auto;
@@ -133,16 +153,19 @@ watch(
   align-items: center;
   background: var(--color-surface);
   border: none;
+  border-bottom: 1px solid var(--color-border-light);
   width: 100%;
   box-sizing: border-box;
 }
 
-/* Séparateurs entre lignes : bordure haute (pas basse) pour pouvoir retirer celle au-dessus de la sélection. */
-.finder-item:not(:first-child) {
-  border-top: 1px solid var(--color-border-light);
-}
-
 .finder-item-content {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
   flex: 1;
   min-width: 0;
   padding: 0 !important;
@@ -154,22 +177,29 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 0;
+  row-gap: 0;
   min-width: 0;
+  line-height: var(--line-height-tight);
 }
 
 .finder-item-title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: var(--line-height-tight);
+  margin: 0;
+  padding: 0;
 }
 
 .finder-item-dates {
   font-size: var(--font-size-xs);
-  line-height: 1.25;
+  line-height: var(--line-height-tight);
   color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0;
+  padding: 0;
 }
 
 .finder-item.selected .finder-item-dates {
@@ -188,6 +218,15 @@ watch(
   display: flex;
   align-items: center;
   flex-shrink: 0;
+}
+
+.finder-item-actions--slot-trailing {
+  justify-content: flex-end;
+}
+
+.finder-item-actions__slot {
+  display: flex;
+  align-items: center;
 }
 
 .action-button {
@@ -210,13 +249,18 @@ watch(
 }
 
 .row-action-button {
-  visibility: hidden;
+  opacity: 0;
+  min-height: 24px;
 }
 
 .finder-item:hover .row-action-button,
+.finder-item:focus-within .row-action-button,
 .finder-item.selected .row-action-button {
-  visibility: visible;
+  opacity: 1;
 }
+
+.finder-item.selected button:focus-visible { outline: 2px solid var(--color-text-white); outline-offset: -2px; }
+@media (hover: none) { .row-action-button { opacity: 1; } }
 
 .finder-item.selected .action-button {
   color: var(--color-text-white);
@@ -226,13 +270,13 @@ watch(
   color: color-mix(in srgb, var(--color-text-white) 88%, transparent);
 }
 
-.finder-item:hover,
-.finder-item.droppable {
+.finder-item:hover {
   background: var(--color-surface-hover);
 }
 
 .finder-item.selected {
   border: none;
+  border-bottom: 1px solid var(--color-border-light);
   box-shadow: none;
   background: var(--color-primary);
   color: var(--color-text-white);
@@ -245,8 +289,7 @@ watch(
   box-shadow: none;
 }
 
-.finder-item:hover .finder-item-chevron,
-.finder-item.droppable .finder-item-chevron {
+.finder-item:hover .finder-item-chevron {
   opacity: 1;
 }
 
@@ -288,4 +331,15 @@ watch(
   justify-content: center;
   margin-left: var(--spacing-xs);
 }
-</style> 
+
+/* Période catalogue hors story (story / finder colonnes) */
+.finder-item--external-catalog:not(.selected) .finder-item-title,
+.finder-item--external-catalog:not(.selected) .finder-item-dates {
+  opacity: 0.58;
+}
+
+.finder-item--external-catalog:not(.selected):hover .finder-item-title,
+.finder-item--external-catalog:not(.selected):hover .finder-item-dates {
+  opacity: 0.78;
+}
+</style>

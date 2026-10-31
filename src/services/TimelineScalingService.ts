@@ -1,98 +1,39 @@
-import { DateService } from './DateService'
-
-/**
- * Élément minimal requis par le service de scaling.
- * PeriodApiService.mapToPeriod() expose startYearsBP et endYearsBP,
- * mais on accepte aussi les anciens objets avec startDate/endDate comme fallback.
- */
+import { resolveYearsBeforePresent } from '@temporal';
 export interface ScalablePeriod {
-  startYearsBP?: number
-  endYearsBP?: number
-  startDate?: string
-  endDate?: string
-  // Accès legacy via temporalData (HomeView)
-  temporalData?: Array<{ startDate?: string; endDate?: string }>
+  startYearsBP?: number; endYearsBP?: number; startDate?: string; endDate?: string;
+  temporalData?: Array<{ startDate?: string; endDate?: string }>;
 }
-
-function getStartYBP(p: ScalablePeriod): number {
-  if (p.startYearsBP != null) return p.startYearsBP
-  const raw = p.startDate ?? p.temporalData?.[0]?.startDate ?? ''
-  return DateService.toYearsBP(raw)
+export function periodCoordinates(p: ScalablePeriod) {
+  return {
+    start: resolveYearsBeforePresent(p.startDate ?? p.temporalData?.[0]?.startDate, p.startYearsBP),
+    end: resolveYearsBeforePresent(p.endDate ?? p.temporalData?.[0]?.endDate, p.endYearsBP),
+  };
 }
-
-function getEndYBP(p: ScalablePeriod): number {
-  if (p.endYearsBP != null) return p.endYearsBP
-  const raw = p.endDate ?? p.temporalData?.[0]?.endDate ?? 'NOW'
-  return DateService.toYearsBP(raw)
+function windowBounds(periods: ScalablePeriod[], parent?: ScalablePeriod) {
+  if (parent) {
+    const { start, end } = periodCoordinates(parent);
+    if (start !== null && end !== null) return { start, end };
+  }
+  const values = periods.flatMap(p => Object.values(periodCoordinates(p))).filter((v): v is number => v !== null);
+  return values.length ? { start: Math.max(...values), end: Math.min(...values) } : { start: 0, end: 0 };
 }
-
 export class TimelineScalingService {
-  /**
-   * Durée totale couverte par un ensemble de périodes enfants.
-   * Prend la période parente si disponible pour être robuste aux enfants
-   * avec des dates manquantes.
-   */
   calculateTotalDuration(periods: ScalablePeriod[], parent?: ScalablePeriod): number {
-    if (parent) {
-      const parentStart = getStartYBP(parent)
-      const parentEnd   = getEndYBP(parent)
-      return Math.max(0, parentStart - parentEnd)
-    }
-
-    if (periods.length === 0) return 0
-
-    const starts = periods.map(getStartYBP)
-    const ends   = periods.map(getEndYBP)
-    const maxStart = Math.max(...starts)
-    const minEnd   = Math.min(...ends)
-    return Math.max(0, maxStart - minEnd)
+    const { start, end } = windowBounds(periods, parent);
+    return Math.max(0, start - end);
   }
-
-  /**
-   * Calcule la position relative (0–100%) d'une date dans la fenêtre temporelle.
-   *   0% = bord gauche (date la plus ancienne = startYears)
-   * 100% = bord droit (aujourd'hui ou fin de la période parente)
-   */
-  calculateRelativePosition(
-    dateYBP: number,
-    totalDuration: number,
-    windowStartYBP: number
-  ): number {
-    if (totalDuration === 0) return 0
-    const position = ((windowStartYBP - dateYBP) / totalDuration) * 100
-    return Math.max(0, Math.min(100, position))
+  calculateRelativePosition(dateYBP: number | null, totalDuration: number, windowStartYBP: number): number {
+    if (dateYBP === null || !Number.isFinite(dateYBP) || !Number.isFinite(totalDuration) || !Number.isFinite(windowStartYBP) || totalDuration <= 0) return 0;
+    return Math.max(0, Math.min(100, ((windowStartYBP - dateYBP) / totalDuration) * 100));
   }
-
-  /**
-   * Largeur relative (0–100%) d'une période dans la fenêtre temporelle.
-   */
-  calculatePeriodWidth(period: ScalablePeriod, totalDuration: number): number {
-    if (totalDuration === 0) return 0
-    const start = getStartYBP(period)
-    const end   = getEndYBP(period)
-    const duration = Math.max(0, start - end)
-    return Math.min(100, (duration / totalDuration) * 100)
+  calculatePeriodStyles(period: ScalablePeriod, totalDuration: number, windowStartYBP: number): { width: string; left: string } {
+    const { start, end } = periodCoordinates(period);
+    const left = this.calculateRelativePosition(start, totalDuration, windowStartYBP);
+    const right = this.calculateRelativePosition(end, totalDuration, windowStartYBP);
+    // Borner les deux extrémités : déplacer seulement le début conserve à tort
+    // la durée hors fenêtre et fait empiéter la carte sur la période suivante.
+    const width = start === null || end === null ? 0 : Math.max(0, right - left);
+    return { width: `${width}%`, left: `${left}%` };
   }
-
-  /**
-   * Styles CSS (left + width) pour positionner une période sur la frise.
-   */
-  calculatePeriodStyles(
-    period: ScalablePeriod,
-    totalDuration: number,
-    windowStartYBP: number
-  ): { width: string; left: string } {
-    const left  = this.calculateRelativePosition(getStartYBP(period), totalDuration, windowStartYBP)
-    const width = Math.min(this.calculatePeriodWidth(period, totalDuration), 100 - left)
-    return { width: `${width}%`, left: `${left}%` }
-  }
-
-  /**
-   * Fenêtre de départ : le point le plus ancien parmi les périodes affichées.
-   */
-  getWindowStart(periods: ScalablePeriod[], parent?: ScalablePeriod): number {
-    if (parent) return getStartYBP(parent)
-    if (periods.length === 0) return 0
-    return Math.max(...periods.map(getStartYBP))
-  }
+  getWindowStart(periods: ScalablePeriod[], parent?: ScalablePeriod): number { return windowBounds(periods, parent).start; }
 }

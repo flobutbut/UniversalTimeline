@@ -10,7 +10,7 @@ export function getFinderColumnParentPeriod<T extends { id: string }>(
   return periods.find((p) => p.id === parentId) ?? null;
 }
 
-/** Colonne survolée pendant un drag (null si même colonne d’origine ou introuvable). */
+/** Colonne survolée pendant un drag (null si même colonne d'origine ou introuvable). */
 export function finderDragOverColumnAfterMove(
   colIdx: number,
   draggedItemId: string,
