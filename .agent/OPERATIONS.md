@@ -83,6 +83,18 @@ Sans serveur sur le port proxifié, les appels `/api` échoueront côté navigat
 - **Serveur :** `yarn build` dans `server/` produit `dist/` ; `yarn start` exécute `node dist/index.js`.
 - **`server/Dockerfile` :** Node 22.23.1 Alpine, étapes de compilation et dépendances de production séparées, USER node, contrôle /health, exécution directe de Node. Compose : API seule, localhost:3000, lecture seule, /tmp temporaire, capacités retirées et arrêt de 20 secondes. Lot 27 : image construite et exécutée contre PostgreSQL TLS jetable, certificat non reconnu refusé, arrêt SIGTERM avec code 0 et nettoyage vérifiés. Le démarrage du compose contre Supabase n’a pas été exécuté ; PM2 occupe 3000.
 
+### Production Vercel (depuis 2026-11-01)
+
+- **Projet :** `universaltimeline` (équipe flobutbuts-projects), relié à GitHub `flobutbut/UniversalTimeline` ; chaque push sur `main` déploie la production. Domaine `universaltimeline.net` (enregistré et DNS chez Hostinger : A `@` et CNAME `www` vers Vercel) ; `www` redirige en 308 vers l’apex.
+- **`vercel.json` (services) :** `app` = racine Vite, avec repli SPA vers `/index.html` ; `server` = Express sous `server/`, entrée `src/vercel.ts`. Rewrites publics : `/api/*` → `server`, le reste → `app`. Aucun binding : le navigateur appelle `/api` en même origine et l’API n’appelle pas le front. `/health` n’est pas public.
+- **Entrée serverless :** `server/src/vercel.ts` exporte l’app de `createApp` et exécute `testConnection` (schéma d’accès + rôles) au chargement du module, à la place de la vérification avant écoute. `src/index.ts` reste l’entrée locale/PM2/Docker.
+- **`buildCommand: tsc --noEmit` obligatoire pour `server` :** avec le script `build` (tsc → `dist/`), Vercel reprend `dist/` à plat et choisit `app.js` comme handler (échec ESM et dépendances introuvables). Avec `--noEmit`, Vercel compile lui-même `src/vercel.ts` en `.mjs` sous `server/src/`, certificat `server/certs/prod-ca-2021.crt` inclus.
+- **Base :** les fonctions Vercel n’ont que l’IPv4 ; l’hôte direct `db.<ref>.supabase.co` (IPv6 seulement) donne `ENOTFOUND`. Sur Vercel, `DATABASE_URL` (sensible, non relisible) utilise le Session pooler `aws-1-eu-central-1.pooler.supabase.com:5432`, utilisateur `postgres.<ref>`. Le `server/.env` local peut garder l’hôte direct.
+- **Variables Production :** `DATABASE_URL`, `AUTH_ENABLED=true`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `FRONTEND_ORIGIN=https://universaltimeline.net`. En Preview, toutes sauf `DATABASE_URL` et `FRONTEND_ORIGIN` : un déploiement Preview ne démarre pas l’API, ce qui évite qu’une branche se connecte à la base de production.
+- **Diagnostic :** `vercel logs -d <deployment>` ; l’échec de connexion consigne `database_check_failed` avec seulement le type et le code.
+- **Déployer depuis Git, pas depuis le poste :** un `vercel build`/`vercel deploy` local trace `server/.env` dans la fonction. Le dossier `.vercel/` (lien du projet) est ignoré par Git.
+- Supabase Auth → URL Configuration : Site URL et Redirect URLs sur `https://universaltimeline.net`.
+
 CI dans `.github/workflows/checks.yml` : même entrée node scripts/check-clean.mjs que la passe locale vierge, avec installations verrouillées, audits des deux arbres, types, builds et PostgreSQL 17 jetable pour baseline/restauration/Auth/contraintes. Aucun push ni exécution GitHub effectués.
 
 Les fournisseurs `@vitest/ui` et `@vitest/coverage-v8` sont verrouillés sur la même version que Vitest. `yarn test:coverage` produit `coverage/` ; le lot 5 vérifie ces commandes sans lancer de mutation distante.

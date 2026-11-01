@@ -2,6 +2,10 @@
 
 # Changelog — documentation agent
 
+## [2026-11-01] — Mise en production Vercel
+
+`vercel.json` en services (`app` Vite avec repli SPA, `server` Express) : `/api/*` vers l’API, le reste vers le front, sans binding. Nouvelle entrée `server/src/vercel.ts` (app exportée, vérification de la base au chargement) et `buildCommand: tsc --noEmit` pour que Vercel n’utilise pas le `dist/` à plat. `testConnection` consigne désormais le code d’erreur (sans message ni URL). Base via le Session pooler IPv4 sur Vercel (`ENOTFOUND` avec l’hôte direct IPv6). Domaine `universaltimeline.net` (Hostinger) relié, `www` en 308, HTTPS actif. Vérifié en production : `/api/access` 200, `/api/account` 401, recherche de stories 200, 404 API, routes SPA rechargées, timeline chargée dans le navigateur. 1079 tests et types validés. Inscription/connexion non testées en production (aucun compte créé).
+
 ## [2026-11-01] — Frises en onglets
 
 La colonne latérale des frises est retirée au profit d’onglets (Accueil + frises ouvertes, fermeture au clic ou clic milieu). La galerie désactivée est réactivée et mise à jour selon Figma : cartes (miniature, titre, compteurs, bornes) et liste (Frise, Début – Fin, Last edit, Création, sans date inventée). Filtres : bouton « Ajouter un filtre » et puces retirables. Miniature des cartes (`layoutCompactLanes`) : racines et enfants directs seulement, 4 lignes au plus, écart constant de 2 px, ligne d’événements dessous ; la vue complète garde toutes les périodes. Filtre Tags (catégories des frises, au moins un tag choisi) dans le panneau, une puce par tag. Icônes Figma ajoutées à DesignIcon (accueil 18 px, liste, fermetures) ; grille via `mdi:view-grid`. 1079 tests, types validés, recette navigateur desktop/mobile en lecture seule.
