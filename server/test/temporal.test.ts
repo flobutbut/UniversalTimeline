@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { parseTemporal, yearsBeforePresent, resolveYearsBeforePresent, periodDateErrors, temporalBounds, MS_PER_YEAR } from '../src/shared/temporal';
+import { parseTemporal, yearsBeforePresent, resolveYearsBeforePresent, periodDateErrors, temporalBounds, MS_PER_YEAR, comparableYearsBeforePresent } from '../src/shared/temporal';
 import { DateService } from '../../src/services/DateService';
 import { aggregateStoryTemporalBounds } from '../src/domain/storyTemporalBounds';
 const now = Date.parse('2026-10-29T12:00:00Z');
@@ -104,4 +104,14 @@ it.each(['800 BCE','800 BC','800 avant J.-C.'])('maps explicit historical BCE ye
 it.each(['+2001-00-00T00:00:00Z','+2001-12-00T00:00:00Z'])('preserves Wikibase unspecified fields without inventing precision: %s', raw => {
   expect(parseTemporal(raw,now)).toMatchObject({kind:'unknown',reason:'unrecognized',raw});
   expect(periodDateErrors(raw,'NOW',now)).toEqual({});
+});
+it('compares calendar dates at one instant, whatever the stale stored coordinates', () => {
+  const now = Date.UTC(2026, 10, 1);
+  const periodStart = comparableYearsBeforePresent('1957-10-04T00:00:00Z', 69.07, now); // stored a day earlier
+  const sameDayEvent = comparableYearsBeforePresent('1957-10-04T00:00:00Z', null, now);
+  expect(sameDayEvent).toBe(periodStart);
+  expect(comparableYearsBeforePresent('G10', '10000000000', now)).toBe(1e10);
+  expect(comparableYearsBeforePresent('', '42', now)).toBe(42);
+  expect(comparableYearsBeforePresent('vers la fin du règne', '42', now)).toBeNull();
+  expect(comparableYearsBeforePresent('TODAY', null, now)).toBe(0);
 });

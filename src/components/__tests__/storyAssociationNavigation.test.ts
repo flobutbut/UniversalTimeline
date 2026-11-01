@@ -146,7 +146,7 @@ it('removes the period from the frise through its menu without deleting the cata
   vi.mocked(api.getStory).mockResolvedValueOnce(detail()).mockResolvedValueOnce({ ...detail(), periods: [] });
   await start();
   await row('root').get('button[aria-haspopup="menu"]').trigger('click');
-  (document.querySelectorAll('[role="menuitem"]')[1] as HTMLButtonElement).click(); await flushPromises();
+  [...document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')].find(item => item.textContent?.trim() === 'Supprimer')!.click(); await flushPromises();
   expect(api.changeAssociations).toHaveBeenCalledExactlyOnceWith('1', 'period', ['root'], true);
   expect(destroy).not.toHaveBeenCalled();
   expect(panel().findAllComponents(FinderItem).some(item => item.props('itemId') === 'root')).toBe(false);

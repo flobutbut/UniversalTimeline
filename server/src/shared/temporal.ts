@@ -116,6 +116,15 @@ export function resolveYearsBeforePresent(raw: string | null | undefined, stored
   }
   return parsed.yearsBeforePresent;
 }
+/** For comparing two items at one reference instant: a recognized text is re-read at `now`
+ * (stored coordinates were computed at different times); the stored number is used only when
+ * the text is missing. Unrecognized text stays unknown, as in resolveYearsBeforePresent.
+ */
+export function comparableYearsBeforePresent(raw: string | null | undefined, stored: unknown, now: number): number | null {
+  const parsed = parseTemporal(raw, now);
+  if (parsed.kind !== 'unknown') return parsed.yearsBeforePresent;
+  return raw?.trim() ? null : resolveYearsBeforePresent(raw, stored, now);
+}
 /** Unknown text is retained; a recognized but impossible date or reversed known range is rejected. */
 export function periodDateErrors(start: string, end: string, now = Date.now()): { start?: string; end?: string } {
   const a = parseTemporal(start, now), b = parseTemporal(end, now);

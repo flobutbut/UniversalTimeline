@@ -363,3 +363,65 @@ test('blocks catalogue deletion when a period is still a scoped parent', async (
   assert.equal((await call('delete','/periods/:id',{}, {id:'scoped-parent'})).statusCode,409);
   assert.equal((await pool.query("SELECT count(*)::int AS n FROM periods WHERE id='scoped-parent'")).rows[0].n,1);
 });
+
+// ─── Frise créée depuis une période ──────────────────────────────────────────
+const sourceRows = async storyId => ({
+  story: (await pool.query('SELECT title_fr,is_public,parent_story_id FROM stories WHERE id=$1', [storyId])).rows,
+  periods: (await pool.query('SELECT period_id,parent_period_id,parent_override FROM story_periods WHERE story_id=$1 ORDER BY period_id', [storyId])).rows,
+  events: (await pool.query('SELECT event_id FROM story_events WHERE story_id=$1 ORDER BY event_id', [storyId])).rows,
+});
+async function seedSplitSource() {
+  await pool.query(`
+    INSERT INTO periods(id,label_fr,start_date,end_date,start_years_bp,end_years_bp,parent_id) VALUES
+      ('apollo','Apollo','1961-05-25','1972-12-19',65.4,53.9,'root'), ('gemini','Gemini','1961-12-07','1966-11-15',64.9,60.0,'apollo'), ('mir','Mir','1986-02-20','2001-03-23',40.7,25.6,'root');
+    INSERT INTO events(id,label_fr,date,date_years_bp) VALUES
+      ('in','Apollo 11','1969-07-16',57.3), ('edge','Fin Apollo','1972-12-19',53.9), ('out','Mir','1986-02-20',40.7), ('undated','Sans date',null,null);
+    UPDATE stories SET is_public=true WHERE id=1;
+    INSERT INTO story_periods(story_id,period_id) VALUES (1,'root'),(1,'apollo'),(1,'gemini'),(1,'mir');
+    INSERT INTO story_events(story_id,event_id) VALUES (1,'in'),(1,'edge'),(1,'out'),(1,'undated');
+    INSERT INTO story_categories VALUES (1,'${category}');`);
+}
+test('creates a child frise from a period with its branch, in-range events, anchor and visibility, leaving the source intact', async () => {
+  await seedSplitSource();
+  const before = await sourceRows(1);
+  const result = await call('post', '/stories/:storyId/from-period', { periodId: 'apollo', title: '  Programme Apollo ' }, { storyId: '1' });
+  assert.equal(result.statusCode, 201);
+  assert.deepEqual(result.payload, { id: '6', parentStoryId: '1', periodId: 'apollo', periodCount: 2, eventCount: 2 });
+  assert.deepEqual(await sourceRows(1), before);
+  const created = await sourceRows(6);
+  assert.deepEqual(created.story, [{ title_fr: 'Programme Apollo', is_public: true, parent_story_id: 1 }]);
+  assert.deepEqual(created.periods, [
+    { period_id: 'apollo', parent_period_id: null, parent_override: true },
+    { period_id: 'gemini', parent_period_id: 'apollo', parent_override: true },
+  ]);
+  assert.deepEqual(created.events.map(row => row.event_id), ['edge', 'in']);
+  assert.deepEqual((await pool.query('SELECT anchor_type,anchor_id FROM story_anchors WHERE story_id=6')).rows, [{ anchor_type: 'period', anchor_id: 'apollo' }]);
+  assert.deepEqual((await pool.query('SELECT category_id FROM story_categories WHERE story_id=6')).rows, [{ category_id: category }]);
+  assert.equal((await pool.query('SELECT owner_user_id FROM stories WHERE id=6')).rows[0].owner_user_id, alice);
+});
+test('an event on the first day of the period is copied even without a stored coordinate', async () => {
+  await seedSplitSource();
+  await pool.query("INSERT INTO events(id,label_fr,date) VALUES ('first-day','Discours','1961-05-25'); INSERT INTO story_events VALUES (1,'first-day')");
+  const result = await call('post', '/stories/:storyId/from-period', { periodId: 'apollo', title: 'Apollo' }, { storyId: '1' });
+  assert.deepEqual((await pool.query('SELECT event_id FROM story_events WHERE story_id=$1 ORDER BY event_id', [result.payload.id])).rows.map(row => row.event_id), ['edge', 'first-day', 'in']);
+});
+test('a period without known dates copies its branch but no event', async () => {
+  await seedSplitSource();
+  await pool.query("INSERT INTO periods(id,label_fr,parent_id) VALUES ('vague','Sans dates','root'); INSERT INTO story_periods(story_id,period_id) VALUES (1,'vague')");
+  const result = await call('post', '/stories/:storyId/from-period', { periodId: 'vague', title: 'Vague' }, { storyId: '1' });
+  assert.equal(result.statusCode, 201);
+  assert.deepEqual([result.payload.periodCount, result.payload.eventCount], [1, 0]);
+});
+test('refuses another owner, a period outside the frise or a blank title without creating anything', async () => {
+  await seedSplitSource();
+  await pool.query("INSERT INTO story_periods(story_id,period_id) VALUES (3,'apollo')");
+  const count = async () => (await pool.query('SELECT count(*)::int AS n FROM stories')).rows[0].n;
+  const total = await count();
+  assert.equal((await call('post', '/stories/:storyId/from-period', { periodId: 'apollo', title: 'Copie' }, { storyId: '3' })).statusCode, 404);
+  assert.equal((await call('post', '/stories/:storyId/from-period', { periodId: 'leaf', title: 'Absente' }, { storyId: '1' })).statusCode, 404);
+  assert.equal((await call('post', '/stories/:storyId/from-period', { periodId: 'apollo', title: '   ' }, { storyId: '1' })).statusCode, 400);
+  // Anonymous writes are refused by the middleware in production; the database refuses them too.
+  assert.equal((await call('post', '/stories/:storyId/from-period', { periodId: 'apollo', title: 'Anonyme' }, { storyId: '1' }, null)).statusCode, 403);
+  assert.equal(await count(), total);
+  assert.equal((await pool.query('SELECT count(*)::int AS n FROM story_anchors')).rows[0].n, 0);
+});

@@ -65,6 +65,14 @@ export class StoryApiService {
   async changeAssociations(storyId: string, kind: 'period' | 'event', ids: string[], remove = false, parentPeriodId?: string | null): Promise<void> {
     await apiClient.post(`/stories/${storyId}/${kind === 'period' ? 'periods' : 'events'}`, { ids: [...new Set(ids)], operation: remove ? 'remove' : 'add', ...(parentPeriodId !== undefined ? { parentPeriodId } : {}) });
   }
+  /** Crée une frise enfant ancrée sur une période : branche de périodes et événements de sa plage copiés. */
+  async createStoryFromPeriod(storyId: string, periodId: string, title: string): Promise<{ id: string; periodCount: number; eventCount: number }> {
+    const result = await apiClient.post<{ id: string | number; periodCount: number; eventCount: number }>(`/stories/${storyId}/from-period`, { periodId, title });
+    if (!result || (typeof result.id !== 'string' && typeof result.id !== 'number') || !Number.isInteger(result.periodCount) || !Number.isInteger(result.eventCount)) {
+      throw new Error('Réponse invalide après la création de la frise.');
+    }
+    return { id: String(result.id), periodCount: result.periodCount, eventCount: result.eventCount };
+  }
   async changeRootPeriod(storyId: string, periodId: string): Promise<void> {
     await apiClient.put(`/stories/${storyId}/root-period`, { periodId });
   }

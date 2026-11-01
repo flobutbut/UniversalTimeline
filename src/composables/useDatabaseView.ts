@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useDataStore } from '@/stores/useDataStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -11,6 +11,7 @@ import type { Story, StoryAnchor, ListPeriod, ListEvent, ListStory } from '@/typ
 import { useLatestRequest } from './useLatestRequest';
 import { collectStoryPeriodSubtreeIds } from '@/lib/storyPeriodFinderColumns';
 import type { EditableItem } from '@/types/editForm';
+import { previewStoryFromPeriod, type StoryFromPeriodPreview } from '@/lib/storyFromPeriod';
 
 export interface DatabaseViewState {
   loading: boolean;
@@ -258,6 +259,37 @@ export function useDatabaseView() {
   const handleDragOver = (_event: DragEvent) => { if (dragDropState.value.draggedItem) dragDropState.value.isDragOver = true; };
   const handleDragLeave = (_event: DragEvent) => { dragDropState.value.isDragOver = false; };
   const removePeriodFromStory = (id: string) => mutateAssociations('period', collectStoryPeriodSubtreeIds(selectedStory.value?.periods ?? [], id), true);
+  // ─── Frise créée depuis une période : copie, la frise d'origine reste intacte ───
+  const storyFromPeriod = ref<{ storyId: string; preview: StoryFromPeriodPreview; busy: boolean; error: string | null } | null>(null);
+  const openStoryFromPeriod = (periodId: string) => {
+    const story = selectedStory.value;
+    const preview = story && previewStoryFromPeriod(story.periods, story.events, periodId);
+    if (!story || !preview || relationsBusy.value) return;
+    storyFromPeriod.value = { storyId: story.id, preview, busy: false, error: null };
+  };
+  const closeStoryFromPeriod = () => { if (!storyFromPeriod.value?.busy) storyFromPeriod.value = null; };
+  // Another frise selected: the pending dialog no longer describes it (a running request still completes).
+  watch(selectedStoryId, id => { if (storyFromPeriod.value && !storyFromPeriod.value.busy && storyFromPeriod.value.storyId !== id) storyFromPeriod.value = null; });
+  /** One request, never resent: a lost response asks for a reload before retrying. */
+  const confirmStoryFromPeriod = async (title: string) => {
+    const pending = storyFromPeriod.value;
+    if (!pending || pending.busy || relationsBusy.value) return;
+    pending.busy = true; pending.error = null; relationsBusy.value = true;
+    let created: Awaited<ReturnType<StoryApiService['createStoryFromPeriod']>> | null = null;
+    try {
+      created = await StoryApiService.getInstance().createStoryFromPeriod(pending.storyId, pending.preview.periodId, title);
+      storyFromPeriod.value = null;
+      dataStore.invalidateStory(pending.storyId);
+      const events = created.eventCount ? ` et ${created.eventCount} événement${created.eventCount > 1 ? 's' : ''}` : '';
+      toast.show(`Frise « ${title} » créée avec ${created.periodCount} période${created.periodCount > 1 ? 's' : ''}${events}.`, 'success');
+      await Promise.all([dataStore.ensureStoriesLoaded(true), refreshSelectedStory(pending.storyId)]);
+    } catch (cause) {
+      if (created) toast.show('Frise créée ; impossible de recharger les données. Réessayez le chargement.', 'error');
+      else pending.error = mutationErrorMessage(cause, 'Impossible de créer la frise depuis cette période.');
+    } finally {
+      pending.busy = false; relationsBusy.value = false;
+    }
+  };
   const changeRootPeriod = async (periodId: string) => {
     const storyId = selectedStory.value?.id;
     if (!storyId || relationsBusy.value) return;
@@ -337,6 +369,7 @@ export function useDatabaseView() {
     handleDragStart, handleDrop, handleDragOver, handleDragLeave,
     selectStory,
     removePeriodFromStory,
+    storyFromPeriod, openStoryFromPeriod, closeStoryFromPeriod, confirmStoryFromPeriod,
     changeRootPeriod,
     removeEventFromStory,
     addPeriodsToStory,

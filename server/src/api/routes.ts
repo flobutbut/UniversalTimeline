@@ -4,7 +4,7 @@ import { parseWriteCategories } from './entityCategories.js';
 import {
   InputValidationError, inputObject, parseEntityId, parseStoryId, parseQid, parseEventWrite, parsePeriodWrite,
   parseStoryWrite, parseAnchor, parseChildStories, parseAssociationOperation,
-  parseSearchText, parseSearchScope, parseCsvIds, parseParentId, parseAssociationIds,
+  parseSearchText, parseSearchScope, parseCsvIds, parseParentId, parseAssociationIds, parseStoryFromPeriod,
 } from './inputValidation.js';
 import * as catalogue from '../services/catalogueService.js';
 import * as stories from '../services/storyService.js';
@@ -149,6 +149,12 @@ router.put('/stories/:storyId/root-period', endpoint('Impossible de changer la r
 }));
 router.get('/stories/:id', endpoint('Erreur lors de la récupération du détail de la frise', async (req, res) => {
   res.json(await stories.getStory(parseStoryId(req.params.id)));
+}));
+// One transaction: create the child frise, copy the period branch and events, anchor it. Never retried automatically.
+router.post('/stories/:storyId/from-period', endpoint('Impossible de créer la frise depuis cette période.', async (req, res) => {
+  const id = parseStoryId(req.params.storyId, 'storyId');
+  const { periodId, title } = parseStoryFromPeriod(req.body);
+  res.status(201).json(await stories.createFromPeriod(id, periodId, title));
 }));
 router.post('/stories/:parentId/child-stories', endpoint('Erreur lors du rattachement', async (req, res) => {
   const id = parseStoryId(req.params.parentId, 'parentId');

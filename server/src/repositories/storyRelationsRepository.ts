@@ -94,3 +94,34 @@ export async function detachChildStory(client: TransactionClient, parentId: stri
   await client.query('DELETE FROM public.story_anchors WHERE story_id = $1', [childId]);
   await client.query('UPDATE public.stories SET parent_story_id = NULL WHERE id = $1 AND parent_story_id = $2', [childId, parentId]);
 }
+/** Source of a derived frise: only its owner may read it FOR UPDATE (RLS). */
+export async function lockSplitSource(client: TransactionClient, storyId: string) {
+  return (await client.query<{ id: number; author: string; is_public: boolean }>(
+    'SELECT id, author, is_public FROM public.stories WHERE id = $1 FOR UPDATE', [storyId])).rows[0];
+}
+/** Effective placement of each period in a frise, without freezing the source. */
+export async function readEffectivePeriodPlacements(client: TransactionClient, storyId: string) {
+  return (await client.query<{ id: string; parent_id: string | null; start_date: string | null; end_date: string | null; start_years_bp: string | null; end_years_bp: string | null }>(`
+    SELECT sp.period_id AS id,
+           CASE WHEN sp.parent_override THEN sp.parent_period_id ELSE p.parent_id END AS parent_id,
+           p.start_date, p.end_date, p.start_years_bp, p.end_years_bp
+    FROM public.story_periods sp JOIN public.periods p ON p.id = sp.period_id
+    WHERE sp.story_id = $1`, [storyId])).rows;
+}
+export async function readStoryEventDates(client: TransactionClient, storyId: string) {
+  return (await client.query<{ id: string; date: string | null; date_years_bp: string | null }>(`
+    SELECT e.id, e.date, e.date_years_bp
+    FROM public.story_events se JOIN public.events e ON e.id = se.event_id
+    WHERE se.story_id = $1`, [storyId])).rows;
+}
+export async function insertDerivedStory(client: TransactionClient, parentId: string, title: string, author: string, isPublic: boolean) {
+  return (await client.query<{ id: number }>(`
+    INSERT INTO public.stories (title_fr, title_en, author, is_public, parent_story_id)
+    VALUES ($1, $1, $2, $3, $4) RETURNING id`, [title, author, isPublic, parentId])).rows[0];
+}
+/** Placements are frozen in the new frise so later catalogue moves cannot reshape it. */
+export async function insertFrozenPlacements(client: TransactionClient, storyId: number, placements: { id: string; parent_id: string | null }[]) {
+  const values = placements.map((_, i) => `($1, $${i * 2 + 2}, $${i * 2 + 3}, true)`).join(', ');
+  await client.query(`INSERT INTO public.story_periods (story_id, period_id, parent_period_id, parent_override) VALUES ${values}`,
+    [storyId, ...placements.flatMap(row => [row.id, row.parent_id])]);
+}

@@ -81,5 +81,6 @@ export const removeAnchor = (id: string, kind: 'period' | 'event', anchor: strin
 export const changeSingleAssociation = (id: string, kind: AssociationKind, entity: string, remove: boolean) => withTransaction(client => associations.changeSingleStoryAssociation(client, id, kind, entity, remove));
 export const changeAssociations = (id: string, kind: AssociationKind, ids: string[], remove: boolean, parentId?: string | null) => withTransaction(client => associations.changeStoryAssociations(client, id, kind, ids, remove, parentId));
 export const changeRootPeriod = (id: string, periodId: string) => withTransaction(client => associations.changeRootPeriod(client, id, periodId));
+export const createFromPeriod = (sourceId: string, periodId: string, title: string) => withTransaction(client => associations.createStoryFromPeriod(client, sourceId, periodId, title));
 export const linkChildren = (id: string, children: string[], anchor?: { anchorType: 'period' | 'event'; anchorId: string }) => withTransaction(client => associations.linkChildStories(client, id, children, anchor));
 export const unlinkChild = (id: string, child: string) => withTransaction(client => associations.unlinkChildStory(client, id, child));

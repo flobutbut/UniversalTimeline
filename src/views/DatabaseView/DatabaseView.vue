@@ -40,7 +40,7 @@
           <StoryDetailPanel :key="selectedStoryId ?? 'none'" :story="selectedStory" :loading="state.loadingStoryDetails" :updating="relationsBusy || visibilityBusy || state.loadingDetails || saveLoading || deleteLoading" :error="state.storyError"
             @retry="retryStory" @period-imported="retryStory" @remove-period="removePeriodFromStory" @remove-event="removeEventFromStory" @add-periods="addPeriodsToStory" @event-added="retryStory"
             @add-child-stories="addChildStoriesToStory" @remove-child-story="removeChildStoryFromStory" @add-event-anchor="addEventAnchorToStory" @remove-event-anchor="removeEventAnchorFromStory"
-            @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @edit-event="onEditStoryEvent" @edit-story="onEditSelectedStory" @toggle-public="toggleStoryVisibility" />
+            @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @create-story-from-period="openStoryFromPeriod" @edit-event="onEditStoryEvent" @edit-story="onEditSelectedStory" @toggle-public="toggleStoryVisibility" />
         </div>
       </div>
     </template>
@@ -66,6 +66,15 @@
       @submit="handleSave"
       @delete="handleDelete"
     />
+    <StoryFromPeriodModal
+      v-if="storyFromPeriod"
+      :key="`${storyFromPeriod.storyId}:${storyFromPeriod.preview.periodId}`"
+      :preview="storyFromPeriod.preview"
+      :busy="storyFromPeriod.busy"
+      :error="storyFromPeriod.error"
+      @close="closeStoryFromPeriod"
+      @confirm="confirmStoryFromPeriod"
+    />
   </div>
 </template>
 
@@ -84,6 +93,7 @@ import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
 import EditModal from './EditModal.vue';
 import StoryDetailPanel from './StoryDetailPanel.vue';
+import StoryFromPeriodModal from './StoryFromPeriodModal.vue';
 import Tabs from '@/components/base/Tabs.vue';
 import { useDatabaseView } from '@/composables/useDatabaseView';
 import type { ListStory } from '@/types/database';
@@ -113,6 +123,7 @@ const {
   loadInitialData,
   selectStory,
   removePeriodFromStory,
+  storyFromPeriod, openStoryFromPeriod, closeStoryFromPeriod, confirmStoryFromPeriod,
   removeEventFromStory,
   addPeriodsToStory,
   addChildStoriesToStory,

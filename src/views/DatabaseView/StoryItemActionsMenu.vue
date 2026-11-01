@@ -12,6 +12,9 @@
         <button type="button" role="menuitem" tabindex="-1" @click="choose('edit')">
           <Icon icon="mdi:pencil-outline" width="16" height="16" aria-hidden="true" />Modifier
         </button>
+        <button v-if="createStory" type="button" role="menuitem" tabindex="-1" @click="choose('create-story')">
+          <Icon icon="mdi:book-plus-outline" width="16" height="16" aria-hidden="true" />Créer une frise
+        </button>
         <button type="button" role="menuitem" tabindex="-1" class="story-item-actions__delete"
           title="Supprimer de cette frise" @click="choose('remove')">
           <Icon icon="mdi:trash-can-outline" width="16" height="16" aria-hidden="true" />Supprimer
@@ -27,8 +30,8 @@ import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
 import { generateDomUid } from '@/utils/generateDomUid';
 
-const props = defineProps<{ label: string; disabled?: boolean }>();
-const emit = defineEmits<{ edit: []; remove: [] }>();
+const props = defineProps<{ label: string; disabled?: boolean; /** Périodes : proposer une frise créée depuis cet élément. */ createStory?: boolean }>();
+const emit = defineEmits<{ edit: []; remove: []; 'create-story': [] }>();
 const open = ref(false);
 const triggerComponent = ref<InstanceType<typeof Button> | null>(null);
 const trigger = computed(() => triggerComponent.value?.$el as HTMLButtonElement | undefined);
@@ -55,10 +58,10 @@ async function show(last = false) {
   const options = items(); options[last ? options.length - 1 : 0]?.focus();
 }
 function toggle() { if (open.value) close(true); else void show(); }
-function choose(action: 'edit' | 'remove') {
+function choose(action: 'edit' | 'remove' | 'create-story') {
   if (props.disabled) return;
   close(action === 'remove');
-  if (action === 'edit') emit('edit'); else emit('remove');
+  if (action === 'edit') emit('edit'); else if (action === 'create-story') emit('create-story'); else emit('remove');
 }
 function onTriggerKeydown(event: KeyboardEvent) {
   if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {

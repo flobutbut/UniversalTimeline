@@ -3,6 +3,9 @@ import type { TransactionClient } from '../api/transaction.js';
 import { StoryAssociationError } from '../domain/errors.js';
 import { checkAncestorChain } from '../domain/hierarchy.js';
 import * as relations from '../repositories/storyRelationsRepository.js';
+import { periodSubtree, itemsWithinPeriod } from '../domain/storySplit.js';
+import { comparableYearsBeforePresent } from '../shared/temporal.js';
+import { readEntityCategories, replaceEntityCategories } from '../repositories/categoryRepository.js';
 
 async function requireWritableStory(client: TransactionClient, storyId: string) {
   if (!await relations.lockWritableStory(client, storyId)) throw new StoryAssociationError(404, 'Frise introuvable ou non modifiable.');
@@ -76,4 +79,27 @@ export async function unlinkChildStory(client: TransactionClient, parentId: stri
   await requireWritableStory(client, parentId);
   if (!await relations.lockChildStory(client, parentId, childId)) throw new StoryAssociationError(404, 'Liaison introuvable.');
   await relations.detachChildStory(client, parentId, childId);
+}
+/** Creates a child frise anchored on one period, with its sub-periods and the events in its time range. */
+export async function createStoryFromPeriod(client: TransactionClient, sourceId: string, periodId: string, title: string) {
+  await relations.setRelationLockTimeout(client);
+  const source = await relations.lockSplitSource(client, sourceId);
+  if (!source) throw new StoryAssociationError(404, 'Frise introuvable ou non modifiable.');
+  const placements = await relations.readEffectivePeriodPlacements(client, sourceId);
+  const subtree = periodSubtree(placements, periodId);
+  if (!subtree) throw new StoryAssociationError(404, 'Cette période n’appartient plus à la frise.');
+  const root = placements.find(row => row.id === periodId)!;
+  // One reference instant: an event on the period's first day must compare equal, not a few ms older.
+  const now = Date.now();
+  const events = (await relations.readStoryEventDates(client, sourceId))
+    .map(row => ({ id: row.id, yearsBP: comparableYearsBeforePresent(row.date, row.date_years_bp, now) }));
+  const eventIds = itemsWithinPeriod(events,
+    comparableYearsBeforePresent(root.start_date, root.start_years_bp, now), comparableYearsBeforePresent(root.end_date, root.end_years_bp, now));
+  const story = await relations.insertDerivedStory(client, sourceId, title, source.author, source.is_public);
+  await relations.insertFrozenPlacements(client, story.id, subtree);
+  if (eventIds.length) await relations.insertAssociations(client, String(story.id), 'event', eventIds);
+  await relations.insertChildAnchor(client, String(story.id), 'period', periodId);
+  const categories = (await readEntityCategories(client, 'story', sourceId)).map(category => category.id);
+  if (categories.length) await replaceEntityCategories(client, 'story', story.id, categories);
+  return { id: String(story.id), parentStoryId: sourceId, periodId, periodCount: subtree.length, eventCount: eventIds.length };
 }

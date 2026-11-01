@@ -174,3 +174,9 @@ export function parseSearchScope(value: unknown): '' | 'period' | 'periods' | 'e
   }
   return only;
 }
+
+/** A frise created from a period: the period to start from and the new title. */
+export function parseStoryFromPeriod(value: unknown) {
+  const body = inputObject(value);
+  return { periodId: parseEntityId(body.periodId, 'periodId'), title: text(body.title, 'title', 300, true)! };
+}

@@ -141,8 +141,9 @@
                         @click="onFinderPeriodSelect(row.item, colIdx)"
                       >
                         <template #actions>
-                          <StoryItemActionsMenu v-if="row.inStory" :label="storyPeriodLabelForFinder(row.item).fr" :disabled="panelBusy"
-                            @edit="emit('edit-period', row.item.id)" @remove="emit('remove-period', row.item.id)" />
+                          <StoryItemActionsMenu v-if="row.inStory" :label="storyPeriodLabelForFinder(row.item).fr" :disabled="panelBusy" create-story
+                            @edit="emit('edit-period', row.item.id)" @remove="emit('remove-period', row.item.id)"
+                            @create-story="emit('create-story-from-period', row.item.id)" />
                           <button
                             v-else
                             type="button"
@@ -364,6 +365,7 @@ const emit = defineEmits<{
   (e: 'period-imported'): void;
   (e: 'remove-period', id: string): void;
   (e: 'edit-period', id: string): void;
+  (e: 'create-story-from-period', id: string): void;
   (e: 'edit-event', id: string): void;
   (e: 'remove-event', id: string): void;
   (e: 'add-periods', ids: string[], parentPeriodId?: string | null): void;
