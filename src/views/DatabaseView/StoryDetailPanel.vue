@@ -832,11 +832,6 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   min-height: 0;
 }
 
-/* Scroll room below the forms; the finder columns run to the bottom of the panel instead. */
-.story-detail-panel__tab-content:not(.story-detail-panel__tab-content--finder-periods):not(.story-detail-panel__tab-content--finder-events) {
-  padding-bottom: 128px;
-}
-
 .story-detail-panel__tab-content--finder-periods,
 .story-detail-panel__tab-content--finder-events {
   flex: 1 0 clamp(320px, 60dvh, 560px);
