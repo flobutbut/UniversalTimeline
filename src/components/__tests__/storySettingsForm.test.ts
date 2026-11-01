@@ -1,0 +1,91 @@
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { flushPromises, mount } from '@vue/test-utils';
+import StorySettingsForm from '@/views/DatabaseView/StorySettingsForm.vue';
+import { CategoryService } from '@/services/CategoryService';
+import type { Story } from '@/types/database';
+
+const story: Story = {
+  id: '1', title: { fr: 'Guerre froide', en: 'Cold War' }, description: { fr: 'Résumé', en: 'Summary' }, author: 'Auteur',
+  isPublic: true, categories: [{ id: 'c1', label: { fr: 'Histoire', en: 'History' } }], periods: [], events: [],
+};
+let view: ReturnType<typeof mount>;
+const button = (label: string) => view.findAll('button').find(item => item.text() === label);
+const titleFr = () => view.get('input[placeholder="Titre en français"]');
+beforeEach(() => {
+  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([{ id: 'c1', label: 'Histoire' }]);
+});
+afterEach(() => { view?.unmount(); vi.restoreAllMocks(); });
+
+it('shows the frise settings as text without a form in read-only mode', async () => {
+  view = mount(StorySettingsForm, { props: { story, editable: false } });
+  await flushPromises();
+  expect(view.find('form').exists()).toBe(false);
+  expect(view.get('dl').text()).toContain('Guerre froide');
+  expect(view.get('dl').text()).not.toContain('Cold War');
+  expect(view.get('dl').text()).not.toContain('Auteur');
+  expect(view.get('dl').text()).toContain('Publique');
+  expect(view.get('dl').text()).toContain('Histoire');
+  expect(button('Enregistrer')).toBeUndefined();
+  expect(button('Supprimer la frise')).toBeUndefined();
+  expect(view.text()).not.toContain('Danger zone');
+});
+
+it('reveals save and cancel only while the draft differs from the frise', async () => {
+  view = mount(StorySettingsForm, { props: { story, editable: true } });
+  await flushPromises();
+  expect((titleFr().element as HTMLInputElement).value).toBe('Guerre froide');
+  expect(view.find('input[placeholder="Title in English"]').exists()).toBe(false);
+  expect(view.find('input[placeholder="Nom de l\'auteur"]').exists()).toBe(false);
+  expect(button('Enregistrer')).toBeUndefined();
+  expect(button('Annuler')).toBeUndefined();
+  await titleFr().setValue('Guerre froide (1947-1991)');
+  expect(button('Enregistrer')?.exists()).toBe(true);
+  await button('Annuler')!.trigger('click');
+  expect((titleFr().element as HTMLInputElement).value).toBe('Guerre froide');
+  expect(button('Enregistrer')).toBeUndefined();
+});
+
+it('emits the submission and settles on the saved frise', async () => {
+  view = mount(StorySettingsForm, { props: { story, editable: true } });
+  await flushPromises();
+  await titleFr().setValue('Nouvelle frise');
+  await view.get('form').trigger('submit');
+  const submission = view.emitted('save')![0][0] as { title: { fr: string }; author: string; categories: Array<{ id: string }> };
+  expect(submission.title.fr).toBe('Nouvelle frise');
+  expect(submission.author).toBe('Auteur');
+  expect(submission.title).toEqual({ fr: 'Nouvelle frise', en: 'Cold War' });
+  expect(submission).toMatchObject({ isPublic: true });
+  expect(submission.categories).toEqual([{ id: 'c1' }]);
+  await view.setProps({ story: { ...story, title: { fr: 'Nouvelle frise', en: 'Cold War' } } });
+  expect(button('Enregistrer')).toBeUndefined();
+});
+
+it('keeps a failed draft and blocks an invalid one', async () => {
+  view = mount(StorySettingsForm, { props: { story, editable: true } });
+  await flushPromises();
+  await titleFr().setValue('Brouillon');
+  await view.get('form').trigger('submit');
+  await view.setProps({ error: 'Erreur lors de la sauvegarde des données' });
+  expect(view.get('[role="alert"]').text()).toContain('Erreur lors de la sauvegarde');
+  expect((titleFr().element as HTMLInputElement).value).toBe('Brouillon');
+  await titleFr().setValue('');
+  expect(button('Enregistrer')!.attributes('disabled')).toBeDefined();
+});
+
+it('keeps visibility out of the draft and changes it from the danger zone', async () => {
+  view = mount(StorySettingsForm, { props: { story, editable: true } });
+  await flushPromises();
+  expect(view.get('form').text()).not.toContain('Mode public');
+  const danger = view.get('section.story-settings-form__danger');
+  expect(danger.text()).toContain('Visibilité : publique');
+  await danger.findAll('button').find(item => item.text() === 'Rendre privée')!.trigger('click');
+  expect(view.emitted('toggle-visibility')).toHaveLength(1);
+  await danger.findAll('button').find(item => item.text() === 'Supprimer la frise')!.trigger('click');
+  expect(view.emitted('delete')).toHaveLength(1);
+  await titleFr().setValue('Brouillon');
+  await view.setProps({ story: { ...story, isPublic: false } });
+  expect((titleFr().element as HTMLInputElement).value).toBe('Brouillon');
+  expect(view.get('section.story-settings-form__danger').text()).toContain('Rendre publique');
+  await view.get('form').trigger('submit');
+  expect(view.emitted('save')![0][0]).toMatchObject({ isPublic: false, title: { fr: 'Brouillon' } });
+});

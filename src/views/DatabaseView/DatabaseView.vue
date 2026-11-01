@@ -13,10 +13,10 @@
       <StoryTabsBar :tabs="openTabs" :active-id="selectedStoryId" @select="onTabSelect" @close="onTabClose" />
       <StoryGallery v-if="!selectedStoryId" v-model:search="storySearch" v-model:visibility="storyVisibility" v-model:time-range="storyTimeRange" v-model:categories="storyCategories" :stories="visibleStories" :category-options="storyCategoryOptions" :error="state.storyError" class="database-view__content" @open="openStory" @create="handleAddStory" />
       <div v-else class="database-story-detail-wrap database-view__content">
-        <StoryDetailPanel :key="selectedStoryId" :story="selectedStory" :loading="state.loadingStoryDetails" :updating="relationsBusy || visibilityBusy || state.loadingDetails || saveLoading || deleteLoading" :error="state.storyError"
+        <StoryDetailPanel :key="selectedStoryId" :story="selectedStory" :loading="state.loadingStoryDetails" :updating="relationsBusy || visibilityBusy || state.loadingDetails || saveLoading || deleteLoading" :error="state.storyError" :settings-error="storySettingsError"
           @retry="retryStory" @period-imported="retryStory" @remove-period="removePeriodFromStory" @remove-event="removeEventFromStory" @add-periods="addPeriodsToStory" @event-added="retryStory"
           @add-child-stories="addChildStoriesToStory" @remove-child-story="removeChildStoryFromStory" @add-event-anchor="addEventAnchorToStory" @remove-event-anchor="removeEventAnchorFromStory"
-          @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @create-story-from-period="openStoryFromPeriod" @edit-event="onEditStoryEvent" @edit-story="onEditSelectedStory" @toggle-public="toggleStoryVisibility" />
+          @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @create-story-from-period="openStoryFromPeriod" @edit-event="onEditStoryEvent" @edit-story="onEditSelectedStory" @save-story="saveSelectedStory" @delete-story="deleteSelectedStory" @toggle-visibility="toggleStoryVisibility" />
       </div>
     </template>
     <EditModal
@@ -59,11 +59,13 @@ import { computed, onMounted, ref, watch, inject } from 'vue';
 import { routeLocationKey, routerKey } from 'vue-router';
 import StoryGallery from './StoryGallery.vue';
 import StoryTabsBar from './StoryTabsBar.vue';
-import { StoryApiService } from '@/services/StoryApiService';
-import { useDataStore } from '@/stores/useDataStore';
 import { readStoryTarget } from '@/router/storyTarget';
 import { Icon } from '@iconify/vue';
 import EditModal from './EditModal.vue';
+import { StoryApiService } from '@/services/StoryApiService';
+import { useDataStore } from '@/stores/useDataStore';
+import { useConfirm } from '@/composables/useConfirm';
+import { mutationErrorMessage } from '@/lib/mutationErrorMessage';
 import StoryDetailPanel from './StoryDetailPanel.vue';
 import StoryFromPeriodModal from './StoryFromPeriodModal.vue';
 import { useDatabaseView } from '@/composables/useDatabaseView';
@@ -116,7 +118,6 @@ const storyCategoryOptions = computed(() => {
   for (const story of filteredStories.value) for (const category of story.categories) if (!labels.has(category.id)) labels.set(category.id, category.label.fr || category.label.en || category.id);
   return [...labels].map(([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }));
 });
-const visibilityBusy = ref(false);
 const visibleStories = computed(() => {
   const query = storySearch.value.trim().toLocaleLowerCase('fr');
   const now = Date.now();
@@ -162,17 +163,6 @@ async function openRouteStory() {
   } catch { state.value.error = 'La frise demandée est invalide.'; }
 }
 if (route) watch(() => route.query.story, () => { if (!state.value.loading) void openRouteStory(); });
-async function toggleStoryVisibility() {
-  const story = selectedStory.value;
-  if (!story || relationsBusy.value || visibilityBusy.value) return;
-  visibilityBusy.value = true;
-  try {
-    const updated = await StoryApiService.getInstance().updateStory(story.id, { title: story.title, description: story.description, author: story.author, isPublic: !story.isPublic, categories: story.categories });
-    useDataStore().upsertSavedStory(updated);
-    await retryStory();
-  } catch { if (selectedStoryId.value === story.id) state.value.storyError = 'Impossible de modifier la visibilité. Réessayez.'; }
-  finally { visibilityBusy.value = false; }
-}
 
 function handleAddStory() {
   saveError.value = null;
@@ -222,6 +212,46 @@ const handleSave = async (formData: EditFormSubmission) => {
     if (savedId === selectedStoryId.value || (savedType === 'period' && selectedStory.value?.periods.some(period => period.id === savedId)) || (savedType === 'event' && selectedStory.value?.events.some(event => event.id === savedId))) await retryStory();
   }
 };
+
+/** Erreur propre à l'onglet Settings, distincte des sauvegardes faites dans la modale. */
+const storySettingsError = ref<string | null>(null);
+watch(selectedStoryId, () => { storySettingsError.value = null; });
+async function saveSelectedStory(submission: EditFormSubmission) {
+  const story = selectedStory.value;
+  if (!story || saveLoading.value || deleteLoading.value) return;
+  storySettingsError.value = null;
+  const success = await saveHandler(submission, 'story', 'edit', story);
+  if (selectedStoryId.value !== story.id) return;
+  if (success) await retryStory();
+  else storySettingsError.value = saveError.value;
+}
+
+const confirm = useConfirm();
+const visibilityBusy = ref(false);
+async function toggleStoryVisibility() {
+  const story = selectedStory.value;
+  if (!story || relationsBusy.value || visibilityBusy.value || saveLoading.value || deleteLoading.value) return;
+  const next = story.isPublic ? 'privée' : 'publique';
+  const accepted = await confirm(`Rendre la frise ${next}`, story.isPublic
+    ? `« ${story.title.fr} » ne sera plus visible que par vous.`
+    : `« ${story.title.fr} » sera visible par tous dans la timeline.`);
+  if (!accepted || selectedStoryId.value !== story.id) return;
+  visibilityBusy.value = true;
+  storySettingsError.value = null;
+  try {
+    const updated = await StoryApiService.getInstance().updateStory(story.id, { title: story.title, description: story.description, author: story.author, isPublic: !story.isPublic, categories: story.categories });
+    useDataStore().upsertSavedStory(updated);
+    if (selectedStoryId.value === story.id) await retryStory();
+  } catch (cause: unknown) {
+    if (selectedStoryId.value === story.id) storySettingsError.value = mutationErrorMessage(cause, 'Impossible de modifier la visibilité. Réessayez.');
+  } finally { visibilityBusy.value = false; }
+}
+
+async function deleteSelectedStory() {
+  const story = selectedStory.value;
+  if (!story || saveLoading.value || deleteLoading.value) return;
+  if (await deleteHandler(story, 'story')) onTabClose(story.id);
+}
 
 const handleDelete = async () => {
   if (saveLoading.value || deleteLoading.value) return;

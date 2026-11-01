@@ -9,6 +9,8 @@ import Select from '@/components/base/Select.vue';
 import { StoryApiService } from '@/services/StoryApiService';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { EventApiService } from '@/services/EventApiService';
+import { CategoryService } from '@/services/CategoryService';
+import { useUiStore } from '@/stores/useUiStore';
 import type { Period, Story, StorySummary } from '@/types/database';
 
 const root: Period = { id: 'root', label: { fr: 'Période racine', en: '' }, startDate: '1945', endDate: '1991', categories: [], hasParent: false, children: [], temporalLocation: '' };
@@ -51,6 +53,8 @@ it('opens on the frise cards and opens a frise in its own tab', async () => {
   expect(tabs()).toEqual(['Guerre froide']);
   expect(view.get('.story-tabs__open').attributes('aria-current')).toBe('page');
   expect(view.get('.story-detail-panel__meta-actions a').attributes('href')).toBe('/timeline?story=1');
+  expect(view.findAll('.story-detail-panel__meta-actions > *').map(item => item.text())).toEqual(['Ajouter un événement', 'Voir dans la timeline']);
+  expect(view.get('.story-detail-panel__meta-actions a').find('svg').exists()).toBe(false);
   const settings = view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Settings')!;
   await settings.trigger('click');
   expect(view.text()).toContain('Paramètres de la frise');
@@ -160,4 +164,37 @@ it('filters the frise list by time overlap and clears it from the chip', async (
   await view.get('.story-gallery__chip button').trigger('click');
   expect(cards()).toEqual(['Guerre froide', 'Histoire de France']);
   expect(view.find('.story-gallery__chip').exists()).toBe(false);
+});
+it('saves the frise settings from the Settings tab and reloads the frise', async () => {
+  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  const update = vi.spyOn(api, 'updateStory').mockImplementation(async (id, data) => ({ ...summaries[0], title: data.title }));
+  vi.mocked(api.getStory).mockImplementation(async id => ({ ...story(id), title: update.mock.calls.length ? { fr: 'Guerre froide renommée', en: 'Cold War' } : story(id).title }));
+  await start('/database?story=1');
+  await view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Settings')!.trigger('click');
+  await flushPromises();
+  expect(button('Enregistrer')).toBeUndefined();
+  await view.get('.story-settings-form input[placeholder="Titre en français"]').setValue('Guerre froide renommée');
+  expect(button('Enregistrer').exists()).toBe(true);
+  await view.get('.story-settings-form form').trigger('submit'); await flushPromises();
+  expect(update).toHaveBeenCalledWith('1', expect.objectContaining({ title: { fr: 'Guerre froide renommée', en: 'Cold War' }, author: 'Auteur' }));
+  expect(view.get('.story-detail-panel__title').text()).toBe('Guerre froide renommée');
+  expect(button('Enregistrer')).toBeUndefined();
+});
+it('changes the frise visibility from the danger zone after confirmation', async () => {
+  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  const update = vi.spyOn(api, 'updateStory').mockImplementation(async (id, data) => ({ ...summaries[0], isPublic: data.isPublic ?? true }));
+  vi.mocked(api.getStory).mockImplementation(async id => ({ ...story(id), isPublic: !update.mock.calls.length }));
+  await start('/database?story=1');
+  expect(view.find('.story-detail-panel__meta-actions [aria-pressed]').exists()).toBe(false);
+  await view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Settings')!.trigger('click');
+  await flushPromises();
+  const ui = useUiStore();
+  await button('Rendre privée').trigger('click'); await flushPromises();
+  expect(ui.confirmation?.title).toBe('Rendre la frise privée');
+  ui.settleConfirmation(ui.confirmation!.id, false); await flushPromises();
+  expect(update).not.toHaveBeenCalled();
+  await button('Rendre privée').trigger('click'); await flushPromises();
+  ui.settleConfirmation(ui.confirmation!.id, true); await flushPromises();
+  expect(update).toHaveBeenCalledWith('1', expect.objectContaining({ isPublic: false, title: summaries[0].title, author: 'Auteur' }));
+  expect(view.get('.story-settings-form__danger').text()).toContain('Visibilité : privée');
 });

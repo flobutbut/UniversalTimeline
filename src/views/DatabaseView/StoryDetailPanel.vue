@@ -24,12 +24,8 @@
           <p v-if="story.description?.fr" class="story-detail-panel__desc">{{ story.description.fr }}</p>
         </div>
         <div class="story-detail-panel__meta-actions">
-          <Button variant="secondary" size="sm" :pressed="story.isPublic" :disabled="panelBusy" @click="emit('toggle-public')">{{ story.isPublic ? 'Public' : 'Privé' }}</Button>
-          <Button variant="tertiary" size="sm" :to="{ path: '/timeline', query: { story: story.id } }">
-            <template #icon><Icon icon="mdi:timeline-outline" width="16" height="16" aria-hidden="true" /></template>
-            Voir dans la timeline
-          </Button>
           <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openEventCreator">Ajouter un événement</Button>
+          <Button variant="tertiary" size="sm" :to="{ path: '/timeline', query: { story: story.id } }">Voir dans la timeline</Button>
         </div>
       </div>
 
@@ -287,9 +283,8 @@
           <Button variant="tertiary" size="sm" @click="emit('edit-story')">Modifier les tags</Button>
         </div>
         <div v-else-if="activeTab === 'settings'" class="story-settings-panel">
-          <h3>Paramètres de la frise</h3>
-          <dl><dt>Titre</dt><dd>{{ story.title.fr }}</dd><dt>Auteur</dt><dd>{{ story.author }}</dd><dt>Visibilité</dt><dd>{{ story.isPublic ? 'Publique' : 'Privée' }}</dd></dl>
-          <Button variant="tertiary" size="sm" @click="emit('edit-story')">Modifier la frise</Button>
+          <StorySettingsForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError"
+            @save="emit('save-story', $event)" @delete="emit('delete-story')" @toggle-visibility="emit('toggle-visibility')" />
         </div>
 
       </div>
@@ -321,6 +316,8 @@ import { storeToRefs } from 'pinia';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
 import RootPeriodModal from './RootPeriodModal.vue';
+import StorySettingsForm from './StorySettingsForm.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
 import StoryItemActionsMenu from './StoryItemActionsMenu.vue';
 import EditModal from './EditModal.vue';
 import { useStoryWikidataPeriodImport } from '@/composables/useStoryWikidataPeriodImport';
@@ -353,14 +350,18 @@ import {
 } from '@/lib/storyPeriodFinderColumns';
 import type { Story, StoryAnchor, ChildStorySummary, ListEvent, ListPeriod } from '@/types/database';
 import type { StoryPeriodInput } from '@/types/periodTree';
+import type { EditFormSubmission } from '@/types/editForm';
 
 const toast = useToast();
+const auth = useAuthStore();
 
 const props = defineProps<{
   story?: Story | null;
   loading?: boolean;
   updating?: boolean;
   error?: string | null;
+  /** Erreur du dernier enregistrement des paramètres. */
+  settingsError?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -376,7 +377,9 @@ const emit = defineEmits<{
   (e: 'add-child-stories', ids: string[], anchor?: StoryAnchor): void;
   (e: 'change-root', id: string): void;
   (e: 'edit-story'): void;
-  (e: 'toggle-public'): void;
+  (e: 'save-story', submission: EditFormSubmission): void;
+  (e: 'delete-story'): void;
+  (e: 'toggle-visibility'): void;
   (e: 'remove-child-story', id: string): void;
   (e: 'add-event-anchor', childStoryId: string, eventId: string): void;
   (e: 'remove-event-anchor', childStoryId: string, eventId: string): void;
@@ -1010,8 +1013,6 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .event-detail-section > .base-button { align-self: flex-start; margin-top: 12px; }
 .story-settings-panel { padding: 24px; background: var(--color-surface); min-height: 100%; }
 .story-settings-panel h3 { font-size: var(--font-size-lg); }
-.story-settings-panel dl { display: grid; grid-template-columns: 100px minmax(0,1fr); gap: 8px 16px; margin-bottom: 24px; }
-.story-settings-panel dt { color: var(--color-text-secondary); }
 .story-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .story-tag { padding: 4px 8px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: var(--font-size-sm); }
 @media (max-width: 1000px) { .story-detail-panel__meta { flex-wrap: wrap; } .story-detail-panel__meta-actions { flex-wrap: wrap; } }
