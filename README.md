@@ -132,6 +132,7 @@ Police de base ~13px, espacements sur une grille 8px, tokens dans `src/styles/va
 - [Flux de données](Documentation/Documentation-flux-donnees.md)
 - [État du projet](Documentation/Documentation-status.md)
 - [Serveur MCP — cadrage](Documentation/MCP.md)
+- [Rôles, contenus personnels et partage — cadrage](Documentation/ROLES-ET-PARTAGE.md)
 
 ## Contribution
 
