@@ -16,7 +16,7 @@
         <StoryDetailPanel :key="selectedStoryId" :story="selectedStory" :loading="state.loadingStoryDetails" :updating="relationsBusy || visibilityBusy || state.loadingDetails || saveLoading || deleteLoading" :error="state.storyError" :settings-error="storySettingsError"
           @retry="retryStory" @period-imported="retryStory" @remove-period="removePeriodFromStory" @remove-event="removeEventFromStory" @add-periods="addPeriodsToStory" @event-added="retryStory"
           @add-child-stories="addChildStoriesToStory" @remove-child-story="removeChildStoryFromStory" @add-event-anchor="addEventAnchorToStory" @remove-event-anchor="removeEventAnchorFromStory"
-          @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @create-story-from-period="openStoryFromPeriod" @edit-event="onEditStoryEvent" @edit-story="onEditSelectedStory" @save-story="saveSelectedStory" @delete-story="deleteSelectedStory" @toggle-visibility="toggleStoryVisibility" />
+          @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @create-story-from-period="openStoryFromPeriod" @edit-event="onEditStoryEvent" @save-story="saveSelectedStory" @delete-story="deleteSelectedStory" @toggle-visibility="toggleStoryVisibility" />
       </div>
     </template>
     <EditModal
@@ -88,7 +88,6 @@ const {
   changeRootPeriod,
   filteredStories,
   handleAddStory: openAddStory,
-  handleEditStory,
   handleEditPeriod,
   handleEditEvent,
   closeAddModal,
@@ -185,13 +184,6 @@ function onEditStoryEvent(id: string) {
   void handleEditEvent(event);
 }
 
-function onEditSelectedStory() {
-  saveError.value = null;
-  if (!selectedStory.value) return;
-  const listStory = findById(filteredStories.value, selectedStory.value.id);
-  if (listStory) handleEditStory(listStory);
-}
-
 const { handleSave: saveHandler, loading: saveLoading, error: saveError } = useDatabaseSave();
 const { handleDelete: deleteHandler, loading: deleteLoading } = useDatabaseDelete();
 
@@ -213,7 +205,7 @@ const handleSave = async (formData: EditFormSubmission) => {
   }
 };
 
-/** Erreur propre à l'onglet Settings, distincte des sauvegardes faites dans la modale. */
+/** Erreur propre aux onglets Settings et Catégories, distincte des sauvegardes faites dans la modale. */
 const storySettingsError = ref<string | null>(null);
 watch(selectedStoryId, () => { storySettingsError.value = null; });
 async function saveSelectedStory(submission: EditFormSubmission) {

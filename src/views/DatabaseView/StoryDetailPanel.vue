@@ -276,11 +276,8 @@
           </div>
         </template>
 
-        <div v-else-if="activeTab === 'tags'" class="story-settings-panel">
-          <h3>Tags de la frise</h3>
-          <div class="story-tags"><span v-for="tag in story.categories" :key="tag.id" class="story-tag">{{ tag.label.fr }}</span></div>
-          <p v-if="!story.categories.length">Aucun tag associé à cette frise.</p>
-          <Button variant="tertiary" size="sm" @click="emit('edit-story')">Modifier les tags</Button>
+        <div v-else-if="activeTab === 'categories'" class="story-settings-panel">
+          <StoryCategoriesForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
         </div>
         <div v-else-if="activeTab === 'settings'" class="story-settings-panel">
           <StorySettingsForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError"
@@ -317,6 +314,7 @@ import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
 import RootPeriodModal from './RootPeriodModal.vue';
 import StorySettingsForm from './StorySettingsForm.vue';
+import StoryCategoriesForm from './StoryCategoriesForm.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import StoryItemActionsMenu from './StoryItemActionsMenu.vue';
 import EditModal from './EditModal.vue';
@@ -360,7 +358,7 @@ const props = defineProps<{
   loading?: boolean;
   updating?: boolean;
   error?: string | null;
-  /** Erreur du dernier enregistrement des paramètres. */
+  /** Erreur du dernier enregistrement des paramètres ou des catégories. */
   settingsError?: string | null;
 }>();
 
@@ -376,7 +374,6 @@ const emit = defineEmits<{
   (e: 'event-added'): void;
   (e: 'add-child-stories', ids: string[], anchor?: StoryAnchor): void;
   (e: 'change-root', id: string): void;
-  (e: 'edit-story'): void;
   (e: 'save-story', submission: EditFormSubmission): void;
   (e: 'delete-story'): void;
   (e: 'toggle-visibility'): void;
@@ -409,7 +406,7 @@ const {
   clear: clearPeriodSelection, pick: pickPeriod, selectRow: selectPeriodRow, toggleExternal: onShowExternalChange,
 } = useStoryPeriodFinder(() => props.story);
 const selectedEventId = ref<string | null>(null);
-const activeTab = ref<'periods' | 'events' | 'tags' | 'settings'>('periods');
+const activeTab = ref<'periods' | 'events' | 'categories' | 'settings'>('periods');
 
 const periodHeaderSearch = ref('');
 const periodFilterCategoryId = ref('');
@@ -434,7 +431,7 @@ function onPeriodAction(row: FinderColumnRow) {
 const storyContentTabs = computed(() => [
   { label: 'Périodes', value: 'periods' as const },
   { label: 'Événements', value: 'events' as const },
-  { label: 'Tags', value: 'tags' as const },
+  { label: 'Catégories', value: 'categories' as const },
   { label: 'Settings', value: 'settings' as const },
 ]);
 
@@ -1012,9 +1009,6 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .event-detail-section { align-items: stretch; gap: 4px; }
 .event-detail-section > .base-button { align-self: flex-start; margin-top: 12px; }
 .story-settings-panel { padding: 24px; background: var(--color-surface); min-height: 100%; }
-.story-settings-panel h3 { font-size: var(--font-size-lg); }
-.story-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.story-tag { padding: 4px 8px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: var(--font-size-sm); }
 @media (max-width: 1000px) { .story-detail-panel__meta { flex-wrap: wrap; } .story-detail-panel__meta-actions { flex-wrap: wrap; } }
 @media (max-width: 600px) { .story-detail-panel__meta-actions { width: 100%; } .events-finder-layout { grid-template-columns: 160px minmax(0,1fr); } .story-detail-panel__tab-panel :deep(.filter-bar__search-wrap), .story-detail-panel__tab-panel :deep(.filter-bar__select) { width: 100%; } }
 

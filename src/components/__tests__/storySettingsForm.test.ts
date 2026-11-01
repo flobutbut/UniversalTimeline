@@ -24,7 +24,7 @@ it('shows the frise settings as text without a form in read-only mode', async ()
   expect(view.get('dl').text()).not.toContain('Cold War');
   expect(view.get('dl').text()).not.toContain('Auteur');
   expect(view.get('dl').text()).toContain('Publique');
-  expect(view.get('dl').text()).toContain('Histoire');
+  expect(view.get('dl').text()).not.toContain('Histoire');
   expect(button('Enregistrer')).toBeUndefined();
   expect(button('Supprimer la frise')).toBeUndefined();
   expect(view.text()).not.toContain('Danger zone');
@@ -35,6 +35,7 @@ it('reveals save and cancel only while the draft differs from the frise', async 
   await flushPromises();
   expect((titleFr().element as HTMLInputElement).value).toBe('Guerre froide');
   expect(view.find('input[placeholder="Title in English"]').exists()).toBe(false);
+  expect(view.text()).not.toContain('Catégories');
   expect(view.find('input[placeholder="Nom de l\'auteur"]').exists()).toBe(false);
   expect(button('Enregistrer')).toBeUndefined();
   expect(button('Annuler')).toBeUndefined();
@@ -88,4 +89,22 @@ it('keeps visibility out of the draft and changes it from the danger zone', asyn
   expect(view.get('section.story-settings-form__danger').text()).toContain('Rendre publique');
   await view.get('form').trigger('submit');
   expect(view.emitted('save')![0][0]).toMatchObject({ isPublic: false, title: { fr: 'Brouillon' } });
+});
+
+it('sends the saved tags and visibility with its text draft, never a stale copy', async () => {
+  view = mount(StorySettingsForm, { props: { story, editable: true } });
+  await flushPromises();
+  await titleFr().setValue('Brouillon');
+  await view.setProps({ story: { ...story, categories: [{ id: 'c2', label: { fr: 'Science', en: '' } }] } });
+  expect((titleFr().element as HTMLInputElement).value).toBe('Brouillon');
+  await view.get('form').trigger('submit');
+  expect(view.emitted('save')![0][0]).toMatchObject({ title: { fr: 'Brouillon' }, categories: [{ id: 'c2' }], isPublic: true });
+});
+
+it('saves its text even when the tag catalogue cannot load', async () => {
+  vi.mocked(CategoryService.getInstance().getCategories).mockRejectedValue(new Error('offline'));
+  view = mount(StorySettingsForm, { props: { story, editable: true } });
+  await flushPromises();
+  await titleFr().setValue('Brouillon');
+  expect(button('Enregistrer')!.attributes('disabled')).toBeUndefined();
 });
