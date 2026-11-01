@@ -795,7 +795,6 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-gutter: stable;
-  padding-bottom: 128px;
 }
 
 .story-detail-panel__tab-panel {
@@ -823,6 +822,8 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .story-detail-panel__finder-columns-wrap .finder-columns {
   flex: 1;
   min-height: 0;
+  /* Same fill as the columns: the space past the last column reads as part of them. */
+  background: var(--color-surface);
 }
 
 /* ─── Contenu du tab ──────────────────────────────────────────────────────────── */
@@ -830,6 +831,11 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .story-detail-panel__tab-content {
   flex: 1 0 auto;
   min-height: 0;
+}
+
+/* Scroll room below the forms; the finder columns run to the bottom of the panel instead. */
+.story-detail-panel__tab-content:not(.story-detail-panel__tab-content--finder-periods):not(.story-detail-panel__tab-content--finder-events) {
+  padding-bottom: 128px;
 }
 
 .story-detail-panel__tab-content--finder-periods,
