@@ -273,7 +273,7 @@ it('offers period and frise additions at the root without retaining a nested anc
   await start(); await pick(period('child', 'inside'));
   const headers = view.findAll('.story-column-header');
   const rootButton = (name: string) => headers[0].findAll('button').find(action => action.text() === name)!;
-  expect(rootButton('Changer la racine').exists()).toBe(true);
+  expect(rootButton('Changer la racine')).toBeUndefined();
   expect(rootButton('Ajouter une période').attributes('disabled')).toBeUndefined();
   await headers[2].findAll('button').find(action => action.text() === 'Ajouter une frise')!.trigger('click');
   view.getComponent({ name: 'StoryRelatedPickerModal' }).vm.$emit('close'); await flushPromises();

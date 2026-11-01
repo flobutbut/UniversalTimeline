@@ -119,7 +119,6 @@
                   <div class="finder-column-header story-column-header">
                     <div class="story-column-header__title">
                       <h2>{{ finderColumnHeader(colIdx) }}</h2>
-                      <Button v-if="colIdx === 0" class="story-column-header__root-action" variant="tertiary" size="xs" :disabled="panelBusy" @click="showRootPicker = true">Changer la racine</Button>
                     </div>
                     <div class="story-column-header__actions">
                       <Button variant="tertiary" size="xs" :disabled="panelBusy || (colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? ''))" :title="colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? '') ? 'Ajoutez d’abord cette période à la frise.' : undefined" @click="openChildStoryPicker(colIdx)">Ajouter une frise</Button>
@@ -995,7 +994,6 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .story-column-header { flex-direction: column; align-items: stretch; gap: var(--spacing-sm); height: 80px; flex-shrink: 0; }
 .story-column-header__title { display: flex; align-items: center; gap: var(--spacing-sm); min-width: 0; min-height: 20px; }
 .story-column-header__title h2 { flex: 1; }
-.story-column-header__root-action { height: 20px; min-height: 20px; padding: 0 4px; font-size: var(--font-size-xs); flex-shrink: 0; }
 .story-column-header__actions { display: flex; gap: var(--spacing-sm); }
 .story-column-header__actions .base-button { flex: 1; min-width: 0; }
 .story-column-header__actions :deep(.base-button__text) { padding-inline: 3px; }

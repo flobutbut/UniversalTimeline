@@ -71,7 +71,7 @@ export function useStoryPeriodFinder(story: () => Story | null | undefined) {
   }
 
   async function scopedSearchPath(id: string, isCurrent: () => boolean, signal: AbortSignal, force: boolean): Promise<string[] | null> {
-    const outsideMessage = 'Cette période est hors de la frise. Choisissez une sous-période de ses périodes ou utilisez « Changer la racine ».';
+    const outsideMessage = 'Cette période est hors de la frise. Choisissez une sous-période de ses périodes.';
     if (!story()?.periods.length) throw new Error(outsideMessage);
     const suffix: string[] = [];
     const seen = new Set<string>();
