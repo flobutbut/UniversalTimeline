@@ -143,6 +143,9 @@ it('resolves semantic IDs in one scoped catalogue query with bound parameters', 
   rows([]);
   expect((await get('/search/by-wikidata', {}, { ids: 'Q43653,Q1085', only: 'events' })).body).toEqual({ periods: [], events: [] });
   expect(db).toHaveBeenCalledOnce(); expect(db.mock.calls[0][1]).toEqual(['', ['Q43653','Q1085']]);
+  // Historical internal IDs can look like Q-ids: only the stored Wikidata link may match.
+  expect(db.mock.calls[0][0]).toMatch(/WHERE e\.wikidata_id=ANY\(\$2::text\[\]\)/);
+  expect(db.mock.calls[0][0]).not.toMatch(/id::text=ANY/);
 });
 it('rejects invalid semantic identifiers before any catalogue query', async () => {
   expect((await get('/search/by-wikidata', {}, { ids: 'bad-id', only: 'events' })).status).toBe(400);

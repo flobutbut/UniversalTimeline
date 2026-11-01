@@ -61,3 +61,23 @@ it('does not fetch broader ancestry once a known classification boundary is reac
   const hits = await api.searchWikidataEntityLabels('Guerre', { restrictToEventConcepts: true });
   expect(hits.map(hit => hit.id)).toEqual(['Q123']); expect(fetchMock).toHaveBeenCalledTimes(2);
 });
+
+const timeClaim = (time: string) => [{ mainsnak: { snaktype: 'value', datavalue: { value: { time } } } }];
+it('adds start/end dates to label hits, reduced to their Wikidata precision', async () => {
+  fetchMock
+    .mockResolvedValueOnce(response({ search: [{ id: 'Q39671', label: 'Stonehenge', description: 'monument' }, { id: 'Q16470', label: 'Débarquement' }, { id: 'Q1', label: 'Sans date' }] }))
+    .mockResolvedValueOnce(response({ entities: {
+      Q39671: { claims: { P571: timeClaim('-3000-00-00T00:00:00Z') } },
+      Q16470: { claims: { P580: timeClaim('+1944-06-06T00:00:00Z'), P582: timeClaim('+1944-08-30T00:00:00Z') } },
+      Q1: { claims: {} },
+    } }));
+  expect(await api.searchWikidataEntityLabels('stone')).toEqual([
+    { id: 'Q39671', label: 'Stonehenge', description: 'monument', startDate: '-3000', endDate: undefined },
+    { id: 'Q16470', label: 'Débarquement', description: undefined, startDate: '+1944-06-06T00:00:00Z', endDate: '+1944-08-30T00:00:00Z' },
+    { id: 'Q1', label: 'Sans date', description: undefined, startDate: undefined, endDate: undefined },
+  ]);
+});
+it('keeps label hits without dates when the date lookup fails', async () => {
+  fetchMock.mockResolvedValueOnce(response({ search: [{ id: 'Q39671', label: 'Stonehenge' }] })).mockResolvedValue(response({}, false));
+  expect(await api.searchWikidataEntityLabels('stone')).toEqual([{ id: 'Q39671', label: 'Stonehenge', description: undefined }]);
+});

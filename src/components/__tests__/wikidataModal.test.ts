@@ -1,5 +1,5 @@
 import { useUiStore } from '@/stores/useUiStore';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { mount, flushPromises } from '@vue/test-utils';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
@@ -7,6 +7,7 @@ import { CategoryService } from '@/services/CategoryService';
 import { WikidataQueryService } from '@/services/WikidataQueryService';
 import { SearchApiService } from '@/services/SearchApiService';
 import { apiClient } from '@/services/ApiClient';
+import { ConflictResolutionService } from '@/services/ConflictResolutionService';
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn() } }));
 let view: ReturnType<typeof mount>;
 const draft = { id: 'draft', wikidata_id: 'Q123', label: { fr: 'Brouillon conservé', en: '' }, date: 'M65' };
@@ -175,4 +176,64 @@ it('finds an existing event through its semantic QID despite no keyword match an
   expect(view.text()).not.toContain('Classification trop complexe');
   await options[0].trigger('click'); await button('Ajouter à la frise').trigger('click');
   expect(view.emitted('select-event')).toEqual([['moon-event']]); expect(view.emitted('submit')).toBeUndefined();
+});
+
+describe('an event already in the base under another label', () => {
+  const existing = { id: 'existing-event', wikidata_id: 'Q9', label: { fr: 'Débarquement de Normandie', en: '' }, date: '1944-06-06' };
+  async function pickWikidataHit(excluded: string[] = []) {
+    vi.spyOn(SearchApiService.getInstance(), 'searchLocal').mockResolvedValue([]);
+    vi.spyOn(SearchApiService.getInstance(), 'searchWikidataEntityLabels').mockResolvedValue([{ id: 'Q9', label: 'Opération Overlord' }]);
+    vi.spyOn(ConflictResolutionService.getInstance(), 'detectConflict').mockResolvedValue({ hasConflict: true, existingItem: existing } as never);
+    view = mount(EditModal, { props: { isOpen: true, type: 'event', mode: 'create', allowExistingEvents: true, excludedEventIds: excluded }, attachTo: document.body }); await flushPromises();
+    vi.useFakeTimers(); const input = view.get('input[aria-label="Rechercher un événement"]');
+    input.element.focus(); await input.setValue('Overlord'); await vi.advanceTimersByTimeAsync(650); await flushPromises();
+    await view.get('[role="option"]').trigger('click'); await flushPromises();
+  }
+  it('offers to add the existing event instead of importing a duplicate from Wikidata', async () => {
+    await pickWikidataHit();
+    expect(WikidataQueryService.getInstance().loadEvent).not.toHaveBeenCalled();
+    expect(view.text()).toContain('Événement existant'); expect(view.text()).toContain('Débarquement de Normandie');
+    await button('Ajouter à la frise').trigger('click');
+    expect(view.emitted('select-event')).toEqual([['existing-event']]); expect(view.emitted('submit')).toBeUndefined();
+  });
+  it('says the event is already in the frise rather than proposing it again', async () => {
+    await pickWikidataHit(['existing-event']);
+    expect(view.get('.edit-modal__existing-notice').text()).toBe('Cet événement est déjà dans la frise.');
+    expect(view.text()).not.toContain('Ajouter à la frise');
+    expect(WikidataQueryService.getInstance().loadEvent).not.toHaveBeenCalled();
+  });
+  it('lets a manually typed duplicate Q-id switch to the existing event', async () => {
+    vi.spyOn(ConflictResolutionService.getInstance(), 'detectConflict').mockResolvedValue({ hasConflict: true, existingItem: existing } as never);
+    view = mount(EditModal, { props: { isOpen: true, type: 'event', mode: 'create', allowExistingEvents: true }, attachTo: document.body }); await flushPromises();
+    const qid = view.get('input[placeholder="Q12345"]'); await qid.setValue('Q9'); await qid.trigger('blur'); await flushPromises();
+    expect(view.text()).toContain('Ce Q-id existe déjà dans la base');
+    await button('Utiliser l’événement existant').trigger('click');
+    await button('Ajouter à la frise').trigger('click');
+    expect(view.emitted('select-event')).toEqual([['existing-event']]);
+  });
+  it('keeps the duplicate error without a reuse action outside a frise', async () => {
+    vi.spyOn(ConflictResolutionService.getInstance(), 'detectConflict').mockResolvedValue({ hasConflict: true, existingItem: existing } as never);
+    view = mount(EditModal, { props: { isOpen: true, type: 'event', mode: 'create' }, attachTo: document.body }); await flushPromises();
+    const qid = view.get('input[placeholder="Q12345"]'); await qid.setValue('Q9'); await qid.trigger('blur'); await flushPromises();
+    expect(view.text()).toContain('Ce Q-id existe déjà dans la base');
+    expect(button('Utiliser l’événement existant')).toBeUndefined();
+  });
+});
+
+it('shows the date and keeps the description of existing items, and dates Wikidata results', async () => {
+  vi.spyOn(SearchApiService.getInstance(), 'searchLocal').mockResolvedValue([
+    { id: 'event-local', wikidataId: 'Q2', type: 'event', label: { fr: 'Débarquement', en: '' }, dateLabel: '6 juin 1944', description: 'Opération alliée en Normandie', fromWikidata: false },
+  ]);
+  vi.spyOn(SearchApiService.getInstance(), 'searchWikidataEntityLabels').mockResolvedValue([{ id: 'Q39671', label: 'Stonehenge', description: 'monument mégalithique', startDate: '-3000' }]);
+  view = mount(EditModal, { props: { isOpen: true, type: 'event', mode: 'create', allowExistingEvents: true }, attachTo: document.body }); await flushPromises();
+  vi.useFakeTimers(); const input = view.get('input[aria-label="Rechercher un événement"]');
+  input.element.focus(); await input.setValue('Débarquement'); await vi.advanceTimersByTimeAsync(280); await flushPromises();
+  const [local, remote] = view.findAll('[role="option"]');
+  expect(local.get('.edit-modal-wd-dd__date').text()).toBe('6 juin 1944');
+  expect(local.get('.edit-modal-wd-dd__desc').text()).toBe('Opération alliée en Normandie');
+  expect(remote.get('.edit-modal-wd-dd__date').text()).not.toBe('');
+  expect(remote.get('.edit-modal-wd-dd__desc').text()).toBe('monument mégalithique');
+  await local.trigger('click');
+  expect(view.get('.edit-modal__existing-date').text()).toBe('6 juin 1944');
+  expect(view.text()).toContain('Opération alliée en Normandie');
 });

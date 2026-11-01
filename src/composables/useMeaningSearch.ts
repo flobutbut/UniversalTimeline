@@ -9,7 +9,8 @@ export function useMeaningSearch(query: () => string, context: () => { enabled: 
     const hits = await api.searchWikidataByMeaning(text, { type, signal });
     // A semantic result may already be saved under another label in our catalogue.
     const local = context().resolveLocal ? await api.searchLocalByWikidataIds(hits.map(hit => hit.id), type, signal) : [];
-    const byQid = new Map(local.map(hit => [hit.wikidataId || hit.id, hit]));
+    // An internal ID shaped like a Q-id is not a Wikidata link.
+    const byQid = new Map(local.flatMap(hit => hit.wikidataId ? [[hit.wikidataId, hit] as const] : []));
     return hits.map(hit => ({ ...hit, localMatch: byQid.get(hit.id) }));
   }, {
     minLength: 3, delayMs: 650, timeoutMs: 28000, criteria: () => context().type,

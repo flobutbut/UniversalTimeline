@@ -61,7 +61,7 @@ function catalogueSearch(kind: 'periods' | 'events', categoryId: string, limit: 
       extensions.unaccent(lower(concat_ws(' ', ${alias}.label_fr, ${alias}.label_en))) AS title,
       extensions.unaccent(lower(concat_ws(' ', ${alias}.label_fr, ${alias}.label_en, ${alias}.description_fr, ${alias}.description_en, ${alias}.wikidata_id, ${alias}.id::text))) AS document
     FROM public.${kind} ${alias}
-    ${byQids ? `WHERE (${alias}.wikidata_id=ANY($2::text[]) OR ${alias}.id::text=ANY($2::text[]))` : categoryId ? `WHERE EXISTS(SELECT 1 FROM public.${period ? 'period_categories' : 'event_categories'} cat WHERE cat.${period ? 'period_id' : 'event_id'}=${alias}.id AND cat.category_id=$2)` : ''}
+    ${byQids ? `WHERE ${alias}.wikidata_id=ANY($2::text[])` : categoryId ? `WHERE EXISTS(SELECT 1 FROM public.${period ? 'period_categories' : 'event_categories'} cat WHERE cat.${period ? 'period_id' : 'event_id'}=${alias}.id AND cat.category_id=$2)` : ''}
   ), scored AS (
     SELECT d.*, CASE WHEN lower(d.id::text)=q.text OR lower(d.wikidata_id)=q.text THEN 100 ELSE 0 END
       + CASE WHEN strpos(d.title,q.text)>0 THEN 12 ELSE 0 END

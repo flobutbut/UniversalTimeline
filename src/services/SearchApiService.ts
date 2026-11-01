@@ -149,6 +149,27 @@ async function loadP279AncestorGraphForClassSeeds(seedClassIds: string[], signal
   return graph;
 }
 
+/** First Wikibase time of a claim, reduced to its known precision ("+1944-00-00…" → "1944"). */
+function wikidataClaimTime(entity: WikidataEntity | undefined, prop: string): string | undefined {
+  const value = entity?.claims?.[prop]?.find(row => row.mainsnak?.snaktype === 'value')?.mainsnak?.datavalue?.value;
+  if (!value || typeof value !== 'object' || !('time' in value) || typeof value.time !== 'string') return undefined;
+  const match = /^([+-])(\d+)-(\d{2})-(\d{2})T/.exec(value.time);
+  if (!match) return value.time;
+  const [, sign, year, month, day] = match;
+  const signedYear = `${sign === '-' ? '-' : ''}${year.padStart(4, '0')}`;
+  if (month === '00') return signedYear;
+  if (day === '00') return `${signedYear}-${month}`;
+  return value.time;
+}
+
+/** Start/end shown in search lists: period bounds, point in time, or inception/dissolution. */
+function wikidataTimeBounds(entity: WikidataEntity | undefined): { startDate?: string; endDate?: string } {
+  return {
+    startDate: wikidataClaimTime(entity, 'P580') || wikidataClaimTime(entity, 'P585') || wikidataClaimTime(entity, 'P571'),
+    endDate: wikidataClaimTime(entity, 'P582') || wikidataClaimTime(entity, 'P576'),
+  };
+}
+
 function wikidataItemHasMainTimeClaim(itemEntity: WikidataEntity | undefined): boolean {
   const c = itemEntity?.claims ?? {};
   const hasVal = (prop: string) =>
@@ -332,12 +353,21 @@ export class SearchApiService {
         description: s.description,
       }),
     );
-    if (!opts?.restrictToEventConcepts || !hits.length) return hits.slice(0, 18);
+    if (!hits.length) return hits;
+    const withDates = (list: WikidataEntityLabelHit[], items: Map<string, WikidataEntity>) =>
+      list.map(hit => ({ ...hit, ...wikidataTimeBounds(items.get(hit.id.toUpperCase())) }));
+
+    if (!opts?.restrictToEventConcepts) {
+      const shown = hits.slice(0, 18);
+      // Dates are a display aid: a failed lookup keeps the hits, without dates.
+      try { return withDates(shown, await wbgetentitiesMap(shown.map(hit => hit.id), opts?.signal)); }
+      catch (cause) { if (opts?.signal?.aborted) throw cause; return shown; }
+    }
 
     const itemMap = await wbgetentitiesMap(hits.map(hit => hit.id), opts?.signal);
     const allP31 = hits.flatMap(hit => extractItemIdsFromClaims(itemMap.get(hit.id.toUpperCase())?.claims, 'P31'));
     const classGraph = await loadP279AncestorGraphForClassSeeds(allP31, opts?.signal);
-    return hits.filter(hit => wikidataSearchHitIsLikelyEvent(itemMap.get(hit.id.toUpperCase()), classGraph)).slice(0, 18);
+    return withDates(hits.filter(hit => wikidataSearchHitIsLikelyEvent(itemMap.get(hit.id.toUpperCase()), classGraph)).slice(0, 18), itemMap);
   }
 
   /** Broader retrieval remains separate so keyword/local results never wait for it. */
@@ -371,13 +401,9 @@ export class SearchApiService {
       const graph = await loadP279AncestorGraphForClassSeeds(seeds, options.signal, true);
       keep = dated.filter(id => wikidataSearchHitIsLikelyEvent(entities.get(id), graph));
     }
-    const time = (entity: WikidataEntity, prop: string) => {
-      const value = entity.claims?.[prop]?.find(row => row.mainsnak?.snaktype !== 'novalue')?.mainsnak?.datavalue?.value;
-      return value && typeof value === 'object' && 'time' in value && typeof value.time === 'string' ? value.time : undefined;
-    };
     return keep.flatMap(id => {
       const entity = entities.get(id)!; const label = entity.labels?.fr?.value || entity.labels?.en?.value;
-      return label ? [{ id, label, description: entity.descriptions?.fr?.value || entity.descriptions?.en?.value, searchOrigin: 'semantic' as const, startDate: time(entity,'P580') || time(entity,'P585'), endDate: time(entity,'P582') }] : [];
+      return label ? [{ id, label, description: entity.descriptions?.fr?.value || entity.descriptions?.en?.value, searchOrigin: 'semantic' as const, ...wikidataTimeBounds(entity) }] : [];
     });
   }
 

@@ -51,3 +51,13 @@ it('maps the authoritative parent response', async () => {
   vi.mocked(apiClient.patch).mockResolvedValue({ id: 'child', parent_id: 'new-parent', has_children: true, categories: [{ id: 'cat' }] });
   expect(await periods.updateParent('child', 'new-parent')).toMatchObject({ parentId: 'new-parent', hasChildren: true, categories: [{ id: 'cat' }] });
 });
+
+it('finds an event by its stored Wikidata link only, never by an internal ID shaped like a Q-id', async () => {
+  vi.mocked(apiClient.get).mockResolvedValue([
+    { id: 'Q39671', wikidata_id: 'Q1025466', label_fr: 'Assassinat de Jules César', date: '-0044-03-15' },
+    { id: 'uuid-stonehenge', wikidata_id: 'q39671', label_fr: 'Construction de Stonehenge', date: '-3000' },
+  ]);
+  expect((await EventApiService.getInstance().getEventById('Q39671'))?.id).toBe('uuid-stonehenge');
+  vi.mocked(apiClient.get).mockResolvedValue([{ id: 'Q39671', wikidata_id: 'Q1025466', label_fr: 'Assassinat de Jules César', date: '-0044-03-15' }]);
+  expect(await EventApiService.getInstance().getEventById('Q39671')).toBeNull();
+});

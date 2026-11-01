@@ -31,7 +31,8 @@ export class EventApiService {
   async getEventById(qid: string): Promise<Event | null> {
     if (!qid.match(/^Q\d+$/)) throw new Error('Format de Q-id invalide');
     const events = await apiClient.get<EventDto[]>('/events');
-    const found = events.find((e) => e.wikidata_id === qid || e.id === qid);
+    // Some historical internal IDs look like Q-ids: only the stored Wikidata link identifies the item.
+    const found = events.find((e) => e.wikidata_id?.toUpperCase() === qid);
     return found ? mapToEvent(found) : null;
   }
 

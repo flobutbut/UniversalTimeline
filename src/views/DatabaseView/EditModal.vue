@@ -72,6 +72,7 @@
             >
               <span class="edit-modal-wd-dd__title">{{ h.label }}</span>
               <span class="edit-modal-wd-dd__id">{{ h.source === 'local' ? existingEntityLabel : `Wikidata${h.searchOrigin === 'semantic' ? ' · Recherche par sens' : ''} · ${h.id}` }}</span>
+              <span v-if="h.dateLabel" class="edit-modal-wd-dd__date">{{ h.dateLabel }}</span>
               <span v-if="h.description" class="edit-modal-wd-dd__desc">{{ h.description }}</span>
             </button>
           </div>
@@ -84,6 +85,7 @@
       {{ wikidataImportError }}
       <button type="button" :disabled="loading || wikidataApplyLoading" @click="retryWikidataImport">Réessayer l’import</button>
     </div>
+    <p v-if="existingQidNotice" class="edit-modal__existing-notice" role="status">{{ existingQidNotice }}</p>
     <p v-if="wikidataApplyLoading" role="status">Chargement depuis Wikidata…</p>
     <p v-else-if="wikidataNotice" role="status">
       {{ wikidataNotice }}
@@ -101,6 +103,7 @@
     <div v-else-if="selectedExistingEntity" class="edit-modal__existing-entity">
       <p>{{ existingEntityLabel }}</p>
       <h3>{{ selectedExistingEntity.label }}</h3>
+      <p v-if="selectedExistingEntity.dateLabel" class="edit-modal__existing-date">{{ selectedExistingEntity.dateLabel }}</p>
       <p v-if="selectedExistingEntity.description">{{ selectedExistingEntity.description }}</p>
       <Button variant="tertiary" size="sm" :disabled="loading" @click="selectedExistingEntity = null">{{ type === 'period' ? 'Créer une nouvelle période' : 'Créer un nouvel événement' }}</Button>
     </div>
@@ -115,6 +118,17 @@
               :error="editState.qidError || fieldError('qid')"
               @blur="touch('qid'); validateQid()"
             />
+            <Button
+              v-if="canOfferExisting && editState.qidExistsInBase && editState.existingItem"
+              class="edit-modal__use-existing"
+              variant="secondary"
+              size="sm"
+              type="button"
+              :disabled="loading"
+              @click="offerExisting(editState.existingItem)"
+            >
+              {{ type === 'period' ? 'Utiliser la période existante' : 'Utiliser l’événement existant' }}
+            </Button>
           </div>
           <div class="form-group">
             <BaseSelect
@@ -343,6 +357,7 @@ import { useWikidataForm } from '@/composables/useWikidataForm';
 import { useLatestRequest } from '@/composables/useLatestRequest';
 import { useSuggestionNavigation } from '@/composables/useSuggestionNavigation';
 import { DateService } from '@/services/DateService';
+import { formatSearchResultDateBound } from '@/lib/formatTemporalBoundLabel';
 import { SearchApiService, type WikidataEntityLabelHit } from '@/services/SearchApiService';
 import { useMeaningSearch } from '@/composables/useMeaningSearch';
 import { creationSearchScore, type SearchTimeBounds } from '@/lib/creationSearchRanking';
@@ -407,7 +422,7 @@ const {
   results: wikidataSuggestHits, loading: wikidataSearchLoading, error: wikidataSearchError, retry: retryWikidataSearch,
 } = wikidataForm.search;
 const wikidataImportLoading = wikidataApplyLoading;
-type CreationSearchHit = WikidataEntityLabelHit & { source: 'local' | 'wikidata'; semanticRank?: number };
+type CreationSearchHit = WikidataEntityLabelHit & { source: 'local' | 'wikidata'; semanticRank?: number; dateLabel?: string };
 const allowExistingSelection = computed(() => props.type === 'period' ? !!props.allowExistingPeriods : props.type === 'event' && !!props.allowExistingEvents);
 const existingEntityLabel = computed(() => props.type === 'period' ? 'Période existante' : 'Événement existant');
 const creationSearchLabel = computed(() => allowExistingSelection.value ? props.type === 'period' ? 'Rechercher une période' : 'Rechercher un événement' : 'Recherche Wikidata');
@@ -422,15 +437,20 @@ const meaningSearch = useMeaningSearch(() => wikidataSearchQuery.value, () => ({
 }));
 const keywordErrorVisible = computed(() => !!wikidataSearchError.value && !meaningSearch.results.value.length);
 const creationSearchLoading = computed(() => wikidataSearchLoading.value || existingSearch.loading.value || meaningSearch.loading.value);
+/** Date courte d'un résultat Wikidata : point, intervalle ou borne connue. */
+function searchHitDateLabel(hit: { startDate?: string; endDate?: string }) {
+  const start = formatSearchResultDateBound(hit.startDate); const end = formatSearchResultDateBound(hit.endDate);
+  return start && end && start !== end ? `${start} → ${end}` : start || end;
+}
 const creationSearchHits = computed<CreationSearchHit[]>(() => {
   const semantic = meaningSearch.results.value;
   const ranks = new Map(semantic.map((hit, index) => [hit.id, index]));
   const locals = new Map([...existingSearch.results.value, ...semantic.flatMap(hit => hit.localMatch ? [hit.localMatch] : [])].filter(hit => hit.type === props.type).map(hit => [hit.id, hit]));
-  const existingQids = new Set([...locals.values()].map(hit => hit.wikidataId || hit.id));
+  const existingQids = new Set([...locals.values()].flatMap(hit => hit.wikidataId ? [hit.wikidataId] : []));
   const excluded = new Set((props.type === 'period' ? props.excludedPeriodIds : props.excludedEventIds) ?? []);
-  const local: CreationSearchHit[] = [...locals.values()].filter(hit => !excluded.has(hit.id)).map(hit => ({ id: hit.id, label: hit.label.fr || hit.label.en, description: hit.dateLabel || hit.description, startDate: hit.startDate || hit.date, endDate: hit.endDate, source: 'local', semanticRank: ranks.get(hit.wikidataId || hit.id) }));
+  const local: CreationSearchHit[] = [...locals.values()].filter(hit => !excluded.has(hit.id)).map(hit => ({ id: hit.id, label: hit.label.fr || hit.label.en, description: hit.description, dateLabel: hit.dateLabel, startDate: hit.startDate || hit.date, endDate: hit.endDate, source: 'local', semanticRank: hit.wikidataId ? ranks.get(hit.wikidataId) : undefined }));
   const remote = new Map([...wikidataSuggestHits.value, ...semantic].map(hit => [hit.id, hit]));
-  const combined = [...local, ...[...remote.values()].filter(hit => !existingQids.has(hit.id)).map(hit => ({ ...hit, source: 'wikidata' as const, semanticRank: ranks.get(hit.id) }))];
+  const combined = [...local, ...[...remote.values()].filter(hit => !existingQids.has(hit.id)).map(hit => ({ ...hit, source: 'wikidata' as const, semanticRank: ranks.get(hit.id), dateLabel: searchHitDateLabel(hit) }))];
   return combined.map((hit, index) => ({ hit, index, score: creationSearchScore(wikidataSearchQuery.value, hit, props.searchBounds) }))
     .sort((a,b) => b.score-a.score || a.index-b.index).map(row => row.hit);
 });
@@ -554,10 +574,40 @@ const handleDelete = () => {
   emit('delete');
 };
 
-function onPickWikidataSearchHit(hit: CreationSearchHit) {
+/** Message affiché quand l'élément Wikidata choisi est déjà dans la frise. */
+const existingQidNotice = ref('');
+const canOfferExisting = computed(() => allowExistingSelection.value && props.mode === 'create');
+/** Remplace la création par l'ajout de l'élément déjà en base, sauf s'il est déjà dans la frise. */
+function offerExisting(item: EditInitialData) {
+  const id = String(item.id ?? '');
+  if (!id) return;
+  const excluded = new Set((props.type === 'period' ? props.excludedPeriodIds : props.excludedEventIds) ?? []);
+  if (excluded.has(id)) {
+    existingQidNotice.value = props.type === 'period' ? 'Cette période est déjà dans la frise.' : 'Cet événement est déjà dans la frise.';
+    return;
+  }
+  const label = item.label?.fr || item.label?.en || id;
+  const dateLabel = props.type === 'event'
+    ? preview(item.date ?? '')
+    : [preview(item.startDate ?? ''), preview(item.endDate ?? '')].filter(Boolean).join(' → ');
+  const description = item.description?.fr || item.description?.en || undefined;
+  existingQidNotice.value = '';
+  selectedExistingEntity.value = { id, label, description, dateLabel, source: 'local' };
+  wikidataSearchQuery.value = '';
+}
+
+async function onPickWikidataSearchHit(hit: CreationSearchHit) {
   wikidataPanelOpen.value = false;
+  existingQidNotice.value = '';
   if (hit.source === 'local') { selectedExistingEntity.value = hit; wikidataSearchQuery.value = ''; return; }
   selectedExistingEntity.value = null;
+  // Un résultat Wikidata peut correspondre à un élément déjà en base sous un autre libellé.
+  if (canOfferExisting.value && props.type !== 'story') {
+    const isCurrent = qidRequests.begin();
+    const found = await validateEntityQid(hit.id, props.type);
+    if (!isCurrent()) return;
+    if (found.exists && found.item) { offerExisting(found.item as EditInitialData); return; }
+  }
   return wikidataForm.pick(hit);
 }
 
@@ -747,7 +797,10 @@ onUnmounted(() => {
 }
 
 .edit-modal__existing-entity { padding: var(--spacing-md) 0; }
-.edit-modal__existing-entity h3 { margin-block: var(--spacing-sm); }
+.edit-modal__existing-entity h3 { margin-block: var(--spacing-sm) 0; }
+.edit-modal__existing-date { margin: 0 0 var(--spacing-sm); font-variant-numeric: tabular-nums; }
+.edit-modal__use-existing { margin-top: var(--spacing-xs); }
+.edit-modal__existing-notice { margin: 0 0 var(--spacing-sm); color: var(--color-text-light); font-size: var(--font-size-sm); }
 
 .edit-modal__parent-hint {
   margin: var(--spacing-xs) 0 0;
@@ -795,7 +848,7 @@ onUnmounted(() => {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--spacing-xs) var(--spacing-sm);
+  gap: 0 var(--spacing-sm);
   width: 100%;
   padding: var(--spacing-sm) var(--spacing-md);
   border: none;
@@ -834,6 +887,13 @@ onUnmounted(() => {
   flex-shrink: 0;
   font-size: var(--font-size-xs);
   color: var(--color-text-light);
+  font-variant-numeric: tabular-nums;
+}
+
+.edit-modal-wd-dd__date {
+  flex: 1 1 100%;
+  font-size: var(--font-size-xs);
+  color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
