@@ -1,7 +1,14 @@
 import { computed, nextTick, onMounted, onScopeDispose, ref, useId, watch, type CSSProperties } from 'vue';
 import type { ListPeriod } from '@/types/database';
 
-/** Une seule infobulle, pilotée par la dernière interaction souris ou clavier. */
+/** Délai avant l'apparition au survol ; le focus clavier l'affiche tout de suite. */
+export const PERIOD_TOOLTIP_DELAY_MS = 400;
+
+/**
+ * Une seule infobulle, pilotée par la dernière interaction souris ou clavier.
+ * Le survol est suivi immédiatement (agrandissement des cartes) ; l'infobulle n'apparaît
+ * qu'après un court délai et disparaît dès que le curseur quitte la période.
+ */
 export function useTimelinePeriodTooltip(
   periods: () => ListPeriod[],
   anchor: (id: string) => HTMLElement | null,
@@ -10,35 +17,49 @@ export function useTimelinePeriodTooltip(
   const hoveredId = ref<string | null>(null);
   const focusedId = ref<string | null>(null);
   const dismissedId = ref<string | null>(null);
+  /** Période survolée assez longtemps pour afficher son infobulle. */
+  const revealedId = ref<string | null>(null);
   const input = ref<'pointer' | 'focus'>('pointer');
   const activeId = computed(() => input.value === 'focus'
     ? focusedId.value ?? hoveredId.value : hoveredId.value ?? focusedId.value);
-  const period = computed(() => enabled() && activeId.value && activeId.value !== dismissedId.value
+  const visible = computed(() => focusedId.value === activeId.value || revealedId.value === activeId.value);
+  const period = computed(() => enabled() && activeId.value && activeId.value !== dismissedId.value && visible.value
     ? periods().find(item => item.id === activeId.value) ?? null : null);
   const tooltipId = `period-details-${useId()}`;
   const tooltipElement = ref<HTMLElement | null>(null);
   const tooltipStyle = ref<CSSProperties>({ visibility: 'hidden' });
-  let closeTimer: ReturnType<typeof setTimeout> | undefined;
+  let revealTimer: ReturnType<typeof setTimeout> | undefined;
   let observer: ResizeObserver | undefined;
   let motionFrame: number | undefined;
 
-  function cancelClose() { clearTimeout(closeTimer); closeTimer = undefined; }
-  function enter(id: string) { cancelClose(); input.value = 'pointer'; hoveredId.value = id; dismissedId.value = null; }
-  function move(id: string) { input.value = 'pointer'; hoveredId.value = id; }
+  function cancelReveal() { clearTimeout(revealTimer); revealTimer = undefined; }
+  function scheduleReveal(id: string) {
+    if (revealedId.value === id || revealTimer !== undefined) return;
+    revealTimer = setTimeout(() => { revealTimer = undefined; if (hoveredId.value === id) revealedId.value = id; }, PERIOD_TOOLTIP_DELAY_MS);
+  }
+  function enter(id: string) {
+    cancelReveal(); input.value = 'pointer'; hoveredId.value = id; dismissedId.value = null;
+    scheduleReveal(id);
+  }
+  function move(id: string) {
+    input.value = 'pointer';
+    if (hoveredId.value !== id) { cancelReveal(); hoveredId.value = id; }
+    scheduleReveal(id);
+  }
   function leave(id: string | null) {
-    cancelClose();
-    closeTimer = setTimeout(() => { if (hoveredId.value === id) hoveredId.value = null; }, 150);
+    if (hoveredId.value !== id) return;
+    cancelReveal(); hoveredId.value = null; revealedId.value = null;
   }
   function focus(id: string) { input.value = 'focus'; focusedId.value = id; dismissedId.value = null; }
   function blur(id: string) { if (focusedId.value === id) focusedId.value = null; }
-  function dismiss() { cancelClose(); dismissedId.value = activeId.value; }
+  function dismiss() { cancelReveal(); dismissedId.value = activeId.value; }
   function dismissFromKeyboard(event: KeyboardEvent) {
     if (!period.value) return;
     event.preventDefault(); event.stopPropagation(); dismiss();
   }
   function reset() {
-    cancelClose(); stopTracking();
-    hoveredId.value = null; focusedId.value = null; dismissedId.value = null;
+    cancelReveal(); stopTracking();
+    hoveredId.value = null; focusedId.value = null; dismissedId.value = null; revealedId.value = null;
     tooltipStyle.value = { visibility: 'hidden' };
   }
   function position() {
@@ -51,10 +72,8 @@ export function useTimelinePeriodTooltip(
     const margin = 12;
     const maxLeft = Math.max(margin, window.innerWidth - bounds.width - margin);
     const left = Math.max(margin, Math.min(maxLeft, rect.left + rect.width / 2 - bounds.width / 2));
-    // Préférer l’espace sous la carte pour laisser la barre de retour accessible.
-    const below = rect.bottom + 16;
-    const top = below + bounds.height <= window.innerHeight - margin
-      ? below : Math.max(margin, rect.top - bounds.height - 8);
+    // Toujours au-dessus de la carte : l’espace sous l’axe est réservé aux événements.
+    const top = Math.max(margin, rect.top - bounds.height - 8);
     tooltipStyle.value = { left: `${left}px`, top: `${top}px`, visibility: 'visible' };
   }
   function stopTracking() {
@@ -106,7 +125,5 @@ export function useTimelinePeriodTooltip(
   return {
     activeId, period, tooltipId, tooltipElement, tooltipStyle,
     enter, move, leave, focus, blur, dismiss, reset,
-    enterTooltip: cancelClose,
-    leaveTooltip: () => leave(hoveredId.value),
   };
 }

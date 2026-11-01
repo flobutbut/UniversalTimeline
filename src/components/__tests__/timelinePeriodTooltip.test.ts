@@ -3,6 +3,7 @@ import { defineComponent, nextTick, ref } from 'vue';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import PeriodGrid from '@/views/HomeView/PeriodGrid.vue';
 import { StoryApiService } from '@/services/StoryApiService';
+import { PERIOD_TOOLTIP_DELAY_MS } from '@/composables/useTimelinePeriodTooltip';
 import type { ListPeriod } from '@/types/database';
 
 vi.mock('@/views/HomeView/AssociatedStoriesBadge.vue', () => ({ default: { name: 'AssociatedStoriesBadge', template: '<span />' } }));
@@ -21,7 +22,7 @@ let hadeanBounds: DOMRect;
 const tip = () => document.querySelector<HTMLElement>('[role="tooltip"]');
 const card = (id: string) => view.get(`[data-period-id="${id}"]`);
 async function settled() { await nextTick(); await nextTick(); }
-async function hover(id: string) { await card(id).trigger('mouseenter'); await settled(); }
+async function hover(id: string) { await card(id).trigger('mouseenter'); await vi.advanceTimersByTimeAsync(PERIOD_TOOLTIP_DELAY_MS); await settled(); }
 
 beforeEach(() => {
   vi.spyOn(StoryApiService.getInstance(), 'getStory').mockResolvedValue({ childStories: [] } as never);
@@ -74,11 +75,18 @@ it('follows keyboard focus while the pointer is stationary, then follows a new p
   expect(tip()?.textContent).toContain('Archéen');
 });
 
-it('stays open while the pointer moves onto the tooltip itself', async () => {
-  await hover('hadean'); await card('hadean').trigger('mouseleave');
-  tip()?.dispatchEvent(new MouseEvent('mouseenter')); await vi.advanceTimersByTimeAsync(200);
-  expect(tip()).not.toBeNull();
-  tip()?.dispatchEvent(new MouseEvent('mouseleave')); await vi.advanceTimersByTimeAsync(150); await settled();
+it('waits a short delay before appearing on hover, and never for a brief pass over a period', async () => {
+  await card('hadean').trigger('mouseenter'); await vi.advanceTimersByTimeAsync(PERIOD_TOOLTIP_DELAY_MS - 50); await settled();
+  expect(tip()).toBeNull();
+  await card('hadean').trigger('mouseleave'); await vi.advanceTimersByTimeAsync(PERIOD_TOOLTIP_DELAY_MS); await settled();
+  expect(tip()).toBeNull();
+  await hover('archean');
+  expect(tip()?.textContent).toContain('Archéen');
+});
+
+it('hides as soon as the pointer leaves the period', async () => {
+  await hover('hadean');
+  await card('hadean').trigger('mouseleave'); await settled();
   expect(tip()).toBeNull();
 });
 
@@ -96,10 +104,14 @@ it('clamps the tooltip inside a narrow viewport and follows an expanded card', a
   hadeanBounds = new DOMRect(600, 160, 200, 52);
   resize(); await settled();
   expect(parseFloat(tip()!.style.left)).toBe(560);
-  expect(parseFloat(tip()!.style.top)).toBe(228);
+  expect(parseFloat(tip()!.style.top)).toBe(82);
   hadeanBounds = new DOMRect(600, 730, 200, 52);
   resize(); await settled();
   expect(parseFloat(tip()!.style.top)).toBe(652);
+  // Sans place au-dessus, l’infobulle reste en haut de la fenêtre, jamais sous la carte.
+  hadeanBounds = new DOMRect(600, 40, 200, 52);
+  resize(); await settled();
+  expect(parseFloat(tip()!.style.top)).toBe(12);
 });
 
 it('allows scrolling its contents and dismisses when the page scrolls or resizes', async () => {
@@ -137,4 +149,28 @@ it('preserves touching boundaries when a small period expands on hover', async (
   expect(parseFloat(first.style.getPropertyValue('--period-width'))).toBeCloseTo(8, 8);
   expect(parseFloat(first.style.getPropertyValue('--period-left')) + parseFloat(first.style.getPropertyValue('--period-width')))
     .toBeCloseTo(parseFloat(second.style.getPropertyValue('--period-left')), 8);
+});
+
+it('adds the period’s short description when it has one, and nothing otherwise', async () => {
+  await view.setProps({ periods: [{ ...hadean, description: { fr: 'Premier éon de la Terre.', en: '' } }, archean] });
+  await hover('hadean');
+  expect(tip()?.querySelector('.period-grid__tooltip-description')?.textContent).toBe('Premier éon de la Terre.');
+  await card('hadean').trigger('mouseleave'); await vi.advanceTimersByTimeAsync(200);
+  await hover('archean');
+  expect(tip()?.textContent).toContain(archean.label.fr);
+  expect(tip()?.querySelector('.period-grid__tooltip-description')).toBeNull();
+});
+
+it('also describes the parent bar, and says what a click does', async () => {
+  await hover('earth');
+  expect(tip()?.textContent).toContain(gridProps.currentPeriod.label.fr);
+  expect(tip()?.querySelector('.period-grid__tooltip-hint')?.textContent).toBe('Cliquer pour remonter');
+  expect(card('earth').attributes('aria-describedby')).toBe(tip()?.id);
+  await card('earth').trigger('mouseleave'); await vi.advanceTimersByTimeAsync(200);
+  await hover('hadean');
+  expect(tip()?.querySelector('.period-grid__tooltip-hint')).toBeNull();
+  await card('hadean').trigger('mouseleave'); await vi.advanceTimersByTimeAsync(200);
+  await view.setProps({ periods: [hadean, { ...archean, hasChildren: true }] });
+  await hover('archean');
+  expect(tip()?.querySelector('.period-grid__tooltip-hint')?.textContent).toBe('Cliquer pour explorer');
 });

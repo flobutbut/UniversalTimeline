@@ -19,7 +19,14 @@
           variant="parent"
           :period="props.currentPeriod"
           :is-selected="false"
+          :aria-describedby="tooltipPeriod?.id === props.currentPeriod.id ? tooltipId : undefined"
           @back="goBack"
+          @mouseenter="periodDetails.enter(props.currentPeriod.id)"
+          @mousemove="periodDetails.move(props.currentPeriod.id)"
+          @mouseleave="periodDetails.leave(props.currentPeriod.id)"
+          @focusin="periodDetails.focus(props.currentPeriod.id)"
+          @focusout="periodDetails.blur(props.currentPeriod.id)"
+          @keydown.esc.stop="periodDetails.reset()"
         >
           <template #title-actions>
             <AssociatedStoriesBadge v-if="props.currentPeriod" :story-id="currentStoryId" :period-id="props.currentPeriod.id" :period-label="props.currentPeriod.label.fr || props.currentPeriod.label.en"
@@ -73,11 +80,11 @@
           role="tooltip"
           class="period-grid__tooltip"
           :style="tooltipStyle"
-          @mouseenter="periodDetails.enterTooltip"
-          @mouseleave="periodDetails.leaveTooltip"
         >
           <strong>{{ tooltipPeriod.label.fr || tooltipPeriod.label.en }}</strong>
           <span v-if="tooltipDateRange">{{ tooltipDateRange }}</span>
+          <p v-if="tooltipDescription" class="period-grid__tooltip-description">{{ tooltipDescription }}</p>
+          <small v-if="tooltipHint" class="period-grid__tooltip-hint">{{ tooltipHint }}</small>
         </div>
         <template v-if="props.storySuggestions.length > 0 && dropdownRect">
           <div class="story-dropdown-backdrop" @click="goBack" />
@@ -156,7 +163,7 @@ const props = withDefaults(defineProps<{
   storyBounds?: { startYearsBP?: number; endYearsBP?: number } | null;
   storySuggestions: StorySuggestion[];
   currentStoryId: string;
-  /** Infobulle conservée pour réutilisation, désactivée dans la timeline. */
+  /** Infobulle des périodes (titre, dates, courte description) ; désactivée par défaut. */
   periodTooltips?: boolean;
 }>(), { periodTooltips: false });
 
@@ -213,9 +220,10 @@ function setPeriodRef(el: unknown, id: string) {
   else periodElMap.delete(id);
 }
 
+// La barre parente a aussi son infobulle : elle est ancrée sur parentBarRef.
 const periodDetails = useTimelinePeriodTooltip(
-  () => props.periods,
-  id => periodElMap.get(id) ?? null,
+  () => props.currentPeriod ? [...props.periods, props.currentPeriod] : props.periods,
+  id => id === props.currentPeriod?.id ? unwrapTemplateRefToHTMLElement(parentBarRef.value) : periodElMap.get(id) ?? null,
   () => props.periodTooltips && active.value && !props.loading,
 );
 const { period: tooltipPeriod, tooltipId, tooltipElement, tooltipStyle } = periodDetails;
@@ -227,6 +235,13 @@ const { minimumPct, laneHeight, wrapContent } = useTimelinePeriodExpansion(
   periodRowRef,
 );
 const tooltipDateRange = computed(() => tooltipPeriod.value ? formatPeriodDateRange(tooltipPeriod.value) : '');
+const tooltipDescription = computed(() => (tooltipPeriod.value?.description?.fr || tooltipPeriod.value?.description?.en || '').trim());
+/** Le clic sur la barre parente remonte ; sur une carte, il n'explore que s'il y a des sous-périodes. */
+const tooltipHint = computed(() => {
+  if (!tooltipPeriod.value) return '';
+  if (tooltipPeriod.value.id === props.currentPeriod?.id) return 'Cliquer pour remonter';
+  return tooltipPeriod.value.hasChildren ? 'Cliquer pour explorer' : '';
+});
 
 const periodFlip = usePeriodFlip(
   () => props.currentPeriod?.id,
@@ -443,7 +458,7 @@ const goBack = () => {
   z-index: var(--z-index-tooltip);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 0;
   width: max-content;
   max-width: min(360px, calc(100vw - 24px));
   max-height: calc(100vh - 24px);
@@ -457,6 +472,24 @@ const goBack = () => {
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-lg);
   font-size: var(--font-size-sm);
+  line-height: var(--line-height-small);
+  /* Purement informative : elle ne retient pas le survol et ne masque pas les clics. */
+  pointer-events: none;
+}
+.period-grid__tooltip-hint {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-light);
+}
+/* Courte description : limitée à quelques lignes, le texte complet reste dans le détail. */
+.period-grid__tooltip-description {
+  margin: var(--spacing-xs) 0 0;
+  color: var(--color-text-light);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
 }
 
 .period-grid__undated { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); margin: var(--spacing-md) 0; }

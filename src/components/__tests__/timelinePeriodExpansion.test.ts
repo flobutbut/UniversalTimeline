@@ -4,6 +4,7 @@ import { mount, type VueWrapper } from '@vue/test-utils';
 import PeriodGrid from '@/views/HomeView/PeriodGrid.vue';
 import { StoryApiService } from '@/services/StoryApiService';
 import type { ListPeriod } from '@/types/database';
+import { PERIOD_TOOLTIP_DELAY_MS } from '@/composables/useTimelinePeriodTooltip';
 
 vi.mock('@/views/HomeView/AssociatedStoriesBadge.vue', () => ({ default: { name: 'AssociatedStoriesBadge', template: '<span />' } }));
 
@@ -131,7 +132,7 @@ it('resets expansion on Escape, back navigation and removal of the active period
 });
 
 it('still supports explicitly enabling the preserved tooltip', async () => {
-  await view.setProps({ periodTooltips: true }); await card().trigger('mouseenter'); await settled();
+  await view.setProps({ periodTooltips: true }); await card().trigger('mouseenter'); await vi.advanceTimersByTimeAsync(PERIOD_TOOLTIP_DELAY_MS); await settled();
   expect(document.querySelector('[role="tooltip"]')?.textContent).toContain(first.label.fr);
   await view.setProps({ periodTooltips: false }); await settled();
   expect(document.querySelector('[role="tooltip"]')).toBeNull();

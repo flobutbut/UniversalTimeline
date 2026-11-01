@@ -38,7 +38,7 @@ it('places a text badge only on linked child periods and reads associations once
   expect(api).toHaveBeenCalledExactlyOnceWith('one', expect.objectContaining({ signal: expect.any(AbortSignal) }));
   expect(view.get('.period-card--parent').find('.associated-stories__badge').exists()).toBe(false);
   expect(view.get('[data-period-id="other"]').find('.associated-stories__badge').exists()).toBe(false);
-  expect(view.get('[data-period-id="leaf"]').get('.associated-stories__badge').text()).toBe('1 frise');
+  expect(view.get('[data-period-id="leaf"]').get('.associated-stories__badge').text()).toBe('1 frise associée');
   expect(badge().find('svg').exists()).toBe(false);
   expect(badge().element.closest('[role="button"]')).toBeNull();
   await badge().trigger('click'); await flushPromises();
@@ -57,7 +57,7 @@ it('shows plural labels, and hides both zero-count and initially loading badges'
   expect(view.find('.associated-stories').exists()).toBe(false);
   await view.setProps({ loading: true }); expect(view.find('button').exists()).toBe(false);
   await view.setProps({ loading: false, stories: [suggestion('a'), suggestion('b')] });
-  expect(badge().text()).toBe('2 frises');
+  expect(badge().text()).toBe('2 frises associées');
   await view.setProps({ stories: [] }); expect(view.find('button').exists()).toBe(false);
 });
 
@@ -109,14 +109,14 @@ it('opens a frise from a child card and restores the original exploration with t
   await router.push('/timeline'); await router.isReady();
   view = mount(HomeView, { attachTo: document.body, global: { plugins: [createPinia(), router] } });
   await flushPromises(); await settle();
-  expect(view.getComponent(StoryBreadcrumb).text()).toContain('Frise 1'); expect(badge().text()).toBe('1 frise');
+  expect(view.getComponent(StoryBreadcrumb).text()).toContain('Frise 1'); expect(badge().text()).toBe('1 frise associée');
   await badge().trigger('click'); await flushPromises(); await body().get('.associated-stories__item').trigger('click'); await flushPromises(); await settle();
   expect(view.getComponent(StoryBreadcrumb).text()).toContain('Frise 2');
   expect(view.get('.period-card--parent').attributes('data-period-id')).toBe('root-2');
   // The source frise's own path stays in the breadcrumb: its last period restores the exploration.
   expect(view.getComponent(StoryBreadcrumb).findAll('button').map(item => item.text())).toEqual(['Frise : Frise 1', 'root-1', 'Frise : Frise 2']);
   await view.getComponent(StoryBreadcrumb).findAll('button')[1].trigger('click'); await flushPromises(); await settle();
-  expect(view.get('.period-card--parent').attributes('data-period-id')).toBe('root-1'); expect(badge().text()).toBe('1 frise');
+  expect(view.get('.period-card--parent').attributes('data-period-id')).toBe('root-1'); expect(badge().text()).toBe('1 frise associée');
   router.options.history.destroy();
 });
 
@@ -129,7 +129,7 @@ it('aborts the shared read when cached and closes child-card overlays on deactiv
   await view.get('.toggle').trigger('click'); expect(signal.aborted).toBe(true);
   pending.resolve(detail('one', [linked('old')])); await settle();
   await view.get('.toggle').trigger('click'); await settle();
-  expect(badge().text()).toBe('1 frise');
+  expect(badge().text()).toBe('1 frise associée');
   await badge().trigger('click'); await flushPromises(); expect(body().find('[role="dialog"]').exists()).toBe(true);
   await view.get('.toggle').trigger('click'); await flushPromises(); expect(body().find('[role="dialog"]').exists()).toBe(false);
 });
@@ -139,7 +139,7 @@ it.each([true, false])('offers direct root associations on the mother period (ch
   const api = vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(detail('one', [linked('root-link', root.id)]));
   view = mount(PeriodGrid, { props: { ...gridProps, periods: showChildren ? [leaf] : [] }, attachTo: document.body }); await settle();
   const parent = view.get('.period-card--parent');
-  expect(parent.get('.associated-stories__badge').text()).toBe('1 frise');
+  expect(parent.get('.associated-stories__badge').text()).toBe('1 frise associée');
   await parent.get('.associated-stories__badge').trigger('click'); await flushPromises();
   expect(body().get('[role="dialog"]').text()).toContain('Frise root-link');
   expect(view.emitted('go-back')).toBeUndefined(); expect(view.emitted('period-click')).toBeUndefined();
@@ -156,7 +156,7 @@ it('offers unanchored frise-level links at the frise root without attaching them
   ];
   vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(source);
   view = mount(PeriodGrid, { props: gridProps, attachTo: document.body }); await settle();
-  expect(view.get('.period-card--parent').get('.associated-stories__badge').text()).toBe('1 frise');
+  expect(view.get('.period-card--parent').get('.associated-stories__badge').text()).toBe('1 frise associée');
   expect(view.get('[data-period-id="leaf"]').find('.associated-stories__badge').exists()).toBe(false);
   await badge().trigger('click'); await flushPromises();
   expect(body().get('[role="dialog"]').text()).toContain('Frise global');
@@ -166,5 +166,5 @@ it('offers unanchored frise-level links at the frise root without attaching them
 it('shows a child anchored on a period that left the frise at frise level instead of hiding it', async () => {
   vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue({ ...detail('one'), periods: [root] as unknown as Story['periods'], childStories: [linked('stale', 'removed-period')] });
   view = mount(PeriodGrid, { props: { ...gridProps, periods: [] }, attachTo: document.body }); await settle();
-  expect(view.get('.period-card--parent .associated-stories__badge').text()).toBe('1 frise');
+  expect(view.get('.period-card--parent .associated-stories__badge').text()).toBe('1 frise associée');
 });

@@ -16,6 +16,7 @@
       :story-bounds="currentStoryBounds"
       :story-suggestions="storySuggestions"
       :current-story-id="currentStoryId"
+      period-tooltips
       @period-click="handlePeriodClick"
       @event-click="handleEventClick"
       @go-back="goBack"

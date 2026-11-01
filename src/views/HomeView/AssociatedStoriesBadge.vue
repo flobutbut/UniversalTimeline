@@ -3,7 +3,7 @@
     <button ref="trigger" type="button" class="associated-stories__badge" :disabled="disabled"
       :aria-label="badgeLabel" :title="badgeLabel" aria-haspopup="dialog" :aria-expanded="open"
       :aria-controls="open ? panelId : undefined" @click="toggle">
-      <span>{{ loading ? 'Frises…' : error ? 'Frises indisponibles' : `${stories.length} ${stories.length === 1 ? 'frise' : 'frises'}` }}</span>
+      <span>{{ loading ? 'Frises…' : error ? 'Frises indisponibles' : `${stories.length} ${stories.length === 1 ? 'frise associée' : 'frises associées'}` }}</span>
     </button>
     <Teleport to="body">
       <template v-if="open">

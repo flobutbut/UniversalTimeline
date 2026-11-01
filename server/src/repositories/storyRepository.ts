@@ -95,8 +95,8 @@ export async function listStoryEvents(db: TransactionClient, id: string) {
     `, [id])).rows;
 }
 export async function listAssociatedPeriods(db: TransactionClient, storyId: string) {
-  return (await db.query<Pick<PeriodRow, 'id' | 'wikidata_id' | 'label_fr' | 'label_en' | 'start_date' | 'end_date' | 'parent_id' | 'story_parent_id' | 'start_years_bp' | 'end_years_bp' | 'has_children'>>(`
-      SELECT p.id, p.wikidata_id, p.label_fr, p.label_en,
+  return (await db.query<Pick<PeriodRow, 'id' | 'wikidata_id' | 'label_fr' | 'label_en' | 'description_fr' | 'description_en' | 'start_date' | 'end_date' | 'parent_id' | 'story_parent_id' | 'start_years_bp' | 'end_years_bp' | 'has_children'>>(`
+      SELECT p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
              p.start_date, p.end_date, p.parent_id, CASE WHEN COALESCE((to_jsonb(sp)->>'parent_override')::boolean, false) THEN to_jsonb(sp)->>'parent_period_id' ELSE p.parent_id END AS story_parent_id,
              p.start_years_bp, p.end_years_bp,
              EXISTS(SELECT 1 FROM public.periods c WHERE c.parent_id = p.id) AS has_children

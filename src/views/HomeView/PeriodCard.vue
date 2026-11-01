@@ -18,20 +18,26 @@
     @keydown.enter.self.prevent="handleClick"
     @keydown.space.self.prevent="handleClick"
   >
-    <div class="main-container">
-      <span v-if="variant === 'parent'" class="period-card__parent-arrow" aria-hidden="true">←</span>
-      <div class="card-content">
+    <div ref="mainRef" class="main-container">
+      <div ref="contentRef" class="card-content">
         <div class="period-header">
           <h3 class="period-title" :aria-label="period.label.fr">
             <button type="button" class="period-card__title-action" :disabled="loading" :aria-label="variant === 'parent' ? `Revenir depuis ${period.label.fr}` : period.label.fr"
               :aria-describedby="typeof $attrs['aria-describedby'] === 'string' ? $attrs['aria-describedby'] : undefined" @click.stop="handleClick">{{ period.label.fr }}</button>
           </h3>
-          <slot name="title-actions" />
         </div>
         <div class="period-footer" v-if="period.startDate || period.endDate">
           <div class="period-info">{{ periodDateRange }}</div>
         </div>
       </div>
+      <!-- Actions de la carte : tout à droite, centrées sur la hauteur ; masquées si le titre et la date manquent de place -->
+      <div ref="actionsRef" class="period-card__actions" :class="{ 'period-card__actions--hidden': !actionsFit }">
+        <slot name="title-actions" />
+      </div>
+      <Button v-if="variant === 'timeline' && period.hasChildren" class="period-card__drill" variant="ghost" size="xs" icon-only
+        :disabled="loading" :aria-label="`Explorer les sous-périodes de ${period.label.fr}`" @click.stop="handleClick">
+        <template #icon><Icon icon="mdi:arrow-right" aria-hidden="true" /></template>
+      </Button>
     </div>
     <div v-show="loading" class="loading-overlay">
       <div class="spinner"></div>
@@ -40,7 +46,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { Icon } from '@iconify/vue';
+import Button from '@/components/base/Button.vue';
 import { formatPeriodDateRange } from '@/lib/formatTemporalBoundLabel';
 import type { ListPeriod } from '@/types/database';
 
@@ -63,6 +71,43 @@ const emit = defineEmits<{
 }>();
 
 const periodDateRange = computed(() => formatPeriodDateRange(props.period));
+
+// ─── Priorité au titre et à la date sur les actions (badge) ─────────────────
+
+const mainRef = ref<HTMLElement | null>(null);
+const contentRef = ref<HTMLElement | null>(null);
+const actionsRef = ref<HTMLElement | null>(null);
+const actionsFit = ref(true);
+let observer: ResizeObserver | undefined;
+
+/** Largeur complète du texte, même tronqué ; un bloc pleine largeur ne la donne pas par scrollWidth. */
+function textWidth(el: HTMLElement): number {
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  return typeof range.getBoundingClientRect === 'function' ? range.getBoundingClientRect().width : el.scrollWidth;
+}
+
+/** La mesure du texte ne dépend pas du badge : pas d'oscillation entre affiché et masqué. */
+function measureActions() {
+  const main = mainRef.value, content = contentRef.value, actions = actionsRef.value;
+  if (!main || !content || !actions) return;
+  const actionsWidth = actions.offsetWidth;
+  if (actionsWidth === 0) { actionsFit.value = true; return; }
+  const gap = parseFloat(getComputedStyle(main).columnGap) || 0;
+  const needed = Math.max(0, ...Array.from(content.querySelectorAll<HTMLElement>('.period-card__title-action, .period-info'), textWidth));
+  // Espace partagé par le texte et les actions : celui du texte, plus celui des actions quand elles sont dans le flux.
+  const shared = content.clientWidth + (actionsFit.value ? actionsWidth + gap : 0);
+  actionsFit.value = Math.ceil(needed) + gap + actionsWidth <= shared;
+}
+
+onMounted(() => {
+  measureActions();
+  if (typeof ResizeObserver === 'undefined') return;
+  observer = new ResizeObserver(measureActions);
+  for (const el of [mainRef.value, actionsRef.value]) if (el) observer.observe(el);
+});
+onBeforeUnmount(() => observer?.disconnect());
+watch(() => [props.period.label.fr, periodDateRange.value], () => nextTick(measureActions));
 
 const handleClick = () => {
   if (props.loading) return;
@@ -119,6 +164,9 @@ const handleClick = () => {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   transition: box-shadow var(--transition-normal), background-color var(--transition-normal);
   box-shadow: var(--shadow-sm);
 }
@@ -136,6 +184,7 @@ const handleClick = () => {
   flex-direction: column;
   justify-content: center;
   gap: 0;
+  flex: 1;
   min-width: 0;
 }
 
@@ -146,17 +195,27 @@ const handleClick = () => {
   gap: var(--spacing-md);
 }
 
+.period-card__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.period-card__actions:empty {
+  display: none;
+}
+
+/* Hors du flux mais mesurable ; invisible aussi au clavier et aux lecteurs d’écran. */
+.period-card__actions--hidden {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .period-card--parent .card-content {
   flex: 1;
   height: auto;
   min-height: 0;
-}
-
-.period-card__parent-arrow {
-  font-size: var(--font-size-lg);
-  color: var(--color-text-light);
-  flex-shrink: 0;
-  line-height: 1;
 }
 
 .period-card--timeline:hover .main-container {
@@ -189,7 +248,7 @@ const handleClick = () => {
   font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text);
-  line-height: var(--line-height-normal);
+  line-height: var(--line-height-body);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -212,7 +271,7 @@ const handleClick = () => {
 .period-info {
   font-size: var(--font-size-sm);
   color: var(--color-text-light);
-  line-height: var(--line-height-normal);
+  line-height: var(--line-height-small);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
