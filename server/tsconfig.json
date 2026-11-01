@@ -14,7 +14,8 @@
     "noEmitOnError": true
   },
   "include": [
-    "src/index.ts"
+    "src/index.ts",
+    "src/vercel.ts"
   ],
   "exclude": [
     "node_modules"
