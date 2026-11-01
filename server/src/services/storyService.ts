@@ -17,6 +17,7 @@ export async function listStories() {
     id: row.id, title_fr: row.title_fr, title_en: row.title_en,
     description_fr: row.description_fr, description_en: row.description_en,
     author: row.author, is_public: row.is_public, owner_user_id: row.owner_user_id,
+    parent_story_id: row.parent_story_id ?? null,
     created_at: row.created_at, updated_at: row.updated_at,
     preview_periods: row.preview_periods ?? [], preview_events: row.preview_events ?? [],
     start_date: bounds.get(String(row.id))?.start_date ?? null, end_date: bounds.get(String(row.id))?.end_date ?? null,

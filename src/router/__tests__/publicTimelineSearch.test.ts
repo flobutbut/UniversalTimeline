@@ -68,6 +68,7 @@ it.each([false, true])('opens the complete selected story from a real header sea
   expect(view.find('[role="dialog"]').exists()).toBe(false);
 });
 it('supports a direct story link and navigation to a child story and the timeline breadcrumb', async () => {
+  vi.mocked(stories.getListStories).mockResolvedValue(['1', '2', '7', '8'].map(id => ({ ...summary(id), parentStoryId: id === '7' ? '1' : null })));
   vi.mocked(stories.getSuggestions).mockResolvedValue([{ id: '2', title: { fr: 'Frise 2', en: '' }, parentStoryId: '7' }]);
   await start('/timeline?story=7');
   await view.get('.period-card--timeline').trigger('click'); await flushPromises();

@@ -113,7 +113,9 @@ it('opens a frise from a child card and restores the original exploration with t
   await badge().trigger('click'); await flushPromises(); await body().get('.associated-stories__item').trigger('click'); await flushPromises(); await settle();
   expect(view.getComponent(StoryBreadcrumb).text()).toContain('Frise 2');
   expect(view.get('.period-card--parent').attributes('data-period-id')).toBe('root-2');
-  await view.getComponent(StoryBreadcrumb).findAll('button')[0].trigger('click'); await flushPromises(); await settle();
+  // The source frise's own path stays in the breadcrumb: its last period restores the exploration.
+  expect(view.getComponent(StoryBreadcrumb).findAll('button').map(item => item.text())).toEqual(['Frise : Frise 1', 'root-1', 'Frise : Frise 2']);
+  await view.getComponent(StoryBreadcrumb).findAll('button')[1].trigger('click'); await flushPromises(); await settle();
   expect(view.get('.period-card--parent').attributes('data-period-id')).toBe('root-1'); expect(badge().text()).toBe('1 frise');
   router.options.history.destroy();
 });

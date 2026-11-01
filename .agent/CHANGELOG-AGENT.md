@@ -2,6 +2,10 @@
 
 # Changelog — documentation agent
 
+## [2026-11-01] — Fil d’Ariane continu entre frises
+
+Audit : doublons dus aux frises enfants qui commencent par leur période d’ancrage (titre par défaut identique), au fil qui juxtaposait titres de frises et périodes de la seule frise courante, aux suggestions calculées sur tout le chemin (Mars ouvrait « Big Bang ») et à une frise d’entrée supposée à l’ouverture par lien. Correction : un chemin continu par frise (`buildTimelineBreadcrumb`, sans icône : « Frise : » lu seulement), fusion du repère avec une racine de même nom ou avec la période d’où part la frise ; suggestions limitées à la période cliquée ; lignée réelle via `parent_story_id` ajouté à la liste des frises (`storyAncestorIds`, arrêt à un parent inaccessible, cycle ignoré). Le repère d’une frise quittée ouvre sa vue d’ensemble, ses périodes rouvrent le niveau choisi. 1072 tests, types front/serveur validés ; recette navigateur sur l’API locale en lecture seule. Données non modifiées.
+
 ## [2026-10-31] — Frises : design system et écrans Figma
 
 Tokens d’usage clair/sombre, styles typographiques compacts et boutons 28/36/44 px avec état Toggled. Galerie avec miniatures temporelles réelles, recherche et filtre de visibilité ; ouverture par URL et retour galerie. Onglets au-dessus de la timeline, en-têtes de colonnes avec actions sous le titre, panneaux Tags/Settings branchés sur l’édition existante et liens de frises associées. Sélecteur de racine avec persistance transactionnelle et conservation du choix en cas d’erreur. Ajout de frise depuis une colonne ou un événement ancré dans la même transaction. SVG Figma locaux. Vérification navigateur en clair/sombre, mobile 390 px, tablette 1024 px et desktop ; aucun contenu utilisateur modifié pour ces vérifications. `yarn verify` : 950 tests, configuration, symboles inutilisés et builds frontend/API réussis. Tests PostgreSQL réels sur une base locale jetable pour les nouvelles opérations et leurs refus ; aucune migration ni modification de configuration distante.

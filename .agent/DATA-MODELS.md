@@ -17,7 +17,7 @@ Interfaces et types exportés observés :
 
 - **`src/types/periodTree.ts`** : `StoryPeriodInput` (dont **`categories?`** optionnel), formes légères pour l’UI story.
 - **`src/types/global.d.ts`** : type `Tab` pour les onglets. Notifications et confirmations typées dans `useUiStore` ; aucun ajout à `Window`.
-- **`src/lib/homeStoryPeriodNav.ts`** (état **UI** timeline `/timeline`, pas une forme renvoyée par l’API) : type **`StoryPeriodNavSnapshot`** (`parentStackIds: string[]`, `currentPeriodId: string | null` — IDs au moment où l’on quitte une story pour une enfant ; réhydratation en **`ListPeriod`** après rechargement via **`resolvePeriodNavFromSnapshot`**) ; fonction **`storyChildrenOf`** — utilisées par **`useHomeNavigation`** (`selectStory`, `navigateToBreadcrumb`, `goBack`, **`expandSingleRoot`**).
+- **`src/lib/homeStoryPeriodNav.ts`** (état **UI** timeline `/timeline`, pas une forme renvoyée par l’API) : type **`StoryPeriodNavSnapshot`** (`parentStackIds: string[]`, `currentPeriodId: string | null` — IDs au moment où l’on quitte une story pour une enfant ; réhydratation en **`ListPeriod`** après rechargement via **`resolvePeriodNavFromSnapshot`**) ; types **`StoryFrame`** / **`TimelineCrumb`** et **`buildTimelineBreadcrumb`** (chemin continu, fusion repère/racine) ; **`storyAncestorIds`** (lignée via `StorySummary.parentStoryId`, présent seulement depuis la liste des frises) ; fonction **`storyChildrenOf`** — utilisées par **`useHomeNavigation`** (`selectStory`, `navigateToBreadcrumb`, `goBack`, **`expandSingleRoot`**).
 
 Types Wikidata / géologie : `src/types/geological.ts` (référencé par `WikidataQueryService` et le serveur `server/src/types/geological.ts` — contenu : non déterminé ligne par ligne dans cette passe).
 

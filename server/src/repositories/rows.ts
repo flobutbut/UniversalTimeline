@@ -34,7 +34,7 @@ export type JoinedPeriodRow = PeriodRecord & CategoryJoinRow;
 export type JoinedPeriodListRow = PeriodListRow & CategoryJoinRow;
 export type JoinedEventRow = EventRow & CategoryJoinRow;
 export type StorySummaryRow = Omit<StoryRow, 'parent_story_id'>;
-export type JoinedStoryRow = StorySummaryRow & CategoryJoinRow & {
+export type JoinedStoryRow = StorySummaryRow & Pick<StoryRow, 'parent_story_id'> & CategoryJoinRow & {
   preview_periods?: Array<Pick<PeriodRow, 'id' | 'label_fr' | 'label_en' | 'start_date' | 'end_date' | 'start_years_bp' | 'end_years_bp' | 'parent_id'>>;
   preview_events?: Array<Pick<EventRow, 'id' | 'date' | 'date_years_bp'>>;
 };

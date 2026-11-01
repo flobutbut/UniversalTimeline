@@ -13,6 +13,7 @@ export async function listStories(db: TransactionClient) {
         s.author,
         s.is_public,
         to_jsonb(s)->>'owner_user_id' AS owner_user_id,
+        s.parent_story_id,
         s.created_at,
         s.updated_at,
         (SELECT COALESCE(json_agg(json_build_object(

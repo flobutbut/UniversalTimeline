@@ -64,11 +64,15 @@ export function mapToEvent(row: EventDto): Event {
   const date = temporal(row.date);
   return { ...metadata(row), wikidata_id: row.wikidata_id ?? '', label: text(row.label, row.label_fr, row.label_en), date, dateYearsBP: years(row.date_years_bp ?? row.dateYearsBP, date) };
 }
+function parentStoryId(row: StoryDto): string | null {
+  return row.parent_story_id == null || row.parent_story_id === '' ? null : apiId(row.parent_story_id);
+}
 export function mapToListStory(row: StoryDto): StorySummary {
   const startDate = temporal(row.start_date ?? row.startDate); const endDate = temporal(row.end_date ?? row.endDate);
   return {
     ...metadata(row), title: text(row.title, row.title_fr, row.title_en), author: row.author ?? '', isPublic: row.is_public ?? row.isPublic ?? false,
     ownerUserId: row.owner_user_id ?? row.ownerUserId ?? null,
+    ...(row.parent_story_id !== undefined ? { parentStoryId: parentStoryId(row) } : {}),
     ...(row.preview_periods ? { previewPeriods: row.preview_periods.map(mapToPeriod) } : {}),
     ...(row.preview_events ? { previewEvents: row.preview_events.map(mapToEvent) } : {}),
     ...(startDate ? { startDate } : {}), ...(endDate ? { endDate } : {}),
@@ -83,5 +87,5 @@ export function mapToStory(row: StoryDto): Story {
 }
 export function mapToStorySuggestion(row: StoryDto): StorySuggestion {
   const summary = mapToListStory(row);
-  return { id: summary.id, title: summary.title, description: summary.description, parentStoryId: row.parent_story_id == null || row.parent_story_id === '' ? null : apiId(row.parent_story_id) };
+  return { id: summary.id, title: summary.title, description: summary.description, parentStoryId: parentStoryId(row) };
 }

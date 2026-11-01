@@ -6,7 +6,7 @@ import { useLatestRequest } from './useLatestRequest';
 import { useDataStore } from '@/stores/useDataStore';
 import { StoryApiService } from '@/services/StoryApiService';
 import type { ListPeriod, ListEvent, StorySuggestion } from '@/types/database';
-import { storyChildrenOf, resolvePeriodNavFromSnapshot, type StoryPeriodNavSnapshot } from '@/lib/homeStoryPeriodNav';
+import { storyChildrenOf, resolvePeriodNavFromSnapshot, buildTimelineBreadcrumb, storyAncestorIds, type StoryFrame, type StoryPeriodNavSnapshot } from '@/lib/homeStoryPeriodNav';
 
 const ENTRY_STORY_ID = '1';
 
@@ -26,18 +26,14 @@ export function useHomeNavigation() {
   const currentStoryAllEvents = ref<ListEvent[]>([]);
   const currentStoryBounds = ref<{ startYearsBP?: number; endYearsBP?: number } | null>(null);
   const storySuggestions = ref<StorySuggestion[]>([]);
-  const storyStack = ref<string[]>([]);
-  const storyNavSnapshots = ref<Record<string, StoryPeriodNavSnapshot>>({});
+  // Frises quittées, chacune avec le chemin de périodes ouvert au moment du départ.
+  const storyStack = ref<StoryFrame[]>([]);
   const allowCatalogueFallback = ref(true);
-  const breadcrumb = computed(() => [
-    ...[...storyStack.value, currentStoryId.value].map(id => {
-      const title = stories.value.find(story => story.id === id)?.title;
-      return { id: `story:${id}`, title: title?.fr || title?.en || 'Timeline' };
-    }),
-    ...[...parentStack.value, ...(currentPeriod.value ? [currentPeriod.value] : [])].map(period => ({
-      id: `period:${period.id}`, title: period.label.fr || period.label.en || 'Période sans nom',
-    })),
-  ]);
+  const crumbs = computed(() => buildTimelineBreadcrumb(
+    [...storyStack.value, { id: currentStoryId.value, path: [...parentStack.value, ...(currentPeriod.value ? [currentPeriod.value] : [])] }],
+    id => { const title = stories.value.find(story => story.id === id)?.title; return title?.fr || title?.en || 'Timeline'; },
+  ));
+  const breadcrumb = computed(() => crumbs.value.map(({ id, title, kind }) => ({ id, title, kind })));
   let retry: () => Promise<void>;
   const retryLoad = () => retry();
 
@@ -62,6 +58,8 @@ export function useHomeNavigation() {
     const byId = new Map(periods.value.map(period => [period.id, period]));
     currentStoryPeriods.value = currentStoryPeriods.value.filter(period => byId.has(period.id)).map(period => ({ ...byId.get(period.id)!, ...(period.storyParentId !== undefined ? { storyParentId: period.storyParentId } : {}) }));
     parentStack.value = parentStack.value.filter(period => byId.has(period.id)).map(period => byId.get(period.id)!);
+    // Les chemins des frises quittées sont revalidés au retour ; seuls les libellés suivent ici.
+    storyStack.value = storyStack.value.map(frame => ({ ...frame, path: frame.path.map(period => byId.get(period.id) ?? period) }));
     if (currentPeriod.value && !byId.has(currentPeriod.value.id)) currentPeriod.value = parentStack.value.pop() ?? null;
     else if (currentPeriod.value) currentPeriod.value = byId.get(currentPeriod.value.id)!;
     displayedPeriods.value = childrenOf(currentPeriod.value?.id ?? null);
@@ -84,6 +82,8 @@ export function useHomeNavigation() {
         await dataStore.ensureStoriesLoaded();
         if (!isCurrent()) return;
         if (!dataStore.storyById(storyId)) throw new Error('Cette frise est introuvable ou n’est pas accessible.');
+        // Ouverture directe : la vraie lignée des frises accessibles, jamais une frise d'entrée supposée.
+        storyStack.value = storyAncestorIds(storyId, dataStore.storyById).map(id => ({ id, path: [] }));
       }
       const [storyPeriods, storyEventRows] = await Promise.all([
         dataStore.ensureStoryPeriodsLoaded(storyId),
@@ -125,8 +125,8 @@ export function useHomeNavigation() {
     storySuggestions.value = [];
     try {
       if (!period.hasChildren) {
-        const ids = [...parentStack.value.map(parent => parent.id), currentPeriod.value?.id, period.id].filter((id): id is string => !!id);
-        const suggestions = await storyService.getSuggestions(currentStoryId.value, ids);
+        // Seules les frises ancrées sur la période cliquée ; celles d'un ancêtre restent sur sa carte.
+        const suggestions = await storyService.getSuggestions(currentStoryId.value, [period.id]);
         if (!isCurrent()) return;
         if (suggestions.length === 1) { await selectStory(suggestions[0].id); return; }
         storySuggestions.value = suggestions;
@@ -155,7 +155,7 @@ export function useHomeNavigation() {
       const roots = childrenOf(null);
       const atStoryRoot = currentPeriod.value && roots.length === 1 && roots[0].id === currentPeriod.value.id;
       if (storyStack.value.length && (!currentPeriod.value || atStoryRoot)) {
-        await navigateToBreadcrumb(storyStack.value.length - 1);
+        await returnToStory(storyStack.value.length - 1, null);
         return;
       }
       currentPeriod.value = null;
@@ -182,38 +182,36 @@ export function useHomeNavigation() {
   };
 
   const openStory = async (id: string) => {
-    storyStack.value = id === ENTRY_STORY_ID ? [] : [ENTRY_STORY_ID];
-    storyNavSnapshots.value = {};
+    storyStack.value = [];
     await loadStory(id, undefined, true);
   };
 
   const selectStory = async (storyId: string | number) => {
     const id = String(storyId);
     if (id === currentStoryId.value) return;
-    storyNavSnapshots.value[currentStoryId.value] = {
-      parentStackIds: parentStack.value.map(period => period.id), currentPeriodId: currentPeriod.value?.id ?? null,
-    };
-    storyStack.value = [...storyStack.value, currentStoryId.value];
+    storyStack.value = [...storyStack.value, { id: currentStoryId.value, path: [...parentStack.value, ...(currentPeriod.value ? [currentPeriod.value] : [])] }];
     await loadStory(id);
   };
 
+  /** Rouvre une frise quittée à `depth` dans son chemin (-1 : vue d'ensemble, null : là où on l'a quittée). */
+  const returnToStory = async (frameIndex: number, depth: number | null) => {
+    const frame = storyStack.value[frameIndex];
+    const path = (depth === null ? frame.path : frame.path.slice(0, depth + 1)).map(period => period.id);
+    storyStack.value = storyStack.value.slice(0, frameIndex);
+    await loadStory(frame.id, { parentStackIds: path.slice(0, -1), currentPeriodId: path[path.length - 1] ?? null });
+  };
+
   const navigateToBreadcrumb = async (index: number) => {
-    const ids = [...storyStack.value, currentStoryId.value];
-    if (!Number.isInteger(index) || index < 0 || index >= breadcrumb.value.length - 1) return;
-    if (index < storyStack.value.length) {
-      const targetId = ids[index];
-      storyStack.value = ids.slice(0, index);
-      await loadStory(targetId, storyNavSnapshots.value[targetId]);
-      return;
-    }
+    if (!Number.isInteger(index) || index < 0 || index >= crumbs.value.length - 1) return;
+    const { frame, depth } = crumbs.value[index];
+    if (frame < storyStack.value.length) { await returnToStory(frame, depth); return; }
     // Retour direct aux périodes déjà chargées, sans ajouter un ancêtre à la pile.
     navigation.cancel();
     loading.value = false;
     error.value = null;
     storySuggestions.value = [];
-    const periodIndex = index - ids.length;
-    const target = periodIndex >= 0 ? parentStack.value[periodIndex] : null;
-    parentStack.value = periodIndex >= 0 ? parentStack.value.slice(0, periodIndex) : [];
+    const target = depth >= 0 ? parentStack.value[depth] : null;
+    parentStack.value = depth >= 0 ? parentStack.value.slice(0, depth) : [];
     currentPeriod.value = target;
     displayedPeriods.value = childrenOf(target?.id ?? null);
     storyEvents.value = eventsForPeriod(target);

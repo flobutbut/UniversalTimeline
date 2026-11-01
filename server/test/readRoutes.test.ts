@@ -99,7 +99,7 @@ it('returns an empty event list for a story with no visible event', async () => 
 });
 it('preserves story ownership and public visibility on the list while aggregating date candidates', async () => {
   rows([{ ...story, ...category }], [{ story_id: 7, start_date: 'M65', end_date: 'NOW', start_years_bp: '65000000', end_years_bp: '0' }]);
-  expect((await get('/stories')).body).toEqual([{ ...story, start_date: 'M65', end_date: 'NOW', categories, preview_periods: [], preview_events: [] }]);
+  expect((await get('/stories')).body).toEqual([{ ...story, parent_story_id: null, start_date: 'M65', end_date: 'NOW', categories, preview_periods: [], preview_events: [] }]);
 });
 it('keeps the detail contract for stories, periods, events, child IDs and anchors', async () => {
   rows([story], [], [{ ...period, story_parent_id: 'frise-parent', ...category }], [{ ...event, ...noCategory }], [

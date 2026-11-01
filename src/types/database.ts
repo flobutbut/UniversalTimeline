@@ -92,6 +92,8 @@ export interface StorySummary extends ListStory {
   description?: MultilingualText;
   author: string;
   isPublic: boolean;
+  /** Frise parente, présente seulement quand la réponse la transporte (liste des frises). */
+  parentStoryId?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -8,23 +8,26 @@
           type="button"
           class="story-breadcrumb__item story-breadcrumb__item--link"
           @click="navigate(i, $event)"
-        >{{ item.title }}</button>
+        ><StoryMarker v-if="item.kind === 'story'" />{{ item.title }}</button>
         <span
           v-else
           ref="currentItem"
           class="story-breadcrumb__item story-breadcrumb__item--current"
           aria-current="location"
           tabindex="-1"
-        >{{ item.title }}</span>
+        ><StoryMarker v-if="item.kind === 'story'" />{{ item.title }}</span>
       </li>
     </ol>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue';
+import { h, nextTick, ref, watch } from 'vue';
 
-export type StoryBreadcrumbItem = { id: string; title: string };
+/** `story` : entrée dans une frise, annoncée aux lecteurs d'écran sans repère visuel. */
+export type StoryBreadcrumbItem = { id: string; title: string; kind?: 'story' | 'period' };
+
+const StoryMarker = () => h('span', { class: 'sr-only' }, 'Frise : ');
 
 const props = defineProps<{
   items: StoryBreadcrumbItem[];
