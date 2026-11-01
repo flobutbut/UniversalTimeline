@@ -5,6 +5,7 @@ import { createDatabaseConfig } from '../config/database.js';
 import { runInTransaction, type TransactionClient } from './transaction.js';
 import { applyPrincipal, principalContext } from '../auth/context.js';
 import { checkAccessSchema } from '../auth/preflight.js';
+import { logServerError } from './errors.js';
 
 dotenv.config({ path: fileURLToPath(new URL('../../.env', import.meta.url)), quiet: true });
 
@@ -29,6 +30,7 @@ export async function testConnection() {
     });
     return true;
   } catch (error) {
+    logServerError('database_check_failed', error);
     throw new Error('Connexion Supabase impossible : vérifiez DATABASE_URL, le réseau et le certificat TLS.');
   }
 }
