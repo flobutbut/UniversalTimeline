@@ -8,8 +8,9 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  /* Hauteur portée par le token, comme Input et Button : pas de padding vertical qui s'ajouterait à l'interligne. */
   min-height: var(--field-height-lg);
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: 0 var(--spacing-lg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
@@ -31,7 +32,7 @@
 
 .base-select--sm .base-select__trigger {
   min-height: var(--field-height-md);
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: 0 var(--spacing-sm);
 }
 
 .base-select--sm .base-select__value {
@@ -47,7 +48,6 @@
 .base-select__trigger--with-tags {
   padding-top: var(--spacing-xs);
   padding-bottom: var(--spacing-xs);
-  min-height: calc(var(--field-height-lg) + var(--spacing-xs));
 }
 
 .base-select__value {
@@ -55,17 +55,26 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+  min-width: 0;
   min-height: 20px;
   padding-right: var(--spacing-sm);
 }
 
 .base-select__placeholder {
+  min-width: 0;
+  overflow: hidden;
   color: var(--color-text-light);
   opacity: 0.7;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .base-select__selected-text {
+  min-width: 0;
+  overflow: hidden;
   color: var(--color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .base-select__selected-items {
