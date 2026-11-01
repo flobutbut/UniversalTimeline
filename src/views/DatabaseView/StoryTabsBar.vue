@@ -38,7 +38,7 @@ defineEmits<{ select: [id: string | null]; close: [id: string] }>();
 .story-tabs__item { gap: var(--spacing-lg); max-width: 260px; padding: 0 var(--spacing-sm) 0 0; }
 .story-tabs__home:hover, .story-tabs__item:hover { background: var(--color-interaction-hover); }
 .story-tabs__item--active, .story-tabs__item--active:hover { background: var(--color-interaction-selected); color: var(--color-text-on-selected); }
-.story-tabs__open { flex: 1; min-width: 0; align-self: stretch; padding: var(--spacing-md) 0 var(--spacing-md) var(--spacing-lg); border: 0; background: none; color: inherit; font-size: var(--font-size-base); line-height: 18px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.story-tabs__open { flex: 1; min-width: 0; align-self: stretch; padding: var(--spacing-md) 0 var(--spacing-md) var(--spacing-lg); border: 0; background: none; color: inherit; font-size: var(--font-size-sm); line-height: var(--line-height-small); text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 .story-tabs__close { display: inline-flex; flex-shrink: 0; padding: 2px; border: 0; border-radius: var(--radius-sm); background: none; color: inherit; cursor: pointer; }
 .story-tabs__close:hover { background: var(--color-interaction-hover); }
 .story-tabs__home:focus-visible, .story-tabs__open:focus-visible, .story-tabs__close:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
