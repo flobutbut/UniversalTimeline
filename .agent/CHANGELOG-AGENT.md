@@ -2,6 +2,10 @@
 
 # Changelog — documentation agent
 
+## [2026-11-01] — Frises en onglets
+
+La colonne latérale des frises est retirée au profit d’onglets (Accueil + frises ouvertes, fermeture au clic ou clic milieu). La galerie désactivée est réactivée et mise à jour selon Figma : cartes (miniature, titre, compteurs, bornes) et liste (Frise, Début – Fin, Last edit, Création, sans date inventée). Filtres : bouton « Ajouter un filtre » et puces retirables. Miniature des cartes (`layoutCompactLanes`) : racines et enfants directs seulement, 4 lignes au plus, écart constant de 2 px, ligne d’événements dessous ; la vue complète garde toutes les périodes. Filtre Tags (catégories des frises, au moins un tag choisi) dans le panneau, une puce par tag. Icônes Figma ajoutées à DesignIcon (accueil 18 px, liste, fermetures) ; grille via `mdi:view-grid`. 1079 tests, types validés, recette navigateur desktop/mobile en lecture seule.
+
 ## [2026-11-01] — Fil d’Ariane continu entre frises
 
 Audit : doublons dus aux frises enfants qui commencent par leur période d’ancrage (titre par défaut identique), au fil qui juxtaposait titres de frises et périodes de la seule frise courante, aux suggestions calculées sur tout le chemin (Mars ouvrait « Big Bang ») et à une frise d’entrée supposée à l’ouverture par lien. Correction : un chemin continu par frise (`buildTimelineBreadcrumb`, sans icône : « Frise : » lu seulement), fusion du repère avec une racine de même nom ou avec la période d’où part la frise ; suggestions limitées à la période cliquée ; lignée réelle via `parent_story_id` ajouté à la liste des frises (`storyAncestorIds`, arrêt à un parent inaccessible, cycle ignoré). Le repère d’une frise quittée ouvre sa vue d’ensemble, ses périodes rouvrent le niveau choisi. 1072 tests, types front/serveur validés ; recette navigateur sur l’API locale en lecture seule. Données non modifiées.

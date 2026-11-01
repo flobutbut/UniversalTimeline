@@ -45,7 +45,7 @@ La route publique `/` utilise `meta.landing` pour afficher son propre en-tête e
 
 ## Frises — mise à jour Figma du 31 octobre 2026
 
-`/database` présente la liste latérale et les colonnes ; la galerie de cartes est temporairement désactivée. `/database?story=<id>` ouvre une frise détenue par le compte courant. Les liens de frises associées utilisent cette cible. Recherche locale et filtre public/privé restent disponibles. Les paramètres sont accessibles par l’onglet Settings du détail.
+`/database` présente une barre d’onglets (`StoryTabsBar`) : l’onglet Accueil affiche toutes les frises en cartes ou en liste (`StoryGallery`, choix mémorisé dans le navigateur), chaque frise ouverte a son onglet fermable. `/database?story=<id>` ouvre une frise détenue par le compte courant et l’ajoute aux onglets ; fermer l’onglet actif passe à sa voisine, puis à l’accueil. `useStoryTabs` garde les IDs ouverts en sessionStorage et retire ceux qui ne figurent plus dans la liste accessible chargée. Les liens de frises associées utilisent cette cible. Recherche locale ; « Ajouter un filtre » (`StoryFilters`) ouvre visibilité, tags (catégories portées par les frises chargées, une frise passe si elle porte l’un d’eux) et période couverte, chaque filtre actif devient une puce retirable. La miniature des cartes ne garde que les racines et leurs enfants directs, sur 4 lignes au plus. La liste affiche les dates techniques transportées par l’API, sinon un tiret. Les paramètres sont accessibles par l’onglet Settings du détail.
 
 `GET /api/stories` joint `preview_periods` et `preview_events` (IDs, bornes temporelles et parent pour les périodes) pour les compteurs et les miniatures sans requête par carte.
 

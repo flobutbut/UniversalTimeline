@@ -10,42 +10,13 @@
       <button type="button" @click="loadInitialData">Réessayer</button>
     </div>
     <template v-else>
-      <p v-if="galleryEnabled && !selectedStoryId && state.storyError" role="alert" class="story-gallery__notice">{{ state.storyError }}</p>
-      <div v-if="galleryEnabled && !selectedStoryId" class="story-gallery">
-        <div class="story-gallery__toolbar">
-          <SearchInput v-model="storySearch" placeholder="Rechercher une frise…" aria-label="Rechercher une frise" />
-          <StoryFilters v-model="storyVisibility" v-model:time-range="storyTimeRange" />
-          <Button size="sm" @click="handleAddStory"><template #icon><DesignIcon name="plus" /></template>Créer une frise</Button>
-        </div>
-        <div v-if="visibleStories.length" class="story-gallery__grid database-story-tabs-wrap">
-          <button v-for="story in visibleStories" :key="story.id" type="button" class="story-card" @click="openStory(story)">
-            <span class="story-card__title">{{ story.title.fr || story.title.en || 'Sans titre' }}</span>
-            <span class="story-card__meta">{{ story.previewPeriods?.length ?? 0 }} {{ story.previewPeriods?.length === 1 ? 'période' : 'périodes' }} – {{ story.previewEvents?.length ?? 0 }} {{ story.previewEvents?.length === 1 ? 'événement' : 'événements' }}</span>
-            <span class="story-card__meta">{{ formatStoryListDateRangeSublabel(story) || 'Dates non déterminées' }}</span>
-            <StoryTimeline :periods="story.previewPeriods" :events="story.previewEvents" compact />
-          </button>
-        </div>
-        <div v-else class="story-gallery__empty"><p>{{ storySearch || storyVisibility !== 'all' || storyTimeRange ? 'Aucune frise ne correspond à votre recherche.' : 'Aucune frise pour le moment.' }}</p><Button size="sm" @click="handleAddStory">Créer une frise</Button></div>
-      </div>
-      <div v-else class="database-columns-layout">
-        <aside class="story-sidebar" aria-label="Frises">
-          <div class="story-sidebar__heading"><h2 class="story-sidebar__title">Frises</h2><Button size="sm" @click="handleAddStory"><template #icon><DesignIcon name="plus" /></template>Créer une frise</Button></div>
-          <div class="story-sidebar__search"><SearchInput v-model="storySearch" placeholder="Rechercher une frise…" aria-label="Rechercher une frise" /><StoryFilters v-model="storyVisibility" v-model:time-range="storyTimeRange" /></div>
-          <div v-if="storyTimeRange" class="story-sidebar__time-chip">
-            <span>{{ formatStoryTimeRange(storyTimeRange) }}</span>
-            <button type="button" :aria-label="`Retirer le filtre ${formatStoryTimeRange(storyTimeRange)}`" @click="storyTimeRange = null"><DesignIcon name="close" /></button>
-          </div>
-          <div class="finder-column-content database-story-tabs-wrap">
-            <Tabs v-if="visibleStories.length" :model-value="selectedStoryTabId" :tabs="storyTabs" vertical @update:model-value="onStoryTabSelect" />
-            <div v-else class="finder-empty-column">Aucune frise</div>
-          </div>
-        </aside>
-        <div class="database-story-detail-wrap">
-          <StoryDetailPanel :key="selectedStoryId ?? 'none'" :story="selectedStory" :loading="state.loadingStoryDetails" :updating="relationsBusy || visibilityBusy || state.loadingDetails || saveLoading || deleteLoading" :error="state.storyError"
-            @retry="retryStory" @period-imported="retryStory" @remove-period="removePeriodFromStory" @remove-event="removeEventFromStory" @add-periods="addPeriodsToStory" @event-added="retryStory"
-            @add-child-stories="addChildStoriesToStory" @remove-child-story="removeChildStoryFromStory" @add-event-anchor="addEventAnchorToStory" @remove-event-anchor="removeEventAnchorFromStory"
-            @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @create-story-from-period="openStoryFromPeriod" @edit-event="onEditStoryEvent" @edit-story="onEditSelectedStory" @toggle-public="toggleStoryVisibility" />
-        </div>
+      <StoryTabsBar :tabs="openTabs" :active-id="selectedStoryId" @select="onTabSelect" @close="onTabClose" />
+      <StoryGallery v-if="!selectedStoryId" v-model:search="storySearch" v-model:visibility="storyVisibility" v-model:time-range="storyTimeRange" v-model:categories="storyCategories" :stories="visibleStories" :category-options="storyCategoryOptions" :error="state.storyError" class="database-view__content" @open="openStory" @create="handleAddStory" />
+      <div v-else class="database-story-detail-wrap database-view__content">
+        <StoryDetailPanel :key="selectedStoryId" :story="selectedStory" :loading="state.loadingStoryDetails" :updating="relationsBusy || visibilityBusy || state.loadingDetails || saveLoading || deleteLoading" :error="state.storyError"
+          @retry="retryStory" @period-imported="retryStory" @remove-period="removePeriodFromStory" @remove-event="removeEventFromStory" @add-periods="addPeriodsToStory" @event-added="retryStory"
+          @add-child-stories="addChildStoriesToStory" @remove-child-story="removeChildStoryFromStory" @add-event-anchor="addEventAnchorToStory" @remove-event-anchor="removeEventAnchorFromStory"
+          @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @create-story-from-period="openStoryFromPeriod" @edit-event="onEditStoryEvent" @edit-story="onEditSelectedStory" @toggle-public="toggleStoryVisibility" />
       </div>
     </template>
     <EditModal
@@ -86,25 +57,20 @@
 import type { EditFormSubmission } from '@/types/editForm';
 import { computed, onMounted, ref, watch, inject } from 'vue';
 import { routeLocationKey, routerKey } from 'vue-router';
-import SearchInput from '@/components/base/SearchInput.vue';
-import DesignIcon from '@/components/base/DesignIcon.vue';
-import StoryTimeline from '@/components/StoryTimeline.vue';
-import StoryFilters from './StoryFilters.vue';
+import StoryGallery from './StoryGallery.vue';
+import StoryTabsBar from './StoryTabsBar.vue';
 import { StoryApiService } from '@/services/StoryApiService';
 import { useDataStore } from '@/stores/useDataStore';
 import { readStoryTarget } from '@/router/storyTarget';
 import { Icon } from '@iconify/vue';
-import Button from '@/components/base/Button.vue';
 import EditModal from './EditModal.vue';
 import StoryDetailPanel from './StoryDetailPanel.vue';
 import StoryFromPeriodModal from './StoryFromPeriodModal.vue';
-import Tabs from '@/components/base/Tabs.vue';
 import { useDatabaseView } from '@/composables/useDatabaseView';
+import { useStoryTabs } from '@/composables/useStoryTabs';
 import type { ListStory } from '@/types/database';
-import type { Tab } from '@/types/global';
-import { formatStoryListDateRangeSublabel } from '@/lib/formatTemporalBoundLabel';
 import { findById } from '@/lib/collectionUtils';
-import { formatStoryTimeRange, storyOverlapsRange, type StoryTimeRange } from '@/lib/storyTimeFilter';
+import { storyOverlapsRange, type StoryTimeRange } from '@/lib/storyTimeFilter';
 import { useDatabaseSave } from '@/composables/useDatabaseSave';
 import { useDatabaseDelete } from '@/composables/useDatabaseDelete';
 
@@ -139,22 +105,51 @@ const {
 
 const route = inject(routeLocationKey, undefined);
 const router = inject(routerKey, undefined);
-// Temporarily keep the gallery unavailable; retain it for a later release.
-const galleryEnabled = false;
 const storySearch = ref('');
 const storyVisibility = ref<'all' | 'public' | 'private'>('all');
 /** One reference instant per evaluation, so story bounds and the range are read at the same time. */
 const storyTimeRange = ref<StoryTimeRange | null>(null);
+/** Tags (catégories) des frises : une frise reste visible si elle porte l'un des tags choisis. */
+const storyCategories = ref<string[]>([]);
+const storyCategoryOptions = computed(() => {
+  const labels = new Map<string, string>();
+  for (const story of filteredStories.value) for (const category of story.categories) if (!labels.has(category.id)) labels.set(category.id, category.label.fr || category.label.en || category.id);
+  return [...labels].map(([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }));
+});
 const visibilityBusy = ref(false);
 const visibleStories = computed(() => {
   const query = storySearch.value.trim().toLocaleLowerCase('fr');
   const now = Date.now();
   return filteredStories.value.filter(story => (!query || `${story.title.fr} ${story.title.en}`.toLocaleLowerCase('fr').includes(query)) && (storyVisibility.value === 'all' || story.isPublic === (storyVisibility.value === 'public'))
-    && (!storyTimeRange.value || storyOverlapsRange(story, storyTimeRange.value, now)));
+    && (!storyTimeRange.value || storyOverlapsRange(story, storyTimeRange.value, now))
+    && (!storyCategories.value.length || story.categories.some(category => storyCategories.value.includes(category.id))));
 });
+const storyTabs = useStoryTabs();
+const openTabs = computed(() => storyTabs.openIds.value.flatMap(id => {
+  const story = findById(filteredStories.value, id);
+  return story ? [{ id, label: story.title.fr || story.title.en || 'Sans titre' }] : [];
+}));
+// Only a loaded list can tell which open tabs are no longer accessible.
+watch(filteredStories, stories => { if (!state.value.loading && !state.value.error) storyTabs.retain(new Set(stories.map(story => story.id))); });
+
 function openStory(story: ListStory) {
+  storyTabs.open(story.id);
   void selectStory(story);
   if (router) void router.replace({ name: 'database', query: { story: story.id } });
+}
+function showStoryList() {
+  if (router) void router.replace({ name: 'database' });
+  else clearStorySelection();
+}
+function onTabSelect(id: string | null) {
+  const story = id ? findById(filteredStories.value, id) : undefined;
+  if (story) openStory(story);
+  else showStoryList();
+}
+function onTabClose(id: string) {
+  const next = storyTabs.close(id, selectedStoryId.value);
+  if (next === selectedStoryId.value) return;
+  onTabSelect(next);
 }
 async function openRouteStory() {
   try {
@@ -162,8 +157,8 @@ async function openRouteStory() {
     if (!id) { clearStorySelection(); return; }
     if (id === selectedStoryId.value) return;
     const story = filteredStories.value.find(s => s.id === id);
-    if (story) await selectStory(story);
-    else { clearStorySelection(); state.value.storyError = 'Cette frise est introuvable ou inaccessible.'; }
+    if (story) { storyTabs.open(id); await selectStory(story); }
+    else { storyTabs.close(id, null); clearStorySelection(); state.value.storyError = 'Cette frise est introuvable ou inaccessible.'; }
   } catch { state.value.error = 'La frise demandée est invalide.'; }
 }
 if (route) watch(() => route.query.story, () => { if (!state.value.loading) void openRouteStory(); });
@@ -177,21 +172,6 @@ async function toggleStoryVisibility() {
     await retryStory();
   } catch { if (selectedStoryId.value === story.id) state.value.storyError = 'Impossible de modifier la visibilité. Réessayez.'; }
   finally { visibilityBusy.value = false; }
-}
-
-const storyTabs = computed<Tab<string>[]>(() =>
-  visibleStories.value.map((s: ListStory) => ({
-    label: s.title?.fr || s.title?.en || 'Sans titre',
-    value: s.id,
-    sublabel: formatStoryListDateRangeSublabel(s),
-  }))
-);
-
-const selectedStoryTabId = computed(() => selectedStoryId.value ?? '');
-
-function onStoryTabSelect(id: string) {
-  const story = findById(filteredStories.value, id);
-  if (story) openStory(story);
 }
 
 function handleAddStory() {
@@ -246,46 +226,27 @@ const handleSave = async (formData: EditFormSubmission) => {
 const handleDelete = async () => {
   if (saveLoading.value || deleteLoading.value) return;
   const deletedId = modalState.value.currentItem?.id;
-  const success = await deleteHandler(modalState.value.currentItem, modalState.value.currentType);
+  const deletedType = modalState.value.currentType;
+  const success = await deleteHandler(modalState.value.currentItem, deletedType);
   if (success) {
     closeEditModal();
-    if (selectedStoryId.value === deletedId) clearStorySelection();
+    if (deletedType === 'story' && deletedId) onTabClose(deletedId);
   }
 };
 
 // Charger les données au montage du composant
 onMounted(async () => {
   await loadInitialData();
-  if (route && !state.value.error) await openRouteStory();
+  if (state.value.error) return;
+  storyTabs.retain(new Set(filteredStories.value.map(story => story.id)));
+  if (route) await openRouteStory();
 });
 </script>
 
 <style scoped>
-.database-view { height: 100%; min-height: 0; background: var(--color-background); }
-.loading, .error { height: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; }
+.database-view { display: flex; flex-direction: column; height: 100%; min-height: 0; background: var(--color-background); }
+.loading, .error { flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px; }
 .error { color: var(--color-status-error-foreground); }
-.story-gallery__notice { padding: 12px 16px; color: var(--color-status-error-foreground); margin: 0; }
-.story-gallery { display: flex; flex-direction: column; height: 100%; overflow-y: auto; }
-.story-gallery__toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; min-height: 60px; flex-shrink: 0; }
-.story-gallery__toolbar > .base-search-input, .story-gallery__toolbar > :first-child { flex: 1; min-width: 0; }
-.story-gallery__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; padding: 76px 16px 24px; align-content: start; }
-.story-card { display: flex; flex-direction: column; min-width: 0; height: 138px; padding: 12px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-align: left; transition: border-color var(--transition-fast), background-color var(--transition-fast); }
-.story-card:hover { background: var(--color-surface-hover); border-color: var(--color-border-strong); }
-.story-card:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 3px; }
-.story-card__title { width: 100%; font-size: var(--font-size-base); font-weight: 600; line-height: var(--line-height-body); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; margin-bottom: 4px; }
-.story-card__meta { font-size: var(--font-size-xs); line-height: 16px; color: var(--color-text-secondary); }
-.story-gallery__empty { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; padding: 24px; color: var(--color-text-secondary); }
-.database-columns-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); height: 100%; min-height: 0; }
-.story-sidebar { display: flex; flex-direction: column; min-height: 0; background: var(--color-surface); border-right: 1px solid var(--color-border); }
-.story-sidebar__heading { display: flex; align-items: center; gap: 8px; padding: 12px; min-height: 64px; }
-.story-sidebar__title { margin: 0; flex: 1; text-align: left; font-size: var(--font-size-base); font-weight: 600; line-height: 18px; }
-.story-sidebar__search { display: flex; align-items: center; gap: 8px; padding: 12px; min-height: 60px; }
-.story-sidebar__search > :first-child { flex: 1; min-width: 0; }
-.story-sidebar__time-chip { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; margin: -4px 12px 8px; padding: 2px 4px 2px 8px; border-radius: var(--radius-sm); background: var(--color-interaction-selected); color: var(--color-text-on-selected); font-size: var(--font-size-xs); }
-.story-sidebar__time-chip button { display: inline-flex; padding: 2px; border: 0; background: none; color: inherit; cursor: pointer; border-radius: var(--radius-sm); }
-.story-sidebar__time-chip button:hover, .story-sidebar__time-chip button:focus-visible { background: var(--color-interaction-hover); }
-.database-story-detail-wrap { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
-@media (max-width: 1100px) { .story-gallery__grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
-@media (max-width: 800px) { .story-gallery__grid { grid-template-columns: repeat(2,minmax(0,1fr)); padding-top: 32px; } .database-columns-layout { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(140px,28%) minmax(0,1fr); } .story-sidebar { border-bottom: 1px solid var(--color-border); border-right: 0; } }
-@media (max-width: 480px) { .story-gallery__grid { grid-template-columns: minmax(0,1fr); padding-top: 24px; } .story-gallery__toolbar { flex-wrap: wrap; padding-inline: 12px; } .story-gallery__toolbar > :first-child { flex-basis: calc(100% - 44px); } .story-gallery__toolbar > .base-button { margin-left: auto; } }
+.database-view__content { flex: 1; min-height: 0; }
+.database-story-detail-wrap { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
 </style>

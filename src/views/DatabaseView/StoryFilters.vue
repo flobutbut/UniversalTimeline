@@ -1,7 +1,7 @@
 <template>
   <div ref="root" class="story-filters" @keydown.esc.stop="close">
-    <Button ref="trigger" variant="tertiary" size="sm" icon-only :pressed="open || modelValue !== 'all' || !!timeRange" aria-label="Filtrer les frises" :aria-expanded="open" @click="open = !open"><template #icon><DesignIcon name="filter" /></template></Button>
-    <div v-if="open" class="story-filters__panel">
+    <Button ref="trigger" variant="tertiary" size="sm" :aria-expanded="open" :aria-controls="open ? `${id}-panel` : undefined" @click="open = !open"><template #icon><DesignIcon name="plus" /></template>Ajouter un filtre</Button>
+    <div v-if="open" :id="`${id}-panel`" class="story-filters__panel">
       <div class="story-filters__group story-filters__visibility">
         <Select
           :id="id"
@@ -11,6 +11,19 @@
           :searchable="false"
           size="sm"
           @update:model-value="value => $emit('update:modelValue', value as 'all' | 'public' | 'private')"
+        />
+      </div>
+      <div class="story-filters__group story-filters__categories">
+        <Select
+          :model-value="categories ?? []"
+          :options="categoryOptions ?? []"
+          label="Tags"
+          multiple
+          placeholder="Tous les tags"
+          search-placeholder="Rechercher un tag…"
+          no-results-text="Aucun tag sur ces frises"
+          size="sm"
+          @update:model-value="value => $emit('update:categories', (value as string[]))"
         />
       </div>
       <fieldset class="story-filters__group story-filters__time">
@@ -51,8 +64,8 @@ import { PeriodApiService } from '@/services/PeriodApiService';
 import { useLatestRequest } from '@/composables/useLatestRequest';
 import { formatYearsBP, positionFromYearsBP, rangeFromPeriod, yearsBPFromPosition, type StoryTimeRange } from '@/lib/storyTimeFilter';
 
-const props = defineProps<{ modelValue: 'all' | 'public' | 'private'; timeRange?: StoryTimeRange | null }>();
-const emit = defineEmits<{ 'update:modelValue': [value: 'all' | 'public' | 'private']; 'update:timeRange': [value: StoryTimeRange | null] }>();
+const props = defineProps<{ modelValue: 'all' | 'public' | 'private'; timeRange?: StoryTimeRange | null; categories?: string[]; categoryOptions?: { value: string; label: string }[] }>();
+const emit = defineEmits<{ 'update:modelValue': [value: 'all' | 'public' | 'private']; 'update:timeRange': [value: StoryTimeRange | null]; 'update:categories': [value: string[]] }>();
 const id = generateDomUid('story-filter');
 const root = ref<HTMLElement>();
 const trigger = ref<{ $el: HTMLButtonElement }>();
@@ -116,7 +129,7 @@ onUnmounted(() => document.removeEventListener('pointerdown', onPointer));
 .story-filters__group { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; border: 0; min-width: 0; }
 /* Same look as the select label above: one heading style in the panel. */
 .story-filters__group legend { padding: 4px 0; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text); }
-.story-filters__visibility { padding: 8px 8px 0; }
+.story-filters__visibility, .story-filters__categories { padding: 8px 8px 0; }
 .story-filters__time { gap: var(--spacing-sm); padding: 0 8px 8px; border-top: 1px solid var(--color-border); }
 .story-filters__time legend { padding-inline: 0; padding-top: 8px; }
 .story-filters__range { position: relative; height: 24px; }

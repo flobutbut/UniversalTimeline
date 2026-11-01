@@ -2,7 +2,7 @@
   <div v-if="hasItems" class="story-timeline" :class="{ 'story-timeline--compact': compact }" @click.self="emit('deselect')">
     <div v-if="bounds" class="story-timeline__track" ref="trackRef" :style="{ height: trackHeight + 'px' }" @click.self="emit('deselect')">
       <!-- Axe -->
-      <div class="story-timeline__axis" />
+      <div v-if="!compact || positionedEvents.length" class="story-timeline__axis" />
 
       <!-- Barres de périodes -->
       <div
@@ -17,7 +17,7 @@
         :style="{
           '--story-period-left': p.left + '%',
           '--story-period-width': Math.max(p.width, 0.5) + '%',
-          '--story-period-top': p.row * (compact ? 10 : ROW_STEP) + (compact ? 0 : ROW_OFFSET) + 'px',
+          '--story-period-top': p.top + 'px',
         }"
         @click="emit('select-period', p.id)"
         @mouseenter="showTooltip($event, p.label, p.detail)"
@@ -66,6 +66,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
+import { COMPACT_BAR_HEIGHT, COMPACT_LANE_GAP, COMPACT_ROOT_HEIGHT, layoutCompactLanes } from '@/lib/compactStoryTimeline';
 import { resolveYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
 import {
   formatStoryTimelineBoundLabel,
@@ -162,7 +163,7 @@ function toLeft(ybp: number): number {
 
 // ─── Périodes positionnées + stagger vertical ─────────────────────────────────
 
-interface PosPeriod { id: string; label: string; detail: string; left: number; width: number; startYbp: number; row: number; isRoot: boolean }
+interface PosPeriod { id: string; label: string; detail: string; left: number; width: number; startYbp: number; row: number; top: number; depth: number; isRoot: boolean }
 
 const positionedPeriods = computed<PosPeriod[]>(() => {
   const b = bounds.value;
@@ -172,7 +173,7 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
   const periodIds = new Set(periods.map(p => p.id));
 
   type DatedPeriod = typeof periods[number];
-  function toPos(p: DatedPeriod, isRoot: boolean): PosPeriod {
+  function toPos(p: DatedPeriod, depth: number): PosPeriod {
     const sYbp = p.startYbp;
     const eYbp = p.endYbp;
     const ancientYbp = Math.max(sYbp, eYbp);
@@ -185,7 +186,9 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
       width: toLeft(recentYbp) - toLeft(ancientYbp),
       startYbp: sYbp,
       row: 0,
-      isRoot,
+      top: 0,
+      depth,
+      isRoot: depth === 0,
     };
   }
 
@@ -210,11 +213,13 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
   let rowCursor = 0;
   let firstGroup = true;
 
-  function traverse(p: DatedPeriod, isRoot: boolean) {
+  function traverse(p: DatedPeriod, depth: number) {
+    const isRoot = depth === 0;
     if (isRoot && !firstGroup) rowCursor += GROUP_GAP;
     if (isRoot) firstGroup = false;
-    const pos = toPos(p, isRoot);
+    const pos = toPos(p, depth);
     pos.row = rowCursor;
+    pos.top = rowCursor * ROW_STEP + ROW_OFFSET;
     rowCursor += 1;
     ordered.push(pos);
     const children = (childrenMap.get(p.id) ?? [])
@@ -224,7 +229,7 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
         const bYbp = b_.startYbp;
         return bYbp - aYbp;
       });
-    for (const child of children) traverse(child, false);
+    for (const child of children) traverse(child, depth + 1);
   }
 
   roots
@@ -234,20 +239,13 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
       const bYbp = b_.startYbp;
       return bYbp - aYbp;
     })
-    .forEach(r => traverse(r, true));
+    .forEach(r => traverse(r, 0));
 
-  if (props.compact) {
-    const laneEnds = [-1, -1];
-    for (const period of [...ordered].sort((a, b) => a.left - b.left)) {
-      if (period.isRoot) { period.row = 0; continue; }
-      const free = laneEnds.findIndex(end => end <= period.left);
-      const lane = free >= 0 ? free : laneEnds[0] <= laneEnds[1] ? 0 : 1;
-      period.row = lane + 1;
-      laneEnds[lane] = period.left + period.width;
-    }
-  }
+  // Miniature : racines et enfants directs seulement, sur un nombre de lignes borné.
+  if (props.compact) return layoutCompactLanes(ordered.filter(period => period.depth <= 1)).placed.map(period => ({ ...period, row: period.lane }));
   return ordered;
 });
+const compactPeriodsHeight = computed(() => props.compact ? Math.max(0, ...positionedPeriods.value.map(p => p.top + (p.isRoot ? COMPACT_ROOT_HEIGHT : COMPACT_BAR_HEIGHT))) : 0);
 
 // ─── Événements positionnés ───────────────────────────────────────────────────
 
@@ -269,7 +267,9 @@ const positionedEvents = computed<PosEvent[]>(() => {
 const trackHeight = computed(() => {
   const pp = positionedPeriods.value;
   const maxRow = pp.length === 0 ? 0 : Math.max(...pp.map(p => p.row));
-  return props.compact ? 42 : Math.max(68, ROW_OFFSET + (maxRow + 1) * ROW_STEP + 8);
+  // Compact : les événements occupent une ligne de 16 px sous les périodes, avec le même écart.
+  if (props.compact) return compactPeriodsHeight.value + (positionedEvents.value.length ? (compactPeriodsHeight.value ? COMPACT_LANE_GAP : 0) + 16 : 0);
+  return Math.max(68, ROW_OFFSET + (maxRow + 1) * ROW_STEP + 8);
 });
 
 // ─── Labels bornes ────────────────────────────────────────────────────────────
@@ -416,11 +416,11 @@ const trackRef = ref<HTMLElement | null>(null);
 <style scoped>
 .story-timeline { padding-top: 16px; background: var(--color-background); }
 .story-timeline__label { line-height: 16px; }
-.story-timeline--compact { margin-top: auto; padding: 0; width: 100%; height: 48px; border: 0; overflow: hidden; background: transparent; pointer-events: none; }
-.story-timeline--compact .story-timeline__track { max-height: 40px; }
-.story-timeline--compact .story-timeline__axis { display: none; }
-.story-timeline--compact .story-timeline__period-bar { height: 8px; border-radius: 2px; }
+.story-timeline--compact { padding: 0; width: 100%; border: 0; overflow: hidden; background: transparent; pointer-events: none; }
+/* Bars of one line keep a 2px gap between them, like the gap between lines. */
+.story-timeline--compact .story-timeline__period-bar { width: max(2px, calc(var(--story-period-width) - 2px)); height: 8px; border-radius: 3px; }
 .story-timeline--compact .story-timeline__period-bar--root { height: 10px; }
-.story-timeline--compact .story-timeline__event-marker { width: 5px; height: 5px; bottom: -3px; }
+.story-timeline--compact .story-timeline__axis { bottom: 8px; }
+.story-timeline--compact .story-timeline__event-marker { width: 6px; height: 6px; bottom: 5px; }
 .story-timeline--compact .story-timeline__undated { display: none; }
 </style>

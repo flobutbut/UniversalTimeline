@@ -18,9 +18,13 @@ const summaries: StorySummary[] = [
 ];
 const story = (id: string): Story => ({ ...summaries.find(s => s.id === id)!, periods: id === '1' ? [root] : [], events: [] });
 const api = StoryApiService.getInstance();
+const cards = () => view.findAll('.story-card__open').map(button => button.text());
+const tabs = () => view.findAll('.story-tabs__open').map(button => button.text());
+const button = (label: string) => view.findAll('button').find(item => item.text() === label || item.attributes('aria-label') === label)!;
 let view: ReturnType<typeof mount>;
 let router: ReturnType<typeof createRouter>;
 beforeEach(() => {
+  sessionStorage.clear(); localStorage.clear();
   setActivePinia(createPinia());
   vi.spyOn(api, 'getListStories').mockResolvedValue(summaries);
   vi.spyOn(api, 'getStory').mockImplementation(async id => story(id));
@@ -34,49 +38,106 @@ async function start(path = '/database') {
   view = mount(RouterView, { global: { plugins: [router], stubs: { StoryTimeline: true, EditModal: true } } });
   await flushPromises();
 }
-it('opens directly in columns with the gallery disabled and selects a story from the sidebar', async () => {
+it('opens on the frise cards and opens a frise in its own tab', async () => {
   await start();
-  expect(view.find('.story-gallery').exists()).toBe(false);
-  expect(view.findAll('.story-card')).toHaveLength(0);
-  expect(view.find('.database-columns-layout').exists()).toBe(true);
-  expect(view.getComponent(StoryDetailPanel).props('story')).toBeNull();
-  await view.get('.database-story-tabs-wrap button').trigger('click'); await flushPromises();
+  expect(cards()).toEqual(['Guerre froide', 'Histoire de France']);
+  expect(view.findComponent(StoryDetailPanel).exists()).toBe(false);
+  expect(view.find('.story-sidebar').exists()).toBe(false);
+  expect(button('Toutes les frises').attributes('aria-current')).toBe('page');
+  await view.get('.story-card__open').trigger('click'); await flushPromises();
   expect(router.currentRoute.value.query.story).toBe('1');
   expect(view.getComponent(StoryDetailPanel).props('story').id).toBe('1');
-  expect(view.findAll('.story-detail-panel__meta-actions button').some(button => button.text() === 'Settings')).toBe(false);
-  expect(view.get('.story-detail-panel__meta-actions a').text()).toBe('Voir dans la timeline');
+  expect(view.find('.story-gallery').exists()).toBe(false);
+  expect(tabs()).toEqual(['Guerre froide']);
+  expect(view.get('.story-tabs__open').attributes('aria-current')).toBe('page');
   expect(view.get('.story-detail-panel__meta-actions a').attributes('href')).toBe('/timeline?story=1');
-  const settings = view.findAll('.story-detail-panel__tabs-bar button').find(button => button.text() === 'Settings')!;
+  const settings = view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Settings')!;
   await settings.trigger('click');
   expect(view.text()).toContain('Paramètres de la frise');
+  await button('Toutes les frises').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.query.story).toBeUndefined();
+  expect(cards()).toHaveLength(2);
+  expect(tabs()).toEqual(['Guerre froide']);
 });
-it('filters the sidebar by search and visibility without changing the stored list', async () => {
+it('filters the cards by search and visibility, with removable filter chips', async () => {
   await start();
-  const rows = () => view.findAll('.database-story-tabs-wrap button');
   await view.get('input[type="search"]').setValue('cold');
-  expect(rows()).toHaveLength(1);
+  expect(cards()).toEqual(['Guerre froide']);
   await view.get('input[type="search"]').setValue('');
-  await view.get('button[aria-label="Filtrer les frises"]').trigger('click');
-  const visibility = view.getComponent(StoryFilters).getComponent(Select);
-  visibility.vm.$emit('update:modelValue', 'private'); await flushPromises();
-  expect(rows()).toHaveLength(1);
-  expect(rows()[0].text()).toContain('Histoire de France');
-  visibility.vm.$emit('update:modelValue', 'all'); await flushPromises();
-  expect(rows()).toHaveLength(2);
+  await button('Ajouter un filtre').trigger('click');
+  view.getComponent(StoryFilters).getComponent(Select).vm.$emit('update:modelValue', 'private'); await flushPromises();
+  expect(cards()).toEqual(['Histoire de France']);
+  expect(view.get('.story-gallery__chip').text()).toBe('Frises privées');
+  await button('Retirer le filtre Frises privées').trigger('click');
+  expect(cards()).toHaveLength(2);
+  expect(view.find('.story-gallery__chip').exists()).toBe(false);
 });
-it('restores the selected story from its URL and follows another story link', async () => {
+it('filters the cards by tag from the filter panel and removes one tag from its chip', async () => {
+  const tag = (id: string, fr: string) => ({ id, label: { fr, en: '' } });
+  vi.mocked(api.getListStories).mockResolvedValue([
+    { ...summaries[0], categories: [tag('war', 'Guerres'), tag('politics', 'Politique')] },
+    { ...summaries[1], categories: [tag('politics', 'Politique')] },
+  ]);
+  await start();
+  await button('Ajouter un filtre').trigger('click');
+  const tags = view.getComponent(StoryFilters).findAllComponents(Select).find(select => select.props('label') === 'Tags')!;
+  expect(tags.props('options')).toEqual([{ value: 'war', label: 'Guerres' }, { value: 'politics', label: 'Politique' }]);
+  tags.vm.$emit('update:modelValue', ['war']); await flushPromises();
+  expect(cards()).toEqual(['Guerre froide']);
+  expect(view.get('.story-gallery__chip').text()).toBe('Guerres');
+  tags.vm.$emit('update:modelValue', ['war', 'politics']); await flushPromises();
+  expect(cards()).toHaveLength(2);
+  await button('Retirer le filtre Politique').trigger('click');
+  expect(cards()).toEqual(['Guerre froide']);
+  await button('Retirer le filtre Guerres').trigger('click');
+  expect(cards()).toHaveLength(2);
+});
+it('switches to the list without inventing missing record dates', async () => {
+  vi.mocked(api.getListStories).mockResolvedValue([{ ...summaries[0], startDate: '1945-01-01', endDate: '1991-12-25', createdAt: new Date('2022-12-12T10:00:00Z') }, summaries[1]]);
+  await start();
+  await button('Afficher en liste').trigger('click');
+  expect(button('Afficher en liste').attributes('aria-pressed')).toBe('true');
+  const rows = view.findAll('.story-table__row');
+  expect(rows).toHaveLength(2);
+  expect(rows[0].findAll('td').map(cell => cell.text())).toEqual(['1 janvier 1945 – 25 décembre 1991', '—', '12 décembre 2022']);
+  expect(rows[1].findAll('td').map(cell => cell.text())).toEqual(['Dates non déterminées', '—', '—']);
+  await rows[1].get('.story-table__open').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.query.story).toBe('2');
+});
+it('restores the selected frise from its URL and keeps every opened frise as a tab', async () => {
   await start('/database?story=1');
   expect(view.getComponent(StoryDetailPanel).props('story').id).toBe('1');
   await router.push('/database?story=2'); await flushPromises();
   expect(view.getComponent(StoryDetailPanel).props('story').id).toBe('2');
+  expect(tabs()).toEqual(['Guerre froide', 'Histoire de France']);
+  await view.findAll('.story-tabs__open')[0].trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.query.story).toBe('1');
   await router.push('/database'); await flushPromises();
-  expect(view.getComponent(StoryDetailPanel).props('story')).toBeNull();
-  expect(view.find('.database-columns-layout').exists()).toBe(true);
+  expect(view.findComponent(StoryDetailPanel).exists()).toBe(false);
+  expect(cards()).toHaveLength(2);
 });
-it('reports an inaccessible linked story while keeping the sidebar available', async () => {
+it('closes tabs onto their neighbour, then back to the frise list', async () => {
+  await start('/database?story=1');
+  await router.push('/database?story=2'); await flushPromises();
+  await button('Fermer Histoire de France').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.query.story).toBe('1');
+  expect(tabs()).toEqual(['Guerre froide']);
+  await button('Fermer Guerre froide').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.query.story).toBeUndefined();
+  expect(tabs()).toEqual([]);
+  expect(cards()).toHaveLength(2);
+});
+it('keeps open tabs across a remount but drops frises that are no longer accessible', async () => {
+  sessionStorage.setItem('frises:open-tabs', JSON.stringify(['2', 'gone']));
+  await start();
+  expect(tabs()).toEqual(['Histoire de France']);
+  expect(JSON.parse(sessionStorage.getItem('frises:open-tabs')!)).toEqual(['2']);
+});
+it('reports an inaccessible linked frise while keeping the list available', async () => {
   await start('/database?story=999');
   expect(view.get('[role="alert"]').text()).toContain('introuvable ou inaccessible');
-  expect(view.findAll('.database-story-tabs-wrap button')).toHaveLength(2);
+  expect(cards()).toHaveLength(2);
+  expect(tabs()).toEqual([]);
   expect(api.getStory).not.toHaveBeenCalled();
 });
 it('lists at the root column a child frise whose anchor period is no longer in the frise', async () => {
@@ -92,12 +153,11 @@ it('filters the frise list by time overlap and clears it from the chip', async (
     { ...summaries[1], startDate: '0476-01-01', endDate: '1789-01-01' },
   ]);
   await start();
-  const tabs = () => view.findAll('.database-story-tabs-wrap button').map(button => button.text().replace(/de \d.*$/, ''));
-  expect(tabs()).toEqual(['Guerre froide', 'Histoire de France']);
-  view.findAllComponents(StoryFilters).at(-1)!.vm.$emit('update:timeRange', { oldBP: 87, recentBP: 81 }); await flushPromises();
-  expect(tabs()).toEqual(['Guerre froide']);
-  expect(view.get('.story-sidebar__time-chip').text()).toMatch(/→/);
-  await view.get('.story-sidebar__time-chip button').trigger('click');
-  expect(tabs()).toEqual(['Guerre froide', 'Histoire de France']);
-  expect(view.find('.story-sidebar__time-chip').exists()).toBe(false);
+  expect(cards()).toEqual(['Guerre froide', 'Histoire de France']);
+  view.getComponent(StoryFilters).vm.$emit('update:timeRange', { oldBP: 87, recentBP: 81 }); await flushPromises();
+  expect(cards()).toEqual(['Guerre froide']);
+  expect(view.get('.story-gallery__chip').text()).toMatch(/→/);
+  await view.get('.story-gallery__chip button').trigger('click');
+  expect(cards()).toEqual(['Guerre froide', 'Histoire de France']);
+  expect(view.find('.story-gallery__chip').exists()).toBe(false);
 });

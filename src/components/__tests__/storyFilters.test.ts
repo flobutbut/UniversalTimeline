@@ -13,7 +13,7 @@ beforeEach(() => { setActivePinia(createPinia()); vi.spyOn(PeriodApiService.getI
 afterEach(() => { view?.unmount(); vi.restoreAllMocks(); });
 async function open(timeRange: { oldBP: number; recentBP: number } | null = null) {
   view = mount(StoryFilters, { props: { modelValue: 'all', timeRange }, attachTo: document.body });
-  await view.get('button[aria-label="Filtrer les frises"]').trigger('click');
+  await view.findAll('button').find(button => button.text() === 'Ajouter un filtre')!.trigger('click');
 }
 
 it('narrows the range with keyboard-accessible sliders whose handles never cross', async () => {
@@ -51,6 +51,14 @@ it('keeps the movable handle on top when both handles overlap', async () => {
   expect(view.findAll('input[type="range"]')[0].classes()).not.toContain('story-filters__slider--front');
 });
 
+it('opens from an « Ajouter un filtre » disclosure button', async () => {
+  view = mount(StoryFilters, { props: { modelValue: 'all', timeRange: null }, attachTo: document.body });
+  const trigger = view.findAll('button').find(button => button.text() === 'Ajouter un filtre')!;
+  expect(trigger.attributes('aria-expanded')).toBe('false');
+  await trigger.trigger('click');
+  expect(trigger.attributes('aria-expanded')).toBe('true');
+  expect(view.get(`#${trigger.attributes('aria-controls')}`).classes()).toContain('story-filters__panel');
+});
 it('chooses the visibility with a labelled select instead of radio buttons', async () => {
   await open();
   expect(view.find('input[type="radio"]').exists()).toBe(false);

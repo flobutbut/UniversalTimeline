@@ -24,6 +24,7 @@ const panel = () => view.getComponent(StoryDetailPanel);
 const row = (id: string) => panel().findAllComponents(FinderItem).find(item => item.props('itemId') === id)!;
 const selected = () => panel().findAllComponents(FinderItem).filter(item => item.props('selected')).map(item => item.props('itemId'));
 beforeEach(() => {
+  sessionStorage.clear(); localStorage.clear();
   pinia = createPinia(); setActivePinia(pinia);
   vi.spyOn(api, 'getListStories').mockResolvedValue([detail()]);
   vi.spyOn(api, 'getStory').mockResolvedValue(detail());
@@ -36,7 +37,7 @@ afterEach(() => { view?.unmount(); disposePinia(pinia); document.body.innerHTML 
 async function start() {
   view = mount(DatabaseView, { attachTo: document.body, global: { plugins: [pinia], stubs: { StoryTimeline: true, EditModal: true } } });
   await flushPromises();
-  await view.get('.database-story-tabs-wrap button').trigger('click'); await flushPromises();
+  await view.get('.story-card__open').trigger('click'); await flushPromises();
   await panel().getComponent(Switch).get('button').trigger('click'); await flushPromises();
   for (const id of ['root', 'branch', 'leaf']) {
     await row(id).get('.finder-item-content').trigger('click'); await flushPromises();
@@ -161,7 +162,8 @@ it('does not open an outdated period editor after switching frises during its re
   await start();
   await row('root').get('button[aria-haspopup="menu"]').trigger('click');
   (document.querySelector('[role="menuitem"]') as HTMLButtonElement).click(); await flushPromises();
-  await view.findAll('.database-story-tabs-wrap button')[1].trigger('click'); await flushPromises();
+  await view.get('button[aria-label="Toutes les frises"]').trigger('click'); await flushPromises();
+  await view.findAll('.story-card__open')[1].trigger('click'); await flushPromises();
   reading.resolve(root); await flushPromises();
   expect(panel().props('story')?.id).toBe('2');
   expect(view.findComponent({ name: 'EditModal' }).exists()).toBe(false);
