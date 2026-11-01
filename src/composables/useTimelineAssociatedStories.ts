@@ -10,10 +10,11 @@ export function useTimelineAssociatedStories(storyId: () => string, enabled: () 
     storyId,
     async (id, signal) => {
       const story = await StoryApiService.getInstance().getStory(id, { signal });
-      const children = story.childStories ?? [];
+      const ids = new Set(story.periods.map(period => period.id));
+      // Anchors on periods no longer in this frise are ignored: the child falls back to frise level.
+      const children = (story.childStories ?? []).map(child => ({ ...child, anchors: child.anchors.filter(anchor => anchor.type !== 'period' || ids.has(anchor.id)) }));
       if (!children.some(child => !child.anchors.length)) return children;
       // A frise-level attachment is offered at the roots of that frise, never at deeper periods.
-      const ids = new Set(story.periods.map(period => period.id));
       const rootAnchors: StoryAnchor[] = story.periods
         .filter(period => { const parent = getStoryPeriodParentId(period); return !parent || !ids.has(parent); })
         .map(period => ({ type: 'period', id: period.id }));

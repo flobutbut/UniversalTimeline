@@ -14,7 +14,7 @@
       <div v-if="galleryEnabled && !selectedStoryId" class="story-gallery">
         <div class="story-gallery__toolbar">
           <SearchInput v-model="storySearch" placeholder="Rechercher une frise…" aria-label="Rechercher une frise" />
-          <StoryFilters v-model="storyVisibility" />
+          <StoryFilters v-model="storyVisibility" v-model:time-range="storyTimeRange" />
           <Button size="sm" @click="handleAddStory"><template #icon><DesignIcon name="plus" /></template>Créer une frise</Button>
         </div>
         <div v-if="visibleStories.length" class="story-gallery__grid database-story-tabs-wrap">
@@ -25,12 +25,16 @@
             <StoryTimeline :periods="story.previewPeriods" :events="story.previewEvents" compact />
           </button>
         </div>
-        <div v-else class="story-gallery__empty"><p>{{ storySearch || storyVisibility !== 'all' ? 'Aucune frise ne correspond à votre recherche.' : 'Aucune frise pour le moment.' }}</p><Button size="sm" @click="handleAddStory">Créer une frise</Button></div>
+        <div v-else class="story-gallery__empty"><p>{{ storySearch || storyVisibility !== 'all' || storyTimeRange ? 'Aucune frise ne correspond à votre recherche.' : 'Aucune frise pour le moment.' }}</p><Button size="sm" @click="handleAddStory">Créer une frise</Button></div>
       </div>
       <div v-else class="database-columns-layout">
         <aside class="story-sidebar" aria-label="Frises">
           <div class="story-sidebar__heading"><h2 class="story-sidebar__title">Frises</h2><Button size="sm" @click="handleAddStory"><template #icon><DesignIcon name="plus" /></template>Créer une frise</Button></div>
-          <div class="story-sidebar__search"><SearchInput v-model="storySearch" placeholder="Rechercher une frise…" aria-label="Rechercher une frise" /><StoryFilters v-model="storyVisibility" /></div>
+          <div class="story-sidebar__search"><SearchInput v-model="storySearch" placeholder="Rechercher une frise…" aria-label="Rechercher une frise" /><StoryFilters v-model="storyVisibility" v-model:time-range="storyTimeRange" /></div>
+          <div v-if="storyTimeRange" class="story-sidebar__time-chip">
+            <span>{{ formatStoryTimeRange(storyTimeRange) }}</span>
+            <button type="button" :aria-label="`Retirer le filtre ${formatStoryTimeRange(storyTimeRange)}`" @click="storyTimeRange = null"><DesignIcon name="close" /></button>
+          </div>
           <div class="finder-column-content database-story-tabs-wrap">
             <Tabs v-if="visibleStories.length" :model-value="selectedStoryTabId" :tabs="storyTabs" vertical @update:model-value="onStoryTabSelect" />
             <div v-else class="finder-empty-column">Aucune frise</div>
@@ -100,6 +104,7 @@ import type { ListStory } from '@/types/database';
 import type { Tab } from '@/types/global';
 import { formatStoryListDateRangeSublabel } from '@/lib/formatTemporalBoundLabel';
 import { findById } from '@/lib/collectionUtils';
+import { formatStoryTimeRange, storyOverlapsRange, type StoryTimeRange } from '@/lib/storyTimeFilter';
 import { useDatabaseSave } from '@/composables/useDatabaseSave';
 import { useDatabaseDelete } from '@/composables/useDatabaseDelete';
 
@@ -138,10 +143,14 @@ const router = inject(routerKey, undefined);
 const galleryEnabled = false;
 const storySearch = ref('');
 const storyVisibility = ref<'all' | 'public' | 'private'>('all');
+/** One reference instant per evaluation, so story bounds and the range are read at the same time. */
+const storyTimeRange = ref<StoryTimeRange | null>(null);
 const visibilityBusy = ref(false);
 const visibleStories = computed(() => {
   const query = storySearch.value.trim().toLocaleLowerCase('fr');
-  return filteredStories.value.filter(story => (!query || `${story.title.fr} ${story.title.en}`.toLocaleLowerCase('fr').includes(query)) && (storyVisibility.value === 'all' || story.isPublic === (storyVisibility.value === 'public')));
+  const now = Date.now();
+  return filteredStories.value.filter(story => (!query || `${story.title.fr} ${story.title.en}`.toLocaleLowerCase('fr').includes(query)) && (storyVisibility.value === 'all' || story.isPublic === (storyVisibility.value === 'public'))
+    && (!storyTimeRange.value || storyOverlapsRange(story, storyTimeRange.value, now)));
 });
 function openStory(story: ListStory) {
   void selectStory(story);
@@ -272,6 +281,9 @@ onMounted(async () => {
 .story-sidebar__title { margin: 0; flex: 1; text-align: left; font-size: var(--font-size-base); font-weight: 600; line-height: 18px; }
 .story-sidebar__search { display: flex; align-items: center; gap: 8px; padding: 12px; min-height: 60px; }
 .story-sidebar__search > :first-child { flex: 1; min-width: 0; }
+.story-sidebar__time-chip { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; margin: -4px 12px 8px; padding: 2px 4px 2px 8px; border-radius: var(--radius-sm); background: var(--color-interaction-selected); color: var(--color-text-on-selected); font-size: var(--font-size-xs); }
+.story-sidebar__time-chip button { display: inline-flex; padding: 2px; border: 0; background: none; color: inherit; cursor: pointer; border-radius: var(--radius-sm); }
+.story-sidebar__time-chip button:hover, .story-sidebar__time-chip button:focus-visible { background: var(--color-interaction-hover); }
 .database-story-detail-wrap { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
 @media (max-width: 1100px) { .story-gallery__grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
 @media (max-width: 800px) { .story-gallery__grid { grid-template-columns: repeat(2,minmax(0,1fr)); padding-top: 32px; } .database-columns-layout { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(140px,28%) minmax(0,1fr); } .story-sidebar { border-bottom: 1px solid var(--color-border); border-right: 0; } }

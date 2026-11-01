@@ -425,3 +425,11 @@ test('refuses another owner, a period outside the frise or a blank title without
   assert.equal(await count(), total);
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM story_anchors')).rows[0].n, 0);
 });
+test('a child moving to another parent drops its old anchors, while relinking to the same parent keeps them', async () => {
+  await pool.query("INSERT INTO story_periods VALUES (1,'root'),(5,'leaf'); UPDATE stories SET parent_story_id=1 WHERE id=2; INSERT INTO story_anchors(story_id,anchor_type,anchor_id) VALUES (2,'period','root')");
+  assert.equal((await call('post', '/stories/:parentId/child-stories', { childStoryIds: ['2'] }, { parentId: '1' })).statusCode, 200);
+  assert.deepEqual((await pool.query('SELECT anchor_id FROM story_anchors WHERE story_id=2')).rows, [{ anchor_id: 'root' }]);
+  assert.equal((await call('post', '/stories/:parentId/child-stories', { childStoryIds: ['2'], anchor: { anchorType: 'period', anchorId: 'leaf' } }, { parentId: '5' })).statusCode, 200);
+  assert.deepEqual((await pool.query('SELECT anchor_id FROM story_anchors WHERE story_id=2')).rows, [{ anchor_id: 'leaf' }]);
+  assert.equal((await pool.query('SELECT parent_story_id FROM stories WHERE id=2')).rows[0].parent_story_id, 5);
+});

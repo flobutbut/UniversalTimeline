@@ -25,6 +25,10 @@
         </div>
         <div class="story-detail-panel__meta-actions">
           <Button variant="secondary" size="sm" :pressed="story.isPublic" :disabled="panelBusy" @click="emit('toggle-public')">{{ story.isPublic ? 'Public' : 'Privé' }}</Button>
+          <Button variant="tertiary" size="sm" :to="{ path: '/timeline', query: { story: story.id } }">
+            <template #icon><Icon icon="mdi:timeline-outline" width="16" height="16" aria-hidden="true" /></template>
+            Voir dans la timeline
+          </Button>
           <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openEventCreator">Ajouter un événement</Button>
         </div>
       </div>
@@ -687,7 +691,9 @@ function childStoriesNotAnchoredToEvent(eventId: string): ChildStorySummary[] {
 function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   const children = props.story?.childStories ?? [];
   if (colIdx === 0) {
-    return children.filter(cs => !cs.anchors.some(a => a.type === 'period'));
+    // An anchor on a period that is no longer in this frise places the child at the root, not nowhere.
+    const periodIds = new Set((props.story?.periods ?? []).map(period => period.id));
+    return children.filter(cs => !cs.anchors.some(a => a.type === 'period' && periodIds.has(a.id)));
   }
   const periodId = finderSelectedPath.value[colIdx - 1] ?? null;
   if (!periodId) return [];

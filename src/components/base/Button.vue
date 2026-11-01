@@ -1,5 +1,8 @@
 <template>
-  <button
+  <!-- Avec `to`, une vraie navigation (clic milieu, ⌘-clic, annoncée comme lien) ; sinon un bouton. -->
+  <component
+    :is="isLink ? (router ? RouterLink : 'a') : 'button'"
+    v-bind="isLink ? (router ? { to } : { href: plainHref }) : { disabled, type, 'aria-pressed': pressed === undefined ? undefined : pressed }"
     :class="[
       'base-button',
       `base-button--${variant}`,
@@ -9,9 +12,6 @@
       { 'base-button--disabled': disabled },
       { 'base-button--toggled': pressed }
     ]"
-    :disabled="disabled"
-    :type="type"
-    :aria-pressed="pressed === undefined ? undefined : pressed"
     @click="$emit('click', $event)"
   >
     <span v-if="$slots.icon" class="base-button__leading">
@@ -20,10 +20,13 @@
     <span v-if="!iconOnly" class="base-button__text">
       <slot></slot>
     </span>
-  </button>
+  </component>
 </template>
 
 <script setup lang="ts">
+import { computed, inject } from 'vue';
+import { RouterLink, routerKey, type RouteLocationRaw } from 'vue-router';
+
 interface Props {
   variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'danger';
   type?: 'button' | 'submit' | 'reset';
@@ -31,15 +34,28 @@ interface Props {
   iconOnly?: boolean;
   disabled?: boolean;
   pressed?: boolean;
+  /** Destination interne : le bouton devient un lien (désactivé, il redevient un bouton inerte). */
+  to?: RouteLocationRaw;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   variant: 'primary',
   type: 'button',
   size: 'md',
   iconOnly: false,
   disabled: false,
-  pressed: undefined
+  pressed: undefined,
+  to: undefined,
+});
+const isLink = computed(() => props.to !== undefined && !props.disabled);
+// Outside a router (isolated rendering), a path destination still works as an ordinary link.
+const router = inject(routerKey, null);
+const plainHref = computed(() => {
+  const to = props.to;
+  if (typeof to === 'string') return to;
+  if (!to || !('path' in to) || !to.path) return undefined;
+  const query = new URLSearchParams(Object.entries(to.query ?? {}).flatMap(([key, value]) => value == null ? [] : [[key, String(value)]])).toString();
+  return query ? `${to.path}?${query}` : to.path;
 });
 
 defineEmits<{
@@ -53,7 +69,7 @@ defineEmits<{
   box-sizing: border-box; gap: 0; padding: 8px; min-height: var(--field-height-lg);
   border: 1px solid transparent; border-radius: var(--radius-md);
   font-size: var(--font-size-base); font-weight: 400; line-height: var(--line-height-body);
-  cursor: pointer; transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  text-decoration: none; cursor: pointer; transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 .base-button__text { padding: 1px 8px; line-height: var(--line-height-small); white-space: nowrap; }
 .base-button__leading { display: inline-flex; align-items: center; justify-content: center; line-height: 0; }

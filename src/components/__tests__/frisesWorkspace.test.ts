@@ -4,6 +4,8 @@ import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 import { flushPromises, mount } from '@vue/test-utils';
 import DatabaseView from '@/views/DatabaseView/DatabaseView.vue';
 import StoryDetailPanel from '@/views/DatabaseView/StoryDetailPanel.vue';
+import StoryFilters from '@/views/DatabaseView/StoryFilters.vue';
+import Select from '@/components/base/Select.vue';
 import { StoryApiService } from '@/services/StoryApiService';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { EventApiService } from '@/services/EventApiService';
@@ -42,6 +44,8 @@ it('opens directly in columns with the gallery disabled and selects a story from
   expect(router.currentRoute.value.query.story).toBe('1');
   expect(view.getComponent(StoryDetailPanel).props('story').id).toBe('1');
   expect(view.findAll('.story-detail-panel__meta-actions button').some(button => button.text() === 'Settings')).toBe(false);
+  expect(view.get('.story-detail-panel__meta-actions a').text()).toBe('Voir dans la timeline');
+  expect(view.get('.story-detail-panel__meta-actions a').attributes('href')).toBe('/timeline?story=1');
   const settings = view.findAll('.story-detail-panel__tabs-bar button').find(button => button.text() === 'Settings')!;
   await settings.trigger('click');
   expect(view.text()).toContain('Paramètres de la frise');
@@ -53,10 +57,11 @@ it('filters the sidebar by search and visibility without changing the stored lis
   expect(rows()).toHaveLength(1);
   await view.get('input[type="search"]').setValue('');
   await view.get('button[aria-label="Filtrer les frises"]').trigger('click');
-  await view.get('input[value="private"]').setValue();
+  const visibility = view.getComponent(StoryFilters).getComponent(Select);
+  visibility.vm.$emit('update:modelValue', 'private'); await flushPromises();
   expect(rows()).toHaveLength(1);
   expect(rows()[0].text()).toContain('Histoire de France');
-  await view.get('input[value="all"]').setValue();
+  visibility.vm.$emit('update:modelValue', 'all'); await flushPromises();
   expect(rows()).toHaveLength(2);
 });
 it('restores the selected story from its URL and follows another story link', async () => {
@@ -73,4 +78,26 @@ it('reports an inaccessible linked story while keeping the sidebar available', a
   expect(view.get('[role="alert"]').text()).toContain('introuvable ou inaccessible');
   expect(view.findAll('.database-story-tabs-wrap button')).toHaveLength(2);
   expect(api.getStory).not.toHaveBeenCalled();
+});
+it('lists at the root column a child frise whose anchor period is no longer in the frise', async () => {
+  vi.mocked(api.getStory).mockImplementation(async id => ({ ...story(id), childStories: id === '1'
+    ? [{ id: '2', title: { fr: 'Histoire de France', en: '' }, anchors: [{ type: 'period', id: 'period-not-in-frise' }] }] : [] }));
+  await start('/database?story=1');
+  const rootColumn = view.findAll('.finder-column')[0];
+  expect(rootColumn.text()).toContain('Histoire de France');
+});
+it('filters the frise list by time overlap and clears it from the chip', async () => {
+  vi.mocked(api.getListStories).mockResolvedValue([
+    { ...summaries[0], startDate: '1945-01-01', endDate: '1991-12-25' },
+    { ...summaries[1], startDate: '0476-01-01', endDate: '1789-01-01' },
+  ]);
+  await start();
+  const tabs = () => view.findAll('.database-story-tabs-wrap button').map(button => button.text().replace(/de \d.*$/, ''));
+  expect(tabs()).toEqual(['Guerre froide', 'Histoire de France']);
+  view.findAllComponents(StoryFilters).at(-1)!.vm.$emit('update:timeRange', { oldBP: 87, recentBP: 81 }); await flushPromises();
+  expect(tabs()).toEqual(['Guerre froide']);
+  expect(view.get('.story-sidebar__time-chip').text()).toMatch(/→/);
+  await view.get('.story-sidebar__time-chip button').trigger('click');
+  expect(tabs()).toEqual(['Guerre froide', 'Histoire de France']);
+  expect(view.find('.story-sidebar__time-chip').exists()).toBe(false);
 });

@@ -83,6 +83,16 @@ export async function hasAssociation(client: TransactionClient, storyId: string,
 export async function insertChildAnchor(client: TransactionClient, storyId: string, kind: AssociationKind, id: string) {
   await client.query('INSERT INTO public.story_anchors (story_id, anchor_type, anchor_id) VALUES ($1, $2, $3) ON CONFLICT (story_id, anchor_type, anchor_id) DO NOTHING', [storyId, kind, id]);
 }
+/** Current parents of the children, read before a reattachment. */
+export async function readStoryParents(client: TransactionClient, childIds: string[]) {
+  const placeholders = childIds.map((_, i) => `$${i + 1}`).join(', ');
+  return (await client.query<{ id: number; parent_story_id: number | null }>(`SELECT id, parent_story_id FROM public.stories WHERE id IN (${placeholders})`, childIds)).rows;
+}
+/** Anchors designate a place in the parent frise: they are meaningless under another parent. */
+export async function deleteStoryAnchors(client: TransactionClient, storyIds: string[]) {
+  const placeholders = storyIds.map((_, i) => `$${i + 1}`).join(', ');
+  await client.query(`DELETE FROM public.story_anchors WHERE story_id IN (${placeholders})`, storyIds);
+}
 export async function setChildrenParent(client: TransactionClient, parentId: string, childIds: string[]) {
   const placeholders = childIds.map((_, i) => `$${i + 2}`).join(', ');
   return (await client.query<{ id: number; parent_story_id: number }>(`UPDATE public.stories SET parent_story_id = $1 WHERE id IN (${placeholders}) RETURNING id, parent_story_id`, [parentId, ...childIds])).rows;

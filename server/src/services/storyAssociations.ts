@@ -66,8 +66,12 @@ export async function linkChildStories(client: TransactionClient, parentId: stri
   const failure = checkAncestorChain(chain, parentId, new Set(childIds));
   if (failure === 'cycle') throw new StoryAssociationError(409, 'Ce rattachement créerait ou rejoindrait un cycle de frises.');
   if (failure === 'incomplete') throw new StoryAssociationError(409, 'La hiérarchie des frises est incomplète.');
+  const moved = (await relations.readStoryParents(client, childIds))
+    .filter(row => String(row.parent_story_id ?? '') !== parentId).map(row => String(row.id));
   const rows = await relations.setChildrenParent(client, parentId, childIds);
   if (rows.length !== childIds.length) throw new StoryAssociationError(404, 'Une frise enfant est introuvable ou non modifiable.');
+  // A child moving from another parent (or none) loses anchors that pointed into that previous context.
+  if (moved.length) await relations.deleteStoryAnchors(client, moved);
   if (anchor) {
     if (!await relations.hasAssociation(client, parentId, anchor.anchorType, anchor.anchorId)) throw new StoryAssociationError(409, 'La période ou l’événement n’appartient plus à cette frise.');
     for (const id of childIds) await relations.insertChildAnchor(client, id, anchor.anchorType, anchor.anchorId);

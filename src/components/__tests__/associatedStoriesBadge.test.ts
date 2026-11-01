@@ -16,7 +16,10 @@ const props = { storyId: 'one', periodId: 'leaf', periodLabel: 'Période enfant'
 const root = { id: 'parent', label: { fr: 'Période parente', en: '' }, hasChildren: true, startDate: 'M65', endDate: 'NOW', categories: [] };
 const leaf = { ...root, id: 'leaf', label: { fr: 'Période enfant', en: '' }, hasChildren: false };
 const linked = (id: string, periodId = 'leaf'): ChildStorySummary => ({ id, title: { fr: `Frise ${id}`, en: '' }, anchors: [{ type: 'period', id: periodId }] });
-const detail = (id: string, childStories: ChildStorySummary[] = []): Story => ({ id, title: { fr: `Frise ${id}`, en: '' }, author: '', isPublic: true, categories: [], periods: [], events: [], childStories });
+// Like the API, a frise detail contains the periods its children are anchored to.
+const anchoredPeriods = (childStories: ChildStorySummary[]) => [...new Set(childStories.flatMap(child => child.anchors.filter(anchor => anchor.type === 'period').map(anchor => anchor.id)))]
+  .map(periodId => ({ ...leaf, id: periodId })) as unknown as Story['periods'];
+const detail = (id: string, childStories: ChildStorySummary[] = []): Story => ({ id, title: { fr: `Frise ${id}`, en: '' }, author: '', isPublic: true, categories: [], periods: anchoredPeriods(childStories), events: [], childStories });
 const gridProps = { periods: [leaf, { ...leaf, id: 'other' }], events: [], currentStoryId: 'one', currentPeriod: root, parentPeriod: null, storySuggestions: [], loading: false };
 let view: ReturnType<typeof mount>;
 const body = () => new DOMWrapper(document.body);
@@ -156,4 +159,10 @@ it('offers unanchored frise-level links at the frise root without attaching them
   await badge().trigger('click'); await flushPromises();
   expect(body().get('[role="dialog"]').text()).toContain('Frise global');
   expect(body().get('[role="dialog"]').text()).not.toContain('Frise event-link');
+});
+
+it('shows a child anchored on a period that left the frise at frise level instead of hiding it', async () => {
+  vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue({ ...detail('one'), periods: [root] as unknown as Story['periods'], childStories: [linked('stale', 'removed-period')] });
+  view = mount(PeriodGrid, { props: { ...gridProps, periods: [] }, attachTo: document.body }); await settle();
+  expect(view.get('.period-card--parent .associated-stories__badge').text()).toBe('1 frise');
 });
