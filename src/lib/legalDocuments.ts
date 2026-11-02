@@ -20,15 +20,15 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
     updated: CURRENT_TERMS_VERSION,
     sections: [
       { title: 'Éditeur du site', paragraphs: [
-        'Universal Timeline est un projet personnel, gratuit et non commercial, édité par un particulier à titre non professionnel. Ce n’est pas une entreprise : il n’y a ni numéro SIREN ni immatriculation.',
-        TODO('nom de l’éditeur, ou mention de l’anonymat permis à un éditeur non professionnel (article 6, III, 2 de la LCEN) une fois son identité communiquée à l’hébergeur'),
+        'Florian Butour, particulier. Universal Timeline est un projet personnel, gratuit et non commercial, édité à titre non professionnel : ce n’est pas une entreprise, il n’y a ni numéro SIREN ni immatriculation.',
+        'Éditeur non professionnel, il ne publie pas son adresse postale (article 6, III, 2 de la loi pour la confiance dans l’économie numérique) ; ses coordonnées complètes sont connues de ses prestataires d’hébergement.',
         `Contact : ${CONTACT_EMAIL}, ou depuis la page Contact du site.`,
       ] },
-      { title: 'Directeur de la publication', paragraphs: ['L’éditeur du site.'] },
+      { title: 'Directeur de la publication', paragraphs: ['Florian Butour.'] },
       { title: 'Hébergement', paragraphs: [
-        'Application et API : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis (vercel.com).',
-        'Base de données et authentification : Supabase Inc., données hébergées dans l’Union européenne (région Francfort, Allemagne).',
-        TODO('vérifier ces adresses au moment de la publication'),
+        'Site, application et API : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis (vercel.com).',
+        'Base de données et authentification : Supabase, Inc., 65 Chulia Street, OCBC Centre, Singapour 049513 (supabase.com) ; données hébergées dans l’Union européenne (région Francfort, Allemagne).',
+        'Nom de domaine et messagerie : Hostinger International Ltd., 61 Lordou Vironos, Lumiel Building, 4e étage, 6023 Larnaca, Chypre (hostinger.com).',
       ] },
       { title: 'Propriété intellectuelle', paragraphs: [
         'Les données du catalogue issues de Wikidata sont publiées sous licence Creative Commons CC0.',
@@ -42,8 +42,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
     updated: CURRENT_TERMS_VERSION,
     sections: [
       { title: 'Responsable du traitement', paragraphs: [
-        'L’éditeur du site, particulier agissant à titre non professionnel (voir les mentions légales). Aucun délégué à la protection des données n’est désigné : ce n’est pas obligatoire pour un projet de cette taille.',
-        TODO('nom du responsable du traitement, identique à celui de l’éditeur'),
+        'Florian Butour, éditeur du site, particulier agissant à titre non professionnel (voir les mentions légales). Aucun délégué à la protection des données n’est désigné : ce n’est pas obligatoire pour un projet de cette taille.',
         `Contact pour vos données personnelles : ${CONTACT_EMAIL} (objet « Données personnelles »), ou depuis la page Contact du site.`,
       ] },
       { title: 'Données traitées', paragraphs: ['Nous ne collectons que les données nécessaires au service :'], items: [
@@ -69,6 +68,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
       ], items: [
         'Supabase Inc. : base de données et authentification, hébergées dans l’Union européenne.',
         'Vercel Inc. : hébergement de l’application et de l’API (États-Unis). ' + TODO('garanties de transfert hors UE : Data Privacy Framework ou clauses contractuelles types'),
+        'Hostinger International Ltd. : messagerie (envoi des e-mails du compte, réception des messages adressés au contact), société établie dans l’Union européenne (Chypre).',
         'PostHog Inc. : mesure d’audience, avec votre accord, hébergée dans l’Union européenne (PostHog Cloud EU). ' + TODO('accord de sous-traitance (DPA) signé avec PostHog'),
       ] },
       { title: 'Vos droits', paragraphs: [
@@ -79,7 +79,11 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
       { title: 'Sécurité', paragraphs: [
         'Les échanges sont chiffrés (HTTPS). L’accès aux données est limité par des règles de sécurité au niveau de la base : chaque compte ne lit et ne modifie que ses propres données privées.',
       ] },
-      { title: 'Âge minimum', paragraphs: [TODO('âge minimum pour créer un compte et, le cas échéant, recueil de l’accord parental')] },
+      { title: 'Âge minimum', paragraphs: [
+        'La timeline et la recherche sont accessibles à tous, sans compte.',
+        'Créer un compte est possible seul à partir de 15 ans. Avant 15 ans, il faut l’accord d’un parent (ou d’une autre personne titulaire de l’autorité parentale), comme pour accepter la mesure d’audience : c’est l’âge retenu en France par l’article 45 de la loi Informatique et Libertés.',
+        'Nous ne demandons aucune pièce d’identité. Un parent qui constate qu’un enfant de moins de 15 ans a créé un compte sans son accord peut le supprimer depuis le profil ou nous demander sa suppression depuis la page Contact.',
+      ] },
     ],
   },
   cookies: {
@@ -115,6 +119,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
       { title: 'Objet', paragraphs: ['Universal Timeline permet de consulter des frises chronologiques et, avec un compte, d’en créer et d’en publier.', 'Le service est gratuit, sans publicité ni vente. C’est un projet personnel maintenu sur le temps libre de son éditeur, un particulier.'] },
       { title: 'Compte', paragraphs: [
         'Un compte nécessite une adresse e-mail valide et un nom d’utilisateur unique. Ce nom signe les frises que vous créez et apparaît sur les frises publiques.',
+        'Vous devez avoir au moins 15 ans pour créer un compte, ou l’accord d’un parent si vous avez moins de 15 ans (voir la politique de confidentialité).',
         'Vous êtes responsable de la confidentialité de votre mot de passe. Vous pouvez supprimer votre compte à tout moment depuis votre profil : vos frises sont alors supprimées.',
       ] },
       { title: 'Contenus publiés', paragraphs: [

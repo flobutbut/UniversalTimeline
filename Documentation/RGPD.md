@@ -31,14 +31,15 @@ Ce document décrit ce qui est en place dans l’application et ce qui reste à 
 
 | Traitement | Finalité | Base légale | Données | Durée | Sous-traitants |
 | --- | --- | --- | --- | --- | --- |
-| Comptes et profils | Gérer l’accès et signer les frises | Contrat | E-mail, mot de passe chiffré, nom d’utilisateur, avatar, acceptation des conditions | Jusqu’à suppression du compte ; [À compléter : comptes inactifs] | Supabase (UE) |
+| Comptes et profils | Gérer l’accès et signer les frises | Contrat | E-mail, mot de passe chiffré, nom d’utilisateur, avatar, acceptation des conditions | Jusqu’à suppression du compte ; [À compléter : comptes inactifs] | Supabase (UE), Hostinger (envoi des e-mails, société chypriote) |
+| Contact | Répondre aux messages | Intérêt légitime | Adresse e-mail et contenu du message | [À compléter : durée de conservation des échanges] | Hostinger (messagerie, société chypriote) |
 | Frises | Créer, publier, partager | Contrat | Contenus, visibilité, auteur | Jusqu’à suppression de la frise ou du compte | Supabase (UE), Vercel |
 | Journaux techniques | Sécurité | Intérêt légitime | IP, horodatage, requête | [À compléter] | Vercel, Supabase |
 | Mesure d’audience | Statistiques d’usage pour améliorer le site | Consentement | Pages vues, clics, provenance, navigateur et appareil, identifiant pseudonyme (IP anonymisée) | Cookie 12 mois au plus ; données 1 an | PostHog Inc. (Cloud EU) |
 
 ## Reste à faire hors code
 
-- Projet personnel non commercial édité par un particulier (pas de SIREN) : reste à choisir entre publier le nom de l’éditeur ou l’anonymat permis par la LCEN (art. 6, III, 2) après communication de son identité à l’hébergeur. L’adresse e-mail de contact est en place.
+- Éditeur, directeur de publication et responsable du traitement : Florian Butour, particulier, projet non commercial (pas de SIREN) ; adresse postale non publiée au titre de l’article 6, III, 2 de la LCEN. Âge minimum : 15 ans pour créer seul un compte, accord parental en dessous (art. 45 loi Informatique et Libertés), déclaré par la case d’inscription. L’interdiction des réseaux sociaux aux moins de 15 ans votée en juillet 2026 a été censurée (décision n° 2026-911 DC) : à surveiller si une nouvelle loi est adoptée.
 - Accords de sous-traitance (DPA) avec Supabase, Vercel et PostHog ; garanties de transfert hors UE pour Vercel.
 - Durées de conservation (comptes inactifs, journaux), âge minimum, licence des contenus publiés, modération.
 - Configuration Supabase Auth : SMTP Hostinger puis modèles d’e-mails en français à coller depuis `Documentation/emails/` (ils mentionnent la politique de confidentialité et le contact).

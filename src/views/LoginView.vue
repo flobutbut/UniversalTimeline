@@ -93,7 +93,7 @@ function switchMode() {
         <p v-if="creating" id="account-password-hint">Au moins 8 caractères. Utilisez un mot de passe unique ; les mots de passe trop faibles ou compromis sont refusés.</p>
         <label v-if="creating" class="account-terms">
           <input v-model="termsAccepted" type="checkbox" required :disabled="busy" />
-          <span>J’accepte les <RouterLink :to="{ name: 'legal', params: { page: 'conditions' } }" target="_blank">conditions d’utilisation</RouterLink>
+          <span>J’ai au moins 15 ans (ou l’accord d’un parent), j’accepte les <RouterLink :to="{ name: 'legal', params: { page: 'conditions' } }" target="_blank">conditions d’utilisation</RouterLink>
             et j’ai lu la <RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }" target="_blank">politique de confidentialité</RouterLink>.</span>
         </label>
         <p v-if="error" role="alert">{{ error }}</p>
