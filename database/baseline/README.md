@@ -16,7 +16,7 @@ Différences volontaires pour une nouvelle installation :
 
 Depuis la racine, `yarn verify:clean` (ou `node scripts/check-clean.mjs`) installe les dépendances verrouillées dans une image jetable et utilise PostgreSQL 17 sans port TCP publié. Les tests comparent le catalogue à `server/test/fixtures/application-schema.json`, puis exercent les vrais handlers, RLS, contraintes, triggers et séquences. La baseline est aussi refusée lors d’un second passage, sans changement des données fictives.
 
-La suite sauvegarde les seuls schémas de test public/auth, avec ACL, puis les restaure dans une autre base jetable et vérifie données, règles d’accès et reprise des compteurs. Le schéma auth de test est une doublure minimale : cette vérification ne constitue pas une restauration d’un projet Supabase complet, de ses comptes réels ou des fichiers Storage. Les autres suites vérifient séparément les migrations historiques.
+La suite sauvegarde les seuls schémas de test public/auth/account_private, avec ACL, puis les restaure dans une autre base jetable et vérifie données, règles d’accès et reprise des compteurs. Le schéma auth de test est une doublure minimale : cette vérification ne constitue pas une restauration d’un projet Supabase complet, de ses comptes réels ou des fichiers Storage. Les autres suites vérifient séparément les migrations historiques.
 
 Les conteneurs, leurs bases et volumes de test sont supprimés après la passe. Aucune variable .env du poste n’entre dans l’image ; aucune copie de travail parallèle du dépôt n’est créée.
 
