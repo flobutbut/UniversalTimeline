@@ -16,6 +16,7 @@ COPY --chown=node:node server/tsconfig.json ./server/
 COPY --chown=node:node server/certs ./server/certs
 COPY --chown=node:node database ./database
 COPY --chown=node:node scripts/check.mjs ./scripts/check.mjs
+COPY --chown=node:node scripts/check-design-system.mjs ./scripts/check-design-system.mjs
 COPY --chown=node:node scripts/lib/config-review.mjs ./scripts/lib/config-review.mjs
 RUN yarn --cwd server build \
   && mkdir -p node_modules/.vite node_modules/.vite-temp node_modules/.tmp \
