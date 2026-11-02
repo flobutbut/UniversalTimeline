@@ -53,7 +53,7 @@ it('reserves the catalogue views and Design system to admins, in routes and navi
   const adminRoutes = appRoutes.filter(route => route.meta?.admin).map(route => route.name).sort();
   expect(adminRoutes).toEqual(['admin', 'design-system', 'events', 'graph']);
   expect(navigationTabsFor(false).map(tab => tab.value)).toEqual(['timeline', 'database']);
-  expect(navigationTabsFor(true).map(tab => tab.value)).toEqual(['timeline', 'database', 'graph', 'events', 'admin', 'design-system']);
+  expect(navigationTabsFor(true).map(tab => tab.value)).toEqual(['timeline', 'database', 'graph', 'events', 'admin']);
 });
 it('keeps protected pages closed while authentication is disabled', async () => {
   setup({ enabled: false }); await router.push('/stories');

@@ -2,6 +2,12 @@
   <div class="design-system">
     <aside class="design-system__aside" aria-label="Navigation design system">
       <div class="design-system__aside-inner">
+        <div class="design-system__back">
+          <Button variant="ghost" size="sm" to="/admin">
+            <template #icon><Icon icon="mdi:arrow-left" width="18" height="18" aria-hidden="true" /></template>
+            Administration
+          </Button>
+        </div>
         <div class="finder-column finder-column--fill design-system__nav-column">
           <div class="finder-column-header">
             <h2>Tokens</h2>
@@ -1117,6 +1123,8 @@ const tokenComputed = (name: string): string => {
   background: var(--color-surface-default);
   overflow-y: auto;
 }
+
+.design-system__back { flex-shrink: 0; padding: var(--spacing-xs) var(--spacing-sm); border-bottom: 1px solid var(--color-border-default); }
 
 .design-system__aside-inner {
   padding: 0;

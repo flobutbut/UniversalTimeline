@@ -22,7 +22,7 @@
 
 ## État et cycle de vie
 
-- `navigation.ts` expose `NavigationView`, les onglets et la correspondance avec les noms de routes. La valeur de Design system est `design-system` partout dans la navigation active.
+- `navigation.ts` expose `NavigationView`, les onglets et la correspondance avec les noms de routes. Design system n’a plus d’onglet : on y entre depuis le menu de l’administration, l’onglet Administration reste actif (`PARENT_VIEWS`) et la page offre un lien de retour vers `/admin`.
 - `useAppNavigation` dérive l’onglet actif de la route résolue. Il conserve la page précédente pendant le chargement, expose un message avec Réessayer en cas d’erreur, ignore les erreurs tardives de navigations abandonnées et désinscrit ses gardes à la destruction du shell.
 - RouterView utilise son slot pour placer le composant de page dans KeepAlive. `include="HomeView"` et `max=1` conservent uniquement la timeline. Son nom est explicite dans `defineOptions` ; la clé est le nom de route pour éviter une réinitialisation lors des changements de query/hash.
 - Le breadcrumb des stories, les snapshots de périodes par story, la période courante et la pile de navigation de la timeline survivent aux changements d’onglet et aux retours navigateur. Les autres pages sont démontées en quittant leur route. Le cache reste en mémoire : un rechargement complet redémarre la timeline ; aucun lien profond vers une période n’est ajouté ici.

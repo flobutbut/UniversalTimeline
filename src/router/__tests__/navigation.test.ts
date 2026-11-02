@@ -158,7 +158,7 @@ it('keeps the current page after a loading failure and retries the failed route'
   expect(load).toHaveBeenCalledTimes(2); expect(view.find('[role="alert"]').exists()).toBe(false); expect(activeTab()).toBe('Événements');
 });
 
-it.each([['/graph', 'Périodes'], ['/design-system', 'Design system'], ['/database', 'Frises']])('renders a direct %s route and the matching header', async (path, label) => {
+it.each([['/graph', 'Périodes'], ['/design-system', 'Administration'], ['/database', 'Frises']])('renders a direct %s route and the matching header', async (path, label) => {
   await start(path); expect(activeTab()).toBe(label);
   expect(view.find('[data-page="timeline"]').exists()).toBe(false);
   expect(StoryApiService.getInstance().getStory).not.toHaveBeenCalled();
