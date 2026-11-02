@@ -8,6 +8,7 @@ export const appRoutes: RouteRecordRaw[] = [
   { path: '/database', name: 'database', component: () => import('@/views/DatabaseView/DatabaseView.vue') },
   { path: '/periods', alias: '/graph', name: 'graph', meta: { admin: true }, component: () => import('@/views/GraphView/Periods.vue') },
   { path: '/events', name: 'events', meta: { admin: true }, component: () => import('@/views/EventsView/EventsView.vue') },
+  { path: '/admin', name: 'admin', meta: { admin: true }, component: () => import('@/views/AdminView/AdminView.vue') },
   { path: '/profile', name: 'profile', component: () => import('@/views/ProfileView.vue') },
   { path: '/legal', redirect: { name: 'legal', params: { page: 'mentions-legales' } } },
   { path: '/legal/:page(mentions-legales|confidentialite|cookies|conditions)', name: 'legal', meta: { public: true }, component: () => import('@/views/LegalView.vue') },

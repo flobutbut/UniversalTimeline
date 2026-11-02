@@ -27,6 +27,7 @@ Sans session vérifiée, le header expose la recherche et les deux liens « Se c
 | Page Stories et édition/relations d’une story | Compte connecté, stories propres au compte |
 | Périodes et événements | Catalogue partagé ; pages et mutations sous connexion, sans propriété inventée |
 | Design system | Compte portant `app_metadata.role = admin` vérifié par l’API |
+| Administration (`/admin`, `/api/admin/*`) | Même rôle, revérifié en base : les fonctions `admin_private.*` exigent le claim admin posé par l’API **et** le rôle stocké dans `auth.users`. Suspension (`banned_until` + fermeture des sessions, refus immédiat par le middleware), suppression (frises puis compte) et changement de rôle sont journalisés dans `admin_private.audit_log` ; ni sur soi-même, ni sur un admin dont le rôle n’a pas été retiré. |
 
 L’admin du Design system n’obtient pas de passe-droit sur les stories privées d’autres comptes. Les périodes/événements restent partagés en attendant la décision produit. Une nouvelle story est privée par défaut ; une édition qui omet la visibilité conserve la valeur existante.
 

@@ -21,7 +21,9 @@ export const authFixture = `
     IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
   END $roles$;
   CREATE SCHEMA auth; GRANT USAGE ON SCHEMA auth TO anon, authenticated;
-  CREATE TABLE auth.users (id uuid PRIMARY KEY, email text, email_confirmed_at timestamptz, raw_app_meta_data jsonb DEFAULT '{}', raw_user_meta_data jsonb DEFAULT '{}');
+  CREATE TABLE auth.users (id uuid PRIMARY KEY, email text, email_confirmed_at timestamptz, raw_app_meta_data jsonb DEFAULT '{}', raw_user_meta_data jsonb DEFAULT '{}',
+    created_at timestamptz DEFAULT now(), last_sign_in_at timestamptz, banned_until timestamptz, is_anonymous boolean NOT NULL DEFAULT false);
+  CREATE TABLE auth.sessions (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE);
   CREATE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE SET search_path='' AS $$
     SELECT coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb
   $$;

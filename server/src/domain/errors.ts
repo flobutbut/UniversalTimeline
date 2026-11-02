@@ -8,6 +8,9 @@ export class PeriodDeletionError extends Error {
 export class StoryAssociationError extends Error {
   constructor(public readonly status: 400 | 404 | 409, message: string) { super(message); }
 }
+export class AdminError extends Error {
+  constructor(public readonly status: 403 | 404 | 409, message: string) { super(message); }
+}
 export class ProfileError extends Error {
   constructor(public readonly status: 404 | 409 | 412, message: string) { super(message); }
 }

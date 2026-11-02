@@ -32,6 +32,7 @@ Ce document décrit ce qui est en place dans l’application et ce qui reste à 
 | Traitement | Finalité | Base légale | Données | Durée | Sous-traitants |
 | --- | --- | --- | --- | --- | --- |
 | Comptes et profils | Gérer l’accès et signer les frises | Contrat | E-mail, mot de passe chiffré, nom d’utilisateur, avatar, acceptation des conditions | Jusqu’à suppression du compte ; [À compléter : comptes inactifs] | Supabase (UE), Hostinger (envoi des e-mails, société chypriote) |
+| Journal d’administration | Sécurité et modération (traçabilité des actions sur les comptes) | Intérêt légitime | Identifiants des comptes concernés, nom d’utilisateur au moment de l’action, action, date | [À compléter : durée de conservation du journal] | Supabase (UE) |
 | Contact | Répondre aux messages | Intérêt légitime | Adresse e-mail et contenu du message | [À compléter : durée de conservation des échanges] | Hostinger (messagerie, société chypriote) |
 | Frises | Créer, publier, partager | Contrat | Contenus, visibilité, auteur | Jusqu’à suppression de la frise ou du compte | Supabase (UE), Vercel |
 | Journaux techniques | Sécurité | Intérêt légitime | IP, horodatage, requête | [À compléter] | Vercel, Supabase |

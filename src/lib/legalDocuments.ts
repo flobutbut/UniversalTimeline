@@ -50,6 +50,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Profil : nom d’utilisateur, couleur et icône d’avatar, version et date d’acceptation des conditions.',
         'Contenus : les frises que vous créez, leur visibilité et leurs liens avec le catalogue. Une frise publique affiche votre nom d’utilisateur.',
         'Données techniques : journaux de connexion et d’erreur des hébergeurs (adresse IP, date, requête), utilisés pour la sécurité.',
+        'Modération : si l’administrateur suspend ou supprime un compte, ou modifie son rôle, l’action est enregistrée avec la date et le nom d’utilisateur concerné.',
         'Mesure d’audience, seulement avec votre accord : pages consultées, clics, provenance, type de navigateur et d’appareil, associés à un identifiant pseudonyme. L’adresse IP n’est pas conservée et les sessions ne sont pas enregistrées.',
       ] },
       { title: 'Finalités et bases légales', paragraphs: [], items: [

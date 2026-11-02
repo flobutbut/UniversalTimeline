@@ -34,6 +34,12 @@ describe('request authentication', () => {
     const { next, res } = await access('Bearer token', 'POST', user);
     expect(res.status).toHaveBeenCalledWith(401); expect(next).not.toHaveBeenCalled();
   });
+  it('refuses a suspended account from its next request, and accepts an expired suspension', async () => {
+    const suspended = await access('Bearer token', 'GET', { id: alice, app_metadata: { role: 'admin' }, banned_until: '2126-11-02T00:00:00Z' });
+    expect(suspended.res.status).toHaveBeenCalledWith(403); expect(suspended.next).not.toHaveBeenCalled();
+    const lifted = await access('Bearer token', 'GET', { id: alice, app_metadata: {}, banned_until: '2020-01-01T00:00:00Z' });
+    expect(lifted.next).toHaveBeenCalledOnce();
+  });
   it('uses verified app_metadata, never user-editable metadata, for admin access', async () => {
     expect((await access('Bearer token', 'POST', { id: alice, user_metadata: { role: 'admin' } })).next.mock.results[0].value).toEqual({ userId: alice, isAdmin: false });
     expect((await access('Bearer token', 'POST', { id: alice, app_metadata: { role: 'admin' } })).next.mock.results[0].value).toEqual({ userId: alice, isAdmin: true });

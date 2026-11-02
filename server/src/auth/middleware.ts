@@ -1,7 +1,10 @@
 import type { RequestHandler } from 'express';
 import { principalContext, type Principal } from './context.js';
 
-export interface VerifiedUser { id: string; is_anonymous?: boolean; app_metadata?: Record<string, unknown> }
+export interface VerifiedUser { id: string; is_anonymous?: boolean; app_metadata?: Record<string, unknown>; banned_until?: string | null }
+
+/** A suspension set by an admin applies from the next request, without waiting for the token to expire. */
+const isSuspended = (user: VerifiedUser) => !!user.banned_until && Date.parse(user.banned_until) > Date.now();
 export type VerifyToken = (token: string) => Promise<VerifiedUser | null>;
 
 export function createAccessMiddleware(verify: VerifyToken): RequestHandler {
@@ -17,6 +20,7 @@ export function createAccessMiddleware(verify: VerifyToken): RequestHandler {
         if (!user || user.is_anonymous || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(user.id)) {
           res.status(401).json({ error: 'Session expirée ou invalide. Reconnectez-vous.' }); return;
         }
+        if (isSuspended(user)) { res.status(403).json({ error: 'Ce compte est suspendu.' }); return; }
         principal = { userId: user.id, isAdmin: user.app_metadata?.role === 'admin' };
       }
       if (!principal.userId && !['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {

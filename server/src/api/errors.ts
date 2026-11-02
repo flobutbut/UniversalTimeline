@@ -1,6 +1,6 @@
 import type { ErrorRequestHandler, Response } from 'express';
 import { InvalidCategoriesError } from './entityCategories.js';
-import { NotFoundError, PeriodHierarchyError, PeriodDeletionError, StoryAssociationError, ProfileError } from '../domain/errors.js';
+import { NotFoundError, PeriodHierarchyError, PeriodDeletionError, StoryAssociationError, ProfileError, AdminError } from '../domain/errors.js';
 import { InputValidationError } from './inputValidation.js';
 
 interface ErrorMessages { conflict?: string; busy?: string; foreignKey?: string }
@@ -18,7 +18,7 @@ export function publicApiError(error: unknown, fallback: string, messages: Error
   if (error instanceof NotFoundError) return { status: 404, message: error.message };
   if (error instanceof InputValidationError) return { status: 400, message: error.message };
   if (error instanceof InvalidCategoriesError) return { status: 400, message: error.message };
-  if (error instanceof PeriodHierarchyError || error instanceof PeriodDeletionError || error instanceof StoryAssociationError || error instanceof ProfileError) return { status: error.status, message: error.message };
+  if (error instanceof PeriodHierarchyError || error instanceof PeriodDeletionError || error instanceof StoryAssociationError || error instanceof ProfileError || error instanceof AdminError) return { status: error.status, message: error.message };
   const fields = record(error);
   if (fields.type === 'entity.parse.failed') return { status: 400, message: 'Le corps de la requête doit être un JSON valide.' };
   if (fields.type === 'entity.too.large') return { status: 413, message: 'Le contenu de la requête est trop volumineux.' };

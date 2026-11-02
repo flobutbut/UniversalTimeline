@@ -200,3 +200,15 @@ export function parseTermsAcceptance(value: unknown): string {
   return text(inputObject(value).version, 'version', 32, true)!;
 }
 
+const UUID = /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
+export function parseUserId(value: unknown, field = 'id'): string {
+  if (typeof value !== 'string' || !UUID.test(value)) throw new InputValidationError(field, 'Identifiant de compte invalide.');
+  return value.toLowerCase();
+}
+
+/** Body `{ [field]: boolean }` for the admin switches (role, suspension). */
+export function parseFlag(value: unknown, field: string): boolean {
+  const flag = inputObject(value)[field];
+  if (typeof flag !== 'boolean') throw new InputValidationError(field, `${field} doit valoir true ou false.`);
+  return flag;
+}

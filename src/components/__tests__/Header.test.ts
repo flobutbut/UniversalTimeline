@@ -65,7 +65,7 @@ it('opens signup from the header and preserves the original destination when swi
 });
 it.each([false, true])('restores the appropriate workspace navigation for a verified account (admin: %s)', async isAdmin => {
   const auth = await start({ account: { id: 'alice', isAdmin } });
-  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Timeline', 'Frises', ...(isAdmin ? ['Périodes', 'Événements', 'Design system'] : [])]);
+  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Timeline', 'Frises', ...(isAdmin ? ['Périodes', 'Événements', 'Administration', 'Design system'] : [])]);
   expect(view.find('.header-account-actions').exists()).toBe(false);
   const trigger = view.get('button[aria-haspopup="menu"]');
   expect(trigger.attributes('aria-label')).toBe('Compte : Mon compte'); expect(view.text()).not.toContain('Se déconnecter');

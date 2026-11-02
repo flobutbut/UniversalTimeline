@@ -5,7 +5,7 @@ import {
   InputValidationError, inputObject, parseEntityId, parseStoryId, parseQid, parseEventWrite, parsePeriodWrite,
   parseStoryWrite, parseAnchor, parseChildStories, parseAssociationOperation,
   parseSearchText, parseSearchScope, parseCsvIds, parseParentId, parseAssociationIds, parseStoryFromPeriod,
-  parseUsername, parseProfileWrite, parseTermsAcceptance,
+  parseUsername, parseProfileWrite, parseTermsAcceptance, parseUserId, parseFlag,
 } from './inputValidation.js';
 import type { Response } from 'express';
 import * as catalogue from '../services/catalogueService.js';
@@ -14,6 +14,7 @@ import { search, searchStoryTimelines } from '../services/searchService.js';
 import { semanticSearch } from '../services/semanticSearch.js';
 import { loadStoryTemporalBounds } from '../services/storyTemporalBounds.js';
 import * as profiles from '../services/profileService.js';
+import * as admin from '../services/adminService.js';
 
 const router = express.Router();
 
@@ -253,6 +254,41 @@ router.get('/profile/export', endpoint('Export de vos données impossible', asyn
 router.delete('/profile', endpoint('Suppression du compte impossible', async (_req, res) => {
   if (!signedIn(res)) return;
   await profiles.deleteAccount();
+  res.status(204).send();
+}));
+// Admin console: refused early without the verified admin role; the database checks it again.
+const isAdmin = (res: Response) => {
+  if (!signedIn(res)) return false;
+  if (res.locals.principal.isAdmin) return true;
+  res.status(403).json({ error: 'Accès réservé à l’administrateur.' }); return false;
+};
+router.get('/admin/dashboard', endpoint('Lecture du tableau de bord impossible', async (_req, res) => {
+  if (isAdmin(res)) res.json(await admin.dashboard());
+}));
+router.get('/admin/users', endpoint('Lecture des utilisateurs impossible', async (_req, res) => {
+  if (isAdmin(res)) res.json(await admin.listUsers());
+}));
+router.get('/admin/users/:id', endpoint('Lecture du compte impossible', async (req, res) => {
+  const id = parseUserId(req.params.id);
+  if (isAdmin(res)) res.json(await admin.userDetail(id));
+}));
+router.put('/admin/users/:id/role', endpoint('Changement de rôle impossible', async (req, res) => {
+  const id = parseUserId(req.params.id); const enabled = parseFlag(req.body, 'admin');
+  if (!isAdmin(res)) return;
+  await admin.setAdmin(id, enabled);
+  res.status(204).send();
+}));
+router.put('/admin/users/:id/suspension', endpoint('Changement de statut impossible', async (req, res) => {
+  const id = parseUserId(req.params.id); const suspended = parseFlag(req.body, 'suspended');
+  if (!isAdmin(res)) return;
+  await admin.setSuspended(id, suspended);
+  res.status(204).send();
+}));
+// Deletes the account and its frises in one transaction. Never retried automatically.
+router.delete('/admin/users/:id', endpoint('Suppression du compte impossible', async (req, res) => {
+  const id = parseUserId(req.params.id);
+  if (!isAdmin(res)) return;
+  await admin.deleteUser(id);
   res.status(204).send();
 }));
 export default router;
