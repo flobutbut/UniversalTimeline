@@ -48,12 +48,12 @@ import { computed, onMounted, onScopeDispose, ref, watch } from 'vue';
 import { RouterLink, useRoute, type RouteLocationRaw } from 'vue-router';
 import { useAuthStore } from '@/stores/useAuthStore';
 
-import { navigationTabs, type NavigationView } from '@/router/navigation';
+import { navigationTabsFor, type NavigationView } from '@/router/navigation';
 import { canUseWorkspace, safeReturnPath } from '@/router/access';
 import type { StorySearchResult } from '@/services/SearchApiService';
 
 const auth = useAuthStore(); const route = useRoute();
-const tabs = computed(() => canUseWorkspace(auth) ? navigationTabs.filter(tab => tab.value !== 'design-system' || auth.isAdmin) : []);
+const tabs = computed(() => canUseWorkspace(auth) ? navigationTabsFor(auth.isAdmin) : []);
 function accountLocation(signup: boolean) {
   return { name: 'login', query: { ...(signup ? { mode: 'signup' } : {}), ...(route.query.redirect ? { redirect: safeReturnPath(route.query.redirect) } : {}) } };
 }

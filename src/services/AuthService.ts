@@ -48,6 +48,11 @@ export const authService = {
     if (!account || typeof (account as { id?: unknown }).id !== 'string' || typeof (account as { isAdmin?: unknown }).isAdmin !== 'boolean') throw new Error('Réponse de connexion invalide.');
     return account as Account;
   },
+  /** Resolves once the SDK has consumed a one-time `code` from the URL (PKCE return); the code can then leave the URL. */
+  async settleUrlSession(): Promise<void> {
+    await initialize();
+    await client?.auth.getSession().catch(() => undefined);
+  },
   /** Email (and pending new email), sign-up date of the local session; only shown to the account itself. */
   async getIdentity(): Promise<{ email: string | null; newEmail: string | null; createdAt: Date | null }> {
     const { data, error } = await client?.auth.getUser() ?? { data: { user: null }, error: null };

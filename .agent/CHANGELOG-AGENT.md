@@ -311,3 +311,7 @@ Adresse unique `CONTACT_EMAIL` (florian@universaltimeline.net) dans les mentions
 ## 2026-11-02 — Mot de passe oublié, changement d’e-mail, projet personnel
 
 Page publique `/reset-password` (demande neutre, puis `verifyOtp` sur `token_hash` retiré de l’URL et nouveau mot de passe), lien « Mot de passe oublié ? » sur la connexion. Carte « Adresse e-mail » du profil : `updateUser({ email })`, adresse en attente (`new_email`) affichée, `code` de retour retiré de l’URL. Erreurs Auth mutualisées dans `src/lib/authErrors.ts`. PostHog : `before_send` masque `token_hash`, `code` et jetons dans les URL capturées. Textes légaux adaptés à un projet personnel non commercial (pas de SIREN, directeur = éditeur, responsabilité, droit français) ; nom de l’éditeur ou anonymat LCEN restant à choisir. Modèle de réinitialisation basé sur `token_hash`.
+
+## 2026-11-02 — Vues catalogue admin, étape de confirmation d’inscription
+
+`/periods` et `/events` portent `meta.admin` ; `navigationTabsFor(isAdmin)` masque Périodes, Événements et Design system aux comptes normaux. Après inscription, le formulaire laisse place à « Vérifiez votre boîte mail » (adresse, étapes, renvoi `auth.resend`, correction de l’adresse, passage à la connexion), titre focalisé. Retour du lien sur `/login?confirmed=1` avec message ; connexion refusée `email_not_confirmed` → renvoi du lien. Les `code` PKCE ne quittent l’URL qu’après `settleUrlSession`. Rôle admin et 27 frises transférés au compte du projet (voir server/AUTHENTICATION.md).

@@ -4,6 +4,8 @@ import { createPinia, setActivePinia } from 'pinia';
 import { vi } from 'vitest';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { installAccessGuard, safeReturnPath } from '../access';
+import { appRoutes } from '../routes';
+import { navigationTabsFor } from '../navigation';
 
 let router: Router;
 afterEach(() => { router?.options.history.destroy(); vi.restoreAllMocks(); });
@@ -46,6 +48,12 @@ it('refuses Design system for a regular account, including a direct URL', async 
 it('lets a verified admin reach Design system', async () => {
   setup({ account: { id: 'alice', isAdmin: true } }); await router.push('/design-system');
   expect(router.currentRoute.value.name).toBe('design-system');
+});
+it('reserves the catalogue views and Design system to admins, in routes and navigation', () => {
+  const adminRoutes = appRoutes.filter(route => route.meta?.admin).map(route => route.name).sort();
+  expect(adminRoutes).toEqual(['design-system', 'events', 'graph']);
+  expect(navigationTabsFor(false).map(tab => tab.value)).toEqual(['timeline', 'database']);
+  expect(navigationTabsFor(true).map(tab => tab.value)).toEqual(['timeline', 'database', 'graph', 'events', 'design-system']);
 });
 it('keeps protected pages closed while authentication is disabled', async () => {
   setup({ enabled: false }); await router.push('/stories');

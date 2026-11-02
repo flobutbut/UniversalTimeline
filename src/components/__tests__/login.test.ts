@@ -5,7 +5,7 @@ import { mount, flushPromises } from '@vue/test-utils';
 import LoginView from '@/views/LoginView.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 
-const sdk = vi.hoisted(() => ({ signInWithPassword:vi.fn(),signUp:vi.fn() }));
+const sdk = vi.hoisted(() => ({ signInWithPassword:vi.fn(),signUp:vi.fn(),resend:vi.fn() }));
 vi.mock('@/services/AuthService',()=>({authService:{getClient:()=>({auth:sdk})}}));
 const profiles = vi.hoisted(() => ({ usernameAvailable: vi.fn() }));
 vi.mock('@/services/ProfileApiService',()=>({profileApi:profiles}));
@@ -17,7 +17,7 @@ beforeEach(async()=>{
   vi.spyOn(auth,'refreshAccount').mockImplementation(async()=>{auth.account={id:'alice',isAdmin:false};});
   router=createRouter({history:createMemoryHistory(),routes:[{path:'/login',name:'login',component:LoginView},{path:'/database',component:{template:'<div />'}},{path:'/timeline',component:{template:'<div />'}},{path:'/legal/:page',name:'legal',component:{template:'<div />'}},{path:'/reset-password',name:'password-reset',component:{template:'<div />'}}]});
   await router.push('/login?redirect=/database');await router.isReady();
-  view=mount(LoginView,{global:{plugins:[pinia,router]}});
+  view=mount(LoginView,{global:{plugins:[pinia,router]},attachTo:document.body});
   sdk.signInWithPassword.mockResolvedValue({data:{session:{access_token:'test-token'}},error:null});
   profiles.usernameAvailable.mockResolvedValue(true);
 });
@@ -45,8 +45,27 @@ it('shows a safe error for invalid credentials without navigating or displaying 
 it('handles email confirmation without claiming that an account is already connected',async()=>{
   await view.findAll('button').find(b=>b.text()==='Créer un compte')!.trigger('click');await flushPromises();await fillSignup();
   sdk.signUp.mockResolvedValue({data:{session:null},error:null});await view.get('form').trigger('submit');await flushPromises();
-  expect(view.get('[role="status"]').text()).toContain('confirmer votre compte');expect(auth.refreshAccount).not.toHaveBeenCalled();
-  expect(view.get('#account-password').element.value).toBe('');expect(router.currentRoute.value.path).toBe('/login');
+  expect(sdk.signUp.mock.calls[0][0].options.emailRedirectTo).toBe(`${window.location.origin}/login?confirmed=1`);
+  // The form gives way to an explicit next step, focused so that the change is noticed and announced.
+  expect(view.find('form').exists()).toBe(false);
+  expect(view.get('h2').text()).toBe('Vérifiez votre boîte mail');expect(document.activeElement).toBe(view.get('h2').element);
+  expect(view.get('[role="status"]').text()).toContain('user@example.test');expect(auth.refreshAccount).not.toHaveBeenCalled();
+  expect(router.currentRoute.value.path).toBe('/login');
+  sdk.resend.mockResolvedValue({data:{},error:null});
+  await view.findAll('button').find(b=>b.text()==='Renvoyer l’e-mail')!.trigger('click');await flushPromises();
+  expect(sdk.resend).toHaveBeenCalledExactlyOnceWith({type:'signup',email:'user@example.test',options:{emailRedirectTo:`${window.location.origin}/login?confirmed=1`}});
+  expect(view.text()).toContain('Un nouveau lien a été envoyé');
+  await view.findAll('button').find(b=>b.text()==='J’ai confirmé, me connecter')!.trigger('click');await flushPromises();
+  expect(router.currentRoute.value.query.mode).toBeUndefined();expect(view.get('h2').text()).toBe('Se connecter');
+  expect((view.get('#account-email').element as HTMLInputElement).value).toBe('user@example.test');
+});
+it('offers a new confirmation link when signing in with an unconfirmed address',async()=>{
+  sdk.signInWithPassword.mockResolvedValue({error:{code:'email_not_confirmed',message:'private'}});
+  await fill();await view.get('form').trigger('submit');await flushPromises();
+  expect(view.get('[role="alert"]').text()).toContain('pas encore confirmée');expect(view.text()).not.toContain('private');
+  sdk.resend.mockResolvedValue({error:{code:'over_email_send_rate_limit'}});
+  await view.findAll('button').find(b=>b.text()==='Renvoyer le lien de confirmation')!.trigger('click');await flushPromises();
+  expect(sdk.resend).toHaveBeenCalledOnce();expect(view.text()).toContain('limite d’envoi');
 });
 it.each([
   [{code:'weak_password'}, 'mot de passe est trop faible'],
@@ -77,8 +96,8 @@ it('preserves plus-address aliases and links password guidance only to signup',a
   expect(view.get('#account-password-hint').text()).toContain('compromis');
   await view.get('#account-email').setValue('  user+test@example.test  ');
   sdk.signUp.mockResolvedValue({data:{session:null},error:null});await view.get('form').trigger('submit');await flushPromises();
-  expect(sdk.signUp).toHaveBeenCalledExactlyOnceWith({email:'user+test@example.test',password:'local-test-password',options:{emailRedirectTo:`${window.location.origin}/login`,data:{username:'Explorer',terms_version:CURRENT_TERMS_VERSION}}});
-  await view.findAll('button').find(b=>b.text()==='J’ai déjà un compte')!.trigger('click');await flushPromises();
+  expect(sdk.signUp).toHaveBeenCalledExactlyOnceWith({email:'user+test@example.test',password:'local-test-password',options:{emailRedirectTo:`${window.location.origin}/login?confirmed=1`,data:{username:'Explorer',terms_version:CURRENT_TERMS_VERSION}}});
+  await view.findAll('button').find(b=>b.text()==='J’ai confirmé, me connecter')!.trigger('click');await flushPromises();
   expect(view.find('#account-password-hint').exists()).toBe(false);
   expect(view.get('#account-password').attributes('aria-describedby')).toBeUndefined();
 });
@@ -130,4 +149,9 @@ it('requires a free, valid username and the accepted terms before creating an ac
   await view.get('form').trigger('submit');await flushPromises();
   expect(sdk.signUp).not.toHaveBeenCalled();
   expect(view.findAll('.account-terms a').map(link=>link.attributes('href'))).toEqual(['/legal/conditions','/legal/confidentialite']);
+});
+it('welcomes the return from the confirmation link',async()=>{
+  view.unmount();await router.push('/login?confirmed=1');
+  view=mount(LoginView,{global:{plugins:[pinia,router]},attachTo:document.body});await flushPromises();
+  expect(view.get('[role="status"]').text()).toContain('Adresse e-mail confirmée');
 });

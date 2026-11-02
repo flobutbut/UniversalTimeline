@@ -10,8 +10,8 @@
 | `/voyage` | `landing-scroll` | `ScrollLandingView.vue` | Second concept public : zoom temporel lié au scroll, du cosmos à une seconde |
 | `/timeline` | `timeline` | `HomeView.vue` | Grille timeline et navigation hiérarchique |
 | `/database` | `database` | `DatabaseView/DatabaseView.vue` | Onglet Stories |
-| `/periods` (alias `/graph`) | `graph` | `GraphView/Periods.vue` | Onglet Periods ; les deux URL existantes sont conservées |
-| `/events` | `events` | `EventsView/EventsView.vue` | Liste et filtres d’événements |
+| `/periods` (alias `/graph`) | `graph` | `GraphView/Periods.vue` | Onglet Periods, réservé aux admins (`meta.admin`) ; les deux URL existantes sont conservées |
+| `/events` | `events` | `EventsView/EventsView.vue` | Liste et filtres d’événements, réservé aux admins (`meta.admin`) |
 | `/profile` | `profile` | `ProfileView.vue` | Profil du compte : nom d’utilisateur et avatar, données et confidentialité (conditions, export, cookies, suppression), session ; `SidebarLayout`, `?section=privacy|session` |
 | `/legal/:page` | `legal` | `LegalView.vue` | Public : mentions légales, confidentialité, cookies, conditions (`src/lib/legalDocuments.ts`) |
 | `/reset-password` | `password-reset` | `PasswordResetView.vue` | Public : demande de lien (`resetPasswordForEmail`, réponse neutre) ; avec `token_hash` + `type=recovery`, retire le jeton de l’URL, `verifyOtp` puis nouveau mot de passe (`updateUser`). Lien depuis « Mot de passe oublié ? » de `/login` |

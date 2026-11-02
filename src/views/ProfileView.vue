@@ -201,7 +201,10 @@ async function signOut() {
 onMounted(async () => {
   void auth.ensureProfile(); void data.ensureStoriesLoaded().catch(() => undefined);
   // Return from an e-mail change link: the SDK has consumed the one-time code, which leaves the address bar.
-  if (route.query.code !== undefined) { const { code: _code, ...query } = route.query; void router.replace({ query }); }
+  if (route.query.code !== undefined) {
+    await authService.settleUrlSession();
+    const { code: _code, ...query } = route.query; void router.replace({ query });
+  }
   await loadIdentity();
 });
 </script>

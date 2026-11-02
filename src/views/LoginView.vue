@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { Icon } from '@iconify/vue';
 import { CURRENT_TERMS_VERSION, USERNAME_MAX, usernameError } from '@account-rules';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import Button from '@/components/base/Button.vue';
@@ -13,6 +14,21 @@ import { rateLimitError, weakPasswordError } from '@/lib/authErrors';
 const auth = useAuthStore(); const route = useRoute(); const router = useRouter();
 const email = ref(''); const password = ref(''); const creating = ref(route.query.mode === 'signup');
 const busy = ref(false); const error = ref(''); const message = ref(''); let alive = true;
+/** Address the confirmation e-mail was sent to: the form gives way to the "check your inbox" step. */
+const sentTo = ref('');
+/** Sign-in refused because the address is not confirmed yet: offer to send the link again. */
+const unconfirmed = ref(false);
+const resending = ref(false); const resendMessage = ref(''); const resendError = ref('');
+const heading = ref<HTMLElement | null>(null);
+// The form disappears on success: move focus to the new step so it is announced and the page does not seem unchanged.
+watch(sentTo, address => { if (address) void nextTick(() => heading.value?.focus()); });
+const confirmRedirect = () => `${window.location.origin}/login?confirmed=1`;
+// Return from the confirmation link: the address is confirmed server-side before the redirect.
+if (route.query.confirmed === '1') message.value = 'Adresse e-mail confirmée. Connectez-vous pour accéder à votre espace.';
+if (route.query.code !== undefined) void authService.settleUrlSession().finally(() => {
+  if (!alive) return;
+  const { code: _code, ...query } = route.query; void router.replace({ query });
+});
 // Sign-up only: the username is unique (checked live, enforced by the database) and the terms must be accepted.
 const username = ref(''); const termsAccepted = ref(false);
 const availability = useUsernameAvailability(username);
@@ -21,6 +37,7 @@ onBeforeUnmount(() => { alive = false; password.value = ''; });
 watch(() => canUseWorkspace(auth), verified => { if (verified) void router.replace(safeReturnPath(route.query.redirect)); }, { immediate: true });
 watch(() => route.query.mode, mode => {
   creating.value = mode === 'signup'; password.value = ''; error.value = ''; message.value = ''; termsAccepted.value = false;
+  sentTo.value = ''; unconfirmed.value = false; resendMessage.value = ''; resendError.value = '';
 });
 
 function signupError(providerError: { code?: string; name?: string }): string {
@@ -44,24 +61,27 @@ function signupError(providerError: { code?: string; name?: string }): string {
 
 async function submit() {
   if (busy.value || signupBlocked.value) return;
-  busy.value = true; error.value = ''; message.value = '';
+  busy.value = true; error.value = ''; message.value = ''; unconfirmed.value = false;
   try {
     await auth.initialize();
     const client = authService.getClient();
     if (!auth.enabled || !client) throw new Error('La connexion utilisateur n’est pas encore activée.');
     const credentials = { email: email.value.trim(), password: password.value };
     const result = creating.value
-      ? await client.auth.signUp({ ...credentials, options: { emailRedirectTo: `${window.location.origin}/login`,
+      ? await client.auth.signUp({ ...credentials, options: { emailRedirectTo: confirmRedirect(),
           data: { username: username.value.trim(), terms_version: CURRENT_TERMS_VERSION } } })
       : await client.auth.signInWithPassword(credentials);
     if (!alive) return;
     if (result.error) {
-      error.value = creating.value ? signupError(result.error) : 'Connexion impossible. Vérifiez vos identifiants et la confirmation de votre adresse.';
+      if (!creating.value && result.error.code === 'email_not_confirmed') {
+        unconfirmed.value = true;
+        error.value = 'Votre adresse e-mail n’est pas encore confirmée. Cliquez sur le lien reçu par e-mail, ou demandez-en un nouveau.';
+      } else error.value = creating.value ? signupError(result.error) : 'Connexion impossible. Vérifiez vos identifiants et la confirmation de votre adresse.';
       return;
     }
     password.value = '';
     if (creating.value && !result.data.session) {
-      message.value = 'Vérifiez votre boîte mail pour confirmer votre compte, puis connectez-vous.';
+      sentTo.value = credentials.email;
     } else {
       await auth.refreshAccount();
       if (alive && auth.signedIn) await router.replace(safeReturnPath(route.query.redirect));
@@ -71,6 +91,26 @@ async function submit() {
     if (alive) error.value = 'La connexion est indisponible. Réessayez dans un instant.';
   } finally { if (alive) busy.value = false; }
 }
+/** Sends the confirmation link again (Supabase applies its own rate limit). */
+async function resendConfirmation() {
+  const address = sentTo.value || email.value.trim();
+  if (resending.value || !address) return;
+  resending.value = true; resendMessage.value = ''; resendError.value = '';
+  try {
+    const result = await authService.getClient()!.auth.resend({ type: 'signup', email: address, options: { emailRedirectTo: confirmRedirect() } });
+    if (!alive) return;
+    if (result.error) resendError.value = rateLimitError(result.error) ?? 'Envoi impossible. Réessayez dans quelques minutes.';
+    else resendMessage.value = `Un nouveau lien a été envoyé à ${address}.`;
+  } catch { if (alive) resendError.value = 'Le service est indisponible. Réessayez dans un instant.'; }
+  finally { if (alive) resending.value = false; }
+}
+/** After confirming, sign in with the same address. */
+function goToSignIn() {
+  email.value = sentTo.value || email.value;
+  const { mode: _mode, ...query } = route.query;
+  void router.replace({ name: 'login', query });
+}
+function editAddress() { sentTo.value = ''; resendMessage.value = ''; resendError.value = ''; }
 function switchMode() {
   const { mode: _mode, ...query } = route.query;
   void router.replace({ name: 'login', query: { ...query, ...(creating.value ? {} : { mode: 'signup' }) } });
@@ -80,7 +120,23 @@ function switchMode() {
 <template>
   <section class="account-page">
     <div class="account-panel">
-      <h2>{{ creating ? 'Créer un compte' : 'Se connecter' }}</h2>
+      <h2 ref="heading" tabindex="-1">{{ sentTo ? 'Vérifiez votre boîte mail' : creating ? 'Créer un compte' : 'Se connecter' }}</h2>
+      <div v-if="sentTo" class="account-sent">
+        <Icon icon="mdi:email-check-outline" width="40" height="40" class="account-sent__icon" aria-hidden="true" />
+        <p role="status">Votre compte est créé. Nous avons envoyé un lien de confirmation à <strong>{{ sentTo }}</strong>.</p>
+        <ol class="account-sent__steps">
+          <li>Ouvrez l’e-mail « Confirmez votre adresse e-mail — Universal Timeline ».</li>
+          <li>Cliquez sur « Confirmer mon adresse ».</li>
+          <li>Connectez-vous avec votre adresse et votre mot de passe.</li>
+        </ol>
+        <p class="account-sent__hint">Rien reçu après quelques minutes ? Regardez dans le dossier des indésirables, ou renvoyez l’e-mail.</p>
+        <p v-if="resendMessage" role="status">{{ resendMessage }}</p>
+        <p v-if="resendError" role="alert">{{ resendError }}</p>
+        <Button @click="goToSignIn">J’ai confirmé, me connecter</Button>
+        <Button variant="secondary" :disabled="resending" @click="resendConfirmation">{{ resending ? 'Envoi…' : 'Renvoyer l’e-mail' }}</Button>
+        <Button variant="ghost" @click="editAddress">Corriger l’adresse e-mail</Button>
+      </div>
+      <template v-else>
       <p>La timeline et la recherche sont accessibles à tous. Connectez-vous pour gérer vos frises.</p>
       <p v-if="auth.error" role="alert">{{ auth.error }} <Button size="sm" @click="auth.initialize">Réessayer</Button></p>
       <p v-if="auth.enabled === false" role="status">La connexion utilisateur sera disponible après la mise en place des accès.</p>
@@ -97,11 +153,15 @@ function switchMode() {
             et j’ai lu la <RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }" target="_blank">politique de confidentialité</RouterLink>.</span>
         </label>
         <p v-if="error" role="alert">{{ error }}</p>
+        <Button v-if="unconfirmed" variant="secondary" size="sm" :disabled="resending || !email.trim()" @click="resendConfirmation">{{ resending ? 'Envoi…' : 'Renvoyer le lien de confirmation' }}</Button>
+        <p v-if="resendMessage" role="status">{{ resendMessage }}</p>
+        <p v-if="resendError" role="alert">{{ resendError }}</p>
         <p v-if="message" role="status">{{ message }}</p>
         <Button type="submit" :disabled="busy || !auth.ready || signupBlocked">{{ busy ? 'Veuillez patienter…' : creating ? 'Créer mon compte' : 'Se connecter' }}</Button>
         <Button variant="ghost" :disabled="busy" @click="switchMode">{{ creating ? 'J’ai déjà un compte' : 'Créer un compte' }}</Button>
         <RouterLink v-if="!creating" class="account-forgot" :to="{ name: 'password-reset', query: email.trim() ? { email: email.trim() } : {} }">Mot de passe oublié ?</RouterLink>
       </form>
+      </template>
       <RouterLink to="/timeline">Revenir à la timeline</RouterLink>
       <nav class="account-legal" aria-label="Informations légales">
         <RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">Mentions légales</RouterLink>
@@ -119,6 +179,13 @@ h2 { margin-top: 0; }
 form { display: flex; flex-direction: column; gap: var(--spacing-sm); margin: var(--spacing-lg) 0; }
 .account-terms { display: flex; align-items: flex-start; gap: var(--spacing-sm); font-size: var(--font-size-sm); }
 .account-terms input { margin-top: 3px; }
+.account-sent { display: flex; flex-direction: column; gap: var(--spacing-sm); margin: var(--spacing-lg) 0; }
+.account-sent p { margin: 0; }
+.account-sent__icon { color: var(--color-text-link); }
+.account-sent__steps { margin: 0; padding-left: var(--spacing-lg); }
+.account-sent__steps li + li { margin-top: var(--spacing-xs); }
+.account-sent__hint { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+h2:focus { outline: none; }
 .account-forgot { align-self: center; font-size: var(--font-size-sm); }
 .account-legal { display: flex; flex-wrap: wrap; gap: var(--spacing-md); margin-top: var(--spacing-lg); font-size: var(--font-size-xs); }
 </style>

@@ -35,7 +35,8 @@ let view: ReturnType<typeof mount>;
 function deferred<T>() { let resolve!: (value: T) => void; const promise = new Promise<T>(yes => { resolve = yes; }); return { resolve, promise }; }
 async function start(path = '/timeline', anonymous = false) {
   const auth = useAuthStore(); auth.enabled = true; auth.ready = true;
-  auth.account = anonymous ? null : { id: 'alice', isAdmin: false };
+  // The catalogue views are reserved to admins.
+  auth.account = anonymous ? null : { id: 'alice', isAdmin: true };
   vi.spyOn(auth, 'initialize').mockResolvedValue(); vi.spyOn(auth, 'refreshAccount').mockResolvedValue();
   router = createRouter({ history: createMemoryHistory(), routes: appRoutes });
   installAccessGuard(router, auth);
