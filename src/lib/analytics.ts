@@ -1,4 +1,4 @@
-import type { PostHog } from 'posthog-js';
+import type { CaptureResult, PostHog } from 'posthog-js';
 import type { ConsentTracker } from '@/stores/useConsentStore';
 
 export interface PostHogSettings { token: string; host: string }
@@ -24,6 +24,23 @@ export function purgePostHogStorage(token: string) {
   }
 }
 
+/** One-time auth secrets that can appear in a URL (recovery, e-mail change, PKCE return). */
+const SECRET_PARAMS = ['token_hash', 'token', 'code', 'access_token', 'refresh_token'];
+
+/** Removes auth secrets from every URL-like property before an event leaves the browser. */
+export function scrubAuthSecrets(event: CaptureResult | null): CaptureResult | null {
+  if (!event) return event;
+  for (const [key, value] of Object.entries(event.properties ?? {})) {
+    if (typeof value !== 'string' || !SECRET_PARAMS.some(name => value.includes(`${name}=`))) continue;
+    try {
+      const url = new URL(value, location.origin);
+      for (const name of SECRET_PARAMS) if (url.searchParams.has(name)) url.searchParams.set(name, 'redacted');
+      event.properties[key] = /^https?:/.test(value) ? url.toString() : `${url.pathname}${url.search}${url.hash}`;
+    } catch { /* not a URL: left unchanged */ }
+  }
+  return event;
+}
+
 type LoadPostHog = () => Promise<PostHog>;
 const loadPostHog: LoadPostHog = () => import('posthog-js').then(module => module.default);
 
@@ -41,7 +58,7 @@ export function createPostHogTracker({ token, host }: PostHogSettings, load: Loa
         loading = null;
         // Consent withdrawn while the script was downloading: never initialise.
         if (!wanted) return;
-        posthog.init(token, { api_host: host, defaults: '2026-08-30', disable_session_recording: true });
+        posthog.init(token, { api_host: host, defaults: '2026-08-30', disable_session_recording: true, before_send: scrubAuthSecrets });
         client = posthog;
       }).catch(() => { loading = null; });
       await loading;

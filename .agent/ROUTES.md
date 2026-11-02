@@ -14,6 +14,8 @@
 | `/events` | `events` | `EventsView/EventsView.vue` | Liste et filtres d’événements |
 | `/profile` | `profile` | `ProfileView.vue` | Profil du compte : nom d’utilisateur et avatar, données et confidentialité (conditions, export, cookies, suppression), session ; `SidebarLayout`, `?section=privacy|session` |
 | `/legal/:page` | `legal` | `LegalView.vue` | Public : mentions légales, confidentialité, cookies, conditions (`src/lib/legalDocuments.ts`) |
+| `/reset-password` | `password-reset` | `PasswordResetView.vue` | Public : demande de lien (`resetPasswordForEmail`, réponse neutre) ; avec `token_hash` + `type=recovery`, retire le jeton de l’URL, `verifyOtp` puis nouveau mot de passe (`updateUser`). Lien depuis « Mot de passe oublié ? » de `/login` |
+| `/contact` | `contact` | `ContactView.vue` | Public : adresse `CONTACT_EMAIL` et sujets pré-remplis par `mailto:`, même menu latéral que les pages légales (`legalMenu`) |
 | `/design-system` | `design-system` | `DesignSystemView/DesignSystemView.vue` | Démonstration des composants |
 | `/:pathMatch(.*)*` | `not-found` | `NotFoundView.vue` | Page introuvable, lien vers la timeline, aucun onglet actif |
 

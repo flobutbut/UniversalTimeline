@@ -303,3 +303,11 @@ Parser, comparaisons et bornes communs à l’API/au navigateur ; DateService li
 ## 2026-11-02 — Mesure d’audience PostHog
 
 Projet PostHog « Universal Timeline » (organisation dédiée, région EU). Traceur `src/lib/analytics.ts` enregistré par `installAnalytics` dans `main.ts` via `registerTracker` : import dynamique de `posthog-js` après consentement, retrait = opt-out, reset et purge des cookies/stockages `ph_<clé>`. Sessions non enregistrées, pas d’identify. Politique cookies, confidentialité et registre RGPD complétés ; `CONSENT_VERSION` passé à 2. Variables `VITE_POSTHOG_*` documentées.
+
+## 2026-11-02 — Contact et e-mails
+
+Adresse unique `CONTACT_EMAIL` (florian@universaltimeline.net) dans les mentions légales, la confidentialité (droits, délai d’un mois) et les conditions (signalement). Page publique `/contact` (`ContactView`) : sujets pré-remplis par `mailto:`, copie de l’adresse, menu `legalMenu` partagé avec les pages légales ; liens depuis les pieds de page des landings et le profil. Six modèles d’e-mails Supabase Auth en français dans `Documentation/emails/`, à coller après configuration du SMTP Hostinger (non fait par l’agent).
+
+## 2026-11-02 — Mot de passe oublié, changement d’e-mail, projet personnel
+
+Page publique `/reset-password` (demande neutre, puis `verifyOtp` sur `token_hash` retiré de l’URL et nouveau mot de passe), lien « Mot de passe oublié ? » sur la connexion. Carte « Adresse e-mail » du profil : `updateUser({ email })`, adresse en attente (`new_email`) affichée, `code` de retour retiré de l’URL. Erreurs Auth mutualisées dans `src/lib/authErrors.ts`. PostHog : `before_send` masque `token_hash`, `code` et jetons dans les URL capturées. Textes légaux adaptés à un projet personnel non commercial (pas de SIREN, directeur = éditeur, responsabilité, droit français) ; nom de l’éditeur ou anonymat LCEN restant à choisir. Modèle de réinitialisation basé sur `token_hash`.

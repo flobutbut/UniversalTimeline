@@ -109,7 +109,7 @@ const questions = [
       <RouterLink to="/" class="landing-brand">Universal Timeline</RouterLink>
       <span>Le temps, une question d’échelle.</span>
       <nav aria-label="Liens de pied de page"><RouterLink to="/timeline">Explorer les frises</RouterLink><RouterLink :to="accountTarget">{{ canUseWorkspace(auth) ? 'Mes frises' : 'Créer un compte' }}</RouterLink></nav>
-      <nav class="landing-legal" aria-label="Informations légales"><RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">Mentions légales</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">Confidentialité</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'cookies' } }">Cookies</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'conditions' } }">Conditions d’utilisation</RouterLink></nav>
+      <nav class="landing-legal" aria-label="Informations légales"><RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">Mentions légales</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">Confidentialité</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'cookies' } }">Cookies</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'conditions' } }">Conditions d’utilisation</RouterLink><RouterLink :to="{ name: 'contact' }">Contact</RouterLink></nav>
     </footer>
   </div>
 </template>

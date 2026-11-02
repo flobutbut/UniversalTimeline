@@ -36,8 +36,8 @@
           <Button type="submit" size="sm" :disabled="!changed || saving || availability.blocking.value">{{ auth.profile ? 'Enregistrer' : 'Créer mon profil' }}</Button>
         </div>
       </form>
+      <EmailChangeCard :email="identity.email" :pending-email="identity.newEmail" @requested="loadIdentity" />
       <dl class="profile-view__card profile-view__facts">
-        <dt>Adresse e-mail</dt><dd>{{ identity.email ?? '—' }}</dd>
         <dt>Membre depuis</dt><dd>{{ identity.createdAt ? formatRecordDate(identity.createdAt) : '—' }}</dd>
         <dt>Rôle</dt><dd>{{ auth.isAdmin ? 'Administrateur' : 'Compte personnel' }}</dd>
       </dl>
@@ -72,6 +72,7 @@
         <h3>Informations légales</h3>
         <ul class="profile-view__links">
           <li v-for="page in LEGAL_PAGES" :key="page"><RouterLink :to="{ name: 'legal', params: { page } }">{{ legalDocuments[page].title }}</RouterLink></li>
+          <li><RouterLink :to="{ name: 'contact' }">Contact</RouterLink></li>
         </ul>
       </nav>
       <div class="profile-view__card profile-view__danger">
@@ -104,6 +105,7 @@ import Input from '@/components/base/Input.vue';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import SidebarLayout, { type SidebarItem } from '@/components/base/SidebarLayout.vue';
 import UserAvatar from '@/components/UserAvatar.vue';
+import EmailChangeCard from '@/components/EmailChangeCard.vue';
 import { authService } from '@/services/AuthService';
 import { profileApi } from '@/services/ProfileApiService';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -149,7 +151,10 @@ async function saveProfile() {
   finally { saving.value = false; }
 }
 
-const identity = ref<{ email: string | null; createdAt: Date | null }>({ email: null, createdAt: null });
+const identity = ref<{ email: string | null; newEmail: string | null; createdAt: Date | null }>({ email: null, newEmail: null, createdAt: null });
+async function loadIdentity() {
+  try { identity.value = await authService.getIdentity(); } catch { /* adresse affichée « — » */ }
+}
 const termsAccepted = computed(() => !!auth.profile?.termsAcceptedAt && auth.profile.termsVersion === auth.profile.currentTermsVersion);
 const accepting = ref(false);
 async function acceptTerms() {
@@ -195,7 +200,9 @@ async function signOut() {
 
 onMounted(async () => {
   void auth.ensureProfile(); void data.ensureStoriesLoaded().catch(() => undefined);
-  try { identity.value = await authService.getIdentity(); } catch { /* adresse affichée « — » */ }
+  // Return from an e-mail change link: the SDK has consumed the one-time code, which leaves the address bar.
+  if (route.query.code !== undefined) { const { code: _code, ...query } = route.query; void router.replace({ query }); }
+  await loadIdentity();
 });
 </script>
 

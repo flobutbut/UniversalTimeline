@@ -4,10 +4,11 @@ import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 import { mount, flushPromises } from '@vue/test-utils';
 import CookieConsent from '@/components/CookieConsent.vue';
 import LegalView from '@/views/LegalView.vue';
+import ContactView from '@/views/ContactView.vue';
 import StoryGallery from '@/views/DatabaseView/StoryGallery.vue';
 import { appRoutes } from '@/router/routes';
 import { useConsentStore, CONSENT_VERSION } from '@/stores/useConsentStore';
-import { LEGAL_PAGES, legalDocuments } from '@/lib/legalDocuments';
+import { CONTACT_EMAIL, LEGAL_PAGES, legalDocuments } from '@/lib/legalDocuments';
 
 let pinia: Pinia; let router: Router; let view: ReturnType<typeof mount> | undefined;
 async function mountWithRouter(component: object, path = '/timeline', props: Record<string, unknown> = {}) {
@@ -60,8 +61,19 @@ it.each(LEGAL_PAGES)('publishes the %s page with a menu and visibly marked missi
   await mountWithRouter(LegalView, `/legal/${page}`);
   expect(view!.get('h2').text()).toBe(legalDocuments[page].title);
   expect(view!.get('[aria-current="page"]').text()).toBe(legalDocuments[page].title);
-  expect(view!.findAll('nav a')).toHaveLength(LEGAL_PAGES.length);
+  expect(view!.findAll('nav a')).toHaveLength(LEGAL_PAGES.length + 1);
+  expect(view!.findAll('nav a').at(-1)!.attributes('href')).toBe('/contact');
   for (const todo of view!.findAll('.legal-view__todo')) expect(todo.text()).toMatch(/^\[À compléter/);
+});
+
+it('publishes a contact page with prefilled mailto subjects and the legal menu', async () => {
+  await mountWithRouter(ContactView, '/contact');
+  expect(view!.get('[aria-current="page"]').text()).toBe('Contact');
+  const mailtos = view!.findAll('a[href^="mailto:"]').map(link => decodeURIComponent(link.attributes('href')!));
+  expect(mailtos[0]).toBe(`mailto:${CONTACT_EMAIL}`);
+  expect(mailtos.slice(1).map(href => href.match(/subject=([^&]+)/)![1]))
+    .toEqual(['[Universal Timeline] Question', '[Universal Timeline] Signalement', '[Universal Timeline] Données personnelles', '[Universal Timeline] Problème technique']);
+  for (const page of LEGAL_PAGES) expect(legalDocuments[page].sections.flatMap(section => section.paragraphs).join(' ')).not.toContain('adresse e-mail de contact');
 });
 
 it('opens the cookie preferences from the cookie policy', async () => {

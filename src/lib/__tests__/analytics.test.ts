@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createPinia, disposePinia, setActivePinia, type Pinia } from 'pinia';
 import type { PostHog } from 'posthog-js';
-import { createPostHogTracker, installAnalytics, purgePostHogStorage, readPostHogSettings } from '@/lib/analytics';
+import { createPostHogTracker, installAnalytics, purgePostHogStorage, readPostHogSettings, scrubAuthSecrets } from '@/lib/analytics';
 import { useConsentStore } from '@/stores/useConsentStore';
 
 const token = 'phc_testtoken';
@@ -59,6 +59,18 @@ it('registers through the consent store and purges leftovers while consent is mi
   expect(register).toHaveBeenCalledOnce(); expect(localStorage.getItem(`ph_${token}_posthog`)).toBeNull();
   installAnalytics(consent, env({}));
   expect(register).toHaveBeenCalledOnce();
+});
+
+it('redacts one-time auth secrets from captured URLs', () => {
+  const event = { uuid: 'u', event: '$pageview', properties: {
+    $current_url: 'https://universaltimeline.net/reset-password?token_hash=secret&type=recovery',
+    $pathname: '/profile?code=one-time', $referrer: 'https://example.test/?q=frise', title: 'token= in text',
+  } } as unknown as Parameters<typeof scrubAuthSecrets>[0];
+  const props = scrubAuthSecrets(event)!.properties;
+  expect(props.$current_url).toBe('https://universaltimeline.net/reset-password?token_hash=redacted&type=recovery');
+  expect(props.$pathname).toBe('/profile?code=redacted');
+  expect(props.$referrer).toBe('https://example.test/?q=frise');
+  expect(JSON.stringify(props)).not.toMatch(/secret|one-time/);
 });
 
 it('leaves unrelated storage untouched', () => {

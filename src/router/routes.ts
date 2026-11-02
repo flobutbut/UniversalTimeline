@@ -12,7 +12,9 @@ export const appRoutes: RouteRecordRaw[] = [
   { path: '/legal', redirect: { name: 'legal', params: { page: 'mentions-legales' } } },
   { path: '/legal/:page(mentions-legales|confidentialite|cookies|conditions)', name: 'legal', meta: { public: true }, component: () => import('@/views/LegalView.vue') },
   { path: '/design-system', name: 'design-system', meta: { admin: true }, component: () => import('@/views/DesignSystemView/DesignSystemView.vue') },
+  { path: '/contact', name: 'contact', meta: { public: true }, component: () => import('@/views/ContactView.vue') },
   { path: '/login', name: 'login', meta: { public: true }, component: () => import('@/views/LoginView.vue') },
+  { path: '/reset-password', name: 'password-reset', meta: { public: true }, component: () => import('@/views/PasswordResetView.vue') },
   { path: '/forbidden', name: 'forbidden', meta: { public: true }, component: () => import('@/views/ForbiddenView.vue') },
   { path: '/:pathMatch(.*)*', name: 'not-found', meta: { public: true }, component: () => import('@/views/NotFoundView.vue') },
 ];

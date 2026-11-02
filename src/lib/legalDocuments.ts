@@ -10,14 +10,21 @@ export interface LegalDocument { title: string; summary: string; updated: string
 
 const TODO = (what: string) => `[À compléter : ${what}]`;
 
+/** Single public contact address: legal pages, Contact page and Supabase e-mail templates. */
+export const CONTACT_EMAIL = 'florian@universaltimeline.net';
+
 export const legalDocuments: Record<LegalPage, LegalDocument> = {
   'mentions-legales': {
     title: 'Mentions légales',
     summary: 'Qui édite et héberge Universal Timeline.',
     updated: CURRENT_TERMS_VERSION,
     sections: [
-      { title: 'Éditeur du site', paragraphs: [TODO('nom ou raison sociale de l’éditeur, adresse postale, adresse e-mail de contact, numéro SIREN/RCS le cas échéant')] },
-      { title: 'Directeur de la publication', paragraphs: [TODO('nom du directeur ou de la directrice de la publication')] },
+      { title: 'Éditeur du site', paragraphs: [
+        'Universal Timeline est un projet personnel, gratuit et non commercial, édité par un particulier à titre non professionnel. Ce n’est pas une entreprise : il n’y a ni numéro SIREN ni immatriculation.',
+        TODO('nom de l’éditeur, ou mention de l’anonymat permis à un éditeur non professionnel (article 6, III, 2 de la LCEN) une fois son identité communiquée à l’hébergeur'),
+        `Contact : ${CONTACT_EMAIL}, ou depuis la page Contact du site.`,
+      ] },
+      { title: 'Directeur de la publication', paragraphs: ['L’éditeur du site.'] },
       { title: 'Hébergement', paragraphs: [
         'Application et API : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis (vercel.com).',
         'Base de données et authentification : Supabase Inc., données hébergées dans l’Union européenne (région Francfort, Allemagne).',
@@ -34,7 +41,11 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
     summary: 'Les données personnelles que nous traitons, pourquoi, combien de temps et vos droits.',
     updated: CURRENT_TERMS_VERSION,
     sections: [
-      { title: 'Responsable du traitement', paragraphs: [TODO('identité et coordonnées du responsable du traitement ; délégué à la protection des données si désigné')] },
+      { title: 'Responsable du traitement', paragraphs: [
+        'L’éditeur du site, particulier agissant à titre non professionnel (voir les mentions légales). Aucun délégué à la protection des données n’est désigné : ce n’est pas obligatoire pour un projet de cette taille.',
+        TODO('nom du responsable du traitement, identique à celui de l’éditeur'),
+        `Contact pour vos données personnelles : ${CONTACT_EMAIL} (objet « Données personnelles »), ou depuis la page Contact du site.`,
+      ] },
       { title: 'Données traitées', paragraphs: ['Nous ne collectons que les données nécessaires au service :'], items: [
         'Compte : adresse e-mail et mot de passe (stocké sous forme chiffrée par le service d’authentification), date d’inscription.',
         'Profil : nom d’utilisateur, couleur et icône d’avatar, version et date d’acceptation des conditions.',
@@ -63,7 +74,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
       { title: 'Vos droits', paragraphs: [
         'Vous disposez des droits d’accès, de rectification, d’effacement, de limitation, d’opposition et de portabilité, ainsi que du droit de définir des directives sur le sort de vos données après votre décès.',
         'Depuis la page Profil, section « Données et confidentialité », vous pouvez modifier votre profil, télécharger toutes vos données (format JSON) et supprimer votre compte et vos frises.',
-        'Pour toute autre demande : ' + TODO('adresse e-mail de contact dédiée aux données personnelles') + '. Vous pouvez aussi saisir la CNIL (www.cnil.fr).',
+        `Pour toute autre demande, écrivez à ${CONTACT_EMAIL} ou passez par la page Contact. Nous répondons dans un délai d’un mois, qui peut être prolongé de deux mois pour une demande complexe ; nous pouvons vous demander de justifier votre identité. Vous pouvez aussi saisir la CNIL (www.cnil.fr).`,
       ] },
       { title: 'Sécurité', paragraphs: [
         'Les échanges sont chiffrés (HTTPS). L’accès aux données est limité par des règles de sécurité au niveau de la base : chaque compte ne lit et ne modifie que ses propres données privées.',
@@ -101,7 +112,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
     summary: 'Les règles d’utilisation du service et de publication des frises.',
     updated: CURRENT_TERMS_VERSION,
     sections: [
-      { title: 'Objet', paragraphs: ['Universal Timeline permet de consulter des frises chronologiques et, avec un compte, d’en créer et d’en publier.', TODO('présentation juridique complète du service')] },
+      { title: 'Objet', paragraphs: ['Universal Timeline permet de consulter des frises chronologiques et, avec un compte, d’en créer et d’en publier.', 'Le service est gratuit, sans publicité ni vente. C’est un projet personnel maintenu sur le temps libre de son éditeur, un particulier.'] },
       { title: 'Compte', paragraphs: [
         'Un compte nécessite une adresse e-mail valide et un nom d’utilisateur unique. Ce nom signe les frises que vous créez et apparaît sur les frises publiques.',
         'Vous êtes responsable de la confidentialité de votre mot de passe. Vous pouvez supprimer votre compte à tout moment depuis votre profil : vos frises sont alors supprimées.',
@@ -109,15 +120,27 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
       { title: 'Contenus publiés', paragraphs: [
         'Une frise publique est visible par tous. Vous restez responsable des textes que vous publiez et vous engagez à respecter la loi et les droits des tiers.',
         'Les périodes et événements du catalogue sont partagés entre les utilisateurs et sont conservés après la suppression d’un compte.',
-        TODO('licence accordée sur les contenus publiés, modération et signalement'),
+        `Pour signaler un contenu qui vous semble illicite ou porter atteinte à vos droits, écrivez à ${CONTACT_EMAIL} (objet « Signalement ») ou passez par la page Contact, en indiquant l’adresse de la frise.`,
+        TODO('licence accordée sur les contenus publiés, règles et délais de modération'),
       ] },
-      { title: 'Responsabilité et disponibilité', paragraphs: [TODO('limitation de responsabilité, disponibilité du service')] },
+      { title: 'Responsabilité et disponibilité', paragraphs: [
+        'Universal Timeline est fourni tel quel, sans garantie de disponibilité continue, d’exactitude des contenus ni de durée. Le service peut être interrompu, modifié ou arrêté à tout moment ; exportez régulièrement vos frises depuis votre profil.',
+        'Les données du catalogue proviennent en partie de Wikidata et des utilisateurs : elles peuvent contenir des erreurs. Dans les limites permises par la loi, l’éditeur ne peut être tenu responsable de leur usage.',
+      ] },
       { title: 'Modification des conditions', paragraphs: [
         `Version en vigueur : ${CURRENT_TERMS_VERSION}. Lorsqu’elles changent, une nouvelle acceptation vous est demandée depuis votre profil.`,
       ] },
-      { title: 'Droit applicable', paragraphs: [TODO('droit applicable et juridiction compétente')] },
+      { title: 'Droit applicable', paragraphs: [
+        'Ces conditions sont soumises au droit français. En cas de désaccord, écrivez d’abord à l’éditeur depuis la page Contact pour chercher une solution amiable.',
+      ] },
     ],
   },
 };
 
 export const isLegalPage = (value: unknown): value is LegalPage => LEGAL_PAGES.includes(value as LegalPage);
+
+/** Menu shared by the legal pages and the Contact page. */
+export const legalMenu = [
+  ...LEGAL_PAGES.map(key => ({ key, label: legalDocuments[key].title, to: { name: 'legal', params: { page: key } } })),
+  { key: 'contact', label: 'Contact', to: { name: 'contact' } },
+];

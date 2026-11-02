@@ -8,6 +8,7 @@ import { authService } from '@/services/AuthService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { canUseWorkspace, safeReturnPath } from '@/router/access';
 import { useUsernameAvailability } from '@/composables/useUsernameAvailability';
+import { rateLimitError, weakPasswordError } from '@/lib/authErrors';
 
 const auth = useAuthStore(); const route = useRoute(); const router = useRouter();
 const email = ref(''); const password = ref(''); const creating = ref(route.query.mode === 'signup');
@@ -23,16 +24,11 @@ watch(() => route.query.mode, mode => {
 });
 
 function signupError(providerError: { code?: string; name?: string }): string {
-  if (providerError.code === 'weak_password' || providerError.name === 'AuthWeakPasswordError') {
-    return 'Ce mot de passe est trop faible ou figure parmi les mots de passe compromis. Choisissez un mot de passe unique et plus robuste.';
-  }
+  const known = weakPasswordError(providerError) ?? rateLimitError(providerError);
+  if (known) return known;
   switch (providerError.code) {
     case 'email_address_not_authorized':
       return 'Le service d’e-mail du projet n’autorise pas encore les inscriptions avec cette adresse. Sa configuration doit être complétée.';
-    case 'over_email_send_rate_limit':
-      return 'La limite d’envoi des e-mails de confirmation est atteinte. Réessayez plus tard.';
-    case 'over_request_rate_limit':
-      return 'Trop de tentatives rapprochées. Patientez quelques minutes avant de réessayer.';
     case 'email_address_invalid':
       return 'Cette adresse e-mail n’est pas acceptée par le service d’inscription. Vérifiez-la ou utilisez une autre adresse.';
     case 'signup_disabled':
@@ -104,6 +100,7 @@ function switchMode() {
         <p v-if="message" role="status">{{ message }}</p>
         <Button type="submit" :disabled="busy || !auth.ready || signupBlocked">{{ busy ? 'Veuillez patienter…' : creating ? 'Créer mon compte' : 'Se connecter' }}</Button>
         <Button variant="ghost" :disabled="busy" @click="switchMode">{{ creating ? 'J’ai déjà un compte' : 'Créer un compte' }}</Button>
+        <RouterLink v-if="!creating" class="account-forgot" :to="{ name: 'password-reset', query: email.trim() ? { email: email.trim() } : {} }">Mot de passe oublié ?</RouterLink>
       </form>
       <RouterLink to="/timeline">Revenir à la timeline</RouterLink>
       <nav class="account-legal" aria-label="Informations légales">
@@ -122,5 +119,6 @@ h2 { margin-top: 0; }
 form { display: flex; flex-direction: column; gap: var(--spacing-sm); margin: var(--spacing-lg) 0; }
 .account-terms { display: flex; align-items: flex-start; gap: var(--spacing-sm); font-size: var(--font-size-sm); }
 .account-terms input { margin-top: 3px; }
+.account-forgot { align-self: center; font-size: var(--font-size-sm); }
 .account-legal { display: flex; flex-wrap: wrap; gap: var(--spacing-md); margin-top: var(--spacing-lg); font-size: var(--font-size-xs); }
 </style>

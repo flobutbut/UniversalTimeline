@@ -48,11 +48,11 @@ export const authService = {
     if (!account || typeof (account as { id?: unknown }).id !== 'string' || typeof (account as { isAdmin?: unknown }).isAdmin !== 'boolean') throw new Error('Réponse de connexion invalide.');
     return account as Account;
   },
-  /** Email and sign-up date of the local session; only shown to the account itself. */
-  async getIdentity(): Promise<{ email: string | null; createdAt: Date | null }> {
+  /** Email (and pending new email), sign-up date of the local session; only shown to the account itself. */
+  async getIdentity(): Promise<{ email: string | null; newEmail: string | null; createdAt: Date | null }> {
     const { data, error } = await client?.auth.getUser() ?? { data: { user: null }, error: null };
     if (error) throw new Error('Profil indisponible. Réessayez.');
     const created = data.user?.created_at ? new Date(data.user.created_at) : null;
-    return { email: data.user?.email ?? null, createdAt: created && Number.isFinite(created.getTime()) ? created : null };
+    return { email: data.user?.email ?? null, newEmail: data.user?.new_email ?? null, createdAt: created && Number.isFinite(created.getTime()) ? created : null };
   },
 };

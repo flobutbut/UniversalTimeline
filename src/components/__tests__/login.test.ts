@@ -15,7 +15,7 @@ beforeEach(async()=>{
   vi.resetAllMocks(); pinia=createPinia();setActivePinia(pinia);auth=useAuthStore();auth.enabled=true;auth.ready=true;
   vi.spyOn(auth,'initialize').mockResolvedValue();
   vi.spyOn(auth,'refreshAccount').mockImplementation(async()=>{auth.account={id:'alice',isAdmin:false};});
-  router=createRouter({history:createMemoryHistory(),routes:[{path:'/login',name:'login',component:LoginView},{path:'/database',component:{template:'<div />'}},{path:'/timeline',component:{template:'<div />'}},{path:'/legal/:page',name:'legal',component:{template:'<div />'}}]});
+  router=createRouter({history:createMemoryHistory(),routes:[{path:'/login',name:'login',component:LoginView},{path:'/database',component:{template:'<div />'}},{path:'/timeline',component:{template:'<div />'}},{path:'/legal/:page',name:'legal',component:{template:'<div />'}},{path:'/reset-password',name:'password-reset',component:{template:'<div />'}}]});
   await router.push('/login?redirect=/database');await router.isReady();
   view=mount(LoginView,{global:{plugins:[pinia,router]}});
   sdk.signInWithPassword.mockResolvedValue({data:{session:{access_token:'test-token'}},error:null});

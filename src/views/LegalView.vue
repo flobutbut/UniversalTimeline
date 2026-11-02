@@ -1,5 +1,5 @@
 <template>
-  <SidebarLayout menu-label="Informations légales" :items="menu" :active="page">
+  <SidebarLayout menu-label="Informations légales" :items="legalMenu" :active="page">
     <article class="legal-view" :aria-labelledby="`legal-${page}-title`">
       <header>
         <h2 :id="`legal-${page}-title`">{{ document.title }}</h2>
@@ -23,14 +23,13 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import Button from '@/components/base/Button.vue';
-import SidebarLayout, { type SidebarItem } from '@/components/base/SidebarLayout.vue';
-import { LEGAL_PAGES, isLegalPage, legalDocuments, type LegalPage } from '@/lib/legalDocuments';
+import SidebarLayout from '@/components/base/SidebarLayout.vue';
+import { isLegalPage, legalDocuments, legalMenu, type LegalPage } from '@/lib/legalDocuments';
 import { useConsentStore } from '@/stores/useConsentStore';
 
 const route = useRoute(); const consent = useConsentStore();
 const page = computed<LegalPage>(() => isLegalPage(route.params.page) ? route.params.page : 'mentions-legales');
 const document = computed(() => legalDocuments[page.value]);
-const menu: SidebarItem[] = LEGAL_PAGES.map(key => ({ key, label: legalDocuments[key].title, to: { name: 'legal', params: { page: key } } }));
 </script>
 
 <style scoped>

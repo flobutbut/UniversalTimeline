@@ -7,10 +7,11 @@ Ce document décrit ce qui est en place dans l’application et ce qui reste à 
 | Exigence | Mise en œuvre |
 | --- | --- |
 | Information (art. 13) | Pages publiques `/legal/mentions-legales`, `/legal/confidentialite`, `/legal/cookies`, `/legal/conditions`, liées depuis l’inscription, la page de connexion, l’accueil, le menu utilisateur et le profil. |
+| Contact et exercice des droits | Adresse unique `CONTACT_EMAIL` (`src/lib/legalDocuments.ts`, actuellement florian@universaltimeline.net), page publique `/contact` : sujets pré-remplis (question, signalement, données personnelles, problème technique) par lien `mailto:`, sans formulaire ni stockage côté site. Réponse aux demandes de droits sous un mois (art. 12.3). |
 | Minimisation | Compte : e-mail et mot de passe (Supabase Auth). Profil : nom d’utilisateur, couleur et icône d’avatar (aucune photo), version et date d’acceptation des conditions. |
 | Acceptation des conditions | Case obligatoire à l’inscription ; la version (`CURRENT_TERMS_VERSION`, `server/src/shared/accountRules.ts`) et la date sont enregistrées par le trigger d’inscription. Une nouvelle version est proposée à l’acceptation dans Profil → Données et confidentialité. |
 | Droit d’accès et portabilité (art. 15, 20) | Profil → « Télécharger (JSON) » : compte, profil, frises avec leurs périodes, événements et catégories (`GET /api/profile/export`). |
-| Rectification (art. 16) | Profil : nom d’utilisateur et avatar ; le nom suit sur les frises existantes. L’e-mail se modifie par le service d’authentification [À compléter : parcours de changement d’e-mail dans l’interface]. |
+| Rectification (art. 16) | Profil : nom d’utilisateur et avatar ; le nom suit sur les frises existantes. L’e-mail se modifie depuis Profil → Adresse e-mail (lien de confirmation envoyé par Supabase Auth). |
 | Effacement (art. 17) | Profil → « Supprimer définitivement » (confirmation par saisie du nom) : `account_private.delete_own_account()` supprime les frises puis le compte ; le profil suit par cascade. Le catalogue partagé (périodes, événements) est conservé. |
 | Sécurité (art. 32) | RLS : chaque compte ne lit et ne modifie que sa ligne de profil ; routines du compte hors du schéma exposé par la Data API ; HTTPS. |
 | Cookies (art. 82 loi Informatique et Libertés) | `useConsentStore` + bandeau `CookieConsent`. Le bandeau n’apparaît que si `VITE_ANALYTICS_PROVIDER` est défini : refus aussi simple que l’acceptation, choix conservé six mois puis redemandé, retrait possible à tout moment (politique cookies, profil). |
@@ -37,7 +38,7 @@ Ce document décrit ce qui est en place dans l’application et ce qui reste à 
 
 ## Reste à faire hors code
 
-- Identité de l’éditeur, du directeur de publication, du responsable de traitement et adresse de contact « données personnelles ».
+- Projet personnel non commercial édité par un particulier (pas de SIREN) : reste à choisir entre publier le nom de l’éditeur ou l’anonymat permis par la LCEN (art. 6, III, 2) après communication de son identité à l’hébergeur. L’adresse e-mail de contact est en place.
 - Accords de sous-traitance (DPA) avec Supabase, Vercel et PostHog ; garanties de transfert hors UE pour Vercel.
 - Durées de conservation (comptes inactifs, journaux), âge minimum, licence des contenus publiés, modération.
-- Configuration Supabase Auth : modèles d’e-mails en français mentionnant la politique de confidentialité.
+- Configuration Supabase Auth : SMTP Hostinger puis modèles d’e-mails en français à coller depuis `Documentation/emails/` (ils mentionnent la politique de confidentialité et le contact).

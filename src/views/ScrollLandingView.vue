@@ -96,7 +96,7 @@ onBeforeUnmount(() => { alive = false; });
         <li v-for="item in journeyChapters" :key="item.id"><h3>{{ item.label }}</h3><p>{{ item.date }}</p><p>{{ item.description }}</p><a v-if="item.source" :href="item.source.url" target="_blank" rel="noopener noreferrer">Source : {{ item.source.name }}<span class="sr-only"> (nouvel onglet)</span></a></li>
       </ol>
     </details>
-    <footer class="journey-footer"><RouterLink to="/">Revoir le premier concept</RouterLink><a href="#lecture" @click="transcriptOpen = true">Repères et sources</a><RouterLink to="/timeline">Entrer dans l’application</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">Mentions légales</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">Confidentialité</RouterLink></footer>
+    <footer class="journey-footer"><RouterLink to="/">Revoir le premier concept</RouterLink><a href="#lecture" @click="transcriptOpen = true">Repères et sources</a><RouterLink to="/timeline">Entrer dans l’application</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">Mentions légales</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">Confidentialité</RouterLink><RouterLink :to="{ name: 'contact' }">Contact</RouterLink></footer>
   </div>
 </template>
 

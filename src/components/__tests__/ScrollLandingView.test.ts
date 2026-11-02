@@ -25,6 +25,7 @@ async function start() {
     { path: '/', name: 'landing', component: page }, { path: '/voyage', name: 'landing-scroll', component: page },
     { path: '/timeline', name: 'timeline', component: page }, { path: '/login', name: 'login', component: page },
     { path: '/database', name: 'database', component: page }, { path: '/legal/:page', name: 'legal', component: page },
+    { path: '/contact', name: 'contact', component: page },
   ] });
   await router.push('/voyage'); await router.isReady();
   view = mount(ScrollLandingView, { global: { plugins: [pinia, router] } });

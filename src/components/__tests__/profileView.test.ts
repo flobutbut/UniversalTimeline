@@ -24,7 +24,7 @@ async function start(path = '/profile', profile: AccountProfile | null = saved) 
   const data = useDataStore(pinia);
   data.stories = [story('1', 'alice'), story('2', 'alice'), story('3', 'bob')];
   vi.spyOn(data, 'ensureStoriesLoaded').mockResolvedValue();
-  vi.spyOn(authService, 'getIdentity').mockResolvedValue({ email: 'alice@example.test', createdAt: new Date('2026-10-29T09:07:58Z') });
+  vi.spyOn(authService, 'getIdentity').mockResolvedValue({ email: 'alice@example.test', newEmail: null, createdAt: new Date('2026-10-29T09:07:58Z') });
   router = createRouter({ history: createMemoryHistory(), routes: appRoutes.map(route => 'component' in route ? { ...route, component: { template: '<div />' } } : route) });
   await router.push(path); await router.isReady();
   view = mount(ProfileView, { global: { plugins: [pinia, router] } });
