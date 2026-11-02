@@ -42,13 +42,13 @@
         @click.stop="onRowActionClick"
         :aria-label="`${wikidataOnly ? 'Ajouter' : 'Modifier'} ${label.fr}`"
       >
-        {{ wikidataOnly ? 'Add' : 'Edit' }}
+        {{ wikidataOnly ? 'Ajouter' : 'Modifier' }}
       </button>
       <div v-if="!hideChevron" class="finder-item-chevron">
         <ChevronIcon
           :width="16"
           :height="16"
-          :color="selected ? 'var(--color-text-white)' : 'var(--color-text-light)'"
+          :color="selected ? 'var(--color-text-on-selected)' : 'var(--color-text-secondary)'"
           :style="{ opacity: chevronOpacity }"
         />
       </div>
@@ -82,7 +82,7 @@ const props = defineProps<{
   categories?: Category[];
   /** Désactive le drag HTML5 (ex. périodes d'une story en mode colonnes). */
   draggable?: boolean;
-  /** Masque le bouton Edit / Add en fin de ligne. */
+  /** Masque le bouton Modifier / Ajouter en fin de ligne. */
   hideRowAction?: boolean;
   /** Masque le chevron (ex. liste d'événements avec actions custom). */
   hideChevron?: boolean;
@@ -142,16 +142,16 @@ function onRowActionClick() {
   position: relative;
   padding: var(--spacing-sm) var(--spacing-md);
   cursor: pointer;
-  color: var(--color-text);
-  transition: all 0.2s ease;
+  color: var(--color-text-primary);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
   font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
+  line-height: var(--line-height-body);
   outline: none;
   min-height: auto;
   height: auto;
   display: flex;
   align-items: center;
-  background: var(--color-surface);
+  background: var(--color-surface-default);
   border: none;
   border-bottom: 1px solid var(--color-border-light);
   width: 100%;
@@ -159,7 +159,6 @@ function onRowActionClick() {
 }
 
 .finder-item-content {
-  padding: 0;
   border: 0;
   background: none;
   font: inherit;
@@ -179,21 +178,21 @@ function onRowActionClick() {
   gap: 0;
   row-gap: 0;
   min-width: 0;
-  line-height: var(--line-height-tight);
+  line-height: var(--line-height-control);
 }
 
 .finder-item-title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  line-height: var(--line-height-tight);
+  line-height: var(--line-height-control);
   margin: 0;
   padding: 0;
 }
 
 .finder-item-dates {
   font-size: var(--font-size-xs);
-  line-height: var(--line-height-tight);
+  line-height: var(--line-height-control);
   color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;
@@ -203,7 +202,7 @@ function onRowActionClick() {
 }
 
 .finder-item.selected .finder-item-dates {
-  color: color-mix(in srgb, var(--color-text-white) 82%, transparent);
+  color: var(--color-text-on-selected);
 }
 
 .finder-item-label-wikidata {
@@ -211,7 +210,7 @@ function onRowActionClick() {
 }
 
 .finder-item.selected .finder-item-label-wikidata {
-  color: var(--color-wikidata-label-on-primary);
+  color: var(--color-wikidata-label-on-selected);
 }
 
 .finder-item-actions {
@@ -234,7 +233,7 @@ function onRowActionClick() {
   border: none;
   padding: 0;
   margin:0 6px;
-  color: var(--color-primary);
+  color: var(--color-text-link);
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -259,27 +258,27 @@ function onRowActionClick() {
   opacity: 1;
 }
 
-.finder-item.selected button:focus-visible { outline: 2px solid var(--color-text-white); outline-offset: -2px; }
+.finder-item.selected button:focus-visible { outline: 2px solid var(--color-text-on-selected); outline-offset: -2px; }
 @media (hover: none) { .row-action-button { opacity: 1; } }
 
 .finder-item.selected .action-button {
-  color: var(--color-text-white);
+  color: var(--color-text-on-selected);
 }
 
 .finder-item.selected .action-button:hover {
-  color: color-mix(in srgb, var(--color-text-white) 88%, transparent);
+  color: color-mix(in srgb, var(--color-text-on-selected) 88%, transparent);
 }
 
 .finder-item:hover {
-  background: var(--color-surface-hover);
+  background: var(--color-interaction-hover);
 }
 
 .finder-item.selected {
   border: none;
   border-bottom: 1px solid var(--color-border-light);
   box-shadow: none;
-  background: var(--color-primary);
-  color: var(--color-text-white);
+  background: var(--color-interaction-selected);
+  color: var(--color-text-on-selected);
 }
 
 /* Clic = focus (tabindex) : pas de contour sur la sélection */
@@ -320,7 +319,7 @@ function onRowActionClick() {
 }
 
 .finder-item.selected .finder-item-chevron {
-  color: var(--color-text-white);
+  color: var(--color-text-on-selected);
   opacity: 1;
 }
 
@@ -335,11 +334,11 @@ function onRowActionClick() {
 /* Période catalogue hors story (story / finder colonnes) */
 .finder-item--external-catalog:not(.selected) .finder-item-title,
 .finder-item--external-catalog:not(.selected) .finder-item-dates {
-  opacity: 0.58;
+  color: var(--color-text-secondary);
 }
 
 .finder-item--external-catalog:not(.selected):hover .finder-item-title,
 .finder-item--external-catalog:not(.selected):hover .finder-item-dates {
-  opacity: 0.78;
+  color: var(--color-text-primary);
 }
 </style>

@@ -7,12 +7,23 @@ interface StorySnapshotRow extends StoryRow {
   periods: Array<JoinedPeriodRow & Pick<PeriodRow, 'has_children'>>;
   events: JoinedEventRow[];
   child_stories: ChildStoryRow[];
+  parent_stories?: Array<Pick<StoryRow, 'id' | 'title_fr' | 'title_en' | 'owner_user_id'> & { anchors: Array<{ type: 'period' | 'event'; id: string; label_fr: string; label_en: string | null }> }>;
   related_stories: Array<Pick<StoryRow, 'id' | 'title_fr' | 'title_en'> & { period_ids: string[]; event_ids: string[] }>;
 }
 
 /** One statement and one RLS snapshot for the whole frise, including its navigation links. */
 export async function findStorySnapshot(db: TransactionClient, id: string) {
   return (await db.query<StorySnapshotRow>(`
+    WITH entry_links AS (
+      SELECT source_story_id, target_story_id,
+        CASE WHEN period_id IS NOT NULL THEN 'period' ELSE 'event' END AS anchor_type,
+        COALESCE(period_id, event_id) AS anchor_id
+      FROM public.story_entry_points WHERE source_story_id = $1 OR target_story_id = $1
+      UNION
+      SELECT child.parent_story_id, child.id, a.anchor_type, a.anchor_id
+      FROM public.stories child JOIN public.story_anchors a ON a.story_id = child.id
+      WHERE child.parent_story_id IS NOT NULL AND (child.parent_story_id = $1 OR child.id = $1)
+    )
     SELECT s.*,
       (SELECT COALESCE(jsonb_agg(to_jsonb(c) ORDER BY c.id), '[]')
        FROM public.story_categories sc JOIN public.categories c ON c.id = sc.category_id
@@ -36,10 +47,22 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
       ) e) AS events,
       (SELECT COALESCE(jsonb_agg(to_jsonb(child) ORDER BY child.id), '[]') FROM (
         SELECT child.id, child.title_fr, child.title_en,
-          (SELECT COALESCE(jsonb_agg(jsonb_build_object('type', a.anchor_type, 'id', a.anchor_id) ORDER BY a.id), '[]')
-           FROM public.story_anchors a WHERE a.story_id = child.id) AS anchors
+          (SELECT COALESCE(jsonb_agg(jsonb_build_object('type', a.anchor_type, 'id', a.anchor_id) ORDER BY a.anchor_type, a.anchor_id), '[]')
+           FROM entry_links a WHERE a.target_story_id = child.id AND a.source_story_id = s.id) AS anchors
         FROM public.stories child WHERE child.parent_story_id = s.id
+          OR EXISTS (SELECT 1 FROM entry_links a WHERE a.source_story_id = s.id AND a.target_story_id = child.id)
       ) child) AS child_stories,
+      (SELECT COALESCE(jsonb_agg(to_jsonb(parent) ORDER BY parent.title_fr, parent.id), '[]') FROM (
+        SELECT parent.id, parent.title_fr, parent.title_en, parent.owner_user_id,
+          (SELECT COALESCE(jsonb_agg(jsonb_build_object('type', a.anchor_type, 'id', a.anchor_id,
+            'label_fr', COALESCE(p.label_fr, e.label_fr, a.anchor_id), 'label_en', COALESCE(p.label_en, e.label_en))
+            ORDER BY a.anchor_type, a.anchor_id), '[]')
+           FROM entry_links a LEFT JOIN public.periods p ON a.anchor_type = 'period' AND p.id = a.anchor_id
+           LEFT JOIN public.events e ON a.anchor_type = 'event' AND e.id = a.anchor_id
+           WHERE a.source_story_id = parent.id AND a.target_story_id = s.id) AS anchors
+        FROM public.stories parent WHERE parent.id = s.parent_story_id
+          OR EXISTS (SELECT 1 FROM entry_links a WHERE a.source_story_id = parent.id AND a.target_story_id = s.id)
+      ) parent) AS parent_stories,
       (SELECT COALESCE(jsonb_agg(to_jsonb(related) ORDER BY related.id), '[]') FROM (
         SELECT other.id, other.title_fr, other.title_en,
           ARRAY(SELECT link.period_id FROM public.story_periods link
@@ -126,7 +149,7 @@ export async function listAssociatedPeriods(db: TransactionClient, storyId: stri
       ORDER BY p.start_years_bp DESC NULLS LAST
     `, [storyId])).rows;
 }
-export async function insertStory(client: TransactionClient, data: StoryWrite) {
+export async function insertStory(client: TransactionClient, data: StoryWrite & { author: string }) {
   const { title, description, author, isPublic } = data;
   return (await client.query<StoryRow>(`
       INSERT INTO public.stories (
@@ -152,7 +175,7 @@ export async function updateStory(client: TransactionClient, id: string, data: S
         title_en = $2,
         description_fr = $3,
         description_en = $4,
-        author = $5,
+        author = COALESCE($5, author),
         is_public = COALESCE($6, is_public),
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $7
@@ -189,9 +212,18 @@ export async function findSuggestedStories(db: TransactionClient, storyId: strin
     params.push(...ids);
   }
   return (await db.query<Pick<StoryRow, 'id' | 'title_fr' | 'title_en' | 'description_fr' | 'description_en' | 'parent_story_id'>>(`
-    SELECT DISTINCT s.id, s.title_fr, s.title_en, s.description_fr, s.description_en, s.parent_story_id
-    FROM public.stories s JOIN public.story_anchors sa ON sa.story_id = s.id
-    WHERE s.parent_story_id = $1 AND (${conditions.join(' OR ')}) ORDER BY s.id
+    WITH entry_links AS (
+      SELECT child.id AS story_id, child.parent_story_id AS source_story_id, a.anchor_type, a.anchor_id
+      FROM public.stories child JOIN public.story_anchors a ON a.story_id = child.id
+      WHERE child.parent_story_id = $1
+      UNION
+      SELECT target_story_id, source_story_id, CASE WHEN period_id IS NOT NULL THEN 'period' ELSE 'event' END, COALESCE(period_id, event_id)
+      FROM public.story_entry_points WHERE source_story_id = $1
+    )
+    SELECT DISTINCT s.id, s.title_fr, s.title_en, s.description_fr, s.description_en, sa.source_story_id AS parent_story_id
+    FROM public.stories s JOIN entry_links sa ON sa.story_id = s.id
+    JOIN public.stories source ON source.id = sa.source_story_id
+    WHERE sa.source_story_id = $1 AND (${conditions.join(' OR ')}) ORDER BY s.id
   `, params)).rows;
 }
 export async function insertAnchor(db: TransactionClient, storyId: string, anchorType: 'period' | 'event', anchorId: string) {

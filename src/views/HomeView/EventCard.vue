@@ -24,7 +24,7 @@
       <p v-if="isSelected && event.description" class="event-description">{{ event.description.fr || event.description.en }}</p>
       <div v-if="suggestionsLoading" class="event-meta" role="status">Chargement des frises…</div>
       <div v-else-if="suggestionsError" class="event-meta event-meta--error" role="alert">
-        {{ suggestionsError }} <button type="button" @click.stop="$emit('retry-suggestions')">Réessayer</button>
+        {{ suggestionsError }} <Button variant="tertiary" size="sm" type="button" @click.stop="$emit('retry-suggestions')">Réessayer</Button>
       </div>
       <!-- Autres frises contenant l'événement : listées directement, rien s'il n'y en a pas -->
       <section v-if="storySuggestions.length > 0" class="event-stories" aria-label="Autres frises associées à cet événement">
@@ -41,6 +41,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from '@/components/base/Button.vue';
 import { computed } from 'vue';
 import type { ListEvent, StorySuggestion } from '@/types/database';
 import { DateService } from '@/services/DateService';
@@ -94,12 +95,12 @@ const displayDate = computed(() => {
   margin: var(--spacing-sm) 0 0;
   font-size: var(--font-size-sm);
   line-height: var(--line-height-small);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 .event-card.event-card--undated { position: relative; top: auto; height: auto; width: auto; pointer-events: auto; margin-top: var(--spacing-sm); }
-.event-undated-trigger { border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-text); padding: var(--spacing-xs) var(--spacing-sm); cursor: pointer; }
+.event-undated-trigger { border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-surface-default); color: var(--color-text-primary); padding: var(--spacing-xs) var(--spacing-sm); cursor: pointer; }
 .event-card--undated .event-vertical-line { display: none; }
 .event-card.event-card--undated .event-info-box { position: static; transform: none; display: none; opacity: 1; visibility: visible; pointer-events: auto; max-width: 100%; }
 .event-card--undated.is-selected .event-info-box { display: block; }
@@ -134,11 +135,10 @@ const displayDate = computed(() => {
   top: 0;
   left: 0;
   padding: 0;
-  border: 0;
   width: calc(var(--font-size-base) - var(--spacing-xs) / 2);
   height: calc(var(--font-size-base) - var(--spacing-xs) / 2);
-  background-color: var(--color-neutral-900);
-  border: 1.5px solid var(--color-surface);
+  background-color: var(--color-text-heading);
+  border: 1.5px solid var(--color-surface-default);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   pointer-events: auto;
@@ -188,8 +188,8 @@ const displayDate = computed(() => {
   pointer-events: none;
   transition: opacity var(--transition-fast), visibility var(--transition-fast);
   z-index: var(--z-index-tooltip);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-md);
   box-shadow: var(--shadow-lg);
@@ -223,8 +223,8 @@ const displayDate = computed(() => {
 
 .event-label {
   font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
   white-space: normal;
   overflow-wrap: break-word;
   line-height: var(--line-height-body);
@@ -233,7 +233,7 @@ const displayDate = computed(() => {
 .event-date,
 .event-meta {
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   line-height: var(--line-height-small);
 }
 
@@ -246,7 +246,7 @@ const displayDate = computed(() => {
 }
 
 .event-meta--error {
-  color: var(--color-error);
+  color: var(--color-status-error-foreground);
 }
 
 .event-meta button {
@@ -264,7 +264,7 @@ const displayDate = computed(() => {
 .event-stories {
   margin-top: var(--spacing-sm);
   padding-top: var(--spacing-sm);
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border-default);
 }
 
 .event-stories-list {
@@ -284,7 +284,7 @@ const displayDate = computed(() => {
   background: none;
   text-align: left;
   font-size: var(--font-size-sm);
-  color: var(--color-primary);
+  color: var(--color-text-link);
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: background-color var(--transition-fast);
@@ -292,7 +292,7 @@ const displayDate = computed(() => {
 
 .event-story-item:hover,
 .event-story-item:focus-visible {
-  background-color: var(--color-neutral-100);
+  background-color: var(--color-interaction-hover);
   color: var(--color-primary-dark);
 }
 </style>

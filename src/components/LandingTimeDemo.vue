@@ -98,44 +98,44 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.time-demo { border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); overflow: hidden; }
-.demo-toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-lg); padding: var(--spacing-md) var(--spacing-xl); border-bottom: 1px solid var(--color-border); }
+.time-demo { border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-surface-default); overflow: hidden; }
+.demo-toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-lg); padding: var(--spacing-md) var(--spacing-xl); border-bottom: 1px solid var(--color-border-default); }
 .toolbar-label { font-size: var(--font-size-xs); color: var(--color-text-secondary); letter-spacing: .08em; }
 .time-figure { margin: 0; padding: var(--spacing-xl); }
-figcaption { display: flex; justify-content: space-between; gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl); color: var(--color-text-light); font-size: var(--font-size-sm); }
+figcaption { display: flex; justify-content: space-between; gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
 .figure-unit { color: var(--color-text-secondary); font-family: var(--font-family-mono); white-space: nowrap; }
 .plot { display: grid; grid-template-columns: 140px minmax(0, 1fr); align-items: stretch; align-content: start; min-height: 274px; }
-.plot-label { display: flex; align-items: center; padding-right: var(--spacing-lg); font-size: var(--font-size-sm); line-height: var(--line-height-tight); }
+.plot-label { display: flex; align-items: center; padding-right: var(--spacing-lg); font-size: var(--font-size-sm); line-height: var(--line-height-control); }
 .axis-label { font-size: var(--font-size-xs); letter-spacing: .1em; color: var(--color-text-secondary); align-items: start; }
 .plot-axis { position: relative; height: 42px; }
 .axis-tick { position: absolute; transform: translateX(-50%); top: 0; white-space: nowrap; font-size: var(--font-size-xs); font-family: var(--font-family-mono); color: var(--color-text-secondary); }
 .axis-tick--first { transform: none; }.axis-tick--last { transform: translateX(-100%); }
 .plot-lane { position: relative; height: 58px; border-bottom: 1px solid var(--color-border-light); }
 .lane-guide { position: absolute; top: -9px; bottom: 0; width: 1px; background: var(--color-border-light); }
-.tone-period { --band-color: var(--color-period); }.tone-period-root { --band-color: var(--color-period-root); }.tone-event { --band-color: var(--color-event); }.tone-story { --band-color: var(--color-story); }
+.tone-period { --band-color: var(--color-data-period); }.tone-period-root { --band-color: var(--color-data-period-root); }.tone-event { --band-color: var(--color-data-event); }.tone-story { --band-color: var(--color-data-frise); }
 .plot-label:not(.axis-label)::before { content: ''; width: 4px; height: 16px; margin-right: var(--spacing-sm); flex-shrink: 0; background: var(--band-color); border-radius: var(--radius-sm); }
-.duration-band { position: absolute; top: 16px; height: 26px; background: color-mix(in srgb, var(--band-color) 28%, var(--color-surface)); border-block: 1px solid var(--band-color); transition: width var(--transition-slow), left var(--transition-slow); }
+.duration-band { position: absolute; top: 16px; height: 26px; background: color-mix(in srgb, var(--band-color) 28%, var(--color-surface-default)); border-block: 1px solid var(--band-color); transition: width var(--transition-slow), left var(--transition-slow); }
 .duration-band::before,.duration-band::after { content: ''; position: absolute; top: -1px; bottom: -1px; width: 1px; background: var(--band-color); }.duration-band::after { right: 0; }
 .subpixel-marker { position: absolute; top: 11px; width: 1px; height: 36px; background: var(--band-color); }
 .plot-caption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--spacing-sm); margin: var(--spacing-xl) 0 var(--spacing-xs); font-size: var(--font-size-xs); color: var(--color-text-secondary); }
-.human-measure { color: var(--color-story); }.marker-note { margin: 0; font-size: var(--font-size-xs); color: var(--color-text-secondary); }
-.demo-insight { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xl); padding: var(--spacing-xl); background: var(--color-background); border-block: 1px solid var(--color-border); }
-.demo-insight h2 { font-family: var(--font-family-heading); font-size: var(--font-size-2xl); font-weight: 400; line-height: var(--line-height-loose); margin: 0 0 var(--spacing-sm); }
-.demo-insight p { font-size: var(--font-size-sm); color: var(--color-text-light); line-height: var(--line-height-tight); margin: 0; max-width: 620px; }
+.human-measure { color: var(--color-text-link); }.marker-note { margin: 0; font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.demo-insight { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xl); padding: var(--spacing-xl); background: var(--color-background-default); border-block: 1px solid var(--color-border-default); }
+.demo-insight h2 { font-family: var(--font-family-heading); font-size: var(--font-size-2xl); font-weight: var(--font-weight-normal); line-height: var(--line-height-loose); margin: 0 0 var(--spacing-sm); }
+.demo-insight p { font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: var(--line-height-control); margin: 0; max-width: 620px; }
 .demo-insight :deep(.base-button) { flex-shrink: 0; }.demo-insight :deep(.base-button__text) { white-space: normal; }
 .landmark-list { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
-.landmark-list button { position: relative; display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: var(--spacing-xs); padding: var(--spacing-lg); border-right: 1px solid var(--color-border-light); font-size: var(--font-size-xs); color: var(--color-text-light); }
-.landmark-list button:last-child { border-right: 0; }.landmark-list button:hover { background: var(--color-surface-hover); }.landmark-list button[aria-pressed='true'] { background: var(--color-primary-light); color: var(--color-text); }
+.landmark-list button { position: relative; display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: var(--spacing-xs); padding: var(--spacing-lg); border-right: 1px solid var(--color-border-light); font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.landmark-list button:last-child { border-right: 0; }.landmark-list button:hover { background: var(--color-interaction-hover); }.landmark-list button[aria-pressed='true'] { background: var(--color-primary-light); color: var(--color-text-primary); }
 .landmark-list button[aria-pressed='true']::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--color-primary); }
-.landmark-list strong { font-size: var(--font-size-sm); font-weight: 500; line-height: var(--line-height-tight); }.landmark-index { font-family: var(--font-family-mono); color: var(--color-text-secondary); margin-bottom: var(--spacing-xs); }
-.landmark-detail { display: flex; align-items: start; justify-content: space-between; gap: var(--spacing-xl); border-top: 1px solid var(--color-border); padding: var(--spacing-lg) var(--spacing-xl); min-height: 90px; }
-.landmark-detail p { margin: 0; font-size: var(--font-size-sm); color: var(--color-text-light); line-height: var(--line-height-tight); max-width: 740px; }.landmark-detail strong { font-weight: 500; color: var(--color-text); }.landmark-detail a { font-size: var(--font-size-xs); flex-shrink: 0; max-width: 200px; }
+.landmark-list strong { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); line-height: var(--line-height-control); }.landmark-index { font-family: var(--font-family-mono); color: var(--color-text-secondary); margin-bottom: var(--spacing-xs); }
+.landmark-detail { display: flex; align-items: start; justify-content: space-between; gap: var(--spacing-xl); border-top: 1px solid var(--color-border-default); padding: var(--spacing-lg) var(--spacing-xl); min-height: 90px; }
+.landmark-detail p { margin: 0; font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: var(--line-height-control); max-width: 740px; }.landmark-detail strong { font-weight: var(--font-weight-medium); color: var(--color-text-primary); }.landmark-detail a { font-size: var(--font-size-xs); flex-shrink: 0; max-width: 200px; }
 @media (max-width: 850px) {
   .demo-toolbar { align-items: stretch; flex-direction: column; gap: var(--spacing-sm); }.demo-insight { align-items: start; flex-direction: column; }.landmark-detail { flex-direction: column; gap: var(--spacing-sm); }.landmark-list { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); }.landmark-list button { border-bottom: 1px solid var(--color-border-light); }
 }
 @media (max-width: 540px) {
   .demo-toolbar,.time-figure,.demo-insight { padding: var(--spacing-lg); }.demo-toolbar :deep(.tabs) { justify-content: space-between; }.demo-toolbar :deep(.tab-button) { padding-inline: var(--spacing-xs); }.demo-toolbar :deep(.tab-button__label) { white-space: normal; }
   figcaption { flex-direction: column; gap: var(--spacing-xs); margin-bottom: var(--spacing-xl); }.plot { grid-template-columns: 80px minmax(0, 1fr); }.plot-label { font-size: var(--font-size-xs); padding-right: var(--spacing-sm); }.plot-label:not(.axis-label)::before { width: 3px; margin-right: var(--spacing-xs); }.plot-lane { height: 56px; }.axis-tick:nth-child(even):not(.axis-tick--last) { display: none; }.axis-tick--last { top: 16px; }.plot-axis { height: 47px; }
-  .demo-insight h2 { font-size: var(--font-size-xl); line-height: var(--line-height-relaxed); }.landmark-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }.landmark-list button { padding: var(--spacing-md); }.landmark-detail { padding: var(--spacing-lg); }.marker-note { line-height: var(--line-height-tight); }
+  .demo-insight h2 { font-size: var(--font-size-xl); line-height: var(--line-height-relaxed); }.landmark-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }.landmark-list button { padding: var(--spacing-md); }.landmark-detail { padding: var(--spacing-lg); }.marker-note { line-height: var(--line-height-control); }
 }
 </style>

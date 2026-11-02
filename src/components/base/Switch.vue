@@ -76,7 +76,7 @@ const switchId = useId();
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--color-surface-hover);
+  background-color: var(--color-switch-track-off);
   border-radius: calc(var(--radius-lg) + var(--spacing-xs));
   transition: background-color var(--transition-fast);
 }
@@ -87,7 +87,7 @@ const switchId = useId();
   left: calc(var(--spacing-xs) / 2);
   width: calc(var(--spacing-lg) + var(--spacing-xs));
   height: calc(var(--spacing-lg) + var(--spacing-xs));
-  background-color: var(--color-surface);
+  background-color: var(--color-switch-thumb);
   border-radius: 50%;
   box-shadow: var(--shadow-sm);
   transition: transform var(--transition-fast);
@@ -101,9 +101,10 @@ const switchId = useId();
   transform: translateX(calc(var(--spacing-lg) + var(--spacing-xs)));
 }
 
+.switch__button:disabled { opacity: .5; cursor: not-allowed; }
+
 .switch__label {
-  font-size: var(--font-size-base);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   user-select: none;
 }
 
@@ -137,7 +138,9 @@ const switchId = useId();
   );
 }
 
-.switch--sm .switch__label {
+.switch--sm .switch__button:disabled { opacity: .5; cursor: not-allowed; }
+
+.switch__label {
   font-size: var(--font-size-xs);
   line-height: 1.2;
   white-space: nowrap;

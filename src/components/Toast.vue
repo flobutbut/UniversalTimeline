@@ -20,7 +20,7 @@ defineProps<{ notification: Notification | null }>();
   right: calc(var(--spacing-lg) + var(--spacing-xs));
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--radius-md);
-  color: var(--color-text-white);
+  color: var(--color-text-on-accent);
   font-size: var(--font-size-sm);
   z-index: var(--z-index-tooltip);
   box-shadow: var(--shadow-lg);
@@ -33,11 +33,11 @@ defineProps<{ notification: Notification | null }>();
 }
 
 .toast.success {
-  background-color: var(--color-success);
+  background-color: var(--color-status-success-foreground);
 }
 
 .toast.error {
-  background-color: var(--color-error);
+  background-color: var(--color-status-error-foreground);
 }
 
 .toast-enter-active,

@@ -1,5 +1,5 @@
 <template>
-  <div class="filter-bar" :class="{ 'filter-bar--no-title': hideTitle }">
+  <div class="filter-bar" :class="{ 'filter-bar--no-title': hideTitle, 'filter-bar--panel': layout === 'panel' }">
     <h2 v-if="!hideTitle" class="filter-bar__title">{{ resolvedTitle }}</h2>
     <div class="filter-bar__filters">
       <div
@@ -23,9 +23,9 @@
           @keydown.up.prevent="focusResults(-1)"
         />
         <Teleport to="body">
-          <div
+          <PopoverSurface
             v-if="dropdownVisible"
-            ref="dropdownRef"
+            :ref="dropdownRefElement"
             class="filter-bar-dd"
             :style="dropdownStyle"
             :id="panelId"
@@ -39,7 +39,7 @@
             <div v-if="searchLoading" class="filter-bar-dd__empty" role="status">Recherche en cours…</div>
             <div v-else-if="searchError" class="filter-bar-dd__empty" role="alert">
               {{ searchError }}
-              <button type="button" @mousedown.prevent @click="$emit('retrySearch')">Réessayer</button>
+              <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="$emit('retrySearch')">Réessayer</Button>
             </div>
             <template v-else-if="mode === 'periods'">
               <div v-if="!suggestions.length" class="filter-bar-dd__empty" role="status">Aucun résultat</div>
@@ -82,7 +82,7 @@
                 </div>
               </template>
             </template>
-          </div>
+          </PopoverSurface>
         </Teleport>
       </div>
       <div class="filter-bar__select">
@@ -105,6 +105,8 @@
 </template>
 
 <script setup lang="ts">
+import { elementRef } from '@/utils/elementRef';
+import PopoverSurface from '@/components/base/PopoverSurface.vue';
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import SearchInput from '@/components/base/SearchInput.vue';
 import Select from '@/components/base/Select.vue';
@@ -123,6 +125,7 @@ const props = withDefaults(
   defineProps<{
     /** `events` : recherche / liste d'autocomplétion pour les événements. */
     mode?: 'periods' | 'events';
+    layout?: 'default' | 'panel';
     /** Masque le titre (h2) à gauche du header. */
     hideTitle?: boolean;
     hideAdd?: boolean;
@@ -170,6 +173,7 @@ const searchWrapRef = ref<HTMLElement | null>(null);
 const searchInputRef = ref<{ focus: () => void }>();
 const panelId = generateDomUid('search-panel');
 const dropdownRef = ref<HTMLElement | null>(null);
+const dropdownRefElement = elementRef(dropdownRef);
 const dropdownStyle = ref<Record<string, string>>({});
 const panelOpen = ref(false);
 let blurTimer: ReturnType<typeof setTimeout> | undefined;
@@ -316,8 +320,8 @@ onUnmounted(() => {
   gap: var(--spacing-sm);
   flex-shrink: 0;
   padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-default);
+  border-bottom: 1px solid var(--color-border-default);
   box-sizing: border-box;
   min-width: 0;
 }
@@ -325,8 +329,8 @@ onUnmounted(() => {
 .filter-bar__title {
   margin: 0;
   font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -376,6 +380,14 @@ onUnmounted(() => {
   .filter-bar__filters { flex-wrap: wrap; }
   .filter-bar__search-wrap, .filter-bar__select { flex-basis: 100%; max-width: none; }
 }
+
+.filter-bar--panel { padding: var(--spacing-md); min-height: 54px; }
+.filter-bar--panel .filter-bar__filters { flex: 0 1 504px; }
+.filter-bar--panel .filter-bar__search-wrap { flex: 0 1 256px; }
+.filter-bar--panel .filter-bar__select { flex: 0 1 240px; }
+.filter-bar--panel .filter-bar__slot-actions { margin-left: auto; }
+@media (max-width: 640px) { .filter-bar--panel .filter-bar__filters { flex: 1 1 100%; } }
+@media (max-width: 400px) { .filter-bar--panel .filter-bar__search-wrap, .filter-bar--panel .filter-bar__select { flex-basis: 100%; } }
 </style>
 
 <style>
@@ -383,10 +395,6 @@ onUnmounted(() => {
 .filter-bar-dd {
   position: fixed;
   z-index: var(--z-index-search-layer);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-xl);
   max-height: min(55vh, calc(var(--spacing-xs) * 105));
   overflow-y: auto;
   box-sizing: border-box;
@@ -395,7 +403,7 @@ onUnmounted(() => {
 .filter-bar-dd__empty {
   padding: var(--spacing-md);
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-style: italic;
 }
 
@@ -407,11 +415,11 @@ onUnmounted(() => {
   padding: var(--spacing-xs) var(--spacing-md);
   border: none;
   border-bottom: 1px solid var(--color-border-light);
-  background: var(--color-surface);
+  background: var(--color-surface-default);
   cursor: pointer;
   text-align: left;
   font: inherit;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   transition: background var(--transition-fast);
 }
 
@@ -422,7 +430,7 @@ onUnmounted(() => {
 .filter-bar-dd__choose { display: flex; flex: 1; min-width: 0; align-items: center; gap: var(--spacing-sm); text-align: left; min-height: 32px; }
 
 .filter-bar-dd__item:hover {
-  background: var(--color-surface-hover);
+  background: var(--color-interaction-hover);
 }
 
 .filter-bar-dd__label {
@@ -437,7 +445,7 @@ onUnmounted(() => {
 .filter-bar-dd__meta {
   flex-shrink: 0;
   font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   max-width: 40%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -451,7 +459,7 @@ onUnmounted(() => {
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--color-primary);
+  color: var(--color-text-link);
   cursor: pointer;
 }
 

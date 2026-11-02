@@ -27,10 +27,8 @@ beforeEach(async () => {
   confirm = mount(UiFeedbackHost, { attachTo: document.body });
   view = mount(PeriodsView, { attachTo: document.body });
   await flushPromises();
-  await view.get('.finder-item').trigger('click');
-  await flushPromises();
-  await view.get('.finder-item').trigger('mouseenter');
-  await view.findAll('button').find(button => button.text() === 'Edit')!.trigger('click');
+  await view.get('.table-row').trigger('mouseenter');
+  await view.findAll('button').find(button => button.text() === 'Modifier')!.trigger('click');
   await flushPromises();
 });
 afterEach(() => { view?.unmount(); confirm?.unmount(); vi.restoreAllMocks(); });
@@ -47,7 +45,7 @@ it('opens the real confirmation from Graph > Edit > Supprimer and cancels withou
   await flushPromises();
   expect(apiClient.delete).not.toHaveBeenCalled();
   expect(view.findComponent(EditModal).exists()).toBe(true);
-  expect(view.get('.finder-item').text()).toContain('Période de test');
+  expect(view.get('.table-row').text()).toContain('Période de test');
 });
 
 it('keeps the edit form and graph intact when the API refuses a linked period', async () => {
@@ -57,19 +55,19 @@ it('keeps the edit form and graph intact when the API refuses a linked period', 
   await flushPromises();
   expect(toast.show).toHaveBeenLastCalledWith('Cette période possède 1 sous-période.', 'error', undefined);
   expect(view.findComponent(EditModal).exists()).toBe(true);
-  expect(view.get('.finder-item').text()).toContain('Période de test');
+  expect(view.get('.table-row').text()).toContain('Période de test');
 });
 
 it('closes the edit form and removes the row and obsolete selection columns after success', async () => {
   vi.mocked(apiClient.delete).mockResolvedValue({ id: 'leaf', parent: null });
-  expect(view.findAll('.finder-column')).toHaveLength(1);
+  expect(view.findAll('[role="table"]')).toHaveLength(1);
   await requestDeletion();
   await new DOMWrapper(document.body).get('[role="alertdialog"]').findAll('button').find(button => button.text() === 'Confirmer')!.trigger('click');
   await flushPromises();
   expect(apiClient.delete).toHaveBeenCalledWith('/periods/leaf');
   expect(view.findComponent(EditModal).exists()).toBe(false);
-  expect(view.findAll('.finder-item')).toHaveLength(0);
-  expect(view.findAll('.finder-column')).toHaveLength(1);
+  expect(view.findAll('.table-row')).toHaveLength(0);
+  expect(view.findAll('[role="table"]')).toHaveLength(1);
   expect(toast.show).toHaveBeenLastCalledWith('Élément supprimé avec succès', 'success', undefined);
 });
 

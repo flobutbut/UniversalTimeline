@@ -27,7 +27,7 @@ it('shows the frise settings as text without a form in read-only mode', async ()
   expect(view.get('dl').text()).not.toContain('Histoire');
   expect(button('Enregistrer')).toBeUndefined();
   expect(button('Supprimer la frise')).toBeUndefined();
-  expect(view.text()).not.toContain('Danger zone');
+  expect(view.text()).not.toContain('Actions sensibles');
 });
 
 it('reveals save and cancel only while the draft differs from the frise', async () => {

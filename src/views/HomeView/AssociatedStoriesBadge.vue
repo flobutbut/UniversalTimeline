@@ -8,7 +8,7 @@
     <Teleport to="body">
       <template v-if="open">
         <div class="associated-stories__backdrop" aria-hidden="true" @mousedown.prevent @click.stop="close()" />
-        <section ref="panel" :id="panelId" class="associated-stories__panel" :style="panelStyle" role="dialog"
+        <PopoverSurface padded :ref="panelElement" :id="panelId" class="associated-stories__panel" :style="panelStyle" role="dialog"
           :aria-labelledby="`${panelId}-title`" @click.stop @focusout="onFocusOut" @keydown="onPanelKeydown">
           <header class="associated-stories__header">
             <div><h4 :id="`${panelId}-title`">Frises associées</h4><p>{{ periodLabel }}</p></div>
@@ -16,20 +16,23 @@
           </header>
           <p v-if="loading" class="associated-stories__status" role="status">Chargement des frises…</p>
           <div v-else-if="error" class="associated-stories__status" role="alert">
-            {{ error }} <button type="button" @click="retry">Réessayer</button>
+            {{ error }} <Button variant="tertiary" size="sm" type="button" @click="retry">Réessayer</Button>
           </div>
           <p v-else-if="!stories.length" class="associated-stories__status">Aucune frise associée à cette période.</p>
           <button v-for="story in stories" v-else :key="story.id" type="button" class="associated-stories__item" @click="select(story.id)">
             <span><strong>{{ story.title.fr || story.title.en }}</strong><small v-if="story.description?.fr || story.description?.en">{{ story.description.fr || story.description.en }}</small></span>
             <span aria-hidden="true">→</span>
           </button>
-        </section>
+        </PopoverSurface>
       </template>
     </Teleport>
   </span>
 </template>
 
 <script setup lang="ts">
+import Button from '@/components/base/Button.vue';
+import { elementRef } from '@/utils/elementRef';
+import PopoverSurface from '@/components/base/PopoverSurface.vue';
 import { computed, nextTick, onDeactivated, onScopeDispose, ref, watch } from 'vue';
 import type { StorySuggestion } from '@/types/database';
 import { generateDomUid } from '@/utils/generateDomUid';
@@ -40,6 +43,7 @@ const retry = () => emit('retry');
 const open = ref(false);
 const trigger = ref<HTMLButtonElement | null>(null);
 const panel = ref<HTMLElement | null>(null);
+const panelElement = elementRef(panel);
 const panelId = generateDomUid('associated-stories');
 const panelStyle = ref<{ top: string; left: string; width: string }>({ top: '0px', left: '0px', width: '360px' });
 const badgeLabel = computed(() => props.loading ? 'Chargement des frises associées'
@@ -96,22 +100,22 @@ onScopeDispose(() => { window.removeEventListener('resize', position); window.re
 
 <style scoped>
 .associated-stories { display: inline-flex; flex-shrink: 0; align-self: center; max-width: 100%; min-width: 0; overflow: hidden; }
-.associated-stories__badge { display: inline-flex; align-items: center; gap: 4px; min-width: 0; max-width: 100%; height: 24px; padding: 2px 6px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); font-size: var(--font-size-xs); line-height: 16px; white-space: nowrap; font-variant-numeric: tabular-nums; cursor: pointer; }
+.associated-stories__badge { display: inline-flex; align-items: center; gap: var(--spacing-xs); min-width: 0; max-width: 100%; height: 24px; padding: 2px 6px; border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-surface-default); color: var(--color-text-primary); font-size: var(--font-size-xs); line-height: var(--line-height-small); white-space: nowrap; font-variant-numeric: tabular-nums; cursor: pointer; }
 .associated-stories__badge > span { overflow: hidden; text-overflow: ellipsis; }
 .associated-stories__badge:focus-visible { outline-offset: -2px; }
-.associated-stories__badge:hover, .associated-stories__badge[aria-expanded="true"] { background: var(--color-surface-hover); border-color: var(--color-primary); }
+.associated-stories__badge:hover, .associated-stories__badge[aria-expanded="true"] { background: var(--color-interaction-hover); border-color: var(--color-primary); }
 .associated-stories__badge:disabled { opacity: .5; cursor: default; }
 .associated-stories__badge:focus-visible, .associated-stories__panel button:focus-visible { outline: 2px solid var(--color-border-focus); }
 .associated-stories__panel button:focus-visible { outline-offset: 2px; }
 .associated-stories__backdrop { position: fixed; inset: 0; z-index: var(--z-index-dropdown, 100); }
-.associated-stories__panel { position: fixed; z-index: calc(var(--z-index-dropdown, 100) + 1); max-height: calc(100dvh - 24px); overflow-y: auto; padding: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-lg); }
-.associated-stories__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 4px 4px 8px; }
-.associated-stories__header h4 { margin: 0; font-size: var(--font-size-base); font-weight: 600; }
+.associated-stories__panel { position: fixed; z-index: calc(var(--z-index-dropdown, 100) + 1); max-height: calc(100dvh - 24px); overflow-y: auto;  }
+.associated-stories__header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-md); padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-sm); }
+.associated-stories__header h4 { margin: 0; font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); }
 .associated-stories__header p { margin: 2px 0 0; font-size: var(--font-size-sm); color: var(--color-text-secondary); overflow-wrap: anywhere; }
 .associated-stories__close { flex: 0 0 24px; height: 24px; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-secondary); cursor: pointer; font-size: 18px; }
-.associated-stories__item { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 10px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text); text-align: left; cursor: pointer; }
-.associated-stories__item:hover, .associated-stories__close:hover { background: var(--color-surface-hover); }
-.associated-stories__item strong { display: block; font-size: var(--font-size-base); font-weight: 500; overflow-wrap: anywhere; }
-.associated-stories__item small { display: block; margin-top: 4px; color: var(--color-text-secondary); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
+.associated-stories__item { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); width: 100%; padding: 10px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-primary); text-align: left; cursor: pointer; }
+.associated-stories__item:hover, .associated-stories__close:hover { background: var(--color-interaction-hover); }
+.associated-stories__item strong { display: block; font-size: var(--font-size-base); font-weight: var(--font-weight-medium); overflow-wrap: anywhere; }
+.associated-stories__item small { display: block; margin-top: var(--spacing-xs); color: var(--color-text-secondary); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
 .associated-stories__status { margin: 0; padding: 10px; font-size: var(--font-size-sm); color: var(--color-text-secondary); }
 </style>

@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import Button from '@/components/base/Button.vue';
 import { RouterView } from 'vue-router'
 import Header from '@/components/Header.vue'
 import UiFeedbackHost from '@/components/UiFeedbackHost.vue'
+import CookieConsent from '@/components/CookieConsent.vue'
 import { useAppNavigation } from '@/composables/useAppNavigation'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { computed, watch } from 'vue'
@@ -31,7 +33,7 @@ watch([() => auth.identityVersion, allowed], () => {
     />
     <div v-if="loading" class="navigation-status" role="status">Chargement de la page…</div>
     <div v-if="error" class="navigation-status" role="alert">
-      {{ error }} <button type="button" @click="retry">Réessayer</button>
+      {{ error }} <Button variant="tertiary" size="sm" type="button" @click="retry">Réessayer</Button>
     </div>
     <main id="main-content" class="main-content" tabindex="-1" :aria-busy="loading">
       <RouterView v-if="allowed" v-slot="{ Component, route: activeRoute }">
@@ -41,6 +43,7 @@ watch([() => auth.identityVersion, allowed], () => {
       </RouterView>
     </main>
     <UiFeedbackHost />
+    <CookieConsent />
   </div>
 </template>
 
@@ -53,11 +56,11 @@ watch([() => auth.identityVersion, allowed], () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background-color: var(--color-background);
-  color: var(--color-text);
+  background-color: var(--color-background-default);
+  color: var(--color-text-primary);
 }
 
-.skip-link { position: fixed; top: var(--spacing-sm); left: var(--spacing-sm); transform: translateY(-200%); z-index: var(--z-index-search-layer); background: var(--color-surface); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); }
+.skip-link { position: fixed; top: var(--spacing-sm); left: var(--spacing-sm); transform: translateY(-200%); z-index: var(--z-index-search-layer); background: var(--color-surface-default); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); }
 .skip-link:focus { transform: none; }
 
 .navigation-status {
@@ -73,7 +76,7 @@ watch([() => auth.identityVersion, allowed], () => {
   flex-direction: column;
   gap: var(--spacing-md);
   overflow: hidden;
-  background-color: var(--color-background);
+  background-color: var(--color-background-default);
   min-height: 0;
   height: 100%;
 }
@@ -83,18 +86,6 @@ watch([() => auth.identityVersion, allowed], () => {
   min-height: 0;
 }
 
-.app--landing .main-content { background: var(--color-background); }
+.app--landing .main-content { background: var(--color-background-default); }
 
-:global(body) {
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-background);
-  color: var(--color-text);
-  height: 100vh;
-  overflow: hidden;
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
-}
 </style>

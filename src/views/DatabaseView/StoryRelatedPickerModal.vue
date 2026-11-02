@@ -1,6 +1,8 @@
 <template>
   <ModalShell title="Ajouter des frises liées" @close="$emit('close')">
     <div class="search-bar">
+      <BaseSelect v-if="periods" v-model="periodId" label="Période de rattachement" placeholder="Choisir une période…"
+        :options="periods.map(period => ({ value: period.id, label: period.label.fr }))" searchable />
       <SearchInput v-model="search" placeholder="Rechercher une frise…" autofocus />
     </div>
 
@@ -19,6 +21,7 @@
         >
           <input
             type="checkbox"
+            :aria-label="`Sélectionner ${s.title.fr || s.title.en}`"
             :checked="checkedIds.has(s.id)"
             :disabled="excludedIds.has(s.id)"
             @change.stop="toggle(s.id)"
@@ -33,10 +36,10 @@
     </div>
 
     <template #footer-left>
-      <PickerSelectionCount :count="checkedIds.size" />
+      <span class="picker-selection-count">{{ checkedIds.size }} sélectionné(s)</span>
     </template>
     <template #footer-right>
-      <PickerModalAddButton :disabled="checkedIds.size === 0" @click="confirm" />
+      <Button :disabled="checkedIds.size === 0 || (!!periods && !periodId)" @click="confirm">Ajouter</Button>
     </template>
   </ModalShell>
 </template>
@@ -48,24 +51,27 @@ import { useDataStore } from '@/stores/useDataStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import ModalShell from '@/components/base/ModalShell.vue';
 import SearchInput from '@/components/base/SearchInput.vue';
-import PickerSelectionCount from './PickerSelectionCount.vue';
-import PickerModalAddButton from './PickerModalAddButton.vue';
-import type { ListStory } from '@/types/database';
+import BaseSelect from '@/components/base/Select.vue';
+
+import Button from '@/components/base/Button.vue';
+import type { ListStory, Period } from '@/types/database';
 
 const props = defineProps<{
   /** Story courante + déjà liées : non sélectionnables. */
   excludeStoryIds: string[];
+  periods?: Period[];
 }>();
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'confirm', ids: string[]): void;
+  (e: 'confirm', ids: string[], periodId?: string): void;
 }>();
 
 const dataStore = useDataStore();
 const auth = useAuthStore();
 const { stories } = storeToRefs(dataStore);
 const search = ref('');
+const periodId = ref<string | null>(null);
 const loading = ref(false);
 const checkedIds = ref(new Set<string>());
 
@@ -90,7 +96,8 @@ function toggle(id: string) {
 }
 
 function confirm() {
-  emit('confirm', [...checkedIds.value]);
+  if (props.periods && !periodId.value) return;
+  emit('confirm', [...checkedIds.value], periodId.value ?? undefined);
 }
 
 onMounted(async () => {
@@ -112,14 +119,14 @@ onMounted(async () => {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
 }
 
 .empty {
   padding: var(--spacing-xl);
   text-align: center;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-style: italic;
   font-size: var(--font-size-sm);
 }
@@ -140,7 +147,7 @@ onMounted(async () => {
 }
 
 .story-item:hover:not(.is-excluded) {
-  background: var(--color-surface-hover);
+  background: var(--color-interaction-hover);
 }
 
 .story-item.is-excluded {
@@ -153,6 +160,7 @@ onMounted(async () => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
+.picker-selection-count { font: var(--type-meta); color: var(--color-text-secondary); }
 </style>

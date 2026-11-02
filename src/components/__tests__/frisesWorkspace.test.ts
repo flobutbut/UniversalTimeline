@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
-import { flushPromises, mount } from '@vue/test-utils';
+import { flushPromises, mount, DOMWrapper } from '@vue/test-utils';
 import DatabaseView from '@/views/DatabaseView/DatabaseView.vue';
 import StoryDetailPanel from '@/views/DatabaseView/StoryDetailPanel.vue';
 import StoryFilters from '@/views/DatabaseView/StoryFilters.vue';
-import Select from '@/components/base/Select.vue';
+import FilterValueList from '@/components/filters/FilterValueList.vue';
 import { StoryApiService } from '@/services/StoryApiService';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { EventApiService } from '@/services/EventApiService';
@@ -55,7 +55,7 @@ it('opens on the frise cards and opens a frise in its own tab', async () => {
   expect(view.get('.story-detail-panel__meta-actions a').attributes('href')).toBe('/timeline?story=1');
   expect(view.findAll('.story-detail-panel__meta-actions > *').map(item => item.text())).toEqual(['Ajouter un événement', 'Voir dans la timeline']);
   expect(view.get('.story-detail-panel__meta-actions a').find('svg').exists()).toBe(false);
-  const settings = view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Settings')!;
+  const settings = view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Paramètres')!;
   await settings.trigger('click');
   expect(view.text()).toContain('Paramètres de la frise');
   await button('Toutes les frises').trigger('click'); await flushPromises();
@@ -69,12 +69,33 @@ it('filters the cards by search and visibility, with removable filter chips', as
   expect(cards()).toEqual(['Guerre froide']);
   await view.get('input[type="search"]').setValue('');
   await button('Ajouter un filtre').trigger('click');
-  view.getComponent(StoryFilters).getComponent(Select).vm.$emit('update:modelValue', 'private'); await flushPromises();
+  await new DOMWrapper(document.body).findAll('[role="menuitem"]').find(item => item.text() === 'Visibilité')!.trigger('click');
+  view.getComponent(StoryFilters).getComponent(FilterValueList).vm.$emit('update:modelValue', ['private']); await flushPromises();
   expect(cards()).toEqual(['Histoire de France']);
-  expect(view.get('.story-gallery__chip').text()).toBe('Frises privées');
+  expect(view.get('.filter-chip').text()).toBe('Frises privées');
   await button('Retirer le filtre Frises privées').trigger('click');
   expect(cards()).toHaveLength(2);
-  expect(view.find('.story-gallery__chip').exists()).toBe(false);
+  expect(view.find('.filter-chip').exists()).toBe(false);
+});
+it.each(['cards', 'list'])('invites creation in an empty %s catalogue, including with a retained search', async mode => {
+  localStorage.setItem('frises:view', mode);
+  vi.mocked(api.getListStories).mockResolvedValue([]);
+  await start();
+  expect(view.get('.feedback-state').text()).toContain('Votre première frise commence ici');
+  await view.get('input[type="search"]').setValue('Histoire');
+  expect(view.get('.feedback-state').text()).toContain('Aucune frise pour le moment.');
+  expect(view.get('.feedback-state').text()).not.toContain('ne correspond');
+  await button('Créer ma première frise').trigger('click'); await flushPromises();
+  expect(view.find('edit-modal-stub').exists()).toBe(true);
+});
+it('distinguishes an unsuccessful search from a catalogue with no frises', async () => {
+  await start();
+  await view.get('input[type="search"]').setValue('Introuvable');
+  expect(view.get('.feedback-state').text()).toContain('Aucune frise ne correspond à votre recherche.');
+  expect(view.get('.feedback-state').text()).not.toContain('Votre première frise');
+  await view.get('input[type="search"]').setValue('');
+  expect(cards()).toHaveLength(2);
+  expect(view.find('.feedback-state').exists()).toBe(false);
 });
 it('filters the cards by tag from the filter panel and removes one tag from its chip', async () => {
   const tag = (id: string, fr: string) => ({ id, label: { fr, en: '' } });
@@ -84,11 +105,12 @@ it('filters the cards by tag from the filter panel and removes one tag from its 
   ]);
   await start();
   await button('Ajouter un filtre').trigger('click');
-  const tags = view.getComponent(StoryFilters).findAllComponents(Select).find(select => select.props('label') === 'Tags')!;
+  await new DOMWrapper(document.body).findAll('[role="menuitem"]').find(item => item.text() === 'Tags')!.trigger('click');
+  const tags = view.getComponent(StoryFilters).findAllComponents(FilterValueList).find(select => select.props('label') === 'Tags')!;
   expect(tags.props('options')).toEqual([{ value: 'war', label: 'Guerres' }, { value: 'politics', label: 'Politique' }]);
   tags.vm.$emit('update:modelValue', ['war']); await flushPromises();
   expect(cards()).toEqual(['Guerre froide']);
-  expect(view.get('.story-gallery__chip').text()).toBe('Guerres');
+  expect(view.get('.filter-chip').text()).toBe('Guerres');
   tags.vm.$emit('update:modelValue', ['war', 'politics']); await flushPromises();
   expect(cards()).toHaveLength(2);
   await button('Retirer le filtre Politique').trigger('click');
@@ -101,11 +123,11 @@ it('switches to the list without inventing missing record dates', async () => {
   await start();
   await button('Afficher en liste').trigger('click');
   expect(button('Afficher en liste').attributes('aria-pressed')).toBe('true');
-  const rows = view.findAll('.story-table__row');
+  const rows = view.findAll('.story-gallery__table .table-row');
   expect(rows).toHaveLength(2);
-  expect(rows[0].findAll('td').map(cell => cell.text())).toEqual(['1 janvier 1945 – 25 décembre 1991', '—', '12 décembre 2022']);
-  expect(rows[1].findAll('td').map(cell => cell.text())).toEqual(['Dates non déterminées', '—', '—']);
-  await rows[1].get('.story-table__open').trigger('click'); await flushPromises();
+  expect(rows[0].findAll('[role="cell"]').slice(1).map(cell => cell.text())).toEqual(['1 janvier 1945 – 25 décembre 1991', '—', '12 décembre 2022']);
+  expect(rows[1].findAll('[role="cell"]').slice(1).map(cell => cell.text())).toEqual(['Dates non déterminées', '—', '—']);
+  await rows[1].get('.catalogue-label-button').trigger('click'); await flushPromises();
   expect(router.currentRoute.value.query.story).toBe('2');
 });
 it('restores the selected frise from its URL and keeps every opened frise as a tab', async () => {
@@ -160,17 +182,17 @@ it('filters the frise list by time overlap and clears it from the chip', async (
   expect(cards()).toEqual(['Guerre froide', 'Histoire de France']);
   view.getComponent(StoryFilters).vm.$emit('update:timeRange', { oldBP: 87, recentBP: 81 }); await flushPromises();
   expect(cards()).toEqual(['Guerre froide']);
-  expect(view.get('.story-gallery__chip').text()).toMatch(/→/);
-  await view.get('.story-gallery__chip button').trigger('click');
+  expect(view.get('.filter-chip').text()).toMatch(/→/);
+  await view.get('.filter-chip .ui-tag__remove').trigger('click');
   expect(cards()).toEqual(['Guerre froide', 'Histoire de France']);
-  expect(view.find('.story-gallery__chip').exists()).toBe(false);
+  expect(view.find('.filter-chip').exists()).toBe(false);
 });
 it('saves the frise settings from the Settings tab and reloads the frise', async () => {
   vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
   const update = vi.spyOn(api, 'updateStory').mockImplementation(async (id, data) => ({ ...summaries[0], title: data.title }));
   vi.mocked(api.getStory).mockImplementation(async id => ({ ...story(id), title: update.mock.calls.length ? { fr: 'Guerre froide renommée', en: 'Cold War' } : story(id).title }));
   await start('/database?story=1');
-  await view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Settings')!.trigger('click');
+  await view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Paramètres')!.trigger('click');
   await flushPromises();
   expect(button('Enregistrer')).toBeUndefined();
   await view.get('.story-settings-form input[placeholder="Titre en français"]').setValue('Guerre froide renommée');
@@ -186,7 +208,7 @@ it('changes the frise visibility from the danger zone after confirmation', async
   vi.mocked(api.getStory).mockImplementation(async id => ({ ...story(id), isPublic: !update.mock.calls.length }));
   await start('/database?story=1');
   expect(view.find('.story-detail-panel__meta-actions [aria-pressed]').exists()).toBe(false);
-  await view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Settings')!.trigger('click');
+  await view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Paramètres')!.trigger('click');
   await flushPromises();
   const ui = useUiStore();
   await button('Rendre privée').trigger('click'); await flushPromises();
@@ -197,4 +219,19 @@ it('changes the frise visibility from the danger zone after confirmation', async
   ui.settleConfirmation(ui.confirmation!.id, true); await flushPromises();
   expect(update).toHaveBeenCalledWith('1', expect.objectContaining({ isPublic: false, title: summaries[0].title, author: 'Auteur' }));
   expect(view.get('.story-settings-form__danger').text()).toContain('Visibilité : privée');
+});
+
+it('filters frises by a selected period independently from the date range', async () => {
+  vi.mocked(api.getListStories).mockResolvedValue([
+    { ...summaries[0], startDate: '1945-01-01', endDate: '1991-12-25' },
+    { ...summaries[1], startDate: '0476-01-01', endDate: '1492-01-01' },
+  ]);
+  await start();
+  const filters = view.getComponent(StoryFilters);
+  filters.vm.$emit('update:period', { id: 'war', label: 'Guerre mondiale', range: { oldBP: 87, recentBP: 81 } }); await flushPromises();
+  expect(cards()).toEqual(['Guerre froide']);
+  filters.vm.$emit('update:timeRange', { oldBP: 1500, recentBP: 600 }); await flushPromises();
+  expect(cards()).toEqual([]);
+  filters.vm.$emit('update:period', null); await flushPromises();
+  expect(cards()).toEqual(['Histoire de France']);
 });

@@ -32,7 +32,7 @@ it('keeps the same parent and period cards mounted while a leaf loads suggestion
   expect(view.get('.period-grid').attributes('aria-busy')).toBe('true');
   expect(view.get('.period-card--parent').element).toBe(parent);
   expect(view.get('.period-card--timeline').element).toBe(leaf);
-  expect(view.find('.loading-container').exists()).toBe(false);
+  expect(view.find('.feedback-state--loading').exists()).toBe(false);
   await view.setProps({ loading: false });
   expect(parent.style.transform).toBe('');
   expect(view.emitted('period-click')?.[0]).toEqual([period('leaf')]);
@@ -47,5 +47,5 @@ it('keeps the back control available when the current period has no remaining it
 it('uses the initial spinner only when there is no timeline context yet', async () => {
   render();
   await view.setProps({ periods: [], currentPeriod: null, loading: true });
-  expect(view.find('.loading-container').exists()).toBe(true);
+  expect(view.find('.feedback-state--loading').exists()).toBe(true);
 });

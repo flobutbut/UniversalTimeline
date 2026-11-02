@@ -37,8 +37,8 @@ const { dialogId: id } = useDialog(dialog, { close: () => emit('cancel') });
 
 .modal-content {
   box-sizing: border-box;
-  background: var(--color-surface);
-  color: var(--color-text);
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   width: 90%;
@@ -49,7 +49,7 @@ const { dialogId: id } = useDialog(dialog, { close: () => emit('cancel') });
 
 .modal-title {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--spacing-sm) 0;
 }
 

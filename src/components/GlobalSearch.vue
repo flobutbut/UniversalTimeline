@@ -19,10 +19,10 @@
       @keydown.enter.prevent="confirm"
     />
 
-    <div v-if="dropdownVisible" class="gs__dropdown">
+    <PopoverSurface v-if="dropdownVisible" class="gs__dropdown">
       <div v-if="loading" class="gs__status" role="status">Recherche de frises…</div>
       <div v-else-if="error" class="gs__status" role="alert">
-        {{ error }} <button type="button" @mousedown.prevent @click="retrySource">Réessayer</button>
+        {{ error }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retrySource">Réessayer</Button>
       </div>
       <div v-if="hasResults" :id="listId" role="listbox" aria-label="Frises trouvées">
         <div class="gs__section" aria-hidden="true">Frises</div>
@@ -41,11 +41,13 @@
       </div>
       <div v-if="!loading && !error && !hasResults" class="gs__status" role="status">Aucune frise trouvée. Essayez un autre mot-clé.</div>
       <span class="sr-only" role="status">{{ hasResults ? `${allHits.length} ${allHits.length === 1 ? 'frise' : 'frises'}. Utilisez les flèches puis Entrée pour choisir.` : '' }}</span>
-    </div>
+    </PopoverSurface>
   </div>
 </template>
 
 <script setup lang="ts">
+import Button from '@/components/base/Button.vue';
+import PopoverSurface from '@/components/base/PopoverSurface.vue';
 import { ref, computed, onScopeDispose } from 'vue';
 import SearchInput from './base/SearchInput.vue';
 import ItemSummary from './base/ItemSummary.vue';
@@ -98,10 +100,6 @@ function clear() {
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-xl);
   max-height: calc(var(--spacing-sm) * 50);
   overflow-y: auto;
   z-index: var(--z-index-dropdown);
@@ -113,7 +111,7 @@ function clear() {
   gap: var(--spacing-sm);
   padding: var(--spacing-md) var(--spacing-lg);
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-style: italic;
 }
 
@@ -123,11 +121,11 @@ function clear() {
   gap: calc((var(--spacing-sm) + var(--spacing-xs)) / 2);
   padding: var(--spacing-xs) var(--spacing-md);
   font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--color-text-light);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: var(--color-background);
+  background: var(--color-background-default);
   border-bottom: 1px solid var(--color-border-light);
   position: sticky;
   top: 0;
@@ -141,36 +139,23 @@ function clear() {
   padding: calc(var(--spacing-sm) - 1px) var(--spacing-md);
   border: none;
   border-bottom: 1px solid var(--color-border-light);
-  background: var(--color-surface);
+  background: var(--color-surface-default);
   cursor: pointer;
   text-align: left;
   transition: background var(--transition-fast);
 }
 .gs__item:last-child { border-bottom: none; }
-.gs__item--active, .gs__item:hover { background: var(--color-surface-hover); }
+.gs__item--active, .gs__item:hover { background: var(--color-interaction-hover); }
 
-.gs__icon { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 1px; color: var(--color-story); }
+.gs__icon { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 1px; color: var(--color-text-link); }
 .gs__content { flex: 1; min-width: 0; }
 .gs__match { display: inline-flex; align-items: center; gap: var(--spacing-xs); min-width: 0; color: var(--color-text-secondary); }
-.gs__match-type { display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; font-size: var(--font-size-xs); color: var(--color-period); }
-.gs__match--event .gs__match-type { color: var(--color-event); }
+.gs__match-type { display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+
 .gs__match-type svg { width: 14px; height: 14px; }
 .gs__match-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 480px) {
   .gs__status { flex-wrap: wrap; }
 }
-
-.gs__spinner {
-  display: inline-block;
-  width: calc(var(--spacing-lg) - var(--spacing-xs) / 2);
-  height: calc(var(--spacing-lg) - var(--spacing-xs) / 2);
-  border: 2px solid var(--color-border);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: gs-spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-.gs__spinner--sm { width: calc(var(--spacing-sm) + var(--spacing-xs) / 2); height: calc(var(--spacing-sm) + var(--spacing-xs) / 2); border-width: 1.5px; }
-@keyframes gs-spin { to { transform: rotate(360deg); } }
 </style>

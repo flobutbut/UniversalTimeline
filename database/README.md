@@ -12,6 +12,8 @@ L’organisation actuelle est décrite dans [Relations au sein des frises](../Do
 - `migrations/20261031204007_story_period_hierarchy.sql` : placement des périodes propre à chaque frise, avec conservation du classement du catalogue ; appliqué.
 - `migrations/20261031220914_hybrid_catalogue_search.sql` : recherche plein texte, tolérance aux fautes et aux accents ; appliqué.
 - `migrations/20261102001509_frise_only_period_hierarchy.sql` : conservation des parcours dans les frises, suppression du parent global et contrôles de hiérarchie locale ; appliquée le 2 novembre 2026.
+- `migrations/20261102075026_story_entry_points.sql` : points d’entrée multiples entre frises, rattachés aux périodes ou événements de leur source ; appliquée le 2 novembre 2026. Les liens historiques sont conservés.
+- `migrations/20261102075524_optimize_story_entry_point_policies.sql` : évaluation du JWT une fois par requête dans les règles des points d’entrée ; appliquée.
 - `operations/assign_admin_role.sql` et `assign_legacy_stories.sql` : opérations ponctuelles et explicites déjà effectuées pour le compte confirmé ; aucune exécution automatique au démarrage.
 
 Ces migrations sont un historique des changements sur le schéma existant. Pour une nouvelle cible vide, utiliser uniquement [la baseline du lot 28](baseline/README.md), validée sur PostgreSQL 17. Elle contient déjà l’état des accès/durcissements applicatifs ; ne pas rejouer ensuite ces migrations ni les opérations d’attribution. Le projet existant ne doit recevoir aucun de ces initialiseurs.

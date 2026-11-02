@@ -4,7 +4,7 @@ import pg from 'pg';
 export const alice = '00000000-0000-0000-0000-000000000001';
 export const bob = '00000000-0000-0000-0000-000000000002';
 export const category = '00000000-0000-0000-0000-000000000010';
-export const applicationTables = ['categories', 'event_categories', 'events', 'period_categories', 'periods', 'stories', 'story_anchors', 'story_categories', 'story_events', 'story_periods'];
+export const applicationTables = ['categories', 'event_categories', 'events', 'period_categories', 'periods', 'profiles', 'stories', 'story_anchors', 'story_categories', 'story_entry_points', 'story_events', 'story_periods'];
 
 export function testPool(database = process.env.TIMELINE_TEST_DATABASE) {
   const socket = process.env.TIMELINE_TEST_SOCKET;
@@ -15,9 +15,13 @@ export function testPool(database = process.env.TIMELINE_TEST_DATABASE) {
 
 // Test double for Supabase-managed Auth infrastructure, never installed on Supabase.
 export const authFixture = `
-  CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN;
+  DO $roles$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
+  END $roles$;
   CREATE SCHEMA auth; GRANT USAGE ON SCHEMA auth TO anon, authenticated;
-  CREATE TABLE auth.users (id uuid PRIMARY KEY, email text, email_confirmed_at timestamptz, raw_app_meta_data jsonb DEFAULT '{}');
+  CREATE TABLE auth.users (id uuid PRIMARY KEY, email text, email_confirmed_at timestamptz, raw_app_meta_data jsonb DEFAULT '{}', raw_user_meta_data jsonb DEFAULT '{}');
   CREATE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE SET search_path='' AS $$
     SELECT coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb
   $$;

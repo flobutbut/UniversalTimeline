@@ -14,6 +14,7 @@
     "daemon:status": "pm2 status",
     "build": "vue-tsc -b && vite build",
     "verify": "node scripts/check.mjs",
+    "verify:design": "node scripts/check-design-system.mjs",
     "verify:clean": "node scripts/check-clean.mjs",
     "verify:config": "node --experimental-strip-types scripts/check-config.mjs",
     "preview": "vite preview",

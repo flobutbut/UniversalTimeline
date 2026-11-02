@@ -5,8 +5,9 @@ import type { StoryDto, PeriodDto, StoryFormPayload, StoryLinkDto } from '@/type
 import { mapToListStory, mapToStory, mapToStorySuggestion } from './entityMappers';
 export { mapToListStory } from './entityMappers';
 
+// Le serveur signe la frise avec le compte connecté ; un auteur vide n'est pas transmis.
 const storyPayload = (data: StoryFormPayload): StoryFormPayload => ({
-  title: data.title, description: data.description, author: data.author,
+  title: data.title, description: data.description, author: data.author?.trim() || undefined,
   isPublic: data.isPublic, categories: data.categories,
 });
 
@@ -92,6 +93,13 @@ export class StoryApiService {
   /** Détache une story enfant et supprime toutes ses ancres. */
   async unlinkChildStory(parentStoryId: string, childStoryId: string): Promise<void> {
     await apiClient.delete(`/stories/${parentStoryId}/child-stories/${childStoryId}`);
+  }
+
+  async changeEntryPoints(sourceId: string, targetIds: string[], anchor: StoryAnchor | undefined, remove = false): Promise<void> {
+    await apiClient.post(`/stories/${sourceId}/entry-points`, {
+      childStoryIds: [...new Set(targetIds)], operation: remove ? 'remove' : 'add',
+      ...(anchor ? { anchor: { anchorType: anchor.type, anchorId: anchor.id } } : {}),
+    });
   }
 
   /** Ajoute une ancre (période ou événement) à une story enfant. */

@@ -36,6 +36,7 @@ before(async () => {
 });
 beforeEach(async () => {
   await pool.query(`TRUNCATE ${applicationTables.map(t => 'public.' + t).join(',')} RESTART IDENTITY CASCADE`);
+  await pool.query("INSERT INTO profiles (user_id,username) VALUES ($1,'Alice'),($2,'Bob')", [alice,bob]);
   await pool.query("INSERT INTO categories (id,label_fr,label_en) VALUES ($1,'Catégorie','Category')", [category]);
   await pool.query("INSERT INTO periods (id,label_fr,label_en,start_date,end_date) VALUES ('root','Racine','Root','M65','NOW')");
   await pool.query("INSERT INTO events (id,label_fr,label_en,date) VALUES ('event','Événement','Event','1944-06-06')");
@@ -49,7 +50,7 @@ test('installs a zero-data schema and passes the real Auth startup preflight', a
   assert.ok(initialEmpty);
   await checkAccessSchema(pool);
 });
-test('matches the reviewed Supabase columns, identity, constraints, indexes, triggers and 21 policies', async () => {
+test('matches the reviewed Supabase columns, identity, constraints, indexes, triggers and access policies', async () => {
   assert.deepEqual(await schemaContract(pool), expected);
 });
 test('refuses replay on an existing application without changing its rows', async () => {
@@ -96,6 +97,45 @@ test('loads complete timeline snapshots and shared-content links under the calle
   const other = await call('get','/stories/:id',{}, {id:'1'},bob);
   assert.deepEqual(other.payload.relatedStories.map(s=>s.id),['3']);
   assert.equal((await call('get','/stories/:id',{}, {id:'2'},null)).statusCode,404);
+});
+test('adds multiple sources and locations without replacing legacy entry points, then removes only the chosen location', async () => {
+  await pool.query("INSERT INTO stories(title_fr,title_en,author,owner_user_id) VALUES ('Autre source','Other source','Alice',$1)", [alice]);
+  await pool.query("INSERT INTO story_periods(story_id,period_id) VALUES (1,'root'),(4,'root'); INSERT INTO story_events VALUES (1,'event')");
+  await pool.query('UPDATE stories SET parent_story_id=1 WHERE id=2');
+  const entry = (sourceId, anchorType, anchorId, operation = 'add') => call('post','/stories/:sourceId/entry-points',{ childStoryIds:['2'], anchor:{anchorType,anchorId},operation },{sourceId});
+  assert.equal((await entry('4','period','root')).statusCode,204);
+  assert.equal((await entry('1','period','root')).statusCode,204);
+  assert.equal((await entry('1','period','root')).statusCode,204);
+  assert.equal((await entry('1','event','event')).statusCode,204);
+  assert.equal((await pool.query('SELECT parent_story_id FROM stories WHERE id=2')).rows[0].parent_story_id,1);
+  assert.equal((await pool.query('SELECT * FROM story_entry_points')).rowCount,3);
+  const detail = await call('get','/stories/:id',{}, {id:'2'});
+  assert.deepEqual(detail.payload.parentStories.map(parent=>({id:parent.id,anchors:parent.anchors.map(a=>a.type+':'+a.id).sort()})).sort((a,b)=>a.id.localeCompare(b.id)),[
+    {id:'1',anchors:['event:event','period:root']},{id:'4',anchors:['period:root']},
+  ]);
+  assert.equal(detail.payload.parentStories.find(parent=>parent.id==='4').anchors[0].label.fr,'Racine');
+  const source = await call('get','/stories/:id',{}, {id:'4'});
+  assert.deepEqual(source.payload.childStories,[{id:'2',title:{fr:'Privé',en:'Private'},anchors:[{type:'period',id:'root'}]}]);
+  assert.equal((await entry('1','period','root','remove')).statusCode,204);
+  const retained = (await call('get','/stories/:id',{}, {id:'2'})).payload.parentStories;
+  assert.deepEqual(retained.find(parent=>parent.id==='1').anchors.map(a=>a.type+':'+a.id),['event:event']);
+  assert.equal(retained.find(parent=>parent.id==='4').anchors[0].id,'root');
+  await scoped(alice,client=>client.query("DELETE FROM story_periods WHERE story_id=4 AND period_id='root'"));
+  assert.deepEqual((await call('get','/stories/:id',{}, {id:'2'})).payload.parentStories.map(parent=>parent.id),['1']);
+});
+test('enforces entry-point ownership, readable endpoints and source membership', async () => {
+  await pool.query("INSERT INTO story_periods(story_id,period_id) VALUES (1,'root'),(3,'root')");
+  const body = {childStoryIds:['2'],anchor:{anchorType:'period',anchorId:'root'},operation:'add'};
+  assert.equal((await call('post','/stories/:sourceId/entry-points',body,{sourceId:'1'},bob)).statusCode,404);
+  assert.equal((await call('post','/stories/:sourceId/entry-points',{...body,childStoryIds:['3']},{sourceId:'1'})).statusCode,404);
+  assert.equal((await call('post','/stories/:sourceId/entry-points',{...body,childStoryIds:['1']},{sourceId:'1'})).statusCode,409);
+  assert.equal((await call('post','/stories/:sourceId/entry-points',{...body,anchor:{anchorType:'period',anchorId:'missing'}},{sourceId:'1'})).statusCode,409);
+  assert.equal((await call('post','/stories/:sourceId/entry-points',body,{sourceId:'1'})).statusCode,204);
+  assert.equal((await scoped(null,client=>client.query('SELECT * FROM story_entry_points'))).rowCount,0);
+  await pool.query('UPDATE stories SET is_public=true WHERE id=2');
+  assert.equal((await scoped(null,client=>client.query('SELECT * FROM story_entry_points'))).rowCount,1);
+  assert.equal((await call('get','/stories/:id',{}, {id:'2'},null)).payload.parentStories[0].id,'1');
+  await assert.rejects(scoped(bob,client=>client.query("INSERT INTO story_entry_points(source_story_id,target_story_id,period_id) VALUES (3,2,'root')")),{code:'42501'});
 });
 test('creates a period and event with canonical categories, numeric bounds and timestamps', async () => {
   const p=await call('post','/periods',{id:'legacy-period',wikidata_id:'Q999909',label:{fr:'Nouvelle'},start_date:'M65',end_date:'NOW',categories:[{id:category}]});

@@ -85,6 +85,12 @@ export interface ChildStorySummary {
   title: MultilingualText;
   anchors: StoryAnchor[];
 }
+export interface ParentStorySummary {
+  id: string;
+  title: MultilingualText;
+  ownerUserId?: string | null;
+  anchors: Array<StoryAnchor & { label: MultilingualText }>;
+}
 
 export interface StorySummary extends ListStory {
   previewPeriods?: Period[];
@@ -92,7 +98,7 @@ export interface StorySummary extends ListStory {
   description?: MultilingualText;
   author: string;
   isPublic: boolean;
-  /** Frise parente directe. */
+  /** Parent historique ; les points d’entrée multiples sont transportés dans parentStories. */
   parentStoryId?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
@@ -103,6 +109,7 @@ export interface Story extends StorySummary {
   events: Event[];
   /** Stories enfants ancrées à des périodes de cette story. */
   childStories?: ChildStorySummary[];
+  parentStories?: ParentStorySummary[];
   /** Readable frises sharing at least one period or event, loaded with this frise. */
   relatedStories?: Array<{ id: string; title: MultilingualText; periodIds: string[]; eventIds: string[] }>;
 }

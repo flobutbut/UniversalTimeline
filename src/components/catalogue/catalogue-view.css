@@ -1,0 +1,12 @@
+.catalogue-view {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--spacing-md);
+  box-sizing: border-box;
+  gap: var(--spacing-md);
+  background: var(--color-surface-default);
+}
+
+.links-error { margin: 0; font-size: var(--font-size-sm); color: var(--color-status-error-foreground); }

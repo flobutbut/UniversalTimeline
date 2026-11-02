@@ -74,3 +74,6 @@ Thumbs.db
 # Historique
 .history/
 .vercel
+
+# Autorisations locales de Claude Code (propres au poste)
+.claude/settings.local.json

@@ -1,6 +1,6 @@
 # Installation vide — état applicatif du 2 novembre 2026
 
-`application.sql` prépare les dix tables applicatives d’un **nouveau projet Supabase PostgreSQL 17 ou ultérieur**. Il reprend les types, colonnes, identité des stories, contraintes, index, cinq triggers et 21 policies observés dans le projet actuel. Il ne contient aucun compte, contenu, mot de passe ni compteur de la base distante.
+`application.sql` prépare les douze tables applicatives d’un **nouveau projet Supabase PostgreSQL 17 ou ultérieur**. Il reprend les types, colonnes, identité des stories, contraintes, index, six triggers applicatifs et 27 policies, y compris les points d’entrée multiples et les profils de compte (username unique, avatar, acceptation des conditions). Les routines du compte sont dans le schéma non exposé `account_private`, avec un trigger sur `auth.users` qui crée le profil à l’inscription. Il ne contient aucun compte, contenu, mot de passe ni compteur de la base distante.
 
 Le script est transactionnel et refuse de s’appliquer si un objet applicatif existe déjà. Il exige l’infrastructure Auth et les rôles gérés par Supabase. Il n’est jamais lancé au démarrage de l’API, ni par les tests sur le projet distant. Ne pas l’utiliser pour réparer ou réinitialiser le projet Universal-Timeline existant.
 

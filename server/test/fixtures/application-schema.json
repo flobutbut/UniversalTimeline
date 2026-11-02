@@ -374,6 +374,111 @@
       "rls": true
     },
     {
+      "name": "profiles",
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": "auth.uid()",
+          "identity": ""
+        },
+        {
+          "name": "username",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "avatar_color",
+          "type": "text",
+          "notNull": true,
+          "default": "'blue'::text",
+          "identity": ""
+        },
+        {
+          "name": "avatar_icon",
+          "type": "text",
+          "notNull": true,
+          "default": "'initial'::text",
+          "identity": ""
+        },
+        {
+          "name": "terms_version",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "terms_accepted_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": "now()",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": "now()",
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "profiles_avatar_color",
+          "definition": "CHECK (avatar_color = ANY (ARRAY['blue'::text, 'green'::text, 'amber'::text, 'red'::text, 'violet'::text, 'pink'::text, 'teal'::text, 'slate'::text]))",
+          "kind": "c"
+        },
+        {
+          "name": "profiles_avatar_icon",
+          "definition": "CHECK (avatar_icon = ANY (ARRAY['initial'::text, 'telescope'::text, 'earth'::text, 'temple'::text, 'dna'::text, 'rocket'::text, 'book'::text, 'compass'::text]))",
+          "kind": "c"
+        },
+        {
+          "name": "profiles_pkey",
+          "definition": "PRIMARY KEY (user_id)",
+          "kind": "p"
+        },
+        {
+          "name": "profiles_terms_pair",
+          "definition": "CHECK ((terms_version IS NULL) = (terms_accepted_at IS NULL))",
+          "kind": "c"
+        },
+        {
+          "name": "profiles_user_id_fkey",
+          "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "profiles_username_format",
+          "definition": "CHECK (username ~ '^[A-Za-z0-9][A-Za-z0-9_.-]{2,29}$'::text)",
+          "kind": "c"
+        },
+        {
+          "name": "profiles_username_reserved",
+          "definition": "CHECK (lower(username) <> ALL (ARRAY['admin'::text, 'administrateur'::text, 'anonyme'::text, 'anonymous'::text, 'moderateur'::text, 'support'::text, 'universaltimeline'::text, 'system'::text]))",
+          "kind": "c"
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX profiles_username_key ON public.profiles USING btree (lower(username))"
+      ],
+      "triggers": [
+        "CREATE TRIGGER trg_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      ],
+      "rls": true
+    },
+    {
       "name": "stories",
       "columns": [
         {
@@ -589,6 +694,95 @@
       "rls": true
     },
     {
+      "name": "story_entry_points",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "a"
+        },
+        {
+          "name": "source_story_id",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "target_story_id",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "period_id",
+          "type": "character varying",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "event_id",
+          "type": "character varying",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "story_entry_points_distinct_stories",
+          "definition": "CHECK (source_story_id <> target_story_id)",
+          "kind": "c"
+        },
+        {
+          "name": "story_entry_points_event",
+          "definition": "FOREIGN KEY (source_story_id, event_id) REFERENCES story_events(story_id, event_id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "story_entry_points_location",
+          "definition": "CHECK (num_nonnulls(period_id, event_id) = 1)",
+          "kind": "c"
+        },
+        {
+          "name": "story_entry_points_period",
+          "definition": "FOREIGN KEY (source_story_id, period_id) REFERENCES story_periods(story_id, period_id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "story_entry_points_pkey",
+          "definition": "PRIMARY KEY (id)",
+          "kind": "p"
+        },
+        {
+          "name": "story_entry_points_source_story_id_fkey",
+          "definition": "FOREIGN KEY (source_story_id) REFERENCES stories(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "story_entry_points_target_story_id_fkey",
+          "definition": "FOREIGN KEY (target_story_id) REFERENCES stories(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "story_entry_points_unique",
+          "definition": "UNIQUE NULLS NOT DISTINCT (source_story_id, target_story_id, period_id, event_id)",
+          "kind": "u"
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX story_entry_points_event_idx ON public.story_entry_points USING btree (source_story_id, event_id) WHERE (event_id IS NOT NULL)",
+        "CREATE INDEX story_entry_points_period_idx ON public.story_entry_points USING btree (source_story_id, period_id) WHERE (period_id IS NOT NULL)",
+        "CREATE INDEX story_entry_points_target_idx ON public.story_entry_points USING btree (target_story_id)"
+      ],
+      "triggers": [],
+      "rls": true
+    },
+    {
       "name": "story_events",
       "columns": [
         {
@@ -794,6 +988,39 @@
       "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
     },
     {
+      "table": "profiles",
+      "name": "profiles_insert_own",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
+      "check": "((user_id = ( SELECT auth.uid() AS uid)) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "profiles",
+      "name": "profiles_read_own",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "(user_id = ( SELECT auth.uid() AS uid))",
+      "check": null
+    },
+    {
+      "table": "profiles",
+      "name": "profiles_update_own",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "UPDATE",
+      "using": "((user_id = ( SELECT auth.uid() AS uid)) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))",
+      "check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
       "table": "stories",
       "name": "ut_delete_stories",
       "permissive": "PERMISSIVE",
@@ -883,6 +1110,40 @@
       "command": "ALL",
       "using": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_categories.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
       "check": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_categories.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "story_entry_points",
+      "name": "entry_points_delete",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.source_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.target_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))))",
+      "check": null
+    },
+    {
+      "table": "story_entry_points",
+      "name": "entry_points_insert",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.source_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.target_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))))"
+    },
+    {
+      "table": "story_entry_points",
+      "name": "entry_points_read",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE (s.id = story_entry_points.source_story_id))) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE (s.id = story_entry_points.target_story_id))))",
+      "check": null
     },
     {
       "table": "story_events",

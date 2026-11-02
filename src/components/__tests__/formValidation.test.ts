@@ -11,14 +11,11 @@ const period = {wikidata_id:'Q123',label:{fr:'Période',en:''},startDate:'M65',e
 beforeEach(()=>{setActivePinia(createPinia());vi.spyOn(CategoryService.getInstance(),'getCategories').mockResolvedValue([]);});
 afterEach(()=>{if(view?.exists()) view.unmount();vi.restoreAllMocks();});
 
-it('blocks a whitespace author, exposes its field error and keeps the draft until corrected',async()=>{
+it('creates a story without author field: the signed-in account signs it',async()=>{
   view=mount(EditModal,{props:{isOpen:true,type:'story',mode:'create',data:{title:{fr:'Brouillon'},author:'  '}}});await flushPromises();
-  const author=view.get('input[placeholder="Nom de l\'auteur"]');await author.trigger('blur');
-  expect(author.attributes('aria-invalid')).toBe('true');expect(button().attributes('disabled')).toBeDefined();
-  await view.get('form').trigger('submit');expect(view.emitted('submit')).toBeUndefined();
-  expect((view.get('input[placeholder="Titre en français"]').element as HTMLInputElement).value).toBe('Brouillon');
-  await author.setValue('Auteur');await author.trigger('blur');await button().trigger('click');
-  expect(view.emitted('submit')?.[0]?.[0]).toMatchObject({author:'Auteur',title:{fr:'Brouillon'}});
+  expect(view.find('input[placeholder="Nom de l\'auteur"]').exists()).toBe(false);
+  await button().trigger('click');
+  expect(view.emitted('submit')?.[0]?.[0]).toMatchObject({title:{fr:'Brouillon'}});
 });
 it.each(['title','description'] as const)('links an overlong %s error to the field and prevents submission',async kind=>{
   const data={...period,[kind]:{fr:'x'.repeat(kind==='title'?256:1001),en:''}};
@@ -39,10 +36,9 @@ it('allows a blank period end and preserves an unsupported historical date as en
 });
 it('revalidates the current form type and keeps the new draft when the same modal changes type',async()=>{
   view=mount(EditModal,{props:{isOpen:true,type:'period',mode:'create',data:period}});await flushPromises();
-  await view.setProps({type:'story',data:{title:{fr:'Nouvelle frise'},author:''}});await flushPromises();
-  expect((view.get('input[placeholder="Titre en français"]').element as HTMLInputElement).value).toBe('Nouvelle frise');
+  await view.setProps({type:'story',data:{title:{fr:''},author:''}});await flushPromises();
   expect(button().attributes('disabled')).toBeDefined();
-  await view.get('input[placeholder="Nom de l\'auteur"]').setValue('Auteur');
+  await view.get('input[placeholder="Titre en français"]').setValue('Nouvelle frise');
   expect(button().attributes('disabled')).toBeUndefined();
 });
 it('rejects malformed draft values without throwing or coercing them into text',()=>{

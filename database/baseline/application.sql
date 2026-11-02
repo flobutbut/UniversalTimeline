@@ -12,7 +12,7 @@ BEGIN
     RAISE EXCEPTION 'UniversalTimeline baseline requires PostgreSQL 17 or later';
   END IF;
   IF EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
-    WHERE n.nspname='public' AND c.relname IN ('categories','event_categories','events','period_categories','periods','stories','story_anchors','story_categories','story_events','story_periods','stories_id_seq','story_anchors_id_seq')) THEN
+    WHERE n.nspname='public' AND c.relname IN ('categories','event_categories','events','period_categories','periods','profiles','stories','story_anchors','story_categories','story_events','story_periods','stories_id_seq','story_anchors_id_seq')) THEN
     RAISE EXCEPTION 'Application objects already exist; baseline refused without modifying them';
   END IF;
   IF to_regclass('auth.users') IS NULL OR to_regprocedure('auth.uid()') IS NULL OR to_regprocedure('auth.jwt()') IS NULL
@@ -348,5 +348,123 @@ CREATE TRIGGER trg_story_period_hierarchy
 BEFORE INSERT OR UPDATE ON public.story_periods
 FOR EACH ROW EXECUTE FUNCTION public.check_story_period_hierarchy();
 
+
+CREATE TABLE public.story_entry_points (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  source_story_id integer NOT NULL REFERENCES public.stories(id) ON DELETE CASCADE,
+  target_story_id integer NOT NULL REFERENCES public.stories(id) ON DELETE CASCADE,
+  period_id varchar,
+  event_id varchar,
+  CONSTRAINT story_entry_points_location CHECK (num_nonnulls(period_id, event_id) = 1),
+  CONSTRAINT story_entry_points_distinct_stories CHECK (source_story_id <> target_story_id),
+  CONSTRAINT story_entry_points_unique UNIQUE NULLS NOT DISTINCT (source_story_id, target_story_id, period_id, event_id),
+  CONSTRAINT story_entry_points_period FOREIGN KEY (source_story_id, period_id)
+    REFERENCES public.story_periods(story_id, period_id) ON DELETE CASCADE,
+  CONSTRAINT story_entry_points_event FOREIGN KEY (source_story_id, event_id)
+    REFERENCES public.story_events(story_id, event_id) ON DELETE CASCADE
+);
+CREATE INDEX story_entry_points_target_idx ON public.story_entry_points(target_story_id);
+CREATE INDEX story_entry_points_period_idx ON public.story_entry_points(source_story_id, period_id) WHERE period_id IS NOT NULL;
+CREATE INDEX story_entry_points_event_idx ON public.story_entry_points(source_story_id, event_id) WHERE event_id IS NOT NULL;
+ALTER TABLE public.story_entry_points ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.story_entry_points FROM anon, authenticated;
+GRANT SELECT ON public.story_entry_points TO anon, authenticated;
+GRANT INSERT, DELETE ON public.story_entry_points TO authenticated;
+GRANT USAGE ON SEQUENCE public.story_entry_points_id_seq TO authenticated;
+CREATE POLICY entry_points_read ON public.story_entry_points FOR SELECT TO anon, authenticated
+  USING (EXISTS (SELECT 1 FROM public.stories s WHERE s.id = source_story_id)
+     AND EXISTS (SELECT 1 FROM public.stories s WHERE s.id = target_story_id));
+CREATE POLICY entry_points_insert ON public.story_entry_points FOR INSERT TO authenticated
+  WITH CHECK ((SELECT auth.uid()) IS NOT NULL AND ((SELECT auth.jwt())->>'is_anonymous') IS DISTINCT FROM 'true'
+    AND EXISTS (SELECT 1 FROM public.stories s WHERE s.id = source_story_id AND s.owner_user_id = (SELECT auth.uid()))
+    AND EXISTS (SELECT 1 FROM public.stories s WHERE s.id = target_story_id AND s.owner_user_id = (SELECT auth.uid())));
+CREATE POLICY entry_points_delete ON public.story_entry_points FOR DELETE TO authenticated
+  USING ((SELECT auth.uid()) IS NOT NULL AND ((SELECT auth.jwt())->>'is_anonymous') IS DISTINCT FROM 'true'
+    AND EXISTS (SELECT 1 FROM public.stories s WHERE s.id = source_story_id AND s.owner_user_id = (SELECT auth.uid()))
+    AND EXISTS (SELECT 1 FROM public.stories s WHERE s.id = target_story_id AND s.owner_user_id = (SELECT auth.uid())));
+
+-- Account routines live outside the schemas exposed by the Data API (migration 20261102110027).
+CREATE SCHEMA account_private;
+REVOKE ALL ON SCHEMA account_private FROM PUBLIC;
+GRANT USAGE ON SCHEMA account_private TO anon, authenticated;
+-- Account profiles (migration 20261102105902): unique username, avatar, terms acceptance, self-service erasure.
+CREATE TABLE public.profiles (
+  user_id uuid PRIMARY KEY DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
+  username text NOT NULL,
+  avatar_color text NOT NULL DEFAULT 'blue',
+  avatar_icon text NOT NULL DEFAULT 'initial',
+  terms_version text,
+  terms_accepted_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT profiles_username_format CHECK (username ~ '^[A-Za-z0-9][A-Za-z0-9_.-]{2,29}$'),
+  CONSTRAINT profiles_username_reserved CHECK (lower(username) <> ALL (ARRAY['admin','administrateur','anonyme','anonymous','moderateur','support','universaltimeline','system'])),
+  CONSTRAINT profiles_avatar_color CHECK (avatar_color = ANY (ARRAY['blue','green','amber','red','violet','pink','teal','slate'])),
+  CONSTRAINT profiles_avatar_icon CHECK (avatar_icon = ANY (ARRAY['initial','telescope','earth','temple','dna','rocket','book','compass'])),
+  CONSTRAINT profiles_terms_pair CHECK ((terms_version IS NULL) = (terms_accepted_at IS NULL))
+);
+-- Usernames are unique regardless of case.
+CREATE UNIQUE INDEX profiles_username_key ON public.profiles (lower(username));
+CREATE TRIGGER trg_profiles_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.profiles FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON public.profiles TO authenticated;
+GRANT INSERT (user_id, username, avatar_color, avatar_icon, terms_version, terms_accepted_at) ON public.profiles TO authenticated;
+GRANT UPDATE (username, avatar_color, avatar_icon, terms_version, terms_accepted_at) ON public.profiles TO authenticated;
+GRANT ALL ON public.profiles TO service_role;
+CREATE POLICY profiles_read_own ON public.profiles FOR SELECT TO authenticated
+  USING (user_id = (SELECT auth.uid()));
+CREATE POLICY profiles_insert_own ON public.profiles FOR INSERT TO authenticated
+  WITH CHECK (user_id = (SELECT auth.uid()) AND ((SELECT auth.jwt())->>'is_anonymous') IS DISTINCT FROM 'true');
+CREATE POLICY profiles_update_own ON public.profiles FOR UPDATE TO authenticated
+  USING (user_id = (SELECT auth.uid()) AND ((SELECT auth.jwt())->>'is_anonymous') IS DISTINCT FROM 'true')
+  WITH CHECK (user_id = (SELECT auth.uid()));
+
+-- Sign-up availability check: answers only "taken or not", never lists profiles.
+CREATE FUNCTION account_private.is_username_available(candidate text) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $function$
+  SELECT NOT EXISTS (
+    SELECT 1 FROM public.profiles p
+    WHERE lower(p.username) = lower(btrim(candidate)) AND p.user_id IS DISTINCT FROM (SELECT auth.uid())
+  );
+$function$;
+REVOKE ALL ON FUNCTION account_private.is_username_available(text) FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION account_private.is_username_available(text) TO anon, authenticated;
+
+-- A sign-up that carries a username creates its profile in the same transaction: a taken or
+-- invalid username makes the sign-up fail. Sign-ups without username keep working (no profile).
+CREATE FUNCTION account_private.create_profile_for_new_user() RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $function$
+DECLARE
+  wanted text := nullif(btrim(NEW.raw_user_meta_data->>'username'), '');
+  terms text := nullif(btrim(NEW.raw_user_meta_data->>'terms_version'), '');
+BEGIN
+  IF wanted IS NOT NULL THEN
+    INSERT INTO public.profiles (user_id, username, terms_version, terms_accepted_at)
+    VALUES (NEW.id, wanted, terms, CASE WHEN terms IS NULL THEN NULL ELSE pg_catalog.now() END);
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+REVOKE ALL ON FUNCTION account_private.create_profile_for_new_user() FROM PUBLIC, anon, authenticated, service_role;
+CREATE TRIGGER on_auth_user_created_profile AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION account_private.create_profile_for_new_user();
+
+-- Right to erasure: the signed-in account deletes its frises, then itself (profile cascades).
+-- Shared catalogue periods and events are kept.
+CREATE FUNCTION account_private.delete_own_account() RETURNS void
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $function$
+DECLARE me uuid := (SELECT auth.uid());
+BEGIN
+  IF me IS NULL OR ((SELECT auth.jwt())->>'is_anonymous') IS NOT DISTINCT FROM 'true' THEN
+    RAISE EXCEPTION 'Connexion requise' USING ERRCODE = '42501';
+  END IF;
+  DELETE FROM public.stories WHERE owner_user_id = me;
+  DELETE FROM auth.users WHERE id = me;
+END;
+$function$;
+REVOKE ALL ON FUNCTION account_private.delete_own_account() FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION account_private.delete_own_account() TO authenticated;
 
 COMMIT;

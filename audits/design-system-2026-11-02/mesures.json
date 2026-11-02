@@ -1,0 +1,645 @@
+{
+  "date": "2026-11-02",
+  "scope": {
+    "vueFilesScanned": 66,
+    "cssFilesScanned": 10,
+    "vueFilesReachableFromMain": 64,
+    "excludedFromUsageCounts": [
+      "src/views/DesignSystemView/DesignSystemView.vue",
+      "src/views/DatabaseView/EventPickerModal.vue",
+      "src/views/DatabaseView/PeriodPickerModal.vue"
+    ],
+    "note": "Occurrences statiques de templates ; pas des instances runtime. Les métriques CSS portent sur tous les fichiers analysés hors démonstration et fichiers de définition des tokens."
+  },
+  "unreachableVueFiles": [
+    "src/views/DatabaseView/EventPickerModal.vue",
+    "src/views/DatabaseView/PeriodPickerModal.vue"
+  ],
+  "activeTemplateComponents": {
+    "Header": {
+      "templateCalls": 1,
+      "files": [
+        "src/App.vue"
+      ]
+    },
+    "RouterView": {
+      "templateCalls": 1,
+      "files": [
+        "src/App.vue"
+      ]
+    },
+    "KeepAlive": {
+      "templateCalls": 1,
+      "files": [
+        "src/App.vue"
+      ]
+    },
+    "UiFeedbackHost": {
+      "templateCalls": 1,
+      "files": [
+        "src/App.vue"
+      ]
+    },
+    "SearchInput": {
+      "templateCalls": 5,
+      "files": [
+        "src/components/FilterBar.vue",
+        "src/components/GlobalSearch.vue",
+        "src/components/filters/CatalogueToolbar.vue",
+        "src/views/DatabaseView/EditModal.vue",
+        "src/views/DatabaseView/StoryRelatedPickerModal.vue"
+      ]
+    },
+    "Teleport": {
+      "templateCalls": 8,
+      "files": [
+        "src/components/FilterBar.vue",
+        "src/components/StoryTimeline.vue",
+        "src/components/Toast.vue",
+        "src/components/base/ConfirmModal.vue",
+        "src/components/filters/FilterBuilder.vue",
+        "src/views/DatabaseView/StoryItemActionsMenu.vue",
+        "src/views/HomeView/AssociatedStoriesBadge.vue",
+        "src/views/HomeView/PeriodGrid.vue"
+      ]
+    },
+    "Select": {
+      "templateCalls": 3,
+      "files": [
+        "src/components/FilterBar.vue",
+        "src/components/StoryMembershipField.vue",
+        "src/views/DatabaseView/MoveStoryPeriodModal.vue"
+      ]
+    },
+    "Button": {
+      "templateCalls": 53,
+      "files": [
+        "src/components/FilterBar.vue",
+        "src/components/Header.vue",
+        "src/components/LandingTimeDemo.vue",
+        "src/components/PeriodSelect.vue",
+        "src/components/StoryMembershipField.vue",
+        "src/components/ThemeToggle.vue",
+        "src/components/base/ConfirmModal.vue",
+        "src/components/base/ModalShell.vue",
+        "src/components/filters/FilterBuilder.vue",
+        "src/components/filters/TemporalRangeFilter.vue",
+        "src/views/DatabaseView/EditModal.vue",
+        "src/views/DatabaseView/MoveStoryPeriodModal.vue",
+        "src/views/DatabaseView/ParentStoryPickerModal.vue",
+        "src/views/DatabaseView/PickerModalAddButton.vue",
+        "src/views/DatabaseView/RootPeriodModal.vue",
+        "src/views/DatabaseView/StoryCategoriesForm.vue",
+        "src/views/DatabaseView/StoryDetailPanel.vue",
+        "src/views/DatabaseView/StoryFromPeriodModal.vue",
+        "src/views/DatabaseView/StoryGallery.vue",
+        "src/views/DatabaseView/StoryItemActionsMenu.vue",
+        "src/views/DatabaseView/StoryRelationsPanel.vue",
+        "src/views/DatabaseView/StorySettingsForm.vue",
+        "src/views/EventsView/EventsView.vue",
+        "src/views/GraphView/Periods.vue",
+        "src/views/HomeView/PeriodCard.vue",
+        "src/views/LoginView.vue",
+        "src/views/ScrollLandingView.vue"
+      ]
+    },
+    "Icon": {
+      "templateCalls": 37,
+      "files": [
+        "src/components/GlobalSearch.vue",
+        "src/components/Header.vue",
+        "src/components/PeriodSelect.vue",
+        "src/components/StoryMembershipField.vue",
+        "src/components/ThemeToggle.vue",
+        "src/components/base/Select.vue",
+        "src/components/base/Tabs.vue",
+        "src/components/filters/CatalogueFilters.vue",
+        "src/components/filters/FilterBuilder.vue",
+        "src/components/filters/FilterValueList.vue",
+        "src/components/icons/ChevronIcon.vue",
+        "src/views/DatabaseView/DatabaseView.vue",
+        "src/views/DatabaseView/EditModal.vue",
+        "src/views/DatabaseView/StoryCategoriesForm.vue",
+        "src/views/DatabaseView/StoryDetailPanel.vue",
+        "src/views/DatabaseView/StoryGallery.vue",
+        "src/views/DatabaseView/StoryItemActionsMenu.vue",
+        "src/views/HomeView/PeriodCard.vue",
+        "src/views/HomeView/PeriodGrid.vue"
+      ]
+    },
+    "ItemSummary": {
+      "templateCalls": 3,
+      "files": [
+        "src/components/GlobalSearch.vue",
+        "src/components/base/Tabs.vue",
+        "src/views/GraphView/FinderItem.vue"
+      ]
+    },
+    "RouterLink": {
+      "templateCalls": 28,
+      "files": [
+        "src/components/Header.vue",
+        "src/components/StoryMembershipField.vue",
+        "src/views/DatabaseView/AnchoredStoryRow.vue",
+        "src/views/EventsView/EventsView.vue",
+        "src/views/ForbiddenView.vue",
+        "src/views/GraphView/Periods.vue",
+        "src/views/HomeView.vue",
+        "src/views/LandingView.vue",
+        "src/views/LoginView.vue",
+        "src/views/NotFoundView.vue",
+        "src/views/ScrollLandingView.vue"
+      ]
+    },
+    "GlobalSearch": {
+      "templateCalls": 1,
+      "files": [
+        "src/components/Header.vue"
+      ]
+    },
+    "DesignIcon": {
+      "templateCalls": 9,
+      "files": [
+        "src/components/Header.vue",
+        "src/components/ThemeToggle.vue",
+        "src/components/base/SearchInput.vue",
+        "src/views/DatabaseView/AnchoredStoryRow.vue",
+        "src/views/DatabaseView/StoryGallery.vue",
+        "src/views/DatabaseView/StoryTabsBar.vue"
+      ]
+    },
+    "ThemeToggle": {
+      "templateCalls": 3,
+      "files": [
+        "src/components/Header.vue",
+        "src/views/LandingView.vue",
+        "src/views/ScrollLandingView.vue"
+      ]
+    },
+    "Tabs": {
+      "templateCalls": 3,
+      "files": [
+        "src/components/LandingTimeDemo.vue",
+        "src/views/DatabaseView/StoryDetailPanel.vue",
+        "src/views/LandingView.vue"
+      ]
+    },
+    "SelectShell": {
+      "templateCalls": 2,
+      "files": [
+        "src/components/PeriodSelect.vue",
+        "src/components/base/Select.vue"
+      ]
+    },
+    "StoryMarker": {
+      "templateCalls": 2,
+      "files": [
+        "src/components/StoryBreadcrumb.vue"
+      ]
+    },
+    "Transition": {
+      "templateCalls": 2,
+      "files": [
+        "src/components/Toast.vue",
+        "src/components/base/SelectShell.vue"
+      ]
+    },
+    "Toast": {
+      "templateCalls": 1,
+      "files": [
+        "src/components/UiFeedbackHost.vue"
+      ]
+    },
+    "ConfirmModal": {
+      "templateCalls": 1,
+      "files": [
+        "src/components/UiFeedbackHost.vue"
+      ]
+    },
+    "FilterBuilder": {
+      "templateCalls": 1,
+      "files": [
+        "src/components/filters/CatalogueFilters.vue"
+      ]
+    },
+    "FilterValueList": {
+      "templateCalls": 4,
+      "files": [
+        "src/components/filters/CatalogueFilters.vue",
+        "src/components/filters/PeriodFilterPicker.vue"
+      ]
+    },
+    "PeriodFilterPicker": {
+      "templateCalls": 1,
+      "files": [
+        "src/components/filters/CatalogueFilters.vue"
+      ]
+    },
+    "TemporalRangeFilter": {
+      "templateCalls": 1,
+      "files": [
+        "src/components/filters/CatalogueFilters.vue"
+      ]
+    },
+    "StoryTabsBar": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/DatabaseView.vue"
+      ]
+    },
+    "StoryGallery": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/DatabaseView.vue"
+      ]
+    },
+    "StoryDetailPanel": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/DatabaseView.vue"
+      ]
+    },
+    "EditModal": {
+      "templateCalls": 7,
+      "files": [
+        "src/views/DatabaseView/DatabaseView.vue",
+        "src/views/DatabaseView/StoryDetailPanel.vue",
+        "src/views/EventsView/EventsView.vue",
+        "src/views/GraphView/Periods.vue"
+      ]
+    },
+    "StoryFromPeriodModal": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/DatabaseView.vue"
+      ]
+    },
+    "ModalShell": {
+      "templateCalls": 6,
+      "files": [
+        "src/views/DatabaseView/EditModal.vue",
+        "src/views/DatabaseView/MoveStoryPeriodModal.vue",
+        "src/views/DatabaseView/ParentStoryPickerModal.vue",
+        "src/views/DatabaseView/RootPeriodModal.vue",
+        "src/views/DatabaseView/StoryFromPeriodModal.vue",
+        "src/views/DatabaseView/StoryRelatedPickerModal.vue"
+      ]
+    },
+    "Input": {
+      "templateCalls": 14,
+      "files": [
+        "src/views/DatabaseView/EditModal.vue",
+        "src/views/DatabaseView/StoryFromPeriodModal.vue",
+        "src/views/DatabaseView/StorySettingsForm.vue"
+      ]
+    },
+    "BaseSelect": {
+      "templateCalls": 6,
+      "files": [
+        "src/views/DatabaseView/EditModal.vue",
+        "src/views/DatabaseView/ParentStoryPickerModal.vue",
+        "src/views/DatabaseView/StoryCategoriesForm.vue",
+        "src/views/DatabaseView/StoryRelatedPickerModal.vue"
+      ]
+    },
+    "Switch": {
+      "templateCalls": 3,
+      "files": [
+        "src/views/DatabaseView/EditModal.vue",
+        "src/views/DatabaseView/StoryDetailPanel.vue"
+      ]
+    },
+    "PickerSelectionCount": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/StoryRelatedPickerModal.vue"
+      ]
+    },
+    "PickerModalAddButton": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/StoryRelatedPickerModal.vue"
+      ]
+    },
+    "PeriodSelect": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/RootPeriodModal.vue"
+      ]
+    },
+    "StoryTimeline": {
+      "templateCalls": 2,
+      "files": [
+        "src/views/DatabaseView/StoryDetailPanel.vue",
+        "src/views/DatabaseView/StoryGallery.vue"
+      ]
+    },
+    "FilterBar": {
+      "templateCalls": 2,
+      "files": [
+        "src/views/DatabaseView/StoryDetailPanel.vue"
+      ]
+    },
+    "FinderItem": {
+      "templateCalls": 2,
+      "files": [
+        "src/views/DatabaseView/StoryDetailPanel.vue"
+      ]
+    },
+    "StoryItemActionsMenu": {
+      "templateCalls": 2,
+      "files": [
+        "src/views/DatabaseView/StoryDetailPanel.vue"
+      ]
+    },
+    "AnchoredStoryRow": {
+      "templateCalls": 2,
+      "files": [
+        "src/views/DatabaseView/StoryDetailPanel.vue"
+      ]
+    },
+    "StoryRelationsPanel": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/StoryDetailPanel.vue"
+      ]
+    },
+    "StoryCategoriesForm": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/StoryDetailPanel.vue"
+      ]
+    },
+    "StorySettingsForm": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/StoryDetailPanel.vue"
+      ]
+    },
+    "MoveStoryPeriodModal": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/StoryDetailPanel.vue"
+      ]
+    },
+    "RootPeriodModal": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/StoryDetailPanel.vue"
+      ]
+    },
+    "StoryRelatedPickerModal": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/StoryDetailPanel.vue"
+      ]
+    },
+    "CatalogueFilters": {
+      "templateCalls": 3,
+      "files": [
+        "src/views/DatabaseView/StoryFilters.vue",
+        "src/views/EventsView/EventsView.vue",
+        "src/views/GraphView/Periods.vue"
+      ]
+    },
+    "CatalogueToolbar": {
+      "templateCalls": 3,
+      "files": [
+        "src/views/DatabaseView/StoryGallery.vue",
+        "src/views/EventsView/EventsView.vue",
+        "src/views/GraphView/Periods.vue"
+      ]
+    },
+    "StoryFilters": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/StoryGallery.vue"
+      ]
+    },
+    "ParentStoryPickerModal": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/DatabaseView/StoryRelationsPanel.vue"
+      ]
+    },
+    "CatalogueTable": {
+      "templateCalls": 2,
+      "files": [
+        "src/views/EventsView/EventsView.vue",
+        "src/views/GraphView/Periods.vue"
+      ]
+    },
+    "StoryMembershipField": {
+      "templateCalls": 2,
+      "files": [
+        "src/views/EventsView/EventsView.vue",
+        "src/views/GraphView/Periods.vue"
+      ]
+    },
+    "ChevronIcon": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/GraphView/FinderItem.vue"
+      ]
+    },
+    "PeriodCard": {
+      "templateCalls": 2,
+      "files": [
+        "src/views/HomeView/PeriodGrid.vue"
+      ]
+    },
+    "AssociatedStoriesBadge": {
+      "templateCalls": 3,
+      "files": [
+        "src/views/HomeView/PeriodGrid.vue"
+      ]
+    },
+    "EventCard": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/HomeView/PeriodGrid.vue"
+      ]
+    },
+    "StoryBreadcrumb": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/HomeView.vue"
+      ]
+    },
+    "PeriodGrid": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/HomeView.vue"
+      ]
+    },
+    "LandingTimeDemo": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/LandingView.vue"
+      ]
+    },
+    "ScrollTimeLens": {
+      "templateCalls": 1,
+      "files": [
+        "src/views/ScrollLandingView.vue"
+      ]
+    }
+  },
+  "undefinedCssVariables": [
+    {
+      "token": "--border-radius-sm",
+      "file": "src/components/StoryTimeline.vue",
+      "line": 292
+    },
+    {
+      "token": "--border-radius-sm",
+      "file": "src/style.css",
+      "line": 62
+    },
+    {
+      "token": "--border-radius-md",
+      "file": "src/style.css",
+      "line": 115
+    },
+    {
+      "token": "--border-radius-md",
+      "file": "src/style.css",
+      "line": 124
+    },
+    {
+      "token": "--color-secondary",
+      "file": "src/styles/base.css",
+      "line": 138
+    },
+    {
+      "token": "--color-secondary",
+      "file": "src/styles/base.css",
+      "line": 144
+    },
+    {
+      "token": "--font-size-md",
+      "file": "src/views/DatabaseView/StoryRelationsPanel.vue",
+      "line": 94
+    },
+    {
+      "token": "--border-radius-sm",
+      "file": "src/views/HomeView/PeriodGrid.vue",
+      "line": 480
+    },
+    {
+      "token": "--color-background-secondary",
+      "file": "src/views/HomeView/PeriodGrid.vue",
+      "line": 633
+    }
+  ],
+  "typography": {
+    "fontSizeDeclarations": 282,
+    "withCssVariables": 251,
+    "numericWithoutVariable": 29,
+    "inherit": 2
+  },
+  "textContrastPairs": [
+    {
+      "context": "Finder / appels éditoriaux en sombre",
+      "foreground": "#ffffff",
+      "background": "#7aa3d4",
+      "ratio": 2.62,
+      "verifiedComputedStyles": true
+    },
+    {
+      "context": "Button primaire en sombre",
+      "foreground": "#121213",
+      "background": "#7aa3d4",
+      "ratio": 7.15,
+      "verifiedComputedStyles": true
+    },
+    {
+      "context": "Button primaire en clair",
+      "foreground": "#ffffff",
+      "background": "#265985",
+      "ratio": 7.37,
+      "verifiedComputedStyles": false
+    },
+    {
+      "context": "Recherche : Événement en clair",
+      "foreground": "#b87256",
+      "background": "#ffffff",
+      "ratio": 3.76,
+      "verifiedComputedStyles": true
+    },
+    {
+      "context": "Recherche : Période en clair",
+      "foreground": "#5080b0",
+      "background": "#ffffff",
+      "ratio": 4.15,
+      "verifiedComputedStyles": false
+    }
+  ],
+  "runtimeDimensions": {
+    "viewport": {
+      "width": 961,
+      "height": 921
+    },
+    "inputMdHeight": 44,
+    "inputSmHeight": 36,
+    "textareaDemoHeight": 58,
+    "textareaDemoComputedMinHeight": 44
+  },
+  "screenshots": [
+    {
+      "name": "events-light.png",
+      "width": 65536,
+      "height": 4292542531
+    },
+    {
+      "name": "finder-dark.png",
+      "width": 65536,
+      "height": 4292542531
+    },
+    {
+      "name": "gallery-light.png",
+      "width": 65536,
+      "height": 4292542531
+    },
+    {
+      "name": "input-dark.png",
+      "width": 65536,
+      "height": 4292542531
+    },
+    {
+      "name": "journey-dark.png",
+      "width": 65536,
+      "height": 4292542531
+    },
+    {
+      "name": "landing-dark.png",
+      "width": 65536,
+      "height": 4292542531
+    },
+    {
+      "name": "search-light.png",
+      "width": 65536,
+      "height": 4292542531
+    },
+    {
+      "name": "story-detail-dark.png",
+      "width": 65536,
+      "height": 4292542531
+    },
+    {
+      "name": "story-detail-light.png",
+      "width": 65536,
+      "height": 4292542531
+    },
+    {
+      "name": "story-list-light.png",
+      "width": 65536,
+      "height": 4292542531
+    },
+    {
+      "name": "switch-light.png",
+      "width": 65536,
+      "height": 4292542531
+    }
+  ]
+}

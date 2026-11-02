@@ -1,6 +1,9 @@
+import { ref } from 'vue';
+
 export type DocumentTheme = 'light' | 'dark';
 
 const STORAGE_KEY = 'theme';
+export const documentTheme = ref<DocumentTheme>('light');
 
 /** Indique si un thème a déjà été enregistré localement (choix utilisateur explicite). */
 export function hasUserChosenTheme(): boolean {
@@ -12,8 +15,10 @@ export function hasUserChosenTheme(): boolean {
 }
 
 /** Applique le thème sur `<html>` (tokens dans `variables.css` via `[data-theme]`). */
-export function applyDocumentTheme(theme: DocumentTheme): void {
+export function applyDocumentTheme(theme: DocumentTheme, persist = true): void {
+  documentTheme.value = theme;
   document.documentElement.setAttribute('data-theme', theme);
+  if (!persist) return;
   try {
     localStorage.setItem(STORAGE_KEY, theme);
   } catch {

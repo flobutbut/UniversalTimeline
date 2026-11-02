@@ -2,7 +2,7 @@
   <div class="home-view">
     <StoryBreadcrumb :items="breadcrumb" :loading="loading" @navigate="navigateToBreadcrumb" />
     <div v-if="routeError || error" role="alert">
-      {{ routeError || error }} <button v-if="!routeError" type="button" :disabled="loading" @click="retryLoad">Réessayer</button><RouterLink v-else :to="{ name: 'timeline' }">Revenir à la timeline</RouterLink>
+      {{ routeError || error }} <Button variant="tertiary" size="sm" v-if="!routeError" type="button" :disabled="loading" @click="retryLoad">Réessayer</Button><RouterLink v-else :to="{ name: 'timeline' }">Revenir à la timeline</RouterLink>
     </div>
     <PeriodGrid
       v-if="!routeError"
@@ -27,6 +27,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from '@/components/base/Button.vue';
 import { onActivated, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import StoryBreadcrumb from '@/components/StoryBreadcrumb.vue';

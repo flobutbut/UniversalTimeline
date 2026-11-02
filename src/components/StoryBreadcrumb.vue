@@ -91,7 +91,7 @@ watch([() => props.items, () => props.loading], async () => {
   min-width: 0;
   padding-block: var(--spacing-xs);
   color: var(--color-text-secondary);
-  line-height: var(--line-height-normal);
+  line-height: var(--line-height-body);
   overflow-wrap: anywhere;
   text-align: start;
 }
@@ -109,13 +109,13 @@ watch([() => props.items, () => props.loading], async () => {
 }
 
 .story-breadcrumb__item--link:hover {
-  color: var(--color-text);
+  color: var(--color-text-primary);
   text-decoration-color: currentColor;
 }
 
 .story-breadcrumb__item--current {
-  color: var(--color-text);
-  font-weight: 600;
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
 .story-breadcrumb__item--current:focus-visible {

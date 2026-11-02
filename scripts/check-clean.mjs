@@ -94,6 +94,7 @@ try {
     ['baseline', 'baseline.postgres.mjs', true], ['auth', 'auth.postgres.mjs'],
     ['hierarchy', 'periodHierarchy.postgres.mjs'], ['deletion', 'periodDeletion.postgres.mjs'],
     ['privileges', 'functionPrivileges.postgres.mjs'], ['atomic', 'atomicWrites.postgres.mjs'],
+    ['profiles', 'profiles.postgres.mjs'],
   ]) await postgresSuite(name, file, restore);
   console.log('\nInstallation vierge, tests, audits, builds et restauration de test réussis.');
 } catch (cause) {

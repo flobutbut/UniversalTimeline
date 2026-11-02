@@ -14,7 +14,6 @@ import { CategoryService } from '@/services/CategoryService';
 import { apiClient } from '@/services/ApiClient';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
 import { searchHitLocation } from '@/router/searchTarget';
-import FinderItem from '@/views/GraphView/FinderItem.vue';
 import type { Period, ListEvent } from '@/types/database';
 
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() } }));
@@ -61,9 +60,8 @@ afterEach(() => { view?.unmount(); router?.options.history.destroy(); document.b
 it('opens a period catalogue fiche directly without navigating global ancestors', async () => {
   await start(); await choose(local('period', 'leaf'));
   expect(router.currentRoute.value.fullPath).toBe('/periods?period=leaf');
-  expect(view.findAllComponents(FinderItem).filter(row => row.props('selected')).map(row => row.props('itemId'))).toEqual(['leaf']);
+  expect(view.getComponent(EditModal).props('data')).toMatchObject({ id: 'leaf', description: { fr: 'Détail canonique leaf' } });
   expect(periods.getPeriod).toHaveBeenCalledWith('leaf');
-  expect(document.activeElement?.getAttribute('aria-label')).toBe('leaf');
   expect(apiClient.post).not.toHaveBeenCalled();
 });
 it('opens a local event with its full catalogue data, not its partial suggestion', async () => {
@@ -127,7 +125,7 @@ it('shows a retryable path failure and resolves the same destination on retry', 
   expect(view.get('[role="alert"]').text()).toContain('Lecture du chemin indisponible');
   await view.get('[role="alert"] button').trigger('click'); await flushPromises();
   expect(view.find('[role="alert"]').exists()).toBe(false);
-  expect(view.findAllComponents(FinderItem).some(row => row.props('itemId') === 'leaf' && row.props('selected'))).toBe(true);
+  expect(view.getComponent(EditModal).props('data')).toMatchObject({ id: 'leaf' });
 });
 it('ignores an old path after a newer query has selected another period', async () => {
   const old = deferred<Period>(); vi.mocked(periods.getPeriod).mockReturnValueOnce(old.promise);
@@ -135,7 +133,7 @@ it('ignores an old path after a newer query has selected another period', async 
   await router.push('/periods?period=fresh'); await flushPromises();
   old.resolve(period('old')); await flushPromises();
   expect(useDataStore().periodById('old')).toBeNull();
-  expect(view.findAllComponents(FinderItem).some(row => row.props('itemId') === 'old' && row.props('selected'))).toBe(false);
+  expect(view.getComponent(EditModal).props('data')).toMatchObject({ id: 'fresh' });
   expect(useDataStore().periodById('fresh')?.id).toBe('fresh');
 });
 it('does not reopen a draft after leaving while its initial catalogue read is pending', async () => {

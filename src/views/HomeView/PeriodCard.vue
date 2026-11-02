@@ -40,12 +40,13 @@
       </Button>
     </div>
     <div v-show="loading" class="loading-overlay">
-      <div class="spinner"></div>
+      <LoadingSpinner />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
@@ -140,7 +141,7 @@ const handleClick = () => {
 
 .period-card {
   cursor: pointer;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   box-sizing: border-box;
   position: relative;
   border: none;
@@ -151,12 +152,12 @@ const handleClick = () => {
 }
 
 .period-card--timeline.period-card--leaf:hover .main-container {
-  background: var(--color-card);
+  background: var(--color-surface-raised);
   box-shadow: var(--shadow-sm);
 }
 
 .main-container {
-  background: var(--color-card);
+  background: var(--color-surface-raised);
   border: none;
   border-radius: var(--radius-sm);
   padding: var(--spacing-xs) var(--spacing-sm);
@@ -219,19 +220,19 @@ const handleClick = () => {
 }
 
 .period-card--timeline:hover .main-container {
-  background: var(--color-card-hover);
+  background: var(--color-surface-raised-hover);
   box-shadow: var(--shadow-md);
 }
 
 .period-card--parent:hover .main-container {
-  background: var(--color-card-hover);
+  background: var(--color-surface-raised-hover);
   box-shadow: var(--shadow-md);
 }
 
 .period-card.selected .main-container {
-  background: var(--color-primary);
+  background: var(--color-interaction-selected);
   box-shadow: var(--shadow-md);
-  color: var(--color-text-white);
+  color: var(--color-text-on-selected);
 }
 
 .period-header {
@@ -246,13 +247,12 @@ const handleClick = () => {
 .period-title {
   margin: 0;
   font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
   line-height: var(--line-height-body);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
   min-width: 0;
 }
 
@@ -261,7 +261,7 @@ const handleClick = () => {
 .period-card__title-action:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
 
 .period-card.selected .period-title {
-  color: var(--color-text-white);
+  color: var(--color-text-on-selected);
 }
 
 .period-footer {
@@ -270,7 +270,7 @@ const handleClick = () => {
 
 .period-info {
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   line-height: var(--line-height-small);
   white-space: nowrap;
   overflow: hidden;
@@ -278,7 +278,7 @@ const handleClick = () => {
 }
 
 .period-card.selected .period-info {
-  color: color-mix(in srgb, var(--color-text-white) 92%, transparent);
+  color: color-mix(in srgb, var(--color-text-on-selected) 92%, transparent);
 }
 
 /* Repli réservé aux textes dépassant toute la frise, après l'élargissement. */
@@ -305,7 +305,7 @@ const handleClick = () => {
 .loading-overlay {
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--color-card) 88%, transparent);
+  background: color-mix(in srgb, var(--color-surface-raised) 88%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -314,20 +314,5 @@ const handleClick = () => {
   pointer-events: none;
 }
 
-.spinner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 24px;
-  height: 24px;
-  border: 3px solid color-mix(in srgb, var(--color-primary) 14%, transparent);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
 
-@keyframes spin {
-  to { transform: translate(-50%, -50%) rotate(360deg); }
-}
 </style>

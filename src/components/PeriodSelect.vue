@@ -59,7 +59,7 @@
       </button>
       <div v-if="loading" role="status" class="base-select__no-results">Chargement…</div>
       <div v-else-if="loadError" role="alert" class="base-select__no-results">
-        {{ loadError }} <button type="button" @click="retry">Réessayer</button>
+        {{ loadError }} <Button variant="tertiary" size="sm" type="button" @click="retry">Réessayer</Button>
       </div>
       <ul v-else-if="periods.length" class="base-select__options period-select__list" aria-label="Périodes disponibles">
         <li v-for="period in periods" :key="period.id" class="base-select__option" :class="{ 'base-select__option--selected': period.id === modelValue }">

@@ -113,15 +113,15 @@ onScopeDispose(removeListeners);
 :global(.finder-item.selected) .story-item-actions__trigger { color: var(--color-text-on-selected); }
 .story-item-actions__menu {
   position: fixed; z-index: 1100; width: 176px; max-width: calc(100vw - 16px); box-sizing: border-box;
-  padding: 4px; border: 1px solid var(--color-border-default); border-radius: var(--radius-md);
-  background: var(--color-surface); box-shadow: 0 6px 20px rgb(0 0 0 / 20%);
+  padding: var(--spacing-xs); border: 1px solid var(--color-border-default); border-radius: var(--radius-md);
+  background: var(--color-surface-default); box-shadow: var(--shadow-lg);
 }
 .story-item-actions__menu button {
-  display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px;
+  display: flex; align-items: center; gap: var(--spacing-sm); width: 100%; padding: var(--spacing-sm);
   border: 0; border-radius: var(--radius-sm); background: transparent;
   color: var(--color-text-primary); font: inherit; font-size: var(--font-size-sm); text-align: left; cursor: pointer;
 }
 .story-item-actions__menu button:hover, .story-item-actions__menu button:focus-visible { background: var(--color-interaction-hover); }
 .story-item-actions__menu button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
-.story-item-actions__menu .story-item-actions__delete { color: var(--color-error); }
+.story-item-actions__menu .story-item-actions__delete { color: var(--color-status-error-foreground); }
 </style>

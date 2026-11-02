@@ -13,7 +13,7 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <Input v-model="form.description.fr" label="Description" placeholder="Description en français" size="sm" :error="validation.fields['description.fr'] || ''" type="textarea" />
+              <Input v-model="form.description.fr" label="Description" placeholder="Description en français" size="sm" :error="validation.fields['description.fr'] || ''" type="textarea" textarea-size="lg" />
             </div>
           </div>
         </fieldset>
@@ -23,7 +23,7 @@
         </div>
       </form>
       <section class="story-settings-form__danger" aria-labelledby="story-danger-zone-title">
-        <h4 id="story-danger-zone-title">Danger zone</h4>
+        <h4 id="story-danger-zone-title">Actions sensibles</h4>
         <div class="story-settings-form__danger-row">
           <div>
             <p class="story-settings-form__danger-label">Visibilité : {{ story.isPublic ? 'publique' : 'privée' }}</p>
@@ -88,24 +88,23 @@ function save() {
 .story-settings-form { display: flex; flex-direction: column; gap: var(--spacing-md); max-width: 960px; }
 .story-settings-form h3 { font-size: var(--font-size-lg); }
 .story-settings-form__form { display: flex; flex-direction: column; gap: var(--spacing-lg); }
-.story-settings-form__form :deep(textarea.base-input__field) { min-height: 160px; }
 .story-settings-form__error { color: var(--color-status-error-foreground); }
 .form-content { border: 0; padding: 0; margin: 0; min-width: 0; display: flex; flex-direction: column; gap: var(--spacing-md); }
 .form-row { display: flex; gap: var(--spacing-md); width: 100%; }
 .form-group { flex: 1; min-width: 0; }
 .story-settings-form__actions { display: flex; justify-content: flex-end; gap: var(--spacing-sm); }
 .story-settings-form__danger { margin-top: var(--spacing-lg); border: 1px solid var(--color-status-error-foreground); border-radius: var(--radius-md); }
-.story-settings-form__danger h4 { margin: 0; padding: var(--spacing-lg); font-size: var(--font-size-base); color: var(--color-status-error-foreground); border-bottom: 1px solid var(--color-border); }
+.story-settings-form__danger h4 { margin: 0; padding: var(--spacing-lg); font-size: var(--font-size-base); color: var(--color-status-error-foreground); border-bottom: 1px solid var(--color-border-default); }
 .story-settings-form__danger-row { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-md); padding: var(--spacing-lg); }
-.story-settings-form__danger-row + .story-settings-form__danger-row { border-top: 1px solid var(--color-border); }
-.story-settings-form__danger-label { margin-bottom: 0; font-weight: 600; }
+.story-settings-form__danger-row + .story-settings-form__danger-row { border-top: 1px solid var(--color-border-default); }
+.story-settings-form__danger-label { margin-bottom: 0; font-weight: var(--font-weight-semibold); }
 .story-settings-form__danger-hint { margin-bottom: 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
-.story-settings-form__readonly { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 8px 16px; }
+.story-settings-form__readonly { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: var(--spacing-sm) var(--spacing-lg); }
 .story-settings-form__readonly dt { color: var(--color-text-secondary); }
 .story-settings-form__text { white-space: pre-wrap; }
 @media (max-width: 640px) {
   .form-row { flex-direction: column; }
-  .story-settings-form__readonly { grid-template-columns: minmax(0, 1fr); gap: 4px; }
-  .story-settings-form__readonly dd { margin-bottom: 8px; }
+  .story-settings-form__readonly { grid-template-columns: minmax(0, 1fr); gap: var(--spacing-xs); }
+  .story-settings-form__readonly dd { margin-bottom: var(--spacing-sm); }
 }
 </style>

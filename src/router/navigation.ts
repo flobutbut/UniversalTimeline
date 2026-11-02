@@ -5,8 +5,8 @@ export type NavigationView = 'timeline' | 'database' | 'graph' | 'events' | 'des
 export const navigationTabs: Tab<NavigationView>[] = [
   { label: 'Timeline', value: 'timeline', icon: 'mdi:timeline' },
   { label: 'Frises', value: 'database', icon: 'mdi:book-open-page-variant' },
-  { label: 'Periods', value: 'graph', icon: 'mdi:chart-tree' },
-  { label: 'Events', value: 'events', icon: 'mdi:calendar-clock' },
+  { label: 'Périodes', value: 'graph', icon: 'mdi:chart-tree' },
+  { label: 'Événements', value: 'events', icon: 'mdi:calendar-clock' },
   { label: 'Design system', value: 'design-system', icon: 'mdi:palette-swatch' },
 ];
 

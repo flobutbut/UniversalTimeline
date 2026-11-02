@@ -1,4 +1,4 @@
-> Généré le : 2026-04-11 — Source : analyse du code source
+> Mis à jour le 2 novembre 2026 — Source : code et vérification du design system
 
 # Conventions (strictement observées dans le code)
 
@@ -10,7 +10,7 @@
 | Composables | préfixe `use` + camelCase + `.ts` | `useDataStore` est un store ; `useHomeNavigation.ts`, `useGraphView.ts` |
 | Services API | suffixe `Service` + classe, fichier `XxxService.ts` | `PeriodApiService`, `ApiClient.ts` |
 | Store Pinia | `use` + nom + `Store` dans `stores/*.ts` | `useDataStore` |
-| Utilitaires / lib | kebab-case ou camelCase selon fichiers | `readCache.ts`, `graphFinderHelpers.ts` |
+| Utilitaires / lib | kebab-case ou camelCase selon fichiers | `readCache.ts`, `storyTimeFilter.ts` |
 | Types | fichiers `*.ts` souvent par domaine | `database.ts`, `periodTree.ts` |
 | Champs API (PostgreSQL / JSON serveur) | snake_case SQL dans `server/src/repositories/`, variantes JSON conservées par les mappers | `label_fr`, `start_date`, `wikidata_id` |
 | Champs frontend après mapping | camelCase | `startDate`, `wikidata_id` parfois conservé tel quel dans les objets |
@@ -30,7 +30,7 @@
 
 ## Iconographie
 
-- **Bibliothèque unique : Iconify** — `import { Icon } from '@iconify/vue'` ; préfixe `mdi:` (Material Design Icons).
+- **Icônes du produit : DesignIcon** pour les SVG locaux, avec dimensions centralisées ; **Iconify** pour les compléments métier — `import { Icon } from '@iconify/vue'` ; préfixe `mdi:` (Material Design Icons).
 - **Taille** : props `width` et `height` (ex. `width="16" height="16"`) ou classe CSS. Ne pas utiliser `:size` (syntaxe Lucide).
 - **Accessibilité** : `aria-hidden="true"` sur toute icône décorative.
 - **Icônes dans Button** : toujours via le slot `#icon`, jamais via prop string.
@@ -53,7 +53,7 @@ Règle : tous les composants d'une même barre (toolbar, FilterBar) utilisent le
 
 ## Patterns UI / données (période parente)
 
-- **Sélecteur parent (modales période, vue finder `/periods`)** : `PeriodSelect` avec `search-remote` utilise **`GET /search?only=periods`** ; en édition, passer `exclude-id` pour ne pas proposer la période courante comme parent. Select reste générique et sans réseau. Après création / édition, le parent côté liste colonnes (`Periods`) peut être mis à jour via `useDatabaseSave` (`updateParent` / patch parent à l’ajout selon le flux métier observé en session).
+- **Sélecteur parent (formulaires de période)** : `PeriodSelect` avec `search-remote` utilise **`GET /search?only=periods`** ; en édition, passer `exclude-id` pour ne pas proposer la période courante comme parent. Select reste générique et sans réseau. Après création / édition, le parent côté liste colonnes (`Periods`) peut être mis à jour via `useDatabaseSave` (`updateParent` / patch parent à l’ajout selon le flux métier observé en session).
 
 ## Wikidata — logs et import (observé)
 
@@ -70,3 +70,14 @@ Règle : tous les composants d'une même barre (toolbar, FilterBar) utilisent le
 | Connexion DB | Seul le pool `pg` utilise `DATABASE_URL`, avec TLS vérifié. Prisma est archivé et absent des dépendances actives. |
 | Outils Docker / paquets | Le Dockerfile et le développement utilisent Yarn et les lockfiles suivis. |
 | Nom `package.json` racine | `"name": "api-wikidata"` ne correspond pas au titre produit « Universal Timeline » / README « Chronologie univers ». |
+
+## Design system
+
+- Un vocabulaire unique : `--color-text-primary`, `--color-text-secondary`, `--color-text-heading`, `--color-text-link`, `--color-text-on-accent` et `--color-text-on-selected`. Les anciens alias de texte et de surfaces ont été migrés et retirés.
+- Sélection : toujours le couple `--color-interaction-selected` / `--color-text-on-selected`, y compris dates, actions et chevrons.
+- `--color-data-*` est réservé aux visualisations ; le texte utilise un rôle de texte contrasté.
+- Surfaces : `background-default` pour l'application, `surface-default` pour chrome/champs, `surface-raised` pour cartes et popovers, `surface-subtle` pour les regroupements.
+- Typographie : privilégier les styles complets `--type-body`, `--type-compact`, `--type-label`, `--type-meta`, `--type-micro`, `--type-panel-title`, `--type-action`. Une seule définition globale du corps. Les grandes tailles fluides des compositions éditoriales et la géométrie des visualisations restent des exceptions explicites.
+- La vue place ses composants ; elle ne modifie pas leurs couleurs, focus ou éléments internes avec `:deep`. Utiliser les variantes publiques (`density`, `layout`, `textareaSize`).
+- Réutiliser Tag, FeedbackState, PopoverSurface et LoadingSpinner pour leurs patterns respectifs. Éviter un wrapper métier qui n'a plus qu'un appelant et n'ajoute aucune règle.
+- `yarn verify` inclut `yarn verify:design` ; voir COMPONENTS.md pour le contrat des composants.

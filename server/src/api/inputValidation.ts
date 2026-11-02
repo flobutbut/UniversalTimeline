@@ -1,3 +1,4 @@
+import { USERNAME_MAX, usernameError, isAvatarColor, isAvatarIcon } from '../shared/accountRules.js';
 import { parseTemporal, periodDateErrors } from '../shared/temporal.js';
 import type { EventWrite, PeriodWrite } from '../domain/writeInputs.js';
 import { PeriodHierarchyError, StoryAssociationError } from '../domain/errors.js';
@@ -110,7 +111,8 @@ export function parseStoryWrite(value: unknown) {
   }
   return {
     title: label(body.title, 'title'), description: bilingual(body.description, 'description'),
-    author: text(body.author, 'author', 255, true)!,
+    // Optional: a signed-in account always signs with its own name (services/storyService).
+    author: body.author === undefined || body.author === null ? null : text(body.author, 'author', 255, true),
     isPublic, categories: body.categories,
   };
 }
@@ -179,3 +181,22 @@ export function parseStoryFromPeriod(value: unknown) {
   const body = inputObject(value);
   return { periodId: parseEntityId(body.periodId, 'periodId'), title: text(body.title, 'title', 300, true)! };
 }
+
+export function parseUsername(value: unknown, field = 'username'): string {
+  const name = text(value, field, USERNAME_MAX * 2, true)!;
+  const problem = usernameError(name);
+  if (problem) throw new InputValidationError(field, problem);
+  return name.trim();
+}
+
+export function parseProfileWrite(value: unknown) {
+  const body = inputObject(value);
+  if (!isAvatarColor(body.avatarColor)) throw new InputValidationError('avatarColor', 'Couleur d’avatar inconnue.');
+  if (!isAvatarIcon(body.avatarIcon)) throw new InputValidationError('avatarIcon', 'Icône d’avatar inconnue.');
+  return { username: parseUsername(body.username), avatarColor: body.avatarColor, avatarIcon: body.avatarIcon };
+}
+
+export function parseTermsAcceptance(value: unknown): string {
+  return text(inputObject(value).version, 'version', 32, true)!;
+}
+

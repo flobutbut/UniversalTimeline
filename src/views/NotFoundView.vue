@@ -13,7 +13,7 @@ import { RouterLink } from 'vue-router';
 <style scoped>
 .not-found {
   padding: var(--spacing-xl);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
-.not-found a { color: var(--color-primary); }
+.not-found a { color: var(--color-text-link); }
 </style>
