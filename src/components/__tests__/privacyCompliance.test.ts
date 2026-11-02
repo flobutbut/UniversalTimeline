@@ -21,6 +21,7 @@ beforeEach(() => { localStorage.clear(); pinia = createPinia(); setActivePinia(p
 afterEach(() => { view?.unmount(); view = undefined; router?.options.history.destroy(); disposePinia(pinia); vi.unstubAllEnvs(); vi.useRealTimers(); });
 
 it('shows no banner while no tracker is configured, but keeps the preferences reachable', async () => {
+  vi.stubEnv('VITE_ANALYTICS_PROVIDER', '');
   const consent = useConsentStore();
   await mountWithRouter(CookieConsent);
   expect(view!.find('.cookie-consent').exists()).toBe(false);

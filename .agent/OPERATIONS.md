@@ -50,6 +50,7 @@ En **2026-04-16**, la suite inclut en outre des tests ciblant la navigation time
 |----------|-------------------|
 | `import.meta.env.DEV` | `src/services/wikidataTransport.ts` (choix URL SPARQL) et `WikidataQueryService.ts` (helper `wdLog`) |
 | `import.meta.env.VITE_WIKIDATA_SPARQL_URL` | `src/services/wikidataTransport.ts` (URL personnalisée optionnelle, incluse dans la clé de cache) |
+| `import.meta.env.VITE_ANALYTICS_PROVIDER`, `VITE_POSTHOG_PROJECT_TOKEN`, `VITE_POSTHOG_HOST` | `src/lib/analytics.ts` et `useConsentStore` : mesure d’audience PostHog (EU) après consentement ; vides = ni traceur ni bandeau |
 
 ### Serveur (`process.env`)
 
@@ -90,7 +91,7 @@ Sans serveur sur le port proxifié, les appels `/api` échoueront côté navigat
 - **Entrée serverless :** `server/src/vercel.ts` exporte l’app de `createApp` et exécute `testConnection` (schéma d’accès + rôles) au chargement du module, à la place de la vérification avant écoute. `src/index.ts` reste l’entrée locale/PM2/Docker.
 - **`buildCommand: tsc --noEmit` obligatoire pour `server` :** avec le script `build` (tsc → `dist/`), Vercel reprend `dist/` à plat et choisit `app.js` comme handler (échec ESM et dépendances introuvables). Avec `--noEmit`, Vercel compile lui-même `src/vercel.ts` en `.mjs` sous `server/src/`, certificat `server/certs/prod-ca-2021.crt` inclus.
 - **Base :** les fonctions Vercel n’ont que l’IPv4 ; l’hôte direct `db.<ref>.supabase.co` (IPv6 seulement) donne `ENOTFOUND`. Sur Vercel, `DATABASE_URL` (sensible, non relisible) utilise le Session pooler `aws-1-eu-central-1.pooler.supabase.com:5432`, utilisateur `postgres.<ref>`. Le `server/.env` local peut garder l’hôte direct.
-- **Variables Production :** `DATABASE_URL`, `AUTH_ENABLED=true`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `FRONTEND_ORIGIN=https://universaltimeline.net`. En Preview, toutes sauf `DATABASE_URL` et `FRONTEND_ORIGIN` : un déploiement Preview ne démarre pas l’API, ce qui évite qu’une branche se connecte à la base de production.
+- **Variables Production :** `DATABASE_URL`, `AUTH_ENABLED=true`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `FRONTEND_ORIGIN=https://universaltimeline.net`, et pour la mesure d’audience `VITE_ANALYTICS_PROVIDER=posthog`, `VITE_POSTHOG_PROJECT_TOKEN` (clé publique `phc_…`), `VITE_POSTHOG_HOST=https://eu.i.posthog.com` (Production seulement, pour ne pas mesurer les Previews). En Preview, toutes sauf `DATABASE_URL` et `FRONTEND_ORIGIN` : un déploiement Preview ne démarre pas l’API, ce qui évite qu’une branche se connecte à la base de production.
 - **Diagnostic :** `vercel logs -d <deployment>` ; l’échec de connexion consigne `database_check_failed` avec seulement le type et le code.
 - **Déployer depuis Git, pas depuis le poste :** un `vercel build`/`vercel deploy` local trace `server/.env` dans la fonction. Le dossier `.vercel/` (lien du projet) est ignoré par Git.
 - Supabase Auth → URL Configuration : Site URL et Redirect URLs sur `https://universaltimeline.net`.

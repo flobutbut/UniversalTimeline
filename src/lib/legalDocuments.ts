@@ -40,22 +40,25 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Profil : nom d’utilisateur, couleur et icône d’avatar, version et date d’acceptation des conditions.',
         'Contenus : les frises que vous créez, leur visibilité et leurs liens avec le catalogue. Une frise publique affiche votre nom d’utilisateur.',
         'Données techniques : journaux de connexion et d’erreur des hébergeurs (adresse IP, date, requête), utilisés pour la sécurité.',
+        'Mesure d’audience, seulement avec votre accord : pages consultées, clics, provenance, type de navigateur et d’appareil, associés à un identifiant pseudonyme. L’adresse IP n’est pas conservée et les sessions ne sont pas enregistrées.',
       ] },
       { title: 'Finalités et bases légales', paragraphs: [], items: [
         'Créer et gérer votre compte, publier vos frises : exécution du contrat (article 6.1.b du RGPD).',
         'Sécuriser le service et prévenir les abus : intérêt légitime (article 6.1.f).',
-        'Mesurer l’audience avec des cookies : votre consentement (article 6.1.a). Aucune mesure d’audience n’est active à ce jour.',
+        'Mesurer l’audience avec des cookies (PostHog) pour améliorer le site : votre consentement (article 6.1.a), retirable à tout moment.',
       ] },
       { title: 'Durées de conservation', paragraphs: [], items: [
         'Compte, profil et frises : jusqu’à la suppression de votre compte. ' + TODO('durée de conservation des comptes inactifs'),
         'Journaux techniques : ' + TODO('durée fixée avec les hébergeurs'),
         'Choix relatif aux cookies : six mois, puis la question vous est reposée.',
+        'Mesure d’audience : cookie conservé douze mois au plus et supprimé dès le retrait de votre accord ; statistiques conservées un an.',
       ] },
       { title: 'Destinataires et sous-traitants', paragraphs: [
         'Vos données ne sont ni vendues ni cédées. Elles sont traitées pour notre compte par :',
       ], items: [
         'Supabase Inc. : base de données et authentification, hébergées dans l’Union européenne.',
         'Vercel Inc. : hébergement de l’application et de l’API (États-Unis). ' + TODO('garanties de transfert hors UE : Data Privacy Framework ou clauses contractuelles types'),
+        'PostHog Inc. : mesure d’audience, avec votre accord, hébergée dans l’Union européenne (PostHog Cloud EU). ' + TODO('accord de sous-traitance (DPA) signé avec PostHog'),
       ] },
       { title: 'Vos droits', paragraphs: [
         'Vous disposez des droits d’accès, de rectification, d’effacement, de limitation, d’opposition et de portabilité, ainsi que du droit de définir des directives sur le sort de vos données après votre décès.',
@@ -82,8 +85,11 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Votre choix sur les cookies (stockage local « ut-consent ») : six mois.',
       ] },
       { title: 'Mesure d’audience', paragraphs: [
-        'Aucun cookie de mesure d’audience n’est déposé aujourd’hui. Lorsqu’un outil sera installé, il ne fonctionnera qu’après votre accord, et le bandeau vous permettra de refuser aussi simplement que d’accepter.',
-        TODO('nom de l’outil, finalités précises, cookies déposés et durée de vie, le jour de son installation'),
+        'Avec votre accord, nous utilisons PostHog (PostHog Inc., données hébergées dans l’Union européenne) pour savoir quelles pages et quelles fonctions sont utilisées, afin d’améliorer le site. Les sessions ne sont pas enregistrées et l’adresse IP n’est pas conservée. Sans votre accord, l’outil n’est même pas chargé.',
+      ], items: [
+        'Cookie « ph_<clé du projet>_posthog » et stockage local du même nom : identifiant pseudonyme de l’appareil et de la visite, douze mois au plus.',
+        'Stockage de session « ph_<clé du projet>_… » : identifiant de l’onglet, effacé à sa fermeture.',
+        'Si vous retirez votre accord, ces éléments sont supprimés et l’outil cesse toute mesure.',
       ] },
       { title: 'Gérer votre choix', paragraphs: [
         'Vous pouvez modifier ou retirer votre consentement à tout moment avec le bouton « Gérer mes préférences » ci-dessous ou depuis votre profil.',

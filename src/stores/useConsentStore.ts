@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 
 /** Bump when the purposes or the list of trackers change: every visitor is asked again. */
-export const CONSENT_VERSION = 1;
+export const CONSENT_VERSION = 2;
 const STORAGE_KEY = 'ut-consent';
 /** A choice (acceptance or refusal) is asked again after six months, as recommended by the CNIL. */
 const CHOICE_LIFETIME_MS = 182 * 24 * 60 * 60 * 1000;

@@ -9,6 +9,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     include: ['src/**/*.{test,spec}.{js,ts,jsx,tsx}', 'server/test/**/*.test.ts'],
+    // Tests must not depend on the developer's .env.local: no audience tracker (nor banner) unless a test stubs it.
+    env: { VITE_ANALYTICS_PROVIDER: '', VITE_POSTHOG_PROJECT_TOKEN: '', VITE_POSTHOG_HOST: '' },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

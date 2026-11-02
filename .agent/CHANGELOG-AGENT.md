@@ -299,3 +299,7 @@ Routes réduites de 1 438 à 168 lignes, services transactionnels séparés des 
 ## 2026-10-29 — Lot 24, domaine temporel partagé
 
 Parser, comparaisons et bornes communs à l’API/au navigateur ; DateService limité à l’affichage. Anciens moteurs/composable/types retirés et formats utiles migrés vers la suite commune. Dates inconnues distinctes du présent, secondes/fuseaux/précision et calendriers contrôlés, dates futures ordonnées, intervalles géologiques invalides refusés avant SQL. Éléments non positionnables accessibles hors axe, aperçus calculés sans réécrire les textes. Bornes importées conservées, convention BP et limites Wikibase documentées. 682 tests Vitest, 48 intégrations PostgreSQL locales, builds et contrôle des inutilisés réussis ; 96 cas temporels vérifiés sous deux fuseaux supplémentaires. Contrôle visuel d’un intervalle inversé puis corrigé, brouillon annulé. Aucun changement de données/droits Supabase ni push ; quatre lots restants estimés.
+
+## 2026-11-02 — Mesure d’audience PostHog
+
+Projet PostHog « Universal Timeline » (organisation dédiée, région EU). Traceur `src/lib/analytics.ts` enregistré par `installAnalytics` dans `main.ts` via `registerTracker` : import dynamique de `posthog-js` après consentement, retrait = opt-out, reset et purge des cookies/stockages `ph_<clé>`. Sessions non enregistrées, pas d’identify. Politique cookies, confidentialité et registre RGPD complétés ; `CONSENT_VERSION` passé à 2. Variables `VITE_POSTHOG_*` documentées.
