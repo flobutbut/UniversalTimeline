@@ -1,0 +1,465 @@
+{
+  "date": "2026-11-02",
+  "referenceInstant": "2026-11-02T00:00:00.000Z",
+  "policy": "Guard every factual correction against the observed old values. Date coordinates are computed together using the application’s astronomical-year convention. Timeline parentage is editorial navigation, not chronological inclusion.",
+  "facts": [
+    {
+      "kind": "period",
+      "id": "PER_EARTH",
+      "expected": {
+        "label_fr": "Empire romain",
+        "end_date": "0476-01-01T00:00:00Z"
+      },
+      "values": {
+        "end_date": "0476-09-04T00:00:00Z"
+      },
+      "reason": "Aligner la borne conventionnelle de fin sur la déposition de Romulus Augustule, au lieu du 1er janvier de son année.",
+      "sources": [
+        "https://www.worldhistory.org/Odoacer/"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "986d377d-aae5-4ba1-bb51-c5cd8d002cbb",
+      "expected": {
+        "label_fr": "Bas-Empire romain",
+        "end_date": "0476-01-01T00:00:00Z"
+      },
+      "values": {
+        "end_date": "0476-09-04T00:00:00Z"
+      },
+      "reason": "Aligner la borne conventionnelle de fin sur la déposition de Romulus Augustule, au lieu du 1er janvier de son année.",
+      "sources": [
+        "https://www.worldhistory.org/Odoacer/"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "Q1747689",
+      "expected": {
+        "label_fr": "Antiquité romaine",
+        "end_date": "0476-01-01T00:00:00Z"
+      },
+      "values": {
+        "end_date": "0476-09-04T00:00:00Z"
+      },
+      "reason": "Aligner la borne conventionnelle de fin sur la déposition de Romulus Augustule, au lieu du 1er janvier de son année.",
+      "sources": [
+        "https://www.worldhistory.org/Odoacer/"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "Q40244",
+      "expected": {
+        "label_fr": "Antiquité",
+        "end_date": "0476-01-01T00:00:00Z"
+      },
+      "values": {
+        "end_date": "0476-09-04T00:00:00Z"
+      },
+      "reason": "Aligner la borne conventionnelle de fin sur la déposition de Romulus Augustule, au lieu du 1er janvier de son année.",
+      "sources": [
+        "https://www.worldhistory.org/Odoacer/"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "Q12554",
+      "expected": {
+        "label_fr": "Moyen Âge",
+        "end_date": "1492-01-01T00:00:00Z"
+      },
+      "values": {
+        "end_date": "1492-10-12T00:00:00Z"
+      },
+      "reason": "Inclure le repère de transition déjà associé à cette frise, au lieu de tronquer l’année 1492 au 1er janvier.",
+      "sources": [
+        "https://www.loc.gov/item/today-in-history/october-12/"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "a664a308-316b-4b14-9a5f-68dce9e3e249",
+      "expected": {
+        "label_fr": "Moyen Âge tardif",
+        "end_date": "1492-01-01T00:00:00Z"
+      },
+      "values": {
+        "end_date": "1492-10-12T00:00:00Z"
+      },
+      "reason": "Inclure le repère de transition déjà associé à cette frise, au lieu de tronquer l’année 1492 au 1er janvier.",
+      "sources": [
+        "https://www.loc.gov/item/today-in-history/october-12/"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "Q12554",
+      "expected": {
+        "label_fr": "Moyen Âge",
+        "start_date": "0476-01-01T00:00:00Z"
+      },
+      "values": {
+        "start_date": "0476-09-04T00:00:00Z"
+      },
+      "reason": "Aligner le repère conventionnel d’entrée dans le Moyen Âge sur celui de fin de l’Antiquité.",
+      "sources": [
+        "https://www.worldhistory.org/Odoacer/"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "Q7432",
+      "expected": {
+        "label_fr": "Époque moderne",
+        "start_date": "1492-01-01T00:00:00Z"
+      },
+      "values": {
+        "start_date": "1492-10-12T00:00:00Z"
+      },
+      "reason": "Aligner l’entrée conventionnelle dans l’époque moderne sur le repère de navigation conservé.",
+      "sources": [
+        "https://www.loc.gov/item/today-in-history/october-12/"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "Q8683",
+      "expected": {
+        "label_fr": "Guerre froide",
+        "end_date": "1991-12-25T00:00:00Z"
+      },
+      "values": {
+        "end_date": "1991-12-26T00:00:00Z"
+      },
+      "reason": "Inclure la dissolution formelle de l’URSS, distincte de la démission de Gorbatchev le 25 décembre.",
+      "sources": [
+        "https://1997-2001.state.gov/background_notes/russia_0697_bgn.html"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_ROME",
+      "expected": {
+        "label_fr": "Fondation de Rome",
+        "date": "-0753-04-21T00:00:00Z"
+      },
+      "values": {
+        "date": "-0752-04-21T00:00:00Z"
+      },
+      "reason": "753 avant notre ère est l’année astronomique ISO -752, avec année zéro.",
+      "sources": [
+        "https://www.worldhistory.org/Romulus_and_Remus_/"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "Q39671",
+      "expected": {
+        "label_fr": "Assassinat de Jules César",
+        "date": "-0044-03-15T00:00:00Z"
+      },
+      "values": {
+        "date": "-0043-03-15T00:00:00Z"
+      },
+      "reason": "44 avant notre ère est l’année astronomique ISO -43.",
+      "sources": [
+        "https://www.worldhistory.org/timeline/Julius_Caesar/"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "Q217450",
+      "expected": {
+        "label_fr": "Bataille d'Actium",
+        "date": "-0031-09-02T00:00:00Z"
+      },
+      "values": {
+        "date": "-0030-09-02T00:00:00Z"
+      },
+      "reason": "31 avant notre ère est l’année astronomique ISO -30.",
+      "sources": [
+        "https://www.worldhistory.org/timeline/Battle_of_Actium/"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_MAMMALS",
+      "expected": {
+        "label_fr": "Apparition des premiers mammifères",
+        "date": "-160000000-01-01T00:00:00Z"
+      },
+      "values": {
+        "date": "M225"
+      },
+      "reason": "Remplacer un repère à 160 Ma, trop récent pour l’apparition des mammaliaformes, par un repère approximatif du Trias supérieur.",
+      "sources": [
+        "https://www.nhm.ac.uk/press-office/press-releases/earliest-known-mammal-is-identified-using-fossil-tooth-records.html"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_SAPIENS",
+      "expected": {
+        "label_fr": "Apparition d'Homo sapiens",
+        "date": "-300000-01-01T00:00:00Z"
+      },
+      "values": {
+        "date": "K300"
+      },
+      "reason": "Exprimer une estimation paléoanthropologique en âge approximatif de 300 ka, plutôt qu’en fausse date civile précise.",
+      "sources": [
+        "https://humanorigins.si.edu/evidence/human-fossils/species/homo-sapiens"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_HOMINIDS",
+      "expected": {
+        "label_fr": "Apparition des premiers hominidés",
+        "label_en": "Appearance of first hominids"
+      },
+      "values": {
+        "label_fr": "Premiers représentants de la lignée humaine",
+        "label_en": "Earliest members of the human lineage"
+      },
+      "reason": "Distinguer l’émergence de la lignée humaine de l’origine plus ancienne de tous les grands singes.",
+      "sources": [
+        "https://humanorigins.si.edu/education/how-do-we-know/how-do-we-know-humans-are-primates"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_FIRE_USE",
+      "expected": {
+        "label_fr": "Première utilisation contrôlée du feu",
+        "date": "-400000-01-01T00:00:00Z",
+        "label_en": "First controlled use of fire"
+      },
+      "values": {
+        "label_fr": "Usage régulier et maîtrise du feu",
+        "label_en": "Regular and controlled use of fire",
+        "date": "K400"
+      },
+      "reason": "Éviter une affirmation de toute première utilisation : distinguer l’usage répandu, la conservation et l’allumage du feu.",
+      "sources": [
+        "https://www.nhm.ac.uk/discover/news/2025/december/earliest-fire-making-dating-back-400-000-years-unearthed-in-suffolk-england.html",
+        "https://peabody.harvard.edu/video-love-and-death-stone-age"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "2bf8b54a-22fe-43fc-8fcf-39eada08d71d",
+      "expected": {
+        "label_fr": "Doctrine Jdanov",
+        "description_en": "Soviet cultural doctrine developed by Central Committee secretary Andrei Zhdanov in 1946 that proposed the world was divided into two camps: the \"imperialistic\", headed by the United States; and \"democratic\", headed by the Soviet Union"
+      },
+      "values": {
+        "description_en": "In 1947, Andrei Zhdanov presented the world as divided into opposing camps led by the United States and the Soviet Union. The doctrine accompanied the creation of the Cominform and the Soviet response to the Truman Doctrine."
+      },
+      "reason": "Corriger une confusion entre la politique culturelle de 1946 et la doctrine géopolitique des deux camps de 1947.",
+      "sources": [
+        "https://www.cvce.eu/content/publication/2011/11/21/6dfe06ed-4790-48a4-8968-855e90593185/publishable_en.pdf"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "771a1b53-5ffe-474e-85a4-b62e12dbdab8",
+      "expected": {
+        "label_fr": "Anthropocène",
+        "description_fr": "époque géologique informelle",
+        "description_en": "informal geologic chronological term"
+      },
+      "values": {
+        "description_fr": "Terme informel désignant l’importance de l’impact humain sur le système Terre. Il ne constitue pas une époque officielle de l’échelle géologique ; les propositions de date de début varient selon les usages.",
+        "description_en": "An informal term for the scale of human influence on the Earth system. It is not an official epoch of the geological timescale; proposed starting dates vary with its use."
+      },
+      "reason": "Préciser le statut informel après le rejet de la proposition d’époque officielle en 2024 ; conserver le repère éditorial existant.",
+      "sources": [
+        "https://quaternary.stratigraphy.org/working-groups/anthropocene"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_EARTH",
+      "expected": {
+        "label_fr": "Empire romain",
+        "description_fr": "nom donné à la domination romaine antique entre 27 av. J.-C. et 395 ap. J.-C.",
+        "description_en": "period of ancient Rome following the Republic"
+      },
+      "values": {
+        "description_fr": "Période de domination impériale romaine ouverte par l’avènement d’Auguste en 27 avant notre ère. Cette fiche retient 476 comme borne occidentale conventionnelle ; l’Empire romain d’Orient continue au-delà.",
+        "description_en": "The period of Roman imperial rule beginning with Augustus in 27 BCE. This record uses 476 as the conventional western endpoint; the Eastern Roman Empire continues beyond it."
+      },
+      "reason": "Faire correspondre la description à la borne occidentale de 476, plutôt qu’à une fin en 395.",
+      "sources": [
+        "https://www.metmuseum.org/pt/essays/the-roman-empire-27-b-c-393-a-d",
+        "https://www.worldhistory.org/Odoacer/"
+      ]
+    }
+  ],
+  "newPeriods": [
+    {
+      "id": "PER_WW1_PRELUDE",
+      "label_fr": "Prélude à la Première Guerre mondiale",
+      "label_en": "Prelude to World War I",
+      "description_fr": "L’assassinat de François-Ferdinand à Sarajevo, le 28 juin 1914, déclenche une crise diplomatique. Les ultimatums et les choix des puissances conduisent à la déclaration de guerre de l’Autriche-Hongrie à la Serbie le 28 juillet.",
+      "description_en": "The assassination of Franz Ferdinand in Sarajevo on 28 June 1914 triggers a diplomatic crisis. Ultimatums and decisions by the powers lead to Austria-Hungary’s declaration of war on Serbia on 28 July.",
+      "start_date": "1914-06-28T00:00:00Z",
+      "end_date": "1914-07-28T00:00:00Z",
+      "categories": [
+        "CAT_HIST"
+      ],
+      "sources": [
+        "https://www.iwm.org.uk/sites/default/files/press-release/4_August_1914_Factsheet.pdf"
+      ]
+    }
+  ],
+  "parents": [
+    {
+      "id": 4,
+      "from": null,
+      "to": 16
+    },
+    {
+      "id": 14,
+      "from": 12,
+      "to": 16
+    },
+    {
+      "id": 15,
+      "from": null,
+      "to": 10
+    },
+    {
+      "id": 17,
+      "from": null,
+      "to": 15
+    }
+  ],
+  "periodLinks": [
+    {
+      "story": 1,
+      "id": "b34af765-32cd-4d01-820d-2934fc21c2aa",
+      "parent": "8923819c-cc1f-4da3-8503-4a485d186b0f"
+    },
+    {
+      "story": 11,
+      "id": "771a1b53-5ffe-474e-85a4-b62e12dbdab8",
+      "parent": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story": 16,
+      "id": "Q11769",
+      "parent": null
+    },
+    {
+      "story": 7,
+      "id": "Q1747689",
+      "parent": null
+    },
+    {
+      "story": 7,
+      "id": "Q170479",
+      "parent": "Q1747689"
+    },
+    {
+      "story": 7,
+      "id": "Q6114",
+      "parent": "Q1747689"
+    },
+    {
+      "story": 4,
+      "id": "PER_WW1_PRELUDE",
+      "parent": null
+    },
+    {
+      "story": 8,
+      "id": "PER_WW1_PRELUDE",
+      "parent": null
+    }
+  ],
+  "moves": [
+    {
+      "story": 7,
+      "id": "PER_EARTH",
+      "from": null,
+      "to": "Q1747689"
+    }
+  ],
+  "eventLinks": [
+    {
+      "story": 16,
+      "id": "EVT_FR_REV"
+    },
+    {
+      "story": 17,
+      "id": "Q827869"
+    },
+    {
+      "story": 17,
+      "id": "Q12568"
+    },
+    {
+      "story": 17,
+      "id": "EVT_AMERICA"
+    }
+  ],
+  "removedEventLinks": [
+    {
+      "story": 5,
+      "id": "EVT_PRIMATES",
+      "reason": "Le jalon à 55 Ma relève des frises générales de la vie et de la géologie (2 et 11), où il reste présent, plutôt que du genre Homo."
+    }
+  ],
+  "removedAnchors": [
+    {
+      "story": 16,
+      "type": "period",
+      "id": "Q7432"
+    },
+    {
+      "story": 14,
+      "type": "period",
+      "id": "Q8683"
+    }
+  ],
+  "anchors": [
+    {
+      "story": 15,
+      "type": "period",
+      "id": "Q40244"
+    },
+    {
+      "story": 16,
+      "type": "period",
+      "id": "Q12554"
+    },
+    {
+      "story": 14,
+      "type": "period",
+      "id": "Q11769"
+    },
+    {
+      "story": 4,
+      "type": "period",
+      "id": "Q11769"
+    },
+    {
+      "story": 17,
+      "type": "period",
+      "id": "a664a308-316b-4b14-9a5f-68dce9e3e249"
+    }
+  ],
+  "categoryLinks": [
+    {
+      "id": "e00cf6f6-a795-4810-bda3-ed726296c822",
+      "category": "CAT_HIST"
+    },
+    {
+      "id": "e00cf6f6-a795-4810-bda3-ed726296c822",
+      "category": "CAT_ART"
+    }
+  ]
+}

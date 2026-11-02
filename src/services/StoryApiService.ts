@@ -28,8 +28,15 @@ export class StoryApiService {
   }
 
   async getStory(storyId: string, options?: { signal?: AbortSignal }): Promise<Story> {
-    const story = await apiClient.get<StoryDto>(`/stories/${storyId}`, options);
-    return mapToStory(story);
+    try {
+      const story = await apiClient.get<StoryDto>(`/stories/${storyId}`, options);
+      return mapToStory(story);
+    } catch (error) {
+      if ((error as { response?: { status?: number } })?.response?.status === 404) {
+        throw new Error('Cette frise est introuvable ou n’est pas accessible.');
+      }
+      throw error;
+    }
   }
 
   async createStory(storyData: StoryFormPayload): Promise<StorySummary> {

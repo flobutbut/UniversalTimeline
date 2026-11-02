@@ -1,0 +1,464 @@
+{
+  "date": "2026-11-02",
+  "policy": "Fill only missing descriptions; preserve every non-empty existing language. Sources support the drafted explanations, not every pre-existing stored date or Wikidata link.",
+  "sources": {
+    "nasa_universe": "https://science.nasa.gov/universe/overview/",
+    "esa_eras": "https://www.esa.int/Science_Exploration/Space_Science/Cosmic_eras",
+    "cern_timeline": "https://cms.cern/physics/story-of-the-universe",
+    "cern_early": "https://home.cern/science/physics/early-universe/",
+    "ics": "https://stratigraphy.org/chart/",
+    "usgs_mesozoic": "https://www.usgs.gov/youth-and-education-in-science/mesozoic",
+    "usgs_earth": "https://pubs.usgs.gov/gip/geotime/age.html",
+    "nasa_solar": "https://science.nasa.gov/astrobiology/learning-resources/alp/how-did-our-solar-system-form/",
+    "nasa_stars": "https://science.nasa.gov/astrophysics/science-questions/how-did-universe-originate-and-evolve-produce-galaxies-stars-and-planets-we-see-today/",
+    "nasa_clusters": "https://science.nasa.gov/universe/star-clusters-inside-the-universes-stellar-collections/",
+    "nasa_moon": "https://science.nasa.gov/moon/formation/",
+    "nasa_oceans": "https://astrobiology.nasa.gov/nai/articles/2001/12/24/earths-oldest-mineral-grains-suggest-an-early-start-for-life/index.html",
+    "life_evidence": "https://www.nature.com/articles/384055a0",
+    "life_review": "https://www.nature.com/articles/nature00934",
+    "nasa_bombardment": "https://astrobiology.nasa.gov/news/life-under-bombardment/",
+    "oxidation": "https://doi.org/10.1073/PNAS.1608824114",
+    "huronian": "https://discovery.ucl.ac.uk/id/eprint/10137626/",
+    "sturtian": "https://www.nature.com/articles/s41467-021-24439-4",
+    "columbia": "https://www.nature.com/articles/s41598-024-56691-1",
+    "pangaea": "https://www.usgs.gov/faqs/what-was-pangea?items_per_page=6&page=0&qt-news_science_products=0",
+    "himalaya": "https://www.tectonics.caltech.edu/research/nepal/outreach.html",
+    "ediacara": "https://www.samuseum.sa.gov.au/ediacara-fossils-gallery",
+    "plants": "https://www.nhm.ac.uk/discover/news/2022/february/new-group-plants-was-one-first-colonise-land.html",
+    "mammals": "https://www.nhm.ac.uk/press-office/press-releases/earliest-known-mammal-is-identified-using-fossil-tooth-records.html",
+    "primates": "https://lemur.duke.edu/discover/dlcmnh/",
+    "human_lineage": "https://humanorigins.si.edu/education/how-do-we-know/how-do-we-know-humans-are-primates",
+    "sapiens": "https://humanorigins.si.edu/evidence/human-fossils/species/homo-sapiens",
+    "fire": "https://www.nhm.ac.uk/discover/news/2025/december/earliest-fire-making-dating-back-400-000-years-unearthed-in-suffolk-england.html",
+    "quaternary": "https://www.nps.gov/articles/000/quaternary-period.htm",
+    "holocene": "https://volcanoes.usgs.gov/vsc/glossary/pleistocene.html",
+    "writing": "https://www.loc.gov/exhibitions/treasures-from-the-library-of-congress/about-this-exhibition/guiding-memory/learning-an-ancient-system-of-writing/",
+    "rome_foundation": "https://www.worldhistory.org/Romulus_and_Remus_/",
+    "rome_fall": "https://www.worldhistory.org/Odoacer/",
+    "roman_empire": "https://www.metmuseum.org/pt/essays/the-roman-empire-27-b-c-393-a-d",
+    "hijri": "https://eclipse.gsfc.nasa.gov/SEhelp/calendars.html",
+    "zhdanov": "https://www.cvce.eu/content/publication/2011/11/21/6dfe06ed-4790-48a4-8968-855e90593185/publishable_en.pdf",
+    "caucasus": "https://encyclopedia.1914-1918-online.net/article/azerbaijan/?format=pdf",
+    "anthropocene": "https://quaternary.stratigraphy.org/working-groups/anthropocene",
+    "july_crisis": "https://www.iwm.org.uk/sites/default/files/press-release/4_August_1914_Factsheet.pdf",
+    "ussr_end": "https://1997-2001.state.gov/background_notes/russia_0697_bgn.html",
+    "french_revolution": "https://www.chateauversailles.fr/decouvrir/histoire/grandes-dates/ouverture-etats-generaux"
+  },
+  "entries": [
+    {
+      "kind": "period",
+      "id": "PER_BIGBANG",
+      "fr": "Le modèle du Big Bang décrit l’évolution d’un Univers initialement très chaud et dense, en expansion depuis environ 13,8 milliards d’années. Il relie l’expansion cosmique, les éléments légers et le fond diffus cosmologique.",
+      "en": "The Big Bang model describes the evolution of an initially hot, dense universe expanding for about 13.8 billion years. It connects cosmic expansion, light elements and the cosmic microwave background.",
+      "sources": [
+        "nasa_universe"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_PLANCK",
+      "fr": "Phase hypothétique des tout premiers instants, à l’échelle du temps de Planck, vers 10⁻⁴³ seconde. La gravitation quantique y serait essentielle ; sa description physique reste incertaine.",
+      "en": "A hypothetical earliest phase at the Planck timescale, around 10⁻⁴³ second. Quantum gravity would be essential, and its physical description remains uncertain.",
+      "sources": [
+        "cern_timeline"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_GUT",
+      "fr": "Phase théorique durant laquelle l’interaction forte et l’interaction électrofaible auraient encore été unifiées. Cette extrapolation aux très hautes énergies n’est pas confirmée expérimentalement.",
+      "en": "A theoretical phase in which the strong and electroweak interactions may have been unified. This extrapolation to extremely high energies has not been experimentally confirmed.",
+      "sources": [
+        "cern_timeline"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_ELECTROWEAK",
+      "fr": "Phase très précoce où les interactions électromagnétique et faible se décrivent comme une interaction électrofaible. Le refroidissement conduit à la rupture de cette symétrie.",
+      "en": "An early phase in which electromagnetic and weak interactions are described by the electroweak interaction. Cooling leads to the breaking of this symmetry.",
+      "sources": [
+        "cern_timeline"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_HADRON",
+      "fr": "En se refroidissant, le plasma primordial permet aux quarks de s’assembler en hadrons, notamment les protons et les neutrons. Cette transition prépare la formation ultérieure des noyaux atomiques.",
+      "en": "As the primordial plasma cools, quarks bind into hadrons, including protons and neutrons. This transition prepares the later formation of atomic nuclei.",
+      "sources": [
+        "cern_early"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_LEPTON",
+      "fr": "Les leptons dominent cette phase du jeune Univers. Le refroidissement entraîne l’annihilation des électrons et positrons et le découplage des neutrinos.",
+      "en": "Leptons dominate this early phase of the universe. Cooling brings electron–positron annihilation and neutrino decoupling.",
+      "sources": [
+        "cern_timeline"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_NUCLEOSYN",
+      "fr": "Dans les premières minutes, protons et neutrons forment les premiers noyaux légers, surtout l’hélium, avec du deutérium et des traces de lithium. Les éléments plus lourds seront principalement produits plus tard dans les étoiles.",
+      "en": "During the first minutes, protons and neutrons form light nuclei, mainly helium, with deuterium and traces of lithium. Heavier elements are produced mainly later in stars.",
+      "sources": [
+        "nasa_universe"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_RECOMB",
+      "fr": "Environ 380 000 ans après le Big Bang, les électrons se lient aux noyaux pour former des atomes neutres. La lumière peut alors se propager plus librement : nous en observons aujourd’hui le fond diffus cosmologique.",
+      "en": "About 380,000 years after the Big Bang, electrons bind to nuclei to form neutral atoms. Light can then travel more freely; we observe its ancient remnant as the cosmic microwave background.",
+      "sources": [
+        "esa_eras"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_DARK_AGES",
+      "fr": "Intervalle entre la formation des premiers atomes neutres et l’allumage des premières étoiles. L’Univers contient surtout du gaz d’hydrogène et d’hélium, dont les concentrations préparent les premières structures lumineuses.",
+      "en": "The interval between the formation of neutral atoms and the first stars. The universe consists mainly of hydrogen and helium gas, whose concentrations become the seeds of luminous structures.",
+      "sources": [
+        "esa_eras"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_REION",
+      "fr": "La lumière énergétique des premières étoiles et galaxies ionise progressivement l’hydrogène intergalactique. Cette transformation étendue dans le temps met fin à la neutralité du gaz caractéristique des âges sombres.",
+      "en": "Energetic light from early stars and galaxies gradually ionizes intergalactic hydrogen. This extended transition ends the predominantly neutral state of gas during the cosmic dark ages.",
+      "sources": [
+        "nasa_universe"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_MESOZOIC",
+      "fr": "Ère comprenant le Trias, le Jurassique et le Crétacé. Elle voit la diversification des dinosaures et la fragmentation progressive de la Pangée.",
+      "en": "The era comprising the Triassic, Jurassic and Cretaceous, marked by dinosaur diversification and the gradual breakup of Pangaea.",
+      "sources": [
+        "ics",
+        "usgs_mesozoic"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_TRIASSIC",
+      "fr": "Première période du Mésozoïque, entre le Permien et le Jurassique. La Pangée rassemble encore les principales terres émergées.",
+      "en": "The first period of the Mesozoic, between the Permian and Jurassic. Pangaea still unites the main continental landmasses.",
+      "sources": [
+        "ics",
+        "usgs_mesozoic"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_SILURIAN",
+      "fr": "Période du Paléozoïque située entre l’Ordovicien et le Dévonien. Elle constitue une subdivision de l’échelle internationale des temps géologiques.",
+      "en": "A Paleozoic period between the Ordovician and Devonian, forming a subdivision of the international geological timescale.",
+      "sources": [
+        "ics"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_PALEOGENE",
+      "fr": "Première période du Cénozoïque, après le Crétacé. Elle comprend le Paléocène, l’Éocène et l’Oligocène.",
+      "en": "The first period of the Cenozoic, following the Cretaceous. It comprises the Paleocene, Eocene and Oligocene.",
+      "sources": [
+        "ics"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_NEOGENE",
+      "fr": "Période du Cénozoïque comprenant le Miocène et le Pliocène. Elle succède au Paléogène et précède le Quaternaire.",
+      "en": "A Cenozoic period comprising the Miocene and Pliocene. It follows the Paleogene and precedes the Quaternary.",
+      "sources": [
+        "ics"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "PER_SOLAR_SYS",
+      "fr": "Ensemble formé par le Soleil et les corps qui lui sont liés gravitationnellement, dont les planètes, leurs satellites, les astéroïdes et les comètes. Il s’est constitué dans un disque de gaz et de poussières il y a environ 4,6 milliards d’années.",
+      "en": "The Sun and the bodies gravitationally bound to it, including planets, moons, asteroids and comets. It formed from a disk of gas and dust about 4.6 billion years ago.",
+      "sources": [
+        "nasa_solar"
+      ]
+    },
+    {
+      "kind": "period",
+      "id": "fd216ffa-0552-48b2-9dbf-b1a551c8bcb8",
+      "fr": "Ensemble de conflits territoriaux entre les républiques d’Arménie et d’Azerbaïdjan entre 1918 et 1920, dans le contexte de l’effondrement des empires russe et ottoman. Il se distingue des guerres plus récentes du Haut-Karabakh.",
+      "sources": [
+        "caucasus"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_SAPIENS",
+      "fr": "Les plus anciens fossiles attribués à Homo sapiens remontent à environ 300 000 ans en Afrique. Ce repère correspond à l’émergence progressive de notre espèce, et non à l’apparition soudaine de tous les comportements humains actuels.",
+      "en": "The oldest fossils attributed to Homo sapiens date to about 300,000 years ago in Africa. This marks the gradual emergence of our species, rather than the sudden appearance of all modern human behaviours.",
+      "sources": [
+        "sapiens"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_GOE",
+      "fr": "Au début du Protérozoïque, l’oxygène produit par la photosynthèse commence à s’accumuler durablement dans l’atmosphère. Cette transition transforme la chimie des océans et les conditions de vie ; sa chronologie précise reste étudiée.",
+      "en": "Early in the Proterozoic, oxygen produced by photosynthesis begins to accumulate persistently in the atmosphere. This transition transforms ocean chemistry and living conditions; its detailed timing remains under study.",
+      "sources": [
+        "oxidation"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_HOMINIDS",
+      "fr": "Ce repère concerne la divergence entre la lignée humaine et celle des chimpanzés, estimée entre 8 et 6 millions d’années. Il ne correspond pas à l’origine de l’ensemble de la famille des grands singes.",
+      "en": "This marker concerns the divergence of the human and chimpanzee lineages, estimated at between 8 and 6 million years ago. It does not mark the origin of the entire great-ape family.",
+      "sources": [
+        "human_lineage"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_MAMMALS",
+      "fr": "Des mammaliaformes issus des cynodontes apparaissent à la fin du Trias. Des fossiles attribués à Brasilodon, datés d’environ 225 millions d’années, éclairent cette transition ; la délimitation des tout premiers mammifères dépend des critères retenus.",
+      "en": "Mammaliaforms evolved from cynodont ancestors in the Late Triassic. Fossils attributed to Brasilodon, about 225 million years old, illuminate this transition; identifying the earliest mammals depends on the criteria used.",
+      "sources": [
+        "mammals"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_PRIMATES",
+      "fr": "Des fossiles de primates proches des premiers lémuriens sont connus au début de l’Éocène, vers 55 millions d’années. Ce repère précède de très loin l’apparition du genre Homo et relève de l’histoire générale des mammifères.",
+      "en": "Fossils of early lemur-like primates are known from the early Eocene, around 55 million years ago. This marker long predates the genus Homo and belongs to the broader history of mammals.",
+      "sources": [
+        "primates"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_ROME_FALL",
+      "fr": "Odoacre dépose Romulus Augustule le 4 septembre 476. Cette date sert de repère conventionnel à la fin de l’Empire romain d’Occident, tandis que l’Empire romain d’Orient poursuit son histoire.",
+      "en": "Odoacer deposes Romulus Augustulus on 4 September 476. This is a conventional marker for the end of the Western Roman Empire; the Eastern Roman Empire continues.",
+      "sources": [
+        "rome_fall"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_LAND_PLANTS",
+      "fr": "Des spores fossiles témoignent de la présence de plantes sur les continents vers 470 millions d’années. La colonisation terrestre est un processus progressif qui transforme les sols, les paysages et les écosystèmes.",
+      "en": "Fossil spores record plants on land around 470 million years ago. Terrestrial colonization is a gradual process that transforms soils, landscapes and ecosystems.",
+      "sources": [
+        "plants"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_HEGIRA",
+      "fr": "L’Hégire désigne l’émigration de Muhammad et de ses compagnons de La Mecque vers Médine en 622. L’ère du calendrier musulman prend cette année pour origine ; son point de départ calendaire ne coïncide pas avec le jour du voyage.",
+      "en": "The Hijrah is Muhammad’s and his companions’ migration from Mecca to Medina in 622. The Islamic era uses that year as its origin; its calendar epoch is distinct from the day of the journey.",
+      "sources": [
+        "hijri"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_QUAT_GLAC",
+      "fr": "Le début du Quaternaire, vers 2,58 millions d’années, marque un repère pour l’intensification des cycles glaciaires de l’hémisphère Nord. Ces alternances de phases froides et tempérées rythment le Pléistocène.",
+      "en": "The beginning of the Quaternary, about 2.58 million years ago, marks a reference point for intensified Northern Hemisphere glacial cycles. Alternating cold and warmer phases characterize the Pleistocene.",
+      "sources": [
+        "quaternary"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "2bf8b54a-22fe-43fc-8fcf-39eada08d71d",
+      "fr": "En 1947, Andreï Jdanov présente le monde comme divisé en deux camps antagonistes, l’un dirigé par les États-Unis et l’autre par l’URSS. Cette doctrine accompagne la création du Kominform et affirme la réponse soviétique à la doctrine Truman.",
+      "sources": [
+        "zhdanov"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_EDIACARA",
+      "fr": "Les biotes de l’Édiacarien réunissent des organismes macroscopiques à corps mou, connus notamment par les empreintes des fonds marins d’Australie. Ils témoignent d’écosystèmes complexes antérieurs à l’explosion cambrienne.",
+      "en": "The Ediacaran biota includes large soft-bodied organisms, known notably from impressions of ancient Australian seafloors. They record complex ecosystems preceding the Cambrian explosion.",
+      "sources": [
+        "ediacara"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_LAST_GLAC",
+      "fr": "Vers 11 700 ans avant le présent, la transition vers l’Holocène marque la fin de la dernière période glaciaire. Les calottes ne disparaissent pas toutes : le climat entre dans une phase interglaciaire.",
+      "en": "Around 11,700 years ago, the transition to the Holocene marks the end of the last glacial period. Ice sheets do not all disappear; climate enters an interglacial phase.",
+      "sources": [
+        "holocene"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_ROME",
+      "fr": "La tradition romaine situe la fondation de Rome par Romulus au 21 avril 753 avant notre ère. Ce récit légendaire sert de repère chronologique ; l’urbanisation du site résulte d’une évolution plus longue.",
+      "en": "Roman tradition dates the founding of Rome by Romulus to 21 April 753 BCE. This legendary account provides a chronological marker; the site’s urban development was a longer process.",
+      "sources": [
+        "rome_foundation"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_HIMALAYA",
+      "fr": "La collision de la plaque indienne avec l’Eurasie, engagée il y a environ 50 millions d’années, provoque la formation de l’Himalaya et du plateau tibétain. La convergence et le soulèvement se poursuivent aujourd’hui.",
+      "en": "The collision of the Indian plate with Eurasia, beginning roughly 50 million years ago, builds the Himalayas and Tibetan Plateau. Convergence and uplift continue today.",
+      "sources": [
+        "himalaya"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_MOON_FORM",
+      "fr": "L’hypothèse dominante relie la formation de la Lune à un impact géant entre la jeune Terre et un autre corps planétaire, il y a environ 4,5 milliards d’années. Les matériaux projetés en orbite participent à l’assemblage du satellite.",
+      "en": "The leading hypothesis links the Moon’s formation to a giant impact between the young Earth and another planetary body about 4.5 billion years ago. Material sent into orbit contributes to assembling the satellite.",
+      "sources": [
+        "nasa_moon"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_SOLAR_NEB",
+      "fr": "L’effondrement d’un nuage interstellaire de gaz et de poussières donne naissance à une protoétoile entourée d’un disque. Dans cette nébuleuse solaire se formeront le Soleil, les planètes et les petits corps du Système solaire.",
+      "en": "A cloud of interstellar gas and dust collapses into a protostar surrounded by a disk. This solar nebula gives rise to the Sun, planets and smaller bodies of the Solar System.",
+      "sources": [
+        "nasa_solar"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_PANGAEA",
+      "fr": "Les mouvements des plaques rapprochent progressivement la plupart des continents au Paléozoïque supérieur pour former la Pangée. Son assemblage s’étale sur des millions d’années ; sa fragmentation ultérieure ouvre notamment l’Atlantique.",
+      "en": "Plate motions progressively bring most continents together in the Late Paleozoic to form Pangaea. Assembly spans millions of years; its later breakup opens the Atlantic, among other ocean basins.",
+      "sources": [
+        "pangaea"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_EARTH_FORM",
+      "fr": "La Terre s’assemble par accrétion de matière au sein du jeune Système solaire, il y a environ 4,54 milliards d’années. Les datations radiométriques de météorites et de matériaux anciens permettent d’estimer cet âge.",
+      "en": "Earth assembles by accretion within the young Solar System about 4.54 billion years ago. Radiometric dating of meteorites and ancient materials constrains this age.",
+      "sources": [
+        "usgs_earth"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_GLOB_CLUSTERS",
+      "fr": "Des groupes d’étoiles très denses se constituent au début de l’histoire des galaxies. Beaucoup d’amas globulaires de la Voie lactée sont extrêmement anciens et conservent des indices sur sa formation.",
+      "en": "Dense groups of stars form early in galactic history. Many of the Milky Way’s globular clusters are extremely old and preserve evidence of its formation.",
+      "sources": [
+        "nasa_clusters"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_OCEAN_FORM",
+      "fr": "En refroidissant, la jeune Terre devient compatible avec la présence durable d’eau liquide en surface. Les indices minéralogiques suggèrent une histoire ancienne des océans, mais leur installation ne correspond pas à une date unique précisément connue.",
+      "en": "As the young Earth cools, lasting liquid water becomes possible at its surface. Mineral evidence points to an early history of oceans, but their development has no single precisely established date.",
+      "sources": [
+        "nasa_oceans"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_FIRST_STARS",
+      "fr": "La gravité concentre le gaz primordial dans les premières structures, où s’allument les premières étoiles. Leur rayonnement et les éléments qu’elles produisent transforment progressivement leur environnement et préparent les premières galaxies.",
+      "en": "Gravity concentrates primordial gas in early structures, where the first stars ignite. Their radiation and newly produced elements gradually transform their surroundings and contribute to the earliest galaxies.",
+      "sources": [
+        "nasa_stars",
+        "esa_eras"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_COLUMBIA",
+      "fr": "Columbia, aussi appelé Nuna dans certaines reconstitutions, désigne un ancien rassemblement continental du Paléoprotérozoïque. Sa géométrie et les étapes de son assemblage, autour de 1,8 milliard d’années, restent des sujets de recherche.",
+      "en": "Columbia, also called Nuna in some reconstructions, is an ancient Paleoproterozoic continental assembly. Its geometry and stages of assembly around 1.8 billion years ago remain research topics.",
+      "sources": [
+        "columbia"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_HURON_GLAC",
+      "fr": "Les dépôts glaciaires du Huronien témoignent de plusieurs épisodes de refroidissement au Paléoprotérozoïque, autour de 2,4 milliards d’années. Certains ont pu atteindre les basses latitudes, dans le contexte des changements de l’oxygénation terrestre.",
+      "en": "Huronian glacial deposits record several Paleoproterozoic cooling episodes around 2.4 billion years ago. Some may have reached low latitudes amid changes in Earth’s oxygenation.",
+      "sources": [
+        "huronian"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_STURT_GLAC",
+      "fr": "La glaciation sturtienne est un épisode majeur du Cryogénien, débutant vers 717 millions d’années. Des dépôts glaciaires de basses latitudes étayent l’hypothèse d’une Terre alors largement englacée.",
+      "en": "The Sturtian glaciation is a major Cryogenian episode beginning around 717 million years ago. Low-latitude glacial deposits support the hypothesis of a largely ice-covered Earth.",
+      "sources": [
+        "sturtian"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_LHB_END",
+      "fr": "Le grand bombardement tardif est un épisode hypothétique d’impacts intenses sur les corps du Système solaire interne, souvent placé entre environ 4,1 et 3,8 milliards d’années. Son existence comme pic distinct et sa chronologie sont discutées.",
+      "sources": [
+        "nasa_bombardment"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_WRITING",
+      "fr": "Les premières écritures mésopotamiennes se développent vers 3200 avant notre ère, notamment pour enregistrer des biens et des transactions. Leurs signes évolueront vers l’écriture cunéiforme ; d’autres traditions d’écriture se développent aussi dans le monde.",
+      "en": "Early Mesopotamian writing develops around 3200 BCE, notably to record goods and transactions. Its signs evolve into cuneiform; other writing traditions also develop elsewhere.",
+      "sources": [
+        "writing"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_FIRE_USE",
+      "fr": "L’usage maîtrisé du feu devient régulier dans de nombreux sites préhistoriques autour de 400 000 ans. Les vestiges plus anciens et la distinction entre conserver un feu et l’allumer rendent délicate l’identification d’une toute première maîtrise.",
+      "en": "Controlled fire use becomes regular at many prehistoric sites around 400,000 years ago. Older evidence and the distinction between maintaining and igniting fire complicate identifying its very first mastery.",
+      "sources": [
+        "fire"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_FIRST_LIFE",
+      "fr": "Des indices géochimiques très anciens ont été interprétés comme des traces d’activité biologique autour de 3,8 milliards d’années. Leur interprétation reste débattue : ce jalon ne constitue pas une date certaine d’apparition de la vie.",
+      "en": "Very ancient geochemical signatures have been interpreted as evidence of biological activity around 3.8 billion years ago. Their interpretation remains debated; this marker is not a certain date for life’s origin.",
+      "sources": [
+        "life_evidence",
+        "life_review"
+      ]
+    },
+    {
+      "kind": "event",
+      "id": "EVT_FIRST_MIN",
+      "fr": "Des cristaux de zircon âgés d’environ 4,4 milliards d’années, conservés en Australie occidentale, figurent parmi les plus anciens matériaux terrestres connus. Ils renseignent sur la croûte et les conditions de la Terre primitive.",
+      "en": "Zircon crystals about 4.4 billion years old, preserved in Western Australia, are among the oldest known terrestrial materials. They reveal information about early Earth’s crust and conditions.",
+      "sources": [
+        "usgs_earth"
+      ]
+    }
+  ]
+}

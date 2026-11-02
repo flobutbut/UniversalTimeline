@@ -1,10 +1,8 @@
-import { periodCoordinates } from '@/services/TimelineScalingService';
-import { listEventYearsBP } from '@/lib/listEventTableHelpers';
 import { ref, computed, watch } from 'vue';
+import { comparableYearsBeforePresent } from '@temporal';
 import { storeToRefs } from 'pinia';
 import { useLatestRequest } from './useLatestRequest';
 import { useDataStore } from '@/stores/useDataStore';
-import { StoryApiService } from '@/services/StoryApiService';
 import type { ListPeriod, ListEvent, StorySuggestion } from '@/types/database';
 import { storyChildrenOf, resolvePeriodNavFromSnapshot, buildTimelineBreadcrumb, storyAncestorIds, type StoryFrame, type StoryPeriodNavSnapshot } from '@/lib/homeStoryPeriodNav';
 
@@ -13,7 +11,6 @@ const ENTRY_STORY_ID = '1';
 export function useHomeNavigation() {
   const dataStore = useDataStore();
   const { periods, events, stories } = storeToRefs(dataStore);
-  const storyService = StoryApiService.getInstance();
   const navigation = useLatestRequest();
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -38,10 +35,12 @@ export function useHomeNavigation() {
 
   function eventsForPeriod(period: ListPeriod | null): ListEvent[] {
     if (!period) return currentStoryAllEvents.value;
-    const { start, end } = periodCoordinates(period);
+    const now = Date.now();
+    const start = comparableYearsBeforePresent(period.startDate, period.startYearsBP, now);
+    const end = comparableYearsBeforePresent(period.endDate, period.endYearsBP, now);
     if (start === null || end === null) return [];
     return currentStoryAllEvents.value.filter(event => {
-      const bp = listEventYearsBP(event);
+      const bp = comparableYearsBeforePresent(event.date, event.dateYearsBP, now);
       return bp !== null && bp <= start && bp >= end;
     });
   }
@@ -53,12 +52,13 @@ export function useHomeNavigation() {
   // Cached HomeView remains subscribed to canonical saves and deletions.
   watch(periods, () => {
     const byId = new Map(periods.value.map(period => [period.id, period]));
-    currentStoryPeriods.value = currentStoryPeriods.value.filter(period => byId.has(period.id)).map(period => ({ ...byId.get(period.id)!, ...(period.storyParentId !== undefined ? { storyParentId: period.storyParentId } : {}) }));
-    parentStack.value = parentStack.value.filter(period => byId.has(period.id)).map(period => byId.get(period.id)!);
+    currentStoryPeriods.value = currentStoryPeriods.value.filter(period => byId.has(period.id)).map(period => ({ ...byId.get(period.id)!, hasChildren: period.hasChildren, ...(period.storyParentId !== undefined ? { storyParentId: period.storyParentId } : {}) }));
+    const placed = new Map(currentStoryPeriods.value.map(period => [period.id, period]));
+    parentStack.value = parentStack.value.filter(period => byId.has(period.id)).map(period => placed.get(period.id) ?? byId.get(period.id)!);
     // Les chemins des frises quittées sont revalidés au retour ; seuls les libellés suivent ici.
     storyStack.value = storyStack.value.map(frame => ({ ...frame, path: frame.path.map(period => byId.get(period.id) ?? period) }));
     if (currentPeriod.value && !byId.has(currentPeriod.value.id)) currentPeriod.value = parentStack.value.pop() ?? null;
-    else if (currentPeriod.value) currentPeriod.value = byId.get(currentPeriod.value.id)!;
+    else if (currentPeriod.value) currentPeriod.value = placed.get(currentPeriod.value.id) ?? byId.get(currentPeriod.value.id)!;
     displayedPeriods.value = childrenOf(currentPeriod.value?.id ?? null);
     storyEvents.value = eventsForPeriod(currentPeriod.value);
   });
@@ -75,19 +75,17 @@ export function useHomeNavigation() {
     loading.value = true;
     error.value = null;
     try {
-      if (verifyStory) {
-        await dataStore.ensureStoriesLoaded();
-        if (!isCurrent()) return;
-        if (!dataStore.storyById(storyId)) throw new Error('Cette frise est introuvable ou n’est pas accessible.');
-        // Ouverture directe : la vraie lignée des frises accessibles, jamais une frise d'entrée supposée.
-        storyStack.value = storyAncestorIds(storyId, dataStore.storyById).map(id => ({ id, path: [] }));
-      }
-      const [storyPeriods, storyEventRows] = await Promise.all([
-        dataStore.ensureStoryPeriodsLoaded(storyId),
-        dataStore.ensureStoryEventsLoaded(storyId),
+      const [story] = await Promise.all([
+        dataStore.ensureStoryLoaded(storyId),
         dataStore.ensureStoriesLoaded(),
       ]);
       if (!isCurrent()) return;
+      if (verifyStory) {
+        if (!dataStore.storyById(storyId)) throw new Error('Cette frise est introuvable ou n’est pas accessible.');
+        storyStack.value = storyAncestorIds(storyId, dataStore.storyById).map(id => ({ id, path: [] }));
+      }
+      const storyPeriods = story.periods;
+      const storyEventRows = story.events;
       currentStoryPeriods.value = storyPeriods;
       currentStoryAllEvents.value = storyEventRows;
       const bounds = [...storyPeriods.flatMap(period => [period.startYearsBP, period.endYearsBP]), ...storyEventRows.map(event => event.dateYearsBP)]
@@ -119,7 +117,10 @@ export function useHomeNavigation() {
     try {
       if (!period.hasChildren) {
         // Seules les frises ancrées sur la période cliquée ; celles d'un ancêtre restent sur sa carte.
-        const suggestions = await storyService.getSuggestions(currentStoryId.value, [period.id]);
+        const story = await dataStore.ensureStoryLoaded(currentStoryId.value);
+        const suggestions = (story.childStories ?? [])
+          .filter(child => child.anchors.some(anchor => anchor.type === 'period' && anchor.id === period.id))
+          .map(child => ({ id: child.id, title: child.title, parentStoryId: currentStoryId.value }));
         if (!isCurrent()) return;
         if (suggestions.length === 1) { await selectStory(suggestions[0].id); return; }
         storySuggestions.value = suggestions;

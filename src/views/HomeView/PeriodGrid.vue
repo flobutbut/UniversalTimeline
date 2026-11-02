@@ -130,15 +130,11 @@
 <script setup lang="ts">
 import { ref, computed, watch, onActivated, onDeactivated } from 'vue';
 import { Icon } from '@iconify/vue';
-import type { ListPeriod, ListEvent, StorySuggestion } from '@/types/database';
+import type { ListPeriod, ListEvent, StorySuggestion, Story } from '@/types/database';
 import { compareYearsOldestFirst } from '@temporal';
 import { periodCoordinates } from '@/services/TimelineScalingService';
 import { listEventYearsBP } from '@/lib/listEventTableHelpers';
 import { useTimelineScaling } from '@/composables/useTimelineScaling';
-import { StoryApiService } from '@/services/StoryApiService';
-import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
-import { useDataStore } from '@/stores/useDataStore';
-import { loadEventStorySuggestions } from '@/lib/eventStorySuggestions';
 import { usePeriodFlip } from '@/composables/usePeriodFlip';
 import { useTimelinePeriodTooltip } from '@/composables/useTimelinePeriodTooltip';
 import { useTimelinePeriodExpansion } from '@/composables/useTimelinePeriodExpansion';
@@ -165,6 +161,8 @@ const props = withDefaults(defineProps<{
   currentStoryId: string;
   /** Infobulle des périodes (titre, dates, courte description) ; désactivée par défaut. */
   periodTooltips?: boolean;
+  /** Home shares its cached frise read with the cards. Standalone grids can load their own metadata. */
+  loadStoryDetails?: (id: string, signal: AbortSignal) => Promise<Story>;
 }>(), { periodTooltips: false });
 
 const emit = defineEmits<{
@@ -180,32 +178,18 @@ const error = ref<string | null>(null);
 const selectedEvent = ref<ListEvent | null>(null);
 /** Suggestions de stories pour l'événement actuellement sélectionné. */
 const active = ref(true);
-const { byPeriod: associatedByPeriod, loading: associationsLoading, error: associationsError, retry: retryAssociations } = useTimelineAssociatedStories(
-  () => props.currentStoryId, () => active.value && (!!props.currentPeriod || props.periods.length > 0),
+const { byPeriod: associatedByPeriod, byEvent: associatedByEvent, loading: associationsLoading, error: associationsError, retry: retryAssociations } = useTimelineAssociatedStories(
+  () => props.currentStoryId, () => active.value && (!!props.currentPeriod || props.periods.length > 0 || props.events.length > 0),
+  props.loadStoryDetails,
 );
-const { results: eventStorySuggestions, loading: eventSuggestionsLoading, error: eventSuggestionsError, retry: retryEventSuggestions } = useDebouncedSearch(
-  () => selectedEvent.value?.id ?? '',
-  (id, signal) => {
-    const api = StoryApiService.getInstance();
-    return loadEventStorySuggestions(props.currentStoryId, id, {
-      anchored: () => api.getSuggestions(props.currentStoryId, [], [id], { signal }),
-      memberships: () => api.getMemberships('event', { signal }),
-      stories: async () => { const dataStore = useDataStore(); await dataStore.ensureStoriesLoaded(); return dataStore.stories; },
-    });
-  },
-  { delayMs: 0, minLength: 1, criteria: () => props.currentStoryId, enabled: () => active.value && !props.loading },
-);
-/** Frises lisibles de chaque événement, lues une fois par frise pour le survol. */
-const { results: eventMemberships, loading: membershipsLoading, error: membershipsError } = useDebouncedSearch(
-  () => props.currentStoryId || 'catalogue',
-  async (_key, signal) => [...await StoryApiService.getInstance().getMemberships('event', { signal })],
-  { delayMs: 0, minLength: 1, enabled: () => active.value && props.events.length > 0 },
-);
-const membershipsByEvent = computed(() => new Map(eventMemberships.value));
+const eventStorySuggestions = computed(() => selectedEvent.value ? associatedByEvent.value.get(selectedEvent.value.id) ?? [] : []);
+const eventSuggestionsLoading = associationsLoading;
+const eventSuggestionsError = associationsError;
+const retryEventSuggestions = retryAssociations;
 /** null tant que le nombre est inconnu : une lecture en cours ou échouée n'est pas « aucune frise ». */
-const otherStoryCount = (id: string) => membershipsLoading.value || membershipsError.value
+const otherStoryCount = (id: string) => associationsLoading.value || associationsError.value
   ? null
-  : (membershipsByEvent.value.get(id) ?? []).filter(storyId => storyId !== props.currentStoryId).length;
+  : (associatedByEvent.value.get(id) ?? []).length;
 // ─── FLIP animation ────────────────────────────────────────────────────────────
 
 /** Ref vers la barre parent (PeriodCard variant="parent"). */

@@ -57,6 +57,7 @@ export interface StoryDto extends MetadataDto {
   periods?: PeriodDto[]; events?: EventDto[];
   preview_periods?: PeriodDto[]; preview_events?: EventDto[];
   childStories?: ChildStoryDto[];
+  relatedStories?: Array<ChildStoryDto & { periodIds: ApiId[]; eventIds: ApiId[] }>;
   parent_story_id?: ApiId | null;
   owner_user_id?: string | null; ownerUserId?: string | null;
 }

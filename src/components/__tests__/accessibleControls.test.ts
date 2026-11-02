@@ -114,7 +114,7 @@ it('keeps finder edit actions in the keyboard order without requiring pointer ho
 it('lists the other frises of a selected event as a labelled list of buttons, without a disclosure', async () => {
   view = mount(EventCard, { props: { event: { id: 'e', label: { fr: 'Terre', en: '' }, date: 'M65', categories: [] }, isSelected: true, isCategoryActive: false, cardStyle: { width: '0', left: '0' }, storySuggestions: [{ id: 's', title: { fr: 'Frise', en: '' } }] as any }, attachTo: document.body });
   const section = view.get('section.event-stories');
-  expect(section.attributes('aria-label')).toBe('Autres frises contenant cet événement');
+  expect(section.attributes('aria-label')).toBe('Autres frises associées à cet événement');
   expect(section.findAll('li button').map(button => button.text())).toEqual(['Frise']);
   expect(view.find('[aria-expanded]').exists()).toBe(false);
   await section.get('button').trigger('click');

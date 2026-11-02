@@ -6,6 +6,8 @@ Audit en lecture seule. Aucune ligne distante, aucun schéma et aucun comporteme
 
 ## Évolution après l’audit
 
+Les descriptions et relations ont ensuite été corrigées le même jour : voir [le compte rendu de correction](../Documentation/PERFORMANCE-ET-CATALOGUE.md). Le contrôle réel après application ne relève plus de description FR ou EN manquante, d’ancre publique invalide ni d’association temporelle hors plage avec la comparaison commune des dates. Les chiffres et recommandations du relevé initial sont conservés ci-dessous comme historique.
+
 Le rattachement de Conquête spatiale à Époque moderne a été confirmé par l’utilisateur. C’est un choix de navigation éditoriale, sans obligation d’inclusion chronologique. Les recommandations ci-dessous sur un éventuel changement de ce parent sont donc abandonnées.
 
 La centralisation des classements dans les frises est décrite dans `Documentation/RELATIONS-FRISES.md`. Les chiffres de descriptions manquantes ci-dessous restent ceux du relevé initial ; cette évolution du modèle ne complète pas les textes.

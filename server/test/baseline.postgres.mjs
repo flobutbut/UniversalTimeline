@@ -76,6 +76,27 @@ test('reads public stories anonymously and keeps another account’s private dat
     assert.equal((await scoped(alice, client => client.query(`SELECT * FROM ${table}`))).rowCount,1);
   }
 });
+test('loads complete timeline snapshots and shared-content links under the caller’s RLS', async () => {
+  await pool.query("INSERT INTO periods(id,label_fr,label_en,start_date,end_date) VALUES ('leaf','Feuille','Leaf','M10','NOW'); INSERT INTO story_periods VALUES (1,'root',null),(1,'leaf','root'),(3,'root',null); INSERT INTO story_events VALUES (1,'event'),(3,'event')");
+  await pool.query('INSERT INTO period_categories VALUES ($1,$2)', ['root',category]);
+  await pool.query('INSERT INTO event_categories VALUES ($1,$2)', ['event',category]);
+  await pool.query('UPDATE stories SET parent_story_id=1 WHERE id=2');
+  const anon = await call('get','/stories/:id',{}, {id:'1'},null);
+  assert.equal(anon.statusCode,200);
+  assert.deepEqual(anon.payload.periods.map(p=>p.id),['leaf','root']);
+  assert.equal(anon.payload.periods.find(p=>p.id==='root').hasChildren,true);
+  assert.equal(anon.payload.periods.find(p=>p.id==='leaf').storyParentId,'root');
+  assert.equal(anon.payload.periods.find(p=>p.id==='root').categories[0].id,category);
+  assert.equal(anon.payload.events[0].categories[0].id,category);
+  assert.deepEqual(anon.payload.childStories,[]);
+  assert.deepEqual(anon.payload.relatedStories,[]);
+  const own = await call('get','/stories/:id',{}, {id:'1'},alice);
+  assert.deepEqual(own.payload.childStories.map(s=>s.id),['2']);
+  assert.deepEqual(own.payload.relatedStories.map(s=>({id:s.id,periods:s.periodIds,events:s.eventIds})),[{id:'2',periods:['root'],events:['event']}]);
+  const other = await call('get','/stories/:id',{}, {id:'1'},bob);
+  assert.deepEqual(other.payload.relatedStories.map(s=>s.id),['3']);
+  assert.equal((await call('get','/stories/:id',{}, {id:'2'},null)).statusCode,404);
+});
 test('creates a period and event with canonical categories, numeric bounds and timestamps', async () => {
   const p=await call('post','/periods',{id:'legacy-period',wikidata_id:'Q999909',label:{fr:'Nouvelle'},start_date:'M65',end_date:'NOW',categories:[{id:category}]});
   assert.equal(p.statusCode,201); assert.equal(p.payload.parent_id,null);

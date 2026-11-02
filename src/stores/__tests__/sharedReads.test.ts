@@ -108,7 +108,7 @@ it('invalidates both parents after a move, preserving an unrelated children cach
   expect(read).toHaveBeenCalledTimes(5); expect(store.periodById('new')?.hasChildren).toBe(true);
 });
 
-it('invalidates only the affected story snapshots and refreshes its aggregate list', async () => {
+it('refreshes shared-link snapshots while retaining unrelated period lists after an association change', async () => {
   const details = vi.spyOn(StoryApiService.getInstance(), 'getStory').mockImplementation(async id => detail(id));
   const periods = vi.spyOn(StoryApiService.getInstance(), 'getStoryPeriods').mockResolvedValue([]);
   const list = vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([story('a'), story('b')]);
@@ -116,7 +116,7 @@ it('invalidates only the affected story snapshots and refreshes its aggregate li
   await Promise.all([store.ensureStoryLoaded('a'), store.ensureStoryLoaded('b'), store.ensureStoryPeriodsLoaded('a'), store.ensureStoryPeriodsLoaded('b'), store.ensureStoriesLoaded()]);
   store.invalidateStory('a');
   await Promise.all([store.ensureStoryLoaded('a'), store.ensureStoryLoaded('b'), store.ensureStoryPeriodsLoaded('a'), store.ensureStoryPeriodsLoaded('b'), store.ensureStoriesLoaded()]);
-  expect(details).toHaveBeenCalledTimes(3); expect(periods).toHaveBeenCalledTimes(3); expect(list).toHaveBeenCalledTimes(2);
+  expect(details).toHaveBeenCalledTimes(4); expect(periods).toHaveBeenCalledTimes(3); expect(list).toHaveBeenCalledTimes(2);
 });
 
 it('does not erase known category and hierarchy enrichment from the sparse story-period endpoint', async () => {

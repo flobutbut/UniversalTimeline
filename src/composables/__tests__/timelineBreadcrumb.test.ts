@@ -4,8 +4,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useHomeNavigation } from '@/composables/useHomeNavigation';
 import { useDataStore } from '@/stores/useDataStore';
 import { StoryApiService } from '@/services/StoryApiService';
-import { EventApiService } from '@/services/EventApiService';
-import type { StorySuggestion } from '@/types/database';
+import { storyFixture } from '@/testFixtures/story';
 import { storyAncestorIds } from '@/lib/homeStoryPeriodNav';
 
 const apiPeriod = (id: string, parent: string | null, start: number, hasChildren = true) => ({
@@ -28,10 +27,9 @@ beforeEach(() => {
     { id: '1', title: { fr: 'Univers Moderne', en: '' }, categories: [] },
     { id: '2', title: { fr: 'Autre frise', en: '' }, categories: [] },
   ]);
-  vi.spyOn(StoryApiService.getInstance(), 'getStoryPeriods').mockImplementation(async id => (
+  vi.spyOn(StoryApiService.getInstance(), 'getStory').mockImplementation(async id => storyFixture(id,
     id === '1' ? source : [apiPeriod('other-root', null, 300), apiPeriod('other-leaf', 'other-root', 0, false)]
-  ) as never[]);
-  vi.spyOn(EventApiService.getInstance(), 'getStoryListEvents').mockResolvedValue([event(750), event(250), event(50)]);
+  , [event(750), event(250), event(50)]));
   nav = scope.run(useHomeNavigation)!;
 });
 afterEach(() => { scope.stop(); vi.restoreAllMocks(); });
@@ -43,7 +41,8 @@ it('builds the path from the story and all committed ancestors, excluding a mere
   vi.spyOn(StoryApiService.getInstance(), 'getSuggestions').mockResolvedValue([]);
   await nav.handlePeriodClick(nav.displayedPeriods.value[0]);
   // Only frises anchored on the clicked period: an ancestor's frises stay on its own card.
-  expect(StoryApiService.getInstance().getSuggestions).toHaveBeenCalledWith('1', ['leaf']);
+  expect(StoryApiService.getInstance().getSuggestions).not.toHaveBeenCalled();
+  expect(StoryApiService.getInstance().getStory).toHaveBeenCalledOnce();
   expect(ids()).toEqual(['story:1', 'story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild']);
 });
 
@@ -70,17 +69,18 @@ it('opens the story overview from its own crumb without reloading or exposing un
   expect(nav.currentPeriod.value).toBeNull(); expect(nav.parentStack.value).toEqual([]);
   expect(nav.displayedPeriods.value.map(p => p.id)).toEqual(['root']);
   expect(ids()).toEqual(['story:1']);
-  expect(StoryApiService.getInstance().getStoryPeriods).toHaveBeenCalledTimes(1);
+  expect(StoryApiService.getInstance().getStory).toHaveBeenCalledTimes(1);
 });
 
 it('cancels a pending leaf request when an ancestor is chosen', async () => {
   await descend();
-  let resolve!: (value: StorySuggestion[]) => void;
-  vi.spyOn(StoryApiService.getInstance(), 'getSuggestions').mockReturnValue(new Promise(yes => { resolve = yes; }));
+  let resolve!: (value: ReturnType<typeof storyFixture>) => void;
+  useDataStore().invalidateStory('1');
+  vi.mocked(StoryApiService.getInstance().getStory).mockReturnValueOnce(new Promise(yes => { resolve = yes; }));
   const pending = nav.handlePeriodClick(nav.displayedPeriods.value[0]);
   expect(nav.loading.value).toBe(true);
   await nav.navigateToBreadcrumb(1);
-  resolve([{ id: '2', title: { fr: 'Autre frise', en: '' } }]); await pending;
+  resolve(storyFixture('1', source, [], [{ id: '2', title_fr: 'Autre frise', anchors: [{ type: 'period', id: 'leaf' }] }])); await pending;
   expect(nav.currentStoryId.value).toBe('1'); expect(nav.currentPeriod.value?.id).toBe('root');
   expect(nav.loading.value).toBe(false); expect(nav.storySuggestions.value).toEqual([]);
 });
@@ -136,9 +136,9 @@ it('merges a child story with the root period that bears its name', async () => 
 });
 
 it('does not repeat the period a child story hangs from', async () => {
-  vi.mocked(StoryApiService.getInstance().getStoryPeriods).mockImplementation(async id => (
+  vi.mocked(StoryApiService.getInstance().getStory).mockImplementation(async id => storyFixture(id,
     id === '1' ? source : [apiPeriod('grandchild', null, 100), apiPeriod('sub', 'grandchild', 80), apiPeriod('sub-leaf', 'sub', 0, false)]
-  ) as never[]);
+  ));
   await descend(); await nav.selectStory('2');
   await nav.handlePeriodClick(nav.displayedPeriods.value[0]);
   expect(ids()).toEqual([...['story:1', 'story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild'], 'story:2', 'story:2/period:sub']);

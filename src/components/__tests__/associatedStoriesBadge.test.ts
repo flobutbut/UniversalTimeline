@@ -10,6 +10,7 @@ import StoryBreadcrumb from '@/components/StoryBreadcrumb.vue';
 import { EventApiService } from '@/services/EventApiService';
 import { StoryApiService } from '@/services/StoryApiService';
 import type { Story, ChildStorySummary, StorySuggestion } from '@/types/database';
+import { storyFixture } from '@/testFixtures/story';
 
 const suggestion = (id: string): StorySuggestion => ({ id, title: { fr: `Frise ${id}`, en: '' }, parentStoryId: 'one' });
 const props = { storyId: 'one', periodId: 'leaf', periodLabel: 'Période enfant', stories: [suggestion('child')], loading: false, error: null, disabled: false };
@@ -104,7 +105,7 @@ it('opens a frise from a child card and restores the original exploration with t
   vi.spyOn(api, 'getListStories').mockResolvedValue([detail('1'), detail('2')]);
   vi.spyOn(api, 'getStoryPeriods').mockImplementation(async id => [sourcePeriod(`root-${id}`, null, true), sourcePeriod(`leaf-${id}`, `root-${id}`, false)]);
   vi.spyOn(EventApiService.getInstance(), 'getStoryListEvents').mockResolvedValue([]);
-  vi.mocked(api.getStory).mockImplementation(async id => detail(id, id === '1' ? [linked('2', 'leaf-1')] : []));
+  vi.mocked(api.getStory).mockImplementation(async id => storyFixture(id, [sourcePeriod(`root-${id}`, null, true), sourcePeriod(`leaf-${id}`, `root-${id}`, false)], [], id === '1' ? [linked('2', 'leaf-1')] : []));
   const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/timeline', name: 'timeline', component: HomeView }] });
   await router.push('/timeline'); await router.isReady();
   view = mount(HomeView, { attachTo: document.body, global: { plugins: [createPinia(), router] } });
@@ -154,6 +155,7 @@ it('offers unanchored frise-level links at the frise root without attaching them
     { ...root, parentId: 'outside-frise', hasParent: true, children: [leaf.id], temporalLocation: '' },
     { ...leaf, parentId: root.id, hasParent: true, children: [], temporalLocation: '' },
   ];
+  source.events = [{ id: root.id, label: { fr: 'Événement', en: '' }, date: 'M65', categories: [] }];
   vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(source);
   view = mount(PeriodGrid, { props: gridProps, attachTo: document.body }); await settle();
   expect(view.get('.period-card--parent').get('.associated-stories__badge').text()).toBe('1 frise associée');
@@ -167,4 +169,16 @@ it('shows a child anchored on a period that left the frise at frise level instea
   vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue({ ...detail('one'), periods: [root] as unknown as Story['periods'], childStories: [linked('stale', 'removed-period')] });
   view = mount(PeriodGrid, { props: { ...gridProps, periods: [] }, attachTo: document.body }); await settle();
   expect(view.get('.period-card--parent .associated-stories__badge').text()).toBe('1 frise associée');
+});
+
+it('offers other frises sharing a period, deduplicated with anchored children', async () => {
+  vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue({ ...detail('one', [linked('child')]), relatedStories: [
+    { id: 'child', title: linked('child').title, periodIds: ['leaf'], eventIds: [] },
+    { id: 'sibling', title: { fr: 'Autre parcours', en: '' }, periodIds: ['leaf'], eventIds: [] },
+    { id: 'one', title: { fr: 'Courante', en: '' }, periodIds: ['leaf'], eventIds: [] },
+  ] });
+  view = mount(PeriodGrid, { props: gridProps, attachTo: document.body }); await settle();
+  expect(badge().text()).toBe('2 frises associées');
+  await badge().trigger('click'); await flushPromises();
+  expect(body().findAll('.associated-stories__item').map(item => item.text())).toEqual(['Frise child', 'Autre parcours']);
 });

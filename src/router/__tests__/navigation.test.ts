@@ -11,6 +11,7 @@ import { EventApiService } from '@/services/EventApiService';
 import { useDataStore } from '@/stores/useDataStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import HomeView from '@/views/HomeView.vue';
+import { storyFixture } from '@/testFixtures/story';
 
 const counts = vi.hoisted(() => ({ eventsImports: 0, databaseImports: 0, graphImports: 0, designImports: 0, eventsUnmounted: 0 }));
 vi.mock('@/components/GlobalSearch.vue', () => ({ default: { template: '<input aria-label="Recherche globale" />' } }));
@@ -63,7 +64,7 @@ const withEventsLoader = (loader: () => Promise<Component>) => appRoutes.map(rec
 
 beforeEach(() => {
   setActivePinia(createPinia());
-  vi.spyOn(StoryApiService.getInstance(), 'getStoryPeriods').mockResolvedValue([period('entry'), period('child', 'entry'), period('leaf', 'child')] as any);
+  vi.spyOn(StoryApiService.getInstance(), 'getStory').mockResolvedValue(storyFixture('1', [period('entry'), period('child', 'entry'), period('leaf', 'child')]));
   vi.spyOn(EventApiService.getInstance(), 'getStoryListEvents').mockResolvedValue([]);
   vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([]);
   vi.spyOn(PeriodApiService.getInstance(), 'loadChildren').mockImplementation(async id => [period(id === 'entry' ? 'child' : 'leaf', id)] as any);
@@ -75,7 +76,7 @@ it('loads only the requested page on direct entry and keeps timeline reads dorma
   await start('/events');
   expect(view.find('[data-page="events"]').exists()).toBe(true);
   expect(view.findComponent(HomeView).exists()).toBe(false);
-  expect(StoryApiService.getInstance().getStoryPeriods).not.toHaveBeenCalled();
+  expect(StoryApiService.getInstance().getStory).not.toHaveBeenCalled();
   expect(EventApiService.getInstance().getStoryListEvents).not.toHaveBeenCalled();
   expect(counts.eventsImports).toBe(1);
   expect(counts.databaseImports + counts.graphImports + counts.designImports).toBe(0);
@@ -115,7 +116,7 @@ it('preserves the actual timeline instance, current period and back stack across
   await go('/events'); await historyMove('back');
   expect(view.getComponent(HomeView).element).toBe(original); expect(activeTab()).toBe('Timeline');
   await historyMove('forward'); expect(activeTab()).toBe('Events');
-  expect(StoryApiService.getInstance().getStoryPeriods).toHaveBeenCalledOnce();
+  expect(StoryApiService.getInstance().getStory).toHaveBeenCalledOnce();
 });
 
 it('reuses the timeline for query and hash changes instead of resetting its navigation', async () => {
@@ -123,7 +124,7 @@ it('reuses the timeline for query and hash changes instead of resetting its navi
   await button('child').trigger('click'); await flushPromises();
   await go('/timeline?source=bookmark#detail');
   expect(view.getComponent(HomeView).element).toBe(original); expect(view.get('[data-context]').text()).toBe('child');
-  expect(StoryApiService.getInstance().getStoryPeriods).toHaveBeenCalledOnce();
+  expect(StoryApiService.getInstance().getStory).toHaveBeenCalledOnce();
 });
 
 it('does not retain other page instances or unfinished modal state in the cache', async () => {
@@ -159,14 +160,14 @@ it('keeps the current page after a loading failure and retries the failed route'
 it.each([['/graph', 'Periods'], ['/design-system', 'Design system'], ['/database', 'Frises']])('renders a direct %s route and the matching header', async (path, label) => {
   await start(path); expect(activeTab()).toBe(label);
   expect(view.find('[data-page="timeline"]').exists()).toBe(false);
-  expect(StoryApiService.getInstance().getStoryPeriods).not.toHaveBeenCalled();
+  expect(StoryApiService.getInstance().getStory).not.toHaveBeenCalled();
 });
 
 it('opens the landing page at the root and displays a useful unknown-page screen with a working return link', async () => {
   await start('/'); expect(router.currentRoute.value.name).toBe('landing');
   expect(view.get('h1').text()).toContain('4,54 milliards d’années.');
   expect(view.find('.header-search-wrap').exists()).toBe(false);
-  expect(StoryApiService.getInstance().getStoryPeriods).not.toHaveBeenCalled();
+  expect(StoryApiService.getInstance().getStory).not.toHaveBeenCalled();
   expect(view.get('.create-bottom a').attributes('href')).toBe('/database');
   useAuthStore().account = null; await nextTick();
   expect(view.get('.create-bottom a').attributes('href')).toBe('/login?mode=signup&redirect=/database');
@@ -179,15 +180,15 @@ it('opens the landing page at the root and displays a useful unknown-page screen
 });
 
 it('retains pending initial timeline data while cached and reflects shared-store saves on return', async () => {
-  const pending = deferred<any[]>();
-  vi.mocked(StoryApiService.getInstance().getStoryPeriods).mockReturnValue(pending.promise);
+  const pending = deferred<ReturnType<typeof storyFixture>>();
+  vi.mocked(StoryApiService.getInstance().getStory).mockReturnValue(pending.promise);
   await start('/timeline'); await go('/events');
-  pending.resolve([period('entry'), period('child', 'entry')]); await flushPromises();
+  pending.resolve(storyFixture('1', [period('entry'), period('child', 'entry')])); await flushPromises();
   const saved = { ...period('entry'), label: { fr: 'Enregistrée', en: '' } };
   useDataStore().upsertSavedPeriod(saved); await nextTick();
-  vi.mocked(StoryApiService.getInstance().getStoryPeriods).mockResolvedValue([saved, period('child', 'entry')] as never[]);
+  vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(storyFixture('1', [saved, period('child', 'entry')]));
   await go('/timeline'); expect(view.get('[data-context]').text()).toBe('Enregistrée');
-  expect(StoryApiService.getInstance().getStoryPeriods).toHaveBeenCalledTimes(2);
+  expect(StoryApiService.getInstance().getStory).toHaveBeenCalledTimes(2);
 });
 
 it('recovers from a failed initial page load before any view has mounted', async () => {
@@ -230,13 +231,13 @@ it('refreshes a changed frise on return and discards a path that is no longer a 
   await start('/timeline');
   expect(view.get('[data-context]').text()).toBe('entry');
   await go('/database');
-  vi.mocked(StoryApiService.getInstance().getStoryPeriods).mockResolvedValue([
+  vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(storyFixture('1', [
     { ...period('univers'), story_parent_id: null },
     { ...period('entry'), story_parent_id: 'univers' },
-  ] as never[]);
+  ]));
   useDataStore().invalidateStory('1');
   await go('/timeline');
-  expect(StoryApiService.getInstance().getStoryPeriods).toHaveBeenCalledTimes(2);
+  expect(StoryApiService.getInstance().getStory).toHaveBeenCalledTimes(2);
   expect(view.get('[data-context]').text()).toBe('univers');
   expect(button('entry').exists()).toBe(true);
 });

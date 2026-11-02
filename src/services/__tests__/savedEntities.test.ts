@@ -93,7 +93,7 @@ it('refreshes a displayed timeline card after saving without clearing its naviga
   const child = { ...original, id: 'child', parentId: original.id };
   const parent = { ...original, id: 'parent', parentId: null, hasParent: false };
   store.updatePeriods([parent, original, child]);
-  vi.spyOn(StoryApiService.getInstance(),'getStoryPeriods').mockResolvedValue([parent,original,child] as any);
+  vi.spyOn(StoryApiService.getInstance(),'getStory').mockResolvedValue({ id: '1', title: { fr: 'Frise', en: '' }, author: '', isPublic: true, categories: [], periods: [parent,original,child], events: [] } as any);
   vi.spyOn(StoryApiService.getInstance(),'getListStories').mockResolvedValue([]);
   vi.spyOn(EventApiService.getInstance(),'getStoryListEvents').mockResolvedValue([]);
   const nav = useHomeNavigation(); await nav.loadInitialData(); nav.displayedPeriods.value = [child]; nav.currentPeriod.value = original; nav.parentStack.value = [parent];

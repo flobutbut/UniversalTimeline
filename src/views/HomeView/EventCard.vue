@@ -20,14 +20,14 @@
       <div class="event-label">{{ displayLabel }}</div>
       <div class="event-date">{{ displayDate }}</div>
       <!-- Au survol seulement : la sélection liste directement ces frises -->
-      <div v-if="!isSelected && otherStoryCount" class="event-meta">Présent dans {{ otherStoryCount }} {{ otherStoryCount > 1 ? 'autres frises' : 'autre frise' }}</div>
+      <div v-if="!isSelected && otherStoryCount" class="event-meta">{{ otherStoryCount }} {{ otherStoryCount > 1 ? 'autres frises associées' : 'autre frise associée' }}</div>
       <p v-if="isSelected && event.description" class="event-description">{{ event.description.fr || event.description.en }}</p>
       <div v-if="suggestionsLoading" class="event-meta" role="status">Chargement des frises…</div>
       <div v-else-if="suggestionsError" class="event-meta event-meta--error" role="alert">
         {{ suggestionsError }} <button type="button" @click.stop="$emit('retry-suggestions')">Réessayer</button>
       </div>
       <!-- Autres frises contenant l'événement : listées directement, rien s'il n'y en a pas -->
-      <section v-if="storySuggestions.length > 0" class="event-stories" aria-label="Autres frises contenant cet événement">
+      <section v-if="storySuggestions.length > 0" class="event-stories" aria-label="Autres frises associées à cet événement">
         <ul class="event-stories-list">
           <li v-for="s in storySuggestions" :key="s.id">
             <button class="event-story-item" type="button" @click.stop="$emit('story-select', s.id)">
