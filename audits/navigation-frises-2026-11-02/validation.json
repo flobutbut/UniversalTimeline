@@ -1,0 +1,57 @@
+{
+  "tables_rls": [
+    {
+      "table": "stories",
+      "enabled": true
+    },
+    {
+      "table": "story_anchors",
+      "enabled": true
+    },
+    {
+      "table": "story_entry_points",
+      "enabled": true
+    },
+    {
+      "table": "story_periods",
+      "enabled": true
+    }
+  ],
+  "case_targets": [
+    {
+      "label": "Histoire contemporaine",
+      "story": 16,
+      "title": "Époque moderne",
+      "parent": null,
+      "period": "Q11769"
+    },
+    {
+      "label": "Moyen Âge",
+      "story": 15,
+      "title": "Moyen Âge",
+      "parent": null,
+      "period": "Q12554"
+    },
+    {
+      "label": "Antiquité",
+      "story": 10,
+      "title": "Antiquité et premières civilisations",
+      "parent": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "period": "Q40244"
+    },
+    {
+      "label": "Époque moderne",
+      "story": 16,
+      "title": "Époque moderne",
+      "parent": null,
+      "period": "Q7432"
+    }
+  ],
+  "periods_without_membership": [],
+  "parent_story_trigger_functions": [
+    {
+      "name": "check_story_period_hierarchy",
+      "definition": "CREATE OR REPLACE FUNCTION public.check_story_period_hierarchy()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\nBEGIN\n  PERFORM 1 FROM public.stories WHERE id = NEW.story_id FOR UPDATE;\n  IF TG_OP = 'UPDATE' AND (NEW.story_id, NEW.period_id) IS DISTINCT FROM (OLD.story_id, OLD.period_id) THEN\n    RAISE EXCEPTION 'Remove and add a membership to change its identity' USING ERRCODE = '23514';\n  END IF;\n  IF NEW.parent_period_id IS NOT NULL AND EXISTS (\n    WITH RECURSIVE ancestors(id, parent_id) AS (\n      SELECT sp.period_id, sp.parent_period_id FROM public.story_periods sp\n      WHERE sp.story_id = NEW.story_id AND sp.period_id = NEW.parent_period_id\n      UNION\n      SELECT sp.period_id, sp.parent_period_id FROM public.story_periods sp\n      JOIN ancestors a ON sp.period_id = a.parent_id WHERE sp.story_id = NEW.story_id\n    ) SELECT 1 FROM ancestors WHERE id = NEW.period_id\n  ) THEN RAISE EXCEPTION 'A frise cannot contain a period cycle' USING ERRCODE = '23514'; END IF;\n  RETURN NEW;\nEND;\n$function$\n"
+    }
+  ]
+}

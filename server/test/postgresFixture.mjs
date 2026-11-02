@@ -4,7 +4,7 @@ import pg from 'pg';
 export const alice = '00000000-0000-0000-0000-000000000001';
 export const bob = '00000000-0000-0000-0000-000000000002';
 export const category = '00000000-0000-0000-0000-000000000010';
-export const applicationTables = ['categories', 'event_categories', 'events', 'period_categories', 'periods', 'profiles', 'stories', 'story_anchors', 'story_categories', 'story_entry_points', 'story_events', 'story_periods'];
+export const applicationTables = ['categories', 'event_categories', 'events', 'period_categories', 'periods', 'profiles', 'stories', 'story_anchors', 'story_categories', 'story_entry_points', 'story_events', 'story_period_presentations', 'story_periods'];
 
 export function testPool(database = process.env.TIMELINE_TEST_DATABASE) {
   const socket = process.env.TIMELINE_TEST_SOCKET;

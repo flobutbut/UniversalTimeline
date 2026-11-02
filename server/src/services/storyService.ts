@@ -9,6 +9,7 @@ import { aggregateStoryTemporalBounds } from '../domain/storyTemporalBounds.js';
 import * as associations from './storyAssociations.js';
 import type { AssociationKind } from '../repositories/storyRelationsRepository.js';
 import { changeEntryPoints } from './storyEntryPoints.js';
+import { changePresentation } from '../repositories/storyRelationsRepository.js';
 import { creatorAuthor, editorAuthor } from './storyAuthor.js';
 
 const db = { query };
@@ -43,6 +44,10 @@ export async function getStory(id: string) {
     author: row.author, isPublic: row.is_public, ownerUserId: row.owner_user_id, created_at: row.created_at,
     parent_story_id: row.parent_story_id ?? null,
     categories, periods, events, childStories,
+    navigationContexts: (row.navigation_contexts ?? []).map(context => ({
+      id: String(context.id), title: localized(context.title_fr, context.title_en), periods: context.periods,
+      presentations: context.presentations.map(view => ({ periodId: view.period_id, storyId: String(view.story_id), title: localized(view.title_fr, view.title_en) })),
+    })),
     parentStories: (row.parent_stories ?? []).map(parent => ({
       id: String(parent.id), title: localized(parent.title_fr, parent.title_en), ownerUserId: parent.owner_user_id,
       anchors: parent.anchors.map(anchor => ({ type: anchor.type, id: anchor.id, label: localized(anchor.label_fr, anchor.label_en) })),
@@ -101,3 +106,8 @@ export const createFromPeriod = (sourceId: string, periodId: string, title: stri
 export const linkChildren = (id: string, children: string[], anchor?: { anchorType: 'period' | 'event'; anchorId: string }) => withTransaction(client => associations.linkChildStories(client, id, children, anchor));
 export const unlinkChild = (id: string, child: string) => withTransaction(client => associations.unlinkChildStory(client, id, child));
 export const changeEntries = (sourceId: string, ids: string[], anchor: { anchorType: 'period' | 'event'; anchorId: string } | undefined, remove: boolean) => withTransaction(client => changeEntryPoints(client, sourceId, ids, anchor, remove));
+
+export const changePeriodPresentation = (contextId: string, periodId: string, targetId: string, remove: boolean) => withTransaction(async client => {
+  if (!remove) await associations.changeStoryAssociations(client, contextId, 'period', [periodId], false);
+  await changePresentation(client, contextId, periodId, targetId, remove);
+});

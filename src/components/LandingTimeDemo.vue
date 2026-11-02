@@ -2,10 +2,10 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import Button from '@/components/base/Button.vue';
 import Tabs from '@/components/base/Tabs.vue';
-import { createIntroScales, EARTH_AGE, HUMAN_AGE, introBandLayout, introLandmarks, type IntroScaleId } from '@/lib/landingTimeline';
+import { createIntroScales, HUMAN_AGE, introBandLayout, introLandmarks, type IntroScaleId } from '@/lib/landingTimeline';
 
-const mode = ref<IntroScaleId>('earth');
-const selectedId = ref('humans');
+const mode = ref<IntroScaleId>('universe');
+const selectedId = ref('universe');
 const year = ref(new Date().getFullYear());
 const track = ref<HTMLElement>();
 const trackWidth = ref<number | null>(null);
@@ -14,7 +14,8 @@ const scale = computed(() => scales.value.find(item => item.id === mode.value)!)
 const scaleTabs = computed(() => scales.value.map(item => ({ value: item.id, label: item.label })));
 const landmarks = computed(() => introLandmarks.filter(item => scale.value.landmarks.includes(item.id)));
 const selected = computed(() => landmarks.value.find(item => item.id === selectedId.value) ?? landmarks.value[0]);
-const humanPixels = computed(() => trackWidth.value === null ? null : trackWidth.value * HUMAN_AGE / EARTH_AGE);
+const humanPixels = computed(() => trackWidth.value === null ? null : trackWidth.value * HUMAN_AGE / scale.value.span);
+const humanPercent = computed(() => (HUMAN_AGE / scale.value.span * 100).toLocaleString('fr-FR', { maximumFractionDigits: 4 }));
 const chartBands = computed(() => scale.value.bands.map(band => {
   const layout = introBandLayout(band, scale.value.span);
   return { ...band, ...layout, subpixel: trackWidth.value !== null && trackWidth.value * layout.width / 100 < 1 };
@@ -48,13 +49,13 @@ onBeforeUnmount(() => {
 <template>
   <div class="time-demo">
     <div class="demo-toolbar">
-      <span class="toolbar-label">UNE MÊME LIGNE · QUATRE ÉCHELLES</span>
+      <span class="toolbar-label">UNE MÊME LIGNE · CINQ ÉCHELLES</span>
       <Tabs :model-value="mode" :tabs="scaleTabs" aria-label="Échelle de la frise" @update:model-value="changeScale" />
     </div>
     <figure class="time-figure" aria-label="Des durées représentées sur une échelle linéaire commune">
       <figcaption>
-        <span>{{ mode === 'earth' ? 'De la formation de la Terre à aujourd’hui' : `Zoom : ${scale.label.toLocaleLowerCase('fr-FR')}` }}</span>
-        <span class="figure-unit">{{ mode === 'earth' ? 'Ga = milliards d’années' : mode === 'dinosaurs' ? 'Ma = millions d’années' : 'Échelle linéaire' }}</span>
+        <span>{{ mode === 'universe' ? 'Du Big Bang à aujourd’hui : l’Univers entier' : mode === 'earth' ? 'De la formation de la Terre à aujourd’hui' : `Zoom : ${scale.label.toLocaleLowerCase('fr-FR')}` }}</span>
+        <span class="figure-unit">{{ mode === 'universe' || mode === 'earth' ? 'Ga = milliards d’années' : mode === 'dinosaurs' ? 'Ma = millions d’années' : 'Échelle linéaire' }}</span>
       </figcaption>
       <div class="plot">
         <div class="plot-label axis-label">LE TEMPS</div>
@@ -72,7 +73,7 @@ onBeforeUnmount(() => {
       </div>
       <div class="plot-caption">
         <span>Même échelle pour toutes les lignes. Dates approximatives.</span>
-        <span v-if="mode === 'earth'" class="human-measure">Homo sapiens : 0,0066 % de la ligne<span v-if="humanPixels !== null"> · {{ humanPixels.toLocaleString('fr-FR', { maximumFractionDigits: 3 }) }} px sur cet écran</span></span>
+        <span v-if="mode === 'universe' || mode === 'earth'" class="human-measure">Homo sapiens : {{ humanPercent }} % de la ligne<span v-if="humanPixels !== null"> · {{ humanPixels.toLocaleString('fr-FR', { maximumFractionDigits: 3 }) }} px sur cet écran</span></span>
       </div>
       <p class="marker-note">Les durées inférieures au pixel sont signalées par un trait de repérage de 1 px, sans agrandir la barre de durée.</p>
     </figure>

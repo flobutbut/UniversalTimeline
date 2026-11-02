@@ -98,6 +98,7 @@ export async function createStoryFromPeriod(client: TransactionClient, sourceId:
   await relations.insertFrozenPlacements(client, story.id, subtree);
   if (eventIds.length) await relations.insertAssociations(client, String(story.id), 'event', eventIds);
   await relations.insertChildAnchor(client, String(story.id), 'period', periodId);
+  await relations.changePresentation(client, sourceId, periodId, String(story.id), false);
   const categories = (await readEntityCategories(client, 'story', sourceId)).map(category => category.id);
   if (categories.length) await replaceEntityCategories(client, 'story', story.id, categories);
   return { id: String(story.id), parentStoryId: sourceId, periodId, periodCount: subtree.length, eventCount: eventIds.length };

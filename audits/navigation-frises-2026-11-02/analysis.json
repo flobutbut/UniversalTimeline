@@ -1,0 +1,1370 @@
+{
+  "auditedAt": "2026-11-02T12:49:41.685588+00:00",
+  "counts": {
+    "events": 128,
+    "periods": 152,
+    "stories": 21,
+    "story_events": 217,
+    "story_anchors": 21,
+    "story_periods": 230,
+    "story_entry_points": 0
+  },
+  "periodCycles": 0,
+  "storyCycles": [],
+  "missingLocalParents": 0,
+  "anchorsMissingFromSource": [],
+  "undated": [],
+  "reversed": [],
+  "equalBounds": [
+    {
+      "id": "PER_ELECTROWEAK",
+      "label": "Ère Électrofaible",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "storedStart": 13800002025,
+      "storedEnd": 13800002024
+    },
+    {
+      "id": "PER_GUT",
+      "label": "Ère de la Grande Unification",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "storedStart": 13800002026,
+      "storedEnd": 13800002025
+    },
+    {
+      "id": "PER_HADRON",
+      "label": "Ère Hadronique",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "storedStart": 13800002024,
+      "storedEnd": 13800002023
+    },
+    {
+      "id": "PER_LEPTON",
+      "label": "Ère Leptonique",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "storedStart": 13800002023,
+      "storedEnd": 13800002022
+    },
+    {
+      "id": "PER_NUCLEOSYN",
+      "label": "Ère de la Nucléosynthèse Primordiale",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "storedStart": 13800002022,
+      "storedEnd": 13800002021
+    },
+    {
+      "id": "PER_PLANCK",
+      "label": "Ère de Planck",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "storedStart": 13800002026,
+      "storedEnd": 13800002026
+    }
+  ],
+  "rootCandidates": [
+    {
+      "id": 1,
+      "title": "Univers moderne",
+      "rootCount": 1,
+      "singleRoot": "Univers",
+      "titleMatches": []
+    },
+    {
+      "id": 2,
+      "title": "Histoire de la vie sur Terre",
+      "rootCount": 1,
+      "singleRoot": "Terre",
+      "titleMatches": []
+    },
+    {
+      "id": 3,
+      "title": "Big Bang et ères primordiales",
+      "rootCount": 1,
+      "singleRoot": "Big Bang",
+      "titleMatches": []
+    },
+    {
+      "id": 4,
+      "title": "Guerres modernes",
+      "rootCount": 5,
+      "singleRoot": null,
+      "titleMatches": []
+    },
+    {
+      "id": 5,
+      "title": "Genre Homo",
+      "rootCount": 1,
+      "singleRoot": "Homo",
+      "titleMatches": []
+    },
+    {
+      "id": 7,
+      "title": "Empire romain",
+      "rootCount": 1,
+      "singleRoot": "Antiquité romaine",
+      "titleMatches": [
+        "Empire romain"
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Première Guerre mondiale",
+      "rootCount": 2,
+      "singleRoot": null,
+      "titleMatches": [
+        "Première Guerre mondiale"
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Seconde Guerre mondiale",
+      "rootCount": 1,
+      "singleRoot": "Seconde Guerre mondiale",
+      "titleMatches": [
+        "Seconde Guerre mondiale"
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Antiquité et premières civilisations",
+      "rootCount": 1,
+      "singleRoot": "Holocène",
+      "titleMatches": []
+    },
+    {
+      "id": 11,
+      "title": "Histoire géologique de la Terre",
+      "rootCount": 1,
+      "singleRoot": "Terre",
+      "titleMatches": []
+    },
+    {
+      "id": 12,
+      "title": "Guerre froide",
+      "rootCount": 1,
+      "singleRoot": "Guerre froide",
+      "titleMatches": [
+        "Guerre froide"
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Conquête spatiale",
+      "rootCount": 1,
+      "singleRoot": "Conquête spatiale",
+      "titleMatches": [
+        "Conquête spatiale"
+      ]
+    },
+    {
+      "id": 15,
+      "title": "Moyen Âge",
+      "rootCount": 1,
+      "singleRoot": "Moyen Âge",
+      "titleMatches": [
+        "Moyen Âge"
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Époque moderne",
+      "rootCount": 2,
+      "singleRoot": null,
+      "titleMatches": [
+        "Époque moderne"
+      ]
+    },
+    {
+      "id": 17,
+      "title": "Renaissance",
+      "rootCount": 1,
+      "singleRoot": "Renaissance",
+      "titleMatches": [
+        "Renaissance"
+      ]
+    },
+    {
+      "id": 18,
+      "title": "Invasion de l'Ukraine par la Russie",
+      "rootCount": 1,
+      "singleRoot": "Invasion de l'Ukraine par la Russie",
+      "titleMatches": [
+        "Invasion de l'Ukraine par la Russie"
+      ]
+    },
+    {
+      "id": 19,
+      "title": "Néolithique et âges des métaux",
+      "rootCount": 4,
+      "singleRoot": null,
+      "titleMatches": []
+    },
+    {
+      "id": 20,
+      "title": "Néolithique",
+      "rootCount": 1,
+      "singleRoot": "Néolithique",
+      "titleMatches": [
+        "Néolithique"
+      ]
+    },
+    {
+      "id": 21,
+      "title": "Âges des métaux",
+      "rootCount": 1,
+      "singleRoot": "Âges des métaux",
+      "titleMatches": [
+        "Âges des métaux"
+      ]
+    },
+    {
+      "id": 22,
+      "title": "Les cinq grandes extinctions",
+      "rootCount": 1,
+      "singleRoot": "Phanérozoïque",
+      "titleMatches": []
+    },
+    {
+      "id": 23,
+      "title": "Histoire du climat",
+      "rootCount": 7,
+      "singleRoot": null,
+      "titleMatches": []
+    }
+  ],
+  "singleRootCount": 16,
+  "periodAnchorCount": 20,
+  "rootMismatchCount": 10,
+  "rootMismatch": [
+    {
+      "source": 1,
+      "target": 3,
+      "title": "Big Bang et ères primordiales",
+      "entry": "Univers",
+      "roots": [
+        "Big Bang"
+      ]
+    },
+    {
+      "source": 16,
+      "target": 4,
+      "title": "Guerres modernes",
+      "entry": "Histoire contemporaine",
+      "roots": [
+        "Invasion de l'Ukraine par la Russie",
+        "Prélude à la Première Guerre mondiale",
+        "Première Guerre mondiale",
+        "Seconde Guerre mondiale",
+        "Guerre froide"
+      ]
+    },
+    {
+      "source": 2,
+      "target": 5,
+      "title": "Genre Homo",
+      "entry": "Quaternaire",
+      "roots": [
+        "Homo"
+      ]
+    },
+    {
+      "source": 5,
+      "target": 10,
+      "title": "Antiquité et premières civilisations",
+      "entry": "Homo sapiens",
+      "roots": [
+        "Holocène"
+      ]
+    },
+    {
+      "source": 16,
+      "target": 14,
+      "title": "Conquête spatiale",
+      "entry": "Histoire contemporaine",
+      "roots": [
+        "Conquête spatiale"
+      ]
+    },
+    {
+      "source": 10,
+      "target": 15,
+      "title": "Moyen Âge",
+      "entry": "Antiquité",
+      "roots": [
+        "Moyen Âge"
+      ]
+    },
+    {
+      "source": 15,
+      "target": 16,
+      "title": "Époque moderne",
+      "entry": "Moyen Âge",
+      "roots": [
+        "Histoire contemporaine",
+        "Époque moderne"
+      ]
+    },
+    {
+      "source": 15,
+      "target": 17,
+      "title": "Renaissance",
+      "entry": "Moyen Âge tardif",
+      "roots": [
+        "Renaissance"
+      ]
+    },
+    {
+      "source": 5,
+      "target": 19,
+      "title": "Néolithique et âges des métaux",
+      "entry": "Homo sapiens",
+      "roots": [
+        "Âges des métaux",
+        "Néolithique",
+        "Mésolithique",
+        "Épipaléolithique"
+      ]
+    },
+    {
+      "source": 11,
+      "target": 23,
+      "title": "Histoire du climat",
+      "entry": "Terre",
+      "roots": [
+        "Maximum thermique du Paléocène-Éocène",
+        "Optimum thermique du Crétacé",
+        "Glaciation de l’Ordovicien supérieur",
+        "Optimum climatique de l’Éocène",
+        "Glaciation du Karoo",
+        "Cryogénien",
+        "Quaternaire"
+      ]
+    }
+  ],
+  "sharedPeriodCount": 57,
+  "sharedPeriodsWithDifferentDepths": [
+    {
+      "id": "PER_MILKYWAY",
+      "label": "Terre",
+      "placements": [
+        {
+          "story": 1,
+          "depth": 3
+        },
+        {
+          "story": 2,
+          "depth": 0
+        },
+        {
+          "story": 11,
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "id": "PER_CAMBRIAN",
+      "label": "Cambrien",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "PER_CARBONIFEROUS",
+      "label": "Carbonifère",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "PER_CENOZOIC",
+      "label": "Cénozoïque",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 2
+        },
+        {
+          "story": 11,
+          "depth": 2
+        },
+        {
+          "story": 22,
+          "depth": 1
+        }
+      ]
+    },
+    {
+      "id": "PER_CRETACEOUS",
+      "label": "Crétacé",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "PER_CRYOGENIAN",
+      "label": "Cryogénien",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 23,
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "id": "PER_DEVONIAN",
+      "label": "Dévonien",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "PER_JURASSIC",
+      "label": "Jurassique",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "PER_MESOZOIC",
+      "label": "Mésozoïque",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 2
+        },
+        {
+          "story": 11,
+          "depth": 2
+        },
+        {
+          "story": 22,
+          "depth": 1
+        }
+      ]
+    },
+    {
+      "id": "PER_NEOGENE",
+      "label": "Néogène",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "PER_ORDOVICIAN",
+      "label": "Ordovicien",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "PER_PALEOGENE",
+      "label": "Paléogène",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "PER_PALEOZOIC",
+      "label": "Paléozoïque",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 2
+        },
+        {
+          "story": 11,
+          "depth": 2
+        },
+        {
+          "story": 22,
+          "depth": 1
+        }
+      ]
+    },
+    {
+      "id": "PER_PERMIAN",
+      "label": "Permien",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "PER_QUATERNARY",
+      "label": "Quaternaire",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        },
+        {
+          "story": 23,
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "id": "PER_SILURIAN",
+      "label": "Silurien",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "PER_TRIASSIC",
+      "label": "Trias",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 3
+        },
+        {
+          "story": 11,
+          "depth": 3
+        },
+        {
+          "story": 22,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "Q101313",
+      "label": "Phanérozoïque",
+      "placements": [
+        {
+          "story": 2,
+          "depth": 1
+        },
+        {
+          "story": 11,
+          "depth": 1
+        },
+        {
+          "story": 22,
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "id": "Q170479",
+      "label": "Royauté romaine",
+      "placements": [
+        {
+          "story": 7,
+          "depth": 1
+        },
+        {
+          "story": 10,
+          "depth": 3
+        }
+      ]
+    },
+    {
+      "id": "Q1747689",
+      "label": "Antiquité romaine",
+      "placements": [
+        {
+          "story": 7,
+          "depth": 0
+        },
+        {
+          "story": 10,
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "id": "Q6114",
+      "label": "République romaine",
+      "placements": [
+        {
+          "story": 7,
+          "depth": 1
+        },
+        {
+          "story": 10,
+          "depth": 3
+        }
+      ]
+    },
+    {
+      "id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "label": "Holocène",
+      "placements": [
+        {
+          "story": 10,
+          "depth": 0
+        },
+        {
+          "story": 11,
+          "depth": 4
+        },
+        {
+          "story": 22,
+          "depth": 3
+        },
+        {
+          "story": 23,
+          "depth": 1
+        }
+      ]
+    },
+    {
+      "id": "3f664826-3a21-419f-a040-55b62803bca4",
+      "label": "Pléistocène",
+      "placements": [
+        {
+          "story": 11,
+          "depth": 4
+        },
+        {
+          "story": 23,
+          "depth": 1
+        }
+      ]
+    },
+    {
+      "id": "4cae203f-2aea-43af-8419-23fd4fe6b4fa",
+      "label": "Glaciation de l’Ordovicien supérieur",
+      "placements": [
+        {
+          "story": 22,
+          "depth": 3
+        },
+        {
+          "story": 23,
+          "depth": 0
+        }
+      ]
+    }
+  ],
+  "historicPlacements": [
+    {
+      "story": 10,
+      "title": "Antiquité et premières civilisations",
+      "period": "Antiquité",
+      "depth": 1,
+      "path": [
+        "Holocène",
+        "Antiquité"
+      ]
+    },
+    {
+      "story": 15,
+      "title": "Moyen Âge",
+      "period": "Moyen Âge",
+      "depth": 0,
+      "path": [
+        "Moyen Âge"
+      ]
+    },
+    {
+      "story": 16,
+      "title": "Époque moderne",
+      "period": "Histoire contemporaine",
+      "depth": 0,
+      "path": [
+        "Histoire contemporaine"
+      ]
+    },
+    {
+      "story": 16,
+      "title": "Époque moderne",
+      "period": "Époque moderne",
+      "depth": 0,
+      "path": [
+        "Époque moderne"
+      ]
+    }
+  ],
+  "historicPeriodsShareStory": [],
+  "siblingOverlapCount": 82,
+  "siblingOverlaps": [
+    {
+      "story": 1,
+      "title": "Univers moderne",
+      "left": "Lune",
+      "right": "Mars"
+    },
+    {
+      "story": 1,
+      "title": "Univers moderne",
+      "left": "Lune",
+      "right": "Soleil"
+    },
+    {
+      "story": 1,
+      "title": "Univers moderne",
+      "left": "Lune",
+      "right": "Terre"
+    },
+    {
+      "story": 1,
+      "title": "Univers moderne",
+      "left": "Mars",
+      "right": "Soleil"
+    },
+    {
+      "story": 1,
+      "title": "Univers moderne",
+      "left": "Mars",
+      "right": "Terre"
+    },
+    {
+      "story": 1,
+      "title": "Univers moderne",
+      "left": "Soleil",
+      "right": "Terre"
+    },
+    {
+      "story": 1,
+      "title": "Univers moderne",
+      "left": "Galaxie d'Andromède",
+      "right": "Voie Lactée"
+    },
+    {
+      "story": 4,
+      "title": "Guerres modernes",
+      "left": "Seconde Guerre mondiale",
+      "right": "Guerre froide"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo floresiensis",
+      "right": "Homo sapiens"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo floresiensis",
+      "right": "Homo neanderthalensis"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo floresiensis",
+      "right": "Homme de Denisova"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo habilis",
+      "right": "Homo rudolfensis"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo habilis",
+      "right": "Homo erectus"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo habilis",
+      "right": "Homo ergaster"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo heidelbergensis",
+      "right": "Homo sapiens"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo heidelbergensis",
+      "right": "Homo naledi"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo heidelbergensis",
+      "right": "Homo erectus"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo heidelbergensis",
+      "right": "Homo neanderthalensis"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo heidelbergensis",
+      "right": "Homme de Denisova"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo antecessor",
+      "right": "Homo erectus"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo rudolfensis",
+      "right": "Homo erectus"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo rudolfensis",
+      "right": "Homo ergaster"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo sapiens",
+      "right": "Homo naledi"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo sapiens",
+      "right": "Homo erectus"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo sapiens",
+      "right": "Homo neanderthalensis"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo sapiens",
+      "right": "Homme de Denisova"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo naledi",
+      "right": "Homo erectus"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo naledi",
+      "right": "Homo neanderthalensis"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo naledi",
+      "right": "Homme de Denisova"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo erectus",
+      "right": "Homo neanderthalensis"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo erectus",
+      "right": "Homo ergaster"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo erectus",
+      "right": "Homme de Denisova"
+    },
+    {
+      "story": 5,
+      "title": "Genre Homo",
+      "left": "Homo neanderthalensis",
+      "right": "Homme de Denisova"
+    },
+    {
+      "story": 9,
+      "title": "Seconde Guerre mondiale",
+      "left": "Seconde Guerre sino-japonaise",
+      "right": "Guerre de Laponie"
+    },
+    {
+      "story": 9,
+      "title": "Seconde Guerre mondiale",
+      "left": "Seconde Guerre sino-japonaise",
+      "right": "Guerre d'Hiver"
+    },
+    {
+      "story": 9,
+      "title": "Seconde Guerre mondiale",
+      "left": "Seconde Guerre sino-japonaise",
+      "right": "Guerre de libération italienne"
+    },
+    {
+      "story": 9,
+      "title": "Seconde Guerre mondiale",
+      "left": "Seconde Guerre sino-japonaise",
+      "right": "Débarquement de Normandie"
+    },
+    {
+      "story": 9,
+      "title": "Seconde Guerre mondiale",
+      "left": "Seconde Guerre sino-japonaise",
+      "right": "Bataille de Mandchourie"
+    },
+    {
+      "story": 9,
+      "title": "Seconde Guerre mondiale",
+      "left": "Seconde Guerre sino-japonaise",
+      "right": "Guerre franco-thaïlandaise"
+    },
+    {
+      "story": 9,
+      "title": "Seconde Guerre mondiale",
+      "left": "Guerre de Laponie",
+      "right": "Guerre de libération italienne"
+    },
+    {
+      "story": 9,
+      "title": "Seconde Guerre mondiale",
+      "left": "Guerre de libération italienne",
+      "right": "Débarquement de Normandie"
+    },
+    {
+      "story": 10,
+      "title": "Antiquité et premières civilisations",
+      "left": "Antiquité grecque",
+      "right": "Antiquité égyptienne"
+    },
+    {
+      "story": 10,
+      "title": "Antiquité et premières civilisations",
+      "left": "Antiquité grecque",
+      "right": "Antiquité romaine"
+    },
+    {
+      "story": 10,
+      "title": "Antiquité et premières civilisations",
+      "left": "Antiquité égyptienne",
+      "right": "Antiquité romaine"
+    },
+    {
+      "story": 14,
+      "title": "Conquête spatiale",
+      "left": "Navette spatiale américaine",
+      "right": "Programme Saliout"
+    },
+    {
+      "story": 14,
+      "title": "Conquête spatiale",
+      "left": "Navette spatiale américaine",
+      "right": "Station spatiale internationale"
+    },
+    {
+      "story": 14,
+      "title": "Conquête spatiale",
+      "left": "Navette spatiale américaine",
+      "right": "Mir"
+    },
+    {
+      "story": 14,
+      "title": "Conquête spatiale",
+      "left": "Programme Saliout",
+      "right": "Mir"
+    },
+    {
+      "story": 14,
+      "title": "Conquête spatiale",
+      "left": "Programme Saliout",
+      "right": "Course à l'espace"
+    },
+    {
+      "story": 14,
+      "title": "Conquête spatiale",
+      "left": "Station spatiale internationale",
+      "right": "Mir"
+    },
+    {
+      "story": 14,
+      "title": "Conquête spatiale",
+      "left": "Station spatiale internationale",
+      "right": "Programme Artemis"
+    },
+    {
+      "story": 14,
+      "title": "Conquête spatiale",
+      "left": "Programme Gemini",
+      "right": "Programme Mercury"
+    },
+    {
+      "story": 14,
+      "title": "Conquête spatiale",
+      "left": "Programme Gemini",
+      "right": "Programme Apollo"
+    },
+    {
+      "story": 14,
+      "title": "Conquête spatiale",
+      "left": "Programme Mercury",
+      "right": "Programme Apollo"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Âge du fer",
+      "right": "Âge du bronze"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Âge du bronze",
+      "right": "Chalcolithique"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Civilisation de la vallée de l’Indus",
+      "right": "Culture campaniforme"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Civilisation de la vallée de l’Indus",
+      "right": "Civilisation minoenne"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Effondrement de l’âge du bronze",
+      "right": "Civilisation minoenne"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Culture campaniforme",
+      "right": "Civilisation minoenne"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Âges des métaux",
+      "right": "Néolithique"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Néolithique",
+      "right": "Mésolithique"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Néolithique",
+      "right": "Épipaléolithique"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Mésolithique",
+      "right": "Épipaléolithique"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Culture de Yangshao",
+      "right": "Culture rubanée"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Culture rubanée",
+      "right": "Culture de la céramique cardiale"
+    },
+    {
+      "story": 19,
+      "title": "Néolithique et âges des métaux",
+      "left": "Dryas récent",
+      "right": "Natoufien"
+    },
+    {
+      "story": 20,
+      "title": "Néolithique",
+      "left": "Culture de Yangshao",
+      "right": "Culture rubanée"
+    },
+    {
+      "story": 20,
+      "title": "Néolithique",
+      "left": "Culture rubanée",
+      "right": "Culture de la céramique cardiale"
+    },
+    {
+      "story": 21,
+      "title": "Âges des métaux",
+      "left": "Âge du fer",
+      "right": "Âge du bronze"
+    },
+    {
+      "story": 21,
+      "title": "Âges des métaux",
+      "left": "Âge du bronze",
+      "right": "Chalcolithique"
+    },
+    {
+      "story": 21,
+      "title": "Âges des métaux",
+      "left": "Civilisation de la vallée de l’Indus",
+      "right": "Culture campaniforme"
+    },
+    {
+      "story": 21,
+      "title": "Âges des métaux",
+      "left": "Civilisation de la vallée de l’Indus",
+      "right": "Civilisation minoenne"
+    },
+    {
+      "story": 21,
+      "title": "Âges des métaux",
+      "left": "Effondrement de l’âge du bronze",
+      "right": "Civilisation minoenne"
+    },
+    {
+      "story": 21,
+      "title": "Âges des métaux",
+      "left": "Culture campaniforme",
+      "right": "Civilisation minoenne"
+    },
+    {
+      "story": 22,
+      "title": "Les cinq grandes extinctions",
+      "left": "Province magmatique centre-atlantique",
+      "right": "Mésozoïque"
+    },
+    {
+      "story": 22,
+      "title": "Les cinq grandes extinctions",
+      "left": "Trapps du Deccan",
+      "right": "Cénozoïque"
+    },
+    {
+      "story": 22,
+      "title": "Les cinq grandes extinctions",
+      "left": "Trapps du Deccan",
+      "right": "Mésozoïque"
+    },
+    {
+      "story": 22,
+      "title": "Les cinq grandes extinctions",
+      "left": "Trapps de Sibérie",
+      "right": "Mésozoïque"
+    },
+    {
+      "story": 22,
+      "title": "Les cinq grandes extinctions",
+      "left": "Trapps de Sibérie",
+      "right": "Paléozoïque"
+    },
+    {
+      "story": 23,
+      "title": "Histoire du climat",
+      "left": "Pléistocène",
+      "right": "Dryas récent"
+    },
+    {
+      "story": 23,
+      "title": "Histoire du climat",
+      "left": "Dryas récent",
+      "right": "Holocène"
+    }
+  ],
+  "sameDepthExamples": [
+    {
+      "story": 11,
+      "title": "Histoire géologique de la Terre",
+      "current": "Crétacé",
+      "depth": 3,
+      "previous": "Jurassique",
+      "next": "Paléogène",
+      "sameDepth": [
+        "Cryogénien",
+        "Cambrien",
+        "Ordovicien",
+        "Silurien",
+        "Dévonien",
+        "Carbonifère",
+        "Permien",
+        "Trias",
+        "Jurassique",
+        "Crétacé",
+        "Paléogène",
+        "Néogène",
+        "Quaternaire"
+      ]
+    },
+    {
+      "story": 22,
+      "title": "Les cinq grandes extinctions",
+      "current": "Crétacé",
+      "depth": 2,
+      "previous": "Jurassique",
+      "next": "Paléogène",
+      "sameDepth": [
+        "Cambrien",
+        "Ordovicien",
+        "Silurien",
+        "Dévonien",
+        "Carbonifère",
+        "Permien",
+        "Trias",
+        "Jurassique",
+        "Crétacé",
+        "Paléogène",
+        "Néogène",
+        "Quaternaire"
+      ]
+    },
+    {
+      "story": 23,
+      "title": "Histoire du climat",
+      "current": "Quaternaire",
+      "depth": 0,
+      "previous": "Optimum climatique de l’Éocène",
+      "next": null,
+      "sameDepth": [
+        "Cryogénien",
+        "Glaciation de l’Ordovicien supérieur",
+        "Glaciation du Karoo",
+        "Optimum thermique du Crétacé",
+        "Maximum thermique du Paléocène-Éocène",
+        "Optimum climatique de l’Éocène",
+        "Quaternaire"
+      ]
+    }
+  ]
+}

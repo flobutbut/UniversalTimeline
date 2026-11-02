@@ -54,3 +54,22 @@ La migration `20261102075026_story_entry_points` ajoute le stockage des points d
 La migration distante `20261102001509_frise_only_period_hierarchy` est appliquée. Ses invariants transactionnels de conservation ont réussi. Le contrôle après migration relève 113 périodes, 104 événements, 16 frises, 144 appartenances de périodes et 156 appartenances d’événements, sans parent local extérieur à sa frise. Les anciens champs d’héritage sont absents et l’audit de sécurité Supabase ne remonte aucune alerte.
 
 Pendant la préparation, une modification concurrente a ajouté une période et une appartenance et a déplacé Conquête spatiale sous Univers moderne. Ces ajouts ont été conservés. Après confirmation explicite de l’utilisateur, Conquête spatiale a été réattachée à Époque moderne ; son point d’entrée vers l’ancien parent a été retiré. Aucun texte de description n’a été complété par cette migration.
+
+
+## Navigation chronologique entre frises — 2 novembre 2026
+
+Les points d’entrée thématiques ne définissent pas les voisins chronologiques. La table `story_period_presentations(context_story_id, period_id, target_story_id)` déclare qu’une frise est une vue de détail d’une période dans un parcours donné. La période doit appartenir à la fois à la frise de référence et à sa vue de détail (clés étrangères composées, suppression en cascade de la présentation). Le lecteur doit avoir accès aux deux frises ; l’écriture est réservée au propriétaire des deux extrémités.
+
+La frise de référence porte l’arbre du parcours dans ses appartenances normales. Les voisins se recalculent par date de début au même rang du contexte ; une égalité est départagée par l’identifiant pour un ordre stable. Ce premier lot ne comporte pas d’ordre manuel. Les chevauchements sont permis ; l’ordre représente un parcours de lecture. Aucun lien précédent/suivant n’est stocké.
+
+`GET /stories/:id` transporte `navigationContexts` : contextes lisibles, périodes et présentations accessibles au lecteur. Les associations ordinaires et les frises partageant du contenu ne sont jamais promues implicitement en présentations. Sans vue dédiée, une période s’ouvre dans sa frise de référence. Plusieurs vues explicites provoquent un choix. Plusieurs contextes provoquent un choix de parcours ; un contexte unique peut être retrouvé automatiquement.
+
+Au niveau de la période présentée, les boutons suivent le contexte, même vers une autre frise. Dans ses subdivisions, ils suivent le niveau local. Une période sans enfant peut être ouverte directement. Les URL acceptent `story`, `period` et `context` pour retrouver la même position après rechargement et avec l’historique du navigateur. Un contexte ou une période disparus sont signalés, sans repli arbitraire vers une autre frise. Le fil d’Ariane garde le parcours comme repère ; une transition chronologique ne transforme pas la frise précédente en ancêtre.
+
+L’onglet **Relations → Parcours chronologique** permet de choisir une frise de référence et la période présentée par la frise courante. L’ajout enregistre la période dans le parcours si elle manque (racine locale) et crée la présentation dans la même transaction. Si la période y est déjà placée, sa position est conservée. Dissocier la vue conserve la période dans le parcours : elle reste consultable dans la référence. Retirer aussi cette période se fait dans les périodes de la frise de référence.
+
+`POST /stories/:contextId/presentations` prend `periodId`, `targetStoryId` et `operation` (`add` ou `remove`). La création d’une frise depuis une période enregistre automatiquement une présentation dans sa source, en plus de son ancre historique.
+
+Le contexte initial « Grandes périodes de l’histoire européenne » comporte Antiquité, Moyen Âge, Époque moderne et Histoire contemporaine. Pour ajouter la Renaissance : ouvrir sa frise, aller dans Relations, choisir ce parcours et la période Renaissance. Son début en 1400 la place automatiquement après Moyen Âge et avant Époque moderne. Aucun voisin existant n’est à modifier.
+
+Validation : suite applicative complète, checks de design et de typage, builds, baseline PostgreSQL, écritures atomiques, tests dédiés aux présentations et test visuel sur Moyen Âge / Époque moderne / Histoire contemporaine. Les tests de mutation utilisent uniquement PostgreSQL local jetable. Les données actives comptent après initialisation 22 frises, 152 périodes, 128 événements, 234 appartenances période–frise, 21 ancres historiques et 4 présentations.

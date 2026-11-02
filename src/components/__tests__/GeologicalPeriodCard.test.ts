@@ -10,9 +10,9 @@ describe('active PeriodCard', () => {
     await wrapper.trigger('click');
     expect(wrapper.emitted('select')?.[0]).toEqual([period]);
   });
-  it('emits leaf selection so the story navigation can offer anchored stories', async () => {
+  it('keeps a leaf inert so its associations are selected explicitly', async () => {
     const wrapper = mount(PeriodCard, { props: { period: { ...period, hasChildren: false }, isSelected: false } });
-    await wrapper.trigger('click'); expect(wrapper.emitted('select')?.[0]).toEqual([{ ...period, hasChildren: false }]);
+    await wrapper.trigger('click'); expect(wrapper.emitted('select')).toBeUndefined();
   });
   it('uses a parent card to go back rather than drilling down', async () => {
     const wrapper = mount(PeriodCard, { props: { period, isSelected: false, variant: 'parent' } });
@@ -53,6 +53,10 @@ describe('PeriodCard actions', () => {
     cardWidth = 200; resize(); await nextTick();
     expect(hidden()).toBe(true);
     resize(); await nextTick();
+    expect(hidden()).toBe(true);
+    await wrapper.setProps({ wrapContent: true }); await nextTick();
+    expect(hidden()).toBe(false);
+    await wrapper.setProps({ wrapContent: false }); await nextTick();
     expect(hidden()).toBe(true);
     cardWidth = 260; resize(); await nextTick();
     expect(hidden()).toBe(false);

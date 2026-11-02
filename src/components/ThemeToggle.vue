@@ -1,6 +1,6 @@
 <template>
   <Button
-    variant="secondary"
+    :variant="variant"
     size="sm"
     iconOnly
     :title="isDark ? 'Passer au thème clair' : 'Passer au thème sombre'"
@@ -25,6 +25,8 @@ import {
   hasUserChosenTheme,
   type DocumentTheme,
 } from '@/composables/useDocumentTheme';
+
+withDefaults(defineProps<{ variant?: 'secondary' | 'ghost' }>(), { variant: 'secondary' });
 
 const isDark = computed(() => documentTheme.value === 'dark');
 

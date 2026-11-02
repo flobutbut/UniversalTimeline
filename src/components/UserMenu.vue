@@ -1,6 +1,6 @@
 <template>
   <div class="user-menu" @keydown="onKeydown" @focusout="onFocusOut">
-    <Button ref="triggerComponent" variant="secondary" size="sm" icon-only
+    <Button ref="triggerComponent" variant="ghost" size="sm" icon-only
       :aria-label="`Compte : ${name}`" :title="`Compte : ${name}`"
       aria-haspopup="menu" :aria-expanded="open" :aria-controls="open ? menuId : undefined"
       @click="toggle" @keydown="onTriggerKeydown">

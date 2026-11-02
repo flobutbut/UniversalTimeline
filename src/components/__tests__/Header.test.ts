@@ -26,11 +26,11 @@ async function start(options: { enabled?: boolean | null; ready?: boolean; accou
     ? { ...route, component: route.name === 'login' ? LoginView : { template: '<div />' } } : route) });
   installAccessGuard(router, auth);
   await router.push(options.path ?? '/timeline'); await router.isReady();
-  view = mount({ components: { Header, RouterView }, template: '<Header current-view="timeline" /><RouterView />' }, { global: { plugins: [pinia, router] } });
+  view = mount({ components: { Header, RouterView }, props: { currentView: { default: 'timeline' } }, template: '<Header :current-view="currentView" /><RouterView />' }, { global: { plugins: [pinia, router] } });
   await flushPromises();
   return auth;
 }
-afterEach(() => { view?.unmount(); router?.options.history.destroy(); disposePinia(pinia); vi.restoreAllMocks(); });
+afterEach(() => { if (view?.exists()) view.unmount(); router?.options.history.destroy(); disposePinia(pinia); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 it.each([
   { enabled: true, ready: true },
@@ -78,4 +78,57 @@ it.each([false, true])('restores the appropriate workspace navigation for a veri
   auth.account = null; await flushPromises();
   expect(view.find('.header-nav').exists()).toBe(false);
   expect(view.find('.header-account-actions').exists()).toBe(true);
+});
+
+it('collapses navigation when space runs out, keeps navigation usable and expands again when space returns', async () => {
+  let availableWidth = 1400;
+  let resize = () => {};
+  const disconnect = vi.fn();
+  vi.stubGlobal('ResizeObserver', class {
+    constructor(callback: () => void) { resize = callback; }
+    observe() {}
+    disconnect = disconnect;
+  });
+  vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (this: HTMLElement) {
+    return this.classList.contains('header-content') ? availableWidth : 0;
+  });
+  vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (this: HTMLElement) {
+    if (this.classList.contains('header-brand')) return 160;
+    if (this.classList.contains('header-nav')) return this.children.length * 120;
+    if (this.classList.contains('header-controls')) return 76;
+    return 0;
+  });
+  const auth = await start({ account: { id: 'alice', isAdmin: true } });
+  const header = view.getComponent(Header);
+  expect(view.find('.header-nav-select').exists()).toBe(false);
+
+  availableWidth = 1060; resize(); await flushPromises();
+  expect(view.get('.header-nav-wrap').attributes('inert')).toBeDefined();
+  expect(view.get('.header-nav-wrap').attributes('aria-hidden')).toBe('true');
+  expect(view.get('[role="combobox"]').attributes('aria-label')).toBe('Navigation principale');
+  expect(view.get('[role="combobox"]').text()).toBe('Timeline');
+  await view.get('[role="combobox"]').trigger('keydown', { key: 'ArrowDown' });
+  await view.get('[role="combobox"]').trigger('keydown', { key: 'ArrowDown' });
+  await view.get('[role="combobox"]').trigger('keydown', { key: 'ArrowDown' });
+  await view.get('[role="combobox"]').trigger('keydown', { key: 'Enter' });
+  expect(header.emitted('change-view')).toEqual([['database']]);
+
+  // Sans recherche, les onglets peuvent tenir dans la même largeur.
+  await view.setProps({ currentView: 'database' });
+  expect(view.find('.header-nav-select').exists()).toBe(false);
+  expect(view.find('.header-search-wrap').exists()).toBe(false);
+  await view.setProps({ currentView: 'timeline' });
+  expect(view.find('.header-nav-select').exists()).toBe(true);
+
+  // Le repli dépend aussi des droits et du nombre réel d'onglets.
+  auth.account = { id: 'alice', isAdmin: false }; await flushPromises();
+  expect(view.find('.header-nav-select').exists()).toBe(false);
+  auth.account = { id: 'alice', isAdmin: true }; await flushPromises();
+  expect(view.find('.header-nav-select').exists()).toBe(true);
+
+  availableWidth = 1400; resize(); await flushPromises();
+  expect(view.find('.header-nav-select').exists()).toBe(false);
+  expect(view.get('.header-nav-wrap').attributes('inert')).toBeUndefined();
+  view.unmount();
+  expect(disconnect).toHaveBeenCalledOnce();
 });

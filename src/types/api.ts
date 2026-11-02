@@ -48,6 +48,7 @@ export interface ChildStoryDto {
   anchors?: Array<{ type: 'period' | 'event'; id: ApiId }> | null;
 }
 export interface StoryDto extends MetadataDto {
+  navigationContexts?: Array<{ id: ApiId; title: ApiText; periods: PeriodDto[]; presentations: Array<{ periodId: string; storyId: ApiId; title: ApiText }> }>;
   title?: ApiText | null;
   title_fr?: string | null; title_en?: string | null;
   author?: string | null;

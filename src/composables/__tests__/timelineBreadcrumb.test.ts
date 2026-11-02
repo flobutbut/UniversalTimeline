@@ -5,7 +5,6 @@ import { useHomeNavigation } from '@/composables/useHomeNavigation';
 import { useDataStore } from '@/stores/useDataStore';
 import { StoryApiService } from '@/services/StoryApiService';
 import { storyFixture } from '@/testFixtures/story';
-import { storyAncestorIds } from '@/lib/homeStoryPeriodNav';
 
 const apiPeriod = (id: string, parent: string | null, start: number, hasChildren = true) => ({
   id, label_fr: id, parent_id: parent, start_date: '', end_date: '',
@@ -26,6 +25,7 @@ beforeEach(() => {
   vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([
     { id: '1', title: { fr: 'Univers Moderne', en: '' }, categories: [] },
     { id: '2', title: { fr: 'Autre frise', en: '' }, categories: [] },
+    { id: '3', title: { fr: 'Troisième frise', en: '' }, categories: [] },
   ]);
   vi.spyOn(StoryApiService.getInstance(), 'getStory').mockImplementation(async id => storyFixture(id,
     id === '1' ? source : [apiPeriod('other-root', null, 300), apiPeriod('other-leaf', 'other-root', 0, false)]
@@ -34,22 +34,23 @@ beforeEach(() => {
 });
 afterEach(() => { scope.stop(); vi.restoreAllMocks(); });
 
-it('builds the path from the story and all committed ancestors, excluding a merely clicked leaf', async () => {
+it('does not descend into a leaf or follow another frise at a period click', async () => {
   await descend();
-  expect(ids()).toEqual(['story:1', 'story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild']);
-  expect(nav.breadcrumb.value[0].title).toBe('Univers Moderne');
+  expect(ids()).toEqual(['story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild']);
+  expect(nav.storyBreadcrumb.value[0].title).toBe('Univers Moderne');
   vi.spyOn(StoryApiService.getInstance(), 'getSuggestions').mockResolvedValue([]);
   await nav.handlePeriodClick(nav.displayedPeriods.value[0]);
-  // Only frises anchored on the clicked period: an ancestor's frises stay on its own card.
+  // A leaf does not change the current period or follow an associated frise.
   expect(StoryApiService.getInstance().getSuggestions).not.toHaveBeenCalled();
   expect(StoryApiService.getInstance().getStory).toHaveBeenCalledOnce();
-  expect(ids()).toEqual(['story:1', 'story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild']);
+  expect(ids()).toEqual(['story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild']);
+  expect(nav.currentPeriod.value?.id).toBe('grandchild');
 });
 
 it('jumps several levels without duplicating history, restoring scoped children and events', async () => {
   await descend();
   expect(nav.storyEvents.value.map(e => e.id)).toEqual(['e50']);
-  await nav.navigateToBreadcrumb(1);
+  await nav.navigateToBreadcrumb(0);
   expect(nav.currentPeriod.value?.id).toBe('root'); expect(nav.parentStack.value).toEqual([]);
   expect(nav.displayedPeriods.value.map(p => p.id)).toEqual(['child']);
   expect(nav.storyEvents.value.map(e => e.id)).toEqual(['e750', 'e250', 'e50']);
@@ -58,114 +59,156 @@ it('jumps several levels without duplicating history, restoring scoped children 
   await nav.goBack(); expect(nav.currentPeriod.value?.id).toBe('root');
 });
 
-it('opens the story overview from its own crumb without reloading or exposing unrelated catalog periods', async () => {
+it('keeps the period breadcrumb local and returns to the overview through the parent action', async () => {
   await descend();
   const store = useDataStore();
   store.updatePeriods([...store.periods, { ...store.periods[0], id: 'outside', parentId: 'root' }]);
   await nextTick();
-  await nav.navigateToBreadcrumb(1);
-  expect(nav.displayedPeriods.value.map(p => p.id)).toEqual(['child']);
   await nav.navigateToBreadcrumb(0);
+  expect(nav.displayedPeriods.value.map(p => p.id)).toEqual(['child']);
+  await nav.goBack();
   expect(nav.currentPeriod.value).toBeNull(); expect(nav.parentStack.value).toEqual([]);
   expect(nav.displayedPeriods.value.map(p => p.id)).toEqual(['root']);
-  expect(ids()).toEqual(['story:1']);
+  expect(ids()).toEqual([]);
   expect(StoryApiService.getInstance().getStory).toHaveBeenCalledTimes(1);
 });
 
-it('cancels a pending leaf request when an ancestor is chosen', async () => {
+it('discards an associated destination that finishes after a new URL is opened', async () => {
   await descend();
   let resolve!: (value: ReturnType<typeof storyFixture>) => void;
-  useDataStore().invalidateStory('1');
   vi.mocked(StoryApiService.getInstance().getStory).mockReturnValueOnce(new Promise(yes => { resolve = yes; }));
-  const pending = nav.handlePeriodClick(nav.displayedPeriods.value[0]);
+  const pending = nav.selectStory('2');
   expect(nav.loading.value).toBe(true);
-  await nav.navigateToBreadcrumb(1);
-  resolve(storyFixture('1', source, [], [{ id: '2', title_fr: 'Autre frise', anchors: [{ type: 'period', id: 'leaf' }] }])); await pending;
+  await nav.openStory('1', {storyId:'1',periodId:'root'});
+  resolve(storyFixture('2', [apiPeriod('other', null, 100)])); await pending;
   expect(nav.currentStoryId.value).toBe('1'); expect(nav.currentPeriod.value?.id).toBe('root');
-  expect(nav.loading.value).toBe(false); expect(nav.storySuggestions.value).toEqual([]);
+  expect(nav.loading.value).toBe(false); expect(nav.error.value).toBeNull();
 });
 
-it('keeps the ancestor story’s periods in one continuous path and reopens any of them', async () => {
+it('describes only the current frise after following an association', async () => {
   await descend(); await nav.selectStory('2');
-  expect(ids()).toEqual([...['story:1', 'story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild'], 'story:2', 'story:2/period:other-root']);
-  expect(nav.breadcrumb.value.map(item => item.kind)).toEqual(['story', 'period', 'period', 'period', 'story', 'period']);
-  await nav.navigateToBreadcrumb(3);
-  expect(nav.currentStoryId.value).toBe('1'); expect(nav.currentPeriod.value?.id).toBe('grandchild');
-  expect(nav.parentStack.value.map(p => p.id)).toEqual(['root', 'child']);
-  expect(ids()).toEqual(['story:1', 'story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild']);
+  expect(ids()).toEqual(['story:2/period:other-root']);
+  expect(nav.breadcrumb.value.map(item => item.kind)).toEqual(['period']);
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:2']);
+  await nav.goBack();
+  expect(nav.currentStoryId.value).toBe('2'); expect(nav.currentPeriod.value).toBeNull();
+  expect(ids()).toEqual([]);
 });
 
-it('can reset only the current story overview while keeping its ancestor story', async () => {
-  await descend(); await nav.selectStory('2'); await nav.navigateToBreadcrumb(4);
+it('returns from a root to the frise overview without reopening its default root', async () => {
+  await nav.openStory('2'); await nav.goBack();
   expect(nav.currentStoryId.value).toBe('2'); expect(nav.currentPeriod.value).toBeNull();
-  expect(ids()).toEqual([...['story:1', 'story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild'], 'story:2']);
-  await nav.goBack();
-  expect(nav.currentStoryId.value).toBe('1'); expect(nav.currentPeriod.value?.id).toBe('grandchild');
+  expect(nav.displayedPeriods.value.map(p => p.id)).toEqual(['other-root']);
+  await nav.loadInitialData(undefined,true);
+  expect(nav.currentPeriod.value).toBeNull();
 });
 
 it('ignores invalid indices and the current position', async () => {
   await descend();
   for (const index of [-1, NaN, 0.5, 3, 999]) await nav.navigateToBreadcrumb(index);
   expect(nav.currentPeriod.value?.id).toBe('grandchild');
-  expect(ids()).toEqual(['story:1', 'story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild']);
+  expect(ids()).toEqual(['story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild']);
 });
 
 it('updates path labels after a canonical period edit', async () => {
   await descend(); const store = useDataStore();
   store.updatePeriods(store.periods.map(p => p.id === 'child' ? { ...p, label: { fr: 'Nouveau nom', en: '' } } : p));
   await nextTick();
-  expect(nav.breadcrumb.value[2].title).toBe('Nouveau nom');
+  expect(nav.breadcrumb.value[1].title).toBe('Nouveau nom');
 });
 
-it('opens the overview of an ancestor story from its own crumb', async () => {
-  await descend(); await nav.selectStory('2'); await nav.navigateToBreadcrumb(0);
-  expect(nav.currentStoryId.value).toBe('1'); expect(nav.currentPeriod.value).toBeNull();
-  expect(nav.displayedPeriods.value.map(p => p.id)).toEqual(['root']);
-  expect(ids()).toEqual(['story:1']);
-});
-
-it('merges a child story with the root period that bears its name', async () => {
+it('keeps a period visible even when its label matches the frise title', async () => {
   vi.mocked(StoryApiService.getInstance().getListStories).mockResolvedValue([
     { id: '1', title: { fr: 'Univers Moderne', en: '' }, categories: [] },
     { id: '2', title: { fr: 'Other-root', en: '' }, categories: [] },
   ] as never);
   await descend(); await nav.selectStory('2');
-  expect(ids()).toEqual([...['story:1', 'story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild'], 'story:2']);
-  expect(nav.breadcrumb.value.at(-1)).toMatchObject({ title: 'Other-root', kind: 'story' });
+  expect(ids()).toEqual(['story:2/period:other-root']);
   expect(nav.currentPeriod.value?.id).toBe('other-root');
+  await nav.goBack();
+  expect(nav.currentPeriod.value).toBeNull();
 });
 
-it('does not repeat the period a child story hangs from', async () => {
+it('keeps only local period ancestors when the associated frise shares the current period', async () => {
   vi.mocked(StoryApiService.getInstance().getStory).mockImplementation(async id => storyFixture(id,
     id === '1' ? source : [apiPeriod('grandchild', null, 100), apiPeriod('sub', 'grandchild', 80), apiPeriod('sub-leaf', 'sub', 0, false)]
   ));
-  await descend(); await nav.selectStory('2');
+  await descend(); await nav.selectStory('2', {type:'period',id:'grandchild'});
+  expect(nav.currentPeriod.value?.id).toBe('grandchild');
   await nav.handlePeriodClick(nav.displayedPeriods.value[0]);
-  expect(ids()).toEqual([...['story:1', 'story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild'], 'story:2', 'story:2/period:sub']);
-  expect(nav.breadcrumb.value[4].title).toBe('Autre frise');
-  await nav.navigateToBreadcrumb(4);
-  expect(nav.currentStoryId.value).toBe('2'); expect(nav.currentPeriod.value?.id).toBe('grandchild');
+  expect(ids()).toEqual(['story:2/period:grandchild', 'story:2/period:sub']);
+  await nav.navigateToBreadcrumb(0);
+  expect(nav.currentPeriod.value?.id).toBe('grandchild');
   expect(nav.parentStack.value).toEqual([]);
 });
 
-it('opens a story under its real accessible lineage instead of the entry story', async () => {
+it('does not present the editorial parent chain as temporal ancestors on a direct link', async () => {
   vi.mocked(StoryApiService.getInstance().getListStories).mockResolvedValue([
     { id: '1', title: { fr: 'Univers Moderne', en: '' }, categories: [], parentStoryId: null },
     { id: '2', title: { fr: 'Autre frise', en: '' }, categories: [], parentStoryId: '3' },
     { id: '3', title: { fr: 'Parente', en: '' }, categories: [], parentStoryId: null },
   ] as never);
   await nav.openStory('2');
-  expect(ids()).toEqual(['story:3', 'story:2', 'story:2/period:other-root']);
+  expect(ids()).toEqual(['story:2/period:other-root']);
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:2']);
   await nav.goBack();
-  expect(nav.currentStoryId.value).toBe('3');
-  await nav.openStory('3');
-  expect(ids()[0]).toBe('story:3');
+  expect(nav.currentStoryId.value).toBe('2');
+  expect(nav.currentPeriod.value).toBeNull();
 });
 
-it('stops a lineage at an inaccessible parent and drops a cyclic one', () => {
-  const rows: Record<string, { parentStoryId?: string | null }> = { a: { parentStoryId: 'b' }, b: { parentStoryId: 'hidden' }, c: { parentStoryId: 'd' }, d: { parentStoryId: 'c' }, e: {} };
-  const byId = (id: string) => rows[id] ?? null;
-  expect(storyAncestorIds('a', byId)).toEqual(['b']);
-  expect(storyAncestorIds('c', byId)).toEqual([]);
-  expect(storyAncestorIds('e', byId)).toEqual([]);
+it('returns through the visited-frise breadcrumb to the exact period left behind', async () => {
+  await descend(); await nav.selectStory('2');
+  await nav.navigateToStoryBreadcrumb(0);
+  expect(nav.currentStoryId.value).toBe('1');
+  expect(nav.currentPeriod.value?.id).toBe('grandchild');
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1']);
+  expect(ids()).toEqual(['story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild']);
+});
+
+it('treats reopening an associated frise as a return, truncating rather than duplicating it', async () => {
+  await descend(); await nav.selectStory('2'); await nav.selectStory('3');
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:2', 'story:3']);
+  await nav.selectStory('2', { type: 'period', id: 'leaf' });
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:2']);
+  expect(nav.currentPeriod.value?.id).toBe('other-root');
+  await nav.selectStory('1');
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1']);
+  expect(nav.currentPeriod.value?.id).toBe('grandchild');
+});
+
+it('remembers a frise overview without reopening its single root', async () => {
+  await nav.openStory('1', { storyId: '1', view: 'overview' });
+  await nav.selectStory('2'); await nav.selectStory('1');
+  expect(nav.currentPeriod.value).toBeNull();
+  expect(nav.breadcrumb.value).toEqual([]);
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1']);
+});
+
+it('records same-frise movements only once and truncates on a browser-history destination', async () => {
+  await descend(); await nav.goBack(); await nav.selectStory('2');
+  await nav.openStory('1', { storyId: '1', periodId: 'root' });
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1']);
+  expect(nav.currentPeriod.value?.id).toBe('root');
+  await nav.selectStory('2'); await nav.navigateToStoryBreadcrumb(0);
+  expect(nav.currentPeriod.value?.id).toBe('root');
+});
+
+it('never adds failed or superseded loads to the visited path', async () => {
+  await descend();
+  vi.mocked(StoryApiService.getInstance().getStory).mockRejectedValueOnce(new Error('Indisponible'));
+  await nav.selectStory('2');
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1']);
+  let resolve!: (value: ReturnType<typeof storyFixture>) => void;
+  vi.mocked(StoryApiService.getInstance().getStory).mockReturnValueOnce(new Promise(yes => { resolve = yes; }));
+  const pending = nav.openStory('3');
+  await nav.openStory('1', { storyId: '1', periodId: 'root' });
+  resolve(storyFixture('3')); await pending;
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1']);
+});
+
+it('ignores invalid visited-path indices and the current frise', async () => {
+  await descend(); await nav.selectStory('2');
+  for (const index of [-1, NaN, 0.5, 1, 99]) await nav.navigateToStoryBreadcrumb(index);
+  expect(nav.currentStoryId.value).toBe('2');
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:2']);
 });

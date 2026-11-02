@@ -3,12 +3,15 @@ import { comparableYearsBeforePresent } from '@temporal';
 import { storeToRefs } from 'pinia';
 import { useLatestRequest } from './useLatestRequest';
 import { useDataStore } from '@/stores/useDataStore';
-import type { ListPeriod, ListEvent, StorySuggestion } from '@/types/database';
-import { storyChildrenOf, resolvePeriodNavFromSnapshot, buildTimelineBreadcrumb, storyAncestorIds, type StoryFrame, type StoryPeriodNavSnapshot } from '@/lib/homeStoryPeriodNav';
+import type { ListPeriod, ListEvent, StoryAnchor, NavigationContext } from '@/types/database';
+import { storyChildrenOf, resolvePeriodNavFromSnapshot, type StoryPeriodNavSnapshot } from '@/lib/homeStoryPeriodNav';
+
+import { timelineLevel, timelinePeriodPath, contextPeriodNeighbors, periodPresentationTargets, type TimelineTarget } from '@/lib/timelineNavigation';
+import { universeStoryTrail } from '@/lib/universeStoryTrail';
 
 const ENTRY_STORY_ID = '1';
 
-export function useHomeNavigation() {
+export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void) {
   const dataStore = useDataStore();
   const { periods, events, stories } = storeToRefs(dataStore);
   const navigation = useLatestRequest();
@@ -22,14 +25,30 @@ export function useHomeNavigation() {
   const currentStoryPeriods = ref<ListPeriod[]>([]);
   const currentStoryAllEvents = ref<ListEvent[]>([]);
   const currentStoryBounds = ref<{ startYearsBP?: number; endYearsBP?: number } | null>(null);
-  const storySuggestions = ref<StorySuggestion[]>([]);
-  // Frises quittées, chacune avec le chemin de périodes ouvert au moment du départ.
-  const storyStack = ref<StoryFrame[]>([]);
-  const crumbs = computed(() => buildTimelineBreadcrumb(
-    [...storyStack.value, { id: currentStoryId.value, path: [...parentStack.value, ...(currentPeriod.value ? [currentPeriod.value] : [])] }],
-    id => { const title = stories.value.find(story => story.id === id)?.title; return title?.fr || title?.en || 'Timeline'; },
-  ));
-  const breadcrumb = computed(() => crumbs.value.map(({ id, title, kind }) => ({ id, title, kind })));
+  const navigationContexts = ref<NavigationContext[]>([]);
+  const contextId = ref<string | null>(null);
+  const selectedContext = computed(() => navigationContexts.value.find(c => c.id === contextId.value) ?? null);
+  const navigationChoices = ref<Array<TimelineTarget & { title: string }>>([]);
+  let requestedTarget: TimelineTarget | undefined;
+  // Chemin des frises (reconstruit à l'entrée du catalogue), puis hiérarchie locale des périodes.
+  const visitedStories = ref<TimelineTarget[]>([]);
+  const storyBreadcrumb = computed(() => visitedStories.value.map(target => {
+    const title = stories.value.find(story => String(story.id) === target.storyId)?.title;
+    return { id: `story:${target.storyId}`, title: title?.fr || title?.en || 'Frise', kind: 'story' as const };
+  }));
+  const periodPath = computed(() => [...parentStack.value, ...(currentPeriod.value ? [currentPeriod.value] : [])]);
+  const breadcrumb = computed(() => periodPath.value.map(period => ({
+    id: `story:${currentStoryId.value}/period:${period.id}`,
+    title: period.label.fr || period.label.en || 'Période sans nom', kind: 'period' as const,
+  })));
+
+  function recordStoryVisit() {
+    const target = positionTarget(currentPeriod.value?.id);
+    const index = visitedStories.value.findIndex(entry => entry.storyId === target.storyId);
+    visitedStories.value = [...(index < 0 ? visitedStories.value : visitedStories.value.slice(0, index)), target];
+  }
+  const usesContextNeighbors = computed(() => !!currentPeriod.value && !!selectedContext.value &&
+    (selectedContext.value.id === currentStoryId.value || selectedContext.value.presentations.some(view => view.storyId === currentStoryId.value && view.periodId === currentPeriod.value!.id)));
   let retry: () => Promise<void>;
   const retryLoad = () => retry();
 
@@ -49,14 +68,54 @@ export function useHomeNavigation() {
     return storyChildrenOf(parentId, currentStoryPeriods.value);
   }
 
+  // Parcourir un même rang de la hiérarchie, y compris au-delà de son parent direct.
+  const adjacentPeriods = computed(() => {
+    if (!currentPeriod.value) return { previous: null, next: null };
+    const context = selectedContext.value;
+    if (usesContextNeighbors.value && context) return contextPeriodNeighbors(context, currentPeriod.value.id);
+    const ordered = timelineLevel(currentStoryPeriods.value, parentStack.value.length);
+    const index = ordered.findIndex(entry => entry.period.id === currentPeriod.value!.id);
+    return {
+      previous: index > 0 ? ordered[index - 1] : null,
+      next: index >= 0 ? ordered[index + 1] ?? null : null,
+    };
+  });
+  const previousPeriod = computed(() => adjacentPeriods.value.previous?.period ?? null);
+  const nextPeriod = computed(() => adjacentPeriods.value.next?.period ?? null);
+
+  const navigateAdjacentPeriod = (direction: 'previous' | 'next') => {
+    if (loading.value) return;
+    const target = adjacentPeriods.value[direction];
+    if (!target) return;
+    const context = selectedContext.value;
+    if (usesContextNeighbors.value && context) {
+      const choices = periodPresentationTargets(context, target.period.id);
+      if (choices.length > 1) { navigationChoices.value = choices; return; }
+      void chooseNavigationTarget(choices[0]);
+      return;
+    }
+    void chooseNavigationTarget(positionTarget(target.period.id));
+  };
+
+  function positionTarget(periodId?: string): TimelineTarget {
+    return { storyId: currentStoryId.value, ...(periodId ? { periodId } : { view: 'overview' as const }),
+      ...(contextId.value ? { contextId: contextId.value } : {}) };
+  }
+
+  function showPeriod(path: ListPeriod[] | null) {
+    parentStack.value = path?.slice(0, -1) ?? [];
+    currentPeriod.value = path?.[path.length - 1] ?? null;
+    displayedPeriods.value = childrenOf(currentPeriod.value?.id ?? null);
+    storyEvents.value = eventsForPeriod(currentPeriod.value);
+    recordStoryVisit();
+  }
+
   // Cached HomeView remains subscribed to canonical saves and deletions.
   watch(periods, () => {
     const byId = new Map(periods.value.map(period => [period.id, period]));
     currentStoryPeriods.value = currentStoryPeriods.value.filter(period => byId.has(period.id)).map(period => ({ ...byId.get(period.id)!, hasChildren: period.hasChildren, ...(period.storyParentId !== undefined ? { storyParentId: period.storyParentId } : {}) }));
     const placed = new Map(currentStoryPeriods.value.map(period => [period.id, period]));
     parentStack.value = parentStack.value.filter(period => byId.has(period.id)).map(period => placed.get(period.id) ?? byId.get(period.id)!);
-    // Les chemins des frises quittées sont revalidés au retour ; seuls les libellés suivent ici.
-    storyStack.value = storyStack.value.map(frame => ({ ...frame, path: frame.path.map(period => byId.get(period.id) ?? period) }));
     if (currentPeriod.value && !byId.has(currentPeriod.value.id)) currentPeriod.value = parentStack.value.pop() ?? null;
     else if (currentPeriod.value) currentPeriod.value = placed.get(currentPeriod.value.id) ?? byId.get(currentPeriod.value.id)!;
     displayedPeriods.value = childrenOf(currentPeriod.value?.id ?? null);
@@ -71,9 +130,11 @@ export function useHomeNavigation() {
   const loadInitialData = async (restorePeriodNav?: StoryPeriodNavSnapshot | null, expandSingleRoot = false, verifyStory = false) => {
     const isCurrent = navigation.begin();
     const storyId = currentStoryId.value;
+    const target = requestedTarget;
     retry = () => loadInitialData(restorePeriodNav, expandSingleRoot, verifyStory);
     loading.value = true;
     error.value = null;
+    if (target?.entry === 'universe') visitedStories.value = [];
     try {
       const [story] = await Promise.all([
         dataStore.ensureStoryLoaded(storyId),
@@ -82,8 +143,23 @@ export function useHomeNavigation() {
       if (!isCurrent()) return;
       if (verifyStory) {
         if (!dataStore.storyById(storyId)) throw new Error('Cette frise est introuvable ou n’est pas accessible.');
-        storyStack.value = storyAncestorIds(storyId, dataStore.storyById).map(id => ({ id, path: [] }));
       }
+      navigationChoices.value = [];
+      navigationContexts.value = story.navigationContexts ?? [];
+      const requestedContext = requestedTarget?.contextId;
+      const explicitContext = requestedContext ? navigationContexts.value.find(c => c.id === requestedContext) : null;
+      if (requestedContext && !explicitContext) throw new Error('Ce parcours est introuvable ou n’est plus accessible depuis cette frise.');
+      const context = explicitContext ?? (navigationContexts.value.length === 1 ? navigationContexts.value[0] : null);
+      contextId.value = context?.id ?? null;
+      const referenceIds = context?.presentations.filter(view => view.storyId === storyId).map(view => view.periodId) ?? [];
+      const overview = requestedTarget?.view === 'overview';
+      const focusId = !overview ? requestedTarget?.periodId ?? (!restorePeriodNav && referenceIds.length === 1 && storyChildrenOf(referenceIds[0], story.periods).length > 0 ? referenceIds[0] : undefined) : undefined;
+      const focusPath = focusId ? timelinePeriodPath(story.periods, focusId) : null;
+      if (focusId && !focusPath) throw new Error('Cette période n’appartient plus à la frise.');
+      const entryTrail = target?.entry === 'universe'
+        ? await universeStoryTrail(story, new Set(stories.value.map(story => story.id)), dataStore.ensureStoryLoaded, isCurrent)
+        : null;
+      if (!isCurrent()) return;
       const storyPeriods = story.periods;
       const storyEventRows = story.events;
       currentStoryPeriods.value = storyPeriods;
@@ -91,15 +167,17 @@ export function useHomeNavigation() {
       const bounds = [...storyPeriods.flatMap(period => [period.startYearsBP, period.endYearsBP]), ...storyEventRows.map(event => event.dateYearsBP)]
         .filter((value): value is number => value != null && Number.isFinite(value));
       currentStoryBounds.value = bounds.length ? { startYearsBP: Math.max(...bounds), endYearsBP: Math.min(...bounds) } : null;
-      const restored = restorePeriodNav ? resolvePeriodNavFromSnapshot(storyPeriods, restorePeriodNav) : null;
+      const restored = focusPath ? { stack: focusPath.slice(0,-1), current: focusPath[focusPath.length-1] } : restorePeriodNav ? resolvePeriodNavFromSnapshot(storyPeriods, restorePeriodNav) : null;
       parentStack.value = restored?.stack ?? [];
       currentPeriod.value = restored?.current ?? null;
-      if (!restored && expandSingleRoot) {
+      if (!restored && !overview && expandSingleRoot) {
         const roots = childrenOf(null);
         if (roots.length === 1 && roots[0].hasChildren) currentPeriod.value = roots[0];
       }
       displayedPeriods.value = childrenOf(currentPeriod.value?.id ?? null);
       storyEvents.value = eventsForPeriod(currentPeriod.value);
+      if (entryTrail) visitedStories.value = entryTrail;
+      recordStoryVisit();
     } catch (cause) {
       if (isCurrent()) error.value = cause instanceof Error ? cause.message : 'Erreur lors du chargement initial';
     } finally {
@@ -109,61 +187,24 @@ export function useHomeNavigation() {
   retry = () => loadInitialData(undefined, true);
 
   const handlePeriodClick = async (period: ListPeriod) => {
-    const isCurrent = navigation.begin();
-    retry = () => handlePeriodClick(period);
-    loading.value = true;
-    error.value = null;
-    storySuggestions.value = [];
-    try {
-      if (!period.hasChildren) {
-        // Seules les frises ancrées sur la période cliquée ; celles d'un ancêtre restent sur sa carte.
-        const story = await dataStore.ensureStoryLoaded(currentStoryId.value);
-        const suggestions = (story.childStories ?? [])
-          .filter(child => child.anchors.some(anchor => anchor.type === 'period' && anchor.id === period.id))
-          .map(child => ({ id: child.id, title: child.title, parentStoryId: currentStoryId.value }));
-        if (!isCurrent()) return;
-        if (suggestions.length === 1) { await selectStory(suggestions[0].id); return; }
-        storySuggestions.value = suggestions;
-        return;
-      }
-      const children = childrenOf(period.id);
-      if (!isCurrent() || !dataStore.periodById(period.id)) return;
-      if (currentPeriod.value) parentStack.value.push(currentPeriod.value);
-      currentPeriod.value = currentStoryPeriods.value.find(p => p.id === period.id) ?? null;
-      displayedPeriods.value = children;
-      storyEvents.value = eventsForPeriod(currentPeriod.value);
-    } catch (cause) {
-      if (isCurrent()) error.value = cause instanceof Error ? cause.message : 'Erreur lors du chargement';
-    } finally {
-      if (isCurrent()) loading.value = false;
-    }
+    if (loading.value || childrenOf(period.id).length === 0 || !timelinePeriodPath(currentStoryPeriods.value, period.id)) return;
+    await chooseNavigationTarget(positionTarget(period.id));
   };
 
   const goBack = async () => {
-    navigation.cancel();
-    loading.value = false;
-    error.value = null;
-    if (storySuggestions.value.length) { storySuggestions.value = []; return; }
-    const parent = parentStack.value.pop();
-    if (!parent) {
-      const roots = childrenOf(null);
-      const atStoryRoot = currentPeriod.value && roots.length === 1 && roots[0].id === currentPeriod.value.id;
-      if (storyStack.value.length && (!currentPeriod.value || atStoryRoot)) {
-        await returnToStory(storyStack.value.length - 1, null);
-        return;
-      }
-      currentPeriod.value = null;
-      displayedPeriods.value = roots;
+    if (loading.value) return;
+    const context = selectedContext.value;
+    const parent = parentStack.value[parentStack.value.length - 1];
+    if (context && context.id !== currentStoryId.value && (usesContextNeighbors.value || !parent)) {
+      await chooseNavigationTarget({ storyId: context.id, contextId: context.id, view: 'overview' });
     } else {
-      currentPeriod.value = parent;
-      displayedPeriods.value = childrenOf(parent.id);
+      await chooseNavigationTarget(positionTarget(parent?.id));
     }
-    storyEvents.value = eventsForPeriod(currentPeriod.value);
   };
 
   const loadStory = async (id: string, restorePeriodNav?: StoryPeriodNavSnapshot, verifyStory = false) => {
     currentStoryId.value = id;
-    storySuggestions.value = [];
+    navigationChoices.value = [];
     currentStoryBounds.value = null;
     currentStoryPeriods.value = [];
     currentStoryAllEvents.value = [];
@@ -174,47 +215,78 @@ export function useHomeNavigation() {
     await loadInitialData(restorePeriodNav, !restorePeriodNav, verifyStory);
   };
 
-  const openStory = async (id: string) => {
-    storyStack.value = [];
-    await loadStory(id, undefined, true);
+  const openStory = async (id: string, target?: TimelineTarget) => {
+    requestedTarget = target;
+    if (id === currentStoryId.value && currentStoryPeriods.value.length) await loadInitialData(undefined, true, true);
+    else await loadStory(id, undefined, true);
   };
 
-  const selectStory = async (storyId: string | number) => {
+  const selectStory = async (storyId: string | number, anchor?: StoryAnchor) => {
     const id = String(storyId);
     if (id === currentStoryId.value) return;
-    storyStack.value = [...storyStack.value, { id: currentStoryId.value, path: [...parentStack.value, ...(currentPeriod.value ? [currentPeriod.value] : [])] }];
-    await loadStory(id);
+    const visited = visitedStories.value.find(entry => entry.storyId === id);
+    if (visited) { await chooseNavigationTarget(visited); return; }
+    const isCurrent = navigation.begin();
+    retry = () => selectStory(id, anchor);
+    loading.value = true;
+    error.value = null;
+    try {
+      const story = await dataStore.ensureStoryLoaded(id);
+      if (!isCurrent()) return;
+      const context = selectedContext.value;
+      const sharedContext = context && story.navigationContexts?.some(c => c.id === context.id) ? context : null;
+      const anchorId = anchor?.type === 'period' ? anchor.id : !anchor ? currentPeriod.value?.id : undefined;
+      const views = sharedContext?.presentations.filter(view => view.storyId === id) ?? [];
+      const candidateId = anchorId && timelinePeriodPath(story.periods, anchorId) ? anchorId : views.length === 1 ? views[0].periodId : undefined;
+      const periodId = candidateId && storyChildrenOf(candidateId, story.periods).length > 0 ? candidateId : undefined;
+      await chooseNavigationTarget({ storyId: id,
+        ...(periodId ? { periodId } : candidateId ? { view: 'overview' as const } : {}),
+        ...(sharedContext ? { contextId: sharedContext.id } : {}),
+      });
+    } catch (cause) {
+      if (isCurrent()) error.value = cause instanceof Error ? cause.message : 'Impossible d’ouvrir cette frise.';
+    } finally {
+      if (isCurrent()) loading.value = false;
+    }
   };
 
-  /** Rouvre une frise quittée à `depth` dans son chemin (-1 : vue d'ensemble, null : là où on l'a quittée). */
-  const returnToStory = async (frameIndex: number, depth: number | null) => {
-    const frame = storyStack.value[frameIndex];
-    const path = (depth === null ? frame.path : frame.path.slice(0, depth + 1)).map(period => period.id);
-    storyStack.value = storyStack.value.slice(0, frameIndex);
-    await loadStory(frame.id, { parentStackIds: path.slice(0, -1), currentPeriodId: path[path.length - 1] ?? null });
-  };
-
-  const navigateToBreadcrumb = async (index: number) => {
-    if (!Number.isInteger(index) || index < 0 || index >= crumbs.value.length - 1) return;
-    const { frame, depth } = crumbs.value[index];
-    if (frame < storyStack.value.length) { await returnToStory(frame, depth); return; }
-    // Retour direct aux périodes déjà chargées, sans ajouter un ancêtre à la pile.
+  const chooseNavigationTarget = async (target: TimelineTarget) => {
     navigation.cancel();
     loading.value = false;
     error.value = null;
-    storySuggestions.value = [];
-    const target = depth >= 0 ? parentStack.value[depth] : null;
-    parentStack.value = depth >= 0 ? parentStack.value.slice(0, depth) : [];
-    currentPeriod.value = target;
-    displayedPeriods.value = childrenOf(target?.id ?? null);
-    storyEvents.value = eventsForPeriod(target);
+    navigationChoices.value = [];
+    if (navigateTo) { navigateTo(target); return; }
+    // Les usages sans routeur conservent la même sémantique et le même chemin.
+    if (!target.entry && target.storyId === currentStoryId.value && (target.periodId || target.view === 'overview') &&
+      (!target.contextId || target.contextId === contextId.value)) {
+      const path = target.periodId ? timelinePeriodPath(currentStoryPeriods.value, target.periodId) : null;
+      if (target.periodId && !path) { error.value = 'Cette période n’appartient plus à la frise.'; return; }
+      requestedTarget = target;
+      showPeriod(path);
+      return;
+    }
+    await openStory(target.storyId, target);
+  };
+
+  const selectNavigationContext = async (id: string) => {
+    if (!navigationContexts.value.some(c => c.id === id) || loading.value) return;
+    await chooseNavigationTarget({ ...positionTarget(currentPeriod.value?.id), contextId: id });
+  };
+
+  const navigateToBreadcrumb = async (index: number) => {
+    if (loading.value || !Number.isInteger(index) || index < 0 || index >= periodPath.value.length - 1) return;
+    await chooseNavigationTarget(positionTarget(periodPath.value[index].id));
+  };
+  const navigateToStoryBreadcrumb = async (index: number) => {
+    if (loading.value || !Number.isInteger(index) || index < 0 || index >= visitedStories.value.length - 1) return;
+    await chooseNavigationTarget(visitedStories.value[index]);
   };
   // EventCard/PeriodGrid handles event suggestions and emits story-select.
   const handleEventClick = async (_event: ListEvent) => {};
 
   return {
     loading, error, retryLoad, parentStack, currentPeriod, displayedPeriods, storyEvents,
-    currentStoryId, breadcrumb, storySuggestions, currentStoryBounds,
-    loadInitialData, openStory, handlePeriodClick, handleEventClick, goBack, selectStory, navigateToBreadcrumb,
+    currentStoryId, breadcrumb, storyBreadcrumb, currentStoryBounds, previousPeriod, nextPeriod, navigationContexts, contextId, navigationChoices, chooseNavigationTarget, selectNavigationContext,
+    loadInitialData, openStory, handlePeriodClick, handleEventClick, goBack, selectStory, navigateToBreadcrumb, navigateToStoryBreadcrumb, navigateAdjacentPeriod,
   };
 }

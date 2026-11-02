@@ -52,7 +52,7 @@ it('opens on the frise cards and opens a frise in its own tab', async () => {
   expect(view.find('.story-gallery').exists()).toBe(false);
   expect(tabs()).toEqual(['Guerre froide']);
   expect(view.get('.story-tabs__open').attributes('aria-current')).toBe('page');
-  expect(view.get('.story-detail-panel__meta-actions a').attributes('href')).toBe('/timeline?story=1');
+  expect(view.get('.story-detail-panel__meta-actions a').attributes('href')).toBe('/timeline?story=1&entry=universe');
   expect(view.findAll('.story-detail-panel__meta-actions > *').map(item => item.text())).toEqual(['Ajouter un événement', 'Voir dans la timeline']);
   expect(view.get('.story-detail-panel__meta-actions a').find('svg').exists()).toBe(false);
   const settings = view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Paramètres')!;

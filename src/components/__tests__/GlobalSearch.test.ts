@@ -18,6 +18,26 @@ beforeEach(() => {
 });
 afterEach(() => { view?.unmount(); vi.useRealTimers(); vi.restoreAllMocks(); });
 
+it('activates only on click or keyboard focus, stays active when the pointer leaves and dismisses with Escape', async () => {
+  const input = view.get('input');
+  expect(view.classes()).not.toContain('gs--active');
+  await view.trigger('mouseenter');
+  expect(view.classes()).not.toContain('gs--active');
+  expect(api.searchStories).not.toHaveBeenCalled();
+
+  await view.get('.search-input-wrap__icon').trigger('click');
+  expect(document.activeElement).toBe(input.element);
+  expect(view.classes()).toContain('gs--active');
+  await view.trigger('mouseleave');
+  expect(view.classes()).toContain('gs--active');
+
+  await input.trigger('keydown', { key: 'Escape' });
+  expect(view.classes()).not.toContain('gs--active');
+  expect(document.activeElement).not.toBe(input.element);
+  input.element.focus(); await flushPromises();
+  expect(view.classes()).toContain('gs--active');
+});
+
 it('offers stories with their description and explains a match through associated content', async () => {
   vi.mocked(api.searchStories).mockResolvedValue([story]);
   await search('Marshall');

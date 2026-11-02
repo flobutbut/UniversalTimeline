@@ -171,3 +171,21 @@ test('updates timestamps through the restricted trigger without exposing the leg
   await assert.rejects(scoped(alice,client=>client.query('SELECT public.set_updated_at()')),{code:'42501'});
   assert.equal((await pool.query("SELECT to_regprocedure('public.maintain_period_relations()') AS routine")).rows[0].routine,null);
 });
+
+test('adding a presentation enrolls the period in its context atomically and enforces ownership', async () => {
+  const body = { periodId:'root', targetStoryId:'2', operation:'add' };
+  const success = await call('post','/stories/:contextId/presentations',body,{contextId:'1'});
+  assert.equal(success.statusCode,204);
+  assert.equal((await pool.query("SELECT * FROM story_periods WHERE story_id=1 AND period_id='root'")).rowCount,1);
+  assert.equal((await pool.query('SELECT * FROM story_period_presentations')).rowCount,1);
+  assert.equal((await call('post','/stories/:contextId/presentations',body,{contextId:'1'})).statusCode,204);
+  assert.equal((await pool.query('SELECT * FROM story_period_presentations')).rowCount,1);
+  assert.equal((await call('post','/stories/:contextId/presentations',{...body,targetStoryId:'1'},{contextId:'1'})).statusCode,400);
+  assert.equal((await call('post','/stories/:contextId/presentations',body,{contextId:'3'})).statusCode,404);
+  assert.equal((await pool.query("SELECT * FROM story_periods WHERE story_id=3 AND period_id='root'")).rowCount,0);
+});
+test('a missing target period rolls back enrollment in the context', async () => {
+  const response = await call('post','/stories/:contextId/presentations',{periodId:'root',targetStoryId:'3',operation:'add'},{contextId:'1'});
+  assert.ok(response.statusCode >= 400);
+  assert.equal((await pool.query("SELECT * FROM story_periods WHERE story_id=1 AND period_id='root'")).rowCount,0);
+});

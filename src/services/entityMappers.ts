@@ -82,6 +82,8 @@ export function mapToStory(row: StoryDto): Story {
   if (!Array.isArray(row.periods) || !Array.isArray(row.events)) throw new Error('Réponse API invalide : détail de frise incomplet.');
   return {
     ...mapToListStory(row), periods: row.periods.map(mapToPeriod), events: row.events.map(mapToEvent),
+    navigationContexts: row.navigationContexts?.map(context => ({ id: apiId(context.id), title: text(context.title),
+      periods: context.periods.map(mapToPeriod), presentations: context.presentations.map(view => ({ periodId: view.periodId, storyId: apiId(view.storyId), title: text(view.title) })) })),
     childStories: row.childStories?.map(child => ({ id: apiId(child.id), title: text(child.title, child.title_fr, child.title_en), anchors: (child.anchors ?? []).map(anchor => ({ ...anchor, id: apiId(anchor.id) })) })),
     parentStories: row.parentStories?.map(parent => ({ id: apiId(parent.id), title: text(parent.title, parent.title_fr, parent.title_en), ownerUserId: parent.ownerUserId,
       anchors: parent.anchors.map(anchor => ({ type: anchor.type, id: apiId(anchor.id), label: text(anchor.label) })) })),

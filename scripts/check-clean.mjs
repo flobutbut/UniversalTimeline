@@ -91,7 +91,7 @@ try {
   await runChecks('audit-api', ['yarn', '--cwd', 'server', 'audit']);
   await run(['pull', 'postgres:17-alpine']);
   for (const [name, file, restore] of [
-    ['baseline', 'baseline.postgres.mjs', true], ['auth', 'auth.postgres.mjs'],
+    ['baseline', 'baseline.postgres.mjs', true], ['presentations', 'storyPresentations.postgres.mjs'], ['auth', 'auth.postgres.mjs'],
     ['hierarchy', 'periodHierarchy.postgres.mjs'], ['deletion', 'periodDeletion.postgres.mjs'],
     ['privileges', 'functionPrivileges.postgres.mjs'], ['atomic', 'atomicWrites.postgres.mjs'],
     ['profiles', 'profiles.postgres.mjs'],

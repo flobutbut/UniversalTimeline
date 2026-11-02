@@ -6,63 +6,79 @@
     <FeedbackState v-else-if="!loading && !currentPeriod && periods.length === 0 && events.length === 0" message="Aucune période à afficher" />
     <div v-else class="timeline-container">
       <div class="periods-container">
-        <PeriodCard
-          v-if="props.currentPeriod"
-          ref="parentBarRef"
-          variant="parent"
-          :period="props.currentPeriod"
-          :is-selected="false"
-          :aria-describedby="tooltipPeriod?.id === props.currentPeriod.id ? tooltipId : undefined"
-          @back="goBack"
-          @mouseenter="periodDetails.enter(props.currentPeriod.id)"
-          @mousemove="periodDetails.move(props.currentPeriod.id)"
-          @mouseleave="periodDetails.leave(props.currentPeriod.id)"
-          @focusin="periodDetails.focus(props.currentPeriod.id)"
-          @focusout="periodDetails.blur(props.currentPeriod.id)"
-          @keydown.esc.stop="periodDetails.reset()"
-        >
-          <template #title-actions>
-            <AssociatedStoriesBadge v-if="props.currentPeriod" :story-id="currentStoryId" :period-id="props.currentPeriod.id" :period-label="props.currentPeriod.label.fr || props.currentPeriod.label.en"
-              :stories="associatedByPeriod.get(props.currentPeriod.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
-              @retry="retryAssociations" @select="emit('story-select', $event)" />
-          </template>
-        </PeriodCard>
-        <div ref="periodRowRef" class="period-row" :style="{ height: `${periodRowHeight}px` }">
+        <nav v-if="props.currentPeriod && !loading && (previousPeriod || nextPeriod)" class="period-grid__navigation" aria-label="Périodes de même niveau">
+          <Button v-if="previousPeriod" variant="ghost" size="sm" data-period-direction="previous"
+            :title="`Période précédente : ${previousPeriod.label.fr || previousPeriod.label.en}`"
+            @click="navigatePeriod('previous')">
+            <template #icon><Icon icon="mdi:arrow-left" aria-hidden="true" /></template>
+            Période précédente<span> - {{ previousPeriod.label.fr || previousPeriod.label.en }}</span>
+          </Button>
+          <Button v-if="nextPeriod" class="period-grid__next-control" variant="ghost" size="sm" data-period-direction="next"
+            :title="`Période suivante : ${nextPeriod.label.fr || nextPeriod.label.en}`"
+            @click="navigatePeriod('next')">
+            Période suivante<span> - {{ nextPeriod.label.fr || nextPeriod.label.en }}</span>
+            <Icon icon="mdi:arrow-right" class="period-grid__next-icon" aria-hidden="true" />
+          </Button>
+        </nav>
+        <div ref="periodSurfaceRef" class="period-grid__surface">
           <PeriodCard
-            v-for="(period, i) in sortedPeriods"
-            :key="period.id"
-            :ref="(el: any) => setPeriodRef(el, period.id)"
-            :period="period"
+            v-if="props.currentPeriod"
+            ref="parentBarRef"
+            variant="parent"
+            :period="props.currentPeriod"
             :is-selected="false"
-            class="timeline-card period-grid__period-position"
-            :expanded="activePeriodId === period.id"
-            :wrap-content="activePeriodId === period.id && wrapContent"
-            :style="{ ...getPeriodCssVars(period), '--enter-delay': `${i * 25}ms` }"
-            @select="selectPeriod"
-            :aria-describedby="tooltipPeriod?.id === period.id ? tooltipId : undefined"
-            @mouseenter="periodDetails.enter(period.id)"
-            @mousemove="periodDetails.move(period.id)"
-            @mouseleave="periodDetails.leave(period.id)"
-            @focusin="periodDetails.focus(period.id)"
-            @focusout="periodDetails.blur(period.id)"
+            :aria-describedby="tooltipPeriod?.id === props.currentPeriod.id ? tooltipId : undefined"
+            @back="goBack"
+            @mouseenter="periodDetails.enter(props.currentPeriod.id)"
+            @mousemove="periodDetails.move(props.currentPeriod.id)"
+            @mouseleave="periodDetails.leave(props.currentPeriod.id)"
+            @focusin="periodDetails.focus(props.currentPeriod.id)"
+            @focusout="periodDetails.blur(props.currentPeriod.id)"
             @keydown.esc.stop="periodDetails.reset()"
           >
             <template #title-actions>
-              <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
-                :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
-                @retry="retryAssociations" @select="emit('story-select', $event)" />
+              <AssociatedStoriesBadge v-if="props.currentPeriod" :story-id="currentStoryId" :period-id="props.currentPeriod.id" :period-label="props.currentPeriod.label.fr || props.currentPeriod.label.en"
+                :stories="associatedByPeriod.get(props.currentPeriod.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
+                @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: props.currentPeriod.id })" />
             </template>
           </PeriodCard>
+          <div ref="periodRowRef" class="period-row" :style="{ height: `${periodRowHeight}px` }">
+            <PeriodCard
+              v-for="(period, i) in sortedPeriods"
+              :key="period.id"
+              :ref="(el: any) => setPeriodRef(el, period.id)"
+              :period="period"
+              :is-selected="false"
+              class="timeline-card period-grid__period-position"
+              :expanded="activePeriodId === period.id"
+              :wrap-content="activePeriodId === period.id && wrapContent"
+              :style="{ ...getPeriodCssVars(period), '--enter-delay': `${i * 25}ms` }"
+              @select="selectPeriod"
+              :aria-describedby="tooltipPeriod?.id === period.id ? tooltipId : undefined"
+              @mouseenter="periodDetails.enter(period.id)"
+              @mousemove="periodDetails.move(period.id)"
+              @mouseleave="periodDetails.leave(period.id)"
+              @focusin="periodDetails.focus(period.id)"
+              @focusout="periodDetails.blur(period.id)"
+              @keydown.esc.stop="periodDetails.reset()"
+            >
+              <template #title-actions>
+                <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
+                  :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
+                  @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: period.id })" />
+              </template>
+            </PeriodCard>
+          </div>
         </div>
       </div>
-      <div class="timeline-line"></div>
-      <div v-if="undatedPeriods.length" class="period-grid__undated">
+      <div ref="timelineLineRef" class="timeline-line"></div>
+      <div v-if="undatedPeriods.length" ref="undatedPeriodsRef" class="period-grid__undated">
         <span>Dates non déterminées</span>
         <span v-for="period in undatedPeriods" :key="`p:${period.id}`" class="period-grid__undated-item">
-          <Button variant="tertiary" size="xs" type="button" @click="selectPeriod(period)">{{ period.label.fr }}</Button>
+          <Button variant="tertiary" size="xs" type="button" :disabled="loading || !period.hasChildren" @click="selectPeriod(period)">{{ period.label.fr }}</Button>
           <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
             :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
-            @retry="retryAssociations" @select="emit('story-select', $event)" />
+            @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: period.id })" />
         </span>
       </div>
       <Teleport to="body">
@@ -79,24 +95,9 @@
           <p v-if="tooltipDescription" class="period-grid__tooltip-description">{{ tooltipDescription }}</p>
           <small v-if="tooltipHint" class="period-grid__tooltip-hint">{{ tooltipHint }}</small>
         </div>
-        <template v-if="props.storySuggestions.length > 0 && dropdownRect">
-          <div class="story-dropdown-backdrop" @click="goBack" />
-          <PopoverSurface padded class="story-dropdown" :style="dropdownStyle">
-            <p class="story-dropdown__label">Explorer en détail</p>
-            <button
-              v-for="s in props.storySuggestions"
-              :key="s.id"
-              class="story-dropdown__item"
-              @click="emit('story-select', s.id)"
-            >
-              <span class="story-dropdown__item-title">{{ s.title.fr }}</span>
-              <span v-if="s.description" class="story-dropdown__item-desc">{{ s.description.fr }}</span>
-              <span class="story-dropdown__item-arrow" aria-hidden="true">→</span>
-            </button>
-          </PopoverSurface>
-        </template>
       </Teleport>
-      <div class="events-container" @click="selectedEvent = null">
+      <div ref="eventsSurfaceRef" class="events-container" @click="selectedEvent = null">
+        <p v-if="currentPeriod && !loading && periods.length === 0 && events.length === 0" class="period-grid__empty-detail">Aucune sous-période ni événement dans cette frise pour cette période.</p>
         <span v-if="undatedEvents.length" class="period-grid__undated-label">Événements sans date déterminée</span>
         <EventCard
           v-for="event in events"
@@ -112,8 +113,8 @@
           :suggestions-loading="selectedEvent?.id === event.id && eventSuggestionsLoading"
           :suggestions-error="selectedEvent?.id === event.id ? eventSuggestionsError : null"
           @retry-suggestions="retryEventSuggestions"
-          @click="(ev: MouseEvent) => selectEvent(event, ev)"
-          @story-select="(id: string) => emit('story-select', id)"
+          @click="selectEvent(event)"
+          @story-select="(id: string) => emit('story-select', id, { type: 'event', id: event.id })"
         />
       </div>
     </div>
@@ -122,11 +123,11 @@
 
 <script setup lang="ts">
 import FeedbackState from '@/components/base/FeedbackState.vue';
-import PopoverSurface from '@/components/base/PopoverSurface.vue';
 import Button from '@/components/base/Button.vue';
+import { Icon } from '@iconify/vue';
 import { ref, computed, watch, onActivated, onDeactivated } from 'vue';
 
-import type { ListPeriod, ListEvent, StorySuggestion, Story } from '@/types/database';
+import type { ListPeriod, ListEvent, Story, StoryAnchor } from '@/types/database';
 import { compareYearsOldestFirst } from '@temporal';
 import { periodCoordinates } from '@/services/TimelineScalingService';
 import { listEventYearsBP } from '@/lib/listEventTableHelpers';
@@ -151,9 +152,10 @@ const props = withDefaults(defineProps<{
   loading: boolean;
   parentPeriod: ListPeriod | null;
   currentPeriod: ListPeriod | null;
+  previousPeriod?: ListPeriod | null;
+  nextPeriod?: ListPeriod | null;
   /** Bornes de la story courante : cadre fixe quand aucun currentPeriod n'est actif. */
   storyBounds?: { startYearsBP?: number; endYearsBP?: number } | null;
-  storySuggestions: StorySuggestion[];
   currentStoryId: string;
   /** Infobulle des périodes (titre, dates, courte description) ; désactivée par défaut. */
   periodTooltips?: boolean;
@@ -165,7 +167,8 @@ const emit = defineEmits<{
   (e: 'period-click', period: ListPeriod): void;
   (e: 'event-click', event: ListEvent): void;
   (e: 'go-back'): void;
-  (e: 'story-select', storyId: string): void;
+  (e: 'navigate-period', direction: 'previous' | 'next'): void;
+  (e: 'story-select', storyId: string, anchor?: StoryAnchor): void;
 }>();
 
 const { updateFromPeriods, getPeriodLayoutStyle, getEventLayoutStyle } = useTimelineScaling();
@@ -193,6 +196,14 @@ const parentBarRef = ref<any>(null);
 /** Map id → élément DOM des cartes de période. */
 const periodElMap = new Map<string, HTMLElement>();
 const periodRowRef = ref<HTMLElement | null>(null);
+const periodSurfaceRef = ref<HTMLElement | null>(null);
+const timelineLineRef = ref<HTMLElement | null>(null);
+const undatedPeriodsRef = ref<HTMLElement | null>(null);
+const eventsSurfaceRef = ref<HTMLElement | null>(null);
+defineExpose({
+  getSlideLayers: () => [periodSurfaceRef.value, timelineLineRef.value, undatedPeriodsRef.value, eventsSurfaceRef.value]
+    .filter((element): element is HTMLElement => element !== null),
+});
 
 function setPeriodRef(el: unknown, id: string) {
   const domEl = unwrapTemplateRefToHTMLElement(el);
@@ -216,11 +227,14 @@ const { minimumPct, laneHeight, wrapContent } = useTimelinePeriodExpansion(
 );
 const tooltipDateRange = computed(() => tooltipPeriod.value ? formatPeriodDateRange(tooltipPeriod.value) : '');
 const tooltipDescription = computed(() => (tooltipPeriod.value?.description?.fr || tooltipPeriod.value?.description?.en || '').trim());
-/** Le clic sur la barre parente remonte ; sur une carte, il n'explore que s'il y a des sous-périodes. */
+/** Seules les périodes avec enfants se parcourent au clic. */
 const tooltipHint = computed(() => {
   if (!tooltipPeriod.value) return '';
   if (tooltipPeriod.value.id === props.currentPeriod?.id) return 'Cliquer pour remonter';
-  return tooltipPeriod.value.hasChildren ? 'Cliquer pour explorer' : '';
+  if (tooltipPeriod.value.hasChildren) return 'Cliquer pour explorer';
+  return (associatedByPeriod.value.get(tooltipPeriod.value.id) ?? []).length
+    ? 'Pas de sous-périodes. Choisissez une frise associée pour continuer.'
+    : 'Pas de sous-périodes.';
 });
 
 const periodFlip = usePeriodFlip(
@@ -361,45 +375,20 @@ const getEventStyles = (event: ListEvent): { width: string; left: string } => {
   return { width: String(base.width), left: String(base.left) };
 };
 
-// ─── Dropdown suggestions ─────────────────────────────────────────────────────
-
-/** Rect de la carte qui a ouvert le dropdown (pour le positionner). */
-const dropdownRect = ref<DOMRect | null>(null);
-
-const dropdownStyle = computed(() => {
-  if (!dropdownRect.value) return {};
-  const rect = dropdownRect.value;
-  const center = rect.left + rect.width / 2;
-  return {
-    top: `${rect.bottom + 8}px`,
-    left: `${center}px`,
-    transform: 'translateX(-50%)',
-  };
-});
-
-watch(() => props.storySuggestions, (val) => {
-  if (val.length === 0) dropdownRect.value = null;
-});
-
 // ─── Actions ──────────────────────────────────────────────────────────────────
 
 const selectPeriod = (period: ListPeriod) => {
+  if (props.loading || !period.hasChildren) return;
   periodDetails.dismiss();
   const el = periodElMap.get(period.id);
-  const rect = el ? el.getBoundingClientRect() : null;
   periodFlip.prepare(period, el ?? null);
-  dropdownRect.value = rect;
   emit('period-click', period);
 };
 
-const selectEvent = (event: ListEvent, nativeEvt?: MouseEvent) => {
+const selectEvent = (event: ListEvent) => {
   const isDeselecting = selectedEvent.value?.id === event.id;
   selectedEvent.value = isDeselecting ? null : event;
   if (!isDeselecting) {
-    if (nativeEvt) {
-      const target = (nativeEvt.currentTarget ?? nativeEvt.target) as HTMLElement | null;
-      if (target) dropdownRect.value = target.getBoundingClientRect();
-    }
     emit('event-click', event);
   }
 };
@@ -412,7 +401,6 @@ watch(() => props.events, events => {
 onActivated(() => { active.value = true; });
 onDeactivated(() => {
   active.value = false;
-  dropdownRect.value = null;
   selectedEvent.value = null;
   periodDetails.reset();
   periodFlip.cancel();
@@ -429,9 +417,29 @@ const goBack = () => {
   periodFlip.cancel();
   emit('go-back');
 };
+
+const navigatePeriod = (direction: 'previous' | 'next') => {
+  if (props.loading || !(direction === 'previous' ? props.previousPeriod : props.nextPeriod)) return;
+  periodDetails.reset();
+  periodFlip.cancel();
+  selectedEvent.value = null;
+  emit('navigate-period', direction);
+};
 </script>
 
 <style scoped>
+.period-grid__navigation {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+.period-grid__navigation :deep(.base-button) { max-width: 100%; height: auto; }
+.period-grid__navigation :deep(.base-button__text) { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+.period-grid__next-control { margin-left: auto; }
+.period-grid__next-icon { margin-left: var(--spacing-xs); vertical-align: middle; }
 .period-grid__undated-item { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
 .period-grid__tooltip {
   position: fixed;
@@ -503,6 +511,14 @@ const goBack = () => {
   gap: calc(var(--spacing-xs) / 2);
 }
 
+.period-grid__surface {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-xs) / 2);
+}
+
+.period-grid__empty-detail { color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-top: var(--spacing-md); }
+
 .period-row {
   position: relative;
   width: 100%;
@@ -549,86 +565,5 @@ const goBack = () => {
     opacity: 1;
     transform: translateY(0);
   }
-}
-</style>
-
-<style>
-/* Styles globaux pour le dropdown (en dehors du scoped car rendu dans body via Teleport) */
-
-.story-dropdown-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-index-dropdown);
-}
-
-.story-dropdown {
-  position: fixed;
-  z-index: calc(var(--z-index-dropdown) + 1);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  min-width: 200px;
-  max-width: 320px;
-
-  animation: dropdown-enter 0.18s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-.story-dropdown__label {
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-  margin: 0 0 var(--spacing-xs) var(--spacing-xs);
-}
-
-.story-dropdown__item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--spacing-sm) var(--spacing-2xl) var(--spacing-sm) 10px;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  text-align: left;
-  position: relative;
-  transition: background 0.12s;
-}
-
-.story-dropdown__item:hover {
-  background: var(--color-interaction-hover);
-}
-
-.story-dropdown__item-title {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-.story-dropdown__item-desc {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: 1.4;
-}
-
-.story-dropdown__item-arrow {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  color: var(--color-text-link);
-  font-size: var(--font-size-base);
-  opacity: 0;
-  transition: opacity 0.12s, transform 0.12s;
-}
-
-.story-dropdown__item:hover .story-dropdown__item-arrow {
-  opacity: 1;
-  transform: translateY(-50%) translateX(3px);
-}
-
-@keyframes dropdown-enter {
-  from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 </style>

@@ -132,3 +132,9 @@ export async function insertFrozenPlacements(client: TransactionClient, storyId:
   await client.query(`INSERT INTO public.story_periods (story_id, period_id, parent_period_id) VALUES ${values}`,
     [storyId, ...placements.flatMap(row => [row.id, row.parent_id])]);
 }
+
+/** Explicitly declare a detail view; composite foreign keys validate both memberships. */
+export async function changePresentation(client: TransactionClient, contextId: string, periodId: string, targetId: string, remove: boolean) {
+  if (remove) await client.query('DELETE FROM public.story_period_presentations WHERE context_story_id=$1 AND period_id=$2 AND target_story_id=$3', [contextId, periodId, targetId]);
+  else await client.query('INSERT INTO public.story_period_presentations(context_story_id,period_id,target_story_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING', [contextId, periodId, targetId]);
+}

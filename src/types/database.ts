@@ -104,7 +104,15 @@ export interface StorySummary extends ListStory {
   updatedAt?: Date;
 }
 
+export interface NavigationContext {
+  id: string;
+  title: MultilingualText;
+  periods: ListPeriod[];
+  presentations: Array<{ periodId: string; storyId: string; title: MultilingualText }>;
+}
+
 export interface Story extends StorySummary {
+  navigationContexts?: NavigationContext[];
   periods: Period[];
   events: Event[];
   /** Stories enfants ancrées à des périodes de cette story. */

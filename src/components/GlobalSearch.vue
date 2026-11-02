@@ -1,5 +1,5 @@
 <template>
-  <div ref="rootRef" class="gs search-bar" @focusin="onFocus" @focusout="onBlur">
+  <div ref="rootRef" class="gs search-bar" :class="{ 'gs--active': focused }" @click="searchRef?.focus()" @focusin="onFocus" @focusout="onBlur">
     <SearchInput
       ref="searchRef"
       v-model="query"
@@ -79,7 +79,7 @@ function onBlur() {
 onScopeDispose(() => clearTimeout(blurTimer));
 function confirm() { const hit = current(); if (hit) selectHit(hit); }
 function retrySource() { searchRef.value?.focus(); return retry(); }
-function dismiss() { query.value = ''; reset(); focused.value = false; }
+function dismiss() { query.value = ''; reset(); focused.value = false; searchRef.value?.blur(); }
 function selectHit(hit: StorySearchResult) { emit('select', hit); clear(); }
 function clear() {
   query.value = ''; reset(); focused.value = false;
@@ -90,7 +90,17 @@ function clear() {
 <style scoped>
 .gs.search-bar {
   position: relative;
-  width: 100%;
+  width: var(--field-height-md);
+  max-width: 100%;
+  transition: width var(--transition-normal);
+  cursor: text;
+}
+
+.gs.search-bar:hover, .gs.search-bar:focus-within { width: 320px; }
+.gs :deep(.search-input-wrap__icon) { width: 18px; height: 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gs.search-bar { transition: none; }
 }
 
 /* ─── Dropdown ───────────────────────────────────────────────────────────────── */

@@ -81,6 +81,10 @@ export class StoryApiService {
     }
     return { id: String(result.id), periodCount: result.periodCount, eventCount: result.eventCount };
   }
+  async changePresentation(contextId: string, periodId: string, targetStoryId: string, remove = false): Promise<void> {
+    await apiClient.post(`/stories/${contextId}/presentations`, { periodId, targetStoryId, operation: remove ? 'remove' : 'add' });
+  }
+
   async changeRootPeriod(storyId: string, periodId: string): Promise<void> {
     await apiClient.put(`/stories/${storyId}/root-period`, { periodId });
   }

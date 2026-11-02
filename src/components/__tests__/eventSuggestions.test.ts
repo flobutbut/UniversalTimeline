@@ -7,7 +7,7 @@ import { StoryApiService } from '@/services/StoryApiService';
 import { storyFixture } from '@/testFixtures/story';
 
 const event = (id: string) => ({ id, label: { fr: id, en: '' }, date: 'M40', categories: [] });
-const props = { periods: [{ id: 'p', label: { fr: 'p', en: '' }, startDate: 'M65', endDate: 'NOW', categories: [] }], events: [event('a'), event('b')], currentStoryId: 'one', storySuggestions: [], parentPeriod: null, currentPeriod: null, loading: false };
+const props = { periods: [{ id: 'p', label: { fr: 'p', en: '' }, startDate: 'M65', endDate: 'NOW', categories: [] }], events: [event('a'), event('b')], currentStoryId: 'one', parentPeriod: null, currentPeriod: null, loading: false };
 const snapshot = () => storyFixture('one', props.periods, props.events);
 const withChild = (eventId = 'a') => ({ ...snapshot(), events: [...props.events, event(eventId)], childStories: [{ id: 'child', title: { fr: 'child', en: '' }, anchors: [{ type: 'event' as const, id: eventId }] }] });
 const related = (id: string, title = id, eventIds = ['a']) => ({ id, title: { fr: title, en: '' }, periodIds: [], eventIds });
@@ -88,7 +88,7 @@ it('offers shared frises after anchored children, without duplicates or the curr
   const card = view.getComponent(EventCard);
   expect(card.props('storySuggestions').map((story: { id: string }) => story.id)).toEqual(['child', 'b', 'z']);
   expect(card.findAll('.event-story-item').map(item => item.text())).toEqual(['child', 'Biologie', 'Zèbre']);
-  await card.findAll('.event-story-item')[1].trigger('click'); expect(view.emitted('story-select')).toEqual([['b']]);
+  await card.findAll('.event-story-item')[1].trigger('click'); expect(view.emitted('story-select')).toEqual([['b', {type:'event', id:'a'}]]);
 });
 
 it('shows nothing for an event with no other associated frise', async () => {

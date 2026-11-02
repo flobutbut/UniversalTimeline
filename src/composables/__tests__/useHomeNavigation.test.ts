@@ -55,7 +55,7 @@ describe('useHomeNavigation', () => {
     expect(nav.displayedPeriods.value.map(p => p.id)).toEqual(['r1']);
   });
 
-  it('goBack à la racine périodes après selectStory recharge la story parente', async () => {
+  it('goBack garde la vue d’ensemble de la frise courante, sans confondre retour local et historique', async () => {
     vi.spyOn(StoryApiService.getInstance(), 'getStory').mockImplementation(async (storyId: string) => {
       if (storyId === '1') {
         return storyFixture(storyId, [apiPeriod('r1', null, false)]);
@@ -74,7 +74,8 @@ describe('useHomeNavigation', () => {
     expect(nav.currentStoryId.value).toBe('2');
 
     await nav.goBack();
-    expect(nav.currentStoryId.value).toBe('1');
+    expect(nav.currentStoryId.value).toBe('2');
+    expect(nav.currentPeriod.value).toBeNull();
     expect(StoryApiService.getInstance().getStory).toHaveBeenCalledTimes(2);
   });
 

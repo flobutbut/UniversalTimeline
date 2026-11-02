@@ -119,7 +119,7 @@ it('keeps the detail contract for stories, periods, events, child IDs and anchor
     childStories: [
       { id: '8', title: { fr: 'Enfant', en: 'Enfant' }, anchors: [{ type: 'period', id: 'legacy-period' }] },
       { id: '9', title: { fr: 'Autre', en: 'Other' }, anchors: [] },
-    ], parentStories: [], relatedStories: [], createdAt: timestamp, updatedAt: timestamp,
+    ], parentStories: [], relatedStories: [], navigationContexts: [], createdAt: timestamp, updatedAt: timestamp,
   });
   expect(db).toHaveBeenCalledOnce();
 });

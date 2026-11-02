@@ -69,16 +69,119 @@ it.each([false, true])('opens the complete selected story from a real header sea
   expect(periods.getListPeriods).not.toHaveBeenCalled(); expect(events.getListEvents).not.toHaveBeenCalled();
   expect(view.find('[role="dialog"]').exists()).toBe(false);
 });
-it('supports a direct story link and navigation to a child story and the timeline breadcrumb', async () => {
-  vi.mocked(stories.getListStories).mockResolvedValue(['1', '2', '7', '8'].map(id => ({ ...summary(id), parentStoryId: id === '7' ? '1' : null })));
-  vi.mocked(stories.getStory).mockImplementation(async id => storyFixture(id, [period(`root-${id}`), period(`leaf-${id}`, `root-${id}`)], [event(`event-${id}`)], id === '7' ? [{ id: '2', title_fr: 'Frise 2', anchors: [{ type: 'period', id: 'leaf-7' }] }] : []));
-  await start('/timeline?story=7');
-  await view.get('.period-card--timeline').trigger('click'); await flushPromises();
-  expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('2');
-  expect(view.get('[aria-label="Fil d’Ariane de la timeline"]').text()).toContain('Frise 7');
-  await view.get('[aria-label="Fil d’Ariane de la timeline"]').findAll('button')[0].trigger('click'); await flushPromises();
-  expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('1');
+
+it('starts the public timeline at the Universe with its full duration, before exploring Earth', async () => {
+  vi.mocked(stories.getStory).mockResolvedValue(storyFixture('1', [
+    { ...period('universe'), label:{fr:'Univers',en:''}, startDate:'G13.8', startYearsBP:13.8e9 },
+    { ...period('earth','universe'), label:{fr:'Terre',en:''}, startDate:'G4.54', startYearsBP:4.54e9 },
+  ]));
+  await start('/timeline');
+  const grid = view.getComponent(PeriodGrid);
+  expect(grid.props('currentStoryId')).toBe('1');
+  expect(grid.props('currentPeriod').label.fr).toBe('Univers');
+  expect(grid.props('currentPeriod').startYearsBP).toBe(13.8e9);
+  expect(grid.props('periods').map((p:Period) => p.label.fr)).toEqual(['Terre']);
 });
+it('keeps a leaf closed and preserves its period only when the selected frise has children', async () => {
+  vi.mocked(stories.getStory).mockImplementation(async id => storyFixture(id,
+    [period(`root-${id}`), period(id === '2' ? 'leaf-7' : `leaf-${id}`, `root-${id}`), ...(id === '2' ? [period('detail-child','leaf-7')] : [])],
+    [event(`event-${id}`)], id === '7' ? [{ id: '2', title_fr: 'Frise 2', anchors: [{ type: 'period', id: 'leaf-7' }] }] : []));
+  await start('/timeline?story=7');
+  await view.get('[data-period-id="leaf-7"]').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7');
+  expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('7');
+  expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('root-7');
+  await view.get('[aria-label="1 frise associée à leaf-7"]').trigger('click'); await flushPromises();
+  (document.body.querySelector('.associated-stories__item') as HTMLButtonElement).click(); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=2&period=leaf-7');
+  expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('2');
+  expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('leaf-7');
+  expect(view.get('[aria-label="Fil d’Ariane de la timeline"]').text()).not.toContain('Frise 7');
+  const moved = new Promise<void>(resolve => { const stop = router.afterEach(() => { stop(); resolve(); }); });
+  router.back(); await moved; await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7');
+  expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('root-7');
+});
+
+it('opens an associated frise at its overview when the shared period has no children there', async () => {
+  vi.mocked(stories.getStory).mockImplementation(async id => storyFixture(id,
+    id === '2' ? [period('leaf-7')] : [period('root-7'),period('leaf-7','root-7')], [],
+    id === '7' ? [{id:'2',title_fr:'Frise 2',anchors:[{type:'period',id:'leaf-7'}]}] : []));
+  await start('/timeline?story=7');
+  await view.get('[aria-label="1 frise associée à leaf-7"]').trigger('click'); await flushPromises();
+  (document.body.querySelector('.associated-stories__item') as HTMLButtonElement).click(); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=2&view=overview');
+  expect(view.getComponent(PeriodGrid).props('currentPeriod')).toBeNull();
+});
+
+it('allows next and previous to consult a leaf while hiding the missing direction', async () => {
+  vi.mocked(stories.getStory).mockResolvedValue(storyFixture('7', [
+    period('root-7'),
+    {...period('branch','root-7'),endDate:'M30'},
+    {...period('leaf','root-7'),startDate:'M30',startYearsBP:30e6},
+    {...period('child','branch'),startDate:'M60',endDate:'M40'},
+  ]));
+  await start('/timeline?story=7&period=branch');
+  await view.get('nav[aria-label="Périodes de même niveau"] button').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7&period=leaf');
+  expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('leaf');
+  const controls = view.get('nav[aria-label="Périodes de même niveau"]').findAll('button');
+  expect(controls.map(control => control.text())).toEqual(['Période précédente - branch']);
+  await controls[0].trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7&period=branch');
+});
+
+it('restores a focused leaf from its address and records the local parent and overview in history', async () => {
+  await start('/timeline?story=7&period=leaf-7');
+  expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('leaf-7');
+  await view.get('.period-card--parent .period-card__title-action').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7&period=root-7');
+  await view.get('.period-card--parent .period-card__title-action').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7&view=overview');
+  expect(view.getComponent(PeriodGrid).props('currentPeriod')).toBeNull();
+  const address = router.currentRoute.value.fullPath;
+  view.unmount(); router.options.history.destroy(); disposePinia(pinia);
+  await start(address);
+  expect(view.getComponent(PeriodGrid).props('currentPeriod')).toBeNull();
+  expect(view.getComponent(PeriodGrid).props('periods').map((p: Period) => p.id)).toEqual(['root-7']);
+});
+
+it('updates the address when a period ancestor is chosen in the breadcrumb', async () => {
+  await start('/timeline?story=7&period=leaf-7');
+  const crumbs = view.get('[aria-label="Fil d’Ariane de la timeline"]').findAll('button');
+  await crumbs[0].trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7&period=root-7');
+  expect(view.get('[aria-label="Fil d’Ariane de la timeline"]').findAll('button')).toHaveLength(0);
+  await view.get('.period-card--parent .period-card__title-action').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7&view=overview');
+});
+
+it('closes a choice between detail frises when leaving the cached timeline', async () => {
+  const reference = period('subject');
+  const older = {...period('older'),startDate:'M100',startYearsBP:1e8};
+  const context = { id:'8', title:{fr:'Parcours',en:''}, periods:[older,reference], presentations:[
+    {storyId:'7',periodId:'subject',title:{fr:'Première vue',en:''}},
+    {storyId:'2',periodId:'subject',title:{fr:'Autre vue',en:''}},
+  ] };
+  vi.mocked(stories.getStory).mockImplementation(async id => ({ ...storyFixture(id, [older,reference]), navigationContexts:[context] }));
+  await start('/timeline?story=8&period=older');
+  await view.get('nav[aria-label="Périodes de même niveau"] button').trigger('click'); await flushPromises();
+  expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain('Autre vue');
+  await router.push('/database'); await flushPromises();
+  expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+});
+
+it.each(['/timeline?story=7&view=other', '/timeline?story=7&view=overview&period=leaf-7', '/timeline?story=7&period=', '/timeline?story=7&entry=other', '/timeline?story=7&entry=universe&entry=universe'])('refuses an invalid timeline position: %s', async path => {
+  await start(path);
+  expect(view.get('[role="alert"]').text()).toContain('invalide');
+  expect(view.findComponent(PeriodGrid).exists()).toBe(false);
+});
+
+it('rejects a period that does not belong to the destination frise', async () => {
+  await start('/timeline?story=7&period=leaf-8');
+  expect(view.get('[role="alert"]').text()).toContain('n’appartient plus à la frise');
+});
+
 it('restores the story associated with browser history', async () => {
   await start('/timeline?story=7');
   await router.push('/timeline?story=8'); await flushPromises();
@@ -86,6 +189,72 @@ it('restores the story associated with browser history', async () => {
   const moved = new Promise<void>(resolve => { const stop = router.afterEach(() => { stop(); resolve(); }); });
   router.back(); await moved; await flushPromises();
   expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('7');
+});
+
+it('separates visited frises from local periods and restores a visited position without duplicates', async () => {
+  await start('/timeline?story=7&period=leaf-7');
+  await router.push('/timeline?story=8&period=leaf-8'); await flushPromises();
+  await router.push('/timeline?story=2'); await flushPromises();
+  const visited = () => view.get('nav[aria-label="Fil d’Ariane des frises"]');
+  expect(visited().findAll('li').map(item => item.text())).toEqual(['Frise : Frise 7', '/Frise : Frise 8', '/Frise : Frise 2']);
+  const local = view.get('nav[aria-label="Fil d’Ariane de la timeline"]');
+  expect(local.text()).toBe('root-2'); expect(local.text()).not.toContain('Frise');
+  await visited().findAll('button')[1].trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=8&period=leaf-8');
+  expect(visited().findAll('li')).toHaveLength(2);
+  expect(view.get('nav[aria-label="Fil d’Ariane de la timeline"]').text()).toBe('root-8/leaf-8');
+  await router.push('/timeline?story=7&view=overview'); await flushPromises();
+  expect(visited().findAll('li')).toHaveLength(1);
+  expect(view.find('nav[aria-label="Fil d’Ariane de la timeline"]').exists()).toBe(false);
+});
+
+it('starts a catalogue selection on its Universe path instead of appending the previously opened frise', async () => {
+  vi.mocked(stories.getStory).mockImplementation(async id => ({
+    ...storyFixture(id, [period(`root-${id}`), period(`leaf-${id}`, `root-${id}`)], [],
+      id === '1' || id === '2' ? [{ id: id === '1' ? '2' : '8', title_fr: `Frise ${id === '1' ? '2' : '8'}`, anchors: [{ type: 'period', id: `root-${id}` }] }] : []),
+    parentStories: id === '8' || id === '2' ? [{ id: id === '8' ? '2' : '1', title: {fr:'Parente',en:''}, anchors: [] }] : [],
+  }));
+  await start('/timeline?story=7&period=leaf-7');
+  await router.push('/database'); await flushPromises();
+  await router.push('/timeline?story=8&entry=universe'); await flushPromises(); await flushPromises();
+  expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('8');
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').findAll('li').map(item => item.text()))
+    .toEqual(['Frise : Frise 1', '/Frise : Frise 2', '/Frise : Frise 8']);
+  expect(view.get('nav[aria-label="Fil d’Ariane de la timeline"]').text()).toBe('root-8');
+  await view.get('nav[aria-label="Fil d’Ariane des frises"]').findAll('button')[1].trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=2&period=root-2');
+  expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('2');
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').findAll('li')).toHaveLength(2);
+  await view.get('[aria-label="1 frise associée à root-2"]').trigger('click'); await flushPromises();
+  (document.body.querySelector('.associated-stories__item') as HTMLButtonElement).click(); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=8');
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').findAll('li')).toHaveLength(3);
+});
+
+it('resets a catalogue entry to the selected frise when no Universe path exists, including the same frise', async () => {
+  await start('/timeline?story=7');
+  await router.push('/timeline?story=8'); await flushPromises();
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').findAll('li')).toHaveLength(2);
+  await router.push('/timeline?story=8&entry=universe'); await flushPromises();
+  expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('8');
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').text()).toBe('Frise : Frise 8');
+});
+
+it('discards a computed entry path when a newer timeline position is opened', async () => {
+  let resolve!: (value: ReturnType<typeof storyFixture>) => void;
+  vi.mocked(stories.getStory).mockImplementation(async id => {
+    if (id === '2') return new Promise(yes => { resolve = yes; });
+    return { ...storyFixture(id, [period(`root-${id}`), period(`leaf-${id}`, `root-${id}`)]),
+      parentStories: id === '8' ? [{ id: '2', title: {fr:'Parente',en:''}, anchors: [] }] : [] };
+  });
+  await start('/timeline?story=7');
+  await router.push('/timeline?story=8&entry=universe'); await flushPromises();
+  expect(view.find('nav[aria-label="Fil d’Ariane des frises"]').exists()).toBe(false);
+  await router.push('/timeline?story=7&period=leaf-7'); await flushPromises();
+  resolve(storyFixture('2')); await flushPromises();
+  expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('7');
+  expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('leaf-7');
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').text()).toBe('Frise : Frise 7');
 });
 it('keeps an empty story empty instead of displaying unrelated catalogue content', async () => {
   vi.mocked(stories.getStory).mockResolvedValue(storyFixture('8'));
