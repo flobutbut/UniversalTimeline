@@ -5,6 +5,7 @@ import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import PeriodsView from '@/views/GraphView/Periods.vue';
 import FilterBar from '@/components/FilterBar.vue';
 import FinderItem from '@/views/GraphView/FinderItem.vue';
+import { StoryApiService } from '@/services/StoryApiService';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { SearchApiService } from '@/services/SearchApiService';
 import { useDataStore } from '@/stores/useDataStore';
@@ -43,6 +44,8 @@ async function search(query: string) {
   await vi.advanceTimersByTimeAsync(250); await flushPromises();
 }
 beforeEach(() => {
+  vi.spyOn(StoryApiService.getInstance(),'getMemberships').mockResolvedValue(new Map());
+  vi.spyOn(StoryApiService.getInstance(),'getListStories').mockResolvedValue([]);
   vi.useFakeTimers(); setActivePinia(createPinia()); vi.spyOn(useUiStore(), 'notify').mockImplementation(({ show: vi.fn(), hide: vi.fn() }).show); vi.spyOn(useUiStore(), 'hideNotification').mockImplementation(({ show: vi.fn(), hide: vi.fn() }).hide);
   vi.spyOn(service, 'getListPeriods').mockResolvedValue([period('old'), period('other')]);
   vi.spyOn(service, 'loadChildren').mockResolvedValue([]);
@@ -85,55 +88,17 @@ it('ignores a late search error after clearing the input and cancels it on unmou
   await search('autre'); const signal = load.mock.calls[1][1]!.signal!; view.unmount(); expect(signal.aborted).toBe(true);
 });
 
-it('keeps the visible path after an ancestor error and navigates the whole path on retry', async () => {
-  const root = period('root'); const parent = period('parent', 'root'); const leaf = period('leaf', 'parent');
-  let fail = true;
-  vi.mocked(service.getPeriod).mockImplementation(async id => {
-    if (id === 'parent' && fail) throw new Error('Ancêtre indisponible');
-    return id === 'leaf' ? leaf : id === 'parent' ? parent : root;
-  });
-  vi.mocked(service.loadChildren).mockImplementation(async id => id === 'root' ? [parent] : id === 'parent' ? [leaf] : []);
-  await start(); await row('old').trigger('click'); await flushPromises();
-  await pick(leaf);
-  expect(view.get('[role="alert"]').text()).toContain('Ancêtre indisponible'); expect(selectedIds()).toEqual(['old']);
-  fail = false; await button('Réessayer').trigger('click'); await flushPromises();
-  expect(selectedIds()).toEqual(['root', 'parent', 'leaf']); expect(view.find('[role="alert"]').exists()).toBe(false);
-  expect(view.findAll('.finder-column')).toHaveLength(4);
-});
-
 it('keeps the latest result when two path reads finish in reverse order', async () => {
   const a = deferred<Period>(); const b = deferred<Period>();
   vi.mocked(service.getPeriod).mockImplementation(id => id === 'a' ? a.promise : b.promise);
   await start(); await pick(period('a')); await pick(period('b'));
   a.reject(new Error('Ancienne panne')); await flushPromises();
-  expect(view.text()).toContain('Ouverture du chemin'); expect(view.find('[role="alert"]').exists()).toBe(false);
+  expect(view.text()).toContain('Chargement de la fiche'); expect(view.find('[role="alert"]').exists()).toBe(false);
   b.resolve(period('b')); await flushPromises(); expect(selectedIds()).toEqual(['b']);
 });
 
-it('keeps the selection when loading an ancestor column fails, then retries that read', async () => {
-  const root = period('root'); const leaf = period('leaf', 'root');
-  vi.mocked(service.getPeriod).mockImplementation(async id => id === 'leaf' ? leaf : root);
-  vi.mocked(service.loadChildren).mockRejectedValueOnce(new Error('Colonne indisponible')).mockImplementation(async id => id === 'root' ? [leaf] : []);
-  await start(); await pick(leaf);
-  expect(view.get('[role="alert"]').text()).toContain('Colonne indisponible'); expect(selectedIds()).toEqual([]);
-  expect(useDataStore().periodById('root')).toBeNull();
-  await button('Réessayer').trigger('click'); await flushPromises();
-  expect(selectedIds()).toEqual(['root', 'leaf']); expect(view.find('[role="alert"]').exists()).toBe(false);
-});
-
-it('warms the shared children cache after cancellation without continuing the abandoned path', async () => {
-  const root = period('root'); const parent = period('parent', 'root'); const leaf = period('leaf', 'parent');
-  const pending = deferred<Period[]>();
-  vi.mocked(service.getPeriod).mockImplementation(async id => id === 'leaf' ? leaf : id === 'parent' ? parent : root);
-  const children = vi.mocked(service.loadChildren).mockReturnValue(pending.promise);
-  await start(); await pick(leaf); expect(children).toHaveBeenCalledExactlyOnceWith('root');
-  await button('Annuler').trigger('click'); pending.resolve([parent]); await flushPromises();
-  expect(selectedIds()).toEqual([]); expect(useDataStore().periodById('parent')?.id).toBe('parent');
-  expect(children).toHaveBeenCalledOnce(); expect(useDataStore().periodById('leaf')).toBeNull();
-});
-
 it.each(['selection', 'search', 'add', 'cancel', 'dispose'] as const)('does not apply an old path after %s', async action => {
-  const pending = deferred<Period>(); vi.mocked(service.getPeriod).mockReturnValue(pending.promise);
+  const pending = deferred<Period>(); vi.mocked(service.getPeriod).mockImplementation(id => id === 'late' ? pending.promise : Promise.resolve(period(id)));
   await start(); await pick(period('late'));
   if (action === 'selection') { await row('other').trigger('click'); await flushPromises(); }
   if (action === 'search') await view.get('input[placeholder="Rechercher une période…"]').setValue('Nouvelle saisie');
@@ -164,7 +129,7 @@ it('shows an edit loading failure and retries without opening an empty form', as
 });
 
 it.each(['add', 'selection', 'cancel', 'dispose'] as const)('does not open a late edit after %s', async action => {
-  const pending = deferred<Period>(); vi.mocked(service.getPeriod).mockReturnValue(pending.promise);
+  const pending = deferred<Period>(); vi.mocked(service.getPeriod).mockImplementation(id => id === 'old' ? pending.promise : Promise.resolve(period(id)));
   await start(); await edit('old');
   if (action === 'add') await button('+ Ajouter une période').trigger('click');
   if (action === 'selection') await row('other').trigger('click');
@@ -176,15 +141,16 @@ it.each(['add', 'selection', 'cancel', 'dispose'] as const)('does not open a lat
   if (action !== 'dispose') expect(view.find('[role="alert"]').exists()).toBe(false);
 });
 
-it('builds a Wikidata draft from its loaded row and captures the parent without a roots fetch', async () => {
-  await start(); const store = useDataStore();
-  store.addPeriodSuggestions([{ ...period('wikidata:Q999', 'old'), wikidata_id: 'Q999' }]);
-  await row('old').trigger('click'); await flushPromises();
-  const readCount = vi.mocked(service.getListPeriods).mock.calls.length;
-  row('wikidata:Q999').vm.$emit('add', 'wikidata:Q999'); await flushPromises();
-  expect(modal().props('data')).toMatchObject({ wikidata_id: 'Q999', parent_id: 'old', endDate: 'NOW' });
-  expect(service.getListPeriods).toHaveBeenCalledTimes(readCount);
-  await modal().get('button').trigger('click');
-  await button('+ Ajouter une période').trigger('click'); await flushPromises();
-  expect(modal().props('data')).toEqual({ parent_id: 'old' });
+it('keeps the current selection after a detail error and retries the requested fiche without loading ancestors', async () => {
+  await start(); await pick(period('old'));
+  vi.mocked(service.getPeriod).mockRejectedValueOnce(new Error('Fiche indisponible')).mockResolvedValueOnce(period('leaf','parent'));
+  await pick(period('leaf')); expect(selectedIds()).toEqual(['old']);
+  expect(view.get('[role="alert"]').text()).toContain('Fiche indisponible');
+  await button('Réessayer').trigger('click'); await flushPromises();
+  expect(selectedIds()).toEqual(['leaf']); expect(view.findAll('.finder-column')).toHaveLength(1);
+  expect(service.loadChildren).not.toHaveBeenCalled();
+});
+it('renders catalogue entries without a global drag or child navigation', async () => {
+  await start(); expect(row('old').props('draggable')).toBe(false); expect(row('old').props('hideChevron')).toBe(true);
+  await button('+ Ajouter une période').trigger('click'); expect(modal().props('data')).toBeUndefined();
 });

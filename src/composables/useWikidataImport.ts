@@ -82,17 +82,12 @@ export function useWikidataImport() {
       warnings.push('Les catégories suggérées n’ont pas pu être chargées. Vos catégories sont conservées.');
       return [];
     });
-    const parent = type === 'period' ? wikidataService.getPartOfParentQid(id, read).catch(() => {
-      warnings.push('Le parent Wikidata n’a pas pu être chargé. Choisissez-le manuellement.');
-      return null;
-    }) : Promise.resolve(null);
-    const [data, wikidataClasses, parentQid] = await Promise.all([
-      type === 'period' ? wikidataService.loadPeriod(id, read) : wikidataService.loadEvent(id, read), classes, parent,
+    const [data, wikidataClasses] = await Promise.all([
+      type === 'period' ? wikidataService.loadPeriod(id, read) : wikidataService.loadEvent(id, read), classes,
     ]);
     if (data && 'warnings' in data && Array.isArray(data.warnings)) warnings.push(...data.warnings);
     if (!data) throw new Error('Aucune donnée trouvée pour ce Q-id');
     const transformed = transformWikidataData(data, type);
-    if (parentQid) transformed.parentWikidataId = parentQid;
     const suggestedCategoryIds = mapWikidataClassesToCategories(wikidataClasses);
     if (suggestedCategoryIds.length) transformed.suggestedCategoryIds = suggestedCategoryIds;
     if (warnings.length) transformed.warnings = warnings;

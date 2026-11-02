@@ -62,7 +62,7 @@ it('keeps the edit form and graph intact when the API refuses a linked period', 
 
 it('closes the edit form and removes the row and obsolete selection columns after success', async () => {
   vi.mocked(apiClient.delete).mockResolvedValue({ id: 'leaf', parent: null });
-  expect(view.findAll('.finder-column')).toHaveLength(2);
+  expect(view.findAll('.finder-column')).toHaveLength(1);
   await requestDeletion();
   await new DOMWrapper(document.body).get('[role="alertdialog"]').findAll('button').find(button => button.text() === 'Confirmer')!.trigger('click');
   await flushPromises();

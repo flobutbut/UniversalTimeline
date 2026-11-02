@@ -6,7 +6,7 @@ interface EntityWrite {
 }
 export interface EventWrite extends EntityWrite { date: string }
 export interface PeriodWrite extends EntityWrite {
-  wikidata_id: string; start_date: string; end_date: string; parentId?: string | null;
+  wikidata_id: string; start_date: string; end_date: string;
 }
 export interface StoryWrite {
   title: LocalizedText; description: Description; author: string;

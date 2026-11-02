@@ -194,17 +194,15 @@ router.post('/periods', endpoint('Erreur lors de la création de la période', a
   const result = await catalogue.createPeriod(data);
   res.status(201).json(result);
 }, { conflict: 'Ce Q-id ou cet identifiant de période est déjà utilisé.' }));
-router.get('/periods/:id/children', endpoint('Erreur lors de la récupération des enfants', async (req, res) => {
-  res.json(await catalogue.listPeriods(parseEntityId(req.params.id)));
-}));
+router.get('/periods/:id/children', (_req, res) => {
+  res.status(410).json({ error: 'Les sous-périodes sont organisées dans chaque frise.' });
+});
 router.get('/periods/:id', endpoint('Erreur lors de la récupération de la période', async (req, res) => {
   res.json(await catalogue.getPeriod(parseEntityId(req.params.id)));
 }));
-router.patch('/periods/:id/parent', endpoint('Erreur lors du déplacement de la période', async (req, res) => {
-  const id = parseEntityId(req.params.id);
-  const parent = parseParentId(inputObject(req.body).parent_id);
-  res.json(await catalogue.movePeriod(id, parent));
-}, { busy: 'La hiérarchie est occupée. Réessayez le déplacement.' }));
+router.patch('/periods/:id/parent', (_req, res) => {
+  res.status(410).json({ error: 'Déplacez cette période dans sa frise.' });
+});
 router.get('/periods/wikidata/:wikidataId', endpoint('Erreur lors de la récupération de la période', async (req, res) => {
   res.json(await catalogue.getPeriod(parseQid(req.params.wikidataId, true)!, 'wikidata_id'));
 }));

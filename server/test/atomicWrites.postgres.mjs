@@ -30,12 +30,13 @@ async function call(method, path, body = {}, params = {}, userId = alice, search
   await principalContext.run({ userId, isAdmin: false }, () => route.route.stack[0].handle({ body, params, query: search }, res));
   return res;
 }
-const periodBody = { id: 'new', wikidata_id: 'Q123', label: { fr: 'Nouvelle' }, start_date: 'M65', end_date: 'NOW', parent_id: 'root', categories: [{ id: category }] };
+const awaitMigration = await readFile(new URL('../../database/migrations/20261102001509_frise_only_period_hierarchy.sql', import.meta.url),'utf8');
+const periodBody = { id: 'new', wikidata_id: 'Q123', label: { fr: 'Nouvelle' }, start_date: 'M65', end_date: 'NOW', categories: [{ id: category }] };
 const links = async () => (await pool.query('SELECT period_id FROM public.story_periods WHERE story_id=1 ORDER BY period_id')).rows.map(row => row.period_id);
 
 before(async () => {
   await pool.query(`
-    CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN;
+    CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN;
     CREATE SCHEMA auth; GRANT USAGE ON SCHEMA auth TO anon, authenticated;
     CREATE TABLE auth.users (id uuid PRIMARY KEY);
     CREATE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE SET search_path='' AS $$ SELECT coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;
@@ -53,24 +54,25 @@ before(async () => {
   `);
   await pool.query(await readFile(new URL('../../database/migrations/20261029090427_story_access.sql', import.meta.url), 'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261031204007_story_period_hierarchy.sql', import.meta.url), 'utf8'));
+  await runInTransaction(pool,client=>client.query(awaitMigration));
+  await pool.query(await readFile(new URL('../../database/migrations/20261031220914_hybrid_catalogue_search.sql',import.meta.url),'utf8'));
   await pool.query('INSERT INTO auth.users VALUES ($1),($2)', [alice,bob]);
 });
 beforeEach(async () => {
   await pool.query('TRUNCATE stories,periods,events,categories,period_categories,event_categories,story_categories,story_periods,story_events,story_anchors RESTART IDENTITY CASCADE');
-  await pool.query("INSERT INTO periods (id,label_fr,start_date,end_date) VALUES ('root','Original','M65','NOW'),('leaf','Feuille','M10','NOW'); UPDATE periods SET parent_id='root' WHERE id='leaf'; INSERT INTO events(id,label_fr) VALUES ('e1','Un'),('e2','Deux')");
+  await pool.query("INSERT INTO periods (id,label_fr,start_date,end_date) VALUES ('root','Original','M65','NOW'),('leaf','Feuille','M10','NOW'); INSERT INTO events(id,label_fr) VALUES ('e1','Un'),('e2','Deux')");
   await pool.query("INSERT INTO categories(id,label_fr,label_en) VALUES ($1,'Catégorie','Category')", [category]);
   await pool.query("INSERT INTO stories(title_fr,is_public,owner_user_id) VALUES ('Alice parent',false,$1),('Alice enfant',false,$1),('Bob publique',true,$2),('Bob privée',false,$2),('Alice autre',false,$1)", [alice,bob]);
 });
 after(() => pool.end());
 
-test('creates the period, its parent and its categories together with a canonical response', async () => {
-  const res = await call('post','/periods',periodBody);
-  assert.equal(res.statusCode,201); assert.equal(res.payload.parent_id,'root');
-  assert.equal(res.payload.categories[0].id,category);
-  assert.equal((await pool.query("SELECT parent_id FROM periods WHERE id='new'")).rows[0].parent_id,'root');
+test('creates shared period facts and categories without a global parent',async()=>{
+ const res=await call('post','/periods',periodBody);assert.equal(res.statusCode,201);assert.equal(res.payload.parent_id,null);
+ assert.equal(res.payload.categories[0].id,category);
+ assert.equal((await pool.query("SELECT * FROM story_periods WHERE period_id='new'")).rowCount,0);
 });
 test('a missing parent leaves neither a new period nor categories behind', async () => {
-  assert.equal((await call('post','/periods',{...periodBody,parent_id:'missing'})).statusCode,404);
+  assert.equal((await call('post','/periods',{...periodBody,parent_id:'missing'})).statusCode,400);
   assert.equal((await pool.query("SELECT * FROM periods WHERE id='new'")).rowCount,0);
   assert.equal((await pool.query('SELECT * FROM period_categories')).rowCount,0);
 });
@@ -78,20 +80,19 @@ test('a category failure rolls back a creation and its already-applied parent', 
   assert.equal((await call('post','/periods',{...periodBody,categories:[{id:bob}]})).statusCode,409);
   assert.equal((await pool.query("SELECT * FROM periods WHERE id='new'")).rowCount,0);
 });
-test('a cycle refusal rolls back metadata and category edits too', async () => {
-  const res=await call('put','/periods/:id',{...periodBody,label:{fr:'Changed'},parent_id:'leaf'}, {id:'root'});
-  assert.equal(res.statusCode,409);
-  assert.deepEqual((await pool.query("SELECT label_fr,parent_id FROM periods WHERE id='root'")).rows,[{label_fr:'Original',parent_id:null}]);
+test('refuses a catalogue parent before changing shared metadata',async()=>{
+ const res=await call('put','/periods/:id',{...periodBody,label:{fr:'Changed'},parent_id:'leaf'},{id:'root'});
+ assert.equal(res.statusCode,400);assert.equal((await pool.query("SELECT label_fr FROM periods WHERE id='root'")).rows[0].label_fr,'Original');
 });
 test('a category refusal rolls back metadata and a valid detachment', async () => {
   const res=await call('put','/periods/:id',{...periodBody,label:{fr:'Changed'},parent_id:null,categories:[{id:bob}]},{id:'leaf'});
   assert.equal(res.statusCode,409);
-  assert.deepEqual((await pool.query("SELECT label_fr,parent_id FROM periods WHERE id='leaf'")).rows,[{label_fr:'Feuille',parent_id:'root'}]);
+  assert.deepEqual((await pool.query("SELECT label_fr FROM periods WHERE id='leaf'")).rows,[{label_fr:'Feuille'}]);
 });
-test('parent omission preserves the link, while explicit null detaches atomically', async () => {
-  const {parent_id,...body}=periodBody;
-  assert.equal((await call('put','/periods/:id',body,{id:'leaf'})).payload.parent_id,'root');
-  assert.equal((await call('put','/periods/:id',{...body,parent_id:null},{id:'leaf'})).payload.parent_id,null);
+test('shared metadata edits preserve the placement in every frise',async()=>{
+ await pool.query("INSERT INTO story_periods VALUES (1,'root',null),(1,'leaf','root')");
+ assert.equal((await call('put','/periods/:id',periodBody,{id:'leaf'})).statusCode,200);
+ assert.equal((await pool.query("SELECT parent_period_id FROM story_periods WHERE story_id=1 AND period_id='leaf'")).rows[0].parent_period_id,'root');
 });
 test('story creation preserves categories and defaults to the verified owner and private visibility', async () => {
   const res=await call('post','/stories',{title:{fr:'Nouvelle'},author:'Auteur',categories:[{id:category}]});
@@ -145,7 +146,7 @@ test('a wrong parent cannot delete a child’s anchors before the relation is ch
 test('a refused detachment restores the deleted anchors in the same transaction', async () => {
   await pool.query("UPDATE stories SET parent_story_id=1 WHERE id=2; INSERT INTO story_anchors(story_id,anchor_type,anchor_id) VALUES (2,'event','e1'); ALTER TABLE stories ADD CONSTRAINT require_parent CHECK (id<>2 OR parent_story_id IS NOT NULL)");
   try {
-    assert.equal((await call('delete','/stories/:parentId/child-stories/:childId',{}, {parentId:'1',childId:'2'})).statusCode,500);
+    assert.equal((await call('delete','/stories/:parentId/child-stories/:childId',{}, {parentId:'1',childId:'2'})).statusCode,409);
     assert.equal((await pool.query('SELECT * FROM story_anchors WHERE story_id=2')).rowCount,1);
     assert.equal((await pool.query('SELECT parent_story_id FROM stories WHERE id=2')).rows[0].parent_story_id,1);
   } finally { await pool.query('ALTER TABLE stories DROP CONSTRAINT require_parent'); }
@@ -164,15 +165,12 @@ test('event batches add and remove the entire selection without duplicate links 
     assert.equal((await pool.query('SELECT * FROM story_events WHERE story_id=1')).rowCount,operation==='add'?2:0);
   }
 });
-test('concurrent crossed period edits serialize before their metadata writes', async () => {
-  await pool.query("UPDATE periods SET parent_id=NULL WHERE id='leaf'");
-  const responses=await Promise.all([
-    call('put','/periods/:id',{...periodBody,wikidata_id:'Q1',parent_id:'leaf'},{id:'root'}),
-    call('put','/periods/:id',{...periodBody,wikidata_id:'Q2',parent_id:'root'},{id:'leaf'}),
-  ]);
-  assert.deepEqual(responses.map(res=>res.statusCode).sort(),[200,409]);
-  const originalId=responses[0].statusCode===409?'root':'leaf';
-  assert.equal((await pool.query('SELECT label_fr FROM periods WHERE id=$1',[originalId])).rows[0].label_fr,originalId==='root'?'Original':'Feuille');
+test('concurrent crossed period moves serialize within the owning frise',async()=>{
+ await pool.query("INSERT INTO story_periods VALUES (1,'root',null),(1,'leaf',null)");
+ const responses=await Promise.all([
+ call('post','/stories/:storyId/periods',{ids:['root'],operation:'add',parentPeriodId:'leaf'},{storyId:'1'}),
+ call('post','/stories/:storyId/periods',{ids:['leaf'],operation:'add',parentPeriodId:'root'},{storyId:'1'})]);
+ assert.deepEqual(responses.map(r=>r.statusCode).sort(),[200,409]);
 });
 test('wire normalization preserves historical date text and a blank end means NOW', async () => {
   const res=await call('post','/periods',{...periodBody,wikidata_id:' q123 ',start_date:'8. millennium BCE',end_date:''});
@@ -200,13 +198,13 @@ test('reads catalogue roots, children, details and categories through the real S
   await pool.query("INSERT INTO period_categories VALUES ('root',$1)",[category]);
   await pool.query("INSERT INTO event_categories VALUES ('e1',$1)",[category]);
   const roots=await call('get','/periods'); assert.equal(roots.statusCode,200);
-  assert.deepEqual(roots.payload.map(row=>row.id),['root']); assert.equal(roots.payload[0].categories[0].id,category);
+  assert.deepEqual(roots.payload.map(row=>row.id),['root','leaf']); assert.equal(roots.payload[0].categories[0].id,category);
   const children=await call('get','/periods/:id/children',{}, {id:'root'});
-  assert.equal(children.statusCode,200); assert.deepEqual(children.payload.map(row=>row.id),['leaf']);
+  assert.equal(children.statusCode,410);
   const detail=await call('get','/periods/:id',{}, {id:'root'});
   const byQid=await call('get','/periods/wikidata/:wikidataId',{}, {wikidataId:'q123'});
   assert.equal(detail.statusCode,200); assert.equal(byQid.statusCode,200); assert.deepEqual(detail.payload,byQid.payload);
-  assert.equal(detail.payload.startYearsBP,65000000); assert.equal(detail.payload.hasChildren,true);
+  assert.equal(detail.payload.startYearsBP,65000000); assert.equal(detail.payload.hasChildren,false);
   const events=await call('get','/events'); assert.equal(events.statusCode,200);
   assert.equal(events.payload.find(row=>row.id==='e1').categories[0].label.en,'Category');
   const categories=await call('get','/categories'); assert.equal(categories.statusCode,200); assert.equal(categories.payload[0].id,category);
@@ -260,17 +258,17 @@ test('keeps future period bounds distinct and ordered, with metadata and parent 
   const res=await call('post','/periods',{...periodBody,start_date:'2030-01-01',end_date:'2031-01-01'});
   assert.equal(res.statusCode,201);assert.equal(res.payload.start_date,'2030-01-01');assert.equal(res.payload.end_date,'2031-01-01');
   assert.ok(Number(res.payload.start_years_bp)<0);assert.ok(Number(res.payload.start_years_bp)>Number(res.payload.end_years_bp));
-  assert.equal(res.payload.parent_id,'root');assert.equal(res.payload.categories[0].id,category);
+  assert.equal(res.payload.parent_id,null);assert.equal(res.payload.categories[0].id,category);
 });
 
 
 test('replaces the root atomically while keeping its associated branch and all events', async () => {
-  await pool.query("INSERT INTO periods(id,label_fr,parent_id) VALUES ('other','Autre',null),('grandchild','Suite','leaf'); INSERT INTO story_periods VALUES (1,'root'),(1,'leaf'),(1,'grandchild'),(1,'other'); INSERT INTO story_events VALUES (1,'e1')");
+  await pool.query("INSERT INTO periods(id,label_fr) VALUES ('other','Autre'),('grandchild','Suite'); INSERT INTO story_periods VALUES (1,'root',null),(1,'leaf','root'),(1,'grandchild','leaf'),(1,'other',null); INSERT INTO story_events VALUES (1,'e1')");
   const result = await call('put', '/stories/:storyId/root-period', { periodId: 'leaf' }, { storyId: '1' });
   assert.equal(result.statusCode, 200);
   assert.deepEqual(await links(), ['grandchild', 'leaf']);
   assert.equal((await pool.query('SELECT * FROM story_events WHERE story_id=1')).rowCount, 1);
-  assert.equal((await pool.query("SELECT parent_id FROM periods WHERE id='leaf'")).rows[0].parent_id, 'root');
+  assert.equal((await pool.query("SELECT NULL::text AS parent_id FROM periods WHERE id='leaf'")).rows[0].parent_id, null);
 });
 test('rejects missing or malformed roots without losing the original period associations', async () => {
   await pool.query("INSERT INTO story_periods VALUES (1,'root'),(1,'leaf')");
@@ -331,13 +329,13 @@ test('places an already-associated catalogue root below Univers in this frise on
   assert.equal(detail.statusCode,200); assert.equal(detail.payload.periods.find(p=>p.id==='root').storyParentId,'univers');
   const other=await call('get','/stories/:storyId/periods',{}, {storyId:'2'});
   assert.equal(other.payload[0].story_parent_id,null);
-  assert.equal((await pool.query("SELECT parent_id FROM periods WHERE id='root'")).rows[0].parent_id,null);
+  assert.equal((await pool.query("SELECT NULL::text AS parent_id FROM periods WHERE id='root'")).rows[0].parent_id,null);
   assert.equal((await call('put','/stories/:storyId/root-period',{periodId:'univers'},{storyId:'1'})).statusCode,200);
   assert.deepEqual(await links(),['root','univers']);
 });
 
 test('rejects cycles and missing parents without changing existing placements', async () => {
-  await pool.query("INSERT INTO story_periods(story_id,period_id,parent_override,parent_period_id) VALUES (1,'root',true,null),(1,'leaf',true,'root')");
+  await pool.query("INSERT INTO story_periods(story_id,period_id,parent_period_id) VALUES (1,'root',null),(1,'leaf','root')");
   const place=body=>call('post','/stories/:storyId/periods',{operation:'add',...body},{storyId:'1'});
   assert.equal((await place({ids:['root'],parentPeriodId:'leaf'})).statusCode,409);
   assert.equal((await place({ids:['root'],parentPeriodId:'root'})).statusCode,409);
@@ -346,20 +344,18 @@ test('rejects cycles and missing parents without changing existing placements', 
   assert.equal((await place({ids:['leaf'],parentPeriodId:null})).statusCode,200);
   const rows=(await call('get','/stories/:storyId/periods',{}, {storyId:'1'})).payload;
   assert.equal(rows.find(p=>p.id==='leaf').story_parent_id,null);
-  assert.equal((await pool.query("SELECT parent_id FROM periods WHERE id='leaf'")).rows[0].parent_id,'root');
+  assert.equal((await pool.query("SELECT NULL::text AS parent_id FROM periods WHERE id='leaf'")).rows[0].parent_id,null);
 });
 
-test('preserves legacy catalogue paths and allows a parent outside the associated set', async () => {
-  await pool.query("INSERT INTO story_periods(story_id,period_id) VALUES (1,'leaf')");
-  const legacy=await call('get','/stories/:storyId/periods',{}, {storyId:'1'});
-  assert.equal(legacy.payload[0].story_parent_id,'root');
-  assert.equal((await call('post','/stories/:storyId/periods',{ids:['leaf'],operation:'add',parentPeriodId:'root'},{storyId:'1'})).statusCode,200);
-  assert.deepEqual(await links(),['leaf']);
-  assert.equal((await pool.query('SELECT parent_period_id,parent_override FROM story_periods WHERE story_id=1')).rows[0].parent_override,true);
+test('new memberships are roots and reject a parent outside their frise',async()=>{
+ await pool.query("INSERT INTO story_periods VALUES (1,'leaf',null)");
+ const result=await call('post','/stories/:storyId/periods',{ids:['leaf'],operation:'add',parentPeriodId:'root'},{storyId:'1'});
+ assert.equal(result.statusCode,409);assert.deepEqual(await links(),['leaf']);
+ assert.equal((await call('get','/stories/:storyId/periods',{}, {storyId:'1'})).payload[0].story_parent_id,null);
 });
 
 test('blocks catalogue deletion when a period is still a scoped parent', async () => {
-  await pool.query("INSERT INTO periods(id,label_fr) VALUES ('scoped-parent','Parent'); INSERT INTO story_periods(story_id,period_id,parent_override,parent_period_id) VALUES (1,'leaf',true,'scoped-parent')");
+  await pool.query("INSERT INTO periods(id,label_fr) VALUES ('scoped-parent','Parent'); INSERT INTO story_periods(story_id,period_id,parent_period_id) VALUES (1,'scoped-parent',null),(1,'leaf','scoped-parent')");
   assert.equal((await call('delete','/periods/:id',{}, {id:'scoped-parent'})).statusCode,409);
   assert.equal((await pool.query("SELECT count(*)::int AS n FROM periods WHERE id='scoped-parent'")).rows[0].n,1);
 });
@@ -367,17 +363,17 @@ test('blocks catalogue deletion when a period is still a scoped parent', async (
 // ─── Frise créée depuis une période ──────────────────────────────────────────
 const sourceRows = async storyId => ({
   story: (await pool.query('SELECT title_fr,is_public,parent_story_id FROM stories WHERE id=$1', [storyId])).rows,
-  periods: (await pool.query('SELECT period_id,parent_period_id,parent_override FROM story_periods WHERE story_id=$1 ORDER BY period_id', [storyId])).rows,
+  periods: (await pool.query('SELECT period_id,parent_period_id FROM story_periods WHERE story_id=$1 ORDER BY period_id', [storyId])).rows,
   events: (await pool.query('SELECT event_id FROM story_events WHERE story_id=$1 ORDER BY event_id', [storyId])).rows,
 });
 async function seedSplitSource() {
   await pool.query(`
-    INSERT INTO periods(id,label_fr,start_date,end_date,start_years_bp,end_years_bp,parent_id) VALUES
-      ('apollo','Apollo','1961-05-25','1972-12-19',65.4,53.9,'root'), ('gemini','Gemini','1961-12-07','1966-11-15',64.9,60.0,'apollo'), ('mir','Mir','1986-02-20','2001-03-23',40.7,25.6,'root');
+    INSERT INTO periods(id,label_fr,start_date,end_date,start_years_bp,end_years_bp) VALUES
+      ('apollo','Apollo','1961-05-25','1972-12-19',65.4,53.9), ('gemini','Gemini','1961-12-07','1966-11-15',64.9,60.0), ('mir','Mir','1986-02-20','2001-03-23',40.7,25.6);
     INSERT INTO events(id,label_fr,date,date_years_bp) VALUES
       ('in','Apollo 11','1969-07-16',57.3), ('edge','Fin Apollo','1972-12-19',53.9), ('out','Mir','1986-02-20',40.7), ('undated','Sans date',null,null);
     UPDATE stories SET is_public=true WHERE id=1;
-    INSERT INTO story_periods(story_id,period_id) VALUES (1,'root'),(1,'apollo'),(1,'gemini'),(1,'mir');
+    INSERT INTO story_periods(story_id,period_id,parent_period_id) VALUES (1,'root',null),(1,'apollo','root'),(1,'gemini','apollo'),(1,'mir','root');
     INSERT INTO story_events(story_id,event_id) VALUES (1,'in'),(1,'edge'),(1,'out'),(1,'undated');
     INSERT INTO story_categories VALUES (1,'${category}');`);
 }
@@ -391,8 +387,8 @@ test('creates a child frise from a period with its branch, in-range events, anch
   const created = await sourceRows(6);
   assert.deepEqual(created.story, [{ title_fr: 'Programme Apollo', is_public: true, parent_story_id: 1 }]);
   assert.deepEqual(created.periods, [
-    { period_id: 'apollo', parent_period_id: null, parent_override: true },
-    { period_id: 'gemini', parent_period_id: 'apollo', parent_override: true },
+    { period_id: 'apollo', parent_period_id: null },
+    { period_id: 'gemini', parent_period_id: 'apollo' },
   ]);
   assert.deepEqual(created.events.map(row => row.event_id), ['edge', 'in']);
   assert.deepEqual((await pool.query('SELECT anchor_type,anchor_id FROM story_anchors WHERE story_id=6')).rows, [{ anchor_type: 'period', anchor_id: 'apollo' }]);
@@ -407,7 +403,7 @@ test('an event on the first day of the period is copied even without a stored co
 });
 test('a period without known dates copies its branch but no event', async () => {
   await seedSplitSource();
-  await pool.query("INSERT INTO periods(id,label_fr,parent_id) VALUES ('vague','Sans dates','root'); INSERT INTO story_periods(story_id,period_id) VALUES (1,'vague')");
+  await pool.query("INSERT INTO periods(id,label_fr) VALUES ('vague','Sans dates'); INSERT INTO story_periods(story_id,period_id) VALUES (1,'vague')");
   const result = await call('post', '/stories/:storyId/from-period', { periodId: 'vague', title: 'Vague' }, { storyId: '1' });
   assert.equal(result.statusCode, 201);
   assert.deepEqual([result.payload.periodCount, result.payload.eventCount], [1, 0]);

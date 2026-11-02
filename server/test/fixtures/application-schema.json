@@ -261,13 +261,6 @@
           "identity": ""
         },
         {
-          "name": "parent_id",
-          "type": "character varying",
-          "notNull": false,
-          "default": null,
-          "identity": ""
-        },
-        {
           "name": "wikidata_id",
           "type": "character varying",
           "notNull": false,
@@ -361,11 +354,6 @@
       ],
       "constraints": [
         {
-          "name": "periods_parent_id_fkey",
-          "definition": "FOREIGN KEY (parent_id) REFERENCES periods(id) ON DELETE SET NULL",
-          "kind": "f"
-        },
-        {
           "name": "periods_pkey",
           "definition": "PRIMARY KEY (id)",
           "kind": "p"
@@ -378,7 +366,6 @@
       ],
       "indexes": [
         "CREATE INDEX idx_periods_end_years_bp ON public.periods USING btree (end_years_bp)",
-        "CREATE INDEX idx_periods_parent_id ON public.periods USING btree (parent_id)",
         "CREATE INDEX idx_periods_start_years_bp ON public.periods USING btree (start_years_bp DESC NULLS LAST)"
       ],
       "triggers": [
@@ -663,13 +650,6 @@
           "notNull": false,
           "default": null,
           "identity": ""
-        },
-        {
-          "name": "parent_override",
-          "type": "boolean",
-          "notNull": true,
-          "default": "false",
-          "identity": ""
         }
       ],
       "constraints": [
@@ -679,13 +659,8 @@
           "kind": "c"
         },
         {
-          "name": "story_periods_parent_override_check",
-          "definition": "CHECK (parent_period_id IS NULL OR parent_override)",
-          "kind": "c"
-        },
-        {
-          "name": "story_periods_parent_period_id_fkey",
-          "definition": "FOREIGN KEY (parent_period_id) REFERENCES periods(id) ON DELETE RESTRICT",
+          "name": "story_periods_parent_in_same_story",
+          "definition": "FOREIGN KEY (story_id, parent_period_id) REFERENCES story_periods(story_id, period_id) DEFERRABLE INITIALLY DEFERRED",
           "kind": "f"
         },
         {
@@ -707,7 +682,9 @@
       "indexes": [
         "CREATE INDEX story_periods_parent_period_id_idx ON public.story_periods USING btree (parent_period_id, story_id)"
       ],
-      "triggers": [],
+      "triggers": [
+        "CREATE TRIGGER trg_story_period_hierarchy BEFORE INSERT OR UPDATE ON story_periods FOR EACH ROW EXECUTE FUNCTION check_story_period_hierarchy()"
+      ],
       "rls": true
     }
   ],

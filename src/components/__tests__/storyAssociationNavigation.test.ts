@@ -15,7 +15,7 @@ vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn() } }));
 const category = { id: 'geo', label: { fr: 'Géologie', en: '' } };
 const period = (id: string, parentId: string | null = null): Period => ({ id, parentId, hasParent: !!parentId, hasChildren: id !== 'leaf', children: [], label: { fr: id, en: '' }, startDate: 'M65', endDate: 'NOW', categories: [category], temporalLocation: '' });
 const root = period('root'); const branch = period('branch', 'root'); const leaf = period('leaf', 'branch');
-const detail = (added = false): Story => ({ id: '1', title: { fr: 'Ma frise', en: '' }, author: '', isPublic: false, categories: [], periods: added ? [root, leaf] : [root], events: [] });
+const detail = (added = false): Story => ({ id: '1', title: { fr: 'Ma frise', en: '' }, author: '', isPublic: false, categories: [], periods: added ? [root,branch,leaf,period('extra','branch')] : [root,branch,leaf], events: [] });
 const api = StoryApiService.getInstance();
 let pinia: Pinia;
 let view: ReturnType<typeof mount>;
@@ -46,77 +46,37 @@ async function start() {
   expect(selected()).toEqual(['leaf']);
   expect(panel().findAll('.finder-column')).toHaveLength(4);
 }
-it('keeps the tree, DOM, filters and scroll positions during the write and detail refresh', async () => {
-  const writing = deferred<void>(); const refreshing = deferred<Story>();
-  vi.mocked(api.changeAssociations).mockReturnValueOnce(writing.promise);
-  vi.mocked(api.getStory).mockResolvedValueOnce(detail()).mockReturnValueOnce(refreshing.promise);
-  await start();
-  const tree = panel().get('.story-detail-panel__finder-columns-wrap').element as HTMLElement;
-  const column = panel().findAll('.finder-column-content')[1].element as HTMLElement;
-  const selectedRow = row('leaf').element;
-  tree.scrollLeft = 220; column.scrollTop = 90;
-  const add = row('leaf').get('button[aria-label="Ajouter à la frise"]');
-  await add.trigger('click'); await flushPromises();
-  expect(panel().attributes('aria-busy')).toBe('true');
-  expect(add.attributes('disabled')).toBeDefined();
-  await add.trigger('click'); expect(api.changeAssociations).toHaveBeenCalledExactlyOnceWith('1', 'period', ['leaf'], false, 'branch');
-  expect(panel().get('.story-detail-panel__finder-columns-wrap').element).toBe(tree);
-  expect(selected()).toEqual(['leaf']);
-  writing.resolve(); await flushPromises();
-  expect(api.getStory).toHaveBeenCalledTimes(2);
-  expect(panel().find('.story-detail-panel__loading').exists()).toBe(false);
-  expect(row('leaf').element).toBe(selectedRow);
-  refreshing.resolve(detail(true)); await flushPromises();
-  expect(panel().attributes('aria-busy')).toBeUndefined();
-  expect(panel().getComponent(Switch).props('modelValue')).toBe(true);
-  expect(panel().getComponent(FilterBar).props('categoryId')).toBe('geo');
-  expect(selected()).toEqual(['leaf']);
-  expect(panel().findAll('.finder-column')).toHaveLength(4);
-  expect(panel().findAllComponents(FinderItem).filter(item => item.props('itemId') === 'leaf')).toHaveLength(1);
-  expect(row('leaf').element).toBe(selectedRow);
-  expect(row('leaf').get('button[aria-haspopup="menu"]').exists()).toBe(true);
-  expect(add.element.isConnected).toBe(false);
-  expect(panel().get('.story-detail-panel__finder-columns-wrap').element).toBe(tree);
-  expect(tree.scrollLeft).toBe(220); expect(column.scrollTop).toBe(90);
-  // The associated leaf must still open at its full catalogue path on another click.
-  await row('leaf').get('.finder-item-content').trigger('click'); await flushPromises();
-  expect(panel().findAll('.finder-column')).toHaveLength(4);
-  // Toggling additional periods keeps the frise boundary instead of restoring global ancestry.
-  await panel().getComponent(Switch).get('button').trigger('click'); await flushPromises();
-  expect(selected()).toEqual(['leaf']);
-  expect(panel().findAll('.finder-column')).toHaveLength(2);
-  await panel().getComponent(Switch).get('button').trigger('click'); await flushPromises();
-  expect(selected()).toEqual(['leaf']);
-  expect(panel().findAll('.finder-column')).toHaveLength(2);
-  expect(panel().findAllComponents(FinderItem).filter(item => item.props('itemId') === 'leaf')).toHaveLength(1);
+it('keeps the tree, DOM, filters and scroll positions during the write and detail refresh',async()=>{
+ const writing=deferred<void>();const refreshing=deferred<Story>();
+ vi.mocked(api.changeAssociations).mockReturnValueOnce(writing.promise);
+ vi.mocked(api.getStory).mockResolvedValueOnce(detail()).mockReturnValueOnce(refreshing.promise);
+ await start();const tree=panel().get('.story-detail-panel__finder-columns-wrap').element as HTMLElement;tree.scrollLeft=220;
+ const selectedRow=row('leaf').element;
+ panel().vm.$emit('add-periods',['extra'],'branch');await flushPromises();
+ expect(panel().attributes('aria-busy')).toBe('true');expect(selected()).toEqual(['leaf']);
+ expect(api.changeAssociations).toHaveBeenCalledExactlyOnceWith('1','period',['extra'],false,'branch');
+ writing.resolve();await flushPromises();expect(panel().find('.story-detail-panel__loading').exists()).toBe(false);
+ refreshing.resolve(detail(true));await flushPromises();
+ expect(panel().get('.story-detail-panel__finder-columns-wrap').element).toBe(tree);expect(tree.scrollLeft).toBe(220);
+ expect(row('leaf').element).toBe(selectedRow);expect(selected()).toEqual(['leaf']);
+ expect(panel().getComponent(FilterBar).props('categoryId')).toBe('geo');
 });
-it('keeps the tree available after a refused write instead of replacing it with an error page', async () => {
-  vi.mocked(api.changeAssociations).mockRejectedValueOnce({ response: { data: { error: 'Ajout refusé' } } });
-  await start();
-  const tree = panel().get('.story-detail-panel__finder-columns-wrap').element;
-  await row('leaf').get('.finder-item-add').trigger('click'); await flushPromises();
-  expect(panel().get('[role="alert"]').text()).toContain('Ajout refusé');
-  expect(panel().get('.story-detail-panel__finder-columns-wrap').element).toBe(tree);
-  expect(selected()).toEqual(['leaf']);
-  expect(panel().findAll('.finder-column')).toHaveLength(4);
-  expect(row('leaf').get('.finder-item-add').attributes('disabled')).toBeUndefined();
-  expect(api.getStory).toHaveBeenCalledOnce();
+it('keeps the tree available after a refused write instead of replacing it with an error page',async()=>{
+ vi.mocked(api.changeAssociations).mockRejectedValueOnce({response:{data:{error:'Ajout refusé'}}});await start();
+ const tree=panel().get('.story-detail-panel__finder-columns-wrap').element;
+ panel().vm.$emit('add-periods',['extra'],'branch');await flushPromises();
+ expect(panel().get('[role="alert"]').text()).toContain('Ajout refusé');
+ expect(panel().get('.story-detail-panel__finder-columns-wrap').element).toBe(tree);expect(selected()).toEqual(['leaf']);
+ expect(api.getStory).toHaveBeenCalledOnce();
 });
-it('retries a failed refresh without repeating the saved write or resetting the tree', async () => {
-  vi.mocked(api.getStory).mockResolvedValueOnce(detail()).mockRejectedValueOnce(new Error('Lecture indisponible')).mockResolvedValueOnce(detail(true));
-  await start();
-  const tree = panel().get('.story-detail-panel__finder-columns-wrap').element;
-  await row('leaf').get('.finder-item-add').trigger('click'); await flushPromises();
-  expect(panel().get('[role="alert"]').text()).toContain('Associations enregistrées');
-  expect(panel().get('.story-detail-panel__finder-columns-wrap').element).toBe(tree);
-  expect(selected()).toEqual(['leaf']);
-  await panel().get('[role="alert"] button').trigger('click'); await flushPromises();
-  expect(panel().find('[role="alert"]').exists()).toBe(false);
-  expect(selected()).toEqual(['leaf']);
-  expect(panel().findAll('.finder-column')).toHaveLength(4);
-  expect(panel().get('.story-detail-panel__finder-columns-wrap').element).toBe(tree);
-  expect(row('leaf').find('button[aria-haspopup="menu"]').exists()).toBe(true);
-  expect(api.changeAssociations).toHaveBeenCalledOnce();
+it('retries a failed refresh without repeating the saved write or resetting the tree',async()=>{
+ vi.mocked(api.getStory).mockResolvedValueOnce(detail()).mockRejectedValueOnce(new Error('Lecture indisponible')).mockResolvedValueOnce(detail(true));await start();
+ const tree=panel().get('.story-detail-panel__finder-columns-wrap').element;
+ panel().vm.$emit('add-periods',['extra'],'branch');await flushPromises();
+ expect(panel().get('[role="alert"]').text()).toContain('Associations enregistrées');
+ await panel().get('[role="alert"] button').trigger('click');await flushPromises();
+ expect(panel().find('[role="alert"]').exists()).toBe(false);expect(selected()).toEqual(['leaf']);
+ expect(panel().get('.story-detail-panel__finder-columns-wrap').element).toBe(tree);expect(api.changeAssociations).toHaveBeenCalledOnce();
 });
 
 it('edits a period from its menu and refreshes the current frise after saving', async () => {

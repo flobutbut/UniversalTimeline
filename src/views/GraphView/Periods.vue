@@ -1,108 +1,51 @@
 <template>
   <div class="finder-root">
-    <div v-if="state.loading" class="finder-loading">Chargement...</div>
-    <div v-else-if="state.error" class="finder-error" role="alert">{{ state.error }} <button type="button" @click="loadView">Réessayer</button></div>
+    <div v-if="loading" class="finder-loading" role="status">Chargement…</div>
+    <div v-else-if="error" class="finder-error" role="alert">{{ error }} <button type="button" @click="loadView">Réessayer</button></div>
     <div v-else class="finder-layout">
-      <FilterBar
-        title="Periods"
-        v-model:search="filterSearch"
-        v-model:category-id="filterCategoryId"
-        :category-options="periodCategoryFilterOptions"
-        :suggestions="periodSearchSuggestions"
-        :search-loading="searchLoading"
-        :search-error="searchError"
-        :allow-wikidata-create="false"
-        @retry-search="retrySearch"
-        @add="handleSubHeaderAdd"
-        @pick-period="handleSearchResultSelect"
-      />
+      <FilterBar title="Périodes" v-model:search="filterSearch" v-model:category-id="filterCategoryId"
+        :category-options="periodCategoryFilterOptions" :suggestions="periodSearchSuggestions"
+        :search-loading="searchLoading" :search-error="searchError" :allow-wikidata-create="false"
+        @retry-search="retrySearch" @add="cancelSelection(); handleAddPeriod(0)" @pick-period="selectPeriod" />
+      <p class="catalogue-hint">Les périodes sont organisées dans les frises. Sélectionnez une fiche pour retrouver ses frises.</p>
       <div v-if="targetLoading || targetError" class="finder-feedback" :role="targetError ? 'alert' : 'status'">
         {{ targetError || 'Ouverture du résultat…' }}
         <button v-if="targetError" type="button" @click="retryTarget">Réessayer</button>
         <button type="button" @click="cancelTarget">Annuler</button>
-      </div>
-      <div v-if="!targetLoading && !targetError && (navigationLoading || navigationError)" class="finder-feedback" :role="navigationError ? 'alert' : 'status'">
-        {{ navigationError || 'Ouverture du chemin…' }}
-        <button v-if="navigationError" type="button" @click="retryNavigation">Réessayer</button>
-        <button type="button" @click="cancelNavigation">Annuler</button>
       </div>
       <div v-if="openingLoading || openingError" class="finder-feedback" :role="openingError ? 'alert' : 'status'">
         {{ openingError || 'Chargement du formulaire…' }}
         <button v-if="openingError" type="button" @click="retryOpening">Réessayer</button>
         <button type="button" @click="cancelOpening">Annuler</button>
       </div>
-      <div class="finder-columns">
-      <div
-        class="finder-column"
-        v-for="(col, colIdx) in displayColumns"
-        :key="colIdx"
-        @dragover.prevent="onColumnDragOver(colIdx)"
-        @dragleave="onColumnDragLeave(colIdx)"
-        @drop.prevent="onColumnDrop(colIdx)"
-        :class="{ 'drag-over': selectionState.dragOverColumnIdx === colIdx }"
-      >
-        <div class="finder-column-header">
-          <h2>
-            <template v-if="colIdx === 0">
-              Périodes racines
-            </template>
-            <template v-else>
-              {{ getParentLabel(colIdx) }}
-            </template>
-          </h2>
-        </div>
-        <div class="finder-column-content">
-          <div v-if="childrenError?.column === colIdx" role="alert">
-            {{ childrenError.message }} <button type="button" @click="retryChildrenLoad">Réessayer</button>
-          </div>
-          <template v-if="col.length > 0">
-            <FinderItem
-              v-for="item in col"
-              :key="item.id"
-              :label="item.label"
-              :startDate="item.startDate"
-              :endDate="item.endDate"
-              :categories="item.categories"
-              :selected="selectionState.selectedIds[colIdx] === item.id"
-              :focus-requested="focusTargetId === item.id"
-              :hasChildren="hasChildren(item.id)"
-              :wikidataOnly="item.id.startsWith('wikidata:')"
-              :itemId="item.id"
-              @click="handleSelect(item, colIdx)"
-              @dragstart="onDragStart"
-              @drop="onDrop"
-              @edit="openEdit"
-              @add="(id) => openWikidataDraft(colIdx, id)"
-            />
-          </template>
-          <div v-else class="finder-empty-column">
-            <template v-if="colIdx > 0 && loadingChildrenColumnIndex === colIdx">
-              Chargement des sous-périodes…
-            </template>
-            <template v-else-if="colIdx === 0">
-              Aucune période racine
-            </template>
-            <template v-else-if="childrenError?.column !== colIdx">
-              Aucune sous-période
-            </template>
-          </div>
-          <!-- Bouton d'enrichissement Wikidata : visible uniquement si la colonne a des enfants en base
-               et que le parent a un wikidata_id -->
-          <div
-            v-if="colIdx > 0 && (columns[colIdx]?.length ?? 0) > 0 && getParentPeriod(colIdx)?.wikidata_id"
-            class="finder-wikidata-enrich"
-          >
-            <button
-              class="wikidata-enrich-btn"
-              :disabled="loadingChildrenColumnIndex === colIdx"
-              @click="enrichColumnWithWikidata(getParentPeriod(colIdx)!, colIdx)"
-            >
-              <span v-if="loadingChildrenColumnIndex === colIdx">Chargement…</span>
-              <span v-else>+ Rechercher aussi sur Wikidata</span>
-            </button>
-          </div>
-        </div>
+      <div v-if="selectionLoading || selectionError" class="finder-feedback" :role="selectionError ? 'alert' : 'status'">
+        {{ selectionError || 'Chargement de la fiche…' }}
+        <button v-if="selectionError" type="button" @click="retrySelection">Réessayer</button>
+        <button type="button" @click="cancelSelection">Annuler</button>
       </div>
+      <div class="catalogue-content">
+        <div class="finder-column catalogue-list">
+          <div class="finder-column-header"><h2>Catalogue · {{ visiblePeriods.length }}</h2></div>
+          <div class="finder-column-content">
+            <FinderItem v-for="item in visiblePeriods" :key="item.id" :label="item.label"
+              :start-date="item.startDate" :end-date="item.endDate" :categories="item.categories"
+              :selected="selectedId === item.id" :focus-requested="focusTargetId === item.id"
+              :has-children="false" :draggable="false" hide-chevron :item-id="item.id"
+              @click="selectPeriod(item)" @edit="id => { cancelSelection(); handleEdit(id); }" />
+            <p v-if="!visiblePeriods.length" class="finder-empty-column">Aucune période</p>
+          </div>
+        </div>
+        <section v-if="selected" class="catalogue-details" aria-label="Détail de la période">
+          <h2>{{ selected.label.fr || selected.label.en }}</h2>
+          <p v-if="selected.description?.fr || selected.description?.en">{{ selected.description?.fr || selected.description?.en }}</p>
+          <p v-else>Description à compléter.</p>
+          <StoryMembershipField :story-ids="storyLinks.storyIdsOf(selected.id)" :stories="stories" :owns-story="auth.ownsStory"
+            empty-text="Cette période n’appartient à aucune frise visible."
+            :loading="storyLinks.loading.value" :load-error="storyLinks.error.value"
+            :pending="storyLinks.pending.value" :change-error="storyLinks.changeError.value"
+            @retry="storyLinks.load" @add="id => storyLinks.change(selected!.id, id, false)"
+            @remove="id => storyLinks.change(selected!.id, id, true)" />
+        </section>
       </div>
     </div>
     <EditModal
@@ -148,353 +91,111 @@
 </template>
 
 <script setup lang="ts">
-import type { EditFormSubmission } from '@/types/editForm';
 import { computed, onMounted, ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import FinderItem from './FinderItem.vue';
 import FilterBar from '@/components/FilterBar.vue';
-import type { ListPeriod } from '@/types/database';
-import { useToast } from '@/composables/useToast';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
-import { useGraphView } from '@/composables/useGraphView';
-import { useGraphDragDrop } from '@/composables/useGraphDragDrop';
-import { useGraphModals } from '@/composables/useGraphModals';
-import { SearchApiService } from '@/services/SearchApiService';
-import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
-import { localSearchHitToPeriod } from '@/lib/searchHitEntities';
-import { useFinderNavigation } from '@/composables/useFinderNavigation';
-import { useSearchTarget } from '@/composables/useSearchTarget';
-import {
-  finderDragOverColumnAfterMove,
-  getFinderColumnParentPeriod,
-} from '@/lib/graphFinderHelpers';
-import { storeToRefs } from 'pinia';
-import { useAuthStore } from '@/stores/useAuthStore';
-import { useDataStore } from '@/stores/useDataStore';
-import { useStoryLinks } from '@/composables/useStoryLinks';
 import StoryMembershipField from '@/components/StoryMembershipField.vue';
+import { useGraphModals } from '@/composables/useGraphModals';
+import { useDataStore } from '@/stores/useDataStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useStoryLinks } from '@/composables/useStoryLinks';
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
+import { useSearchTarget } from '@/composables/useSearchTarget';
+import { useLatestRequest } from '@/composables/useLatestRequest';
+import { SearchApiService } from '@/services/SearchApiService';
+import { PeriodApiService } from '@/services/PeriodApiService';
+import { localSearchHitToPeriod } from '@/lib/searchHitEntities';
+import type { ListPeriod } from '@/types/database';
+import type { EditFormSubmission } from '@/types/editForm';
 
-// Utilisation des composables
-const {
-  state,
-  selectionState,
-  allPeriods,
-  columns,
-  loadingChildrenColumnIndex,
-  childrenError,
-  retryChildrenLoad,
-  hasChildren,
-  getParentLabel,
-  isDescendant,
-  handleSelect: selectPeriod,
-  enrichColumnWithWikidata,
-  loadInitialData
-} = useGraphView();
-
-const toast = useToast();
+const store = useDataStore();
+const auth = useAuthStore();
+const { stories } = storeToRefs(store);
+const storyLinks = useStoryLinks('period');
+const loading = ref(false);
+const error = ref<string | null>(null);
+const initialized = ref(false);
+const selectedId = ref<string | null>(null);
+const focusTargetId = ref<string | null>(null);
+const selected = computed(() => store.periodById(selectedId.value ?? ''));
 const filterSearch = ref('');
 const filterCategoryId = ref('');
-
-const periodCategoryFilterOptions = computed(() => {
-  const map = new Map<string, { id: string; label: { fr: string; en: string } }>();
-  for (const p of allPeriods.value) {
-    for (const cat of p.categories ?? []) {
-      if (!map.has(cat.id)) map.set(cat.id, cat as { id: string; label: { fr: string; en: string } });
-    }
-  }
-  const rest = [...map.values()]
-    .sort((a, b) => a.label.fr.localeCompare(b.label.fr, 'fr', { sensitivity: 'base' }))
-    .map((c) => ({ value: c.id, label: c.label.fr }));
-  return [{ value: '', label: 'Toutes les catégories' }, ...rest];
+const allPeriods = computed(() => store.periods.filter(p => !p.id.startsWith('wikidata:')));
+const visiblePeriods = computed(() => {
+  const q = filterSearch.value.trim().toLocaleLowerCase('fr');
+  return allPeriods.value.filter(p => (!filterCategoryId.value || p.categories.some(c => c.id === filterCategoryId.value))
+    && (!q || [p.label.fr, p.label.en, p.description?.fr, p.description?.en].some(v => v?.toLocaleLowerCase('fr').includes(q))))
+    .sort((a, b) => a.label.fr.localeCompare(b.label.fr, 'fr'));
 });
-
-function periodMatchesCategory(p: ListPeriod, categoryId: string): boolean {
-  if (!categoryId) return true;
-  return p.categories?.some((c) => c.id === categoryId) ?? false;
-}
-
-/** Suggestions du sous-header : `/api/search` sur toute la table `periods` (pas seulement le store). */
-const {
-  results: periodSearchSuggestions,
-  loading: searchLoading,
-  error: searchError,
-  retry: retrySearch,
-} = useDebouncedSearch(
+const periodCategoryFilterOptions = computed(() => {
+  const categories = new Map(allPeriods.value.flatMap(p => p.categories.map(c => [c.id, c] as const)));
+  return [{ value: '', label: 'Toutes les catégories' }, ...[...categories.values()]
+    .sort((a,b) => a.label.fr.localeCompare(b.label.fr, 'fr')).map(c => ({ value: c.id, label: c.label.fr }))];
+});
+const { results: periodSearchSuggestions, loading: searchLoading, error: searchError, retry: retrySearch } = useDebouncedSearch(
   () => filterSearch.value,
-  async (query, signal) => {
-    const hits = await SearchApiService.getInstance().searchLocal(query, {
-      categoryId: filterCategoryId.value || undefined,
-      onlyPeriods: true,
-      signal,
-    });
-    return hits.filter(hit => hit.type === 'period').map(localSearchHitToPeriod);
-  },
+  async (q, signal) => (await SearchApiService.getInstance().searchLocal(q, { categoryId: filterCategoryId.value || undefined, onlyPeriods: true, signal }))
+    .filter(hit => hit.type === 'period').map(localSearchHitToPeriod),
   { delayMs: 250, minLength: 1, criteria: () => filterCategoryId.value },
 );
-
-/** En mode explorateur : filtre éventuel par catégorie sur chaque colonne (sans recherche texte). */
-const displayColumns = computed(() => {
-  const catId = filterCategoryId.value;
-  return columns.value.map((col) => col.filter((p) => periodMatchesCategory(p, catId)));
-});
-
 const {
-  navigate,
-  loading: navigationLoading,
-  error: navigationError,
-  retry: retryPath,
-  cancel: cancelNavigation,
-} = useFinderNavigation(selectionState, selectPeriod);
-
-const handleSearchResultSelect = async (period: ListPeriod) => {
-  cancelTarget();
-  cancelOpening();
-  if (await navigate(period)) filterSearch.value = '';
-};
-
-const retryNavigation = async () => {
-  if (await retryPath()) filterSearch.value = '';
-};
-
-// New user intent invalidates pending path/form reads before it changes context.
-watch([filterSearch, filterCategoryId], () => {
-  if (settingTargetFilters) return;
-  cancelTarget();
-  cancelNavigation();
-  cancelOpening();
-}, { flush: 'sync' });
-
-const handleSelect = (period: ListPeriod, column: number) => {
-  cancelTarget();
-  cancelNavigation();
-  cancelOpening();
-  return selectPeriod(period, column);
-};
-
-const openEdit = (id: string) => {
-  cancelTarget();
-  cancelNavigation();
-  return handleEdit(id);
-};
-
-const openWikidataDraft = (column: number, id: string) => {
-  cancelTarget();
-  cancelNavigation();
-  handleAddFromWikidataFinderItem(column, id, {
-    dbParentId: column > 0 ? selectionState.selectedIds[column - 1] ?? null : null,
-  });
-};
-
-const getParentPeriod = (colIdx: number) =>
-  getFinderColumnParentPeriod(colIdx, selectionState.selectedIds, allPeriods.value);
-
-const {
-  onDrop: dropHandler,
-  onColumnDrop: columnDropHandler
-} = useGraphDragDrop();
-
-const {
-  showEditModal,
-  showAddModal,
-  selectedPeriod,
-  loading: openingLoading,
-  openingError,
-  retryOpening,
-  cancelOpening,
-  addModalInitialData,
-  handleEdit,
-  handleDelete,
-  busy,
-  saveError,
-  addError,
-  closeEditModal,
-  handleEditSubmit,
-  handleAddPeriod: addPeriodHandler,
-  handleAddFromWikidataFinderItem,
-  closeAddModal,
-  handleAddSubmit: addSubmitHandler
+  showEditModal, showAddModal, selectedPeriod, loading: openingLoading, openingError, retryOpening, cancelOpening,
+  addModalInitialData, handleEdit, handleDelete, busy, saveError, addError, closeEditModal, handleEditSubmit,
+  handleAddPeriod, closeAddModal, handleAddSubmit: submit,
 } = useGraphModals();
-
-// Frises de la période éditée : relues à chaque ouverture pour refléter les changements faits ailleurs.
-const auth = useAuthStore();
-const { stories } = storeToRefs(useDataStore());
-const storyLinks = useStoryLinks('period');
+const handleAddSubmit = (data: EditFormSubmission) => submit(data, []);
+const selectionRequests = useLatestRequest();
+const selectionLoading = ref(false);
+const selectionError = ref<string | null>(null);
+let retrySelectionTask: (() => Promise<void>) | null = null;
+function cancelSelection() { selectionRequests.cancel(); selectionLoading.value = false; selectionError.value = null; }
+const retrySelection = () => retrySelectionTask?.();
+async function selectPeriod(period: ListPeriod) {
+  cancelTarget(); cancelOpening(); filterSearch.value = '';
+  const isCurrent = selectionRequests.begin();
+  retrySelectionTask = () => selectPeriod(period);
+  selectionLoading.value = true; selectionError.value = null;
+  try {
+    const detail = await PeriodApiService.getInstance().getPeriod(period.id);
+    if (!isCurrent()) return;
+    store.cachePeriod(detail); selectedId.value = detail.id; void storyLinks.load();
+  } catch (cause) { if (isCurrent()) selectionError.value = cause instanceof Error ? cause.message : 'Fiche indisponible.'; }
+  finally { if (isCurrent()) selectionLoading.value = false; }
+}
+watch([filterSearch, filterCategoryId], cancelSelection, { flush: 'sync' });
 watch(() => showEditModal.value && selectedPeriod.value?.id, id => { if (id) void storyLinks.load(); });
-
-// Fonctions de drag & drop
-const onDragStart = (itemId: string) => {
-  cancelTarget();
-  cancelNavigation();
-  cancelOpening();
-  selectionState.draggedItemId = itemId;
-};
-
-const onColumnDragOver = (colIdx: number) => {
-  const id = selectionState.draggedItemId;
-  if (id) {
-    selectionState.dragOverColumnIdx = finderDragOverColumnAfterMove(colIdx, id, columns.value);
-  }
-};
-
-const onColumnDragLeave = (colIdx: number) => {
-  if (selectionState.dragOverColumnIdx === colIdx) {
-    selectionState.dragOverColumnIdx = null;
-  }
-};
-
-const onDrop = async (targetItemId: string) => {
-  await dropHandler(targetItemId, selectionState.draggedItemId, isDescendant);
-  selectionState.draggedItemId = null;
-};
-
-const onColumnDrop = async (colIdx: number) => {
-  await columnDropHandler(
-    colIdx, 
-    selectionState.draggedItemId, 
-    selectionState.selectedIds, 
-    columns.value, 
-    isDescendant
-  );
-  selectionState.dragOverColumnIdx = null;
-  selectionState.draggedItemId = null;
-};
-
-// Fonctions de modales avec validation
-const handleAddPeriod = (colIdx: number) => {
-  cancelTarget();
-  cancelNavigation();
-  // Vérifier si on a besoin d'un parent et s'il est sélectionné
-  if (colIdx > 0 && !selectionState.selectedIds[colIdx - 1]) {
-    toast.show('Veuillez sélectionner un parent avant d\'ajouter une période', 'error');
-    return;
-  }
-  const patch =
-    colIdx > 0 && selectionState.selectedIds[colIdx - 1]
-      ? { parent_id: selectionState.selectedIds[colIdx - 1] }
-      : null;
-  addPeriodHandler(colIdx, patch);
-};
-
-/** Ajout depuis la barre : sous la dernière période sélectionnée, ou racine si aucune sélection. */
-const handleSubHeaderAdd = () => {
-  handleAddPeriod(selectionState.selectedIds.length);
-};
-
-const handleAddSubmit = async (formData: EditFormSubmission) => {
-  await addSubmitHandler(formData, selectionState.selectedIds);
-};
-
-const initialized = ref(false);
-const focusTargetId = ref<string | null>(null);
-let settingTargetFilters = false;
 const { loading: targetLoading, error: targetError, retry: retryTarget, cancel: cancelTarget } = useSearchTarget(
-  'period', () => initialized.value && !state.loading && !state.error,
+  'period', () => initialized.value && !loading.value && !error.value,
   async (target, isCurrent) => {
-    settingTargetFilters = true;
     filterSearch.value = ''; filterCategoryId.value = '';
-    settingTargetFilters = false;
-    if (target.kind === 'wikidata') {
-      // A public search result opens a draft. Only the existing form can save it.
-      addPeriodHandler(0, { wikidata_id: target.qid });
-    } else {
-      const opened = await navigate({ id: target.id });
+    if (target.kind === 'wikidata') handleAddPeriod(0, { wikidata_id: target.qid });
+    else {
+      const period = await PeriodApiService.getInstance().getPeriod(target.id);
       if (!isCurrent()) return;
-      if (opened) focusTargetId.value = target.id;
-      else if (navigationError.value) {
-        const message = navigationError.value;
-        cancelNavigation();
-        throw new Error(message);
-      }
+      store.cachePeriod(period); selectedId.value = period.id; focusTargetId.value = period.id; void storyLinks.load();
     }
   },
-  () => { focusTargetId.value = null; cancelNavigation(); cancelOpening(); closeAddModal(); closeEditModal(); },
+  () => { focusTargetId.value = null; cancelOpening(); closeAddModal(); closeEditModal(); },
 );
 async function loadView() {
-  await loadInitialData();
-  initialized.value = true;
+  loading.value = true; error.value = null;
+  try { await store.ensureRootsLoaded(); initialized.value = true; }
+  catch (cause) { error.value = cause instanceof Error ? cause.message : 'Catalogue indisponible.'; }
+  finally { loading.value = false; }
 }
 onMounted(loadView);
-
 </script>
 
 <style scoped>
-.finder-root {
-  width: 100%;
-  height: 100%;
-  background: var(--color-background);
-  display: flex;
-  flex-direction: column;
-  max-width: 100vw;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.finder-layout {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.finder-loading, .finder-error {
-  padding: var(--spacing-lg);
-  color: var(--color-text);
-  font-size: var(--font-size-lg);
-  text-align: center;
-}
-
-.finder-feedback {
-  padding: var(--spacing-sm) var(--spacing-md);
-  color: var(--color-text);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.finder-feedback button {
-  margin-left: var(--spacing-sm);
-}
-
-/* Colonnes : src/styles/finder-column-layout.css */
-
-.finder-layout .finder-columns {
-  flex: 1;
-  min-height: 0;
-}
-
-.finder-wikidata-enrich {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-top: 1px solid var(--color-border);
-}
-
-.wikidata-enrich-btn {
-  width: 100%;
-  background: none;
-  border: 1px dashed var(--color-primary);
-  border-radius: var(--radius-sm);
-  color: var(--color-primary);
-  font-size: var(--font-size-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-
-.wikidata-enrich-btn:hover:not(:disabled) {
-  background: var(--color-primary-light);
-}
-
-.wikidata-enrich-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-</style>
-
-<style>
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
-#app {
-  height: 100%;
-  overflow: hidden;
-}
+.finder-root, .finder-layout { display: flex; flex-direction: column; flex: 1; min-height: 0; height: 100%; overflow: hidden; }
+.finder-loading, .finder-error, .finder-feedback, .catalogue-hint { padding: var(--spacing-md); }
+.catalogue-hint { margin: 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+.catalogue-content { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+.catalogue-list { flex: 1; width: auto; min-width: 0; }
+.catalogue-details { flex: 1; min-width: 0; padding: var(--spacing-lg); overflow: auto; border-left: 1px solid var(--color-border); }
+.catalogue-details h2 { font-size: var(--font-size-lg); }
+.catalogue-details p { line-height: 1.5; }
+@media (max-width: 700px) { .catalogue-content { flex-direction: column; overflow: auto; } .catalogue-details { flex: none; border-left: 0; border-top: 1px solid var(--color-border); } }
 </style>

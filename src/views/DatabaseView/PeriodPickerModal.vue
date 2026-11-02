@@ -8,52 +8,14 @@
       <SearchInput ref="searchInputRef" v-model="search" placeholder="Rechercher une période…" autocomplete="off" />
     </div>
 
-    <!-- Mode recherche : liste plate -->
-    <div v-if="isSearching" class="ppm-columns">
+    <div class="ppm-columns">
       <div class="ppm-column ppm-column--fill">
-        <div class="ppm-column-header">
-          Résultats <span class="ppm-column-header__count">{{ searchResults.length }}</span>
-        </div>
+        <div class="ppm-column-header">Catalogue <span class="ppm-column-header__count">{{ displayedPeriods.length }}</span></div>
         <div class="ppm-column-content">
-          <template v-if="searchResults.length">
-            <PeriodPickerItem
-              v-for="p in searchResults"
-              :key="p.id"
-              :period="p"
-              :checked="checkedIds.has(p.id)"
-              :already="alreadyInStory.includes(p.id)"
-              :selected="false"
-              @click="handleItemClick(p, -1)"
-              @toggle="toggleCheck(p.id)"
-            />
-          </template>
-          <div v-else class="ppm-empty">Aucun résultat</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mode explorateur : colonnes -->
-    <div v-else ref="columnsRef" class="ppm-columns">
-      <div v-for="(col, colIdx) in columns" :key="colIdx" class="ppm-column">
-        <div class="ppm-column-header">
-          {{ colIdx === 0 ? 'Racines' : getColumnLabel(colIdx) }}
-        </div>
-        <div class="ppm-column-content">
-          <template v-if="col.length">
-            <PeriodPickerItem
-              v-for="p in col"
-              :key="p.id"
-              :period="p"
-              :checked="checkedIds.has(p.id)"
-              :already="alreadyInStory.includes(p.id)"
-              :selected="selectedParentIds[colIdx] === p.id"
-              @click="handleItemClick(p, colIdx)"
-              @toggle="toggleCheck(p.id)"
-            />
-          </template>
-          <div v-else class="ppm-empty">
-            {{ loading ? 'Chargement…' : loadError ? '' : colIdx === 0 ? 'Aucune période' : 'Aucune sous-période' }}
-          </div>
+          <PeriodPickerItem v-for="p in displayedPeriods" :key="p.id" :period="p"
+            :checked="checkedIds.has(p.id)" :already="alreadyInStory.includes(p.id)" :selected="false"
+            @click="toggleCheck(p.id)" @toggle="toggleCheck(p.id)" />
+          <div v-if="!displayedPeriods.length && !loading && !loadError" class="ppm-empty">Aucune période</div>
         </div>
       </div>
     </div>
@@ -69,11 +31,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick, defineComponent, h } from 'vue';
+import { ref, computed, onMounted, defineComponent, h } from 'vue';
 import { useLatestRequest } from '@/composables/useLatestRequest';
 import { useDataStore } from '@/stores/useDataStore';
-import { PeriodApiService } from '@/services/PeriodApiService';
-import { buildPeriodIdAncestorChain } from '@/lib/periodAncestorChain';
 import ModalShell from '@/components/base/ModalShell.vue';
 import SearchInput from '@/components/base/SearchInput.vue';
 import PickerSelectionCount from './PickerSelectionCount.vue';
@@ -112,10 +72,6 @@ const PeriodPickerItem = defineComponent({
           }),
       // Label
       h('span', { class: 'ppm-item__label' }, props.period.label.fr),
-      // Chevron si enfants
-      props.period.hasChildren
-        ? h('span', { class: 'ppm-item__chevron' }, '›')
-        : null,
     ]);
   },
 });
@@ -151,62 +107,15 @@ async function load(action: (isCurrent: () => boolean) => Promise<void>) {
   }
 }
 const search = ref('');
-const selectedParentIds = ref<string[]>([]);
 const checkedIds = ref(new Set<string>());
 const searchInputRef = ref<{ focus: () => void } | null>(null);
-const columnsRef = ref<HTMLElement | null>(null);
 
 // ─── Recherche ────────────────────────────────────────────────────────────────
 
-const isSearching = computed(() => search.value.trim().length > 0);
-
-const searchResults = computed(() => {
-  const q = search.value.trim().toLowerCase();
-  if (!q) return [];
-  return dataStore.periods.filter(p =>
-    p.label.fr.toLowerCase().includes(q) ||
-    p.label.en?.toLowerCase().includes(q)
-  );
-});
-
-// ─── Colonnes explorateur ─────────────────────────────────────────────────────
-
-const rootPeriods = computed(() =>
-  dataStore.periods.filter(p => !p.parentId && !p.hasParent)
-);
-
-const columns = computed(() => {
-  const cols: ListPeriod[][] = [rootPeriods.value];
-  for (const parentId of selectedParentIds.value) {
-    cols.push(dataStore.periods.filter(p => p.parentId === parentId));
-  }
-  return cols;
-});
-
-const getColumnLabel = (colIdx: number) =>
-  dataStore.periods.find(p => p.id === selectedParentIds.value[colIdx - 1])?.label.fr
-  ?? `Niveau ${colIdx + 1}`;
-
-// ─── Auto-scroll quand une colonne est ajoutée ───────────────────────────────
-
-watch(
-  () => columns.value.length,
-  async () => {
-    if (isSearching.value) return;
-    await nextTick();
-    columnsRef.value?.scrollTo({ left: columnsRef.value.scrollWidth });
-  }
-);
-
-// ─── Interactions ─────────────────────────────────────────────────────────────
-
-const handleItemClick = (period: ListPeriod, colIdx: number) => load(async isCurrent => {
-  if (!isSearching.value) {
-    selectedParentIds.value = selectedParentIds.value.slice(0, colIdx);
-    selectedParentIds.value[colIdx] = period.id;
-  }
-  if (period.hasChildren) await dataStore.ensureChildrenLoaded(period.id);
-  if (!isCurrent()) return;
+const displayedPeriods = computed(() => {
+  const q = search.value.trim().toLocaleLowerCase('fr');
+  return dataStore.periods.filter(p => !p.id.startsWith('wikidata:') && (!q || p.label.fr.toLocaleLowerCase('fr').includes(q) || p.label.en?.toLocaleLowerCase('fr').includes(q)))
+    .sort((a,b) => a.label.fr.localeCompare(b.label.fr, 'fr'));
 });
 
 const toggleCheck = (id: string) => {
@@ -218,33 +127,8 @@ const toggleCheck = (id: string) => {
 
 const confirm = () => emit('confirm', [...checkedIds.value]);
 
-// Réinitialiser la navigation quand la recherche change
-watch(isSearching, () => { selectedParentIds.value = []; });
-
 const loadInitialData = () => load(async isCurrent => {
   await dataStore.ensureRootsLoaded();
-  if (!isCurrent()) return;
-  if (props.initialPeriodId) {
-    const path = await buildPeriodIdAncestorChain(props.initialPeriodId, {
-      getPeriodFromStore: (id) => dataStore.periods.find((p) => p.id === id),
-      fetchPeriodFromApi: async (id) => {
-        try {
-          const fetched = await PeriodApiService.getInstance().getPeriod(id);
-          return { parentId: (fetched as { parentId?: string | null } | null)?.parentId ?? null };
-        } catch (cause: any) {
-          if (cause?.response?.status === 404) return null;
-          throw cause;
-        }
-      },
-    });
-    // Charger les enfants de chaque niveau (du haut vers le bas)
-    for (const id of path) {
-      await dataStore.ensureChildrenLoaded(id);
-      if (!isCurrent()) return;
-    }
-    if (!isCurrent()) return;
-    selectedParentIds.value = path;
-  }
   if (isCurrent()) searchInputRef.value?.focus();
 });
 onMounted(loadInitialData);

@@ -58,10 +58,10 @@ beforeEach(() => {
 });
 afterEach(() => { view?.unmount(); router?.options.history.destroy(); document.body.innerHTML = ''; vi.useRealTimers(); vi.restoreAllMocks(); vi.clearAllMocks(); });
 
-it('opens the complete finder path for a period deep link', async () => {
+it('opens a period catalogue fiche directly without navigating global ancestors', async () => {
   await start(); await choose(local('period', 'leaf'));
   expect(router.currentRoute.value.fullPath).toBe('/periods?period=leaf');
-  expect(view.findAllComponents(FinderItem).filter(row => row.props('selected')).map(row => row.props('itemId'))).toEqual(['root', 'child', 'leaf']);
+  expect(view.findAllComponents(FinderItem).filter(row => row.props('selected')).map(row => row.props('itemId'))).toEqual(['leaf']);
   expect(periods.getPeriod).toHaveBeenCalledWith('leaf');
   expect(document.activeElement?.getAttribute('aria-label')).toBe('leaf');
   expect(apiClient.post).not.toHaveBeenCalled();

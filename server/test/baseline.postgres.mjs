@@ -77,8 +77,8 @@ test('reads public stories anonymously and keeps another account’s private dat
   }
 });
 test('creates a period and event with canonical categories, numeric bounds and timestamps', async () => {
-  const p=await call('post','/periods',{id:'legacy-period',wikidata_id:'Q999909',label:{fr:'Nouvelle'},start_date:'M65',end_date:'NOW',parent_id:'root',categories:[{id:category}]});
-  assert.equal(p.statusCode,201); assert.equal(p.payload.parent_id,'root');
+  const p=await call('post','/periods',{id:'legacy-period',wikidata_id:'Q999909',label:{fr:'Nouvelle'},start_date:'M65',end_date:'NOW',categories:[{id:category}]});
+  assert.equal(p.statusCode,201); assert.equal(p.payload.parent_id,null);
   assert.equal(Number(p.payload.start_years_bp),65000000); assert.equal(p.payload.categories[0].id,category); assert.ok(p.payload.created_at);
   const e=await call('post','/events',{id:'legacy-event',wikidata_id:'Q999908',label:{fr:'Nouveau'},date:'1944-06-06',categories:[{id:category}]});
   assert.equal(e.statusCode,201); assert.equal(e.payload.categories[0].id,category); assert.ok(Number.isFinite(Number(e.payload.date_years_bp)));

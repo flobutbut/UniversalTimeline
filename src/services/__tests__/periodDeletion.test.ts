@@ -8,7 +8,6 @@ import { useHomeNavigation } from '@/composables/useHomeNavigation';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { StoryApiService } from '@/services/StoryApiService';
 import { apiClient } from '@/services/ApiClient';
-import { useGraphView } from '@/composables/useGraphView';
 import { WikidataQueryService } from '@/services/WikidataQueryService';
 
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn(), delete: vi.fn() } }));
@@ -122,17 +121,6 @@ it('returns to a surviving ancestor when the current timeline context is deleted
   useDataStore().removeDeletedPeriod(deleted); await nextTick();
   expect(nav.currentPeriod.value?.id).toBe('parent');
   expect(nav.parentStack.value).toEqual([]);
-});
-
-it.each(['select', 'enrich'] as const)('ignores a late Wikidata %s response under a deleted period', async action => {
-  let complete!: (rows: any[]) => void;
-  vi.spyOn(WikidataQueryService.getInstance(), 'loadPeriodChildrenByWikidataId').mockReturnValue(new Promise(resolve => { complete = resolve; }));
-  const graph = useGraphView();
-  const fetching = action === 'select' ? graph.handleSelect(leaf, 0) : graph.enrichColumnWithWikidata(leaf, 0);
-  useDataStore().removeDeletedPeriod(deleted);
-  complete([{ id: 'Q999', label: { fr: 'Suggestion', en: '' }, temporalData: [{ startDate: 'M65', endDate: 'NOW' }], hasChildren: false }]);
-  await fetching;
-  expect(useDataStore().periodById('wikidata:Q999')).toBeNull();
 });
 
 it.each(['event', 'story'] as const)('preserves the existing %s deletion workflow', async type => {

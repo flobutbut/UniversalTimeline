@@ -21,7 +21,7 @@ it('preserves every historical file exactly, outside active script and migration
 
 it('exposes only the reviewed Supabase migrations and explicit ownership operations', () => {
   expect(readdirSync(root + 'database/migrations').sort()).toEqual([
-    '20261029090427_story_access.sql', '20261029093707_harden_public_functions.sql', '20261029093923_isolate_postgis.sql', '20261031204007_story_period_hierarchy.sql', '20261031220914_hybrid_catalogue_search.sql',
+    '20261029090427_story_access.sql', '20261029093707_harden_public_functions.sql', '20261029093923_isolate_postgis.sql', '20261031204007_story_period_hierarchy.sql', '20261031220914_hybrid_catalogue_search.sql', '20261102001509_frise_only_period_hierarchy.sql',
   ]);
   expect(readdirSync(root + 'database/operations').sort()).toEqual(['assign_admin_role.sql', 'assign_legacy_stories.sql']);
   expect(readdirSync(root + 'database').filter(name => /\.(sh|sql)$/.test(name))).toEqual([]);

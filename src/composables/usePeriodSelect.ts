@@ -4,7 +4,7 @@ import { PeriodApiService } from '@/services/PeriodApiService';
 import { useDataStore } from '@/stores/useDataStore';
 import { localSearchHitToPeriod } from '@/lib/searchHitEntities';
 import { useLatestRequest } from './useLatestRequest';
-import { buildPeriodAncestorPathFromLeaf, listPeriodShowsDrillChevron, sortListPeriodsByLabel } from '@/lib/selectListPeriodHelpers';
+import { sortListPeriodsByLabel } from '@/lib/selectListPeriodHelpers';
 import type { ListPeriod } from '@/types/database';
 
 /** Domain navigation and reads; popup visibility and focus belong to PeriodSelect. */
@@ -24,11 +24,11 @@ export function usePeriodSelect(selectedId: () => string | null, options: { remo
   const selectedPeriod = computed(() => store.periodById(selectedId() ?? ''));
   const currentParent = computed(() => store.periodById(currentParentId.value ?? ''));
   const periods = computed(() => {
-    const rows = remoteActive.value ? remoteRows.value : currentParentId.value ? store.childrenOf(currentParentId.value) : store.rootPeriods;
+    const rows = remoteActive.value ? remoteRows.value : store.periods.filter(p => !p.id.startsWith('wikidata:'));
     const query = search.value.trim().toLocaleLowerCase('fr');
     return sortListPeriodsByLabel(rows).filter(period => period.id !== options.excludeId?.() && (remoteActive.value || !query || period.label.fr.toLocaleLowerCase('fr').includes(query)));
   });
-  const hasChildren = (period: ListPeriod) => listPeriodShowsDrillChevron(period, store.periods);
+  const hasChildren = (_period: ListPeriod) => false;
   let retry: () => Promise<boolean> = async () => false;
 
   async function run(action: (isCurrent: () => boolean) => Promise<void>): Promise<boolean> {
@@ -89,25 +89,11 @@ export function usePeriodSelect(selectedId: () => string | null, options: { remo
       if (!isCurrent()) return;
       store.cachePeriod(selected);
     }
-    const selected = selectedPeriod.value;
-    if (selected) {
-      const path = buildPeriodAncestorPathFromLeaf(selected.id, store.periodById);
-      for (const id of path) {
-        await store.ensureChildrenLoaded(id);
-        if (!isCurrent()) return;
-      }
-    }
-    currentParentId.value = selected?.parentId ?? null;
+    currentParentId.value = null;
     search.value = '';
   });
 
-  const drillDown = (period: ListPeriod) => run(async isCurrent => {
-    if (!store.periodById(period.id)) store.cachePeriod(period);
-    await store.ensureChildrenLoaded(period.id);
-    if (!isCurrent() || !store.periodById(period.id)) return;
-    currentParentId.value = period.id;
-    search.value = '';
-  });
+  const drillDown = async (_period: ListPeriod) => false;
 
   function goBack() {
     cancel();

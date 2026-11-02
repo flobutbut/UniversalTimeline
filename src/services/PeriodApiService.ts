@@ -42,12 +42,13 @@ export class PeriodApiService {
   }
 
   async loadChildren(periodId: string): Promise<Period[]> {
-    const data = await apiClient.get<PeriodDto[]>(`/periods/${periodId}/children`);
-    return data.map(mapToPeriod);
+    void periodId;
+    return [];
   }
 
   async updateParent(periodId: string, parentId: string | null): Promise<Period> {
-    return mapToPeriod(await apiClient.patch<PeriodDto>(`/periods/${periodId}/parent`, { parent_id: parentId }));
+    void periodId; void parentId;
+    throw new Error('Déplacez cette période dans sa frise.');
   }
 
   async createPeriod(formData: PeriodFormPayload): Promise<Period> {
@@ -65,7 +66,6 @@ export class PeriodApiService {
       end_date: formData.endDate || 'NOW',
       children: [],
       categories: formData.categories,
-      ...(Object.prototype.hasOwnProperty.call(formData, 'parentId') ? { parent_id: formData.parentId } : {}),
     };
 
     return mapToPeriod(await apiClient.post<PeriodDto>('/periods', payload));
@@ -82,7 +82,6 @@ export class PeriodApiService {
       start_date: formData.startDate,
       end_date: formData.endDate || null,
       categories: formData.categories || [],
-      ...(Object.prototype.hasOwnProperty.call(formData, 'parentId') ? { parent_id: formData.parentId } : {}),
     };
     const data = await apiClient.put<PeriodDto>(`/periods/${periodId}`, payload);
     return mapToPeriod(data);

@@ -146,17 +146,12 @@ export function useGraphModals() {
     addModalInitialData.value = null;
   };
 
-  const handleAddSubmit = async (formData: EditFormSubmission, selectedIds: string[]) => {
+  const handleAddSubmit = async (formData: EditFormSubmission, _selectedIds: string[]) => {
     if (busy.value) return;
     addLoading.value = true;
     addError.value = null;
     try {
-      const colIdx = currentColumnIdx.value;
-      const formParent = typeof formData.parentId === 'string' && formData.parentId.trim() ? formData.parentId.trim() : null;
-      const parentId = Object.prototype.hasOwnProperty.call(formData, 'parentId')
-        ? formParent : (colIdx !== null && colIdx > 0 ? selectedIds[colIdx - 1] ?? null : null);
-      const service = PeriodApiService.getInstance();
-      const period = await service.createPeriod({ ...formData, parentId });
+      const period = await PeriodApiService.getInstance().createPeriod(formData);
       dataStore.upsertSavedPeriod(period);
       closeAddModal();
       toast.show('Période ajoutée avec succès', 'success');

@@ -49,9 +49,9 @@ function catalogueSearch(kind: 'periods' | 'events', categoryId: string, limit: 
   const period = kind === 'periods';
   const alias = period ? 'p' : 'e';
   const columns = period
-    ? `p.id, p.wikidata_id, p.label_fr, p.label_en, p.start_date, p.end_date, p.parent_id,
+    ? `p.id, p.wikidata_id, p.label_fr, p.label_en, p.start_date, p.end_date, NULL::varchar AS parent_id,
        p.start_years_bp, p.end_years_bp,
-       EXISTS(SELECT 1 FROM public.periods c WHERE c.parent_id=p.id) AS has_children`
+       false AS has_children`
     : 'e.id, e.wikidata_id, e.label_fr, e.label_en, e.description_fr, e.date, e.date_years_bp';
   return `WITH query_text AS (
     SELECT extensions.unaccent(lower($1::text)) AS text,

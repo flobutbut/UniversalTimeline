@@ -96,6 +96,8 @@ Les dépendances HTTP/PostgreSQL se trouvent dans `server/`. Prisma, ts-node et 
 
 Les lectures publiques Wikidata passent par `src/services/wikidataTransport.ts`. Le cache reste en mémoire dans le navigateur : recherches pendant une minute, autres réponses pendant cinq minutes, sans données de compte. Les demandes identiques partagent leur transport ; erreurs et annulations ne sont pas conservées. Chaque lecture et ses reprises sont bornées (15 secondes MediaWiki, 30 secondes SPARQL). Le formulaire conserve les données principales lorsqu’un complément échoue et propose une reprise explicite, sans sauvegarde automatique.
 
+L’organisation des périodes et événements est désormais définie uniquement dans les frises ; le catalogue rassemble les fiches communes sans arbre global. Voir [Relations au sein des frises](Documentation/RELATIONS-FRISES.md).
+
 ## Structure du dépôt (résumé)
 
 ```

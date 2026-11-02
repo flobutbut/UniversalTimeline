@@ -62,43 +62,6 @@ it('keeps an empty frise scoped instead of opening the global catalogue from sea
   expect(api.getPeriod).not.toHaveBeenCalled();
 });
 
-it('keeps the existing story path on a catalogue failure and retries without treating it as empty', async () => {
-  vi.mocked(api.loadChildren).mockRejectedValueOnce(new Error('Catalogue indisponible'));
-  await start(); await pick(period('child', 'inside')); await pick(period('outside'));
-  expect(view.get('[role="alert"]').text()).toContain('Catalogue indisponible'); expect(selected()).toEqual(['child']);
-  await button('Réessayer').trigger('click'); await flushPromises(); expect(selected()).toEqual(['outside']);
-  expect(view.find('[role="alert"]').exists()).toBe(false);
-});
-
-it.each(['story', 'tab', 'query', 'cancel', 'dispose'] as const)('does not apply an external path after a change of %s', async context => {
-  const pending = deferred<Period>(); vi.mocked(api.getPeriod).mockReturnValue(pending.promise);
-  await start(); await pick(period('late'));
-  if (context === 'story') await view.setProps({ story: story('two') });
-  if (context === 'tab') { view.getComponent(Tabs).vm.$emit('update:modelValue', 'events'); await flushPromises(); }
-  if (context === 'query') await view.getComponent(FilterBar).get('input').setValue('Autre recherche');
-  if (context === 'cancel') await button('Annuler').trigger('click');
-  if (context === 'dispose') view.unmount();
-  pending.resolve(period('late')); await flushPromises();
-  if (context !== 'dispose') { expect(selected()).toEqual([]); expect(view.find('[role="alert"]').exists()).toBe(false); }
-  expect(api.loadChildren).not.toHaveBeenCalled();
-});
-
-it('keeps the newer external period when detail responses arrive in reverse order', async () => {
-  const a = deferred<Period>(); const b = deferred<Period>();
-  vi.mocked(api.getPeriod).mockImplementation(id => id === 'a' ? a.promise : b.promise);
-  await start(); await pick(period('a')); await pick(period('b'));
-  b.resolve(period('b', 'inside')); await flushPromises(); a.reject(new Error('Ancienne panne')); await flushPromises();
-  expect(selected()).toEqual(['b']); expect(view.find('[role="alert"]').exists()).toBe(false);
-});
-
-it('shows and retries failures when enabling external periods, then clears an external selection when disabled', async () => {
-  vi.mocked(api.loadChildren).mockRejectedValueOnce(new Error('Hors ligne'));
-  await start(); await pick(period('child', 'inside')); view.getComponent(Switch).vm.$emit('update:modelValue', true); await flushPromises();
-  expect(view.get('[role="alert"]').text()).toContain('Hors ligne'); expect(view.getComponent(Switch).props('modelValue')).toBe(true);
-  await button('Réessayer').trigger('click'); await flushPromises(); expect(view.getComponent(Switch).props('modelValue')).toBe(true);
-  await pick(period('outside')); view.getComponent(Switch).vm.$emit('update:modelValue', false); await flushPromises(); expect(selected()).toEqual([]);
-});
-
 it('clears selection, search and open pickers when switching stories', async () => {
   await start(); await pick(period('child', 'inside'));
   view.getComponent(FilterBar).vm.$emit('add'); await flushPromises(); expect(view.findComponent(EditModal).exists()).toBe(true);
@@ -130,23 +93,23 @@ it('aborts story search on tab or story changes and ignores its old results', as
 
 
 it('shows additional children beneath the frise root without revealing its global ancestors or other roots', async () => {
-  const friseRoot = period('frise-root', 'global-parent');
-  const linkedChild = period('linked-child', 'frise-root');
+  const friseRoot = {...period('frise-root', 'global-parent'),wikidata_id:'Q100'};
+  const linkedChild = {...period('linked-child', 'frise-root'),wikidata_id:'Q200'};
   const additionalChild = period('additional-child', 'frise-root');
   const store = useDataStore();
   store.cachePeriod(period('global-parent'));
   store.cachePeriod(period('unrelated-root'));
-  vi.mocked(api.loadChildren).mockResolvedValue([linkedChild, additionalChild]);
+  vi.mocked(WikidataQueryService.getInstance().loadPeriodChildrenByWikidataId).mockResolvedValue([wdChild('Q200'),wdChild('Q300')]);
   await start(story('scoped', [friseRoot, linkedChild]));
   await pick(friseRoot);
   view.getComponent(Switch).vm.$emit('update:modelValue', true); await flushPromises();
   const firstColumn = view.findAll('.finder-column')[0];
   expect(firstColumn.findAllComponents(FinderItem).map(row => row.props('itemId'))).toEqual(['frise-root']);
-  expect(view.findAllComponents(FinderItem).map(row => row.props('itemId'))).toEqual(['frise-root', 'additional-child', 'linked-child']);
+  expect(view.findAllComponents(FinderItem).map(row => row.props('itemId'))).toEqual(['frise-root', 'linked-child', 'wikidata:Q300']);
   expect(selected()).toEqual(['frise-root']);
   expect(api.getListPeriods).not.toHaveBeenCalled();
   expect(api.getPeriod).not.toHaveBeenCalled();
-  expect(api.loadChildren).toHaveBeenCalledExactlyOnceWith('frise-root');
+  expect(api.loadChildren).not.toHaveBeenCalled();
   view.getComponent(Switch).vm.$emit('update:modelValue', false); await flushPromises();
   expect(view.findAllComponents(FinderItem).map(row => row.props('itemId'))).toEqual(['frise-root', 'linked-child']);
   expect(selected()).toEqual(['frise-root']);
@@ -158,7 +121,7 @@ it('does not load global roots when enabling the switch before selecting a frise
   expect(view.findAllComponents(FinderItem).map(row => row.props('itemId'))).toEqual(['frise-root']);
   expect(api.getListPeriods).not.toHaveBeenCalled();
   expect(api.getPeriod).not.toHaveBeenCalled();
-  expect(api.loadChildren).toHaveBeenCalledExactlyOnceWith('frise-root');
+  expect(api.loadChildren).not.toHaveBeenCalled();
 });
 
 it('refuses a search result outside the frise while preserving the current selection', async () => {
@@ -185,7 +148,7 @@ it('queries Wikidata even with local children, deduplicates Q-ids, and keeps the
     .mockResolvedValue([wdChild('Q100'), wdChild('Q200'), wdChild('Q300')]);
   await enableWikidata();
   expect(wd).toHaveBeenCalledExactlyOnceWith('Q100', expect.objectContaining({ signal: expect.any(AbortSignal), force: false }));
-  expect(view.findAllComponents(FinderItem).map(row => row.props('itemId'))).toEqual(['inside', 'local', 'wikidata:Q300']);
+  expect(view.findAllComponents(FinderItem).map(row => row.props('itemId'))).toEqual(['inside', 'wikidata:Q200', 'wikidata:Q300']);
   expect(finderRow('wikidata:Q300').props('wikidataOnly')).toBe(true);
   expect(api.getListPeriods).not.toHaveBeenCalled(); expect(api.getPeriod).not.toHaveBeenCalled();
   expect(useDataStore().periodById('wikidata:Q300')).toBeNull();
@@ -199,7 +162,7 @@ it('queries frise roots when the switch is enabled before a selection', async ()
   await start(story('one', [root]));
   view.getComponent(Switch).vm.$emit('update:modelValue', true); await flushPromises();
   expect(WikidataQueryService.getInstance().loadPeriodChildrenByWikidataId).toHaveBeenCalledWith('Q100', expect.anything());
-  expect(api.loadChildren).toHaveBeenCalledExactlyOnceWith('root');
+  expect(api.loadChildren).not.toHaveBeenCalled();
   expect(selected()).toEqual([]); expect(api.getListPeriods).not.toHaveBeenCalled();
 });
 
@@ -209,7 +172,7 @@ it('explores virtual Wikidata children without sending virtual IDs to the databa
   await enableWikidata();
   await finderRow('wikidata:Q300').get('.finder-item-content').trigger('click'); await flushPromises();
   expect(wd.mock.calls.map(call => call[0])).toEqual(['Q100', 'Q300']);
-  expect(api.loadChildren).toHaveBeenCalledExactlyOnceWith('inside');
+  expect(api.loadChildren).not.toHaveBeenCalled();
   expect(finderRow('wikidata:Q400').exists()).toBe(true);
   for (const action of view.findAll('.finder-column')[2].findAll('.story-column-header button')) expect(action.attributes('disabled')).toBeDefined();
   expect(finderRow('wikidata:Q400').get('button[aria-label="Importer depuis Wikidata"]').attributes('disabled')).toBeDefined();

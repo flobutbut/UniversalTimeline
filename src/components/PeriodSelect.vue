@@ -48,7 +48,7 @@
           v-model="search"
           type="search"
           class="base-select__search"
-          :placeholder="searchRemote ? 'Rechercher dans le catalogue…' : currentParentId ? 'Filtrer la liste…' : 'Rechercher une racine…'"
+          :placeholder="'Rechercher dans le catalogue…'"
           aria-label="Rechercher une période"
         />
         <Button variant="tertiary" size="sm" type="button" @click="clearSelection">Toutes les périodes</Button>

@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useDatabaseSave } from '@/composables/useDatabaseSave';
 import { useDataStore } from '@/stores/useDataStore';
 import { ConflictResolutionService } from '@/services/ConflictResolutionService';
+import { EventApiService } from '@/services/EventApiService';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { StoryApiService } from '@/services/StoryApiService';
 import { useHomeNavigation } from '@/composables/useHomeNavigation';
@@ -47,10 +48,10 @@ it('blocks a second submission while the first creation is still pending', async
   expect(await first).toBe(true); expect(apiClient.post).toHaveBeenCalledOnce();
 });
 
-it('sends period metadata and its parent together, without a follow-up mutation', async () => {
+it('saves shared metadata without a catalogue parent', async () => {
   vi.mocked(apiClient.put).mockResolvedValue({ ...periodRow, parent_id: null });
   expect(await useDatabaseSave().handleSave({ ...form, parentId: null }, 'period', 'edit', {id:'p1'})).toBe(true);
-  expect(apiClient.put).toHaveBeenCalledExactlyOnceWith('/periods/p1', expect.objectContaining({ parent_id: null }));
+  expect(apiClient.put).toHaveBeenCalledOnce(); expect(vi.mocked(apiClient.put).mock.calls[0][1]).not.toHaveProperty('parent_id');
 });
 
 it.each(['edit', 'create'] as const)('stores the mapped period response on %s rather than reconstructing it from the form', async mode => {
@@ -92,7 +93,10 @@ it('refreshes a displayed timeline card after saving without clearing its naviga
   const child = { ...original, id: 'child', parentId: original.id };
   const parent = { ...original, id: 'parent', parentId: null, hasParent: false };
   store.updatePeriods([parent, original, child]);
-  const nav = useHomeNavigation(); nav.displayedPeriods.value = [child]; nav.currentPeriod.value = original; nav.parentStack.value = [parent];
+  vi.spyOn(StoryApiService.getInstance(),'getStoryPeriods').mockResolvedValue([parent,original,child] as any);
+  vi.spyOn(StoryApiService.getInstance(),'getListStories').mockResolvedValue([]);
+  vi.spyOn(EventApiService.getInstance(),'getStoryListEvents').mockResolvedValue([]);
+  const nav = useHomeNavigation(); await nav.loadInitialData(); nav.displayedPeriods.value = [child]; nav.currentPeriod.value = original; nav.parentStack.value = [parent];
   store.upsertSavedPeriod({ ...child, label: { fr: 'Normalisé', en: '' } });
   store.upsertSavedPeriod(PeriodApiService.mapPeriod(periodRow)); await nextTick();
   expect(nav.displayedPeriods.value[0].label.fr).toBe('Normalisé');

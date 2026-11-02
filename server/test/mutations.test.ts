@@ -128,85 +128,13 @@ for (const entity of ['events', 'stories']) {
   });
 }
 
-describe('PATCH /periods/:id/parent', () => {
-  const path = '/periods/:id/parent';
-  const ancestorRows = [{ id: 'parent', parent_id: 'root' }, { id: 'root', parent_id: null }];
-  beforeEach(() => {
-    client.query.mockImplementation(async (sql: string, params?: unknown[]) => {
-      if (sql.startsWith('SELECT id FROM')) return { rows: [{ id: 'entity-1' }] };
-      if (sql.includes('WITH RECURSIVE')) return { rows: ancestorRows };
-      if (sql.includes('RETURNING')) return { rows: [{ id: 'entity-1', parent_id: params?.[0], has_children: true }] };
-      if (sql.includes('SELECT c.id')) return { rows: [{ id: 'cat', label_fr: 'Catégorie' }] };
-      return { rows: [] };
-    });
-  });
-
-  it.each([undefined, '', '   ', 1, [], {}])('rejects malformed/missing parent_id without opening a transaction (%j)', async parent_id => {
-    const res = await call('patch', path, parent_id === undefined ? {} : { parent_id });
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(withTransaction).not.toHaveBeenCalled();
-  });
-
-  it('rejects self-parenting without writing', async () => {
-    const res = await call('patch', path, { parent_id: 'entity-1' });
-    expect(res.status).toHaveBeenCalledWith(409);
-    expect(client.query.mock.calls.map(args => args[0])).toEqual(['BEGIN', 'ROLLBACK']);
-  });
-
-  it.each(['parent', null])('commits a valid move or explicit detachment (%j) and returns canonical data', async parent_id => {
-    const res = await call('patch', path, { parent_id });
-    const sql = client.query.mock.calls.map(args => args[0]);
-    expect(sql[0]).toBe('BEGIN');
-    expect(sql[1]).toContain('lock_timeout');
-    expect(sql[2]).toBe('LOCK TABLE public.periods IN SHARE ROW EXCLUSIVE MODE');
-    expect(sql.at(-1)).toBe('COMMIT');
-    expect(query).not.toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith({ id: 'entity-1', parent_id, has_children: true, categories: [{ id: 'cat', label: { fr: 'Catégorie', en: 'Catégorie' } }] });
-    expect(client.release).toHaveBeenCalledOnce();
-  });
-
-  it.each([
-    { scenario: 'indirect cycle', rows: [{ id: 'parent', parent_id: 'middle' }, { id: 'middle', parent_id: 'entity-1' }, { id: 'entity-1', parent_id: null }] },
-    { scenario: 'existing cycle', rows: [{ id: 'parent', parent_id: 'other' }, { id: 'other', parent_id: 'parent' }] },
-    { scenario: 'broken ancestry', rows: [{ id: 'parent', parent_id: 'missing-ancestor' }] },
-  ])('refuses $scenario', async ({ rows }) => {
-    client.query.mockImplementation(async (sql: string) => ({ rows: sql.includes('WITH RECURSIVE') ? rows : [{ id: 'entity-1' }] }));
-    const res = await call('patch', path, { parent_id: 'parent' });
-    expect(res.status).toHaveBeenCalledWith(409);
-    expect(client.query.mock.calls.some(args => args[0].includes('UPDATE'))).toBe(false);
-    expect(client.query.mock.calls.at(-1)?.[0]).toBe('ROLLBACK');
-  });
-
-  it.each(['child', 'parent'])('returns 404 when the %s does not exist', async missing => {
-    client.query.mockImplementation(async (sql: string) => ({ rows: (missing === 'child' && sql.startsWith('SELECT id')) || sql.includes('WITH RECURSIVE') ? [] : [{ id: 'entity-1' }] }));
-    const res = await call('patch', path, { parent_id: 'parent' });
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(client.query.mock.calls.some(args => args[0].includes('UPDATE'))).toBe(false);
-    expect(client.query.mock.calls.at(-1)?.[0]).toBe('ROLLBACK');
-  });
-
-  it.each(['UPDATE', 'SELECT c.id'])('rolls back when %s fails, without returning SQL details', async failing => {
-    const previous = client.query.getMockImplementation()!;
-    client.query.mockImplementation(async (...args: any[]) => {
-      if (args[0].includes(failing)) throw new Error('Private SQL detail');
-      return previous(...args);
-    });
-    const res = await call('patch', path, { parent_id: 'parent' });
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Erreur lors du déplacement de la période' });
-    expect(client.query.mock.calls.at(-1)?.[0]).toBe('ROLLBACK');
-  });
-
-  it('returns a retryable 503 when the lock cannot be acquired', async () => {
-    client.query.mockImplementation(async (sql: string) => {
-      if (sql.startsWith('LOCK')) throw Object.assign(new Error('timeout'), { code: '55P03' });
-      return { rows: [] };
-    });
-    const res = await call('patch', path, { parent_id: 'parent' });
-    expect(res.status).toHaveBeenCalledWith(503);
-    expect(client.query.mock.calls.at(-1)?.[0]).toBe('ROLLBACK');
-    expect(client.release).toHaveBeenCalledOnce();
-  });
+it('retires the global parent endpoint without opening a transaction', async () => {
+  const res = await call('patch', '/periods/:id/parent', { parent_id: 'parent' });
+  expect(res.status).toHaveBeenCalledWith(410); expect(withTransaction).not.toHaveBeenCalled();
+});
+it('refuses a global parent in a shared period metadata write', async () => {
+  const res = await call('post', '/periods', {id:'new',wikidata_id:'Q123',label:{fr:'Fiche'},start_date:'M65',parent_id:'parent'});
+  expect(res.status).toHaveBeenCalledWith(400); expect(withTransaction).not.toHaveBeenCalled();
 });
 
 it.each(['periods', 'events'])('returns 409 and rolls back a concurrent duplicate during PUT /%s/:id', async entity => {
@@ -234,7 +162,7 @@ it('returns 409 when period creation races with another creation', async () => {
 describe('DELETE /periods/:id', () => {
   beforeEach(() => {
     client.query.mockImplementation(async (sql: string) => {
-      if (sql.startsWith('SELECT id, parent_id')) return { rows: [{ id: 'entity-1', parent_id: 'parent' }] };
+      if (sql.startsWith('SELECT id FROM public.periods')) return { rows: [{ id: 'entity-1', parent_id: 'parent' }] };
       if (sql.includes('AS children')) return { rows: [{ children: 0, stories: 0 }] };
       if (sql.includes('AS has_children')) return { rows: [{ has_children: false }] };
       return { rows: [] };
@@ -246,14 +174,13 @@ describe('DELETE /periods/:id', () => {
     const sql = client.query.mock.calls.map(args => args[0]);
     expect(sql[0]).toBe('BEGIN');
     expect(sql[1]).toContain('lock_timeout');
-    expect(sql[2]).toBe('LOCK TABLE public.periods IN SHARE ROW EXCLUSIVE MODE');
-    expect(sql[3]).toContain('FOR UPDATE');
-    expect(sql[5]).toBe('DELETE FROM public.period_categories WHERE period_id = $1');
-    expect(sql[6]).toBe('DELETE FROM public.periods WHERE id = $1');
+    expect(sql[2]).toContain('FOR UPDATE');
+    expect(sql[4]).toBe('DELETE FROM public.period_categories WHERE period_id = $1');
+    expect(sql[5]).toBe('DELETE FROM public.periods WHERE id = $1');
     expect(sql.at(-1)).toBe('COMMIT');
-    expect(client.query.mock.calls[5][1]).toEqual(['entity-1']);
+    expect(client.query.mock.calls[4][1]).toEqual(['entity-1']);
     expect(query).not.toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith({ id: 'entity-1', parent: { id: 'parent', hasChildren: false } });
+    expect(res.json).toHaveBeenCalledWith({ id: 'entity-1', parent: null });
     expect(client.release).toHaveBeenCalledOnce();
   });
 
@@ -274,7 +201,7 @@ describe('DELETE /periods/:id', () => {
     expect(client.query.mock.calls.some(args => args[0].startsWith('DELETE'))).toBe(false);
   });
 
-  it.each(['period_categories', 'DELETE FROM public.periods', 'AS has_children'])('rolls back the entire delete if %s fails', async failing => {
+  it.each(['period_categories', 'DELETE FROM public.periods', 'AS children'])('rolls back the entire delete if %s fails', async failing => {
     const previous = client.query.getMockImplementation()!;
     client.query.mockImplementation(async (sql: string, ...args: any[]) => {
       if (sql.includes(failing)) throw new Error('Private SQL detail');
@@ -300,7 +227,7 @@ describe('DELETE /periods/:id', () => {
 
   it('returns a null parent for a deleted root', async () => {
     const previous = client.query.getMockImplementation()!;
-    client.query.mockImplementation(async (sql: string, ...args: any[]) => sql.startsWith('SELECT id, parent_id') ? { rows: [{ id: 'entity-1', parent_id: null }] } : previous(sql, ...args));
+    client.query.mockImplementation(async (sql: string, ...args: any[]) => sql.startsWith('SELECT id FROM public.periods') ? { rows: [{ id: 'entity-1', parent_id: null }] } : previous(sql, ...args));
     const res = await call('delete', '/periods/:id');
     expect(res.json).toHaveBeenCalledWith({ id: 'entity-1', parent: null });
     expect(client.query.mock.calls.some(args => args[0].includes('AS has_children'))).toBe(false);

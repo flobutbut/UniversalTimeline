@@ -36,6 +36,11 @@ export const useDataStore = defineStore('data', () => {
     for (const period of rows) {
       if (!deletedPeriodIds.has(period.id)) {
         const cataloguePeriod = { ...period };
+        if (cataloguePeriod.storyParentId !== undefined) {
+          cataloguePeriod.parentId = null;
+          cataloguePeriod.hasParent = false;
+          cataloguePeriod.hasChildren = false;
+        }
         delete cataloguePeriod.storyParentId;
         periods.value = upsertById(periods.value, cataloguePeriod);
       }

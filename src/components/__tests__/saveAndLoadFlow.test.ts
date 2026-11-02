@@ -118,11 +118,11 @@ it.each(['events', 'stories', 'periods'] as const)('renders a %s load error and 
   });
   view = mount(resource === 'events' ? EventsView : resource === 'stories' ? DatabaseView : PeriodsView); await flushPromises();
   expect(view.get('[role="alert"]').text()).toContain('Service indisponible');
-  expect(view.text()).not.toContain(resource === 'stories' ? 'Aucune frise' : resource === 'periods' ? 'Aucune période racine' : 'Aucun événement');
+  expect(view.text()).not.toContain(resource === 'stories' ? 'Aucune frise' : resource === 'periods' ? 'Aucune période' : 'Aucun événement');
   vi.mocked(apiClient.get).mockResolvedValue([]);
   await button('Réessayer').trigger('click'); await flushPromises();
   expect(view.find('[role="alert"]').exists()).toBe(false);
-  expect(view.text()).toContain(resource === 'stories' ? 'Aucune frise' : resource === 'periods' ? 'Aucune période racine' : 'Aucun événement');
+  expect(view.text()).toContain(resource === 'stories' ? 'Aucune frise' : resource === 'periods' ? 'Aucune période' : 'Aucun événement');
 });
 
 it.each(['events', 'periods'] as const)('distinguishes an empty %s picker from a failed load', async resource => {
@@ -161,12 +161,13 @@ it('shows the readable frises of each event and keeps a links failure distinct f
 it('keeps the graph draft and store intact when atomic creation fails, then saves the child in one request', async () => {
   vi.mocked(apiClient.get).mockImplementation(async url => {
     if (url === '/periods') return [{ id: 'parent', label_fr: 'Parent', wikidata_id: 'Q111', start_date: 'M65', end_date: 'NOW' }] as any;
-    if (url === '/periods/parent/children') return [] as any;
+    if (url === '/periods/parent') return {id:'parent',label_fr:'Parent',start_date:'M65',end_date:'NOW'} as any;
+    if (url === '/periods/story-links' || url === '/stories') return [] as any;
     if (url.startsWith('/periods/wikidata/')) return null as any;
     throw new Error(`Unexpected read ${url}`);
   });
   vi.spyOn(WikidataQueryService.getInstance(), 'loadPeriodChildrenByWikidataId').mockResolvedValue([]);
-  const created = { id: 'created', wikidata_id: 'Q222', label_fr: 'Enfant', start_date: 'M65', end_date: 'NOW', parent_id: 'parent', categories: [] };
+  const created = { id: 'created', wikidata_id: 'Q222', label_fr: 'Enfant', start_date: 'M65', end_date: 'NOW', parent_id: null, categories: [] };
   vi.mocked(apiClient.post).mockRejectedValueOnce({ response: { data: { error: 'Parent indisponible' } } }).mockResolvedValueOnce(created);
   view = mount(PeriodsView); await flushPromises();
   await view.get('.finder-item').trigger('click'); await flushPromises();
@@ -181,8 +182,8 @@ it('keeps the graph draft and store intact when atomic creation fails, then save
   expect(useDataStore().periodById('created')).toBeNull();
   await button('Créer').trigger('click'); await flushPromises();
   expect(apiClient.post).toHaveBeenCalledTimes(2); expect(apiClient.put).not.toHaveBeenCalled(); expect(apiClient.patch).not.toHaveBeenCalled();
-  expect(apiClient.post).toHaveBeenLastCalledWith('/periods', expect.objectContaining({ parent_id: 'parent', categories: [] }));
-  expect(useDataStore().periodById('created')?.parentId).toBe('parent'); expect(view.findComponent(EditModal).exists()).toBe(false);
+  expect(vi.mocked(apiClient.post).mock.calls.at(-1)?.[1]).not.toHaveProperty('parent_id');
+  expect(useDataStore().periodById('created')?.parentId).toBeNull(); expect(view.findComponent(EditModal).exists()).toBe(false);
 });
 
 it('keeps the draft and blocks saving when categories fail, then reloads real categories on retry', async () => {
@@ -199,12 +200,8 @@ it('keeps the draft and blocks saving when categories fail, then reloads real ca
   expect((view.get('input[placeholder="Titre en français"]').element as HTMLInputElement).value).toBe('Mon brouillon');
 });
 
-it('surfaces an ancestor lookup failure instead of showing a falsely complete period path', async () => {
-  vi.mocked(apiClient.get).mockImplementation(async url => {
-    if (url === '/periods') return [] as any;
-    throw new Error('Ancêtre indisponible');
-  });
-  view = mount(PeriodPickerModal, { props: { alreadyInStory: [], initialPeriodId: 'leaf' } });
-  await flushPromises();
-  expect(view.get('[role="alert"]').text()).toContain('Ancêtre indisponible');
+it('opens the flat catalogue picker without fetching an old ancestor chain', async () => {
+  vi.mocked(apiClient.get).mockResolvedValue([]);
+  view=mount(PeriodPickerModal,{props:{alreadyInStory:[],initialPeriodId:'leaf'}}); await flushPromises();
+  expect(apiClient.get).toHaveBeenCalledExactlyOnceWith('/periods'); expect(view.text()).toContain('Aucune période');
 });

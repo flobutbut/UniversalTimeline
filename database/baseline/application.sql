@@ -65,7 +65,6 @@ CREATE TABLE public."period_categories" (
 
 CREATE TABLE public."periods" (
   "id" character varying NOT NULL,
-  "parent_id" character varying,
   "wikidata_id" character varying,
   "label_fr" text NOT NULL,
   "label_en" text NOT NULL,
@@ -137,7 +136,6 @@ ALTER TABLE public."event_categories" ADD CONSTRAINT "event_categories_category_
 ALTER TABLE public."event_categories" ADD CONSTRAINT "event_categories_event_id_fkey" FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE;
 ALTER TABLE public."period_categories" ADD CONSTRAINT "period_categories_category_id_fkey" FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE;
 ALTER TABLE public."period_categories" ADD CONSTRAINT "period_categories_period_id_fkey" FOREIGN KEY (period_id) REFERENCES periods(id) ON DELETE CASCADE;
-ALTER TABLE public."periods" ADD CONSTRAINT "periods_parent_id_fkey" FOREIGN KEY (parent_id) REFERENCES periods(id) ON DELETE SET NULL;
 ALTER TABLE public."stories" ADD CONSTRAINT "stories_owner_user_id_fkey" FOREIGN KEY (owner_user_id) REFERENCES auth.users(id) ON DELETE RESTRICT;
 ALTER TABLE public."stories" ADD CONSTRAINT "stories_parent_same_owner" FOREIGN KEY (parent_story_id, owner_user_id) REFERENCES stories(id, owner_user_id);
 ALTER TABLE public."stories" ADD CONSTRAINT "stories_parent_story_id_fkey" FOREIGN KEY (parent_story_id) REFERENCES stories(id);
@@ -153,7 +151,6 @@ ALTER SEQUENCE public.story_anchors_id_seq OWNED BY public.story_anchors.id;
 
 CREATE INDEX idx_events_date_years_bp ON public.events USING btree (date_years_bp DESC NULLS LAST);
 CREATE INDEX idx_periods_end_years_bp ON public.periods USING btree (end_years_bp);
-CREATE INDEX idx_periods_parent_id ON public.periods USING btree (parent_id);
 CREATE INDEX idx_periods_start_years_bp ON public.periods USING btree (start_years_bp DESC NULLS LAST);
 CREATE INDEX idx_stories_is_public ON public.stories USING btree (is_public);
 CREATE INDEX idx_stories_parent_story_id ON public.stories USING btree (parent_story_id);
@@ -315,12 +312,10 @@ CREATE POLICY "ut_write_story_periods" ON public."story_periods" AS PERMISSIVE F
 COMMENT ON COLUMN public.stories.owner_user_id IS 'UniversalTimeline access v1; NULL = legacy story pending explicit attribution';
 -- Keep catalogue parentage unchanged; a frise can store its own placement.
 ALTER TABLE public.story_periods
-  ADD COLUMN parent_period_id character varying,
-  ADD COLUMN parent_override boolean NOT NULL DEFAULT false;
+  ADD COLUMN parent_period_id character varying;
 ALTER TABLE public.story_periods
-  ADD CONSTRAINT story_periods_parent_override_check CHECK (parent_period_id IS NULL OR parent_override),
   ADD CONSTRAINT story_periods_no_self_parent CHECK (parent_period_id IS DISTINCT FROM period_id),
-  ADD CONSTRAINT story_periods_parent_period_id_fkey FOREIGN KEY (parent_period_id) REFERENCES public.periods(id) ON DELETE RESTRICT;
+  ADD CONSTRAINT story_periods_parent_in_same_story FOREIGN KEY (story_id, parent_period_id) REFERENCES public.story_periods(story_id, period_id) DEFERRABLE INITIALLY DEFERRED;
 CREATE INDEX story_periods_parent_period_id_idx ON public.story_periods (parent_period_id, story_id);
 
 -- Read-only search helpers, isolated from the application schema.
@@ -328,5 +323,30 @@ CREATE SCHEMA IF NOT EXISTS extensions;
 CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA extensions;
 GRANT USAGE ON SCHEMA extensions TO anon, authenticated, service_role;
+
+CREATE FUNCTION public.check_story_period_hierarchy() RETURNS trigger
+LANGUAGE plpgsql SECURITY INVOKER SET search_path = '' AS $function$
+BEGIN
+  PERFORM 1 FROM public.stories WHERE id = NEW.story_id FOR UPDATE;
+  IF TG_OP = 'UPDATE' AND (NEW.story_id, NEW.period_id) IS DISTINCT FROM (OLD.story_id, OLD.period_id) THEN
+    RAISE EXCEPTION 'Remove and add a membership to change its identity' USING ERRCODE = '23514';
+  END IF;
+  IF NEW.parent_period_id IS NOT NULL AND EXISTS (
+    WITH RECURSIVE ancestors(id, parent_id) AS (
+      SELECT sp.period_id, sp.parent_period_id FROM public.story_periods sp
+      WHERE sp.story_id = NEW.story_id AND sp.period_id = NEW.parent_period_id
+      UNION
+      SELECT sp.period_id, sp.parent_period_id FROM public.story_periods sp
+      JOIN ancestors a ON sp.period_id = a.parent_id WHERE sp.story_id = NEW.story_id
+    ) SELECT 1 FROM ancestors WHERE id = NEW.period_id
+  ) THEN RAISE EXCEPTION 'A frise cannot contain a period cycle' USING ERRCODE = '23514'; END IF;
+  RETURN NEW;
+END;
+$function$;
+REVOKE ALL ON FUNCTION public.check_story_period_hierarchy() FROM PUBLIC, anon, authenticated;
+CREATE TRIGGER trg_story_period_hierarchy
+BEFORE INSERT OR UPDATE ON public.story_periods
+FOR EACH ROW EXECUTE FUNCTION public.check_story_period_hierarchy();
+
 
 COMMIT;
