@@ -5,7 +5,7 @@ import * as relations from '../repositories/storyRelationsRepository.js';
 import { periodSubtree, itemsWithinPeriod } from '../domain/storySplit.js';
 import { comparableYearsBeforePresent } from '../shared/temporal.js';
 import { readEntityCategories, replaceEntityCategories } from '../repositories/categoryRepository.js';
-import { creatorAuthor } from './profileService.js';
+import { creatorAuthor } from './storyAuthor.js';
 
 async function requireWritableStory(client: TransactionClient, storyId: string) {
   if (!await relations.lockWritableStory(client, storyId)) throw new StoryAssociationError(404, 'Frise introuvable ou non modifiable.');

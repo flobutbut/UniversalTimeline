@@ -1,11 +1,8 @@
 import { withTransaction } from '../api/database.js';
-import type { TransactionClient } from '../api/transaction.js';
-import { principalContext } from '../auth/context.js';
 import { ProfileError } from '../domain/errors.js';
 import * as profiles from '../repositories/profileRepository.js';
 import { CURRENT_TERMS_VERSION } from '../shared/accountRules.js';
 
-const ANONYMOUS_AUTHOR = 'Anonyme';
 const isoDate = (value: Date | string | null) => value === null ? null : new Date(value).toISOString();
 
 function mapProfile(row: profiles.ProfileRow) {
@@ -15,22 +12,6 @@ function mapProfile(row: profiles.ProfileRow) {
     currentTermsVersion: CURRENT_TERMS_VERSION,
   };
 }
-
-const signedIn = () => !!principalContext.getStore()?.userId;
-
-/**
- * Byline of a new frise. A signed-in account signs with its unique username and cannot create
- * without one; without accounts (local mode) the requested author is kept.
- */
-export async function creatorAuthor(client: TransactionClient, requested?: string | null): Promise<string> {
-  if (!signedIn()) return requested?.trim() || ANONYMOUS_AUTHOR;
-  const profile = await profiles.readOwnProfile(client);
-  if (!profile) throw new ProfileError(412, 'Choisissez un nom d’utilisateur dans votre profil avant de créer une frise.');
-  return profile.username;
-}
-
-/** An edit by a signed-in account keeps the stored author (null); without accounts the body may set it. */
-export const editorAuthor = (requested?: string | null): string | null => signedIn() ? null : requested?.trim() || null;
 
 export async function getProfile() {
   const row = await withTransaction(client => profiles.readOwnProfile(client));

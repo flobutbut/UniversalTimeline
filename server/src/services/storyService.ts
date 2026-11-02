@@ -9,7 +9,7 @@ import { aggregateStoryTemporalBounds } from '../domain/storyTemporalBounds.js';
 import * as associations from './storyAssociations.js';
 import type { AssociationKind } from '../repositories/storyRelationsRepository.js';
 import { changeEntryPoints } from './storyEntryPoints.js';
-import { creatorAuthor, editorAuthor } from './profileService.js';
+import { creatorAuthor, editorAuthor } from './storyAuthor.js';
 
 const db = { query };
 export async function listStories() {
