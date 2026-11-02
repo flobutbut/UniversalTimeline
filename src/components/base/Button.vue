@@ -24,8 +24,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue';
-import { RouterLink, routerKey, type RouteLocationRaw } from 'vue-router';
+import { computed } from 'vue';
+import { useLinkDestination } from '@/composables/useLinkDestination';
+import { RouterLink, type RouteLocationRaw } from 'vue-router';
 
 interface Props {
   variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'danger';
@@ -48,15 +49,7 @@ const props = withDefaults(defineProps<Props>(), {
   to: undefined,
 });
 const isLink = computed(() => props.to !== undefined && !props.disabled);
-// Outside a router (isolated rendering), a path destination still works as an ordinary link.
-const router = inject(routerKey, null);
-const plainHref = computed(() => {
-  const to = props.to;
-  if (typeof to === 'string') return to;
-  if (!to || !('path' in to) || !to.path) return undefined;
-  const query = new URLSearchParams(Object.entries(to.query ?? {}).flatMap(([key, value]) => value == null ? [] : [[key, String(value)]])).toString();
-  return query ? `${to.path}?${query}` : to.path;
-});
+const { router, plainHref } = useLinkDestination(() => props.to);
 
 defineEmits<{
   (e: 'click', event: MouseEvent): void;
@@ -66,12 +59,12 @@ defineEmits<{
 <style scoped>
 .base-button {
   display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
-  box-sizing: border-box; gap: 0; padding: 8px; min-height: var(--field-height-lg);
+  box-sizing: border-box; gap: 0; padding: var(--spacing-sm); min-height: var(--field-height-lg);
   border: 1px solid transparent; border-radius: var(--radius-md);
-  font-size: var(--font-size-base); font-weight: 400; line-height: var(--line-height-body);
+  font: var(--type-action);
   text-decoration: none; cursor: pointer; transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
-.base-button__text { padding: 1px 8px; line-height: var(--line-height-small); white-space: nowrap; }
+.base-button__text { padding: 1px var(--spacing-sm); line-height: var(--line-height-small); white-space: nowrap; }
 .base-button__leading { display: inline-flex; align-items: center; justify-content: center; line-height: 0; }
 .base-button--primary { background: var(--color-action-primary-default); border-color: var(--color-action-primary-default); color: var(--color-text-on-accent); }
 .base-button--primary:hover:not(:disabled) { background: var(--color-action-primary-hover); border-color: var(--color-action-primary-hover); }
@@ -83,7 +76,7 @@ defineEmits<{
 .base-button--danger:hover:not(:disabled) { background: var(--color-action-danger-hover); border-color: var(--color-action-danger-hover); }
 .base-button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 .base-button--sm { min-height: var(--field-height-md); height: var(--field-height-md); font-size: var(--font-size-sm); }
-.base-button--xs { min-height: var(--control-height-xs); height: var(--control-height-xs); padding: 4px; font-size: var(--font-size-sm); }
+.base-button--xs { min-height: var(--control-height-xs); height: var(--control-height-xs); padding: var(--spacing-xs); font-size: var(--font-size-sm); }
 .base-button--xs .base-button__text { padding-inline: 6px; }
 .base-button--icon-only { padding: 0; width: var(--field-height-lg); min-width: var(--field-height-lg); }
 .base-button--sm.base-button--icon-only { width: var(--field-height-md); min-width: var(--field-height-md); }

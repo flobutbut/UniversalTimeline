@@ -24,6 +24,7 @@
 !database/**
 !scripts/
 !scripts/check.mjs
+!scripts/check-design-system.mjs
 !scripts/lib/
 !scripts/lib/config-review.mjs
 !tools/

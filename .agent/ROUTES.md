@@ -12,6 +12,8 @@
 | `/database` | `database` | `DatabaseView/DatabaseView.vue` | Onglet Stories |
 | `/periods` (alias `/graph`) | `graph` | `GraphView/Periods.vue` | Onglet Periods ; les deux URL existantes sont conservées |
 | `/events` | `events` | `EventsView/EventsView.vue` | Liste et filtres d’événements |
+| `/profile` | `profile` | `ProfileView.vue` | Profil du compte : nom d’utilisateur et avatar, données et confidentialité (conditions, export, cookies, suppression), session ; `SidebarLayout`, `?section=privacy|session` |
+| `/legal/:page` | `legal` | `LegalView.vue` | Public : mentions légales, confidentialité, cookies, conditions (`src/lib/legalDocuments.ts`) |
 | `/design-system` | `design-system` | `DesignSystemView/DesignSystemView.vue` | Démonstration des composants |
 | `/:pathMatch(.*)*` | `not-found` | `NotFoundView.vue` | Page introuvable, lien vers la timeline, aucun onglet actif |
 

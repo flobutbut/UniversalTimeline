@@ -83,6 +83,8 @@ export function mapToStory(row: StoryDto): Story {
   return {
     ...mapToListStory(row), periods: row.periods.map(mapToPeriod), events: row.events.map(mapToEvent),
     childStories: row.childStories?.map(child => ({ id: apiId(child.id), title: text(child.title, child.title_fr, child.title_en), anchors: (child.anchors ?? []).map(anchor => ({ ...anchor, id: apiId(anchor.id) })) })),
+    parentStories: row.parentStories?.map(parent => ({ id: apiId(parent.id), title: text(parent.title, parent.title_fr, parent.title_en), ownerUserId: parent.ownerUserId,
+      anchors: parent.anchors.map(anchor => ({ type: anchor.type, id: apiId(anchor.id), label: text(anchor.label) })) })),
     relatedStories: row.relatedStories?.map(story => ({ id: apiId(story.id), title: text(story.title, story.title_fr, story.title_en), periodIds: story.periodIds.map(apiId), eventIds: story.eventIds.map(apiId) })),
   };
 }

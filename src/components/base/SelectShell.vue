@@ -19,9 +19,9 @@
       <slot name="trigger" />
 
       <Transition name="select-dropdown">
-        <div
+        <PopoverSurface
           v-if="open"
-          ref="dropdownRef"
+          :ref="dropdownRefElement"
           class="base-select__dropdown"
           :class="[dropdownClass, { 'base-select__dropdown--unbounded': unboundedDropdown }]"
           :id="dropdownId"
@@ -30,7 +30,7 @@
           :aria-multiselectable="dropdownRole === 'listbox' ? dropdownMultiple : undefined"
         >
           <slot name="dropdown" />
-        </div>
+        </PopoverSurface>
       </Transition>
     </div>
 
@@ -40,6 +40,8 @@
 </template>
 
 <script setup lang="ts">
+import { elementRef } from '@/utils/elementRef';
+import PopoverSurface from '@/components/base/PopoverSurface.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { shouldDismissOpenSelectOnKeydown } from '@/lib/modalOverlayDismiss';
 
@@ -79,6 +81,7 @@ const emit = defineEmits<{
 
 const rootRef = ref<HTMLElement | null>(null);
 const dropdownRef = ref<HTMLElement | null>(null);
+const dropdownRefElement = elementRef(dropdownRef);
 function handleFocusOut(event: FocusEvent) {
   if (event.relatedTarget instanceof Node && !rootRef.value?.contains(event.relatedTarget)) open.value = false;
 }
@@ -127,15 +130,15 @@ defineExpose({
 
 .base-select__label {
   font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
 }
 
 .base-select__required {
-  color: var(--color-error);
+  color: var(--color-status-error-foreground);
 }
 
 .base-select__wrapper {
@@ -149,10 +152,6 @@ defineExpose({
   right: 0;
   z-index: var(--z-index-dropdown);
   margin-top: var(--spacing-xs);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
   max-height: calc(var(--spacing-xs) * 75);
   overflow: hidden;
 }
@@ -183,12 +182,12 @@ defineExpose({
 
 .base-select__error {
   font-size: var(--font-size-sm);
-  color: var(--color-error);
+  color: var(--color-status-error-foreground);
 }
 
 .base-select__hint {
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
 }
 </style>
 

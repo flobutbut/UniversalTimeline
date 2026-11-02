@@ -35,8 +35,11 @@ it.each([null,{},[],1,'','a'.repeat(256)])('refuses a non-text or missing requir
 it.each([0,1,'false',null,{},[]])('refuses non-boolean story visibility (%j)', async isPublic => {
   const res=await call('put','/stories/:id',{...story,isPublic}); expect(res.status).toHaveBeenCalledWith(400); noSql();
 });
-it.each([undefined,null,1,'','  ','a'.repeat(256)])('refuses an invalid author before SQL (%j)', async author => {
+it.each([1,'','  ','a'.repeat(256)])('refuses an invalid author before SQL (%j)', async author => {
   const res=await call('post','/stories',{...story,author}); expect(res.status).toHaveBeenCalledWith(400); noSql();
+});
+it.each([undefined,null])('accepts a story without author: the account signs it (%j)', author => {
+  expect(parseStoryWrite({...story,author}).author).toBeNull();
 });
 it.each([{},[],1,'','Q-1','Q0'])('refuses invalid Q-ids before SQL (%j)', async wikidata_id => {
   const res=await call('post','/periods',{...entity,wikidata_id}); expect(res.status).toHaveBeenCalledWith(400); noSql();

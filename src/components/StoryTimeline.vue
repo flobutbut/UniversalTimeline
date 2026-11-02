@@ -45,8 +45,8 @@
 
     <div v-if="undatedPeriods.length || undatedEvents.length" class="story-timeline__undated">
       <span>Dates non déterminées</span>
-      <button v-for="p in undatedPeriods" :key="`p:${p.id}`" type="button" @click="emit('select-period', p.id)">{{ p.label?.fr || p.id }}</button>
-      <button v-for="e in undatedEvents" :key="`e:${e.id}`" type="button" @click="emit('select-event', e.id)">{{ typeof e.label === 'string' ? e.label : e.label?.fr || e.id }}</button>
+      <Button variant="tertiary" size="xs" v-for="p in undatedPeriods" :key="`p:${p.id}`" type="button" @click="emit('select-period', p.id)">{{ p.label?.fr || p.id }}</Button>
+      <Button variant="tertiary" size="xs" v-for="e in undatedEvents" :key="`e:${e.id}`" type="button" @click="emit('select-event', e.id)">{{ typeof e.label === 'string' ? e.label : e.label?.fr || e.id }}</Button>
     </div>
 
     <!-- Tooltip -->
@@ -64,6 +64,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from '@/components/base/Button.vue';
 import { computed, ref } from 'vue';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import { COMPACT_BAR_HEIGHT, COMPACT_LANE_GAP, COMPACT_ROOT_HEIGHT, layoutCompactLanes } from '@/lib/compactStoryTimeline';
@@ -289,13 +290,13 @@ const trackRef = ref<HTMLElement | null>(null);
 
 <style scoped>
 .story-timeline__undated { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); margin-top: var(--spacing-sm); }
-.story-timeline__undated button { color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); padding: var(--spacing-xs) var(--spacing-sm); cursor: pointer; }
+
 
 .story-timeline {
-  padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--spacing-lg) var(--spacing-md) var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border-default);
   flex-shrink: 0;
-  background: var(--color-surface);
+  background: transparent;
 }
 
 .story-timeline__track {
@@ -309,7 +310,7 @@ const trackRef = ref<HTMLElement | null>(null);
   left: 0;
   right: 0;
   height: 1px;
-  background: var(--color-border);
+  background: var(--color-border-default);
 }
 
 .story-timeline__period-bar {
@@ -319,7 +320,7 @@ const trackRef = ref<HTMLElement | null>(null);
   top: var(--story-period-top);
   height: var(--spacing-sm);
   border-radius: calc(var(--radius-md) / 2);
-  background: var(--color-period);
+  background: var(--color-data-period);
   opacity: 0.8;
   cursor: pointer;
   transition: opacity var(--transition-fast), box-shadow var(--transition-fast);
@@ -330,7 +331,7 @@ const trackRef = ref<HTMLElement | null>(null);
 }
 
 .story-timeline__period-bar--root {
-  background: var(--color-period-root);
+  background: var(--color-data-period-root);
   opacity: 0.8;
   height: calc(var(--spacing-sm) + var(--spacing-xs) / 2);
 }
@@ -341,11 +342,11 @@ const trackRef = ref<HTMLElement | null>(null);
 
 .story-timeline__period-bar--selected {
   opacity: 1;
-  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 calc(var(--radius-md) * 7 / 12) var(--color-period);
+  box-shadow: 0 0 0 2px var(--color-surface-default), 0 0 0 calc(var(--radius-md) * 7 / 12) var(--color-data-period);
 }
 
 .story-timeline__period-bar--root.story-timeline__period-bar--selected {
-  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 calc(var(--radius-md) * 7 / 12) var(--color-period-root);
+  box-shadow: 0 0 0 2px var(--color-surface-default), 0 0 0 calc(var(--radius-md) * 7 / 12) var(--color-data-period-root);
 }
 
 .story-timeline__event-marker {
@@ -354,7 +355,7 @@ const trackRef = ref<HTMLElement | null>(null);
   width: var(--spacing-sm);
   height: var(--spacing-sm);
   transform: translateX(-50%) rotate(45deg);
-  background: var(--color-event);
+  background: var(--color-data-event);
   border-radius: calc(var(--radius-sm) / 4);
   cursor: pointer;
   transition: opacity var(--transition-fast), box-shadow var(--transition-fast);
@@ -366,7 +367,7 @@ const trackRef = ref<HTMLElement | null>(null);
 
 .story-timeline__event-marker--selected {
   opacity: 1;
-  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 calc(var(--radius-md) * 7 / 12) var(--color-event);
+  box-shadow: 0 0 0 2px var(--color-surface-default), 0 0 0 calc(var(--radius-md) * 7 / 12) var(--color-data-event);
 }
 
 .story-timeline__foot {
@@ -379,7 +380,16 @@ const trackRef = ref<HTMLElement | null>(null);
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-small);
 }
+
+.story-timeline--compact { padding: 0; width: 100%; border: 0; overflow: hidden; pointer-events: none; }
+/* Bars of one line keep a 2px gap between them, like the gap between lines. */
+.story-timeline--compact .story-timeline__period-bar { width: max(2px, calc(var(--story-period-width) - 2px)); height: 8px; border-radius: 3px; }
+.story-timeline--compact .story-timeline__period-bar--root { height: 10px; }
+.story-timeline--compact .story-timeline__axis { bottom: 8px; }
+.story-timeline--compact .story-timeline__event-marker { width: 6px; height: 6px; bottom: 5px; }
+.story-timeline--compact .story-timeline__undated { display: none; }
 </style>
 
 <style>
@@ -388,8 +398,8 @@ const trackRef = ref<HTMLElement | null>(null);
   position: fixed;
   z-index: var(--z-index-tooltip, 9999);
   transform: translate(-50%, -100%);
-  background: var(--color-neutral-800);
-  color: var(--color-neutral-0);
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
   border-radius: var(--radius-md);
   padding: var(--spacing-xs) calc(var(--spacing-sm) + var(--spacing-xs) / 2);
   pointer-events: none;
@@ -402,7 +412,7 @@ const trackRef = ref<HTMLElement | null>(null);
 
 .story-timeline-tooltip__name {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1.4;
 }
 
@@ -411,16 +421,4 @@ const trackRef = ref<HTMLElement | null>(null);
   opacity: 0.75;
   line-height: 1.3;
 }
-</style>
-
-<style scoped>
-.story-timeline { padding-top: 16px; background: var(--color-background); }
-.story-timeline__label { line-height: 16px; }
-.story-timeline--compact { padding: 0; width: 100%; border: 0; overflow: hidden; background: transparent; pointer-events: none; }
-/* Bars of one line keep a 2px gap between them, like the gap between lines. */
-.story-timeline--compact .story-timeline__period-bar { width: max(2px, calc(var(--story-period-width) - 2px)); height: 8px; border-radius: 3px; }
-.story-timeline--compact .story-timeline__period-bar--root { height: 10px; }
-.story-timeline--compact .story-timeline__axis { bottom: 8px; }
-.story-timeline--compact .story-timeline__event-marker { width: 6px; height: 6px; bottom: 5px; }
-.story-timeline--compact .story-timeline__undated { display: none; }
 </style>

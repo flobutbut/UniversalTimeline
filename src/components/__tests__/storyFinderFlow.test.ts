@@ -29,7 +29,7 @@ const button = (name: string) => view.findAll('button').find(b => b.text() === n
 async function start(data = story('one'), realTimeline = false) {
   view = mount(StoryDetailPanel, { props: { story: data }, attachTo: document.body, global: { stubs: {
     StoryTimeline: realTimeline ? false : { name: 'StoryTimeline', props: ['selectedPeriodId', 'selectedEventId'], template: '<div />' },
-    EventPickerModal: true, StoryRelatedPickerModal: true,
+    StoryRelatedPickerModal: true,
   } } }); await flushPromises();
 }
 async function pick(p: Period) { view.getComponent(FilterBar).vm.$emit('pickPeriod', p); await flushPromises(); }
@@ -241,8 +241,9 @@ it('offers period and frise additions at the root without retaining a nested anc
   await headers[2].findAll('button').find(action => action.text() === 'Ajouter une frise')!.trigger('click');
   view.getComponent({ name: 'StoryRelatedPickerModal' }).vm.$emit('close'); await flushPromises();
   await rootButton('Ajouter une frise').trigger('click');
-  view.getComponent({ name: 'StoryRelatedPickerModal' }).vm.$emit('confirm', ['linked-frise']); await flushPromises();
-  expect(view.emitted('add-child-stories')).toEqual([[['linked-frise'], undefined]]);
+  expect(view.getComponent({ name: 'StoryRelatedPickerModal' }).props('periods')).toHaveLength(2);
+  view.getComponent({ name: 'StoryRelatedPickerModal' }).vm.$emit('confirm', ['linked-frise'], 'inside'); await flushPromises();
+  expect(view.emitted('add-child-stories')).toEqual([[['linked-frise'], { type: 'period', id: 'inside' }]]);
   await rootButton('Ajouter une période').trigger('click');
   expect(view.getComponent(EditModal).props()).toMatchObject({ mode: 'create', type: 'period', data: { parent_id: null }, allowExistingPeriods: true });
   expect(view.emitted('add-periods')).toBeUndefined();

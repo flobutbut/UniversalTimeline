@@ -68,8 +68,8 @@ const handleOverlayClick = (e: MouseEvent) => {
 
 .modal-content {
   position: relative;
-  background: var(--color-surface);
-  color: var(--color-text);
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl) var(--spacing-2xl);
   width: calc(var(--spacing-xs) * 215);
@@ -100,8 +100,8 @@ const handleOverlayClick = (e: MouseEvent) => {
   flex: 1;
   min-width: 0;
   font-size: var(--font-size-xl);
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
   margin: 0;
   line-height: 1.25;
 }

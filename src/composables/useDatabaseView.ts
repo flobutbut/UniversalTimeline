@@ -341,21 +341,28 @@ export function useDatabaseView() {
   const addChildStoriesToStory = (childIds: string[], anchor?: StoryAnchor) => mutateRelatedStories(async parentId => {
     const ids = [...new Set(childIds)];
     const service = StoryApiService.getInstance();
-    if (anchor) await service.linkChildStories(parentId, ids, anchor);
-    else await service.linkChildStories(parentId, ids);
+    await service.changeEntryPoints(parentId, ids, anchor);
     return `${ids.length} frise(s) rattachée(s)`;
   });
-  const removeChildStoryFromStory = (childId: string) => mutateRelatedStories(async parentId => {
-    await StoryApiService.getInstance().unlinkChildStory(parentId, childId);
+  const removeChildStoryFromStory = (childId: string, anchor?: StoryAnchor) => mutateRelatedStories(async parentId => {
+    await StoryApiService.getInstance().changeEntryPoints(parentId, [childId], anchor, true);
     return 'Frise détachée';
   });
-  const addEventAnchorToStory = (childId: string, eventId: string) => mutateRelatedStories(async () => {
-    await StoryApiService.getInstance().addAnchor(childId, { type: 'event', id: eventId });
+  const addEventAnchorToStory = (childId: string, eventId: string) => mutateRelatedStories(async parentId => {
+    await StoryApiService.getInstance().changeEntryPoints(parentId, [childId], { type: 'event', id: eventId });
     return 'Ancre ajoutée';
   });
-  const removeEventAnchorFromStory = (childId: string, eventId: string) => mutateRelatedStories(async () => {
-    await StoryApiService.getInstance().removeAnchor(childId, { type: 'event', id: eventId });
+  const removeEventAnchorFromStory = (childId: string, eventId: string) => mutateRelatedStories(async parentId => {
+    await StoryApiService.getInstance().changeEntryPoints(parentId, [childId], { type: 'event', id: eventId }, true);
     return 'Ancre retirée';
+  });
+  const addParentEntryToStory = (sourceId: string, periodId: string) => mutateRelatedStories(async targetId => {
+    await StoryApiService.getInstance().changeEntryPoints(sourceId, [targetId], { type: 'period', id: periodId });
+    return 'Point d’entrée ajouté';
+  });
+  const removeParentEntryFromStory = (sourceId: string, anchor?: StoryAnchor) => mutateRelatedStories(async targetId => {
+    await StoryApiService.getInstance().changeEntryPoints(sourceId, [targetId], anchor, true);
+    return 'Point d’entrée retiré';
   });
 
   return {
@@ -377,6 +384,8 @@ export function useDatabaseView() {
     removeChildStoryFromStory,
     addEventAnchorToStory,
     removeEventAnchorFromStory,
+    addParentEntryToStory,
+    removeParentEntryFromStory,
     sharedLoading, sharedError,
   };
 }

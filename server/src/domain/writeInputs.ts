@@ -9,6 +9,6 @@ export interface PeriodWrite extends EntityWrite {
   wikidata_id: string; start_date: string; end_date: string;
 }
 export interface StoryWrite {
-  title: LocalizedText; description: Description; author: string;
+  title: LocalizedText; description: Description; author: string | null;
   isPublic?: boolean; categories?: string[];
 }

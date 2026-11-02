@@ -12,7 +12,7 @@ const story: Story = {
 let view: ReturnType<typeof mount>;
 const button = (label: string) => view.findAll('button').find(item => item.text() === label || item.attributes('aria-label') === label);
 const select = () => view.getComponent(BaseSelect);
-const chips = () => view.findAll('.story-categories-form__tag').map(item => item.text());
+const chips = () => view.findAll('.story-categories-form__tags .ui-tag').map(item => item.text());
 const add = async (id: string) => { select().vm.$emit('update:modelValue', id); await flushPromises(); };
 beforeEach(() => {
   vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([{ id: 'c1', label: 'Histoire' }, { id: 'c2', label: 'Science' }]);

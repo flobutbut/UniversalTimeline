@@ -5,6 +5,8 @@ let enabled: boolean | null = null;
 let initialization: Promise<void> | null = null;
 let rejectedToken: string | undefined;
 
+export interface Account { id: string; isAdmin: boolean }
+
 async function initialize(): Promise<void> {
   if (enabled !== null) return;
   if (initialization) return initialization;
@@ -36,7 +38,7 @@ export const authService = {
     const token = data.session?.access_token;
     return token && token !== rejectedToken ? token : undefined;
   },
-  async getAccount(): Promise<{ id: string; isAdmin: boolean } | null> {
+  async getAccount(): Promise<Account | null> {
     const token = await this.getAccessToken();
     if (!token) return null;
     const response = await fetch('/api/account', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
@@ -44,6 +46,13 @@ export const authService = {
     if (!response.ok) throw new Error('Impossible de vérifier votre compte. Réessayez.');
     const account: unknown = await response.json();
     if (!account || typeof (account as { id?: unknown }).id !== 'string' || typeof (account as { isAdmin?: unknown }).isAdmin !== 'boolean') throw new Error('Réponse de connexion invalide.');
-    return account as { id: string; isAdmin: boolean };
+    return account as Account;
+  },
+  /** Email and sign-up date of the local session; only shown to the account itself. */
+  async getIdentity(): Promise<{ email: string | null; createdAt: Date | null }> {
+    const { data, error } = await client?.auth.getUser() ?? { data: { user: null }, error: null };
+    if (error) throw new Error('Profil indisponible. Réessayez.');
+    const created = data.user?.created_at ? new Date(data.user.created_at) : null;
+    return { email: data.user?.email ?? null, createdAt: created && Number.isFinite(created.getTime()) ? created : null };
   },
 };

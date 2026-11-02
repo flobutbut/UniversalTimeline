@@ -4,22 +4,13 @@
     <p id="story-membership-hint" class="story-membership__hint">Chaque ajout ou retrait est enregistré immédiatement, indépendamment du formulaire.</p>
     <p v-if="loading" role="status" class="story-membership__hint">Chargement des frises…</p>
     <p v-else-if="loadError" role="alert" class="story-membership__error">
-      {{ loadError }} <button type="button" class="story-membership__link-button" @click="$emit('retry')">Réessayer</button>
+      {{ loadError }} <Button variant="tertiary" size="sm" type="button" class="story-membership__link-button" @click="$emit('retry')">Réessayer</Button>
     </p>
     <template v-else>
       <ul v-if="linked.length" class="story-membership__list">
         <li v-for="story in linked" :key="story.id" class="story-membership__item">
-          <RouterLink :to="{ path: '/timeline', query: { story: story.id } }" class="story-membership__story">{{ story.title }}</RouterLink>
-          <button
-            v-if="story.owned"
-            type="button"
-            class="story-membership__remove"
-            :disabled="!!pending"
-            :aria-label="`Retirer de la frise ${story.title}`"
-            @click="$emit('remove', story.id)"
-          >
-            <Icon icon="mdi:close" aria-hidden="true" />
-          </button>
+          <Tag :label="story.title" :to="{ path: '/timeline', query: { story: story.id } }" variant="accent"
+            :removable="story.owned" :disabled="!!pending" :remove-label="`Retirer de la frise ${story.title}`" @remove="$emit('remove', story.id)" />
         </li>
       </ul>
       <p v-else class="story-membership__hint">{{ emptyText }}</p>
@@ -44,7 +35,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Icon } from '@iconify/vue';
+import Tag from '@/components/base/Tag.vue';
 import Button from '@/components/base/Button.vue';
 import Select from '@/components/base/Select.vue';
 import type { StorySummary } from '@/types/database';
@@ -85,36 +76,19 @@ function add() {
   gap: var(--spacing-sm);
   margin-top: var(--spacing-md);
   padding-top: var(--spacing-md);
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border-default);
 }
-.story-membership__title { margin: 0; font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text); }
-.story-membership__hint { margin: 0; font-size: var(--font-size-xs); color: var(--color-text-light); }
-.story-membership__error { margin: 0; font-size: var(--font-size-xs); color: var(--color-error); }
+.story-membership__title { margin: 0; font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+.story-membership__hint { margin: 0; font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.story-membership__error { margin: 0; font-size: var(--font-size-xs); color: var(--color-status-error-foreground); }
 .story-membership__list { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); margin: 0; padding: 0; list-style: none; }
-.story-membership__item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: 2px var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
-  font-size: var(--font-size-xs);
-}
-.story-membership__story { color: var(--color-primary); text-decoration: none; }
-.story-membership__story:hover, .story-membership__story:focus-visible { text-decoration: underline; }
-.story-membership__remove, .story-membership__link-button {
-  display: inline-flex;
-  align-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--color-text-light);
-  cursor: pointer;
-  font: inherit;
-}
-.story-membership__link-button { text-decoration: underline; }
-.story-membership__remove:hover, .story-membership__remove:focus-visible { color: var(--color-text); }
-.story-membership__remove:disabled { cursor: default; opacity: 0.5; }
+
+
+
+
+.story-membership__link-button { color: var(--color-text-link); text-decoration: underline; }
+
+
 .story-membership__add { display: flex; gap: var(--spacing-sm); align-items: flex-end; flex-wrap: wrap; }
 .story-membership__add > :first-child { flex: 1 1 220px; min-width: 0; }
 </style>

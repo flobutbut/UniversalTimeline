@@ -1,9 +1,9 @@
 <template>
   <ModalShell :title="modalTitle" height="auto" :busy="loading" @close="closeModal">
-    <p v-if="error" role="alert" class="error-message">{{ error }}</p>
-    <div v-if="editState.categoriesError" class="error-message" role="alert">
-      {{ editState.categoriesError }} <button type="button" :disabled="loading || editState.categoriesLoading" @click="loadCategories">Réessayer</button>
-    </div>
+    <FeedbackState kind="error" layout="inline" v-if="error" role="alert" >{{ error }}</FeedbackState>
+    <FeedbackState kind="error" layout="inline" v-if="editState.categoriesError"  role="alert">
+      {{ editState.categoriesError }} <Button variant="tertiary" size="sm" type="button" :disabled="loading || editState.categoriesLoading" @click="loadCategories">Réessayer</Button>
+    </FeedbackState>
     <template
       v-if="mode === 'create' && (type === 'period' || type === 'event')"
       #header-bottom
@@ -44,13 +44,13 @@
           </template>
           <div v-if="keywordErrorVisible" class="edit-modal-wd-dd__status" role="alert">
             {{ wikidataSearchError }}
-            <button type="button" @mousedown.prevent @click="retryWikidataSuggestions">Réessayer la recherche</button>
+            <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retryWikidataSuggestions">Réessayer la recherche</Button>
           </div>
           <div v-if="existingSearch.error.value" class="edit-modal-wd-dd__status" role="alert">
             {{ existingSearch.error.value }} <button type="button" @mousedown.prevent @click="existingSearch.retry">{{ type === 'period' ? 'Réessayer les périodes existantes' : 'Réessayer les événements existants' }}</button>
           </div>
           <div v-if="meaningSearch.error.value" class="edit-modal-wd-dd__status" role="alert">
-            {{ meaningSearch.error.value }} <button type="button" @mousedown.prevent @click="meaningSearch.retry">Réessayer la recherche par sens</button>
+            {{ meaningSearch.error.value }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="meaningSearch.retry">Réessayer la recherche par sens</Button>
           </div>
           <template v-if="!meaningSearch.error.value && !creationSearchLoading && !keywordErrorVisible && !existingSearch.error.value && !creationSearchHits.length">
             <div class="edit-modal-wd-dd__status" role="status">Aucun résultat</div>
@@ -81,25 +81,22 @@
       </div>
     </template>
 
-    <div v-if="wikidataImportError" class="error-message" role="alert">
+    <FeedbackState kind="error" layout="inline" v-if="wikidataImportError"  role="alert">
       {{ wikidataImportError }}
-      <button type="button" :disabled="loading || wikidataApplyLoading" @click="retryWikidataImport">Réessayer l’import</button>
-    </div>
+      <Button variant="tertiary" size="sm" type="button" :disabled="loading || wikidataApplyLoading" @click="retryWikidataImport">Réessayer l’import</Button>
+    </FeedbackState>
     <p v-if="existingQidNotice" class="edit-modal__existing-notice" role="status">{{ existingQidNotice }}</p>
     <p v-if="wikidataApplyLoading" role="status">Chargement depuis Wikidata…</p>
     <p v-else-if="wikidataNotice" role="status">
       {{ wikidataNotice }}
-      <button v-if="wikidataRetryAvailable" type="button" :disabled="loading || wikidataApplyLoading" @click="retryWikidataImport">Réessayer les compléments</button>
+      <Button variant="tertiary" size="sm" v-if="wikidataRetryAvailable" type="button" :disabled="loading || wikidataApplyLoading" @click="retryWikidataImport">Réessayer les compléments</Button>
     </p>
-    <div v-if="editState.loading" class="loading-overlay">
-      <div class="spinner"></div>
-      <span>Chargement des données...</span>
-    </div>
-    <div v-else-if="editState.error" class="error-message">
+    <FeedbackState v-if="editState.loading" kind="loading" message="Chargement des données…" />
+    <FeedbackState kind="error" layout="inline" v-else-if="editState.error" >
       <Icon icon="mdi:alert-circle" />
       <span>{{ editState.error }}</span>
       <Button variant="secondary" @click="closeModal">Fermer</Button>
-    </div>
+    </FeedbackState>
     <div v-else-if="selectedExistingEntity" class="edit-modal__existing-entity">
       <p>{{ existingEntityLabel }}</p>
       <h3>{{ selectedExistingEntity.label }}</h3>
@@ -253,16 +250,6 @@
 
         <div class="form-row" v-if="type === 'story'">
           <div class="form-group">
-            <Input
-              v-model="form.author"
-              label="Auteur"
-              placeholder="Nom de l'auteur"
-              required
-              :error="fieldError('author')"
-              @blur="touch('author')"
-            />
-          </div>
-          <div class="form-group">
             <div class="switch-group">
               <Switch v-model="form.isPublic" label="Mode public" label-first />
             </div>
@@ -330,6 +317,7 @@
 </template>
 
 <script setup lang="ts">
+import FeedbackState from '@/components/base/FeedbackState.vue';
 import { watch, ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import type { EditInitialData, EditFormSubmission } from '@/types/editForm';
 import { Icon } from '@iconify/vue';
@@ -656,16 +644,16 @@ onUnmounted(() => {
 }
 
 .form-group label {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin-bottom: var(--spacing-xs);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .form-group input,
 .form-group textarea {
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   padding: var(--spacing-sm);
   font-size: var(--font-size-base);
@@ -701,37 +689,8 @@ onUnmounted(() => {
   display: block;
 }
 
-.loading-overlay,
-.error-message {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-xl);
-  color: var(--color-text);
-}
-
-.spinner {
-  width: calc(var(--spacing-sm) * 5);
-  height: calc(var(--spacing-sm) * 5);
-  border: 4px solid var(--color-border);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.error-message {
-  background-color: var(--color-error);
-  color: var(--color-text-white);
-}
-
 .children-count {
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   margin-left: var(--spacing-sm);
 }
@@ -748,7 +707,7 @@ onUnmounted(() => {
   display: block;
   margin-top: 0.25rem;
   font-size: 0.9em;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-style: italic;
   min-height: 1.2em;
 }
@@ -773,12 +732,12 @@ onUnmounted(() => {
 .edit-modal__existing-entity h3 { margin-block: var(--spacing-sm) 0; }
 .edit-modal__existing-date { margin: 0 0 var(--spacing-sm); font-variant-numeric: tabular-nums; }
 .edit-modal__use-existing { margin-top: var(--spacing-xs); }
-.edit-modal__existing-notice { margin: 0 0 var(--spacing-sm); color: var(--color-text-light); font-size: var(--font-size-sm); }
+.edit-modal__existing-notice { margin: 0 0 var(--spacing-sm); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
 
 .edit-modal__parent-hint {
   margin: var(--spacing-xs) 0 0;
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   line-height: 1.45;
 }
 
@@ -801,8 +760,8 @@ onUnmounted(() => {
   right: 0;
   width: max(100%, min(320px, calc(100vw - 48px)));
   z-index: var(--z-index-search-layer);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xl);
   max-height: min(50vh, 320px);
@@ -813,7 +772,7 @@ onUnmounted(() => {
 .edit-modal-wd-dd__status {
   padding: var(--spacing-md);
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-style: italic;
 }
 
@@ -826,11 +785,11 @@ onUnmounted(() => {
   padding: var(--spacing-sm) var(--spacing-md);
   border: none;
   border-bottom: 1px solid var(--color-border-light);
-  background: var(--color-surface);
+  background: var(--color-surface-default);
   cursor: pointer;
   text-align: left;
   font: inherit;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   transition: background var(--transition-fast);
 }
 
@@ -838,10 +797,10 @@ onUnmounted(() => {
   border-bottom: none;
 }
 
-.edit-modal-wd-dd__item--active { background: var(--color-surface-hover); outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.edit-modal-wd-dd__item--active { background: var(--color-interaction-hover); outline: 2px solid var(--color-primary); outline-offset: -2px; }
 
 .edit-modal-wd-dd__item:hover:not(:disabled) {
-  background: var(--color-surface-hover);
+  background: var(--color-interaction-hover);
 }
 
 .edit-modal-wd-dd__item:disabled {
@@ -853,27 +812,27 @@ onUnmounted(() => {
   flex: 1 1 auto;
   min-width: 0;
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .edit-modal-wd-dd__id {
   flex-shrink: 0;
   font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
 .edit-modal-wd-dd__date {
   flex: 1 1 100%;
   font-size: var(--font-size-xs);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   font-variant-numeric: tabular-nums;
 }
 
 .edit-modal-wd-dd__desc {
   flex: 1 1 100%;
   font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   line-height: 1.35;
 }
 </style>

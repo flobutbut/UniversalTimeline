@@ -1,22 +1,16 @@
 <template>
   <div class="database-view">
-    <div v-if="state.loading" class="loading">
-      <div class="spinner"></div>
-      <span>Chargement des données...</span>
-    </div>
-    <div v-else-if="state.error" class="error">
-      <Icon icon="mdi:alert-circle" />
-      <span role="alert">{{ state.error }}</span>
-      <button type="button" @click="loadInitialData">Réessayer</button>
-    </div>
+    <FeedbackState v-if="state.loading" kind="loading" message="Chargement des données…" />
+    <FeedbackState v-else-if="state.error" kind="error" :message="state.error" retryable @retry="loadInitialData" />
     <template v-else>
       <StoryTabsBar :tabs="openTabs" :active-id="selectedStoryId" @select="onTabSelect" @close="onTabClose" />
-      <StoryGallery v-if="!selectedStoryId" v-model:search="storySearch" v-model:visibility="storyVisibility" v-model:time-range="storyTimeRange" v-model:categories="storyCategories" :stories="visibleStories" :category-options="storyCategoryOptions" :error="state.storyError" class="database-view__content" @open="openStory" @create="handleAddStory" />
+      <StoryGallery v-if="!selectedStoryId" v-model:search="storySearch" v-model:visibility="storyVisibility" v-model:time-range="storyTimeRange" v-model:period="storyPeriodFilter" v-model:categories="storyCategories" :stories="visibleStories" :total-stories="filteredStories.length" :category-options="storyCategoryOptions" :error="state.storyError" :can-create="auth.canCreateStories" class="database-view__content" @open="openStory" @create="handleAddStory" />
       <div v-else class="database-story-detail-wrap database-view__content">
         <StoryDetailPanel :key="selectedStoryId" :story="selectedStory" :loading="state.loadingStoryDetails" :updating="relationsBusy || visibilityBusy || state.loadingDetails || saveLoading || deleteLoading" :error="state.storyError" :settings-error="storySettingsError"
           @retry="retryStory" @period-imported="retryStory" @remove-period="removePeriodFromStory" @remove-event="removeEventFromStory" @add-periods="addPeriodsToStory" @event-added="retryStory"
           @add-child-stories="addChildStoriesToStory" @remove-child-story="removeChildStoryFromStory" @add-event-anchor="addEventAnchorToStory" @remove-event-anchor="removeEventAnchorFromStory"
-          @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @create-story-from-period="openStoryFromPeriod" @edit-event="onEditStoryEvent" @save-story="saveSelectedStory" @delete-story="deleteSelectedStory" @toggle-visibility="toggleStoryVisibility" />
+          @add-parent-entry="addParentEntryToStory" @remove-parent-entry="removeParentEntryFromStory"
+          @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @create-story-from-period="startStoryFromPeriod" @edit-event="onEditStoryEvent" @save-story="saveSelectedStory" @delete-story="deleteSelectedStory" @toggle-visibility="toggleStoryVisibility" />
       </div>
     </template>
     <EditModal
@@ -54,13 +48,14 @@
 </template>
 
 <script setup lang="ts">
+import FeedbackState from '@/components/base/FeedbackState.vue';
 import type { EditFormSubmission } from '@/types/editForm';
 import { computed, onMounted, ref, watch, inject } from 'vue';
 import { routeLocationKey, routerKey } from 'vue-router';
 import StoryGallery from './StoryGallery.vue';
 import StoryTabsBar from './StoryTabsBar.vue';
 import { readStoryTarget } from '@/router/storyTarget';
-import { Icon } from '@iconify/vue';
+
 import EditModal from './EditModal.vue';
 import { StoryApiService } from '@/services/StoryApiService';
 import { useDataStore } from '@/stores/useDataStore';
@@ -72,9 +67,12 @@ import { useDatabaseView } from '@/composables/useDatabaseView';
 import { useStoryTabs } from '@/composables/useStoryTabs';
 import type { ListStory } from '@/types/database';
 import { findById } from '@/lib/collectionUtils';
+import type { PeriodFilter } from '@/components/filters/filterTypes';
 import { storyOverlapsRange, type StoryTimeRange } from '@/lib/storyTimeFilter';
 import { useDatabaseSave } from '@/composables/useDatabaseSave';
 import { useDatabaseDelete } from '@/composables/useDatabaseDelete';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useToast } from '@/composables/useToast';
 
 // Utilisation des composables
 const {
@@ -102,6 +100,8 @@ const {
   removeChildStoryFromStory,
   addEventAnchorToStory,
   removeEventAnchorFromStory,
+  addParentEntryToStory,
+  removeParentEntryFromStory,
 } = useDatabaseView();
 
 const route = inject(routeLocationKey, undefined);
@@ -110,6 +110,7 @@ const storySearch = ref('');
 const storyVisibility = ref<'all' | 'public' | 'private'>('all');
 /** One reference instant per evaluation, so story bounds and the range are read at the same time. */
 const storyTimeRange = ref<StoryTimeRange | null>(null);
+const storyPeriodFilter = ref<PeriodFilter | null>(null);
 /** Tags (catégories) des frises : une frise reste visible si elle porte l'un des tags choisis. */
 const storyCategories = ref<string[]>([]);
 const storyCategoryOptions = computed(() => {
@@ -122,6 +123,7 @@ const visibleStories = computed(() => {
   const now = Date.now();
   return filteredStories.value.filter(story => (!query || `${story.title.fr} ${story.title.en}`.toLocaleLowerCase('fr').includes(query)) && (storyVisibility.value === 'all' || story.isPublic === (storyVisibility.value === 'public'))
     && (!storyTimeRange.value || storyOverlapsRange(story, storyTimeRange.value, now))
+    && (!storyPeriodFilter.value || storyOverlapsRange(story, storyPeriodFilter.value.range, now))
     && (!storyCategories.value.length || story.categories.some(category => storyCategories.value.includes(category.id))));
 });
 const storyTabs = useStoryTabs();
@@ -163,9 +165,17 @@ async function openRouteStory() {
 }
 if (route) watch(() => route.query.story, () => { if (!state.value.loading) void openRouteStory(); });
 
+const auth = useAuthStore(); const toast = useToast();
+onMounted(() => { void auth.ensureProfile(); });
+const usernameRequired = 'Choisissez un nom d’utilisateur dans votre profil avant de créer une frise.';
 function handleAddStory() {
+  if (!auth.canCreateStories) { toast.show(usernameRequired, 'error'); return; }
   saveError.value = null;
   openAddStory();
+}
+function startStoryFromPeriod(periodId: string) {
+  if (!auth.canCreateStories) { toast.show(usernameRequired, 'error'); return; }
+  openStoryFromPeriod(periodId);
 }
 
 function onEditStoryPeriod(id: string) {
@@ -266,9 +276,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.database-view { display: flex; flex-direction: column; height: 100%; min-height: 0; background: var(--color-background); }
-.loading, .error { flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px; }
-.error { color: var(--color-status-error-foreground); }
+.database-view { display: flex; flex-direction: column; height: 100%; min-height: 0; background: var(--color-background-default); }
 .database-view__content { flex: 1; min-height: 0; }
 .database-story-detail-wrap { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
 </style>

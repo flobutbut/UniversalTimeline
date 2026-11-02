@@ -16,9 +16,9 @@ defineProps<{ story: ChildStorySummary; summary?: StorySummary; disabled?: boole
 defineEmits<{ remove: [] }>();
 </script>
 <style scoped>
-.anchored-story-row { display: flex; align-items: center; min-height: 56px; padding: 12px; background: var(--color-interaction-selected); color: var(--color-status-success-foreground); }
+.anchored-story-row { display: flex; align-items: center; min-height: 56px; padding: var(--spacing-md); background: var(--color-interaction-selected); color: var(--color-status-success-foreground); }
 .anchored-story-row__link { display: flex; flex: 1; min-width: 0; flex-direction: column; color: inherit; line-height: var(--line-height-small); }
-.anchored-story-row__title { font-size: var(--font-size-sm); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.anchored-story-row__title { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .anchored-story-row__meta { font-size: var(--font-size-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .anchored-story-row__remove { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; opacity: 0; color: inherit; }
 .anchored-story-row:hover .anchored-story-row__remove, .anchored-story-row:focus-within .anchored-story-row__remove { opacity: 1; }

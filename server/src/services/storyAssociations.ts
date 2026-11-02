@@ -5,6 +5,7 @@ import * as relations from '../repositories/storyRelationsRepository.js';
 import { periodSubtree, itemsWithinPeriod } from '../domain/storySplit.js';
 import { comparableYearsBeforePresent } from '../shared/temporal.js';
 import { readEntityCategories, replaceEntityCategories } from '../repositories/categoryRepository.js';
+import { creatorAuthor } from './storyAuthor.js';
 
 async function requireWritableStory(client: TransactionClient, storyId: string) {
   if (!await relations.lockWritableStory(client, storyId)) throw new StoryAssociationError(404, 'Frise introuvable ou non modifiable.');
@@ -93,7 +94,7 @@ export async function createStoryFromPeriod(client: TransactionClient, sourceId:
     .map(row => ({ id: row.id, yearsBP: comparableYearsBeforePresent(row.date, row.date_years_bp, now) }));
   const eventIds = itemsWithinPeriod(events,
     comparableYearsBeforePresent(root.start_date, root.start_years_bp, now), comparableYearsBeforePresent(root.end_date, root.end_years_bp, now));
-  const story = await relations.insertDerivedStory(client, sourceId, title, source.author, source.is_public);
+  const story = await relations.insertDerivedStory(client, sourceId, title, await creatorAuthor(client, source.author), source.is_public);
   await relations.insertFrozenPlacements(client, story.id, subtree);
   if (eventIds.length) await relations.insertAssociations(client, String(story.id), 'event', eventIds);
   await relations.insertChildAnchor(client, String(story.id), 'period', periodId);

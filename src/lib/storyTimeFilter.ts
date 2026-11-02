@@ -33,9 +33,9 @@ export function formatStoryTimeRange(range: StoryTimeRange, now = Date.now()): s
 }
 
 /** Une frise est gardée si sa période recoupe la plage ; sans dates connues, elle ne peut pas l'être. */
-export function storyOverlapsRange(story: { startDate?: string; endDate?: string }, range: StoryTimeRange, now = Date.now()): boolean {
-  const start = comparableYearsBeforePresent(story.startDate, undefined, now);
-  const end = comparableYearsBeforePresent(story.endDate, undefined, now) ?? start;
+export function storyOverlapsRange(story: { startDate?: string; endDate?: string; startYearsBP?: number; endYearsBP?: number }, range: StoryTimeRange, now = Date.now()): boolean {
+  const start = comparableYearsBeforePresent(story.startDate, story.startYearsBP, now);
+  const end = comparableYearsBeforePresent(story.endDate, story.endYearsBP, now) ?? start;
   if (start === null || end === null) return false;
   return Math.max(start, end) >= range.recentBP && Math.min(start, end) <= range.oldBP;
 }

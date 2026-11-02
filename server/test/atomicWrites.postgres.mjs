@@ -36,11 +36,16 @@ const links = async () => (await pool.query('SELECT period_id FROM public.story_
 
 before(async () => {
   await pool.query(`
-    CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN;
+    DO $roles$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
+    END $roles$;
     CREATE SCHEMA auth; GRANT USAGE ON SCHEMA auth TO anon, authenticated;
-    CREATE TABLE auth.users (id uuid PRIMARY KEY);
+    CREATE TABLE auth.users (id uuid PRIMARY KEY, raw_user_meta_data jsonb DEFAULT '{}');
     CREATE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE SET search_path='' AS $$ SELECT coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;
     CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE SET search_path='' AS $$ SELECT nullif(auth.jwt()->>'sub','')::uuid $$;
+    CREATE FUNCTION public.set_updated_at() RETURNS trigger LANGUAGE plpgsql SET search_path = '' AS $$ BEGIN NEW.updated_at = now(); RETURN NEW; END; $$;
     CREATE TABLE public.periods (id text PRIMARY KEY, wikidata_id text UNIQUE, label_fr text, label_en text, description_fr text, description_en text, start_date text, end_date text, start_years_bp numeric, end_years_bp numeric, parent_id text REFERENCES periods ON DELETE SET NULL, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now());
     CREATE TABLE public.events (id text PRIMARY KEY, wikidata_id text UNIQUE, label_fr text, label_en text, description_fr text, description_en text, date text, date_years_bp numeric, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now());
     CREATE TABLE public.categories (id varchar PRIMARY KEY, label_fr text, label_en text, description_fr text, description_en text);
@@ -56,7 +61,11 @@ before(async () => {
   await pool.query(await readFile(new URL('../../database/migrations/20261031204007_story_period_hierarchy.sql', import.meta.url), 'utf8'));
   await runInTransaction(pool,client=>client.query(awaitMigration));
   await pool.query(await readFile(new URL('../../database/migrations/20261031220914_hybrid_catalogue_search.sql',import.meta.url),'utf8'));
-  await pool.query('INSERT INTO auth.users VALUES ($1),($2)', [alice,bob]);
+  await pool.query(await readFile(new URL('../../database/migrations/20261102075026_story_entry_points.sql', import.meta.url),'utf8'));
+  await pool.query(await readFile(new URL('../../database/migrations/20261102105902_account_profiles.sql', import.meta.url),'utf8'));
+  await pool.query(await readFile(new URL('../../database/migrations/20261102110027_account_functions_private_schema.sql', import.meta.url),'utf8'));
+  // Frises are signed by a username: both accounts sign up with one.
+  await pool.query(`INSERT INTO auth.users (id, raw_user_meta_data) VALUES ($1, '{"username":"Alice"}'),($2, '{"username":"Bob"}')`, [alice,bob]);
 });
 beforeEach(async () => {
   await pool.query('TRUNCATE stories,periods,events,categories,period_categories,event_categories,story_categories,story_periods,story_events,story_anchors RESTART IDENTITY CASCADE');

@@ -7,18 +7,28 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 const sdk = vi.hoisted(() => ({ signInWithPassword:vi.fn(),signUp:vi.fn() }));
 vi.mock('@/services/AuthService',()=>({authService:{getClient:()=>({auth:sdk})}}));
+const profiles = vi.hoisted(() => ({ usernameAvailable: vi.fn() }));
+vi.mock('@/services/ProfileApiService',()=>({profileApi:profiles}));
+import { CURRENT_TERMS_VERSION } from '@account-rules';
 let pinia:Pinia; let router:Router; let view:ReturnType<typeof mount>; let auth:ReturnType<typeof useAuthStore>;
 beforeEach(async()=>{
   vi.resetAllMocks(); pinia=createPinia();setActivePinia(pinia);auth=useAuthStore();auth.enabled=true;auth.ready=true;
   vi.spyOn(auth,'initialize').mockResolvedValue();
   vi.spyOn(auth,'refreshAccount').mockImplementation(async()=>{auth.account={id:'alice',isAdmin:false};});
-  router=createRouter({history:createMemoryHistory(),routes:[{path:'/login',name:'login',component:LoginView},{path:'/database',component:{template:'<div />'}},{path:'/timeline',component:{template:'<div />'}}]});
+  router=createRouter({history:createMemoryHistory(),routes:[{path:'/login',name:'login',component:LoginView},{path:'/database',component:{template:'<div />'}},{path:'/timeline',component:{template:'<div />'}},{path:'/legal/:page',name:'legal',component:{template:'<div />'}}]});
   await router.push('/login?redirect=/database');await router.isReady();
   view=mount(LoginView,{global:{plugins:[pinia,router]}});
   sdk.signInWithPassword.mockResolvedValue({data:{session:{access_token:'test-token'}},error:null});
+  profiles.usernameAvailable.mockResolvedValue(true);
 });
 afterEach(()=>{view.unmount();router.options.history.destroy();disposePinia(pinia);vi.restoreAllMocks();});
 async function fill(){await view.get('#account-email').setValue('user@example.test');await view.get('#account-password').setValue('local-test-password');}
+/** Sign-up also needs a free username (checked after a pause) and the accepted terms. */
+async function fillSignup(name='Explorer'){
+  vi.useFakeTimers({toFake:['setTimeout','clearTimeout']});
+  await fill();await view.get('#account-username').setValue(name);await view.get('.account-terms input').setValue(true);
+  vi.advanceTimersByTime(500);vi.useRealTimers();await flushPromises();
+}
 it('uses native email/password controls and returns to the requested local workspace after verification',async()=>{
   expect(view.get('#account-email').attributes('autocomplete')).toBe('email');
   expect(view.get('#account-password').attributes('type')).toBe('password');
@@ -33,7 +43,7 @@ it('shows a safe error for invalid credentials without navigating or displaying 
   expect(router.currentRoute.value.path).toBe('/login');expect(auth.refreshAccount).not.toHaveBeenCalled();
 });
 it('handles email confirmation without claiming that an account is already connected',async()=>{
-  await view.findAll('button').find(b=>b.text()==='Créer un compte')!.trigger('click');await flushPromises();await fill();
+  await view.findAll('button').find(b=>b.text()==='Créer un compte')!.trigger('click');await flushPromises();await fillSignup();
   sdk.signUp.mockResolvedValue({data:{session:null},error:null});await view.get('form').trigger('submit');await flushPromises();
   expect(view.get('[role="status"]').text()).toContain('confirmer votre compte');expect(auth.refreshAccount).not.toHaveBeenCalled();
   expect(view.get('#account-password').element.value).toBe('');expect(router.currentRoute.value.path).toBe('/login');
@@ -47,11 +57,11 @@ it.each([
   [{code:'email_address_invalid'}, 'adresse e-mail n’est pas acceptée'],
   [{code:'signup_disabled'}, 'inscriptions par e-mail sont actuellement désactivées'],
   [{code:'email_provider_disabled'}, 'inscriptions par e-mail sont actuellement désactivées'],
-  [{code:'unexpected_failure'}, 'Création du compte impossible'],
+  [{code:'unexpected_failure'}, 'vient d’être pris'],
   [{code:'user_already_exists'}, 'Création du compte impossible'],
   [{}, 'Création du compte impossible'],
 ])('explains safe signup failures from their code without leaking provider details: %j',async(providerError,expected)=>{
-  await view.findAll('button').find(b=>b.text()==='Créer un compte')!.trigger('click');await flushPromises();await fill();
+  await view.findAll('button').find(b=>b.text()==='Créer un compte')!.trigger('click');await flushPromises();await fillSignup();
   sdk.signUp.mockResolvedValue({error:{...providerError,message:'private provider details'}});
   await view.get('form').trigger('submit');await flushPromises();
   expect(view.get('[role="alert"]').text()).toContain(expected);
@@ -62,12 +72,12 @@ it.each([
 });
 it('preserves plus-address aliases and links password guidance only to signup',async()=>{
   expect(view.find('#account-password-hint').exists()).toBe(false);
-  await view.findAll('button').find(b=>b.text()==='Créer un compte')!.trigger('click');await flushPromises();await fill();
+  await view.findAll('button').find(b=>b.text()==='Créer un compte')!.trigger('click');await flushPromises();await fillSignup();
   expect(view.get('#account-password').attributes('aria-describedby')).toBe('account-password-hint');
   expect(view.get('#account-password-hint').text()).toContain('compromis');
   await view.get('#account-email').setValue('  user+test@example.test  ');
   sdk.signUp.mockResolvedValue({data:{session:null},error:null});await view.get('form').trigger('submit');await flushPromises();
-  expect(sdk.signUp).toHaveBeenCalledExactlyOnceWith({email:'user+test@example.test',password:'local-test-password',options:{emailRedirectTo:`${window.location.origin}/login`}});
+  expect(sdk.signUp).toHaveBeenCalledExactlyOnceWith({email:'user+test@example.test',password:'local-test-password',options:{emailRedirectTo:`${window.location.origin}/login`,data:{username:'Explorer',terms_version:CURRENT_TERMS_VERSION}}});
   await view.findAll('button').find(b=>b.text()==='J’ai déjà un compte')!.trigger('click');await flushPromises();
   expect(view.find('#account-password-hint').exists()).toBe(false);
   expect(view.get('#account-password').attributes('aria-describedby')).toBeUndefined();
@@ -108,4 +118,16 @@ it('waits for account verification before returning to a protected destination',
   expect(router.currentRoute.value.path).toBe('/login');
   auth.ready=true;await flushPromises();
   expect(router.currentRoute.value.path).toBe('/database');
+});
+
+it('requires a free, valid username and the accepted terms before creating an account',async()=>{
+  await view.findAll('button').find(b=>b.text()==='Créer un compte')!.trigger('click');await flushPromises();
+  profiles.usernameAvailable.mockResolvedValue(false);await fillSignup('Pris');
+  expect(view.text()).toContain('déjà pris');expect(view.get('button[type="submit"]').attributes('disabled')).toBeDefined();
+  profiles.usernameAvailable.mockResolvedValue(true);await fillSignup('a b');
+  expect(view.get('#account-username').attributes('aria-invalid')).toBe('true');
+  await fillSignup('Explorer');await view.get('.account-terms input').setValue(false);
+  await view.get('form').trigger('submit');await flushPromises();
+  expect(sdk.signUp).not.toHaveBeenCalled();
+  expect(view.findAll('.account-terms a').map(link=>link.attributes('href'))).toEqual(['/legal/conditions','/legal/confidentialite']);
 });

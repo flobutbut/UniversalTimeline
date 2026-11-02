@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 vi.mock('@/components/GlobalSearch.vue', () => ({ default: { template: '<input aria-label="Recherche globale" />' } }));
 vi.mock('@/components/ThemeToggle.vue', () => ({ default: { template: '<button>Thème</button>' } }));
+vi.mock('@/services/ProfileApiService', () => ({ profileApi: { get: vi.fn().mockResolvedValue(null) } }));
 let pinia: Pinia;
 let router: Router;
 let view: ReturnType<typeof mount>;
@@ -38,7 +39,7 @@ it.each([
   { enabled: true, ready: false, account: { id: 'unverified', isAdmin: true } },
 ])('shows search and the two account actions without a redundant navigation tab before a verified session: %j', async options => {
   await start(options);
-  expect(view.find('nav').exists()).toBe(false);
+  expect(view.find('.header-nav').exists()).toBe(false);
   expect(view.find('input[aria-label="Recherche globale"]').exists()).toBe(true);
   expect(view.get('.header-account-actions').findAll('a').map(a => [a.text(), a.attributes('href')])).toEqual([
     ['Se connecter', '/login'], ['Créer un compte', '/login?mode=signup'],
@@ -49,7 +50,7 @@ it.each(['/database', '/periods', '/graph', '/events', '/design-system'])('redir
   await start({ path });
   expect(router.currentRoute.value.name).toBe('login');
   expect(router.currentRoute.value.query.redirect).toBe(path);
-  expect(view.find('nav').exists()).toBe(false);
+  expect(view.find('.header-nav').exists()).toBe(false);
 });
 it('opens signup from the header and preserves the original destination when switching back to login', async () => {
   await start({ path: '/events?event=example' });
@@ -64,10 +65,17 @@ it('opens signup from the header and preserves the original destination when swi
 });
 it.each([false, true])('restores the appropriate workspace navigation for a verified account (admin: %s)', async isAdmin => {
   const auth = await start({ account: { id: 'alice', isAdmin } });
-  expect(view.get('nav').findAll('a').map(a => a.text())).toEqual(['Timeline', 'Frises', 'Periods', 'Events', ...(isAdmin ? ['Design system'] : [])]);
+  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Timeline', 'Frises', 'Périodes', 'Événements', ...(isAdmin ? ['Design system'] : [])]);
   expect(view.find('.header-account-actions').exists()).toBe(false);
-  expect(view.text()).toContain('Se déconnecter');
+  const trigger = view.get('button[aria-haspopup="menu"]');
+  expect(trigger.attributes('aria-label')).toBe('Compte : Mon compte'); expect(view.text()).not.toContain('Se déconnecter');
+  await trigger.trigger('click'); await flushPromises();
+  expect(trigger.attributes('aria-expanded')).toBe('true');
+  expect(view.findAll('[role="menuitem"]').map(item => item.text())).toEqual(['Profil', 'Données et confidentialité', 'Se déconnecter']);
+  expect(view.get('[role="menuitem"]').attributes('href')).toBe('/profile');
+  await view.get('[role="menu"]').trigger('keydown', { key: 'Escape' }); await flushPromises();
+  expect(view.find('[role="menu"]').exists()).toBe(false);
   auth.account = null; await flushPromises();
-  expect(view.find('nav').exists()).toBe(false);
+  expect(view.find('.header-nav').exists()).toBe(false);
   expect(view.find('.header-account-actions').exists()).toBe(true);
 });

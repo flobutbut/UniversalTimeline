@@ -109,7 +109,7 @@ it('keeps the detail contract for stories, periods, events, child IDs and anchor
   ], related_stories: [] }]);
   expect((await get('/stories/:id', { id: '7' })).body).toEqual({
     id: 7, title: { fr: 'Histoire', en: 'Histoire' }, description: { fr: 'Résumé', en: 'Résumé' },
-    author: 'Auteur', isPublic: true, ownerUserId: 'owner', parent_story_id: null, categories: [],
+    author: 'Auteur', isPublic: true, ownerUserId: 'owner', created_at: timestamp, parent_story_id: null, categories: [],
     periods: [{
       id: 'legacy-period', wikidata_id: 'Q123', storyParentId: 'frise-parent', label: { fr: 'Période', en: 'Période' }, description: { fr: 'Description', en: 'Description' },
       startDate: 'M65', endDate: 'NOW', parentId: null, hasChildren: true, startYearsBP: 65000000, endYearsBP: 0,
@@ -119,7 +119,7 @@ it('keeps the detail contract for stories, periods, events, child IDs and anchor
     childStories: [
       { id: '8', title: { fr: 'Enfant', en: 'Enfant' }, anchors: [{ type: 'period', id: 'legacy-period' }] },
       { id: '9', title: { fr: 'Autre', en: 'Other' }, anchors: [] },
-    ], relatedStories: [], createdAt: timestamp, updatedAt: timestamp,
+    ], parentStories: [], relatedStories: [], createdAt: timestamp, updatedAt: timestamp,
   });
   expect(db).toHaveBeenCalledOnce();
 });

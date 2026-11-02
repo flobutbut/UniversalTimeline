@@ -29,17 +29,9 @@
         <header class="design-system__header">
           <h1 class="design-system__h1">{{ currentTokenSection.sectionTitle }}</h1>
           <p class="design-system__lead">
-            Variables dans <code class="design-system__code-inline">src/styles/variables.css</code>
-            (thème clair / sombre). Tailles de texte, interlignes et espacements : <strong>px entiers</strong> (références
-            <code class="design-system__code-inline">--base-font-size</code> 13px,
-            <code class="design-system__code-inline">--base-spacing</code> 8px). Depuis la refonte tokens : familles
-            <code class="design-system__code-inline">--font-family-heading</code> /
-            <code class="design-system__code-inline">--font-family-mono</code>, voiles
-            <code class="design-system__code-inline">--overlay-scrim*</code>, assombrissements sur primaire
-            <code class="design-system__code-inline">--color-on-primary-shade*</code>, z-index étendus
-            (<code class="design-system__code-inline">--z-index-modal-nested</code>,
-            <code class="design-system__code-inline">--z-index-search-layer</code>, timeline, etc.), assets logo Vue
-            <code class="design-system__code-inline">--color-asset-vue-*</code>. Menu <strong>Tokens</strong> ci-contre.
+            Les rôles de <code class="design-system__code-inline">variables.css</code> s’adaptent au thème.
+            Les primitives sont immuables. Les styles <code class="design-system__code-inline">--type-*</code>
+            associent famille, taille, interligne et graisse. Cette liste est générée depuis les définitions du code.
           </p>
         </header>
 
@@ -69,6 +61,8 @@
         </div>
       </section>
 
+      <SharedPatternsDemo v-else-if="selected === 'patterns'" />
+      <CatalogueDemo v-else-if="selected === 'catalogues'" />
       <section v-else-if="selected === 'button'" class="design-system__section">
         <header class="design-system__header">
           <h1 class="design-system__h1">Button</h1>
@@ -76,7 +70,6 @@
             Déclenche une action. Props :
             <code class="design-system__code-inline">variant</code>,
             <code class="design-system__code-inline">size</code>,
-            <code class="design-system__code-inline">icon</code>,
             <code class="design-system__code-inline">iconOnly</code>,
             <code class="design-system__code-inline">disabled</code>.
           </p>
@@ -298,8 +291,7 @@
             <code class="design-system__code-inline">underline</code> (bordure basse, header de section),
             <code class="design-system__code-inline">vertical</code> (colonne Finder).
             Chaque entrée accepte <code class="design-system__code-inline">sublabel</code> et <code class="design-system__code-inline">count</code>.
-            Badge de compteur : <code class="design-system__code-inline">border-radius: var(--radius-pill)</code> ; onglet vertical actif : texte sur primaire via
-            <code class="design-system__code-inline">color-mix</code> sur <code class="design-system__code-inline">--color-text-white</code>.
+            Badge de compteur : <code class="design-system__code-inline">border-radius: var(--radius-pill)</code> ; onglet vertical actif : couple <code class="design-system__code-inline">--color-interaction-selected</code> / <code class="design-system__code-inline">--color-text-on-selected</code>.
           </p>
         </header>
 
@@ -559,8 +551,8 @@
             <code class="design-system__code-inline">draggable</code> ; slot
             <code class="design-system__code-inline">#actions</code> (retirer / ajouter en frise). Gabarit colonnes : <code class="design-system__code-inline">finder-columns</code>,
             <code class="design-system__code-inline">finder-column</code> dans
-            <code class="design-system__code-inline">finder-column-layout.css</code>. Ligne sélectionnée : primaire +
-            <code class="design-system__code-inline">color-mix</code> ; barre gauche enfants :
+            <code class="design-system__code-inline">finder-column-layout.css</code>. Ligne sélectionnée :
+            <code class="design-system__code-inline">interaction-selected / text-on-selected</code> ; barre gauche enfants :
             <code class="design-system__code-inline">calc(var(--radius-md) / 2)</code>.
           </p>
         </header>
@@ -633,7 +625,7 @@
 
         <h2 class="design-system__h2">FinderItem — détail frise (slot, catalogue externe, événements)</h2>
         <p class="design-system__finder-hint">
-          Même composant qu'en base de données : actions dans <code class="design-system__code-inline">#actions</code>, sans chevron pour la liste d'événements.
+          Même composant que dans le détail d’une frise : actions dans <code class="design-system__code-inline">#actions</code>, sans chevron pour la liste d'événements.
         </p>
         <div class="finder-columns finder-columns--demo design-system__finder-story-demos">
           <div class="finder-column">
@@ -800,7 +792,7 @@
         <h2 class="design-system__h2">États</h2>
         <div class="design-system__icon-catalog">
           <div class="design-system__icon-item"><Icon icon="mdi:alert-circle" width="24" height="24" /><span>mdi:alert-circle</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:loading" width="24" height="24" class="spin" /><span>mdi:loading</span></div>
+          <div class="design-system__icon-item"><LoadingSpinner /><span>mdi:loading</span></div>
           <div class="design-system__icon-item"><Icon icon="mdi:check" width="24" height="24" /><span>mdi:check</span></div>
           <div class="design-system__icon-item"><Icon icon="mdi:information-outline" width="24" height="24" /><span>mdi:information-outline</span></div>
         </div>
@@ -845,7 +837,12 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { tokenSections } from './tokenCatalogue';
+import { documentTheme } from '@/composables/useDocumentTheme';
+import SharedPatternsDemo from './SharedPatternsDemo.vue';
+import CatalogueDemo from './CatalogueDemo.vue';
 import { Icon } from '@iconify/vue';
+import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';
 import SearchInput from '@/components/base/SearchInput.vue';
@@ -866,6 +863,8 @@ type TokenFamilyId = 'tokens-colors' | 'tokens-typography' | 'tokens-layout' | '
 
 type SectionId =
   | TokenFamilyId
+  | 'patterns'
+  | 'catalogues'
   | 'button'
   | 'input'
   | 'search-input'
@@ -894,6 +893,8 @@ watch(selected, () => {
 });
 
 const componentNav: { id: Exclude<SectionId, TokenFamilyId>; label: string }[] = [
+  { id: 'patterns', label: 'Tags, états & icônes' },
+  { id: 'catalogues', label: 'Catalogues & frises' },
   { id: 'button', label: 'Button' },
   { id: 'input', label: 'Input' },
   { id: 'search-input', label: 'SearchInput' },
@@ -909,6 +910,8 @@ const componentNav: { id: Exclude<SectionId, TokenFamilyId>; label: string }[] =
 ];
 
 const componentTabIcons: Record<Exclude<SectionId, TokenFamilyId>, string> = {
+  patterns: 'mdi:shape-outline',
+  catalogues: 'mdi:table',
   button: 'mdi:gesture-tap-button',
   input: 'mdi:form-textbox',
   'search-input': 'mdi:magnify',
@@ -1084,236 +1087,13 @@ const openConfirmDemo = async () => {
 };
 
 
-type TokenRow = { name: string; kind: 'color' | 'other' };
-
-type TokenGroup = { title: string; rows: TokenRow[] };
-
-type TokenSectionConfig = { id: TokenFamilyId; sectionTitle: string; groups: TokenGroup[] };
-
-const tokenSections: TokenSectionConfig[] = [
-  {
-    id: 'tokens-colors',
-    sectionTitle: 'Couleurs',
-    groups: [
-      { title: 'Figma · Couleurs d’usage', rows: [
-        '--color-background-default', '--color-surface-default', '--color-surface-raised', '--color-surface-subtle',
-        '--color-text-primary', '--color-text-secondary', '--color-text-disabled', '--color-text-link', '--color-text-on-accent', '--color-text-on-selected',
-        '--color-border-default', '--color-border-strong', '--color-border-focus',
-        '--color-interaction-hover', '--color-interaction-pressed', '--color-interaction-selected', '--color-interaction-disabled',
-        '--color-action-primary-default', '--color-action-primary-hover', '--color-action-primary-pressed', '--color-action-danger-default', '--color-action-danger-hover',
-        '--color-status-success-foreground', '--color-status-success-background', '--color-status-error-foreground', '--color-status-error-background',
-        '--color-status-warning-foreground', '--color-status-warning-background', '--color-data-period', '--color-data-period-root', '--color-data-event', '--color-data-frise',
-      ].map(name => ({ name, kind: 'color' as const })) },
-      {
-        title: 'Échelle neutre',
-        rows: [
-          '--color-neutral-0',
-          '--color-neutral-50',
-          '--color-neutral-100',
-          '--color-neutral-200',
-          '--color-neutral-300',
-          '--color-neutral-400',
-          '--color-neutral-500',
-          '--color-neutral-600',
-          '--color-neutral-700',
-          '--color-neutral-800',
-          '--color-neutral-900',
-        ].map((name) => ({ name, kind: 'color' as const })),
-      },
-      {
-        title: 'Marque, états et Wikidata',
-        rows: [
-          '--color-primary',
-          '--color-primary-dark',
-          '--color-primary-light',
-          '--color-primary-button',
-          '--color-primary-button-hover',
-          '--color-success',
-          '--color-success-light',
-          '--color-error',
-          '--color-error-light',
-          '--color-error-dark',
-          '--color-warning',
-          '--color-warning-light',
-          '--color-wikidata-label',
-          '--color-wikidata-label-on-primary',
-        ].map((name) => ({ name, kind: 'color' as const })),
-      },
-      {
-        title: 'Fonds, surfaces, cartes et bordures',
-        rows: [
-          '--color-background',
-          '--color-surface',
-          '--color-surface-hover',
-          '--color-card',
-          '--color-card-hover',
-          '--color-border',
-          '--color-border-light',
-          '--color-border-dark',
-          '--color-border-darker',
-          '--color-background-soft',
-          '--color-background-mute',
-          '--color-error-bg',
-        ].map((name) => ({ name, kind: 'color' as const })),
-      },
-      {
-        title: 'Accents entités (période, événement, frise)',
-        rows: ['--color-period', '--color-period-root', '--color-event', '--color-story'].map((name) => ({
-          name,
-          kind: 'color' as const,
-        })),
-      },
-      {
-        title: 'Overlays modaux & sur-couche sur primaire',
-        rows: [
-          '--overlay-scrim',
-          '--overlay-scrim-strong',
-          '--color-on-primary-shade',
-          '--color-on-primary-shade-strong',
-        ].map((name) => ({ name, kind: 'color' as const })),
-      },
-      {
-        title: 'Assets tiers (logo Vue SVG)',
-        rows: ['--color-asset-vue-green', '--color-asset-vue-blue'].map((name) => ({
-          name,
-          kind: 'color' as const,
-        })),
-      },
-      {
-        title: 'Texte et titres',
-        rows: [
-          '--color-text',
-          '--color-text-light',
-          '--color-text-secondary',
-          '--color-text-white',
-          '--color-heading',
-        ].map((name) => ({ name, kind: 'color' as const })),
-      },
-    ],
-  },
-  {
-    id: 'tokens-typography',
-    sectionTitle: 'Typographie',
-    groups: [
-      {
-        title: 'Repères (taille de base, interligne)',
-        rows: ['--base-font-size', '--base-line-height'].map((name) => ({
-          name,
-          kind: 'other' as const,
-        })),
-      },
-      {
-        title: 'Familles et tailles de police',
-        rows: [
-          '--font-family-base',
-          '--font-family-heading',
-          '--font-family-mono',
-          '--font-size-xs',
-          '--font-size-sm',
-          '--font-size-base',
-          '--font-size-lg',
-          '--font-size-xl',
-          '--font-size-2xl',
-          '--font-size-3xl',
-        ].map((name) => ({ name, kind: 'other' as const })),
-      },
-      {
-        title: 'Interlignes',
-        rows: [
-          '--line-height-micro',
-          '--line-height-small',
-          '--line-height-body',
-          '--line-height-heading',
-          '--line-height-dialog',
-          '--line-height-tight',
-          '--line-height-normal',
-          '--line-height-relaxed',
-          '--line-height-loose',
-        ].map((name) => ({ name, kind: 'other' as const })),
-      },
-    ],
-  },
-  {
-    id: 'tokens-layout',
-    sectionTitle: 'Espacements, ombres et mise en page',
-    groups: [
-      {
-        title: 'Ombres',
-        rows: ['--shadow-sm', '--shadow-md', '--shadow-lg', '--shadow-xl'].map((name) => ({
-          name,
-          kind: 'other' as const,
-        })),
-      },
-      {
-        title: 'Espacements',
-        rows: [
-          '--base-spacing',
-          '--spacing-xs',
-          '--spacing-sm',
-          '--spacing-md',
-          '--spacing-lg',
-          '--spacing-xl',
-          '--spacing-2xl',
-        ].map((name) => ({ name, kind: 'other' as const })),
-      },
-      {
-        title: 'Hauteurs de champ',
-        rows: [
-          '--control-height-xs',
-          '--field-height-sm',
-          '--field-height-md',
-          '--field-height-lg',
-        ].map((name) => ({ name, kind: 'other' as const })),
-      },
-      {
-        title: 'Rayons et transitions',
-        rows: [
-          '--radius-sm',
-          '--radius-md',
-          '--radius-lg',
-          '--radius-xl',
-          '--radius-pill',
-          '--transition-fast',
-          '--transition-normal',
-          '--transition-slow',
-        ].map((name) => ({ name, kind: 'other' as const })),
-      },
-      {
-        title: 'Z-index',
-        rows: [
-          '--z-index-dropdown',
-          '--z-index-sticky',
-          '--z-index-fixed',
-          '--z-index-modal',
-          '--z-index-popover',
-          '--z-index-tooltip',
-          '--z-index-modal-nested',
-          '--z-index-search-layer',
-          '--z-index-timeline-item',
-          '--z-index-period-row-band',
-          '--z-index-local-bump',
-        ].map((name) => ({ name, kind: 'other' as const })),
-      },
-      {
-        title: 'Breakpoints',
-        rows: [
-          '--breakpoint-sm',
-          '--breakpoint-md',
-          '--breakpoint-lg',
-          '--breakpoint-xl',
-          '--breakpoint-2xl',
-        ].map((name) => ({ name, kind: 'other' as const })),
-      },
-    ],
-  },
-];
-
 const currentTokenSection = computed(
   () => tokenSections.find((s) => s.id === selected.value) ?? null
 );
 
 /** Valeurs lues sur `:root` (typos et espacements en px fixes dans `variables.css`). */
 const tokenComputed = (name: string): string => {
+  void documentTheme.value;
   if (typeof document === 'undefined') return '';
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   return v || '—';
@@ -1327,14 +1107,14 @@ const tokenComputed = (name: string): string => {
   flex: 1;
   width: 100%;
   overflow: hidden;
-  background: var(--color-background);
+  background: var(--color-background-default);
 }
 
 .design-system__aside {
   flex-shrink: 0;
   width: calc(var(--spacing-xs) * 55);
-  border-right: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border-right: 1px solid var(--color-border-default);
+  background: var(--color-surface-default);
   overflow-y: auto;
 }
 
@@ -1350,7 +1130,7 @@ const tokenComputed = (name: string): string => {
 }
 
 .design-system__nav-column--stacked {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border-default);
 }
 
 .design-system__lead--tight {
@@ -1366,10 +1146,10 @@ const tokenComputed = (name: string): string => {
 }
 
 .design-system__underline-demo--panel {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--color-surface);
+  background: var(--color-surface-default);
   max-width: calc(var(--spacing-xs) * 105);
   margin-bottom: 0;
 }
@@ -1379,14 +1159,14 @@ const tokenComputed = (name: string): string => {
   align-items: center;
   justify-content: space-between;
   padding-right: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 
 .design-system__fake-panel-body {
   padding: var(--spacing-lg);
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-style: italic;
   min-height: calc(var(--spacing-sm) * 10);
   display: flex;
@@ -1411,7 +1191,7 @@ const tokenComputed = (name: string): string => {
 .design-system__finder-hint {
   margin: 0 0 var(--spacing-md);
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
 }
 
 .design-system__header {
@@ -1421,16 +1201,16 @@ const tokenComputed = (name: string): string => {
 .design-system__h1 {
   margin: 0 0 var(--spacing-sm);
   font-size: var(--font-size-2xl);
-  font-weight: 600;
-  color: var(--color-heading);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-heading);
   font-family: var(--font-family-base);
 }
 
 .design-system__h2 {
   margin: var(--spacing-xl) 0 var(--spacing-md);
   font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }
 
 .design-system__h2:first-of-type:not(.design-system__h2--token-group) {
@@ -1449,7 +1229,7 @@ const tokenComputed = (name: string): string => {
 .design-system__lead {
   margin: 0;
   font-size: var(--font-size-base);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   line-height: var(--line-height-relaxed);
 }
 
@@ -1457,8 +1237,8 @@ const tokenComputed = (name: string): string => {
   font-size: 0.92em;
   padding: 0.15em 0.4em;
   border-radius: var(--radius-sm);
-  background: var(--color-background-mute);
-  color: var(--color-text);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-primary);
 }
 
 .design-system__token-block {
@@ -1476,7 +1256,7 @@ const tokenComputed = (name: string): string => {
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--color-surface);
+  background: var(--color-surface-default);
 }
 
 .design-system__token-row {
@@ -1495,7 +1275,7 @@ const tokenComputed = (name: string): string => {
 
 .design-system__token-name {
   font-family: var(--font-family-mono);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   word-break: break-all;
 }
 
@@ -1503,7 +1283,7 @@ const tokenComputed = (name: string): string => {
   width: 32px;
   height: 32px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-default);
   box-shadow: var(--shadow-sm);
   justify-self: center;
 }
@@ -1516,7 +1296,7 @@ const tokenComputed = (name: string): string => {
 
 .design-system__token-value {
   font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   word-break: break-word;
 }
 
@@ -1576,7 +1356,7 @@ const tokenComputed = (name: string): string => {
 
 .design-system__variant-desc {
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   line-height: 1.4;
 }
 
@@ -1590,7 +1370,7 @@ const tokenComputed = (name: string): string => {
 
 .design-system__size-label {
   font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-family: var(--font-family-mono, monospace);
 }
 
@@ -1605,7 +1385,7 @@ const tokenComputed = (name: string): string => {
 
 .design-system__icon-only-size-label {
   font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-family: var(--font-family-mono, monospace);
   text-align: right;
 }
@@ -1619,10 +1399,10 @@ const tokenComputed = (name: string): string => {
 
 .design-system__subheader-demo {
   max-width: calc(var(--spacing-xs) * 140);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--color-surface);
+  background: var(--color-surface-default);
 }
 
 .design-system__finder-story-demos {
@@ -1635,7 +1415,7 @@ const tokenComputed = (name: string): string => {
   padding: var(--spacing-md);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  background: var(--color-surface-default);
 }
 
 .design-system__demo-row--align-start {
@@ -1651,13 +1431,13 @@ const tokenComputed = (name: string): string => {
 .design-system__wikidata-last {
   margin-top: var(--spacing-md);
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
 }
 
 .design-system__chevron-label {
   min-width: calc(var(--spacing-xs) * 18);
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
 }
 
 .design-system__chevron-on-primary {
@@ -1671,7 +1451,7 @@ const tokenComputed = (name: string): string => {
 
 .design-system__modal-body-text {
   margin: 0;
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 @media (max-width: 768px) {
@@ -1682,7 +1462,7 @@ const tokenComputed = (name: string): string => {
   .design-system__aside {
     width: 100%;
     border-right: none;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border-default);
     max-height: 40vh;
   }
 
@@ -1699,13 +1479,13 @@ const tokenComputed = (name: string): string => {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
   line-height: 1.6;
-  background: var(--color-surface-hover);
-  border: 1px solid var(--color-border);
+  background: var(--color-interaction-hover);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   padding: var(--spacing-md) var(--spacing-lg);
   overflow-x: auto;
   white-space: pre;
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .design-system__icon-catalog {
@@ -1720,12 +1500,12 @@ const tokenComputed = (name: string): string => {
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-surface);
+  background: var(--color-surface-default);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
   font-size: var(--font-size-xs);
   font-family: var(--font-family-mono);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   overflow: hidden;
 }
 
@@ -1737,6 +1517,6 @@ const tokenComputed = (name: string): string => {
 
 .design-system__icon-item svg {
   flex-shrink: 0;
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 </style>

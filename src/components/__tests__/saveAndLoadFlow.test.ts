@@ -7,8 +7,6 @@ import DatabaseView from '@/views/DatabaseView/DatabaseView.vue';
 import PeriodsView from '@/views/GraphView/Periods.vue';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
 import Select from '@/components/base/Select.vue';
-import EventPickerModal from '@/views/DatabaseView/EventPickerModal.vue';
-import PeriodPickerModal from '@/views/DatabaseView/PeriodPickerModal.vue';
 import { CategoryService } from '@/services/CategoryService';
 import { WikidataQueryService } from '@/services/WikidataQueryService';
 import { apiClient } from '@/services/ApiClient';
@@ -101,7 +99,6 @@ it('keeps a new story draft after failure and inserts the saved story on retry',
   view = mount(DatabaseView); await flushPromises();
   await button('Créer une frise').trigger('click'); await flushPromises();
   await view.get('input[placeholder="Titre en français"]').setValue('Ma frise');
-  await view.get('input[placeholder="Nom de l\'auteur"]').setValue('Auteur');
   await button('Créer').trigger('click'); await flushPromises();
   expect(view.findComponent(EditModal).exists()).toBe(true);
   expect(view.get('[role="alert"]').text()).toBe('Réseau coupé');
@@ -125,17 +122,6 @@ it.each(['events', 'stories', 'periods'] as const)('renders a %s load error and 
   expect(view.text()).toContain(resource === 'stories' ? 'Aucune frise' : resource === 'periods' ? 'Aucune période' : 'Aucun événement');
 });
 
-it.each(['events', 'periods'] as const)('distinguishes an empty %s picker from a failed load', async resource => {
-  vi.mocked(apiClient.get).mockRejectedValue(new Error('Chargement impossible'));
-  view = resource === 'events' ? mount(EventPickerModal, { props: { alreadyInStory: [], storyPeriods: [] } }) : mount(PeriodPickerModal, { props: { alreadyInStory: [] } });
-  await flushPromises();
-  expect(view.get('[role="alert"]').text()).toContain('Chargement impossible');
-  vi.mocked(apiClient.get).mockResolvedValue([]);
-  await button('Réessayer').trigger('click'); await flushPromises();
-  expect(view.find('[role="alert"]').exists()).toBe(false);
-  expect(view.text()).toContain(resource === 'events' ? 'Aucun événement disponible' : 'Aucune période');
-  expect(view.text()).not.toContain('Chargement…');
-});
 
 it('shows the readable frises of each event and keeps a links failure distinct from an empty list', async () => {
   vi.mocked(apiClient.get).mockImplementation(async url => {
@@ -170,7 +156,6 @@ it('keeps the graph draft and store intact when atomic creation fails, then save
   const created = { id: 'created', wikidata_id: 'Q222', label_fr: 'Enfant', start_date: 'M65', end_date: 'NOW', parent_id: null, categories: [] };
   vi.mocked(apiClient.post).mockRejectedValueOnce({ response: { data: { error: 'Parent indisponible' } } }).mockResolvedValueOnce(created);
   view = mount(PeriodsView); await flushPromises();
-  await view.get('.finder-item').trigger('click'); await flushPromises();
   await button('+ Ajouter une période').trigger('click'); await flushPromises();
   await view.get('input[placeholder="Q12345"]').setValue('Q222');
   await view.get('input[placeholder="Titre en français"]').setValue('Enfant');
@@ -198,10 +183,4 @@ it('keeps the draft and blocks saving when categories fail, then reloads real ca
   expect(view.find('[role="alert"]').exists()).toBe(false);
   expect(button('Mettre à jour').attributes('disabled')).toBeUndefined();
   expect((view.get('input[placeholder="Titre en français"]').element as HTMLInputElement).value).toBe('Mon brouillon');
-});
-
-it('opens the flat catalogue picker without fetching an old ancestor chain', async () => {
-  vi.mocked(apiClient.get).mockResolvedValue([]);
-  view=mount(PeriodPickerModal,{props:{alreadyInStory:[],initialPeriodId:'leaf'}}); await flushPromises();
-  expect(apiClient.get).toHaveBeenCalledExactlyOnceWith('/periods'); expect(view.text()).toContain('Aucune période');
 });

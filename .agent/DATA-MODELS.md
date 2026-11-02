@@ -54,6 +54,12 @@ Le frontend appelle `baseURL: '/api'` ; le serveur monte le routeur sur `/api` (
 - **`POST /stories/:parentId/child-stories`** : `{ childStoryIds: string[] }`, sélection atomique de stories du même propriétaire, refus des cycles. Le champ individuel historique `childStoryId` reste accepté. Réponse groupée `{ ids }` après COMMIT.
 - **`DELETE /stories/:parentId/child-stories/:childId`** : vérifie le lien et les droits avant de supprimer les ancres et de détacher dans une seule transaction. Un refus préserve les deux.
 
+### Profil du compte
+
+- Table `profiles` (une ligne par compte, RLS sur la ligne propre) : `username` unique sans casse, `avatar_color`, `avatar_icon`, `terms_version`/`terms_accepted_at`. Règles partagées dans `server/src/shared/accountRules.ts` (alias front `@account-rules`).
+- **`GET /profile`** (profil ou `null`), **`PUT /profile`** `{ username, avatarColor, avatarIcon }` (409 si nom pris ; renomme l’auteur des frises propres), **`POST /profile/terms`** `{ version }`, **`GET /profile/username-availability?username=`** (anonyme), **`GET /profile/export`**, **`DELETE /profile`** (frises puis compte).
+- `POST /stories` et la frise créée depuis une période sont signées par le `username` ; sans profil : 412.
+
 ### Catégories
 
 - **`GET /categories`** : lignes `id`, `label_fr`, `description_fr` (réponse SQL brute partielle selon route).

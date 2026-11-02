@@ -1,16 +1,9 @@
 <template>
   <div class="period-grid" :aria-busy="loading || undefined">
     <!-- Garder le niveau courant affiché pendant une navigation ou une recherche de stories. -->
-    <div v-if="loading && !currentPeriod && periods.length === 0 && events.length === 0" class="loading-container">
-      <Icon icon="mdi:loading" class="spin" />
-      <span>Chargement de la timeline...</span>
-    </div>
-    <div v-else-if="error" class="error-message">
-      {{ error }}
-    </div>
-    <div v-else-if="!loading && !currentPeriod && periods.length === 0 && events.length === 0" class="empty-message">
-      Aucune période à afficher
-    </div>
+    <FeedbackState v-if="loading && !currentPeriod && periods.length === 0 && events.length === 0" kind="loading" message="Chargement de la timeline…" />
+    <FeedbackState v-else-if="error" kind="error" :message="error" />
+    <FeedbackState v-else-if="!loading && !currentPeriod && periods.length === 0 && events.length === 0" message="Aucune période à afficher" />
     <div v-else class="timeline-container">
       <div class="periods-container">
         <PeriodCard
@@ -66,7 +59,7 @@
       <div v-if="undatedPeriods.length" class="period-grid__undated">
         <span>Dates non déterminées</span>
         <span v-for="period in undatedPeriods" :key="`p:${period.id}`" class="period-grid__undated-item">
-          <button type="button" @click="selectPeriod(period)">{{ period.label.fr }}</button>
+          <Button variant="tertiary" size="xs" type="button" @click="selectPeriod(period)">{{ period.label.fr }}</Button>
           <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
             :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
             @retry="retryAssociations" @select="emit('story-select', $event)" />
@@ -88,7 +81,7 @@
         </div>
         <template v-if="props.storySuggestions.length > 0 && dropdownRect">
           <div class="story-dropdown-backdrop" @click="goBack" />
-          <div class="story-dropdown" :style="dropdownStyle">
+          <PopoverSurface padded class="story-dropdown" :style="dropdownStyle">
             <p class="story-dropdown__label">Explorer en détail</p>
             <button
               v-for="s in props.storySuggestions"
@@ -100,7 +93,7 @@
               <span v-if="s.description" class="story-dropdown__item-desc">{{ s.description.fr }}</span>
               <span class="story-dropdown__item-arrow" aria-hidden="true">→</span>
             </button>
-          </div>
+          </PopoverSurface>
         </template>
       </Teleport>
       <div class="events-container" @click="selectedEvent = null">
@@ -128,8 +121,11 @@
 </template>
 
 <script setup lang="ts">
+import FeedbackState from '@/components/base/FeedbackState.vue';
+import PopoverSurface from '@/components/base/PopoverSurface.vue';
+import Button from '@/components/base/Button.vue';
 import { ref, computed, watch, onActivated, onDeactivated } from 'vue';
-import { Icon } from '@iconify/vue';
+
 import type { ListPeriod, ListEvent, StorySuggestion, Story } from '@/types/database';
 import { compareYearsOldestFirst } from '@temporal';
 import { periodCoordinates } from '@/services/TimelineScalingService';
@@ -450,9 +446,9 @@ const goBack = () => {
   white-space: normal;
   overflow-wrap: anywhere;
   padding: var(--spacing-sm) var(--spacing-md);
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-lg);
   font-size: var(--font-size-sm);
@@ -463,12 +459,12 @@ const goBack = () => {
 .period-grid__tooltip-hint {
   margin-top: var(--spacing-xs);
   font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
 }
 /* Courte description : limitée à quelques lignes, le texte complet reste dans le détail. */
 .period-grid__tooltip-description {
   margin: var(--spacing-xs) 0 0;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
@@ -477,7 +473,7 @@ const goBack = () => {
 }
 
 .period-grid__undated { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); margin: var(--spacing-md) 0; }
-.period-grid__undated button { color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); padding: var(--spacing-xs) var(--spacing-sm); cursor: pointer; }
+
 
 .period-grid {
   height: 100%;
@@ -487,39 +483,13 @@ const goBack = () => {
   gap: var(--spacing-md);
   padding: var(--spacing-md);
   overflow: hidden;
-  background-color: var(--color-background);
-}
-
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-md);
-  height: 100%;
-}
-
-.error-message {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--color-error);
-}
-
-.empty-message {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--color-text-secondary);
+  background-color: var(--color-background-default);
 }
 
 .timeline-container {
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 100%;
   width: 100%;
 }
 
@@ -588,38 +558,34 @@ const goBack = () => {
 .story-dropdown-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: var(--z-index-dropdown);
 }
 
 .story-dropdown {
   position: fixed;
-  z-index: 101;
+  z-index: calc(var(--z-index-dropdown) + 1);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--spacing-xs);
   min-width: 200px;
   max-width: 320px;
-  padding: 8px;
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+
   animation: dropdown-enter 0.18s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .story-dropdown__label {
-  font-size: 0.68rem;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-text-secondary);
-  margin: 0 0 4px 4px;
+  margin: 0 0 var(--spacing-xs) var(--spacing-xs);
 }
 
 .story-dropdown__item {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 32px 8px 10px;
+  padding: var(--spacing-sm) var(--spacing-2xl) var(--spacing-sm) 10px;
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
@@ -630,17 +596,17 @@ const goBack = () => {
 }
 
 .story-dropdown__item:hover {
-  background: var(--color-background-secondary, rgba(255,255,255,0.06));
+  background: var(--color-interaction-hover);
 }
 
 .story-dropdown__item-title {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--color-text);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }
 
 .story-dropdown__item-desc {
-  font-size: 0.75rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: 1.4;
 }
@@ -650,8 +616,8 @@ const goBack = () => {
   top: 50%;
   right: 10px;
   transform: translateY(-50%);
-  color: var(--color-primary);
-  font-size: 0.9rem;
+  color: var(--color-text-link);
+  font-size: var(--font-size-base);
   opacity: 0;
   transition: opacity 0.12s, transform 0.12s;
 }

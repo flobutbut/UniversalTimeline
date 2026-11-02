@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const steps = [
+  ['Design system', ['verify:design']],
   ['Tests isolés', ['test', '--maxWorkers=4']],
   ['Configuration sans connexion', ['node', '--experimental-strip-types', '--test', 'server/test/database.test.mjs']],
   ['Symboles inutilisés', ['vue-tsc', '-p', 'tsconfig.audit-unused.json', '--noEmit']],

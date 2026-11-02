@@ -14,21 +14,21 @@ body {
 }
 
 body {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-base);
-  line-height: var(--base-line-height);
-  color: var(--color-text);
-  background-color: var(--color-background);
+  font: var(--type-body);
+  height: 100vh;
+  overflow: hidden;
+  color: var(--color-text-primary);
+  background-color: var(--color-background-default);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   line-height: 1.25;
   margin-bottom: var(--spacing-md);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 h1 { font-size: var(--font-size-3xl); }
@@ -40,12 +40,12 @@ h6 { font-size: var(--font-size-sm); }
 
 p {
   margin-bottom: var(--spacing-md);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 /* Links */
 a {
-  color: var(--color-primary);
+  color: var(--color-text-link);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
@@ -63,14 +63,14 @@ button {
   border: none;
   background: none;
   padding: 0;
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 /* Lists */
 ul, ol {
   margin-bottom: var(--spacing-md);
   padding-left: var(--spacing-xl);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 /* Images */
@@ -85,9 +85,9 @@ input, select, textarea {
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
-  color: var(--color-text);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   padding: var(--spacing-sm);
   transition: border-color var(--transition-fast),
@@ -97,7 +97,7 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-default);
 }
 
 /* Focus styles — uniquement sur les éléments interactifs natifs */
@@ -132,55 +132,6 @@ input:focus-visible {
     scroll-behavior: auto !important;
   }
 }
-
-/* Utility classes */
-.text-primary { color: var(--color-primary); }
-.text-secondary { color: var(--color-secondary); }
-.text-success { color: var(--color-success); }
-.text-warning { color: var(--color-warning); }
-.text-error { color: var(--color-error); }
-
-.bg-primary { background-color: var(--color-primary); }
-.bg-secondary { background-color: var(--color-secondary); }
-.bg-success { background-color: var(--color-success); }
-.bg-warning { background-color: var(--color-warning); }
-.bg-error { background-color: var(--color-error); }
-
-/* Spacing utilities */
-.m-0 { margin: 0; }
-.m-1 { margin: var(--spacing-xs); }
-.m-2 { margin: var(--spacing-sm); }
-.m-3 { margin: var(--spacing-md); }
-.m-4 { margin: var(--spacing-lg); }
-.m-5 { margin: var(--spacing-xl); }
-
-.p-0 { padding: 0; }
-.p-1 { padding: var(--spacing-xs); }
-.p-2 { padding: var(--spacing-sm); }
-.p-3 { padding: var(--spacing-md); }
-.p-4 { padding: var(--spacing-lg); }
-.p-5 { padding: var(--spacing-xl); }
-
-/* Flex utilities */
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.gap-1 { gap: var(--spacing-xs); }
-.gap-2 { gap: var(--spacing-sm); }
-.gap-3 { gap: var(--spacing-md); }
-.gap-4 { gap: var(--spacing-lg); }
-.gap-5 { gap: var(--spacing-xl); }
-
-/* Grid utilities */
-.grid { display: grid; }
-.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
-.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-
-/* Responsive utilities */
 @media (min-width: 640px) {
   .sm\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
   .sm\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
@@ -197,21 +148,4 @@ input:focus-visible {
   .lg\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
   .lg\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
   .lg\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-}
-
-/* Dark mode: shadow overrides are defined in variables.css */
-
-/* Styles pour les éléments de formulaire en mode sombre */
-[data-theme="dark"] input,
-[data-theme="dark"] select,
-[data-theme="dark"] textarea {
-  background-color: var(--color-neutral-50);
-  border-color: var(--color-neutral-200);
-}
-
-[data-theme="dark"] input:focus,
-[data-theme="dark"] select:focus,
-[data-theme="dark"] textarea:focus {
-  background-color: var(--color-neutral-100);
-  border-color: var(--color-primary);
 }

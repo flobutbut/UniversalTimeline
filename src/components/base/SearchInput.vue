@@ -51,8 +51,8 @@ defineExpose({
   gap: var(--spacing-sm);
   height: var(--field-height-md);
   padding: 0 var(--spacing-sm);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   transition: border-color var(--transition-fast);
   overflow: hidden;
@@ -73,14 +73,14 @@ defineExpose({
   flex-shrink: 0;
   width: var(--font-size-lg);
   height: var(--font-size-lg);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
 }
 
 .search-input-wrap__field {
   flex: 1;
   border: none !important;
   background: transparent !important;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   outline: none !important;
   box-shadow: none !important;
@@ -89,7 +89,7 @@ defineExpose({
 }
 
 .search-input-wrap__field::placeholder {
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
 }
 
 .search-input-wrap__field::-webkit-search-cancel-button { -webkit-appearance: none; }
@@ -100,7 +100,7 @@ defineExpose({
   background: none;
   border: none;
   padding: 0;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   cursor: pointer;
   width: 24px;
   height: 24px;
@@ -108,11 +108,10 @@ defineExpose({
 }
 
 .search-input-wrap__clear:hover {
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
-</style>
 
-<style scoped>
+
 .search-input-wrap__field { line-height: var(--line-height-small); }
 .search-input-wrap:has(input:disabled) { background: var(--color-interaction-disabled); opacity: .5; }
 </style>

@@ -58,13 +58,13 @@ const zoom = computed(() => {
 </template>
 
 <style scoped>
-.time-lens { min-width: 0; --lens-accent: var(--color-period); }
-.lens-period { --lens-accent: var(--color-period); }.lens-period-root { --lens-accent: var(--color-period-root); }.lens-event { --lens-accent: var(--color-event); }.lens-story { --lens-accent: var(--color-story); }
+.time-lens { min-width: 0; --lens-accent: var(--color-data-period); }
+.lens-period { --lens-accent: var(--color-data-period); }.lens-period-root { --lens-accent: var(--color-data-period-root); }.lens-event { --lens-accent: var(--color-data-event); }.lens-story { --lens-accent: var(--color-data-frise); }
 .lens-meta,.lens-footnote { display: flex; justify-content: space-between; gap: var(--spacing-lg); color: var(--color-text-secondary); font-size: var(--font-size-xs); }
 .lens-meta>span:first-child { letter-spacing: .1em; }.lens-meta>span:last-child { font-family: var(--font-family-mono); }
 .lens-measure { display: flex; flex-direction: column; padding-block: var(--spacing-xl); }
-.measure-value { font-family: var(--font-family-heading); font-size: clamp(60px, 8.5vw, 128px); line-height: 1.05; letter-spacing: -.06em; color: var(--color-text); font-variant-numeric: tabular-nums; }
-.measure-unit { font-family: var(--font-family-heading); font-size: clamp(18px, 2.3vw, 30px); color: var(--lens-accent); margin-top: var(--spacing-sm); }
+.measure-value { font-family: var(--font-family-heading); font-size: clamp(60px, 8.5vw, 128px); line-height: 1.05; letter-spacing: -.06em; color: var(--color-text-primary); font-variant-numeric: tabular-nums; }
+.measure-unit { font-family: var(--font-family-heading); font-size: clamp(18px, 2.3vw, 30px); color: var(--color-text-link); margin-top: var(--spacing-sm); }
 .lens-drawing { display: block; width: 100%; overflow: visible; }
 .ruler-grid { stroke: var(--color-border-light); stroke-width: 1; }
 .axis-heading,.next-caption { fill: var(--color-text-secondary); font-family: var(--font-family-base); font-size: 12px; letter-spacing: 1.5px; }
@@ -75,8 +75,8 @@ const zoom = computed(() => {
 .tick-label { fill: var(--color-text-secondary); font-family: var(--font-family-mono); font-size: 14px; }
 .next-window { fill: color-mix(in srgb, var(--lens-accent) 10%, transparent); stroke: var(--lens-accent); stroke-width: 1; }
 .zoom-guides { fill: none; stroke: var(--lens-accent); stroke-opacity: .4; stroke-dasharray: 3 5; }
-.next-name { fill: var(--lens-accent); font-family: var(--font-family-heading); font-size: 20px; }
-.last-caption { fill: var(--lens-accent); font-family: var(--font-family-heading); font-size: 23px; }
+.next-name { fill: var(--color-text-link); font-family: var(--font-family-heading); font-size: 20px; }
+.last-caption { fill: var(--color-text-link); font-family: var(--font-family-heading); font-size: 23px; }
 @media (max-width: 700px) {
   .lens-measure { padding-block: var(--spacing-md); }.measure-value { font-size: clamp(42px, 13vw, 70px); }.measure-unit { font-size: var(--font-size-xl); margin-top: var(--spacing-xs); }.lens-meta { font-size: var(--font-size-xs); }.lens-meta>span:last-child { display: none; }.lens-footnote { font-size: var(--font-size-xs); }.lens-footnote>span:last-child { display: none; }
   .tick-label { font-size: 24px; }.tick-label--intermediate { visibility: hidden; }.axis-heading,.next-caption { font-size: 22px; }.next-name { font-size: 28px; }

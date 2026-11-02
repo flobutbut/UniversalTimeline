@@ -8,7 +8,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@temporal': path.resolve(__dirname, './server/src/shared/temporal.ts')
+      '@temporal': path.resolve(__dirname, './server/src/shared/temporal.ts'),
+      '@account-rules': path.resolve(__dirname, './server/src/shared/accountRules.ts')
     }
   },
   server: {

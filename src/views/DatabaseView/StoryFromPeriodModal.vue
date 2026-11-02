@@ -47,7 +47,7 @@ function submit() {
 .story-from-period { display: flex; flex-direction: column; gap: var(--spacing-md); }
 .story-from-period__summary { display: flex; flex-direction: column; gap: var(--spacing-xs); font-size: var(--font-size-sm); line-height: var(--line-height-body); }
 .story-from-period__heading { margin: 0; color: var(--color-text-secondary); }
-.story-from-period__summary ul { margin: 0; padding-left: var(--spacing-lg); color: var(--color-text); }
+.story-from-period__summary ul { margin: 0; padding-left: var(--spacing-lg); color: var(--color-text-primary); }
 .story-from-period__hint { margin: var(--spacing-xs) 0 0; color: var(--color-text-secondary); }
 .story-from-period__error { margin: 0; color: var(--color-status-error-foreground); font-size: var(--font-size-sm); }
 </style>

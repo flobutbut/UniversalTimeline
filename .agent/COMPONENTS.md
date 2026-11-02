@@ -1,75 +1,49 @@
-> Généré le : 2026-04-11 — Source : analyse du code source
+# Composants — inventaire structurant
 
-# Composants (inventaire structurant)
+Mis à jour le 2 novembre 2026 après consolidation du design system. Les routes chargent leurs vues à la demande ; `App` fournit Header et UiFeedbackHost.
 
-Référence d’usage : recherche `from '@/components/` et imports relatifs entre composants. Les anciennes copies `* 2.vue` ont été supprimées (voir CONVENTIONS).
+## Primitives partagées (`src/components/base`)
 
-Légende **Utilisé dans** : vues ou composants parents observés (liste non exhaustive si le composant est transitif).
+| Composant | Contrat |
+| --- | --- |
+| Button | `variant`, `size` (`md` 44 / `sm` 36 / `xs` 28 px), `type`, `iconOnly`, `disabled`, `pressed`, `to`. Icône via le slot `#icon` ; une destination produit un vrai lien. |
+| Input | `modelValue`, `label`, `type`, `placeholder`, `error`, `hint`, `disabled`, `required`, `size`, `textareaSize`. Les attributs natifs (`name`, `autocomplete`, contraintes, ARIA) sont transmis au champ. Les classes et styles de placement restent sur le conteneur. Textarea : 88 px, ou 160 px avec `textarea-size="lg"`. |
+| SearchInput | Recherche 36 / 32 px, bouton d'effacement et retour du focus au champ. |
+| Select / SelectShell | Liste générique sans réseau ; enveloppe commune, clavier, rôles, fermeture extérieure/Escape, PopoverSurface et styles partagés. |
+| Switch | Booléen, variantes normale / `sm`, libellé ou nom accessible, rôle `switch`. Piste arrêt et curseur utilisent des rôles contrastés dans les deux thèmes. |
+| Tabs | `tabs`, `modelValue`, `vertical`, `variant` (`pill` / `underline`), `density` (`compact` / `comfortable`). Navigation clavier ; sélection fond/texte sémantique. |
+| Tag | `label`, `to`, `variant` (`neutral` / `accent`), `size`, `removable`, `removeLabel`, `disabled` ; événement `remove`. Slot `label` pour l'éditeur d'un filtre. |
+| FeedbackState | États `loading` / `error` / `empty`, disposition `panel` / `inline`, `title`, `message`, `retryable`, `retryLabel`, événement `retry`, slots `icon` / `actions`. Les panneaux empilent icône, contenu et actions ; le mode inline reste horizontal. |
+| LoadingSpinner | Indicateur décoratif partagé ; l'état accessible est porté par son message ou son bouton parent. |
+| PopoverSurface | Fond, bordure, rayon, ombre et padding optionnel. Le parent garde le placement et le comportement de son menu. `elementRef` permet aux recherches et menus d'accéder au DOM de la surface. |
+| ItemSummary | Titre, description et métadonnées compacts. |
+| ModalShell | `title`, `height`, `busy` ; slots corps, `header-right`, `header-bottom`, `footer-left`, `footer-right`. Gestion du dialogue avec `useDialog`. |
+| ConfirmModal | `title`, `message`, événements `confirm` / `cancel`. Hébergé par UiFeedbackHost via le store. |
+| DesignIcon | SVG locaux du produit, décoratifs, dimensions centralisées. Iconify / mdi complète les actions métier. |
 
-## Layout / shell
+## Catalogues et filtres
 
-| Nom | Chemin | Props principales | Utilisé dans |
-|-----|--------|-------------------|--------------|
-| Header | `src/components/Header.vue` | `currentView: NavigationView \| ''` ; liens natifs de `router/navigation.ts`, navigation nommée, aria-current=page | `App.vue` |
+- `CatalogueToolbar` porte la recherche et les slots filtres/actions ; Frises, Périodes et Événements l'utilisent.
+- `CatalogueFilters` / `FilterBuilder` gèrent visibilité, catégories, appartenances, période et plage de dates selon le contexte. Les puces utilisent Tag, les panneaux PopoverSurface.
+- `CatalogueTable` porte les colonnes, le tri et le redimensionnement accessible, les états de lecture et le défilement. Densité compacte (44 px) pour Périodes/Événements, confortable (64 px) pour Frises. Les cellules métier sont fournies par slot.
+- `FilterBar` est la recherche/suggestion du détail d'une frise ; `layout="panel"` expose sa présentation intégrée sans surcharger ses descendants depuis la vue.
+- `PeriodSelect` / `usePeriodSelect` assurent la sélection de période avec recherche distante et exclusions. Ils réutilisent SelectShell.
 
-## UI partagés (`src/components/base/`)
+## Frises et timeline
 
-| Nom | Chemin | Props principales | Utilisé dans |
-|-----|--------|-------------------|--------------|
-| Button | `src/components/base/Button.vue` | `variant`, `type`, `size`, `icon`, `iconOnly`, `disabled` | `DesignSystemView`, `EditModal`, `EventsView`, `StoryDetailPanel`, `PickerModalAddButton`, `ModalShell`, `WikidataImportButton`, … |
-| Input | `src/components/base/Input.vue` | `modelValue`, `label`, `type`, `placeholder`, `error`, `hint`, `disabled`, `required`, `compact` | `DesignSystemView`, `EditModal` |
-| SearchInput | `src/components/base/SearchInput.vue` | `modelValue`, `placeholder` | `DesignSystemView`, `EventsView`, `GlobalSearch`, `PeriodPickerModal`, `EventPickerModal` |
-| Select | `src/components/base/Select.vue` | `options`, `modelValue`, `multiple`, `searchable`, `disabled`, `loading`, `label`, `compact` ; liste générique sans store ni réseau | `DesignSystemView`, `EditModal`, `EventsView` |
-| SelectShell | `src/components/base/SelectShell.vue` | enveloppe visuelle, slots trigger/dropdown, `open`, rôles/labels du panneau, fermeture extérieure/Escape ; styles partagés | `Select.vue`, `PeriodSelect.vue` |
-| Switch | `src/components/base/Switch.vue` | `modelValue`, `label?`, `aria-label` si texte masqué, `disabled?` ; nom sur le bouton | `DesignSystemView`, `EditModal`, `StoryDetailPanel` |
-| Tabs | `src/components/base/Tabs.vue` | `modelValue`, `tabs`, `vertical?`, `variant?` | `DatabaseView`, `StoryDetailPanel`, `DesignSystemView` |
-| ModalShell | `src/components/base/ModalShell.vue` | `title`, `height?` ; slots corps / pied, **`header-right`** (optionnel, ex. recherche Wikidata). **Dropdowns** : `overflow` visible côté shell, overlay scroll, z-index distincts en-tête / corps / pied pour éviter de rogner les listes déroulantes (`Select` notamment). | `DesignSystemView`, `EditModal`, `PeriodPickerModal`, `EventPickerModal`, `StoryRelatedPickerModal` |
-| ConfirmModal | `src/components/base/ConfirmModal.vue` | pas de props externes documentées ; méthode exposée `show(title, message)` | `App.vue`, `DesignSystemView` |
+- `StoryGallery` affiche les cartes avec miniatures StoryTimeline ou le CatalogueTable confortable. `totalStories` indique le nombre de frises avant recherche et filtres : zéro déclenche l’invitation à créer sa première frise ; une liste filtrée vide affiche l’absence de résultat. Les préférences de mode sont conservées dans le navigateur.
+- `StoryTabsBar` porte les frises ouvertes et leur fermeture. Les onglets sont gérés par `useStoryTabs`.
+- `StoryDetailPanel` assemble les onglets Périodes, Événements, Relations, Catégories et Paramètres.
+- `FinderItem` porte les lignes de périodes/événements, la sélection et les actions. La vue ne redéfinit pas sa couleur interne.
+- `StorySettingsForm`, `StoryCategoriesForm`, `StoryRelationsPanel`, `StoryMembershipField` éditent leurs domaines respectifs avec les primitives partagées.
+- `EditModal` est le formulaire de création/édition et d'import Wikidata. StoryRelatedPickerModal, ParentStoryPickerModal, RootPeriodModal, MoveStoryPeriodModal et StoryFromPeriodModal couvrent les dialogues métier actifs.
+- `HomeView` / `PeriodGrid` / `PeriodCard` / `EventCard` portent l'exploration ; AssociatedStoriesBadge et StoryBreadcrumb fournissent les liens et le contexte.
+- `StoryTimeline` fournit la miniature et la visualisation intégrée. Les éléments sans date utilisent Button, comme PeriodGrid.
 
-## Métier / transverse
+## Référence et contrôles
 
-| Nom | Chemin | Props principales | Utilisé dans |
-|-----|--------|-------------------|--------------|
-| PeriodSelect | `src/components/PeriodSelect.vue` | `modelValue: string \| null`, `disabled`, `label`, `compact` ; `searchRemote`, `excludeId` pour le parent ; navigation et lectures via `usePeriodSelect` | `EventsView`, `DesignSystemView`, `EditModal` |
-| ItemSummary | `src/components/base/ItemSummary.vue` | Titre, description et métadonnées compacts ; partagé par la recherche, les lignes du finder et les onglets de frises | `GlobalSearch`, `FinderItem`, `Tabs` |
-| GlobalSearch | `src/components/GlobalSearch.vue` | *(aucune prop)* ; emit `select(hit)` | `Header.vue` |
-| FilterBar | `src/components/FilterBar.vue` | `mode?` (`periods` \| `events`), `title?`, `categoryOptions`, `suggestions?` (périodes), `eventSuggestions?` (événements), `hideTitle?`, `allowWikidataCreate?` ; `v-model:search`, `v-model:categoryId` ; emit `add`, `pickPeriod`, `pickEvent`, `wikidataAdd`. Tous les champs internes à `size="sm"` (36px). | `Periods.vue`, `StoryDetailPanel.vue`, `DesignSystemView` |
-| ThemeToggle | `src/components/ThemeToggle.vue` | Aucune prop. Utilise `<Button variant="secondary" iconOnly>` + slot `#icon` (SVG inline soleil/lune). | `Header.vue` |
-| StoryBreadcrumb | `src/components/StoryBreadcrumb.vue` | `items` (`{ id: string; title: string; kind?: 'story' \| 'period' }[]`), `loading?` ; emit `navigate(index)` pour les ancêtres. Chemin continu : nom de frise (« Frise : » lu, sans icône) suivi de ses périodes, liste ordonnée et aria-current, retour clavier avec focus sur la destination. Dans le flux au-dessus de la frise ; libellés complets et lignes adaptables. | `HomeView.vue` |
-| UiFeedbackHost / Toast / ConfirmModal | `src/components/UiFeedbackHost.vue` | Store `useUiStore` ; `useToast` et `useConfirm` ; confirmation en file, dialogue déclaratif | Un seul host dans App, aucun global window |
-| ~~WikidataImportButton~~ | ~~supprimé~~ | Remplacé par `useWikidataImport` + `Button` variant secondary inline dans `EditModal`. | — |
-| StoryTimeline | `src/components/StoryTimeline.vue` | `periods?`, `events?`, `selectedPeriodId?`, `selectedEventId?` ; emits `select-period`, `select-event`, `deselect` | `StoryDetailPanel.vue`, `DesignSystemView` |
+`/design-system` montre les primitives, les états, les variantes compactes/confortables, les catalogues, les filtres, les cartes et les onglets de frises. `tokenCatalogue.ts` génère l'inventaire depuis les CSS ; les valeurs suivent les changements de thème.
 
-### `EditModal` (`src/views/DatabaseView/EditModal.vue`)
+`yarn verify:design` contrôle les références de variables, les contrastes des rôles, l'absence d'accents de données utilisés directement comme couleurs de texte et les fichiers Vue/TypeScript isolés. Les fixtures et déclarations TypeScript ne sont pas du code applicatif mort.
 
-- **Création période ou événement** : recherche Wikidata via `SearchInput` placé dans le slot **`header-right`** de `ModalShell` (pas de libellé texte au-dessus du champ).
-- **Comportement** : `importAndTransform` et le flux d’import selon le type d’entité ; `runWikidataLabelSearch` avec **`restrictToEventConcepts`** lorsque la création concerne un **événement**.
-- **Erreurs** : états visibles distincts, reprise explicite, données principales conservées en cas d’échec d’un complément. Les suggestions restent dans le dialogue et se parcourent par flèches/Entrée avec le focus au champ ; Échap ferme d’abord la liste.
-
-## Icônes
-
-Bibliothèque unique : **Iconify** (`@iconify/vue`). Import : `import { Icon } from '@iconify/vue'`. Préfixe principal : `mdi:`. Taille via props `width`/`height` ou CSS. Toujours `aria-hidden="true"` sur les icônes décoratives. **Pas de FontAwesome, pas de lucide-vue-next.**
-
-| Nom | Chemin | Props principales | Utilisé dans |
-|-----|--------|-------------------|--------------|
-| ChevronIcon | `src/components/icons/ChevronIcon.vue` | `width?`, `height?`, `color?` — wraps `<Icon icon="mdi:chevron-right">` | `FinderItem.vue`, `DesignSystemView` |
-
-## Vue finder périodes / `/periods` (structurant, hors `src/components/`)
-
-| Nom | Chemin | Props principales | Utilisé dans |
-|-----|--------|-------------------|--------------|
-| FinderItem | `src/views/GraphView/FinderItem.vue` | `label`, `selected`, `hasChildren`, `wikidataOnly?`, `itemId`, `startDate?`, `endDate?`, `categories?`, `draggable?` (défaut `true`), `hideRowAction?`, `hideChevron?` (pas de drilldown), `dateSubtitleOverride?`, `isExternalCatalog?` (ligne catalogue hors story : titres/dates atténués) ; slot **`#actions`** (boutons fin de ligne, ex. retirer / ajouter) ; **`border-bottom`** sur la racine du composant (séparateur de ligne ; la feuille `finder-column-layout.css` ne redéclare plus ce bord sur les enfants) ; pas de style `.droppable` (retiré) ; commentaire d’usage en tête du `<script setup>` | `Periods.vue`, `StoryDetailPanel.vue`, `DesignSystemView` |
-| StoryDetailPanel | `src/views/DatabaseView/StoryDetailPanel.vue` | `story?` (`Story \| null`), `loading` ; onglets Périodes / Événements / **Stories enfants** ; périodes et **événements** : même ligne **`FinderItem`** (liste événements `.events-finder-list`, fond `var(--color-surface)`, sans padding vertical parasite sur la liste) ; périodes : colonnes finder + Switch « Hors story » ; en-tête colonne : titre + bouton **Ancrer une story** ; stories enfants ancrées **au-dessus** des périodes dans chaque colonne ; emits `add-child-stories`, `remove-child-story`, etc. | `DatabaseView.vue` |
-| StoryRelatedPickerModal | `src/views/DatabaseView/StoryRelatedPickerModal.vue` | `excludeStoryIds` (courante + déjà liées) ; emits `confirm(ids)`, `close` | `StoryDetailPanel.vue` |
-
-## Nettoyage composants non branchés (2026-04-12)
-
-Supprimés du dépôt après vérification d’imports : `SearchBar.vue`, `SearchResults.vue`, `DateConverter.vue`, `BackButton.vue`, `ArrowIcon.vue`, `Favicon.vue`, `LanguageSelector.vue`, ainsi que le service mort `WikidataSearchService.ts` et `wikidataSearchResultUi.ts` (consommateur unique supprimé).
-
-## Hors périmètre (volontairement non tabulés)
-
-- Cartes et panneaux fortement couplés à une seule vue (`PeriodCard`, modales métiers spécifiques, etc.) : logique locale ; seuls les modaux réutilisant `ModalShell` sont listés via les parents ci-dessus.
-
-## Sélection de périodes — lot 7
-
-`Select` gère uniquement les options fournies par son parent. `PeriodSelect` présente le filtre métier ; `usePeriodSelect` gère les niveaux, la recherche locale et les lectures via le store partagé. `SelectShell` conserve les interactions et styles communs. Les appels actifs ne passent plus de prop `mode`. Lors de la consolidation du 29 octobre, les copies `* 2.*` retirées dans Desktop ne sont pas réintroduites. La recherche distante et l’exclusion du parent ont été portées dans PeriodSelect/usePeriodSelect. SelectShell accepte size=sm et compact pour la même taille de champ.
+Les anciennes modales EventPickerModal / PeriodPickerModal, leurs wrappers de pied et les utilitaires sans appelant ont été retirés. L'audit initial dans `audits/design-system-2026-11-02/AUDIT.md` reste une photographie avant correction ; voir `CORRECTIONS.md` dans le même dossier.

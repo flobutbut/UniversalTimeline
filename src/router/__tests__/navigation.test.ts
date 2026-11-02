@@ -80,13 +80,13 @@ it('loads only the requested page on direct entry and keeps timeline reads dorma
   expect(EventApiService.getInstance().getStoryListEvents).not.toHaveBeenCalled();
   expect(counts.eventsImports).toBe(1);
   expect(counts.databaseImports + counts.graphImports + counts.designImports).toBe(0);
-  expect(activeTab()).toBe('Events');
+  expect(activeTab()).toBe('Événements');
 });
 
 it('provides native navigation links with a current page and a skip link to the focusable main landmark', async () => {
   await start('/events');
   const nav = view.get('nav[aria-label="Navigation principale"]');
-  expect(nav.get('a[aria-current="page"]').text()).toBe('Events');
+  expect(nav.get('a[aria-current="page"]').text()).toBe('Événements');
   expect(nav.findAll('a').every(link => !!link.attributes('href'))).toBe(true);
   const skip = view.get('.skip-link'); expect(skip.attributes('href')).toBe('#main-content');
   expect(view.get('main').attributes('tabindex')).toBe('-1');
@@ -115,7 +115,7 @@ it('preserves the actual timeline instance, current period and back stack across
   expect(view.get('[data-context]').text()).toBe('entry');
   await go('/events'); await historyMove('back');
   expect(view.getComponent(HomeView).element).toBe(original); expect(activeTab()).toBe('Timeline');
-  await historyMove('forward'); expect(activeTab()).toBe('Events');
+  await historyMove('forward'); expect(activeTab()).toBe('Événements');
   expect(StoryApiService.getInstance().getStory).toHaveBeenCalledOnce();
 });
 
@@ -133,31 +133,31 @@ it('does not retain other page instances or unfinished modal state in the cache'
   const before = counts.eventsUnmounted;
   await go('/graph'); expect(counts.eventsUnmounted).toBe(before + 1);
   await go('/events'); expect((view.get('[data-page="events"] input').element as HTMLInputElement).value).toBe('');
-  expect(activeTab()).toBe('Events');
+  expect(activeTab()).toBe('Événements');
 });
 
 it('shows loading while a lazy page is pending and updates the active tab only after navigation succeeds', async () => {
   const pending = deferred<Component>();
   await start('/timeline', withEventsLoader(() => pending.promise));
-  await button('Events').trigger('click'); await flushPromises();
+  await button('Événements').trigger('click'); await flushPromises();
   expect(view.get('[role="status"]').text()).toContain('Chargement de la page');
   expect(activeTab()).toBe('Timeline'); expect(view.find('[data-page="timeline"]').exists()).toBe(true);
   pending.resolve(defineComponent({ template: '<section data-page="events">Événements chargés</section>' }));
   await flushPromises();
-  expect(activeTab()).toBe('Events'); expect(view.find('[role="status"]').exists()).toBe(false);
+  expect(activeTab()).toBe('Événements'); expect(view.find('[role="status"]').exists()).toBe(false);
 });
 
 it('keeps the current page after a loading failure and retries the failed route', async () => {
   const load = vi.fn().mockRejectedValueOnce(new Error('Chunk indisponible')).mockResolvedValueOnce(defineComponent({ template: '<section data-page="events">Événements chargés</section>' }));
   await start('/timeline', withEventsLoader(load));
-  await button('Events').trigger('click'); await flushPromises();
+  await button('Événements').trigger('click'); await flushPromises();
   expect(view.get('[role="alert"]').text()).toContain('Impossible de charger cette page');
   expect(activeTab()).toBe('Timeline'); expect(view.find('[data-page="timeline"]').exists()).toBe(true);
   await button('Réessayer').trigger('click'); await flushPromises();
-  expect(load).toHaveBeenCalledTimes(2); expect(view.find('[role="alert"]').exists()).toBe(false); expect(activeTab()).toBe('Events');
+  expect(load).toHaveBeenCalledTimes(2); expect(view.find('[role="alert"]').exists()).toBe(false); expect(activeTab()).toBe('Événements');
 });
 
-it.each([['/graph', 'Periods'], ['/design-system', 'Design system'], ['/database', 'Frises']])('renders a direct %s route and the matching header', async (path, label) => {
+it.each([['/graph', 'Périodes'], ['/design-system', 'Design system'], ['/database', 'Frises']])('renders a direct %s route and the matching header', async (path, label) => {
   await start(path); expect(activeTab()).toBe(label);
   expect(view.find('[data-page="timeline"]').exists()).toBe(false);
   expect(StoryApiService.getInstance().getStory).not.toHaveBeenCalled();
@@ -200,13 +200,13 @@ it('recovers from a failed initial page load before any view has mounted', async
   expect(view.get('[role="alert"]').text()).toContain('Impossible de charger cette page');
   expect(view.find('[data-page="timeline"]').exists()).toBe(false);
   await button('Réessayer').trigger('click'); await flushPromises();
-  expect(view.find('[data-page="events"]').exists()).toBe(true); expect(activeTab()).toBe('Events');
+  expect(view.find('[data-page="events"]').exists()).toBe(true); expect(activeTab()).toBe('Événements');
 });
 
 it('ignores a late load failure from an abandoned navigation', async () => {
   const pending = deferred<Component>();
   await start('/timeline', withEventsLoader(() => pending.promise));
-  await button('Events').trigger('click'); await flushPromises();
+  await button('Événements').trigger('click'); await flushPromises();
   await button('Frises').trigger('click'); await flushPromises();
   expect(activeTab()).toBe('Frises');
   pending.reject(new Error('Ancien téléchargement interrompu')); await flushPromises();
@@ -224,7 +224,7 @@ it('does not clear a newer loader when a cancelled request targeted the same URL
   old.resolve(defineComponent({ template: '<p>Ancienne réponse</p>' })); await first; await flushPromises();
   expect(view.find('[role="status"]').exists()).toBe(true); expect(activeTab()).toBe('Timeline');
   fresh.resolve(defineComponent({ template: '<section data-page="events">Événements chargés</section>' })); await second; await flushPromises();
-  expect(view.find('[role="status"]').exists()).toBe(false); expect(activeTab()).toBe('Events');
+  expect(view.find('[role="status"]').exists()).toBe(false); expect(activeTab()).toBe('Événements');
 });
 
 it('refreshes a changed frise on return and discards a path that is no longer a root', async () => {

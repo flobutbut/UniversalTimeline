@@ -5,12 +5,15 @@ import {
   InputValidationError, inputObject, parseEntityId, parseStoryId, parseQid, parseEventWrite, parsePeriodWrite,
   parseStoryWrite, parseAnchor, parseChildStories, parseAssociationOperation,
   parseSearchText, parseSearchScope, parseCsvIds, parseParentId, parseAssociationIds, parseStoryFromPeriod,
+  parseUsername, parseProfileWrite, parseTermsAcceptance,
 } from './inputValidation.js';
+import type { Response } from 'express';
 import * as catalogue from '../services/catalogueService.js';
 import * as stories from '../services/storyService.js';
 import { search, searchStoryTimelines } from '../services/searchService.js';
 import { semanticSearch } from '../services/semanticSearch.js';
 import { loadStoryTemporalBounds } from '../services/storyTemporalBounds.js';
+import * as profiles from '../services/profileService.js';
 
 const router = express.Router();
 
@@ -162,6 +165,14 @@ router.post('/stories/:parentId/child-stories', endpoint('Erreur lors du rattach
   const rows = await stories.linkChildren(id, ids, anchor);
   res.json(multiple ? { ids: rows.map(row => String(row.id)) } : rows[0]);
 }));
+router.post('/stories/:sourceId/entry-points', endpoint('Impossible de modifier les points d’entrée.', async (req, res) => {
+  const sourceId = parseStoryId(req.params.sourceId, 'sourceId');
+  const { ids, anchor } = parseChildStories(req.body);
+  const operation = parseAssociationOperation(inputObject(req.body).operation);
+  if (operation === 'add' && !anchor) throw new InputValidationError('anchor', 'Choisissez une période ou un événement de rattachement.');
+  await stories.changeEntries(sourceId, ids, anchor, operation === 'remove');
+  res.status(204).send();
+}));
 router.delete('/stories/:parentId/child-stories/:childId', endpoint('Erreur lors du détachement', async (req, res) => {
   const id = parseStoryId(req.params.parentId, 'parentId');
   const child = parseStoryId(req.params.childId, 'childId');
@@ -205,5 +216,33 @@ router.patch('/periods/:id/parent', (_req, res) => {
 });
 router.get('/periods/wikidata/:wikidataId', endpoint('Erreur lors de la récupération de la période', async (req, res) => {
   res.json(await catalogue.getPeriod(parseQid(req.params.wikidataId, true)!, 'wikidata_id'));
+}));
+// Account profile: own row only. Sign-up availability is the one anonymous read.
+const signedIn = (res: Response) => {
+  if (res.locals.principal?.userId) return true;
+  res.status(401).json({ error: 'Connexion requise.' }); return false;
+};
+router.get('/profile/username-availability', endpoint('Vérification du nom d’utilisateur impossible.', async (req, res) => {
+  res.json({ available: await profiles.usernameAvailable(parseUsername(req.query.username)) });
+}));
+router.get('/profile', endpoint('Erreur lors de la lecture du profil', async (_req, res) => {
+  if (signedIn(res)) res.json(await profiles.getProfile());
+}));
+router.put('/profile', endpoint('Erreur lors de l’enregistrement du profil', async (req, res) => {
+  const data = parseProfileWrite(req.body);
+  if (signedIn(res)) res.json(await profiles.saveProfile(data));
+}, { conflict: 'Ce nom d’utilisateur est déjà pris.' }));
+router.post('/profile/terms', endpoint('Erreur lors de l’enregistrement de votre acceptation', async (req, res) => {
+  const version = parseTermsAcceptance(req.body);
+  if (signedIn(res)) res.json(await profiles.acceptTerms(version));
+}));
+router.get('/profile/export', endpoint('Export de vos données impossible', async (_req, res) => {
+  if (signedIn(res)) res.json(await profiles.exportData());
+}));
+// Right to erasure: frises then account, in one transaction. Never retried automatically.
+router.delete('/profile', endpoint('Suppression du compte impossible', async (_req, res) => {
+  if (!signedIn(res)) return;
+  await profiles.deleteAccount();
+  res.status(204).send();
 }));
 export default router;

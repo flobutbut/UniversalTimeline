@@ -126,11 +126,11 @@ it('keeps a related-story write attached to its original story after selection c
   const pending = deferred<void>();
   vi.spyOn(service, 'getStory').mockImplementation(async id => detail(id));
   vi.spyOn(service, 'getListStories').mockResolvedValue([story('a'), story('b')]);
-  const write = vi.spyOn(service, 'linkChildStories').mockReturnValue(pending.promise);
+  const write = vi.spyOn(service, 'changeEntryPoints').mockReturnValue(pending.promise);
   const view = scoped(useDatabaseView); await view.selectStory(story('a'));
-  const saving = view.addChildStoriesToStory(['child']);
+  const saving = view.addChildStoriesToStory(['child'], { type: 'period', id: 'period' });
   await view.selectStory(story('b')); pending.resolve(); await saving;
-  expect(write).toHaveBeenCalledExactlyOnceWith('a', ['child']);
+  expect(write).toHaveBeenCalledExactlyOnceWith('a', ['child'], { type: 'period', id: 'period' });
   expect(view.selectedStory.value?.id).toBe('b'); expect(view.relationsBusy.value).toBe(false);
 });
 
@@ -138,7 +138,7 @@ it('refreshes the cached story detail after an anchor changes', async () => {
   const service = StoryApiService.getInstance();
   const read = vi.spyOn(service, 'getStory').mockResolvedValueOnce(detail('a')).mockResolvedValueOnce({ ...detail('a'), childStories: [{ id: 'child', title: story('child').title, anchors: [{ type: 'event', id: 'event' }] }] });
   vi.spyOn(service, 'getListStories').mockResolvedValue([story('a')]);
-  vi.spyOn(service, 'addAnchor').mockResolvedValue(undefined);
+  vi.spyOn(service, 'changeEntryPoints').mockResolvedValue(undefined);
   useDataStore().updateStories([story('a')]);
   const view = scoped(useDatabaseView); await view.selectStory(story('a'));
   await view.addEventAnchorToStory('child', 'event');

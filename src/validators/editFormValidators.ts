@@ -36,7 +36,8 @@ export class EditFormValidator {
       text(description.en, 'description.en', 'La description en anglais', 1000);
     }
     if (type === 'story') {
-      text(data.author, 'author', 'L’auteur', 255, true);
+      // L'auteur est signé par le compte côté serveur ; une valeur héritée reste seulement bornée.
+      text(data.author, 'author', 'L’auteur', 255);
       if (data.isPublic !== undefined && typeof data.isPublic !== 'boolean') fields.isPublic = 'La visibilité doit être un booléen.';
     } else {
       Object.assign(fields, this.validateQid(data.qid).fields);

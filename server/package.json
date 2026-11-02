@@ -10,7 +10,8 @@
     "test:hierarchy": "yarn build && node --test test/periodHierarchy.postgres.mjs",
     "test:deletion": "yarn build && node --test test/periodDeletion.postgres.mjs",
     "test:privileges": "node --test test/functionPrivileges.postgres.mjs",
-    "test:atomic": "yarn build && node --experimental-test-module-mocks --test test/atomicWrites.postgres.mjs"
+    "test:atomic": "yarn build && node --experimental-test-module-mocks --test test/atomicWrites.postgres.mjs",
+    "test:profiles": "yarn build && node --experimental-test-module-mocks --test test/profiles.postgres.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",

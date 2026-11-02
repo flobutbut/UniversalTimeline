@@ -4,7 +4,7 @@
     <template v-if="editable">
       <p v-if="error" role="alert" class="story-categories-form__error">{{ error }}</p>
       <div v-if="editState.categoriesError" class="story-categories-form__error" role="alert">
-        {{ editState.categoriesError }} <button type="button" :disabled="busy || editState.categoriesLoading" @click="loadCategories">Réessayer</button>
+        {{ editState.categoriesError }} <Button variant="tertiary" size="sm" type="button" :disabled="busy || editState.categoriesLoading" @click="loadCategories">Réessayer</Button>
       </div>
       <form class="story-categories-form__form" aria-label="Catégories de la frise" @submit.prevent="save">
         <fieldset class="story-categories-form__fields" :disabled="busy">
@@ -23,12 +23,7 @@
           />
         </fieldset>
         <ul v-if="selected.length" class="story-categories-form__tags" aria-label="Catégories sélectionnées">
-          <li v-for="item in selected" :key="item.id" class="story-categories-form__tag">
-            {{ item.label }}
-            <button type="button" class="story-categories-form__remove" :disabled="busy" :aria-label="`Retirer ${item.label}`" @click="remove(item.id)">
-              <Icon icon="mdi:close" width="14" height="14" aria-hidden="true" />
-            </button>
-          </li>
+          <li v-for="item in selected" :key="item.id"><Tag :label="item.label" removable size="md" :disabled="busy" @remove="remove(item.id)" /></li>
         </ul>
         <p v-else class="story-categories-form__empty">Aucune catégorie associée à cette frise.</p>
         <div v-if="dirty" class="story-categories-form__actions">
@@ -39,7 +34,7 @@
     </template>
     <template v-else>
       <ul v-if="story.categories.length" class="story-categories-form__tags" aria-label="Catégories">
-        <li v-for="tag in story.categories" :key="tag.id" class="story-categories-form__tag">{{ tag.label.fr }}</li>
+        <li v-for="tag in story.categories" :key="tag.id"><Tag :label="tag.label.fr" size="md" /></li>
       </ul>
       <p v-else class="story-categories-form__empty">Aucune catégorie associée à cette frise.</p>
     </template>
@@ -48,7 +43,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Icon } from '@iconify/vue';
+import Tag from '@/components/base/Tag.vue';
 import Button from '@/components/base/Button.vue';
 import BaseSelect from '@/components/base/Select.vue';
 import { useStoryDraft } from '@/composables/useStoryDraft';
@@ -106,8 +101,4 @@ function save() {
 .story-categories-form__empty { margin-bottom: 0; color: var(--color-text-secondary); }
 .story-categories-form__actions { display: flex; justify-content: flex-end; gap: var(--spacing-sm); }
 .story-categories-form__tags { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin: 0; padding: 0; list-style: none; }
-.story-categories-form__tag { display: inline-flex; align-items: center; gap: var(--spacing-xs); height: var(--field-height-md); padding: 0 var(--spacing-md); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: var(--font-size-sm); }
-.story-categories-form__remove { display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; background: none; color: var(--color-text-secondary); cursor: pointer; }
-.story-categories-form__remove:hover:not(:disabled), .story-categories-form__remove:focus-visible { color: var(--color-text); }
-.story-categories-form__remove:disabled { cursor: not-allowed; opacity: .5; }
 </style>

@@ -8,6 +8,8 @@ import { description, localized, groupCategories, mapCategory, mapPeriodDetail, 
 import { aggregateStoryTemporalBounds } from '../domain/storyTemporalBounds.js';
 import * as associations from './storyAssociations.js';
 import type { AssociationKind } from '../repositories/storyRelationsRepository.js';
+import { changeEntryPoints } from './storyEntryPoints.js';
+import { creatorAuthor, editorAuthor } from './storyAuthor.js';
 
 const db = { query };
 export async function listStories() {
@@ -38,9 +40,13 @@ export async function getStory(id: string) {
   }));
   return {
     id: row.id, title: localized(row.title_fr, row.title_en), description: description(row.description_fr, row.description_en),
-    author: row.author, isPublic: row.is_public, ownerUserId: row.owner_user_id,
+    author: row.author, isPublic: row.is_public, ownerUserId: row.owner_user_id, created_at: row.created_at,
     parent_story_id: row.parent_story_id ?? null,
     categories, periods, events, childStories,
+    parentStories: (row.parent_stories ?? []).map(parent => ({
+      id: String(parent.id), title: localized(parent.title_fr, parent.title_en), ownerUserId: parent.owner_user_id,
+      anchors: parent.anchors.map(anchor => ({ type: anchor.type, id: anchor.id, label: localized(anchor.label_fr, anchor.label_en) })),
+    })),
     relatedStories: row.related_stories.map(related => ({
       id: String(related.id), title: localized(related.title_fr, related.title_en),
       periodIds: related.period_ids, eventIds: related.event_ids,
@@ -50,14 +56,14 @@ export async function getStory(id: string) {
 }
 export function createStory(data: StoryWrite) {
   return withTransaction(async client => {
-    const row = await stories.insertStory(client, data);
+    const row = await stories.insertStory(client, { ...data, author: await creatorAuthor(client, data.author) });
     await replaceEntityCategories(client, 'story', row.id, data.categories);
     return { ...row, categories: await readEntityCategories(client, 'story', row.id) };
   });
 }
 export async function updateStory(id: string, data: StoryWrite) {
   const row = await withTransaction(async client => {
-    const row = await stories.updateStory(client, id, data);
+    const row = await stories.updateStory(client, id, { ...data, author: editorAuthor(data.author) });
     if (!row) return undefined;
     await replaceEntityCategories(client, 'story', id, data.categories);
     return { ...row, categories: await readEntityCategories(client, 'story', id) };
@@ -94,3 +100,4 @@ export const changeRootPeriod = (id: string, periodId: string) => withTransactio
 export const createFromPeriod = (sourceId: string, periodId: string, title: string) => withTransaction(client => associations.createStoryFromPeriod(client, sourceId, periodId, title));
 export const linkChildren = (id: string, children: string[], anchor?: { anchorType: 'period' | 'event'; anchorId: string }) => withTransaction(client => associations.linkChildStories(client, id, children, anchor));
 export const unlinkChild = (id: string, child: string) => withTransaction(client => associations.unlinkChildStory(client, id, child));
+export const changeEntries = (sourceId: string, ids: string[], anchor: { anchorType: 'period' | 'event'; anchorId: string } | undefined, remove: boolean) => withTransaction(client => changeEntryPoints(client, sourceId, ids, anchor, remove));

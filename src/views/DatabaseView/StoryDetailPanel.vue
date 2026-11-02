@@ -1,27 +1,24 @@
 <template>
   <div class="story-detail-panel" :aria-busy="loading || panelBusy || undefined">
 
-    <div v-if="loading" class="story-detail-panel__loading">
-      <div class="spinner"></div>
-      <span>Chargement…</span>
-    </div>
-
-    <div v-else-if="error && !story" role="alert">
-      {{ error }} <button type="button" @click="$emit('retry')">Réessayer</button>
-    </div>
-
-    <div v-else-if="!story" class="story-detail-panel__empty"> Sélectionnez une frise pour voir ses détails </div>
-
+    <FeedbackState v-if="loading" kind="loading" />
+    <FeedbackState v-else-if="error && !story" kind="error" :message="error" retryable @retry="$emit('retry')" />
+    <FeedbackState v-else-if="!story" message="Sélectionnez une frise pour voir ses détails" />
     <template v-else>
       <div v-if="panelBusy" class="sr-only" role="status">Opération en cours…</div>
       <div v-if="error" class="story-finder-feedback" role="alert">
-        {{ error }} <button type="button" :disabled="panelBusy" @click="$emit('retry')">Réessayer</button>
+        {{ error }} <Button variant="tertiary" size="sm" type="button" :disabled="panelBusy" @click="$emit('retry')">Réessayer</Button>
       </div>
       <!-- En-tête méta -->
       <div class="story-detail-panel__meta">
         <div class="story-detail-panel__meta-text">
           <h2 class="story-detail-panel__title">{{ story.title.fr }}</h2>
           <p v-if="story.description?.fr" class="story-detail-panel__desc">{{ story.description.fr }}</p>
+          <p v-if="story.createdAt || story.author" class="story-detail-panel__byline">
+            <template v-if="story.createdAt">Créée le <time :datetime="story.createdAt.toISOString()">{{ formatRecordDate(story.createdAt) }}</time></template>
+            <template v-if="story.createdAt && story.author"> · </template>
+            <template v-if="story.author">par {{ story.author }}</template>
+          </p>
         </div>
         <div class="story-detail-panel__meta-actions">
           <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openEventCreator">Ajouter un événement</Button>
@@ -35,7 +32,7 @@
           v-model="activeTab"
           class="story-detail-panel__tabs"
           :tabs="storyContentTabs"
-          variant="underline"
+          variant="underline" density="comfortable"
         />
       </div>
 
@@ -65,7 +62,7 @@
         <!-- Périodes -->
         <template v-if="activeTab === 'periods'">
           <div class="story-detail-panel__tab-panel">
-            <FilterBar
+            <FilterBar layout="panel"
               hide-title
               hide-add
               v-model:search="periodHeaderSearch"
@@ -83,7 +80,7 @@
                 <span class="story-finder-activity">
                   <span class="sr-only" role="status">{{ finderLoading ? 'Recherche des sous-périodes…' : '' }}</span>
                   <button v-if="finderLoading" type="button" class="story-finder-activity__cancel" aria-label="Annuler la recherche des sous-périodes" @click="cancelFinder">
-                    <span class="story-finder-activity__spinner" aria-hidden="true"></span>
+                    <LoadingSpinner />
                     <span class="sr-only">Annuler</span>
                   </button>
                 </span>
@@ -98,11 +95,11 @@
             </FilterBar>
           <div v-if="finderError" class="story-finder-feedback" role="alert">
             {{ finderError }}
-            <button type="button" @click="retryFinder">Réessayer</button>
-            <button type="button" @click="cancelFinder">Annuler</button>
+            <Button variant="tertiary" size="sm" type="button" @click="retryFinder">Réessayer</Button>
+            <Button variant="tertiary" size="sm" type="button" @click="cancelFinder">Annuler</Button>
           </div>
           <div v-if="periodImportError && !periodImportDraft" class="story-finder-feedback" role="alert">
-            {{ periodImportError }} <button type="button" :disabled="periodImportBusy" @click="retryPeriodImport">Réessayer</button>
+            {{ periodImportError }} <Button variant="tertiary" size="sm" type="button" :disabled="periodImportBusy" @click="retryPeriodImport">Réessayer</Button>
           </div>
           <template v-if="story.periods?.length || showExternalInFinder">
             <div class="story-detail-panel__finder-columns-wrap">
@@ -156,7 +153,7 @@
                           </button>
                         </template>
                       </FinderItem>
-                      <AnchoredStoryRow v-for="cs in childStoriesForColumn(colIdx)" :key="cs.id" :story="cs" :summary="childStorySummary(cs.id)" :disabled="panelBusy" @remove="emit('remove-child-story', cs.id)" />
+                      <AnchoredStoryRow v-for="cs in childStoriesForColumn(colIdx)" :key="cs.id" :story="cs" :summary="childStorySummary(cs.id)" :disabled="panelBusy" @remove="emit('remove-child-story', cs.id, finderSelectedPath[colIdx - 1] ? { type: 'period', id: finderSelectedPath[colIdx - 1]! } : undefined)" />
 
                     </template>
                     <div v-else class="finder-empty-column">
@@ -175,7 +172,7 @@
         <!-- Événements -->
         <template v-else-if="activeTab === 'events'">
           <div class="story-detail-panel__tab-panel">
-            <FilterBar
+            <FilterBar layout="panel"
               mode="events"
               hide-title
               hide-add
@@ -258,9 +255,9 @@
                               {{ cs.title.fr }}
                             </button>
                           </div>
-                          <button type="button" class="event-anchor-cancel" @click="showAnchorPickerForEvent = null">
+                          <Button variant="tertiary" size="sm" type="button" class="event-anchor-cancel" @click="showAnchorPickerForEvent = null">
                             Annuler
-                          </button>
+                          </Button>
                         </template>
                       </div>
                     </div>
@@ -276,6 +273,11 @@
           </div>
         </template>
 
+        <div v-else-if="activeTab === 'relations'" class="story-settings-panel">
+          <StoryRelationsPanel :story="story" :busy="panelBusy" :error="error"
+            @add-parent="(sourceId, periodId) => emit('add-parent-entry', sourceId, periodId)"
+            @remove-parent="(sourceId, anchor) => emit('remove-parent-entry', sourceId, anchor)" />
+        </div>
         <div v-else-if="activeTab === 'categories'" class="story-settings-panel">
           <StoryCategoriesForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
         </div>
@@ -301,6 +303,7 @@
     <StoryRelatedPickerModal
       v-if="showChildStoryPicker && story"
       :exclude-story-ids="childStoryPickerExcludeIds"
+      :periods="childStoryAnchor ? undefined : story.periods"
       @close="showChildStoryPicker = false"
       @confirm="onAddChildStories"
     />
@@ -308,6 +311,8 @@
 </template>
 
 <script setup lang="ts">
+import FeedbackState from '@/components/base/FeedbackState.vue';
+import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import { resolveYearsBeforePresent } from '@temporal';
 import { ref, computed, watch } from 'vue';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
@@ -317,6 +322,7 @@ import RootPeriodModal from './RootPeriodModal.vue';
 import MoveStoryPeriodModal from './MoveStoryPeriodModal.vue';
 import StorySettingsForm from './StorySettingsForm.vue';
 import StoryCategoriesForm from './StoryCategoriesForm.vue';
+import StoryRelationsPanel from './StoryRelationsPanel.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import StoryItemActionsMenu from './StoryItemActionsMenu.vue';
 import EditModal from './EditModal.vue';
@@ -331,6 +337,7 @@ import { useDataStore } from '@/stores/useDataStore';
 import { useStoryEventCreation } from '@/composables/useStoryEventCreation';
 import StoryRelatedPickerModal from './StoryRelatedPickerModal.vue';
 import { formatStoryEventDateLabel } from '@/lib/formatTemporalBoundLabel';
+import { formatRecordDate } from '@/lib/storyListDates';
 import { useToast } from '@/composables/useToast';
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { useStoryPeriodFinder } from '@/composables/useStoryPeriodFinder';
@@ -379,7 +386,9 @@ const emit = defineEmits<{
   (e: 'save-story', submission: EditFormSubmission): void;
   (e: 'delete-story'): void;
   (e: 'toggle-visibility'): void;
-  (e: 'remove-child-story', id: string): void;
+  (e: 'remove-child-story', id: string, anchor?: StoryAnchor): void;
+  (e: 'add-parent-entry', sourceId: string, periodId: string): void;
+  (e: 'remove-parent-entry', sourceId: string, anchor?: StoryAnchor): void;
   (e: 'add-event-anchor', childStoryId: string, eventId: string): void;
   (e: 'remove-event-anchor', childStoryId: string, eventId: string): void;
 }>();
@@ -414,7 +423,7 @@ const {
   clear: clearPeriodSelection, pick: pickPeriod, selectRow: selectPeriodRow, toggleExternal: onShowExternalChange,
 } = useStoryPeriodFinder(() => props.story);
 const selectedEventId = ref<string | null>(null);
-const activeTab = ref<'periods' | 'events' | 'categories' | 'settings'>('periods');
+const activeTab = ref<'periods' | 'events' | 'relations' | 'categories' | 'settings'>('periods');
 
 const periodHeaderSearch = ref('');
 const periodFilterCategoryId = ref('');
@@ -438,8 +447,9 @@ function onPeriodAction(row: FinderColumnRow) {
 const storyContentTabs = computed(() => [
   { label: 'Périodes', value: 'periods' as const },
   { label: 'Événements', value: 'events' as const },
+  { label: 'Relations', value: 'relations' as const },
   { label: 'Catégories', value: 'categories' as const },
-  { label: 'Settings', value: 'settings' as const },
+  { label: 'Paramètres', value: 'settings' as const },
 ]);
 
 const storySearchBounds = computed(() => {
@@ -660,7 +670,8 @@ const showChildStoryPicker = ref(false);
 const childStoryPickerExcludeIds = computed(() => {
   const s = props.story;
   if (!s) return [];
-  return [s.id, ...(s.childStories ?? []).map((cs) => cs.id)];
+  const anchor = childStoryAnchor.value;
+  return [s.id, ...(anchor ? (s.childStories ?? []).filter(cs => cs.anchors.some(a => a.type === anchor.type && a.id === anchor.id)).map(cs => cs.id) : [])];
 });
 
 function openChildStoryPicker(colIdx?: number, eventId?: string) {
@@ -669,9 +680,10 @@ function openChildStoryPicker(colIdx?: number, eventId?: string) {
   showChildStoryPicker.value = true;
 }
 
-function onAddChildStories(ids: string[]) {
+function onAddChildStories(ids: string[], periodId?: string) {
   showChildStoryPicker.value = false;
-  if (ids.length) emit('add-child-stories', ids, childStoryAnchor.value);
+  const anchor = childStoryAnchor.value ?? (periodId ? { type: 'period' as const, id: periodId } : undefined);
+  if (ids.length && anchor) emit('add-child-stories', ids, anchor);
 }
 
 /**
@@ -708,14 +720,13 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 </script>
 
 <style scoped>
-.story-finder-feedback { padding: var(--spacing-sm) var(--spacing-md); color: var(--color-text); }
+.story-finder-feedback { padding: var(--spacing-sm) var(--spacing-md); color: var(--color-text-primary); }
 .story-finder-feedback button { margin-left: var(--spacing-sm); }
 .story-finder-activity { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: 0 0 20px; }
 .story-finder-activity__cancel { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 2px; border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer; }
 .story-finder-activity__cancel:focus-visible { outline: 2px solid var(--color-border-focus); }
-.story-finder-activity__spinner { width: 14px; height: 14px; border: 2px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: story-finder-spin 1s linear infinite; }
-@keyframes story-finder-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .story-finder-activity__spinner { animation: none; } }
+
+
 
 /* ─── Container ──────────────────────────────────────────────────────────────── */
 
@@ -724,30 +735,17 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: var(--color-background);
+  background: var(--color-background-default);
 }
 
-.story-detail-panel__loading,
-.story-detail-panel__empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  height: 100%;
-  color: var(--color-text-light);
-  font-size: var(--font-size-sm);
-  font-style: italic;
-}
+
 
 /* ─── Méta ───────────────────────────────────────────────────────────────────── */
 
 .story-detail-panel__meta {
   display: flex;
-  align-items: flex-start;
   gap: var(--spacing-md);
   padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
 }
 
@@ -760,9 +758,8 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 }
 
 .story-detail-panel__title {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -771,9 +768,16 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 
 .story-detail-panel__desc {
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   margin: 0;
-  line-height: var(--line-height-normal);
+  /* Une ligne lisible ; les actions restent à droite. */
+  max-width: 72ch;
+}
+
+.story-detail-panel__byline {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 
 /* ─── Tab bar ─────────────────────────────────────────────────────────────────── */
@@ -783,7 +787,7 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   align-items: center;
   gap: var(--spacing-md);
   padding-right: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-default);
   flex-shrink: 0;
 }
 
@@ -828,7 +832,7 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   flex: 1;
   min-height: 0;
   /* Same fill as the columns: the space past the last column reads as part of them. */
-  background: var(--color-surface);
+  background: var(--color-surface-default);
 }
 
 /* ─── Contenu du tab ──────────────────────────────────────────────────────────── */
@@ -850,7 +854,7 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .finder-empty-column {
   padding: var(--spacing-lg);
   text-align: center;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-style: italic;
 }
@@ -868,9 +872,9 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .events-finder-list {
   overflow-y: auto;
   min-height: 0;
-  border-right: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border-default);
   padding: 0;
-  background: var(--color-surface);
+  background: var(--color-surface-default);
 }
 
 .events-finder-detail {
@@ -880,44 +884,33 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  background: var(--color-surface);
+  background: var(--color-surface-default);
 }
 
 .event-detail-header {
   padding-bottom: var(--spacing-sm);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .event-detail-label {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }
 
 .event-detail-date {
   font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   margin-top: 2px;
 }
 
 .event-detail-section {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.event-detail-section-title {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--color-text-light);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: var(--spacing-xs);
 }
 
 .event-detail-empty {
   font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-style: normal;
 }
 
@@ -927,7 +920,7 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   justify-content: center;
   height: 100%;
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   font-style: italic;
 }
 
@@ -939,7 +932,7 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: var(--spacing-xs);
@@ -953,8 +946,8 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 }
 
 .event-anchor-picker-item:hover {
-  background-color: var(--color-neutral-100);
-  color: var(--color-primary);
+  background-color: var(--color-interaction-hover);
+  color: var(--color-text-link);
 }
 
 .event-anchor-cancel {
@@ -962,61 +955,40 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   border: none;
   padding: 0;
   font-size: var(--font-size-xs);
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   cursor: pointer;
   text-decoration: underline;
 }
 
 .event-anchor-cancel:hover {
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 
 /* ─── Spinner ─────────────────────────────────────────────────────────────────── */
 
-.spinner {
-  width: calc(var(--spacing-xl) + var(--spacing-xs));
-  height: calc(var(--spacing-xl) + var(--spacing-xs));
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
 
-@keyframes spin { to { transform: rotate(360deg); } }
 
 .story-detail-panel { min-width: 0; }
-.story-detail-panel__meta { border-bottom: 0; min-height: 64px; background: var(--color-surface); align-items: flex-start; }
+.story-detail-panel__meta { border-bottom: 0; min-height: 64px; background: var(--color-surface-default); align-items: flex-start; }
 .story-detail-panel__meta-actions { display: flex; gap: var(--spacing-sm); align-items: center; flex-shrink: 0; }
 .story-detail-panel__title { font-size: var(--font-size-lg); line-height: var(--line-height-heading); }
 .story-detail-panel__desc { line-height: var(--line-height-small); }
-.story-detail-panel__tabs-bar { background: var(--color-surface); }
-.story-detail-panel__tabs :deep(.tab-button) { padding: 12px 16px; }
+.story-detail-panel__tabs-bar { background: var(--color-surface-default); }
 .story-column-header { flex-direction: column; align-items: stretch; gap: var(--spacing-sm); height: 80px; flex-shrink: 0; }
 .story-column-header__title { display: flex; align-items: center; gap: var(--spacing-sm); min-width: 0; min-height: 20px; }
 .story-column-header__title h2 { flex: 1; }
 .story-column-header__actions { display: flex; gap: var(--spacing-sm); }
 .story-column-header__actions .base-button { flex: 1; min-width: 0; }
-.story-column-header__actions :deep(.base-button__text) { padding-inline: 3px; }
-.story-detail-panel__tab-panel :deep(.filter-bar) { padding: 12px; background: var(--color-surface); min-height: 54px; }
-.story-detail-panel__tab-panel :deep(.filter-bar__search-wrap) { width: 256px; flex: 0 1 256px; }
-.story-detail-panel__tab-panel :deep(.filter-bar__select) { width: 240px; flex: 0 1 240px; }
-.story-detail-panel__tab-panel :deep(.filter-bar__slot-actions) { margin-left: auto; }
-.story-detail-panel :deep(.finder-empty-column) { font-style: normal; opacity: 1; }
 .event-detail-label { font-size: var(--font-size-lg); line-height: var(--line-height-heading); }
-.event-detail-date { line-height: var(--line-height-micro); }
-.event-detail-section-title { font-size: var(--font-size-base); font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--color-text); margin-bottom: 0; }
-.event-detail-section-description { font-size: var(--font-size-sm); line-height: var(--line-height-small); color: var(--color-text-secondary); margin: 0 0 12px; }
-.event-detail-section { align-items: stretch; gap: 4px; }
-.event-detail-section > .base-button { align-self: flex-start; margin-top: 12px; }
-.story-settings-panel { padding: 24px; background: var(--color-surface); min-height: 100%; }
+.event-detail-date { line-height: var(--line-height-small); }
+.event-detail-section-title { font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); text-transform: none; letter-spacing: 0; color: var(--color-text-primary); margin-bottom: 0; }
+.event-detail-section-description { font-size: var(--font-size-sm); line-height: var(--line-height-small); color: var(--color-text-secondary); margin: 0 0 var(--spacing-md); }
+.event-detail-section { align-items: stretch; gap: var(--spacing-xs); }
+.event-detail-section > .base-button { align-self: flex-start; margin-top: var(--spacing-md); }
+.story-settings-panel { padding: var(--spacing-xl); background: var(--color-surface-default); min-height: 100%; }
 @media (max-width: 1000px) { .story-detail-panel__meta { flex-wrap: wrap; } .story-detail-panel__meta-actions { flex-wrap: wrap; } }
-@media (max-width: 600px) { .story-detail-panel__meta-actions { width: 100%; } .events-finder-layout { grid-template-columns: 160px minmax(0,1fr); } .story-detail-panel__tab-panel :deep(.filter-bar__search-wrap), .story-detail-panel__tab-panel :deep(.filter-bar__select) { width: 100%; } }
+@media (max-width: 600px) { .story-detail-panel__meta-actions { width: 100%; } .events-finder-layout { grid-template-columns: 160px minmax(0,1fr); }  }
 
-.story-detail-panel__tab-panel :deep(.filter-bar__filters) { flex: 0 1 504px; }
-@media (max-width: 640px) { .story-detail-panel__tab-panel :deep(.filter-bar__filters) { flex: 1 1 100%; } }
-.story-detail-panel :deep(.finder-item.selected) { background: var(--color-interaction-selected); color: var(--color-text-on-selected); border-left-color: var(--color-border-focus); }
-.story-detail-panel :deep(.finder-item.selected .finder-item-content), .story-detail-panel :deep(.finder-item.selected .finder-item-title), .story-detail-panel :deep(.finder-item.selected .finder-item-dates) { color: var(--color-text-on-selected); }
-.story-detail-panel :deep(.finder-item.selected .finder-item-remove), .story-detail-panel :deep(.finder-item.selected .finder-item-add) { background: transparent; color: var(--color-text-on-selected); }
 
 </style>

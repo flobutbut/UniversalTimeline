@@ -9,12 +9,14 @@ Depuis le 2 novembre 2026, les frises sont la seule source d’organisation des 
 | Identité, nom, description, dates, Wikidata et catégories | Fiche commune dans `periods` ou `events` |
 | Appartenance d’une période et parent dans cette frise | `story_periods(story_id, period_id, parent_period_id)` |
 | Appartenance d’un événement | `story_events(story_id, event_id)` |
-| Frise parente et parcours de navigation | `stories.parent_story_id` |
-| Point d’entrée explicite depuis une période ou un événement de la frise parente | `story_anchors` |
+| Points d’entrée explicites depuis plusieurs frises sources | `story_entry_points(source_story_id, target_story_id, period_id, event_id)` |
+| Rattachements historiques, conservés et toujours affichés | `stories.parent_story_id` et `story_anchors` |
 
 Un parent de période NULL signifie « racine de cette frise ». Il n’existe plus de repli vers le catalogue, ni de `parent_override`. Le même objet peut avoir des parents différents dans deux frises. Modifier ses faits communs, notamment sa description ou ses dates, reste une modification partagée.
 
-Une frise parente organise la navigation ; elle n’impose pas que les dates de sa frise enfant soient incluses dans les siennes. **Conquête spatiale reste enfant d’Époque moderne**, conformément au choix éditorial confirmé. Une frise enfant sans ancre explicite reste proposée au niveau des racines de sa parente.
+Une même frise peut être proposée depuis plusieurs périodes d’une source, ou depuis plusieurs sources différentes. Ajouter un point d’entrée conserve les autres accès et n’impose aucune inclusion de dates. Le rattachement historique de **Conquête spatiale à Époque moderne** reste conservé. Un ancien rattachement sans ancre explicite reste proposé au niveau des racines de sa source.
+
+L’onglet **Relations** présente les points d’entrée vers la frise courante, regroupés par source. L’ajout demande une source et une période ; un retrait ne supprime que le point choisi. Les frises accessibles depuis la frise courante restent affichées au niveau des périodes et événements concernés, sans liste globale d’enfants dans cet onglet.
 
 Les événements appartiennent explicitement aux frises. Dans la timeline, leurs dates déterminent leur affichage à l’intérieur des périodes de cette frise. Il n’existe pas de relation globale événement–période, ni de rattachement obligatoire à une période unique.
 
@@ -31,6 +33,8 @@ Les événements appartiennent explicitement aux frises. Dans la timeline, leurs
 
 Les écritures passent par les associations de frise : `POST /stories/:storyId/periods` avec `operation`, `ids` et, pour un placement explicite, `parentPeriodId` (NULL pour une racine).
 
+Les points d’entrée utilisent `POST /stories/:sourceId/entry-points` avec `childStoryIds`, `operation` (`add` ou `remove`) et `anchor: { anchorType, anchorId }`. Une période ou un événement de la source est obligatoire à l’ajout. La même relation est dédupliquée ; plusieurs sources et plusieurs emplacements par source sont permis. Les deux frises doivent être modifiables par le compte. Les clés étrangères composées retirent les accès lorsque leur période ou événement est retiré de la source. Le détail de frise transporte les sources dans `parentStories` et les destinations dans `childStories`, avec leurs ancres limitées à ce contexte. Les anciens endpoints de hiérarchie sont conservés pour compatibilité ; l’interface utilise les points d’entrée multiples.
+
 `POST/PUT /periods` modifie uniquement les faits communs et refuse un `parent_id` non NULL. Les anciens endpoints globaux `/periods/:id/children` et `/periods/:id/parent` répondent 410. Les réponses du catalogue conservent des champs de compatibilité `parent_id: null` et `has_children: false` ; les réponses de frise transportent le parent local dans `story_parent_id` / `storyParentId`.
 
 La clé étrangère composée impose l’existence du parent dans la même frise. Elle est différée jusqu’au commit pour permettre la copie ou la suppression atomique d’une branche. Un trigger invoker sérialise les modifications par frise, interdit les cycles et empêche de modifier l’identité d’une appartenance par UPDATE. Les règles RLS et les droits de propriété existants restent applicables.
@@ -44,6 +48,8 @@ Une vérification transactionnelle compare le nombre de fiches, leurs données c
 Validation : `yarn verify`, tests PostgreSQL 17 de migration et hiérarchie (y compris SQL concurrent), baseline/RLS, écritures atomiques et suppressions concurrentes. Toutes les suites PostgreSQL utilisent uniquement des bases locales jetables ; jamais Supabase.
 
 ## État de la base active
+
+La migration `20261102075026_story_entry_points` ajoute le stockage des points d’entrée multiples. Les 16 frises et 16 ancres historiques ont été conservées à l’application. La nouvelle table dispose de RLS, de règles d’accès limitées aux frises lisibles et de droits d’écriture réservés au propriétaire des deux extrémités. L’audit de sécurité après application ne remonte aucune alerte. Les tests d’ajout/retrait ont été exécutés uniquement sur des données fictives dans PostgreSQL local.
 
 La migration distante `20261102001509_frise_only_period_hierarchy` est appliquée. Ses invariants transactionnels de conservation ont réussi. Le contrôle après migration relève 113 périodes, 104 événements, 16 frises, 144 appartenances de périodes et 156 appartenances d’événements, sans parent local extérieur à sa frise. Les anciens champs d’héritage sont absents et l’audit de sécurité Supabase ne remonte aucune alerte.
 

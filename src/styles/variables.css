@@ -1,113 +1,79 @@
 @import './primitives.css';
 
-/**
- * Design tokens — neutres désaturés (zinc / gris neutre), accents légèrement adoucis.
- *
- * Hiérarchie des fonds (même logique en clair et sombre) :
- *   --color-background     → zone app / marges (PeriodGrid externe, body)
- *   --color-surface        → barres chrome (header, champs) — le plus « papier » en clair
- *   --color-card           → cartes / barres de période (bordure + ombre pour le contraste)
- */
-
+/* Rôles sémantiques. Les primitives restent immuables ; seuls les rôles changent de thème.
+   Surfaces : background = application, default = chrome/champs, raised = cartes,
+   subtle = regroupements. Une sélection utilise toujours son couple fond/texte. */
 :root {
   color-scheme: light;
-
-  /* Neutres clair — faible saturation, pas de cyan sur les fonds */
-  --color-neutral-0:   var(--palette-neutral-0);
-  --color-neutral-50:  var(--palette-neutral-50);
-  --color-neutral-100: var(--palette-neutral-100);
-  --color-neutral-200: var(--palette-neutral-200);
-  --color-neutral-300: var(--palette-neutral-300);
-  --color-neutral-400: var(--palette-neutral-400);
-  --color-neutral-500: var(--palette-neutral-500);
-  --color-neutral-600: var(--palette-neutral-600);
-  --color-neutral-700: var(--palette-neutral-700);
-  --color-neutral-800: var(--palette-neutral-800);
-  --color-neutral-900: var(--palette-neutral-900);
-
-  /* Marque — bleu désaturé aligné sur les gris zinc.
-     #4476af → 4.71:1 sur blanc : passe WCAG AA pour le texte (liens, tags, focus).
-     primary-button (#265985) réservé aux fonds pleins : label blanc à 7.37:1 (WCAG AAA). */
+  --color-background-default: var(--palette-neutral-200);
+  --color-surface-default: var(--palette-neutral-0);
+  --color-surface-raised: var(--palette-neutral-0);
+  --color-surface-raised-hover: var(--palette-neutral-50);
+  --color-surface-subtle: var(--palette-neutral-100);
+  --color-interaction-hover: var(--palette-neutral-100);
+  --color-interaction-pressed: var(--palette-neutral-200);
+  --color-interaction-selected: var(--palette-blue-100);
+  --color-interaction-disabled: var(--palette-neutral-200);
+  --color-border-default: var(--palette-neutral-300);
+  --color-border-light: var(--palette-neutral-200);
+  --color-border-dark: var(--palette-neutral-500);
+  --color-border-strong: var(--palette-neutral-500);
+  --color-border-focus: var(--palette-blue-600);
+  --color-text-primary: var(--palette-neutral-800);
+  --color-text-secondary: var(--palette-neutral-600);
+  --color-text-heading: var(--palette-neutral-900);
+  --color-text-disabled: var(--palette-neutral-400);
+  --color-text-link: var(--palette-blue-700);
+  --color-text-on-accent: var(--palette-neutral-0);
+  --color-text-on-selected: var(--palette-blue-900);
   --color-primary: var(--palette-blue-700);
-  --color-primary-dark: var(--palette-blue-700);
+  --color-primary-dark: var(--palette-blue-800);
   --color-primary-light: var(--palette-blue-100);
-  /* Boutons pleins (label blanc) */
-  --color-primary-button: var(--palette-blue-800);
-  --color-primary-button-hover: var(--palette-blue-900);
-
-  --color-success: var(--palette-green-700);
-  --color-success-light: var(--palette-green-50);
-  --color-error: var(--palette-red-700);
-  --color-error-light: var(--palette-red-50);
-  --color-error-dark: var(--palette-red-700);
-  /* Rouge plus saturé que l'erreur UI : complément du bleu primaire (finder, lignes Wikidata) */
+  --color-action-primary-default: var(--palette-blue-800);
+  --color-action-primary-hover: var(--palette-blue-900);
+  --color-action-primary-pressed: var(--palette-blue-950);
+  --color-action-danger-default: var(--palette-red-600);
+  --color-action-danger-hover: var(--palette-red-700);
+  --color-status-success-foreground: var(--palette-green-700);
+  --color-status-success-background: var(--palette-green-50);
+  --color-status-error-foreground: var(--palette-red-700);
+  --color-status-error-background: var(--palette-red-50);
+  --color-status-warning-foreground: var(--palette-amber-700);
+  --color-status-warning-background: var(--palette-amber-50);
   --color-wikidata-label: #d4193d;
-  --color-wikidata-label-on-primary: #ff9aad;
-  --color-warning: var(--palette-amber-700);
-  --color-warning-light: var(--palette-amber-50);
-
-  /* Sémantique */
-  --color-background: var(--color-neutral-200);
-  --color-surface: var(--color-neutral-0);
-  --color-surface-hover: var(--color-neutral-50);
-  --color-card: var(--color-neutral-0);
-  --color-card-hover: var(--color-neutral-50);
-  --color-border: var(--color-neutral-300);
-  --color-border-light: var(--color-neutral-200);
-  --color-border-dark: var(--color-neutral-500);
-  --color-border-darker: var(--color-neutral-800);
-
-  --color-text: var(--color-neutral-800);
-  --color-text-light: var(--color-neutral-600);
-  --color-text-secondary: var(--color-neutral-500);
-  --color-text-white: var(--palette-neutral-0);
-  --color-heading: var(--color-neutral-900);
-
-  --color-background-soft: var(--color-neutral-50);
-  --color-background-mute: var(--color-neutral-100);
-  --color-error-bg: #f5e8e8;
-
-  /* Cartes base de données (bandeau latéral) */
-  --color-period: var(--palette-blue-500);
-  /* Timeline story : barres des périodes racines (tinte verte, distinct du bleu période) */
-  --color-period-root: var(--palette-green-600);
-  --color-event: var(--palette-copper-600);
-  --color-story: var(--palette-purple-600);
-
-  /* Assombrissement sur fond primaire (boutons / lignes sélectionnées) — inchangé clair/sombre */
-  --color-on-primary-shade: color-mix(in srgb, #000000 12%, transparent);
-  --color-on-primary-shade-strong: color-mix(in srgb, #000000 15%, transparent);
-
-  /* Ombres — légère teinte neutre, un peu plus douces */
-  --shadow-sm: 0 1px 2px rgb(24 24 27 / 0.06);
-  --shadow-md: 0 4px 10px rgb(24 24 27 / 0.08);
-  --shadow-lg: 0 10px 24px rgb(24 24 27 / 0.1);
-  --shadow-xl: 0 20px 40px rgb(24 24 27 / 0.12);
-
-  /* Voiles modales (indépendants des neutres sémantiques clair/sombre) */
+  --color-wikidata-label-on-selected: #9a3030;
+  /* Accents de visualisation : ne pas les employer comme couleurs de petit texte. */
+  --color-data-period: var(--palette-blue-500);
+  --color-data-period-root: var(--palette-green-600);
+  --color-data-event: var(--palette-copper-600);
+  --color-data-frise: var(--palette-purple-600);
+  --color-switch-track-off: var(--palette-neutral-500);
+  --color-switch-thumb: var(--palette-neutral-0);
+  --shadow-sm: 0 1px 2px rgb(24 24 27 / 6%);
+  --shadow-md: 0 4px 10px rgb(24 24 27 / 8%);
+  --shadow-lg: 0 10px 24px rgb(24 24 27 / 10%);
+  --shadow-xl: 0 20px 40px rgb(24 24 27 / 12%);
   --overlay-scrim: var(--palette-alpha-black-60);
-  --overlay-scrim-strong: color-mix(in srgb, #0f0f0f 65%, transparent);
+  --overlay-scrim-strong: var(--palette-alpha-black-70);
 
-  /* Référence typo (13px) — les tailles dérivées sont en px fixes (pas de calc). */
-  --base-font-size: 13px;
-  /* Hauteur de ligne en px entiers (repère ~13px : tight ≈1.4, normal ≈1.69, etc.). */
-  --base-line-height: 18px;
-  /* Grille d'espacement 8px — échelle en px fixes. */
-  --base-spacing: 8px;
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 12px;
   --spacing-lg: 16px;
   --spacing-xl: 24px;
   --spacing-2xl: 32px;
-
-  /* Hauteurs de champ — référence commune Input / Select / SearchInput. */
   --control-height-xs: 28px;
-  --field-height-sm: 32px;  /* SearchInput, champs très compacts */
-  --field-height-md: 36px;  /* champs compact (toolbar, filtres) */
-  --field-height-lg: 44px;  /* champs normaux (formulaires) */
+  --field-height-sm: 32px;
+  --field-height-md: 36px;
+  --field-height-lg: 44px;
+  --textarea-height-default: 88px;
+  --textarea-height-large: 160px;
+  --list-row-height-compact: 44px;
+  --list-row-height-comfortable: 64px;
 
   --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-family-heading: 'Lora', Georgia, 'Times New Roman', serif;
+  --font-family-mono: 'Courier New', Courier, ui-monospace, monospace;
   --font-size-xs: 10px;
   --font-size-sm: 11px;
   --font-size-base: 13px;
@@ -115,21 +81,34 @@
   --font-size-xl: 16px;
   --font-size-2xl: 20px;
   --font-size-3xl: 24px;
-
-  --line-height-tight: 18px;
-  --line-height-normal: 22px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-small: 16px;
+  --line-height-control: 18px;
+  --line-height-body: 22px;
+  --line-height-heading: 22px;
+  --line-height-dialog: 22px;
   --line-height-relaxed: 24px;
   --line-height-loose: 28px;
+  /* Styles complets : taille, interligne, graisse et famille restent liés. */
+  --type-body: var(--font-weight-normal) var(--font-size-base)/var(--line-height-body) var(--font-family-base);
+  --type-compact: var(--font-weight-normal) var(--font-size-sm)/var(--line-height-control) var(--font-family-base);
+  --type-label: var(--font-weight-medium) var(--font-size-sm)/var(--line-height-control) var(--font-family-base);
+  --type-meta: var(--font-weight-normal) var(--font-size-sm)/var(--line-height-small) var(--font-family-base);
+  --type-micro: var(--font-weight-normal) var(--font-size-xs)/var(--line-height-small) var(--font-family-base);
+  --type-panel-title: var(--font-weight-semibold) var(--font-size-lg)/var(--line-height-heading) var(--font-family-base);
+  --type-action: var(--font-weight-normal) var(--font-size-base)/var(--line-height-control) var(--font-family-base);
 
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
   --radius-xl: 12px;
-
+  --radius-pill: 999px;
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
   --transition-slow: 350ms ease;
-
   --z-index-dropdown: 1000;
   --z-index-sticky: 1020;
   --z-index-fixed: 1030;
@@ -141,140 +120,46 @@
   --z-index-timeline-item: 10;
   --z-index-period-row-band: 2;
   --z-index-local-bump: 1;
-
-  --font-family-heading: 'Lora', Georgia, 'Times New Roman', serif;
-  --font-family-mono: 'Courier New', Courier, ui-monospace, monospace;
-
-  --radius-pill: 999px;
-
-  --color-asset-vue-green: #41b883;
-  --color-asset-vue-blue: #35495e;
-
-  --breakpoint-sm: 640px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
-  --breakpoint-2xl: 1536px;
+  /* Avatars de compte : texte clair sur fond saturé, identique dans les deux thèmes. */
+  --color-avatar-foreground: var(--palette-neutral-0);
+  --color-avatar-blue: var(--palette-blue-700);
+  --color-avatar-green: #2f6b4f;
+  --color-avatar-amber: #8a5a00;
+  --color-avatar-red: var(--palette-red-700);
+  --color-avatar-violet: #6b46a8;
+  --color-avatar-pink: #a3326b;
+  --color-avatar-teal: #1f6f6a;
+  --color-avatar-slate: var(--palette-neutral-700);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
-
-  /* Neutres sombre — même famille que le clair, pas d'inversion 0/900 (0 = le plus sombre) */
-  --color-neutral-0:   var(--palette-neutral-950);
-  --color-neutral-50:  var(--palette-neutral-900);
-  --color-neutral-100: var(--palette-neutral-850);
-  --color-neutral-200: var(--palette-neutral-800);
-  --color-neutral-300: var(--palette-neutral-700);
-  --color-neutral-400: var(--palette-neutral-500);
-  --color-neutral-500: var(--palette-neutral-500);
-  --color-neutral-600: var(--palette-neutral-400);
-  --color-neutral-700: #c8c8d0;
-  --color-neutral-800: var(--palette-neutral-200);
-  --color-neutral-900: #f4f4f6;
-
-  --color-primary: var(--palette-blue-300);
-  --color-primary-dark: var(--palette-blue-400);
-  --color-primary-light: var(--palette-blue-950);
-  --color-primary-button: var(--palette-blue-300);
-  --color-primary-button-hover: var(--palette-blue-400);
-
-  --color-success: var(--palette-green-500);
-  --color-success-light: var(--palette-green-950);
-  --color-error: var(--palette-red-400);
-  --color-error-light: var(--palette-red-950);
-  --color-error-dark: var(--palette-red-300);
-  --color-wikidata-label: #ff5c7a;
-  --color-wikidata-label-on-primary: #ffd0dc;
-  --color-warning: var(--palette-amber-400);
-  --color-warning-light: var(--palette-amber-950);
-
-  --color-background: var(--color-neutral-50);
-  --color-surface: var(--color-neutral-0);
-  --color-surface-hover: var(--color-neutral-100);
-  --color-card: var(--color-neutral-100);
-  --color-card-hover: var(--color-neutral-200);
-  --color-border: var(--color-neutral-200);
-  --color-border-light: var(--color-neutral-100);
-  --color-border-dark: var(--color-neutral-400);
-  --color-border-darker: var(--color-neutral-800);
-
-  --color-text: var(--color-neutral-800);
-  --color-text-light: var(--color-neutral-600);
-  --color-text-secondary: var(--color-neutral-500);
-  --color-text-white: var(--palette-neutral-0);
-  --color-heading: var(--color-neutral-900);
-
-  --color-background-soft: var(--color-neutral-100);
-  --color-background-mute: var(--color-neutral-50);
-  --color-error-bg: #2a1818;
-
-  --color-period: var(--palette-blue-300);
-  --color-period-root: var(--palette-green-400);
-  --color-event: var(--palette-copper-400);
-  --color-story: var(--palette-purple-400);
-
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35);
-  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 12px 28px rgb(0 0 0 / 0.45);
-  --shadow-xl: 0 24px 48px rgb(0 0 0 / 0.5);
-
-  --overlay-scrim: color-mix(in srgb, #000000 70%, transparent);
-  --overlay-scrim-strong: color-mix(in srgb, #000000 75%, transparent);
-}
-
-/* Figma · Couleurs / Usages. Legacy names above remain available to existing views. */
-:root {
-  --color-background-default: var(--color-background);
-  --color-surface-default: var(--color-surface);
-  --color-surface-raised: var(--color-card);
-  --color-surface-subtle: var(--color-background-soft);
-  --color-interaction-hover: var(--palette-neutral-100);
-  --color-interaction-pressed: var(--palette-neutral-200);
-  --color-interaction-selected: var(--palette-blue-100);
-  --color-interaction-disabled: var(--palette-neutral-200);
-  --color-border-default: var(--color-border);
-  --color-border-strong: var(--palette-neutral-500);
-  --color-border-focus: var(--palette-blue-600);
-  --color-text-primary: var(--color-text);
-  --color-text-secondary: var(--palette-neutral-600);
-  --color-text-disabled: var(--palette-neutral-400);
-  --color-text-link: var(--palette-blue-700);
-  --color-text-on-accent: var(--palette-neutral-0);
-  --color-text-on-selected: var(--palette-blue-900);
-  --color-action-primary-default: var(--color-primary-button);
-  --color-action-primary-hover: var(--color-primary-button-hover);
-  --color-action-primary-pressed: var(--palette-blue-950);
-  --color-action-danger-default: var(--palette-red-600);
-  --color-action-danger-hover: var(--palette-red-700);
-  --color-status-success-foreground: var(--palette-green-700);
-  --color-status-success-background: var(--palette-green-50);
-  --color-status-error-foreground: var(--palette-red-700);
-  --color-status-error-background: var(--palette-red-50);
-  --color-status-warning-foreground: var(--palette-amber-700);
-  --color-status-warning-background: var(--palette-amber-50);
-  --color-data-period: var(--color-period);
-  --color-data-period-root: var(--color-period-root);
-  --color-data-event: var(--color-event);
-  --color-data-frise: var(--color-story);
-  --line-height-micro: 16px;
-  --line-height-small: 16px;
-  --line-height-body: 18px;
-  --line-height-heading: 18px;
-  --line-height-dialog: 22px;
-}
-[data-theme="dark"] {
+  --color-background-default: var(--palette-neutral-900);
+  --color-surface-default: var(--palette-neutral-950);
+  --color-surface-raised: var(--palette-neutral-850);
+  --color-surface-raised-hover: var(--palette-neutral-800);
+  --color-surface-subtle: var(--palette-neutral-850);
   --color-interaction-hover: var(--palette-neutral-800);
   --color-interaction-pressed: var(--palette-neutral-700);
   --color-interaction-selected: var(--palette-blue-950);
   --color-interaction-disabled: var(--palette-neutral-800);
+  --color-border-default: var(--palette-neutral-800);
+  --color-border-light: var(--palette-neutral-700);
+  --color-border-dark: var(--palette-neutral-500);
   --color-border-strong: var(--palette-neutral-400);
   --color-border-focus: var(--palette-blue-300);
+  --color-text-primary: var(--palette-neutral-200);
   --color-text-secondary: var(--palette-neutral-400);
+  --color-text-heading: var(--palette-neutral-50);
   --color-text-disabled: var(--palette-neutral-600);
   --color-text-link: var(--palette-blue-300);
   --color-text-on-accent: var(--palette-neutral-950);
   --color-text-on-selected: var(--palette-blue-100);
+  --color-primary: var(--palette-blue-300);
+  --color-primary-dark: var(--palette-blue-400);
+  --color-primary-light: var(--palette-blue-950);
+  --color-action-primary-default: var(--palette-blue-300);
+  --color-action-primary-hover: var(--palette-blue-400);
   --color-action-primary-pressed: var(--palette-blue-500);
   --color-action-danger-default: var(--palette-red-400);
   --color-action-danger-hover: var(--palette-red-300);
@@ -284,7 +169,18 @@
   --color-status-error-background: var(--palette-red-950);
   --color-status-warning-foreground: var(--palette-amber-400);
   --color-status-warning-background: var(--palette-amber-950);
+  --color-wikidata-label: #ff5c7a;
+  --color-wikidata-label-on-selected: #ffd0dc;
+  --color-data-period: var(--palette-blue-300);
+  --color-data-period-root: var(--palette-green-400);
+  --color-data-event: var(--palette-copper-400);
+  --color-data-frise: var(--palette-purple-400);
+  --color-switch-track-off: var(--palette-neutral-400);
+  --color-switch-thumb: var(--palette-neutral-950);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 35%);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 40%);
+  --shadow-lg: 0 12px 28px rgb(0 0 0 / 45%);
+  --shadow-xl: 0 24px 48px rgb(0 0 0 / 50%);
   --overlay-scrim: var(--palette-alpha-black-70);
+  --overlay-scrim-strong: var(--palette-alpha-black-70);
 }
-
-:root { --color-status-success-focus: var(--color-border-focus); }

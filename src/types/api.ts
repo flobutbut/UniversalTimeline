@@ -57,6 +57,7 @@ export interface StoryDto extends MetadataDto {
   periods?: PeriodDto[]; events?: EventDto[];
   preview_periods?: PeriodDto[]; preview_events?: EventDto[];
   childStories?: ChildStoryDto[];
+  parentStories?: Array<Omit<ChildStoryDto, 'anchors'> & { ownerUserId?: string | null; anchors: Array<{ type: 'period' | 'event'; id: ApiId; label?: ApiText }> }>;
   relatedStories?: Array<ChildStoryDto & { periodIds: ApiId[]; eventIds: ApiId[] }>;
   parent_story_id?: ApiId | null;
   owner_user_id?: string | null; ownerUserId?: string | null;
@@ -70,7 +71,8 @@ export interface EntityFormPayload extends NewEntityFormCore {
 export interface StoryFormPayload {
   title: { fr: string; en?: string };
   description?: { fr?: string | null; en?: string | null } | null;
-  author: string;
+  /** Ignoré pour un compte connecté : le serveur signe avec son nom d'auteur. */
+  author?: string;
   isPublic?: boolean;
   categories?: Array<{ id: string }>;
 }

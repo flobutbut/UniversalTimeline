@@ -66,7 +66,7 @@ async function postgresSuite(name, file, restore = false) {
   if (restore) {
     // Only fictional rows created by this test suite are dumped, with their ACL/RLS.
     await run(['exec', container, 'pg_dump', '-h', '/var/run/postgresql', '-p', '55439', '-U', 'postgres',
-      '--format=custom', '--schema=public', '--schema=auth', '--file=/tmp/application.dump', database]);
+      '--format=custom', '--schema=public', '--schema=auth', '--schema=account_private', '--file=/tmp/application.dump', database]);
     await run(['exec', container, 'createdb', '-h', '/var/run/postgresql', '-p', '55439', '-U', 'postgres', 'universaltimeline_test_restore']);
     // pg_dump includes CREATE SCHEMA public. Remove only the empty default schema on this new test target.
     await run(['exec', container, 'psql', '-h', '/var/run/postgresql', '-p', '55439', '-U', 'postgres',
@@ -94,6 +94,7 @@ try {
     ['baseline', 'baseline.postgres.mjs', true], ['auth', 'auth.postgres.mjs'],
     ['hierarchy', 'periodHierarchy.postgres.mjs'], ['deletion', 'periodDeletion.postgres.mjs'],
     ['privileges', 'functionPrivileges.postgres.mjs'], ['atomic', 'atomicWrites.postgres.mjs'],
+    ['profiles', 'profiles.postgres.mjs'],
   ]) await postgresSuite(name, file, restore);
   console.log('\nInstallation vierge, tests, audits, builds et restauration de test réussis.');
 } catch (cause) {

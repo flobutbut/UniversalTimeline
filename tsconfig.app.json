@@ -18,6 +18,9 @@
       ],
       "@temporal": [
         "./server/src/shared/temporal.ts"
+      ],
+      "@account-rules": [
+        "./server/src/shared/accountRules.ts"
       ]
     },
     "types": [

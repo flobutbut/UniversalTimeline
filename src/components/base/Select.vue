@@ -38,17 +38,7 @@
           <template v-if="multiple">
             <div v-if="selectedItems.length === 0" class="base-select__placeholder">{{ placeholder }}</div>
             <div v-else class="base-select__selected-items">
-              <span v-for="item in selectedItems" :key="item.value" class="base-select__selected-item">
-                {{ item.label }}
-                <button
-                  type="button"
-                  class="base-select__remove-item"
-                  :disabled="disabled"
-                  :aria-label="`Retirer ${item.label}`"
-                  @click.stop="removeItem(item)"
-                  @keydown.stop
-                >×</button>
-              </span>
+              <Tag v-for="item in selectedItems" :key="item.value" class="base-select__selected-item" :label="item.label" variant="accent" removable :disabled="disabled" @remove="removeItem(item)" />
             </div>
           </template>
           <template v-else>
@@ -111,6 +101,7 @@
 defineOptions({ inheritAttrs: false });
 import { ref, computed, watch, nextTick } from 'vue';
 import { Icon } from '@iconify/vue';
+import Tag from './Tag.vue';
 import SelectShell from './SelectShell.vue';
 import { generateDomUid } from '@/utils/generateDomUid';
 import { isSelectListOptionSelected, type SelectOption, type SelectValue } from '@/lib/selectOptions';
