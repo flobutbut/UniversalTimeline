@@ -3,16 +3,20 @@ import { query, withTransaction } from '../api/database.js';
 import { NotFoundError } from '../domain/errors.js';
 import type { StoryWrite } from '../domain/writeInputs.js';
 import * as stories from '../repositories/storyRepository.js';
-import { listDetailedCategories, replaceEntityCategories } from '../repositories/categoryRepository.js';
+import { replaceEntityCategories } from '../repositories/categoryRepository.js';
 import { description, localized, groupCategories, mapCategory, mapPeriodDetail, mapEventDetail } from './mappers.js';
-import { loadStoryTemporalBounds } from './storyTemporalBounds.js';
+import { aggregateStoryTemporalBounds } from '../domain/storyTemporalBounds.js';
 import * as associations from './storyAssociations.js';
 import type { AssociationKind } from '../repositories/storyRelationsRepository.js';
 
 const db = { query };
 export async function listStories() {
   const rows = await stories.listStories(db);
-  const bounds = new Map((await loadStoryTemporalBounds()).map(bound => [String(bound.story_id), bound]));
+  const candidates = [...new Map(rows.map(row => [String(row.id), row])).values()].flatMap(row => [
+    ...(row.preview_periods ?? []).map(period => ({ ...period, story_id: row.id })),
+    ...(row.preview_events ?? []).map(event => ({ story_id: row.id, start_date: event.date, end_date: event.date, start_years_bp: event.date_years_bp, end_years_bp: event.date_years_bp })),
+  ]);
+  const bounds = new Map(aggregateStoryTemporalBounds(candidates).map(bound => [String(bound.story_id), bound]));
   return groupCategories(rows, row => ({
     id: row.id, title_fr: row.title_fr, title_en: row.title_en,
     description_fr: row.description_fr, description_en: row.description_en,
@@ -24,19 +28,24 @@ export async function listStories() {
   }));
 }
 export async function getStory(id: string) {
-  const row = await stories.findStory(db, id);
+  const row = await stories.findStorySnapshot(db, id);
   if (!row) throw new NotFoundError('Frise non trouvée');
-  // Keep reads sequential to preserve established query/response behaviour.
-  const categories = (await listDetailedCategories(db, 'story', id)).map(mapCategory);
-  const periods = groupCategories(await stories.listStoryPeriods(db, id), mapPeriodDetail);
-  const events = groupCategories(await stories.listStoryEvents(db, id), mapEventDetail);
-  const childStories = (await stories.listChildStories(db, id)).map(child => ({
+  const categories = row.categories.map(mapCategory);
+  const periods = groupCategories(row.periods, period => ({ ...mapPeriodDetail(period), hasChildren: period.has_children }));
+  const events = groupCategories(row.events, event => ({ ...mapEventDetail(event), wikidata_id: event.wikidata_id, dateYearsBP: event.date_years_bp == null ? null : Number(event.date_years_bp) }));
+  const childStories = row.child_stories.map(child => ({
     id: String(child.id), title: localized(child.title_fr, child.title_en), anchors: child.anchors ?? [],
   }));
   return {
     id: row.id, title: localized(row.title_fr, row.title_en), description: description(row.description_fr, row.description_en),
     author: row.author, isPublic: row.is_public, ownerUserId: row.owner_user_id,
-    categories, periods, events, childStories, createdAt: row.created_at, updatedAt: row.updated_at,
+    parent_story_id: row.parent_story_id ?? null,
+    categories, periods, events, childStories,
+    relatedStories: row.related_stories.map(related => ({
+      id: String(related.id), title: localized(related.title_fr, related.title_en),
+      periodIds: related.period_ids, eventIds: related.event_ids,
+    })),
+    createdAt: row.created_at, updatedAt: row.updated_at,
   };
 }
 export function createStory(data: StoryWrite) {

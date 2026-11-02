@@ -16,6 +16,7 @@
       :story-bounds="currentStoryBounds"
       :story-suggestions="storySuggestions"
       :current-story-id="currentStoryId"
+      :load-story-details="dataStore.ensureStoryLoaded"
       period-tooltips
       @period-click="handlePeriodClick"
       @event-click="handleEventClick"
@@ -35,6 +36,9 @@ import { readStoryTarget } from '@/router/storyTarget';
 defineOptions({ name: 'HomeView' });
 import PeriodGrid from './HomeView/PeriodGrid.vue';
 import { useHomeNavigation } from '@/composables/useHomeNavigation';
+import { useDataStore } from '@/stores/useDataStore';
+
+const dataStore = useDataStore();
 
 const {
   loading,

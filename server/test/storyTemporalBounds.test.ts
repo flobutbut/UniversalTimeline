@@ -53,7 +53,7 @@ beforeEach(() => vi.clearAllMocks());
 it('returns the same bounds on the list and the dedicated API endpoint', async () => {
   vi.mocked(query).mockImplementation(async sql => ({ rows: sql.includes('UNION ALL')
     ? [candidate('M54', 'M8'), candidate('M65', 'M10')]
-    : [{ id: 1, title_fr: 'Frise', title_en: 'Frise' }], rowCount: 1 } as any));
+    : [{ id: 1, title_fr: 'Frise', title_en: 'Frise', preview_periods: [candidate('M54', 'M8'), candidate('M65', 'M10')] }], rowCount: 1 } as any));
   async function get(path: string) {
     const handler = router.stack.find((layer: any) => layer.route?.path === path && layer.route.methods.get).route.stack[0].handle;
     const res = { json: vi.fn(), status: vi.fn() }; res.status.mockReturnValue(res);

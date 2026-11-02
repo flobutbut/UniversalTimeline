@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { useHomeNavigation } from '@/composables/useHomeNavigation';
 import { StoryApiService } from '@/services/StoryApiService';
-import { EventApiService } from '@/services/EventApiService';
+import { storyFixture } from '@/testFixtures/story';
 
 /** Payload minimal compatible avec `PeriodApiService.mapPeriod` (store). */
 function apiPeriod(
@@ -27,14 +27,13 @@ describe('useHomeNavigation', () => {
     setActivePinia(createPinia());
     vi.restoreAllMocks();
     vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([]);
-    vi.spyOn(EventApiService.getInstance(), 'getStoryListEvents').mockResolvedValue([]);
   });
 
   it('loadInitialData avec expandSingleRoot ouvre la racine unique + enfants', async () => {
-    vi.spyOn(StoryApiService.getInstance(), 'getStoryPeriods').mockResolvedValue([
+    vi.spyOn(StoryApiService.getInstance(), 'getStory').mockResolvedValue(storyFixture('1', [
       apiPeriod('r1', null, true),
       apiPeriod('c1', 'r1', false),
-    ] as never[]);
+    ]));
 
     const nav = useHomeNavigation();
     await nav.loadInitialData(undefined, true);
@@ -44,10 +43,10 @@ describe('useHomeNavigation', () => {
   });
 
   it('loadInitialData sans expandSingleRoot garde la ligne des racines', async () => {
-    vi.spyOn(StoryApiService.getInstance(), 'getStoryPeriods').mockResolvedValue([
+    vi.spyOn(StoryApiService.getInstance(), 'getStory').mockResolvedValue(storyFixture('1', [
       apiPeriod('r1', null, true),
       apiPeriod('c1', 'r1', false),
-    ] as never[]);
+    ]));
 
     const nav = useHomeNavigation();
     await nav.loadInitialData(undefined, false);
@@ -57,14 +56,14 @@ describe('useHomeNavigation', () => {
   });
 
   it('goBack à la racine périodes après selectStory recharge la story parente', async () => {
-    vi.spyOn(StoryApiService.getInstance(), 'getStoryPeriods').mockImplementation(async (storyId: string) => {
+    vi.spyOn(StoryApiService.getInstance(), 'getStory').mockImplementation(async (storyId: string) => {
       if (storyId === '1') {
-        return [apiPeriod('r1', null, false)] as never[];
+        return storyFixture(storyId, [apiPeriod('r1', null, false)]);
       }
       if (storyId === '2') {
-        return [apiPeriod('s2r', null, false)] as never[];
+        return storyFixture(storyId, [apiPeriod('s2r', null, false)]);
       }
-      return [];
+      return storyFixture(storyId);
     });
 
     const nav = useHomeNavigation();
@@ -76,5 +75,19 @@ describe('useHomeNavigation', () => {
 
     await nav.goBack();
     expect(nav.currentStoryId.value).toBe('1');
+    expect(StoryApiService.getInstance().getStory).toHaveBeenCalledTimes(2);
+  });
+
+  it('includes exact calendar boundaries despite coordinates saved at different instants', async () => {
+    vi.spyOn(StoryApiService.getInstance(), 'getStory').mockResolvedValue(storyFixture('1', [
+      { id: 'root', start_date: '2000-01-01', end_date: '2001-01-01', start_years_bp: 999, end_years_bp: 800, has_children: true },
+      { id: 'child', parent_id: 'root', start_date: '2000-02-01', end_date: '2000-03-01' },
+    ], [
+      { id: 'start', date: '2000-01-01', date_years_bp: 700 },
+      { id: 'end', date: '2001-01-01', date_years_bp: 600 },
+      { id: 'outside', date: '2002-01-01', date_years_bp: 900 },
+    ]));
+    const nav = useHomeNavigation(); await nav.loadInitialData(undefined, true);
+    expect(nav.storyEvents.value.map(event => event.id)).toEqual(['start', 'end']);
   });
 });

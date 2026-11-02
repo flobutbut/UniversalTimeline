@@ -12,6 +12,8 @@ import { SearchApiService } from '@/services/SearchApiService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { installAccessGuard } from '@/router/access';
 import type { ListEvent, Period } from '@/types/database';
+import { storyFixture } from '@/testFixtures/story';
+import { apiClient } from '@/services/ApiClient';
 
 vi.mock('@/components/ThemeToggle.vue', () => ({ default: { template: '<button>Thème</button>' } }));
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
@@ -26,7 +28,7 @@ let pinia: Pinia;
 let router: Router;
 let view: ReturnType<typeof mount>;
 beforeEach(() => {
-  vi.spyOn(stories, 'getStory').mockResolvedValue({ childStories: [] } as never);
+  vi.spyOn(stories, 'getStory').mockImplementation(async id => storyFixture(id, [period(`root-${id}`), period(`leaf-${id}`, `root-${id}`)], [event(`event-${id}`)]));
   vi.spyOn(periods, 'getListPeriods').mockResolvedValue([period('unrelated-catalogue')]);
   vi.spyOn(events, 'getListEvents').mockResolvedValue([event('unrelated-event')]);
   vi.spyOn(events, 'getStoryListEvents').mockImplementation(async id => [event(`event-${id}`)]);
@@ -69,7 +71,7 @@ it.each([false, true])('opens the complete selected story from a real header sea
 });
 it('supports a direct story link and navigation to a child story and the timeline breadcrumb', async () => {
   vi.mocked(stories.getListStories).mockResolvedValue(['1', '2', '7', '8'].map(id => ({ ...summary(id), parentStoryId: id === '7' ? '1' : null })));
-  vi.mocked(stories.getSuggestions).mockResolvedValue([{ id: '2', title: { fr: 'Frise 2', en: '' }, parentStoryId: '7' }]);
+  vi.mocked(stories.getStory).mockImplementation(async id => storyFixture(id, [period(`root-${id}`), period(`leaf-${id}`, `root-${id}`)], [event(`event-${id}`)], id === '7' ? [{ id: '2', title_fr: 'Frise 2', anchors: [{ type: 'period', id: 'leaf-7' }] }] : []));
   await start('/timeline?story=7');
   await view.get('.period-card--timeline').trigger('click'); await flushPromises();
   expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('2');
@@ -86,6 +88,7 @@ it('restores the story associated with browser history', async () => {
   expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('7');
 });
 it('keeps an empty story empty instead of displaying unrelated catalogue content', async () => {
+  vi.mocked(stories.getStory).mockResolvedValue(storyFixture('8'));
   vi.mocked(stories.getStoryPeriods).mockResolvedValue([]);
   vi.mocked(events.getStoryListEvents).mockResolvedValue([]);
   await start('/timeline?story=8');
@@ -93,7 +96,9 @@ it('keeps an empty story empty instead of displaying unrelated catalogue content
   expect(view.getComponent(PeriodGrid).props('events')).toEqual([]);
   expect(periods.getListPeriods).not.toHaveBeenCalled();
 });
-it('refuses an unavailable story before loading its associations', async () => {
+it('refuses an unavailable story without exposing catalogue content', async () => {
+  vi.mocked(stories.getStory).mockRestore();
+  vi.mocked(apiClient.get).mockRejectedValueOnce({ response: { status: 404 } });
   await start('/timeline?story=99');
   expect(view.get('[role="alert"]').text()).toContain('introuvable ou n’est pas accessible');
   expect(stories.getStoryPeriods).not.toHaveBeenCalled(); expect(events.getStoryListEvents).not.toHaveBeenCalled();
@@ -104,7 +109,7 @@ it.each(['/timeline?story=one', '/timeline?story=1&story=2', '/timeline?story=21
   expect(stories.getStoryPeriods).not.toHaveBeenCalled();
 });
 it('keeps association failures retryable', async () => {
-  vi.mocked(stories.getStoryPeriods).mockRejectedValueOnce(new Error('Lecture indisponible'));
+  vi.mocked(stories.getStory).mockRejectedValueOnce(new Error('Lecture indisponible'));
   await start('/timeline?story=7');
   expect(view.get('[role="alert"]').text()).toContain('Lecture indisponible');
   await view.get('[role="alert"] button').trigger('click'); await flushPromises();
@@ -112,11 +117,11 @@ it('keeps association failures retryable', async () => {
   expect(view.getComponent(PeriodGrid).props('periods').map((p: Period) => p.id)).toEqual(['leaf-7']);
 });
 it('discards stale story contents after a newer story is requested', async () => {
-  let resolve!: (periods: Period[]) => void;
-  vi.mocked(stories.getStoryPeriods).mockReturnValueOnce(new Promise(yes => { resolve = yes; }));
+  let resolve!: (story: ReturnType<typeof storyFixture>) => void;
+  vi.mocked(stories.getStory).mockReturnValueOnce(new Promise(yes => { resolve = yes; }));
   await start('/timeline?story=7');
   await router.push('/timeline?story=8'); await flushPromises();
-  resolve([period('late')]); await flushPromises();
+  resolve(storyFixture('7', [period('late')])); await flushPromises();
   expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('8');
   expect(view.getComponent(PeriodGrid).props('periods').map((p: Period) => p.id)).toEqual(['leaf-8']);
 });

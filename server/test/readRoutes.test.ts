@@ -98,29 +98,30 @@ it('returns an empty event list for a story with no visible event', async () => 
   expect(await get('/stories/:storyId/events', { storyId: '7' })).toEqual({ status: 200, body: [] });
 });
 it('preserves story ownership and public visibility on the list while aggregating date candidates', async () => {
-  rows([{ ...story, ...category }], [{ story_id: 7, start_date: 'M65', end_date: 'NOW', start_years_bp: '65000000', end_years_bp: '0' }]);
-  expect((await get('/stories')).body).toEqual([{ ...story, parent_story_id: null, start_date: 'M65', end_date: 'NOW', categories, preview_periods: [], preview_events: [] }]);
+  rows([{ ...story, ...category, preview_periods: [period] }]);
+  expect((await get('/stories')).body).toEqual([{ ...story, parent_story_id: null, start_date: 'M65', end_date: 'NOW', categories, preview_periods: [period], preview_events: [] }]);
+  expect(db).toHaveBeenCalledOnce();
 });
 it('keeps the detail contract for stories, periods, events, child IDs and anchors', async () => {
-  rows([story], [], [{ ...period, story_parent_id: 'frise-parent', ...category }], [{ ...event, ...noCategory }], [
+  rows([{ ...story, categories: [], periods: [{ ...period, story_parent_id: 'frise-parent', ...category }], events: [{ ...event, ...noCategory }], child_stories: [
     { id: 8, title_fr: 'Enfant', title_en: null, anchors: [{ type: 'period', id: 'legacy-period' }] },
     { id: 9, title_fr: 'Autre', title_en: 'Other', anchors: null },
-  ]);
+  ], related_stories: [] }]);
   expect((await get('/stories/:id', { id: '7' })).body).toEqual({
     id: 7, title: { fr: 'Histoire', en: 'Histoire' }, description: { fr: 'Résumé', en: 'Résumé' },
-    author: 'Auteur', isPublic: true, ownerUserId: 'owner', categories: [],
+    author: 'Auteur', isPublic: true, ownerUserId: 'owner', parent_story_id: null, categories: [],
     periods: [{
       id: 'legacy-period', wikidata_id: 'Q123', storyParentId: 'frise-parent', label: { fr: 'Période', en: 'Période' }, description: { fr: 'Description', en: 'Description' },
-      startDate: 'M65', endDate: 'NOW', parentId: null, startYearsBP: 65000000, endYearsBP: 0,
+      startDate: 'M65', endDate: 'NOW', parentId: null, hasChildren: true, startYearsBP: 65000000, endYearsBP: 0,
       categories, createdAt: timestamp, updatedAt: timestamp,
     }],
-    events: [{ id: 'legacy-event', label: { fr: 'Événement', en: 'Événement' }, description: undefined, date: 'M54', categories: [], createdAt: timestamp, updatedAt: timestamp }],
+    events: [{ id: 'legacy-event', wikidata_id: null, label: { fr: 'Événement', en: 'Événement' }, description: undefined, date: 'M54', dateYearsBP: 54000000, categories: [], createdAt: timestamp, updatedAt: timestamp }],
     childStories: [
       { id: '8', title: { fr: 'Enfant', en: 'Enfant' }, anchors: [{ type: 'period', id: 'legacy-period' }] },
       { id: '9', title: { fr: 'Autre', en: 'Other' }, anchors: [] },
-    ], createdAt: timestamp, updatedAt: timestamp,
+    ], relatedStories: [], createdAt: timestamp, updatedAt: timestamp,
   });
-  expect(db).toHaveBeenCalledTimes(5);
+  expect(db).toHaveBeenCalledOnce();
 });
 it.each([
   ['/periods/:id', { id: 'missing' }, 'Période non trouvée'],

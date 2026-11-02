@@ -10,6 +10,7 @@ import { PeriodApiService } from '@/services/PeriodApiService';
 import { EventApiService } from '@/services/EventApiService';
 import { StoryApiService } from '@/services/StoryApiService';
 import { WikidataQueryService } from '@/services/WikidataQueryService';
+import { storyFixture } from '@/testFixtures/story';
 
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn() } }));
 function deferred<T>() {
@@ -99,10 +100,9 @@ it('reports a refused batch without claiming that some associations were saved',
   expect(view.relationsBusy.value).toBe(false);
 });
 
-it('handles event loading errors in the timeline initial load', async () => {
-  vi.spyOn(StoryApiService.getInstance(), 'getStoryPeriods').mockResolvedValue([]);
+it('handles snapshot loading errors in the timeline initial load', async () => {
+  vi.spyOn(StoryApiService.getInstance(), 'getStory').mockRejectedValue(new Error('Événements hors ligne'));
   vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([]);
-  vi.spyOn(EventApiService.getInstance(), 'getStoryListEvents').mockRejectedValue(new Error('Événements hors ligne'));
   const nav = scoped(useHomeNavigation); await nav.loadInitialData();
   expect(nav.error.value).toBe('Événements hors ligne'); expect(nav.loading.value).toBe(false);
 });
@@ -147,13 +147,12 @@ it('refreshes the cached story detail after an anchor changes', async () => {
 });
 
 it('does not let an older timeline story overwrite a newer story and its scoped events', async () => {
-  const pending = deferred<any[]>();
+  const pending = deferred<ReturnType<typeof storyFixture>>();
   vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([story('1'), story('2')]);
-  vi.spyOn(StoryApiService.getInstance(), 'getStoryPeriods').mockImplementation(async id => id === '1' ? pending.promise : [{ ...period('new-root'), parentId: null }]);
-  vi.spyOn(EventApiService.getInstance(), 'getStoryListEvents').mockImplementation(async id => [{ id: `event-${id}`, label: { fr: id, en: '' }, date: 'M65', dateYearsBP: 65000000, categories: [] }]);
+  vi.spyOn(StoryApiService.getInstance(), 'getStory').mockImplementation(async id => id === '1' ? pending.promise : storyFixture(id, [{ ...period('new-root'), parentId: null }], [{ id: `event-${id}`, label: { fr: id, en: '' }, date: 'M65', dateYearsBP: 65000000, categories: [] }]));
   const nav = scoped(useHomeNavigation);
   const first = nav.loadInitialData(); await nav.selectStory('2');
-  pending.resolve([period('old-root')]); await first;
+  pending.resolve(storyFixture('1', [period('old-root')])); await first;
   expect(nav.currentStoryId.value).toBe('2'); expect(nav.displayedPeriods.value.map(p => p.id)).toEqual(['new-root']);
   expect(nav.storyEvents.value.map(e => e.id)).toEqual(['event-2']);
   expect(nav.loading.value).toBe(false);
@@ -186,6 +185,7 @@ it('keeps the original story after a root replacement fails and releases the pen
 });
 
 it('keeps an empty frise empty instead of falling back to the catalogue tree', async () => {
+  vi.spyOn(StoryApiService.getInstance(),'getStory').mockResolvedValue(storyFixture('1'));
   vi.spyOn(StoryApiService.getInstance(),'getStoryPeriods').mockResolvedValue([]);
   vi.spyOn(StoryApiService.getInstance(),'getListStories').mockResolvedValue([]);
   vi.spyOn(EventApiService.getInstance(),'getStoryListEvents').mockResolvedValue([]);

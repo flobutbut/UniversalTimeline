@@ -16,6 +16,10 @@ L’organisation actuelle est décrite dans [Relations au sein des frises](../Do
 
 Ces migrations sont un historique des changements sur le schéma existant. Pour une nouvelle cible vide, utiliser uniquement [la baseline du lot 28](baseline/README.md), validée sur PostgreSQL 17. Elle contient déjà l’état des accès/durcissements applicatifs ; ne pas rejouer ensuite ces migrations ni les opérations d’attribution. Le projet existant ne doit recevoir aucun de ces initialiseurs.
 
+## Corrections du catalogue
+
+Les fichiers `data/20261102_catalogue_*` contiennent les textes sourcés et le lot transactionnel de correction de l’audit du 2 novembre 2026, déjà appliqué au projet actif. Le [compte rendu](../Documentation/PERFORMANCE-ET-CATALOGUE.md) décrit les décisions et la validation. Ces corrections ciblent les anciennes fiches recensées et ne doivent pas être exécutées sur une nouvelle base vide. Le retour arrière refuse les contenus ou relations modifiés depuis l’application.
+
 ## Archives
 
 Les anciens initialiseurs Docker, imports, scripts de sauvegarde, migrations Prisma/anciens modèles et dumps sont conservés comme textes dans [archive/](archive/README.md), avec leur chemin d’origine et leur SHA-256. Certains anciens scripts détruisent des données ou remplacent les IDs ; ils sont incompatibles avec le schéma courant. La routine historique `maintain_period_relations()` a été retirée avec le classement global le 2 novembre 2026. Les fichiers d’archive restent inchangés.

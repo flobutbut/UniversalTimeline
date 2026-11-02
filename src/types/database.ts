@@ -92,7 +92,7 @@ export interface StorySummary extends ListStory {
   description?: MultilingualText;
   author: string;
   isPublic: boolean;
-  /** Frise parente, présente seulement quand la réponse la transporte (liste des frises). */
+  /** Frise parente directe. */
   parentStoryId?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
@@ -103,6 +103,8 @@ export interface Story extends StorySummary {
   events: Event[];
   /** Stories enfants ancrées à des périodes de cette story. */
   childStories?: ChildStorySummary[];
+  /** Readable frises sharing at least one period or event, loaded with this frise. */
+  relatedStories?: Array<{ id: string; title: MultilingualText; periodIds: string[]; eventIds: string[] }>;
 }
 
 // Types pour les requêtes

@@ -1,6 +1,58 @@
 import type { TransactionClient } from '../api/transaction.js';
 import type { StoryWrite } from '../domain/writeInputs.js';
-import type { StoryRow, StorySummaryRow, JoinedStoryRow, JoinedPeriodRow, JoinedEventRow, ChildStoryRow, TemporalCandidate, PeriodRow } from './rows.js';
+import type { StoryRow, JoinedStoryRow, JoinedPeriodRow, JoinedEventRow, ChildStoryRow, TemporalCandidate, PeriodRow, CategoryRow } from './rows.js';
+
+interface StorySnapshotRow extends StoryRow {
+  categories: CategoryRow[];
+  periods: Array<JoinedPeriodRow & Pick<PeriodRow, 'has_children'>>;
+  events: JoinedEventRow[];
+  child_stories: ChildStoryRow[];
+  related_stories: Array<Pick<StoryRow, 'id' | 'title_fr' | 'title_en'> & { period_ids: string[]; event_ids: string[] }>;
+}
+
+/** One statement and one RLS snapshot for the whole frise, including its navigation links. */
+export async function findStorySnapshot(db: TransactionClient, id: string) {
+  return (await db.query<StorySnapshotRow>(`
+    SELECT s.*,
+      (SELECT COALESCE(jsonb_agg(to_jsonb(c) ORDER BY c.id), '[]')
+       FROM public.story_categories sc JOIN public.categories c ON c.id = sc.category_id
+       WHERE sc.story_id = s.id) AS categories,
+      (SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY p.start_date, p.id, p.category_id), '[]') FROM (
+        SELECT p.*, NULL::varchar AS parent_id, sp.parent_period_id AS story_parent_id,
+          EXISTS(SELECT 1 FROM public.story_periods child
+                 WHERE child.story_id = sp.story_id AND child.parent_period_id = p.id) AS has_children,
+          c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
+        FROM public.story_periods sp JOIN public.periods p ON p.id = sp.period_id
+        LEFT JOIN public.period_categories pc ON pc.period_id = p.id
+        LEFT JOIN public.categories c ON c.id = pc.category_id
+        WHERE sp.story_id = s.id
+      ) p) AS periods,
+      (SELECT COALESCE(jsonb_agg(to_jsonb(e) ORDER BY e.date, e.id, e.category_id), '[]') FROM (
+        SELECT e.*, c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
+        FROM public.story_events se JOIN public.events e ON e.id = se.event_id
+        LEFT JOIN public.event_categories ec ON ec.event_id = e.id
+        LEFT JOIN public.categories c ON c.id = ec.category_id
+        WHERE se.story_id = s.id
+      ) e) AS events,
+      (SELECT COALESCE(jsonb_agg(to_jsonb(child) ORDER BY child.id), '[]') FROM (
+        SELECT child.id, child.title_fr, child.title_en,
+          (SELECT COALESCE(jsonb_agg(jsonb_build_object('type', a.anchor_type, 'id', a.anchor_id) ORDER BY a.id), '[]')
+           FROM public.story_anchors a WHERE a.story_id = child.id) AS anchors
+        FROM public.stories child WHERE child.parent_story_id = s.id
+      ) child) AS child_stories,
+      (SELECT COALESCE(jsonb_agg(to_jsonb(related) ORDER BY related.id), '[]') FROM (
+        SELECT other.id, other.title_fr, other.title_en,
+          ARRAY(SELECT link.period_id FROM public.story_periods link
+                JOIN public.story_periods current ON current.period_id = link.period_id AND current.story_id = s.id
+                WHERE link.story_id = other.id ORDER BY link.period_id) AS period_ids,
+          ARRAY(SELECT link.event_id FROM public.story_events link
+                JOIN public.story_events current ON current.event_id = link.event_id AND current.story_id = s.id
+                WHERE link.story_id = other.id ORDER BY link.event_id) AS event_ids
+        FROM public.stories other WHERE other.id <> s.id
+      ) related WHERE cardinality(related.period_ids) > 0 OR cardinality(related.event_ids) > 0) AS related_stories
+    FROM public.stories s WHERE s.id = $1
+  `, [id])).rows[0];
+}
 
 export async function listStories(db: TransactionClient) {
   return (await db.query<JoinedStoryRow>(`
@@ -32,38 +84,6 @@ export async function listStories(db: TransactionClient) {
       LEFT JOIN public.categories c ON sc.category_id = c.id
       ORDER BY s.created_at DESC
     `)).rows;
-}
-export async function findStory(db: TransactionClient, id: string) {
-  return (await db.query<StorySummaryRow>(`
-      SELECT
-        s.id,
-        s.title_fr,
-        s.title_en,
-        s.description_fr,
-        s.description_en,
-        s.author,
-        s.is_public,
-        to_jsonb(s)->>'owner_user_id' AS owner_user_id,
-        s.created_at,
-        s.updated_at
-      FROM public.stories s
-      WHERE s.id = $1
-    `, [id])).rows[0];
-}
-export async function listStoryPeriods(db: TransactionClient, id: string) {
-  return (await db.query<JoinedPeriodRow>(`
-      SELECT
-        p.*, NULL::varchar AS parent_id, sp.parent_period_id AS story_parent_id,
-        c.id as category_id,
-        c.label_fr as category_label_fr,
-        c.label_en as category_label_en
-      FROM public.periods p
-      JOIN public.story_periods sp ON p.id = sp.period_id
-      LEFT JOIN public.period_categories pc ON p.id = pc.period_id
-      LEFT JOIN public.categories c ON pc.category_id = c.id
-      WHERE sp.story_id = $1
-      ORDER BY p.start_date
-    `, [id])).rows;
 }
 const storyLinkTables = {
   event: { table: 'story_events', column: 'event_id' },
@@ -147,15 +167,6 @@ export async function deleteStory(client: TransactionClient, id: string) {
   await client.query('DELETE FROM public.story_periods WHERE story_id = $1', [id]);
   await client.query('DELETE FROM public.story_categories WHERE story_id = $1', [id]);
   return (await client.query<StoryRow>('DELETE FROM public.stories WHERE id = $1 RETURNING *', [id])).rows[0];
-}
-export async function listChildStories(db: TransactionClient, id: string) {
-  return (await db.query<ChildStoryRow>(`
-    SELECT s.id, s.title_fr, s.title_en,
-           json_agg(json_build_object('type', sa.anchor_type, 'id', sa.anchor_id) ORDER BY sa.id)
-             FILTER (WHERE sa.id IS NOT NULL) AS anchors
-    FROM public.stories s LEFT JOIN public.story_anchors sa ON sa.story_id = s.id
-    WHERE s.parent_story_id = $1 GROUP BY s.id, s.title_fr, s.title_en ORDER BY s.id
-  `, [id])).rows;
 }
 export async function listTemporalCandidates(db: TransactionClient) {
   return (await db.query<TemporalCandidate>(`

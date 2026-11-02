@@ -88,6 +88,10 @@ export const useDataStore = defineStore('data', () => {
 
   async function ensureStoryLoaded(storyId: string): Promise<Story> {
     await reads.load(`story-detail:${storyId}`, () => StoryApiService.getInstance().getStory(storyId), story => {
+      mergePeriods(story.periods);
+      const byId = new Map(events.value.map(event => [event.id, event]));
+      for (const event of story.events) byId.set(event.id, event);
+      events.value = [...byId.values()];
       storyDetailsCache.set(storyId, story);
     });
     return storyDetailsCache.get(storyId)!;
@@ -103,12 +107,13 @@ export const useDataStore = defineStore('data', () => {
 
   function invalidateStory(storyId: string) {
     reads.invalidate(`story-periods:${storyId}`);
-    reads.invalidate(`story-detail:${storyId}`);
+    // Shared-content links in any snapshot may change when one membership or title changes.
+    reads.invalidateMatching(key => key.startsWith('story-detail:'));
     reads.invalidate(`story-events:${storyId}`);
     storyEventsCache.delete(storyId);
     reads.invalidate('stories');
     storyPeriodsCache.delete(storyId);
-    storyDetailsCache.delete(storyId);
+    storyDetailsCache.clear();
   }
 
   function invalidateStories() {
