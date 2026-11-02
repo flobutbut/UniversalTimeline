@@ -180,5 +180,5 @@ it('offers other frises sharing a period, deduplicated with anchored children', 
   view = mount(PeriodGrid, { props: gridProps, attachTo: document.body }); await settle();
   expect(badge().text()).toBe('2 frises associées');
   await badge().trigger('click'); await flushPromises();
-  expect(body().findAll('.associated-stories__item').map(item => item.text())).toEqual(['Frise child', 'Autre parcours']);
+  expect(body().findAll('.associated-stories__item strong').map(item => item.text())).toEqual(['Frise child', 'Autre parcours']);
 });
