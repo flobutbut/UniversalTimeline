@@ -11,7 +11,7 @@ import { useRouter } from 'vue-router'
 import { useUiStore } from '@/stores/useUiStore'
 import { canUseWorkspace } from '@/router/access'
 
-const { currentView, loading, error, navigate, selectSearch, retry } = useAppNavigation()
+const { currentView, loading, error, navigate, selectSearch, retry, timelineDestination } = useAppNavigation()
 const auth = useAuthStore(); const router = useRouter(); const ui = useUiStore()
 const allowed = computed(() => router.currentRoute.value.meta.public === true || (canUseWorkspace(auth) && (!router.currentRoute.value.meta.admin || auth.isAdmin)))
 const isLanding = computed(() => router.currentRoute.value.meta.landing === true)
@@ -28,6 +28,7 @@ watch([() => auth.identityVersion, allowed], () => {
     <Header
       v-if="!isLanding"
       :current-view="currentView"
+      :timeline-destination="timelineDestination"
       @change-view="navigate"
       @select-search="selectSearch"
     />

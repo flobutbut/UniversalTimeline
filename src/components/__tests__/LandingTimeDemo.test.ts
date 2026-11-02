@@ -6,20 +6,22 @@ import LandingTimeDemo from '@/components/LandingTimeDemo.vue';
 let view: ReturnType<typeof mount>;
 afterEach(() => { view?.unmount(); vi.unstubAllGlobals(); });
 
-it('starts with the whole Earth history and offers all five sourced landmarks', async () => {
+it('starts with the whole Universe and offers all six sourced landmarks', async () => {
   view = mount(LandingTimeDemo);
-  expect(view.get('figcaption').text()).toContain('De la formation de la Terre');
-  expect(view.findAll('.landmark-list button')).toHaveLength(5);
+  expect(view.get('figcaption').text()).toContain('Du Big Bang à aujourd’hui');
+  expect(view.findAll('.landmark-list button')).toHaveLength(6);
   expect(view.get('.marker-note').text()).toContain('sans agrandir la barre');
-  expect(view.get('.landmark-detail a').attributes('href')).toContain('humanorigins.si.edu');
-  await view.findAll('.landmark-list button')[1].trigger('click');
+  expect(view.get('.landmark-detail a').attributes('href')).toBe('https://science.nasa.gov/universe/overview/');
+  await view.findAll('.landmark-list button')[2].trigger('click');
   expect(view.get('.landmark-detail').text()).toContain('La date exacte de son apparition reste inconnue');
   expect(view.get('.landmark-detail a').attributes('href')).toContain('origin-of-life');
 });
 
-it('lets the visitor zoom from the Earth to inventions and return to the starting scale', async () => {
+it('lets the visitor zoom from the Universe to inventions and return to the starting scale', async () => {
   view = mount(LandingTimeDemo);
   const next = () => view.get('.demo-insight button').trigger('click');
+  await next();
+  expect(view.get('figcaption').text()).toContain('De la formation de la Terre');
   await next();
   expect(view.get('figcaption').text()).toContain('les dinosaures');
   expect(view.get('[data-band="humans"]').attributes('style')).toContain('width: 0.12%');
@@ -31,7 +33,7 @@ it('lets the visitor zoom from the Earth to inventions and return to the startin
   expect(view.get('[data-band="internet"]').exists()).toBe(true);
   expect(view.findAll('.landmark-list button')).toHaveLength(2);
   await next();
-  expect(view.get('figcaption').text()).toContain('De la formation de la Terre');
+  expect(view.get('figcaption').text()).toContain('Du Big Bang à aujourd’hui');
 });
 
 it('shows a separate 1 px marker only when the actual duration is subpixel, including after resize', async () => {
@@ -43,8 +45,9 @@ it('shows a separate 1 px marker only when the actual duration is subpixel, incl
   });
   view = mount(LandingTimeDemo);
   await nextTick();
-  expect(view.get('.human-measure').text()).toContain('0,066 px');
+  expect(view.get('.human-measure').text()).toContain('0,022 px');
   expect(view.findAll('.subpixel-marker')).toHaveLength(1);
+  await view.get('.demo-insight button').trigger('click');
   await view.get('.demo-insight button').trigger('click');
   expect(view.find('.subpixel-marker').exists()).toBe(false);
   resize([{ contentRect: { width: 200 } }]);

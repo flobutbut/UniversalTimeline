@@ -1,5 +1,5 @@
 <template>
-  <nav v-if="items.length" class="story-breadcrumb" aria-label="Fil d’Ariane de la timeline" :aria-busy="loading || undefined">
+  <nav v-if="items.length" class="story-breadcrumb" :aria-label="label" :aria-busy="loading || undefined">
     <ol class="story-breadcrumb__list">
       <li v-for="(item, i) in items" :key="item.id" class="story-breadcrumb__step">
         <span v-if="i > 0" class="story-breadcrumb__sep" aria-hidden="true">/</span>
@@ -29,10 +29,11 @@ export type StoryBreadcrumbItem = { id: string; title: string; kind?: 'story' | 
 
 const StoryMarker = () => h('span', { class: 'sr-only' }, 'Frise : ');
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   items: StoryBreadcrumbItem[];
   loading?: boolean;
-}>();
+  label?: string;
+}>(), { label: 'Fil d’Ariane de la timeline' });
 
 const emit = defineEmits<{
   navigate: [index: number];

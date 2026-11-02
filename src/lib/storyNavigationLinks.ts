@@ -10,13 +10,13 @@ export function storyNavigationLinks(story: Story): Array<StorySuggestion & { an
     .map(period => ({ type: 'period', id: period.id }));
   const links = new Map<string, StorySuggestion & { anchors: StoryAnchor[] }>();
   for (const child of story.childStories ?? []) {
-    if (child.id === story.id) continue;
+    if (String(child.id).trim() === String(story.id).trim()) continue;
     const anchors = child.anchors.filter(anchor => (anchor.type === 'period' ? periods : events).has(anchor.id));
     links.set(child.id, { id: child.id, title: child.title, parentStoryId: story.id, anchors: anchors.length ? anchors : roots });
   }
   const related = [...(story.relatedStories ?? [])].sort((a, b) => (a.title.fr || a.title.en).localeCompare(b.title.fr || b.title.en, 'fr'));
   for (const other of related) {
-    if (other.id === story.id) continue;
+    if (String(other.id).trim() === String(story.id).trim()) continue;
     const link = links.get(other.id) ?? { id: other.id, title: other.title, parentStoryId: null, anchors: [] };
     const seen = new Set(link.anchors.map(anchor => `${anchor.type}:${anchor.id}`));
     for (const [type, ids] of [['period', other.periodIds], ['event', other.eventIds]] as const) {

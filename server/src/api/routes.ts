@@ -150,6 +150,16 @@ router.put('/stories/:storyId/root-period', endpoint('Impossible de changer la r
   const periodId = parseEntityId(inputObject(req.body).periodId, 'periodId');
   res.json(await stories.changeRootPeriod(id, periodId));
 }));
+router.post('/stories/:contextId/presentations', endpoint('Impossible de modifier le parcours chronologique.', async (req, res) => {
+  const contextId = parseStoryId(req.params.contextId, 'contextId');
+  const body = inputObject(req.body);
+  const periodId = parseEntityId(body.periodId, 'periodId');
+  const targetId = parseStoryId(body.targetStoryId, 'targetStoryId');
+  if (contextId === targetId) throw new InputValidationError('targetStoryId', 'Choisissez une autre frise pour la vue de détail.');
+  const operation = parseAssociationOperation(body.operation);
+  await stories.changePeriodPresentation(contextId, periodId, targetId, operation === 'remove');
+  res.status(204).send();
+}));
 router.get('/stories/:id', endpoint('Erreur lors de la récupération du détail de la frise', async (req, res) => {
   res.json(await stories.getStory(parseStoryId(req.params.id)));
 }));

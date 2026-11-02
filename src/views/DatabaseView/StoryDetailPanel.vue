@@ -22,7 +22,7 @@
         </div>
         <div class="story-detail-panel__meta-actions">
           <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openEventCreator">Ajouter un événement</Button>
-          <Button variant="tertiary" size="sm" :to="{ path: '/timeline', query: { story: story.id } }">Voir dans la timeline</Button>
+          <Button variant="tertiary" size="sm" :to="{ path: '/timeline', query: { story: story.id, entry: 'universe' } }">Voir dans la timeline</Button>
         </div>
       </div>
 
@@ -277,6 +277,7 @@
           <StoryRelationsPanel :story="story" :busy="panelBusy" :error="error"
             @add-parent="(sourceId, periodId) => emit('add-parent-entry', sourceId, periodId)"
             @remove-parent="(sourceId, anchor) => emit('remove-parent-entry', sourceId, anchor)" />
+          <StoryNavigationPanel :story="story" :busy="panelBusy" @saved="emit('retry')" />
         </div>
         <div v-else-if="activeTab === 'categories'" class="story-settings-panel">
           <StoryCategoriesForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
@@ -323,6 +324,7 @@ import MoveStoryPeriodModal from './MoveStoryPeriodModal.vue';
 import StorySettingsForm from './StorySettingsForm.vue';
 import StoryCategoriesForm from './StoryCategoriesForm.vue';
 import StoryRelationsPanel from './StoryRelationsPanel.vue';
+import StoryNavigationPanel from './StoryNavigationPanel.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import StoryItemActionsMenu from './StoryItemActionsMenu.vue';
 import EditModal from './EditModal.vue';

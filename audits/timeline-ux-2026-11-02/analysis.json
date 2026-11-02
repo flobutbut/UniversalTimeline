@@ -1,0 +1,91 @@
+{
+  "capturedAt": "2026-11-02T13:27:25.406Z",
+  "counts": {
+    "stories": 22,
+    "periods": 152,
+    "events": 128,
+    "placements": 234,
+    "storiesWithContext": 4,
+    "contexts": [
+      "24"
+    ],
+    "sharedPeriodsAtDifferentDepths": 25
+  },
+  "periodCycles": [],
+  "missingLocalParents": [],
+  "periodsOutsideParentByMoreThanOneYear": [
+    {
+      "story": 23,
+      "period": "Glaciation marinoenne",
+      "parent": "Cryogénien"
+    },
+    {
+      "story": 22,
+      "period": "Extinction du Dévonien tardif",
+      "parent": "Dévonien"
+    },
+    {
+      "story": 22,
+      "period": "Glaciation de l’Ordovicien supérieur",
+      "parent": "Ordovicien"
+    },
+    {
+      "story": 11,
+      "period": "Hadéen",
+      "parent": "Terre"
+    },
+    {
+      "story": 10,
+      "period": "Antiquité égyptienne",
+      "parent": "Antiquité"
+    },
+    {
+      "story": 8,
+      "period": "Guerre arméno-azerbaïdjanaise",
+      "parent": "Première Guerre mondiale"
+    },
+    {
+      "story": 9,
+      "period": "Seconde Guerre sino-japonaise",
+      "parent": "Seconde Guerre mondiale"
+    },
+    {
+      "story": 2,
+      "period": "Hadéen",
+      "parent": "Terre"
+    }
+  ],
+  "equalBounds": [
+    {
+      "id": "PER_ELECTROWEAK",
+      "label": "Ère Électrofaible"
+    },
+    {
+      "id": "PER_GUT",
+      "label": "Ère de la Grande Unification"
+    },
+    {
+      "id": "PER_HADRON",
+      "label": "Ère Hadronique"
+    },
+    {
+      "id": "PER_LEPTON",
+      "label": "Ère Leptonique"
+    },
+    {
+      "id": "PER_NUCLEOSYN",
+      "label": "Ère de la Nucléosynthèse Primordiale"
+    },
+    {
+      "id": "PER_PLANCK",
+      "label": "Ère de Planck"
+    }
+  ],
+  "periodLinks": 20,
+  "periodLinksWhoseAnchorIsNotTargetRoot": 10,
+  "climateBounds": {
+    "startYearsBP": 2450000000,
+    "endYearsBP": 0,
+    "quaternaryNominalWidthAt1704px": 1.7944163265306123
+  }
+}

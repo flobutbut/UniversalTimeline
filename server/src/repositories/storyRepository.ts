@@ -8,6 +8,11 @@ interface StorySnapshotRow extends StoryRow {
   events: JoinedEventRow[];
   child_stories: ChildStoryRow[];
   parent_stories?: Array<Pick<StoryRow, 'id' | 'title_fr' | 'title_en' | 'owner_user_id'> & { anchors: Array<{ type: 'period' | 'event'; id: string; label_fr: string; label_en: string | null }> }>;
+  navigation_contexts?: Array<{
+    id: number; title_fr: string; title_en: string;
+    periods: Array<Pick<PeriodRow, 'id' | 'label_fr' | 'label_en' | 'start_date' | 'end_date' | 'start_years_bp' | 'end_years_bp'> & { story_parent_id: string | null }>;
+    presentations: Array<{ period_id: string; story_id: number; title_fr: string; title_en: string }>;
+  }>;
   related_stories: Array<Pick<StoryRow, 'id' | 'title_fr' | 'title_en'> & { period_ids: string[]; event_ids: string[] }>;
 }
 
@@ -25,6 +30,22 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
       WHERE child.parent_story_id IS NOT NULL AND (child.parent_story_id = $1 OR child.id = $1)
     )
     SELECT s.*,
+      (SELECT COALESCE(jsonb_agg(to_jsonb(ctx) ORDER BY ctx.id), '[]') FROM (
+        SELECT context.id, context.title_fr, context.title_en,
+          (SELECT COALESCE(jsonb_agg(jsonb_build_object(
+            'id',p.id,'label_fr',p.label_fr,'label_en',p.label_en,
+            'start_date',p.start_date,'end_date',p.end_date,'start_years_bp',p.start_years_bp,'end_years_bp',p.end_years_bp,
+            'story_parent_id',sp.parent_period_id) ORDER BY p.id), '[]')
+           FROM public.story_periods sp JOIN public.periods p ON p.id=sp.period_id WHERE sp.story_id=context.id) AS periods,
+          (SELECT COALESCE(jsonb_agg(jsonb_build_object('period_id',v.period_id,'story_id',target.id,
+            'title_fr',target.title_fr,'title_en',target.title_en) ORDER BY v.period_id,target.id), '[]')
+           FROM public.story_period_presentations v JOIN public.stories target ON target.id=v.target_story_id
+           WHERE v.context_story_id=context.id) AS presentations
+        FROM public.stories context WHERE EXISTS (
+          SELECT 1 FROM public.story_period_presentations v
+          WHERE v.context_story_id=context.id AND (v.target_story_id=s.id OR context.id=s.id)
+        )
+      ) ctx) AS navigation_contexts,
       (SELECT COALESCE(jsonb_agg(to_jsonb(c) ORDER BY c.id), '[]')
        FROM public.story_categories sc JOIN public.categories c ON c.id = sc.category_id
        WHERE sc.story_id = s.id) AS categories,

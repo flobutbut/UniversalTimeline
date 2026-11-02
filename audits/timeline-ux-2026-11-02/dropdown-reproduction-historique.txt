@@ -1,0 +1,27 @@
+// Régression du menu perdu pendant le chargement, corrigée après l’audit.
+import { afterEach, expect, it, vi } from 'vitest';
+import { mount, type VueWrapper } from '@vue/test-utils';
+import PeriodGrid from '@/views/HomeView/PeriodGrid.vue';
+import { StoryApiService } from '@/services/StoryApiService';
+
+let view: VueWrapper;
+afterEach(() => { view?.unmount(); vi.restoreAllMocks(); });
+
+it('conserve le menu après le reset asynchrone des suggestions', async () => {
+  vi.spyOn(StoryApiService.getInstance(), 'getStory').mockResolvedValue({ childStories: [] } as never);
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(100,100,400,52));
+  view = mount(PeriodGrid, { attachTo: document.body, props: {
+    periods: [{ id: 'earth', label: {fr:'Terre',en:''}, startDate:'M4540', endDate:'NOW', categories:[], hasChildren:false }],
+    events: [], loading: false, currentPeriod:null, parentPeriod:null, storySuggestions:[], currentStoryId:'1',
+  } });
+  const choices = [{id:'2',title:{fr:'Vie',en:''}},{id:'11',title:{fr:'Géologie',en:''}}];
+  await view.get('.period-card--timeline').trigger('click');
+  await view.setProps({ storySuggestions: [], loading: true });
+  await view.setProps({ storySuggestions: choices, loading: false });
+  expect(document.body.querySelector('.story-dropdown')).not.toBeNull();
+  // Les mêmes choix s'affichent si le rectangle est conservé entre clic et résultat.
+  await view.setProps({ storySuggestions: [] });
+  await view.get('.period-card--timeline').trigger('click');
+  await view.setProps({ storySuggestions: choices });
+  expect(document.body.querySelector('.story-dropdown')).not.toBeNull();
+});

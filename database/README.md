@@ -18,6 +18,14 @@ L’organisation actuelle est décrite dans [Relations au sein des frises](../Do
 
 Ces migrations sont un historique des changements sur le schéma existant. Pour une nouvelle cible vide, utiliser uniquement [la baseline du lot 28](baseline/README.md), validée sur PostgreSQL 17. Elle contient déjà l’état des accès/durcissements applicatifs ; ne pas rejouer ensuite ces migrations ni les opérations d’attribution. Le projet existant ne doit recevoir aucun de ces initialiseurs.
 
+## Parcours chronologiques
+
+La migration `20261102131202_story_period_presentations.sql` ajoute les présentations de périodes par contexte, avec clés étrangères composées, index et RLS. Elle est appliquée au projet actif. La baseline des projets vides contient déjà cette table.
+
+Le lot `data/20261102_historical_navigation_context.sql`, appliqué le 2 novembre 2026, crée la frise de référence « Grandes périodes de l’histoire européenne » et quatre présentations sur les fiches existantes Antiquité, Moyen Âge, Époque moderne et Histoire contemporaine. Les points d’entrée historiques sont conservés. Ce lot est propre aux données auditées ; ne pas l’exécuter sur une installation vide. Les identifiants des frises créées sont obtenus par `RETURNING`, jamais imposés.
+
+Voir [Relations au sein des frises](../Documentation/RELATIONS-FRISES.md) pour le comportement et l’édition des parcours.
+
 ## Corrections du catalogue
 
 Les fichiers `data/20261102_catalogue_*` contiennent les textes sourcés et le lot transactionnel de correction de l’audit du 2 novembre 2026, déjà appliqué au projet actif. Le [compte rendu](../Documentation/PERFORMANCE-ET-CATALOGUE.md) décrit les décisions et la validation. Ces corrections ciblent les anciennes fiches recensées et ne doivent pas être exécutées sur une nouvelle base vide. Le retour arrière refuse les contenus ou relations modifiés depuis l’application.

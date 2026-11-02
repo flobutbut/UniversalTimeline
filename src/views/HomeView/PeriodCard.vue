@@ -22,15 +22,15 @@
       <div ref="contentRef" class="card-content">
         <div class="period-header">
           <h3 class="period-title" :aria-label="period.label.fr">
-            <button type="button" class="period-card__title-action" :disabled="loading" :aria-label="variant === 'parent' ? `Revenir depuis ${period.label.fr}` : period.label.fr"
-              :aria-describedby="typeof $attrs['aria-describedby'] === 'string' ? $attrs['aria-describedby'] : undefined" @click.stop="handleClick">{{ period.label.fr }}</button>
+            <component :is="navigable ? 'button' : 'span'" :type="navigable ? 'button' : undefined" class="period-card__title-action" :disabled="navigable ? loading : undefined" :tabindex="navigable ? undefined : 0" :aria-label="variant === 'parent' ? `Revenir depuis ${period.label.fr}` : period.label.fr"
+              :aria-describedby="typeof $attrs['aria-describedby'] === 'string' ? $attrs['aria-describedby'] : undefined" @click.stop="handleClick">{{ period.label.fr }}</component>
           </h3>
         </div>
         <div class="period-footer" v-if="period.startDate || period.endDate">
           <div class="period-info">{{ periodDateRange }}</div>
         </div>
       </div>
-      <!-- Actions de la carte : tout à droite, centrées sur la hauteur ; masquées si le titre et la date manquent de place -->
+      <!-- Actions mesurables même masquées : l'agrandissement réserve leur largeur complète. -->
       <div ref="actionsRef" class="period-card__actions" :class="{ 'period-card__actions--hidden': !actionsFit }">
         <slot name="title-actions" />
       </div>
@@ -47,10 +47,11 @@
 
 <script setup lang="ts">
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
 import { formatPeriodDateRange } from '@/lib/formatTemporalBoundLabel';
+import { measureTextWidth } from '@/lib/measureTextWidth';
 import type { ListPeriod } from '@/types/database';
 
 const props = withDefaults(
@@ -72,6 +73,7 @@ const emit = defineEmits<{
 }>();
 
 const periodDateRange = computed(() => formatPeriodDateRange(props.period));
+const navigable = computed(() => props.variant === 'parent' || !!props.period.hasChildren);
 
 // ─── Priorité au titre et à la date sur les actions (badge) ─────────────────
 
@@ -81,21 +83,14 @@ const actionsRef = ref<HTMLElement | null>(null);
 const actionsFit = ref(true);
 let observer: ResizeObserver | undefined;
 
-/** Largeur complète du texte, même tronqué ; un bloc pleine largeur ne la donne pas par scrollWidth. */
-function textWidth(el: HTMLElement): number {
-  const range = document.createRange();
-  range.selectNodeContents(el);
-  return typeof range.getBoundingClientRect === 'function' ? range.getBoundingClientRect().width : el.scrollWidth;
-}
-
 /** La mesure du texte ne dépend pas du badge : pas d'oscillation entre affiché et masqué. */
 function measureActions() {
   const main = mainRef.value, content = contentRef.value, actions = actionsRef.value;
   if (!main || !content || !actions) return;
   const actionsWidth = actions.offsetWidth;
-  if (actionsWidth === 0) { actionsFit.value = true; return; }
+  if (actionsWidth === 0 || props.wrapContent) { actionsFit.value = true; return; }
   const gap = parseFloat(getComputedStyle(main).columnGap) || 0;
-  const needed = Math.max(0, ...Array.from(content.querySelectorAll<HTMLElement>('.period-card__title-action, .period-info'), textWidth));
+  const needed = Math.max(0, ...Array.from(content.querySelectorAll<HTMLElement>('.period-card__title-action, .period-info'), measureTextWidth));
   // Espace partagé par le texte et les actions : celui du texte, plus celui des actions quand elles sont dans le flux.
   const shared = content.clientWidth + (actionsFit.value ? actionsWidth + gap : 0);
   actionsFit.value = Math.ceil(needed) + gap + actionsWidth <= shared;
@@ -108,10 +103,10 @@ onMounted(() => {
   for (const el of [mainRef.value, actionsRef.value]) if (el) observer.observe(el);
 });
 onBeforeUnmount(() => observer?.disconnect());
-watch(() => [props.period.label.fr, periodDateRange.value], () => nextTick(measureActions));
+watch(() => [props.period.label.fr, periodDateRange.value, props.wrapContent], measureActions, { flush: 'post' });
 
 const handleClick = () => {
-  if (props.loading) return;
+  if (props.loading || !navigable.value) return;
   if (props.variant === 'parent') emit('back');
   else emit('select', props.period);
 };
@@ -147,9 +142,7 @@ const handleClick = () => {
   border: none;
 }
 
-.period-card--timeline.period-card--leaf {
-  cursor: default;
-}
+.period-card--leaf, .period-card--leaf .period-card__title-action { cursor: default; }
 
 .period-card--timeline.period-card--leaf:hover .main-container {
   background: var(--color-surface-raised);
@@ -198,6 +191,7 @@ const handleClick = () => {
 
 .period-card__actions {
   display: flex;
+  width: max-content;
   flex-shrink: 0;
   align-items: center;
 }
@@ -297,6 +291,7 @@ const handleClick = () => {
 }
 
 .period-card--wrap .period-title,
+.period-card--wrap .period-card__title-action,
 .period-card--wrap .period-info {
   white-space: normal;
   overflow-wrap: anywhere;

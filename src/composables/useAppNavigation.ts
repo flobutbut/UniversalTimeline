@@ -8,6 +8,7 @@ export function useAppNavigation() {
   const route = useRoute();
   const router = useRouter();
   const currentView = computed(() => navigationViewForRoute(route.name));
+  const timelineDestination = ref<RouteLocationRaw>(route.name === 'timeline' ? route.fullPath : { name: 'timeline' });
   const loading = ref(false);
   const error = ref<string | null>(null);
   let pendingRoute: RouteLocationNormalized | null = null;
@@ -18,8 +19,9 @@ export function useAppNavigation() {
     loading.value = true;
     error.value = null;
   });
-  const removeAfter = router.afterEach(to => {
+  const removeAfter = router.afterEach((to, _from, failure) => {
     if (to === pendingRoute) loading.value = false;
+    if (!failure && to.name === 'timeline') timelineDestination.value = to.fullPath;
   });
   const removeError = router.onError((_cause, to) => {
     if (pendingRoute && to !== pendingRoute) return;
@@ -38,8 +40,8 @@ export function useAppNavigation() {
   }
 
   return {
-    currentView, loading, error,
-    navigate: (view: NavigationView) => push({ name: view }),
+    currentView, loading, error, timelineDestination,
+    navigate: (view: NavigationView) => push(view === 'timeline' ? timelineDestination.value : { name: view }),
     selectSearch: (hit: StorySearchResult) => {
       try {
         return push(storyTimelineLocation(hit.id));

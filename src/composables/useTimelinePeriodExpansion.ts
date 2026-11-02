@@ -1,6 +1,7 @@
 import { computed, onScopeDispose, ref, watch, type Ref } from 'vue';
+import { measureTextWidth } from '@/lib/measureTextWidth';
 
-/** Mesure le texte avant l'agrandissement ; seul le cadre est remesuré pendant celui-ci. */
+/** Mesure le texte avant l'agrandissement et réserve aussi la place des actions. */
 export function useTimelinePeriodExpansion(
   activeId: () => string | null,
   anchor: (id: string) => HTMLElement | null,
@@ -10,12 +11,22 @@ export function useTimelinePeriodExpansion(
   const rowWidth = ref(0);
   const laneHeight = ref(56);
   const wrapContent = ref(false);
+  let textPixels = 0;
+  let paddingPixels = 0;
   let observer: ResizeObserver | undefined;
 
   function measureFrame() {
     rowWidth.value = row.value?.getBoundingClientRect().width ?? 0;
     const id = activeId();
     const card = id && anchor(id);
+    if (card) {
+      const main = card.querySelector<HTMLElement>('.main-container');
+      const controls = Array.from(card.querySelectorAll<HTMLElement>('.period-card__actions, .period-card__drill'))
+        .map(element => element.offsetWidth).filter(width => width > 0);
+      const gap = main ? parseFloat(getComputedStyle(main).columnGap) || 0 : 0;
+      requiredPixels.value = Math.ceil(textPixels + paddingPixels
+        + controls.reduce((sum, width) => sum + width, 0) + gap * controls.length + 2);
+    }
     // Le texte reste sur une ligne pendant la transition horizontale. Un retour
     // à la ligne n'est utile que si la frise entière ne suffit pas, une fois atteinte.
     wrapContent.value = !!card && rowWidth.value > 0 && requiredPixels.value > rowWidth.value
@@ -26,20 +37,20 @@ export function useTimelinePeriodExpansion(
   watch(activeId, id => {
     const card = id && anchor(id);
     requiredPixels.value = 0;
+    textPixels = paddingPixels = 0;
     laneHeight.value = 56;
     wrapContent.value = false;
     if (!card) return;
     const main = card.querySelector<HTMLElement>('.main-container');
-    const lines = card.querySelectorAll<HTMLElement>('.period-title, .period-info');
-    const padding = [card, main].reduce((sum, element) => {
+    paddingPixels = [card, main].reduce((sum, element) => {
       if (!element) return sum;
       const style = getComputedStyle(element);
       return sum + (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0)
         + (parseFloat(style.borderLeftWidth) || 0) + (parseFloat(style.borderRightWidth) || 0);
     }, 0);
-    // Deux pixels de réserve évitent une ellipse due aux arrondis de scrollWidth.
-    requiredPixels.value = Array.from(lines).some(line => line.scrollWidth > line.clientWidth)
-      ? Math.ceil(Math.max(0, ...Array.from(lines, line => line.scrollWidth)) + padding + 2) : 0;
+    // Mesurer le texte lui-même : le h3 peut être étroit sans déborder, car son
+    // bouton/span enfant masque déjà le texte. Cela vaut aussi sans badge ni flèche.
+    textPixels = Math.max(0, ...Array.from(card.querySelectorAll<HTMLElement>('.period-card__title-action, .period-info'), measureTextWidth));
     measureFrame();
   }, { flush: 'sync' });
 
@@ -51,7 +62,10 @@ export function useTimelinePeriodExpansion(
       if (row.value) observer.observe(row.value);
       const id = activeId();
       const card = id && anchor(id);
-      if (card) observer.observe(card);
+      if (card) {
+        observer.observe(card);
+        card.querySelectorAll('.period-card__actions, .period-card__drill').forEach(element => observer!.observe(element));
+      }
     }
   }, { flush: 'post', immediate: true });
   onScopeDispose(() => observer?.disconnect());

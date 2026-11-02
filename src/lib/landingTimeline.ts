@@ -1,7 +1,8 @@
 /** Rounded, sourced examples, independent of the live catalogue. */
+export const UNIVERSE_AGE = 13_800_000_000;
 export const EARTH_AGE = 4_540_000_000;
 export const HUMAN_AGE = 300_000;
-export type IntroScaleId = 'earth' | 'dinosaurs' | 'humans' | 'inventions';
+export type IntroScaleId = 'universe' | 'earth' | 'dinosaurs' | 'humans' | 'inventions';
 export interface IntroBand {
   id: string; label: string; from: number; to: number;
   color: 'period' | 'period-root' | 'event' | 'story'; dateLabel: string;
@@ -10,8 +11,11 @@ export interface IntroLandmark {
   id: string; title: string; date: string; description: string; source: string; sourceName: string;
 }
 export const introLandmarks: IntroLandmark[] = [
+  { id: 'universe', title: 'L’Univers', date: '≈ 13,8 milliards d’années',
+    description: 'Du Big Bang à aujourd’hui : toute la durée de départ. Les galaxies, la Terre et notre histoire prennent place dans cette même fenêtre.',
+    source: 'https://science.nasa.gov/universe/overview/', sourceName: 'NASA' },
   { id: 'earth', title: 'Formation de la Terre', date: '≈ 4,54 milliards d’années',
-    description: 'Notre point de départ : la formation de la Terre, dans le jeune Système solaire. Tout ce qui suit tient sur cette même ligne.',
+    description: 'La Terre se forme dans le jeune Système solaire, longtemps après le début de l’Univers. L’histoire du vivant et la nôtre tiennent dans cette fenêtre plus récente.',
     source: 'https://pubs.usgs.gov/gip/geotime/age.html', sourceName: 'USGS' },
   { id: 'life', title: 'Premières traces de vie', date: '≈ 3,5 milliards d’années',
     description: 'Des fossiles largement reconnus attestent déjà la présence de vie. La date exacte de son apparition reste inconnue ; certains indices plus anciens sont débattus.',
@@ -44,6 +48,7 @@ export function introBandLayout(band: Pick<IntroBand, 'from' | 'to'>, span: numb
   return { left: (span - from) / span * 100, width: Math.max(0, from - to) / span * 100 };
 }
 export function createIntroScales(year: number): IntroScale[] {
+  const universe: IntroBand = { id: 'universe', label: 'L’Univers', from: UNIVERSE_AGE, to: 0, color: 'period-root', dateLabel: '13,8 milliards d’années' };
   const earth: IntroBand = { id: 'earth', label: 'La Terre', from: EARTH_AGE, to: 0, color: 'period', dateLabel: '4,54 milliards d’années' };
   const life: IntroBand = { id: 'life', label: 'La vie', from: 3_500_000_000, to: 0, color: 'period-root', dateLabel: 'Depuis au moins 3,5 milliards d’années' };
   const dinosaurs: IntroBand = { id: 'dinosaurs', label: 'Dinosaures non aviens', from: 230_000_000, to: 66_000_000, color: 'event', dateLabel: 'Environ −230 à −66 millions d’années' };
@@ -51,6 +56,12 @@ export function createIntroScales(year: number): IntroScale[] {
   const printing: IntroBand = { id: 'printing', label: 'Depuis Gutenberg', from: year - 1450, to: 0, color: 'period', dateLabel: 'Depuis environ 1450' };
   const internet: IntroBand = { id: 'internet', label: 'Depuis Internet', from: year - 1983, to: 0, color: 'story', dateLabel: 'Depuis le passage à TCP/IP en 1983' };
   return [
+    { id: 'universe', label: 'L’Univers', span: UNIVERSE_AGE,
+      ticks: [{ age: UNIVERSE_AGE, label: '−13,8 Ga' }, { age: 10e9, label: '−10 Ga' }, { age: 5e9, label: '−5 Ga' }, { age: 0, label: 'Aujourd’hui' }],
+      bands: [universe, earth, life, dinosaurs, humans], landmarks: ['universe', 'earth', 'life', 'dinosaurs', 'extinction', 'humans'],
+      thought: 'Tout l’Univers. Et nous, tout au bout.',
+      explanation: 'La Terre n’occupe que le dernier tiers de cette durée. Notre espèce tient dans une fraction presque invisible, à l’extrémité.',
+      nextLabel: 'Agrandir les derniers 4,54 milliards d’années' },
     { id: 'earth', label: 'La Terre', span: EARTH_AGE,
       ticks: [{ age: EARTH_AGE, label: '−4,54 Ga' }, { age: 3e9, label: '−3 Ga' }, { age: 2e9, label: '−2 Ga' }, { age: 1e9, label: '−1 Ga' }, { age: 0, label: 'Aujourd’hui' }],
       bands: [earth, life, dinosaurs, humans], landmarks: ['earth', 'life', 'dinosaurs', 'extinction', 'humans'],
@@ -74,6 +85,6 @@ export function createIntroScales(year: number): IntroScale[] {
       bands: [printing, internet], landmarks: ['printing', 'internet'],
       thought: 'Deux révolutions. Une tout autre distance.',
       explanation: 'De Gutenberg au repère TCP/IP : environ 533 ans. D’Internet à aujourd’hui : quelques décennies. Les mêmes dates, vues de plus près.',
-      nextLabel: 'Revenir à la formation de la Terre' },
+      nextLabel: 'Revenir à l’Univers entier' },
   ];
 }

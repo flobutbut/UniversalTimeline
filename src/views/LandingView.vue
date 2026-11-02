@@ -41,8 +41,8 @@ const questions = [
       <div class="section-index"><span>01</span> UNE QUESTION D’ÉCHELLE</div>
       <div class="hero-heading">
         <div>
-          <h1 id="hero-title">4,54 milliards d’années.<br /><span>Et nous, tout au bout.</span></h1>
-          <p class="hero-description">La Terre, la vie, les dinosaures, notre espèce.<br />Prenez un instant pour regarder la place de chacun.</p>
+          <h1 id="hero-title">13,8 milliards d’années.<br /><span>Et nous, tout au bout.</span></h1>
+          <p class="hero-description">L’Univers, la Terre, la vie, notre espèce.<br />Commencez par tout le temps disponible, puis explorez-le.</p>
         </div>
         <div class="hero-actions">
           <Button to="/timeline" class="action-link">Explorer les frises</Button>
@@ -63,7 +63,7 @@ const questions = [
       </div>
       <div class="context-copy">
         <p>Nous savons situer des événements. Nous imaginons moins bien ce qui les sépare. En les plaçant sur une même échelle, les distances deviennent visibles et les perspectives changent.</p>
-        <p>Universal Timeline permet de parcourir des frises, d’explorer leurs périodes et de découvrir les événements qui s’y rattachent. Du temps de la Terre à l’histoire d’un sujet qui vous intéresse.</p>
+        <p>Universal Timeline permet de parcourir des frises, d’explorer leurs périodes et de découvrir les événements qui s’y rattachent. De l’Univers entier à l’histoire d’un sujet qui vous intéresse.</p>
         <div class="data-note">
           <span class="data-label">LE SAVOIR EN COMMUN</span>
           <p>La plateforme est connectée à <a href="https://www.wikidata.org/wiki/Wikidata:Main_Page" target="_blank" rel="noopener noreferrer">Wikidata<span class="sr-only"> (nouvel onglet)</span></a>. Les données de référence proviennent de cette base collaborative ; ses données structurées sont ouvertes et librement réutilisables sous <a href="https://www.wikidata.org/wiki/Wikidata:Licensing" target="_blank" rel="noopener noreferrer">licence CC0<span class="sr-only"> (nouvel onglet)</span></a>.</p>

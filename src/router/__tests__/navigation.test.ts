@@ -66,7 +66,7 @@ beforeEach(() => {
   setActivePinia(createPinia());
   vi.spyOn(StoryApiService.getInstance(), 'getStory').mockResolvedValue(storyFixture('1', [period('entry'), period('child', 'entry'), period('leaf', 'child')]));
   vi.spyOn(EventApiService.getInstance(), 'getStoryListEvents').mockResolvedValue([]);
-  vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([]);
+  vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([{ id:'1', title:{fr:'Frise 1',en:''}, author:'', isPublic:true, categories:[] }]);
   vi.spyOn(PeriodApiService.getInstance(), 'loadChildren').mockImplementation(async id => [period(id === 'entry' ? 'child' : 'leaf', id)] as any);
 });
 afterEach(() => { view?.unmount(); router?.options.history.destroy(); vi.restoreAllMocks(); });
@@ -108,7 +108,8 @@ it('preserves the actual timeline instance, current period and back stack across
   await button('child').trigger('click'); await flushPromises();
   expect(view.get('[data-context]').text()).toBe('child');
   await go('/database'); expect(view.find('[data-page="timeline"]').exists()).toBe(false);
-  await go('/timeline');
+  await button('Timeline').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=1&period=child');
   expect(view.getComponent(HomeView).element).toBe(original);
   expect(view.get('[data-context]').text()).toBe('child');
   await button('Remonter').trigger('click'); await flushPromises();
@@ -122,7 +123,7 @@ it('preserves the actual timeline instance, current period and back stack across
 it('reuses the timeline for query and hash changes instead of resetting its navigation', async () => {
   await start('/timeline'); const original = view.getComponent(HomeView).element;
   await button('child').trigger('click'); await flushPromises();
-  await go('/timeline?source=bookmark#detail');
+  await go('/timeline?story=1&period=child&source=bookmark#detail');
   expect(view.getComponent(HomeView).element).toBe(original); expect(view.get('[data-context]').text()).toBe('child');
   expect(StoryApiService.getInstance().getStory).toHaveBeenCalledOnce();
 });
@@ -165,7 +166,7 @@ it.each([['/graph', 'Périodes'], ['/design-system', 'Design system'], ['/databa
 
 it('opens the landing page at the root and displays a useful unknown-page screen with a working return link', async () => {
   await start('/'); expect(router.currentRoute.value.name).toBe('landing');
-  expect(view.get('h1').text()).toContain('4,54 milliards d’années.');
+  expect(view.get('h1').text()).toContain('13,8 milliards d’années.');
   expect(view.find('.header-search-wrap').exists()).toBe(false);
   expect(StoryApiService.getInstance().getStory).not.toHaveBeenCalled();
   expect(view.get('.create-bottom a').attributes('href')).toBe('/database');
@@ -240,4 +241,18 @@ it('refreshes a changed frise on return and discards a path that is no longer a 
   expect(StoryApiService.getInstance().getStory).toHaveBeenCalledTimes(2);
   expect(view.get('[data-context]').text()).toBe('univers');
   expect(button('entry').exists()).toBe(true);
+});
+
+it('rebuilds a changed local parent path while preserving an explicitly addressed period', async () => {
+  await start('/timeline?story=1&period=entry');
+  await go('/database');
+  vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(storyFixture('1', [
+    { ...period('univers'), story_parent_id: null },
+    { ...period('entry'), story_parent_id: 'univers' },
+  ]));
+  useDataStore().invalidateStory('1');
+  await button('Timeline').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=1&period=entry');
+  expect(view.get('[data-context]').text()).toBe('entry');
+  expect(view.get('[aria-label="Fil d’Ariane de la timeline"]').text()).toContain('univers');
 });

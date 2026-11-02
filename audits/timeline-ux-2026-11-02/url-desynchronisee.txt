@@ -1,0 +1,53 @@
+URL: http://localhost:5173/timeline?story=17
+
+- link "Aller au contenu":
+  - /url: "#main-content"
+- banner:
+  - link "Universal Timeline — accueil":
+    - /url: /
+    - text: Universal Timeline
+  - combobox "Rechercher une frise par titre, période ou événement"
+  - navigation "Navigation principale":
+    - link "Timeline":
+      - /url: /timeline
+      - text: Timeline
+    - link "Frises":
+      - /url: /database
+      - text: Frises
+    - link "Périodes":
+      - /url: /periods
+      - text: Périodes
+    - link "Événements":
+      - /url: /events
+      - text: Événements
+    - link "Design system":
+      - /url: /design-system
+      - text: Design system
+  - 'button "Compte : Flobutbut"':
+    - generic: F
+  - button "Passer au thème clair"
+- main:
+  - navigation "Fil d’Ariane de la timeline":
+    - list:
+      - generic: "Frise :"
+      - text: Univers moderne
+  - heading "Univers" [level=3]:
+    - button "Univers"
+  - generic: de 13.80 Ga à aujourd'hui
+  - button "1 frise associée à Univers":
+    - generic: 1 frise associée
+  - button "Explorer les sous-périodes de Univers":
+  - button "Afficher l’événement Big Bang"
+  - button "Afficher l’événement Apparition des eucaryotes"
+  - button "Afficher l’événement Invention de l'écriture"
+  - button "Afficher l’événement Formation de la Lune"
+  - button "Afficher l’événement Formation de la nébuleuse solaire"
+  - button "Afficher l’événement Formation du Soleil"
+  - button "Afficher l’événement Explosion cambrienne"
+  - button "Afficher l’événement Extinction Crétacé-Paléogène"
+  - button "Afficher l’événement Formation des premières étoiles"
+  - button "Afficher l’événement Apparition de l'oxygène atmosphérique (Grande Oxydation)"
+  - button "Afficher l’événement Premières traces de vie"
+  - button "Afficher l’événement Premiers minéraux connus (zircons)"
+  - button "Afficher l’événement Formation de la Terre"
+  - button "Afficher l’événement Apparition d'Homo sapiens"

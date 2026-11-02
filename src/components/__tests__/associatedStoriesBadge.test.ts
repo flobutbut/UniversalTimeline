@@ -21,7 +21,7 @@ const linked = (id: string, periodId = 'leaf'): ChildStorySummary => ({ id, titl
 const anchoredPeriods = (childStories: ChildStorySummary[]) => [...new Set(childStories.flatMap(child => child.anchors.filter(anchor => anchor.type === 'period').map(anchor => anchor.id)))]
   .map(periodId => ({ ...leaf, id: periodId })) as unknown as Story['periods'];
 const detail = (id: string, childStories: ChildStorySummary[] = []): Story => ({ id, title: { fr: `Frise ${id}`, en: '' }, author: '', isPublic: true, categories: [], periods: anchoredPeriods(childStories), events: [], childStories });
-const gridProps = { periods: [leaf, { ...leaf, id: 'other' }], events: [], currentStoryId: 'one', currentPeriod: root, parentPeriod: null, storySuggestions: [], loading: false };
+const gridProps = { periods: [leaf, { ...leaf, id: 'other' }], events: [], currentStoryId: 'one', currentPeriod: root, parentPeriod: null, loading: false };
 let view: ReturnType<typeof mount>;
 const body = () => new DOMWrapper(document.body);
 const badge = () => view.get('.associated-stories__badge');
@@ -46,9 +46,9 @@ it('places a text badge only on linked child periods and reads associations once
   expect(body().get('[role="dialog"]').text()).toContain('Frise child');
   expect(view.emitted('period-click')).toBeUndefined(); expect(view.emitted('go-back')).toBeUndefined();
   await body().get('.associated-stories__item').trigger('click');
-  expect(view.emitted('story-select')).toEqual([['child']]); expect(body().find('[role="dialog"]').exists()).toBe(false);
-  await view.get('button[aria-label="Période enfant"]').trigger('click');
-  expect(view.emitted('period-click')).toEqual([[leaf]]);
+  expect(view.emitted('story-select')).toEqual([['child', {type:'period', id:'leaf'}]]); expect(body().find('[role="dialog"]').exists()).toBe(false);
+  await view.get('[data-period-id="leaf"] .period-card__title-action').trigger('click');
+  expect(view.emitted('period-click')).toBeUndefined();
   await view.setProps({ periods: [{ ...leaf, id: 'deeper' }] }); await settle();
   expect(api).toHaveBeenCalledOnce();
 });
@@ -62,9 +62,23 @@ it('shows plural labels, and hides both zero-count and initially loading badges'
   await view.setProps({ stories: [] }); expect(view.find('button').exists()).toBe(false);
 });
 
+it.each(['one', ' one '])('excludes the current frise from both the count and destinations (%s)', async id => {
+  const self = { ...suggestion(id), title:{fr:'Frise courante',en:''} };
+  view = mount(AssociatedStoriesBadge, { props:{ ...props, stories:[self, suggestion('child')] }, attachTo:document.body });
+  expect(badge().text()).toBe('1 frise associée');
+  await badge().trigger('click'); await flushPromises();
+  expect(body().findAll('.associated-stories__item').map(item => item.get('strong').text())).toEqual(['Frise child']);
+  await view.setProps({ stories:[self] }); await flushPromises();
+  expect(view.find('.associated-stories__badge').exists()).toBe(false);
+  expect(body().find('[role="dialog"]').exists()).toBe(false);
+});
+
 it('closes on Escape or outside click and restores focus to the badge', async () => {
   view = mount(AssociatedStoriesBadge, { props, attachTo: document.body });
   await badge().trigger('click'); await flushPromises();
+  expect(body().get('[role="dialog"]').attributes('aria-label')).toBe('Frises associées à Période enfant');
+  expect(document.activeElement).toBe(body().get('.associated-stories__item').element);
+  expect(body().find('[role="heading"]').exists()).toBe(false);
   await body().get('[role="dialog"]').trigger('keydown', { key: 'Escape' }); await flushPromises();
   expect(body().find('[role="dialog"]').exists()).toBe(false); expect(document.activeElement).toBe(badge().element);
   await badge().trigger('click'); await flushPromises(); await body().get('.associated-stories__backdrop').trigger('click'); await flushPromises();
@@ -99,7 +113,7 @@ it('does not attach an event anchor or an unanchored child story to a period', a
   expect(view.find('.associated-stories__badge').exists()).toBe(false);
 });
 
-it('opens a frise from a child card and restores the original exploration with the breadcrumb', async () => {
+it('opens an associated frise explicitly and restores the source period through browser history', async () => {
   const api = StoryApiService.getInstance();
   const sourcePeriod = (id: string, parentId: string | null, hasChildren: boolean) => ({ id, parent_id: parentId, label_fr: id, start_date: 'M65', end_date: 'NOW', has_children: hasChildren });
   vi.spyOn(api, 'getListStories').mockResolvedValue([detail('1'), detail('2')]);
@@ -114,10 +128,13 @@ it('opens a frise from a child card and restores the original exploration with t
   await badge().trigger('click'); await flushPromises(); await body().get('.associated-stories__item').trigger('click'); await flushPromises(); await settle();
   expect(view.getComponent(StoryBreadcrumb).text()).toContain('Frise 2');
   expect(view.get('.period-card--parent').attributes('data-period-id')).toBe('root-2');
-  // The source frise's own path stays in the breadcrumb: its last period restores the exploration.
-  expect(view.getComponent(StoryBreadcrumb).findAll('button').map(item => item.text())).toEqual(['Frise : Frise 1', 'root-1', 'Frise : Frise 2']);
-  await view.getComponent(StoryBreadcrumb).findAll('button')[1].trigger('click'); await flushPromises(); await settle();
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').text()).toContain('Frise 1');
+  expect(view.get('nav[aria-label="Fil d’Ariane de la timeline"]').text()).not.toContain('Frise 1');
+  expect(router.currentRoute.value.query.story).toBe('2');
+  const moved = new Promise<void>(resolve => { const stop = router.afterEach(() => { stop(); resolve(); }); });
+  router.back(); await moved; await flushPromises(); await settle();
   expect(view.get('.period-card--parent').attributes('data-period-id')).toBe('root-1'); expect(badge().text()).toBe('1 frise associée');
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').findAll('li')).toHaveLength(1);
   router.options.history.destroy();
 });
 
@@ -145,7 +162,7 @@ it.each([true, false])('offers direct root associations on the mother period (ch
   expect(body().get('[role="dialog"]').text()).toContain('Frise root-link');
   expect(view.emitted('go-back')).toBeUndefined(); expect(view.emitted('period-click')).toBeUndefined();
   await body().get('.associated-stories__item').trigger('click');
-  expect(view.emitted('story-select')).toEqual([['root-link']]);
+  expect(view.emitted('story-select')).toEqual([['root-link', {type:'period', id:'parent'}]]);
   expect(api).toHaveBeenCalledOnce();
 });
 

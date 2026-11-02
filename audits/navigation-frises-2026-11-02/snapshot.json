@@ -1,0 +1,3947 @@
+{
+  "counts": {
+    "events": 128,
+    "periods": 152,
+    "stories": 21,
+    "story_events": 217,
+    "story_anchors": 21,
+    "story_periods": 230,
+    "story_entry_points": 0
+  },
+  "anchors": [
+    {
+      "id": "PER_MILKYWAY",
+      "type": "period",
+      "label": "Terre",
+      "source": 1,
+      "target": 2,
+      "in_source": true
+    },
+    {
+      "id": "8923819c-cc1f-4da3-8503-4a485d186b0f",
+      "type": "period",
+      "label": "Univers",
+      "source": 1,
+      "target": 3,
+      "in_source": true
+    },
+    {
+      "id": "Q11769",
+      "type": "period",
+      "label": "Histoire contemporaine",
+      "source": 16,
+      "target": 4,
+      "in_source": true
+    },
+    {
+      "id": "PER_QUATERNARY",
+      "type": "period",
+      "label": "Quaternaire",
+      "source": 2,
+      "target": 5,
+      "in_source": true
+    },
+    {
+      "id": "EVT_MAMMALS",
+      "type": "event",
+      "label": "Apparition des premiers mammifères",
+      "source": 2,
+      "target": 5,
+      "in_source": true
+    },
+    {
+      "id": "Q1747689",
+      "type": "period",
+      "label": "Antiquité romaine",
+      "source": 10,
+      "target": 7,
+      "in_source": true
+    },
+    {
+      "id": "Q361",
+      "type": "period",
+      "label": "Première Guerre mondiale",
+      "source": 4,
+      "target": 8,
+      "in_source": true
+    },
+    {
+      "id": "Q362",
+      "type": "period",
+      "label": "Seconde Guerre mondiale",
+      "source": 4,
+      "target": 9,
+      "in_source": true
+    },
+    {
+      "id": "Q15978631",
+      "type": "period",
+      "label": "Homo sapiens",
+      "source": 5,
+      "target": 10,
+      "in_source": true
+    },
+    {
+      "id": "PER_MILKYWAY",
+      "type": "period",
+      "label": "Terre",
+      "source": 1,
+      "target": 11,
+      "in_source": true
+    },
+    {
+      "id": "Q8683",
+      "type": "period",
+      "label": "Guerre froide",
+      "source": 4,
+      "target": 12,
+      "in_source": true
+    },
+    {
+      "id": "Q11769",
+      "type": "period",
+      "label": "Histoire contemporaine",
+      "source": 16,
+      "target": 14,
+      "in_source": true
+    },
+    {
+      "id": "Q40244",
+      "type": "period",
+      "label": "Antiquité",
+      "source": 10,
+      "target": 15,
+      "in_source": true
+    },
+    {
+      "id": "Q12554",
+      "type": "period",
+      "label": "Moyen Âge",
+      "source": 15,
+      "target": 16,
+      "in_source": true
+    },
+    {
+      "id": "a664a308-316b-4b14-9a5f-68dce9e3e249",
+      "type": "period",
+      "label": "Moyen Âge tardif",
+      "source": 15,
+      "target": 17,
+      "in_source": true
+    },
+    {
+      "id": "9fe99ef7-2251-4c40-b392-ff148c816019",
+      "type": "period",
+      "label": "Invasion de l'Ukraine par la Russie",
+      "source": 4,
+      "target": 18,
+      "in_source": true
+    },
+    {
+      "id": "Q15978631",
+      "type": "period",
+      "label": "Homo sapiens",
+      "source": 5,
+      "target": 19,
+      "in_source": true
+    },
+    {
+      "id": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "type": "period",
+      "label": "Néolithique",
+      "source": 19,
+      "target": 20,
+      "in_source": true
+    },
+    {
+      "id": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd",
+      "type": "period",
+      "label": "Âges des métaux",
+      "source": 19,
+      "target": 21,
+      "in_source": true
+    },
+    {
+      "id": "Q101313",
+      "type": "period",
+      "label": "Phanérozoïque",
+      "source": 2,
+      "target": 22,
+      "in_source": true
+    },
+    {
+      "id": "PER_MILKYWAY",
+      "type": "period",
+      "label": "Terre",
+      "source": 11,
+      "target": 23,
+      "in_source": true
+    }
+  ],
+  "stories": [
+    {
+      "id": 1,
+      "roots": [
+        {
+          "id": "8923819c-cc1f-4da3-8503-4a485d186b0f",
+          "end": "TODAY",
+          "label": "Univers",
+          "start": "-13798000000-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Univers moderne",
+      "parent": null,
+      "public": true,
+      "period_count": 8
+    },
+    {
+      "id": 2,
+      "roots": [
+        {
+          "id": "PER_MILKYWAY",
+          "end": "TODAY",
+          "label": "Terre",
+          "start": "-4540000000-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Histoire de la vie sur Terre",
+      "parent": 1,
+      "public": true,
+      "period_count": 28
+    },
+    {
+      "id": 3,
+      "roots": [
+        {
+          "id": "PER_BIGBANG",
+          "end": "-11800000000-01-01T00:00:00Z",
+          "label": "Big Bang",
+          "start": "-13800000000-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Big Bang et ères primordiales",
+      "parent": 1,
+      "public": true,
+      "period_count": 10
+    },
+    {
+      "id": 4,
+      "roots": [
+        {
+          "id": "9fe99ef7-2251-4c40-b392-ff148c816019",
+          "end": "TODAY",
+          "label": "Invasion de l'Ukraine par la Russie",
+          "start": "2022-02-24T00:00:00Z"
+        },
+        {
+          "id": "PER_WW1_PRELUDE",
+          "end": "1914-07-28T00:00:00Z",
+          "label": "Prélude à la Première Guerre mondiale",
+          "start": "1914-06-28T00:00:00Z"
+        },
+        {
+          "id": "Q361",
+          "end": "1918-11-11T00:00:00Z",
+          "label": "Première Guerre mondiale",
+          "start": "1914-07-28T00:00:00Z"
+        },
+        {
+          "id": "Q362",
+          "end": "1945-09-02T00:00:00Z",
+          "label": "Seconde Guerre mondiale",
+          "start": "1939-09-01T00:00:00Z"
+        },
+        {
+          "id": "Q8683",
+          "end": "1991-12-26T00:00:00Z",
+          "label": "Guerre froide",
+          "start": "1945-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Guerres modernes",
+      "parent": 16,
+      "public": true,
+      "period_count": 5
+    },
+    {
+      "id": 5,
+      "roots": [
+        {
+          "id": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+          "end": "TODAY",
+          "label": "Homo",
+          "start": "-2800000-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Genre Homo",
+      "parent": 2,
+      "public": true,
+      "period_count": 12
+    },
+    {
+      "id": 7,
+      "roots": [
+        {
+          "id": "Q1747689",
+          "end": "0476-09-04T00:00:00Z",
+          "label": "Antiquité romaine",
+          "start": "-0753-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Empire romain",
+      "parent": 10,
+      "public": true,
+      "period_count": 6
+    },
+    {
+      "id": 8,
+      "roots": [
+        {
+          "id": "PER_WW1_PRELUDE",
+          "end": "1914-07-28T00:00:00Z",
+          "label": "Prélude à la Première Guerre mondiale",
+          "start": "1914-06-28T00:00:00Z"
+        },
+        {
+          "id": "Q361",
+          "end": "1918-11-11T00:00:00Z",
+          "label": "Première Guerre mondiale",
+          "start": "1914-07-28T00:00:00Z"
+        }
+      ],
+      "title": "Première Guerre mondiale",
+      "parent": 4,
+      "public": true,
+      "period_count": 4
+    },
+    {
+      "id": 9,
+      "roots": [
+        {
+          "id": "Q362",
+          "end": "1945-09-02T00:00:00Z",
+          "label": "Seconde Guerre mondiale",
+          "start": "1939-09-01T00:00:00Z"
+        }
+      ],
+      "title": "Seconde Guerre mondiale",
+      "parent": 4,
+      "public": true,
+      "period_count": 8
+    },
+    {
+      "id": 10,
+      "roots": [
+        {
+          "id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+          "end": "TODAY",
+          "label": "Holocène",
+          "start": "-9700-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Antiquité et premières civilisations",
+      "parent": 5,
+      "public": true,
+      "period_count": 22
+    },
+    {
+      "id": 11,
+      "roots": [
+        {
+          "id": "PER_MILKYWAY",
+          "end": "TODAY",
+          "label": "Terre",
+          "start": "-4540000000-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Histoire géologique de la Terre",
+      "parent": 1,
+      "public": true,
+      "period_count": 31
+    },
+    {
+      "id": 12,
+      "roots": [
+        {
+          "id": "Q8683",
+          "end": "1991-12-26T00:00:00Z",
+          "label": "Guerre froide",
+          "start": "1945-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Guerre froide",
+      "parent": 4,
+      "public": true,
+      "period_count": 1
+    },
+    {
+      "id": 14,
+      "roots": [
+        {
+          "id": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+          "end": "TODAY",
+          "label": "Conquête spatiale",
+          "start": "1957-10-04T00:00:00Z"
+        }
+      ],
+      "title": "Conquête spatiale",
+      "parent": 16,
+      "public": true,
+      "period_count": 10
+    },
+    {
+      "id": 15,
+      "roots": [
+        {
+          "id": "Q12554",
+          "end": "1492-10-12T00:00:00Z",
+          "label": "Moyen Âge",
+          "start": "0476-09-04T00:00:00Z"
+        }
+      ],
+      "title": "Moyen Âge",
+      "parent": 10,
+      "public": true,
+      "period_count": 3
+    },
+    {
+      "id": 16,
+      "roots": [
+        {
+          "id": "Q11769",
+          "end": "TODAY",
+          "label": "Histoire contemporaine",
+          "start": "1789-01-01T00:00:00Z"
+        },
+        {
+          "id": "Q7432",
+          "end": "1789-01-01T00:00:00Z",
+          "label": "Époque moderne",
+          "start": "1492-10-12T00:00:00Z"
+        }
+      ],
+      "title": "Époque moderne",
+      "parent": 15,
+      "public": true,
+      "period_count": 2
+    },
+    {
+      "id": 17,
+      "roots": [
+        {
+          "id": "e00cf6f6-a795-4810-bda3-ed726296c822",
+          "end": "1650-01-01T00:00:00Z",
+          "label": "Renaissance",
+          "start": "1400-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Renaissance",
+      "parent": 15,
+      "public": true,
+      "period_count": 1
+    },
+    {
+      "id": 18,
+      "roots": [
+        {
+          "id": "9fe99ef7-2251-4c40-b392-ff148c816019",
+          "end": "TODAY",
+          "label": "Invasion de l'Ukraine par la Russie",
+          "start": "2022-02-24T00:00:00Z"
+        }
+      ],
+      "title": "Invasion de l'Ukraine par la Russie",
+      "parent": 4,
+      "public": true,
+      "period_count": 1
+    },
+    {
+      "id": 19,
+      "roots": [
+        {
+          "id": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd",
+          "end": "25 BCE",
+          "label": "Âges des métaux",
+          "start": "4500 BCE"
+        },
+        {
+          "id": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+          "end": "3000 BCE",
+          "label": "Néolithique",
+          "start": "9600 BCE"
+        },
+        {
+          "id": "a15a25f7-7e81-45cd-a7b1-192def228c33",
+          "end": "5000 BCE",
+          "label": "Mésolithique",
+          "start": "9700 BCE"
+        },
+        {
+          "id": "d1d763df-312d-4c4e-8df0-8d6bd0b4059c",
+          "end": "9500 BCE",
+          "label": "Épipaléolithique",
+          "start": "14000 BCE"
+        }
+      ],
+      "title": "Néolithique et âges des métaux",
+      "parent": 5,
+      "public": true,
+      "period_count": 21
+    },
+    {
+      "id": 20,
+      "roots": [
+        {
+          "id": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+          "end": "3000 BCE",
+          "label": "Néolithique",
+          "start": "9600 BCE"
+        }
+      ],
+      "title": "Néolithique",
+      "parent": 19,
+      "public": true,
+      "period_count": 6
+    },
+    {
+      "id": 21,
+      "roots": [
+        {
+          "id": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd",
+          "end": "25 BCE",
+          "label": "Âges des métaux",
+          "start": "4500 BCE"
+        }
+      ],
+      "title": "Âges des métaux",
+      "parent": 19,
+      "public": true,
+      "period_count": 11
+    },
+    {
+      "id": 22,
+      "roots": [
+        {
+          "id": "Q101313",
+          "end": "TODAY",
+          "label": "Phanérozoïque",
+          "start": "-538800000-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Les cinq grandes extinctions",
+      "parent": 2,
+      "public": true,
+      "period_count": 22
+    },
+    {
+      "id": 23,
+      "roots": [
+        {
+          "id": "1bed4622-1d47-46da-9249-a7e10b676ab8",
+          "end": "M55.8",
+          "label": "Maximum thermique du Paléocène-Éocène",
+          "start": "M56"
+        },
+        {
+          "id": "49650a85-b139-494f-83e3-866700a9631d",
+          "end": "M89.8",
+          "label": "Optimum thermique du Crétacé",
+          "start": "M93.9"
+        },
+        {
+          "id": "4cae203f-2aea-43af-8419-23fd4fe6b4fa",
+          "end": "M443.8",
+          "label": "Glaciation de l’Ordovicien supérieur",
+          "start": "M445.2"
+        },
+        {
+          "id": "55988cb3-56e7-490e-b6fe-a53aadfa173e",
+          "end": "M49",
+          "label": "Optimum climatique de l’Éocène",
+          "start": "M53"
+        },
+        {
+          "id": "9cf0a438-f17c-4dbd-a00c-8d01305c711c",
+          "end": "M260",
+          "label": "Glaciation du Karoo",
+          "start": "M360"
+        },
+        {
+          "id": "PER_CRYOGENIAN",
+          "end": "-635000000-01-01T00:00:00Z",
+          "label": "Cryogénien",
+          "start": "-720000000-01-01T00:00:00Z"
+        },
+        {
+          "id": "PER_QUATERNARY",
+          "end": "TODAY",
+          "label": "Quaternaire",
+          "start": "-2580000-01-01T00:00:00Z"
+        }
+      ],
+      "title": "Histoire du climat",
+      "parent": 11,
+      "public": true,
+      "period_count": 18
+    }
+  ],
+  "database": "postgres",
+  "postgres": "17.6",
+  "audited_at": "2026-11-02T12:49:41.685588+00:00",
+  "entries": [],
+  "periods": [
+    {
+      "id": "0682aee4-1e91-42fc-b85a-345d4d2c1b70",
+      "end": "25 BCE",
+      "endBP": 2050.796530598588,
+      "label": "Âge du fer",
+      "start": "1200 BCE",
+      "startBP": 3225.7698365534134,
+      "wikidata": "Q11764",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "06c82523-2a50-46ee-a322-04c3ec7c87a1",
+      "end": "2011-07-21T00:00:00Z",
+      "endBP": 15.2825326983635,
+      "label": "Navette spatiale américaine",
+      "start": "1981-04-12T00:00:00Z",
+      "startBP": 45.55494885168314,
+      "wikidata": "Q48806",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "06c83e55-1748-454a-831d-b459bf909ffa",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Lune",
+      "start": "-4527000000-01-01T00:00:00Z",
+      "startBP": 4527002026,
+      "wikidata": "Q405",
+      "categories": [
+        "Astrophysique"
+      ]
+    },
+    {
+      "id": "092c5cb7-1142-44e2-b6fc-2e0f2e598270",
+      "end": "M358.9",
+      "endBP": 358900000,
+      "label": "Extinction du Dévonien tardif",
+      "start": "M372.2",
+      "startBP": 372200000,
+      "wikidata": "Q678023",
+      "categories": [
+        "Biologie Évolutive",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "09b75ef7-c101-4176-a510-7e465ac4e4b1",
+      "end": "1300 BCE",
+      "endBP": 3325.7698365534134,
+      "label": "Civilisation de la vallée de l’Indus",
+      "start": "3300 BCE",
+      "startBP": 5325.728768791607,
+      "wikidata": "Q42534",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "10159b05-8732-40f4-bda9-20efd9f1f2e8",
+      "end": "1991-02-07T00:00:00Z",
+      "endBP": 35.731540227453166,
+      "label": "Programme Saliout",
+      "start": "1971-04-19T00:00:00Z",
+      "startBP": 55.537152821566785,
+      "wikidata": "Q207933",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "1322e5b2-1cce-4ceb-af43-96b34912ed6e",
+      "end": "450 BCE",
+      "endBP": 2475.78763258353,
+      "label": "Civilisation de Hallstatt",
+      "start": "800 BCE",
+      "startBP": 2825.778050105775,
+      "wikidata": "Q202165",
+      "categories": [
+        "Anthropologie et Archéologie",
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd",
+      "end": "25 BCE",
+      "endBP": 2050.7965473801555,
+      "label": "Âges des métaux",
+      "start": "4500 BCE",
+      "startBP": 6525.70414491609,
+      "wikidata": null,
+      "categories": [
+        "Anthropologie et Archéologie",
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "1bed4622-1d47-46da-9249-a7e10b676ab8",
+      "end": "M55.8",
+      "endBP": 55800000,
+      "label": "Maximum thermique du Paléocène-Éocène",
+      "start": "M56",
+      "startBP": 56000000,
+      "wikidata": "Q55826",
+      "categories": [
+        "Géologie",
+        "Océanographie"
+      ]
+    },
+    {
+      "id": "1c73542f-c195-40d2-a81b-d0aa9728bc8e",
+      "end": "1150 BCE",
+      "endBP": 3175.771205478807,
+      "label": "Effondrement de l’âge du bronze",
+      "start": "1200 BCE",
+      "startBP": 3225.7698365534134,
+      "wikidata": "Q1059758",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "213d4f29-b839-4493-87e2-ab566d74734f",
+      "end": "M200.9",
+      "endBP": 200900000,
+      "label": "Province magmatique centre-atlantique",
+      "start": "M201.6",
+      "startBP": 201600000,
+      "wikidata": "Q3408476",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "223307f6-4c30-49f3-8e85-04426b1b093b",
+      "end": "1945-09-09T00:00:00Z",
+      "endBP": 80.58313239333789,
+      "label": "Seconde Guerre sino-japonaise",
+      "start": "1937-07-07T00:00:00Z",
+      "startBP": 88.75835484371436,
+      "wikidata": "Q170314",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "2418eb78-4792-48b6-a1e0-9f458f010655",
+      "end": "1850",
+      "endBP": 176.834,
+      "label": "Petit âge glaciaire",
+      "start": "1300",
+      "startBP": 726.821,
+      "wikidata": "Q190530",
+      "categories": [
+        "Géologie",
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "2f74243a-643a-4632-9bfc-ff83ed3d1b2d",
+      "end": "1966-11-15T00:00:00Z",
+      "endBP": 59.961519693572264,
+      "label": "Programme Gemini",
+      "start": "1961-12-07T00:00:00Z",
+      "startBP": 64.90060251355857,
+      "wikidata": "Q214996",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "38f93ea1-ad8e-4f4f-8bd4-3deab5d9c2e3",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Station spatiale internationale",
+      "start": "1998-11-20T00:00:00Z",
+      "startBP": 27.9478304396366,
+      "wikidata": "Q25271",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "3af651c4-61ed-45f0-bed0-38d360a68f1d",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Mars",
+      "start": "-4540000000-01-01T00:00:00Z",
+      "startBP": 4540002026,
+      "wikidata": "Q111",
+      "categories": [
+        "Astrophysique"
+      ]
+    },
+    {
+      "id": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "end": "3000 BCE",
+      "endBP": 5025.734244493181,
+      "label": "Néolithique",
+      "start": "9600 BCE",
+      "startBP": 11625.597351953824,
+      "wikidata": "Q36422",
+      "categories": [
+        "Anthropologie et Archéologie",
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "3f664826-3a21-419f-a040-55b62803bca4",
+      "end": "-9700-01-01T00:00:00Z",
+      "endBP": 11726,
+      "label": "Pléistocène",
+      "start": "-2580000-01-01T00:00:00Z",
+      "startBP": 2582026,
+      "wikidata": "Q25546",
+      "categories": [
+        "Anthropologie et Archéologie",
+        "Géologie"
+      ]
+    },
+    {
+      "id": "418dcf15-402a-42fa-b335-7e5984106dba",
+      "end": "M65.6",
+      "endBP": 65600000,
+      "label": "Trapps du Deccan",
+      "start": "M66.4",
+      "startBP": 66400000,
+      "wikidata": "Q55819",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "4223b878-d545-46fd-afc8-15bf9627664a",
+      "end": "3000 BCE",
+      "endBP": 5025.734244493181,
+      "label": "Culture de Yangshao",
+      "start": "5000 BCE",
+      "startBP": 7025.693176731374,
+      "wikidata": "Q854631",
+      "categories": [
+        "Anthropologie et Archéologie",
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "430dd9d5-3756-458c-80b6-0ad34c2e844f",
+      "end": "3000 BCE",
+      "endBP": 5025.734,
+      "label": "Optimum climatique de l’Holocène",
+      "start": "7000 BCE",
+      "startBP": 9025.652,
+      "wikidata": "Q2511922",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "43ad65a9-3365-4110-8a25-079d1b8522bd",
+      "end": "1100 BCE",
+      "endBP": 3125.7725744042004,
+      "label": "Âge du bronze",
+      "start": "3300 BCE",
+      "startBP": 5325.728768791607,
+      "wikidata": "Q11761",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "48ba8ead-0f0f-4d67-bbcd-ff4d95ae2ee7",
+      "end": "M251",
+      "endBP": 251000000,
+      "label": "Trapps de Sibérie",
+      "start": "M252.3",
+      "startBP": 252300000,
+      "wikidata": "Q58808",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "49650a85-b139-494f-83e3-866700a9631d",
+      "end": "M89.8",
+      "endBP": 89800000,
+      "label": "Optimum thermique du Crétacé",
+      "start": "M93.9",
+      "startBP": 93900000,
+      "wikidata": "Q5184702",
+      "categories": [
+        "Géologie",
+        "Océanographie"
+      ]
+    },
+    {
+      "id": "4c7b54fd-8b9d-4365-ae2a-3177815f276f",
+      "end": "1945-04-25T00:00:00Z",
+      "endBP": 80.95821758435369,
+      "label": "Guerre de Laponie",
+      "start": "1944-09-15T00:00:00Z",
+      "startBP": 81.56602045906533,
+      "wikidata": "Q154940",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "4cae203f-2aea-43af-8419-23fd4fe6b4fa",
+      "end": "M443.8",
+      "endBP": 443800000,
+      "label": "Glaciation de l’Ordovicien supérieur",
+      "start": "M445.2",
+      "startBP": 445200000,
+      "wikidata": "Q6495334",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "4fed3a83-74c1-4e19-945e-1333752f517b",
+      "end": "1940-03-13T00:00:00Z",
+      "endBP": 86.07525983541207,
+      "label": "Guerre d'Hiver",
+      "start": "1939-11-30T00:00:00Z",
+      "startBP": 86.35999631727381,
+      "wikidata": "Q134949",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "55988cb3-56e7-490e-b6fe-a53aadfa173e",
+      "end": "M49",
+      "endBP": 49000000,
+      "label": "Optimum climatique de l’Éocène",
+      "start": "M53",
+      "startBP": 53000000,
+      "wikidata": "Q25379710",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "56b0f980-fc39-44a1-b647-2ecfd4689793",
+      "end": "4900 BCE",
+      "endBP": 6925.695914582161,
+      "label": "Culture rubanée",
+      "start": "5500 BCE",
+      "startBP": 7525.682225328225,
+      "wikidata": "Q806348",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "59fadf1f-4bd5-485d-a92d-a95aec7986b6",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Soleil",
+      "start": "G4.6",
+      "startBP": 4600000000,
+      "wikidata": "Q525",
+      "categories": [
+        "Astrophysique"
+      ]
+    },
+    {
+      "id": "69a1b371-b991-4642-af48-10d964c0ad86",
+      "end": "1945-05-02T00:00:00Z",
+      "endBP": 80.9390564229219,
+      "label": "Guerre de libération italienne",
+      "start": "1943-09-08T00:00:00Z",
+      "startBP": 82.58724259677543,
+      "wikidata": "Q3778681",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "6bd93f0b-228e-443e-bbbe-ee0d3eb9b05e",
+      "end": "K115",
+      "endBP": 115000,
+      "label": "Eémien",
+      "start": "K130",
+      "startBP": 130000,
+      "wikidata": "Q1295340",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "6fa87489-6d36-423a-a5a9-7eda1ab9badd",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Réchauffement climatique actuel",
+      "start": "1850",
+      "startBP": 176.834,
+      "wikidata": "Q7942",
+      "categories": [
+        "Écologie",
+        "Géologie",
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "703d766f-28a0-400c-b213-9d8c21afce5e",
+      "end": "1944-08-29T00:00:00Z",
+      "endBP": 81.61793636962253,
+      "label": "Débarquement de Normandie",
+      "start": "1944-06-06T00:00:00Z",
+      "startBP": 81.84791583574163,
+      "wikidata": "Q16470",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "7107b409-b8a5-45d8-832b-077a1ec5a6cd",
+      "end": "5000 BCE",
+      "endBP": 7025.693176731374,
+      "label": "Culture de la céramique cardiale",
+      "start": "5800 BCE",
+      "startBP": 7825.676749626651,
+      "wikidata": "Q1035710",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "7467acc7-913f-4f0d-b282-ac2317457deb",
+      "end": "1800 BCE",
+      "endBP": 3825.758885150265,
+      "label": "Culture campaniforme",
+      "start": "2800 BCE",
+      "startBP": 4825.736982343968,
+      "wikidata": "Q470867",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "771a1b53-5ffe-474e-85a4-b62e12dbdab8",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Anthropocène",
+      "start": "-8000",
+      "startBP": 10026.626658157242,
+      "wikidata": "Q26841",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "7cf4100b-8d33-450a-84dc-0af1c1aac6ca",
+      "end": "3100 BCE",
+      "endBP": 5125.7315066423935,
+      "label": "Chalcolithique",
+      "start": "4500 BCE",
+      "startBP": 6525.704128134522,
+      "wikidata": "Q130253",
+      "categories": [
+        "Anthropologie et Archéologie",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "805e293c-f3d7-4d88-a966-31b37c160de3",
+      "end": "1945-09-02T00:00:00Z",
+      "endBP": 80.5912319498631,
+      "label": "Bataille de Mandchourie",
+      "start": "1945-08-09T00:00:00Z",
+      "startBP": 80.65694036875428,
+      "wikidata": "Q220602",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "80b51412-4ff5-4f15-8c53-99047fe52681",
+      "end": "25 BCE",
+      "endBP": 2050.796530598588,
+      "label": "La Tène",
+      "start": "450 BCE",
+      "startBP": 2475.78763258353,
+      "wikidata": "Q208247",
+      "categories": [
+        "Anthropologie et Archéologie",
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "8659fa39-5cde-421f-92ca-f10aa20e8299",
+      "end": "M635",
+      "endBP": 635000000,
+      "label": "Glaciation marinoenne",
+      "start": "M650",
+      "startBP": 650000000,
+      "wikidata": "Q1144136",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "8923819c-cc1f-4da3-8503-4a485d186b0f",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Univers",
+      "start": "-13798000000-01-01T00:00:00Z",
+      "startBP": 13798002026,
+      "wikidata": "Q1",
+      "categories": [
+        "Astrophysique",
+        "Cosmologie"
+      ]
+    },
+    {
+      "id": "955c3337-fd3f-4303-b8a2-d4da6751189a",
+      "end": "1916-12-18T00:00:00Z",
+      "endBP": 109.31399147340102,
+      "label": "Bataille de Verdun",
+      "start": "1916-02-21T00:00:00Z",
+      "startBP": 110.1380845602961,
+      "wikidata": "Q130847",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "9729cb6c-f444-4281-846c-ec78c5b3c573",
+      "end": "9700 BCE",
+      "endBP": 11725.597351953824,
+      "label": "Dryas récent",
+      "start": "10900 BCE",
+      "startBP": 12925.57271129674,
+      "wikidata": "Q944279",
+      "categories": [
+        "Anthropologie et Archéologie",
+        "Géologie"
+      ]
+    },
+    {
+      "id": "98335b7d-b9e5-454a-9b3d-92d139c3900d",
+      "end": "2001-03-23T00:00:00Z",
+      "endBP": 25.609705867425788,
+      "label": "Mir",
+      "start": "1986-02-20T00:00:00Z",
+      "startBP": 40.69526370452366,
+      "wikidata": "Q48604",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "986d377d-aae5-4ba1-bb51-c5cd8d002cbb",
+      "end": "0476-09-04T00:00:00Z",
+      "endBP": 1550.1273100616017,
+      "label": "Bas-Empire romain",
+      "start": "0235-01-01T00:00:00Z",
+      "startBP": 1791.2249226944382,
+      "wikidata": "Q2886278",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "9cf0a438-f17c-4dbd-a00c-8d01305c711c",
+      "end": "M260",
+      "endBP": 260000000,
+      "label": "Glaciation du Karoo",
+      "start": "M360",
+      "startBP": 360000000,
+      "wikidata": "Q685167",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "9f9854f6-2c05-43d3-a1f0-695e0b08a8cb",
+      "end": "1941-05-09T00:00:00Z",
+      "endBP": 84.91988730467463,
+      "label": "Guerre franco-thaïlandaise",
+      "start": "1940-10-01T00:00:00Z",
+      "startBP": 85.52221447784369,
+      "wikidata": "Q780845",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "9fe99ef7-2251-4c40-b392-ff148c816019",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Invasion de l'Ukraine par la Russie",
+      "start": "2022-02-24T00:00:00Z",
+      "startBP": 4.68041308977869,
+      "wikidata": "Q110999040",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "a15a25f7-7e81-45cd-a7b1-192def228c33",
+      "end": "5000 BCE",
+      "endBP": 7025.693176731374,
+      "label": "Mésolithique",
+      "start": "9700 BCE",
+      "startBP": 11725.597351953824,
+      "wikidata": "Q44155",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "a3e84bb3-a20e-4dd4-8799-0e6c00eab321",
+      "end": "1963-05-16T00:00:00Z",
+      "endBP": 63.46323085031422,
+      "label": "Programme Mercury",
+      "start": "1958-10-07T00:00:00Z",
+      "startBP": 68.06829587427042,
+      "wikidata": "Q52162",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "a664a308-316b-4b14-9a5f-68dce9e3e249",
+      "end": "1492-10-12T00:00:00Z",
+      "endBP": 534.0451745379877,
+      "label": "Moyen Âge tardif",
+      "start": "1301-01-01T00:00:00Z",
+      "startBP": 725.2564641874541,
+      "wikidata": "Q212976",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "ac29c7dc-679a-4393-a6af-de0125af25ca",
+      "end": "9500 BCE",
+      "endBP": 11525.600089804611,
+      "label": "Natoufien",
+      "start": "12500 BCE",
+      "startBP": 14525.539857087295,
+      "wikidata": "Q733489",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "b34af765-32cd-4d01-820d-2934fc21c2aa",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Galaxie d'Andromède",
+      "start": "G10",
+      "startBP": 10000000000,
+      "wikidata": "Q2469",
+      "categories": [
+        "Astrophysique"
+      ]
+    },
+    {
+      "id": "bdfa109a-864c-4ae8-adb9-b7e9aec9443f",
+      "end": "K19",
+      "endBP": 19000,
+      "label": "Dernier maximum glaciaire",
+      "start": "K26.5",
+      "startBP": 26500,
+      "wikidata": "Q1979625",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Conquête spatiale",
+      "start": "1957-10-04T00:00:00Z",
+      "startBP": 69.07582496393502,
+      "wikidata": "Q180046",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "bfe9a9f1-0ec3-49da-9517-581d5dde2c35",
+      "end": "K700",
+      "endBP": 700000,
+      "label": "Transition du Pléistocène moyen",
+      "start": "M1.25",
+      "startBP": 1250000,
+      "wikidata": "Q64707157",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "c01c8370-fd8f-479e-b7da-8575a630df7c",
+      "end": "1100 BCE",
+      "endBP": 3125.7725744042004,
+      "label": "Civilisation minoenne",
+      "start": "3000 BCE",
+      "startBP": 5025.734244493181,
+      "wikidata": "Q134178",
+      "categories": [
+        "Art et Culture",
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "c6709134-0ed2-4dc2-802e-c1ebf70b0559",
+      "end": "1972-12-19T00:00:00Z",
+      "endBP": 53.867063841416204,
+      "label": "Programme Apollo",
+      "start": "1961-05-25T00:00:00Z",
+      "startBP": 65.43722126783646,
+      "wikidata": "Q46611",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "ce637529-1c39-48ce-80a0-79a3b9e59185",
+      "end": "8800 BCE",
+      "endBP": 10825.613779058547,
+      "label": "Néolithique précéramique A",
+      "start": "9600 BCE",
+      "startBP": 11625.597351953824,
+      "wikidata": "Q1047444",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "cf42e843-25b9-4750-a520-b33fb66e759e",
+      "end": "1250",
+      "endBP": 776.82,
+      "label": "Optimum climatique médiéval",
+      "start": "0950",
+      "startBP": 1076.815,
+      "wikidata": "Q498819",
+      "categories": [
+        "Géologie",
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "d1d763df-312d-4c4e-8df0-8d6bd0b4059c",
+      "end": "9500 BCE",
+      "endBP": 11525.600089804611,
+      "label": "Épipaléolithique",
+      "start": "14000 BCE",
+      "startBP": 16025.507002877848,
+      "wikidata": "Q829005",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "d24bce08-5f19-4c6f-ad71-d34f8ede81cc",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Programme Artemis",
+      "start": "2017-12-11T00:00:00Z",
+      "startBP": 8.889651110410044,
+      "wikidata": "Q63819987",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "d5c571fb-43bb-435d-b9fc-a77c46e2d319",
+      "end": "1300-01-01T00:00:00Z",
+      "endBP": 726.2557803162788,
+      "label": "Moyen Âge central",
+      "start": "1000-01-01T00:00:00Z",
+      "startBP": 1026.2503046147046,
+      "wikidata": "Q212685",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "e00cf6f6-a795-4810-bda3-ed726296c822",
+      "end": "1650-01-01T00:00:00Z",
+      "endBP": 376.8253865421008,
+      "label": "Renaissance",
+      "start": "1400-01-01T00:00:00Z",
+      "startBP": 626.82127976592,
+      "wikidata": "Q4692",
+      "categories": [
+        "Art et Culture",
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Homo",
+      "start": "-2800000-01-01T00:00:00Z",
+      "startBP": 2802026,
+      "wikidata": "Q171283",
+      "categories": [
+        "Anthropologie et Archéologie",
+        "Biologie Évolutive"
+      ]
+    },
+    {
+      "id": "ee0d6158-29d5-4228-9961-3e035f0a270b",
+      "end": "6500 BCE",
+      "endBP": 8525.663060372715,
+      "label": "Néolithique précéramique B",
+      "start": "8800 BCE",
+      "startBP": 10825.613779058547,
+      "wikidata": "Q897323",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Holocène",
+      "start": "-9700-01-01T00:00:00Z",
+      "startBP": 11726,
+      "wikidata": "Q25445",
+      "categories": [
+        "Géologie",
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "f4427dee-575f-40f5-b674-6997455fed0b",
+      "end": "0235-01-01T00:00:00Z",
+      "endBP": 1791.2249327719471,
+      "label": "Haut-Empire romain",
+      "start": "-0026-01-01T00:00:00Z",
+      "startBP": 2052,
+      "wikidata": "Q787204",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "fa5c357a-0750-43f4-9351-10a255374c62",
+      "end": "1975-07-17T00:00:00Z",
+      "endBP": 51.29348410151203,
+      "label": "Course à l'espace",
+      "start": "1957-10-04T00:00:00Z",
+      "startBP": 69.07582496393502,
+      "wikidata": "Q1932",
+      "categories": [
+        "Histoire et Civilisations",
+        "Technologie et Innovations"
+      ]
+    },
+    {
+      "id": "fd216ffa-0552-48b2-9dbf-b1a551c8bcb8",
+      "end": "1920-11-28T00:00:00Z",
+      "endBP": 105.35360270023703,
+      "label": "Guerre arméno-azerbaïdjanaise",
+      "start": "1918-03-30T00:00:00Z",
+      "startBP": 108.02026936690369,
+      "wikidata": "Q2015687",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "fdabc7c6-cd28-414b-a738-8510831f688b",
+      "end": "3100 BCE",
+      "endBP": 5125.7315066423935,
+      "label": "Période d’Uruk",
+      "start": "4000 BCE",
+      "startBP": 6025.7123416868835,
+      "wikidata": "Q731494",
+      "categories": [
+        "Anthropologie et Archéologie",
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "PER_BIGBANG",
+      "end": "-11800000000-01-01T00:00:00Z",
+      "endBP": 11800002026,
+      "label": "Big Bang",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "startBP": 13800002026,
+      "wikidata": "Q323",
+      "categories": [
+        "Cosmologie",
+        "Physique Théorique"
+      ]
+    },
+    {
+      "id": "PER_CAMBRIAN",
+      "end": "-486850000-01-01T00:00:00Z",
+      "endBP": 486850000,
+      "label": "Cambrien",
+      "start": "-538800000-01-01T00:00:00Z",
+      "startBP": 538802026,
+      "wikidata": "Q79064",
+      "categories": [
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "PER_CARBONIFEROUS",
+      "end": "-298900000-01-01T00:00:00Z",
+      "endBP": 298900000,
+      "label": "Carbonifère",
+      "start": "-358900000-01-01T00:00:00Z",
+      "startBP": 358902026,
+      "wikidata": "Q133738",
+      "categories": [
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "PER_CENOZOIC",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Cénozoïque",
+      "start": "-66000000-01-01T00:00:00Z",
+      "startBP": 66000000,
+      "wikidata": "Q102416",
+      "categories": [
+        "Biologie Évolutive",
+        "Géologie"
+      ]
+    },
+    {
+      "id": "PER_CRETACEOUS",
+      "end": "-66000000-01-01T00:00:00Z",
+      "endBP": 66000000,
+      "label": "Crétacé",
+      "start": "-145000000-01-01T00:00:00Z",
+      "startBP": 145002026,
+      "wikidata": "Q44626",
+      "categories": [
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "PER_CRYOGENIAN",
+      "end": "-635000000-01-01T00:00:00Z",
+      "endBP": 635000000,
+      "label": "Cryogénien",
+      "start": "-720000000-01-01T00:00:00Z",
+      "startBP": 720002026,
+      "wikidata": "Q507402",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "PER_DARK_AGES",
+      "end": "-12800000000-01-01T00:00:00Z",
+      "endBP": 12800002026,
+      "label": "Ère des Âges Sombres",
+      "start": "-13420000000-01-01T00:00:00Z",
+      "startBP": 13420002026,
+      "wikidata": "Q3577063",
+      "categories": [
+        "Astrophysique",
+        "Cosmologie"
+      ]
+    },
+    {
+      "id": "PER_DEVONIAN",
+      "end": "-358900000-01-01T00:00:00Z",
+      "endBP": 358900000,
+      "label": "Dévonien",
+      "start": "-419200000-01-01T00:00:00Z",
+      "startBP": 419202026,
+      "wikidata": "Q65955",
+      "categories": [
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "PER_EARTH",
+      "end": "0476-09-04T00:00:00Z",
+      "endBP": 1550.1273100616017,
+      "label": "Empire romain",
+      "start": "-0026-01-01T00:00:00Z",
+      "startBP": 2052,
+      "wikidata": "Q2277",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "PER_ELECTROWEAK",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "endBP": 13800002024,
+      "label": "Ère Électrofaible",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "startBP": 13800002025,
+      "wikidata": "Q3772968",
+      "categories": [
+        "Cosmologie",
+        "Physique des Particules",
+        "Physique Théorique"
+      ]
+    },
+    {
+      "id": "PER_GUT",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "endBP": 13800002025,
+      "label": "Ère de la Grande Unification",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "startBP": 13800002026,
+      "wikidata": "Q2444744",
+      "categories": [
+        "Cosmologie",
+        "Physique des Particules",
+        "Physique Théorique"
+      ]
+    },
+    {
+      "id": "PER_HADEAN",
+      "end": "-4031000000-01-01T00:00:00Z",
+      "endBP": 4031000000,
+      "label": "Hadéen",
+      "start": "-4567300000-01-01T00:00:00Z",
+      "startBP": 4567302026,
+      "wikidata": "Q104460",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "PER_HADRON",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "endBP": 13800002023,
+      "label": "Ère Hadronique",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "startBP": 13800002024,
+      "wikidata": "Q3491753",
+      "categories": [
+        "Cosmologie",
+        "Physique des Particules",
+        "Physique Théorique"
+      ]
+    },
+    {
+      "id": "PER_JURASSIC",
+      "end": "-145000000-01-01T00:00:00Z",
+      "endBP": 145000000,
+      "label": "Jurassique",
+      "start": "-201400000-01-01T00:00:00Z",
+      "startBP": 201402026,
+      "wikidata": "Q45805",
+      "categories": [
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "PER_LEPTON",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "endBP": 13800002022,
+      "label": "Ère Leptonique",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "startBP": 13800002023,
+      "wikidata": "Q1079826",
+      "categories": [
+        "Cosmologie",
+        "Physique des Particules",
+        "Physique Théorique"
+      ]
+    },
+    {
+      "id": "PER_MESOPROTEROZOIC",
+      "end": "-1000000000-01-01T00:00:00Z",
+      "endBP": 1000000000,
+      "label": "Mésoprotérozoïque",
+      "start": "-1600000000-01-01T00:00:00Z",
+      "startBP": 1600002026,
+      "wikidata": "Q210611",
+      "categories": [
+        "Biologie Évolutive",
+        "Géologie"
+      ]
+    },
+    {
+      "id": "PER_MESOZOIC",
+      "end": "-66000000-01-01T00:00:00Z",
+      "endBP": 66000000,
+      "label": "Mésozoïque",
+      "start": "-251902000-01-01T00:00:00Z",
+      "startBP": 251902000,
+      "wikidata": "Q83222",
+      "categories": [
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "PER_MILKYWAY",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Terre",
+      "start": "-4540000000-01-01T00:00:00Z",
+      "startBP": 4540002026,
+      "wikidata": "Q2",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "PER_NEOGENE",
+      "end": "-2580000-01-01T00:00:00Z",
+      "endBP": 2580000,
+      "label": "Néogène",
+      "start": "-23030000-01-01T00:00:00Z",
+      "startBP": 23030000,
+      "wikidata": "Q103924",
+      "categories": [
+        "Biologie Évolutive",
+        "Géologie"
+      ]
+    },
+    {
+      "id": "PER_NUCLEOSYN",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "endBP": 13800002021,
+      "label": "Ère de la Nucléosynthèse Primordiale",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "startBP": 13800002022,
+      "wikidata": "Q837317",
+      "categories": [
+        "Chimie",
+        "Cosmologie",
+        "Physique Théorique"
+      ]
+    },
+    {
+      "id": "PER_ORDOVICIAN",
+      "end": "-443800000-01-01T00:00:00Z",
+      "endBP": 443800000,
+      "label": "Ordovicien",
+      "start": "-486850000-01-01T00:00:00Z",
+      "startBP": 486852026,
+      "wikidata": "Q62100",
+      "categories": [
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "PER_PALEOGENE",
+      "end": "-23030000-01-01T00:00:00Z",
+      "endBP": 23030000,
+      "label": "Paléogène",
+      "start": "-66000000-01-01T00:00:00Z",
+      "startBP": 66000000,
+      "wikidata": "Q55810",
+      "categories": [
+        "Biologie Évolutive",
+        "Géologie"
+      ]
+    },
+    {
+      "id": "PER_PALEOPROTEROZOIC",
+      "end": "-1600000000-01-01T00:00:00Z",
+      "endBP": 1600000000,
+      "label": "Paléoprotérozoïque",
+      "start": "-2500000000-01-01T00:00:00Z",
+      "startBP": 2500002026,
+      "wikidata": "Q193738",
+      "categories": [
+        "Biologie Évolutive",
+        "Géologie"
+      ]
+    },
+    {
+      "id": "PER_PALEOZOIC",
+      "end": "-251902000-01-01T00:00:00Z",
+      "endBP": 251902000,
+      "label": "Paléozoïque",
+      "start": "-538800000-01-01T00:00:00Z",
+      "startBP": 538802026,
+      "wikidata": "Q75507",
+      "categories": [
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "PER_PERMIAN",
+      "end": "-251902000-01-01T00:00:00Z",
+      "endBP": 251902000,
+      "label": "Permien",
+      "start": "-298900000-01-01T00:00:00Z",
+      "startBP": 298902026,
+      "wikidata": "Q76402",
+      "categories": [
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "PER_PLANCK",
+      "end": "-13800000000-01-01T00:00:00Z",
+      "endBP": 13800002026,
+      "label": "Ère de Planck",
+      "start": "-13800000000-01-01T00:00:00Z",
+      "startBP": 13800002026,
+      "wikidata": "Q59077",
+      "categories": [
+        "Cosmologie",
+        "Physique des Particules",
+        "Physique Théorique"
+      ]
+    },
+    {
+      "id": "PER_QUATERNARY",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Quaternaire",
+      "start": "-2580000-01-01T00:00:00Z",
+      "startBP": 2582026,
+      "wikidata": "Q26185",
+      "categories": [
+        "Anthropologie et Archéologie",
+        "Géologie"
+      ]
+    },
+    {
+      "id": "PER_RECOMB",
+      "end": "-13420000000-01-01T00:00:00Z",
+      "endBP": 13420002026,
+      "label": "Ère de la Recombinaison",
+      "start": "-13799620000-01-01T00:00:00Z",
+      "startBP": 13799622026,
+      "wikidata": "Q3373825",
+      "categories": [
+        "Cosmologie",
+        "Physique Théorique"
+      ]
+    },
+    {
+      "id": "PER_REION",
+      "end": "-11800000000-01-01T00:00:00Z",
+      "endBP": 11800002026,
+      "label": "Ère de Réionisation",
+      "start": "-12800000000-01-01T00:00:00Z",
+      "startBP": 12800002026,
+      "wikidata": "Q1670901",
+      "categories": [
+        "Astrophysique",
+        "Cosmologie"
+      ]
+    },
+    {
+      "id": "PER_SILURIAN",
+      "end": "-419200000-01-01T00:00:00Z",
+      "endBP": 419200000,
+      "label": "Silurien",
+      "start": "-443800000-01-01T00:00:00Z",
+      "startBP": 443800000,
+      "wikidata": "Q62412",
+      "categories": [
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "PER_SOLAR_SYS",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Système solaire",
+      "start": "-4600000000-01-01T00:00:00Z",
+      "startBP": 4600002026,
+      "wikidata": "Q544",
+      "categories": [
+        "Astrophysique"
+      ]
+    },
+    {
+      "id": "PER_TRIASSIC",
+      "end": "-201400000-01-01T00:00:00Z",
+      "endBP": 201400000,
+      "label": "Trias",
+      "start": "-251902000-01-01T00:00:00Z",
+      "startBP": 251902000,
+      "wikidata": "Q47158",
+      "categories": [
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "PER_WW1_PRELUDE",
+      "end": "1914-07-28T00:00:00Z",
+      "endBP": 112.26557152635182,
+      "label": "Prélude à la Première Guerre mondiale",
+      "start": "1914-06-28T00:00:00Z",
+      "startBP": 112.34770704996578,
+      "wikidata": null,
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q101313",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Phanérozoïque",
+      "start": "-538800000-01-01T00:00:00Z",
+      "startBP": 538802026,
+      "wikidata": "Q101313",
+      "categories": [
+        "Biologie Évolutive",
+        "Géologie",
+        "Paléontologie"
+      ]
+    },
+    {
+      "id": "Q104162",
+      "end": "-538800000-01-01T00:00:00Z",
+      "endBP": 538800000,
+      "label": "Protérozoïque",
+      "start": "-2500000000-01-01T00:00:00Z",
+      "startBP": 2500002026,
+      "wikidata": "Q104162",
+      "categories": [
+        "Biologie Évolutive",
+        "Géologie"
+      ]
+    },
+    {
+      "id": "Q104168",
+      "end": "-2500000000-01-01T00:00:00Z",
+      "endBP": 2500000000,
+      "label": "Archéen",
+      "start": "-4031000000-01-01T00:00:00Z",
+      "startBP": 4031002026,
+      "wikidata": "Q104168",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "Q11537",
+      "end": "-0031-01-01T00:00:00Z",
+      "endBP": 2057,
+      "label": "Antiquité grecque",
+      "start": "-1600-01-01T00:00:00Z",
+      "startBP": 3626,
+      "wikidata": "Q11772",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q11768",
+      "end": "-0030-01-01T00:00:00Z",
+      "endBP": 2056,
+      "label": "Antiquité égyptienne",
+      "start": "-5500-01-01T00:00:00Z",
+      "startBP": 7526,
+      "wikidata": "Q11768",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q11769",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Histoire contemporaine",
+      "start": "1789-01-01T00:00:00Z",
+      "startBP": 237.826017,
+      "wikidata": "Q6495391",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q12554",
+      "end": "1492-10-12T00:00:00Z",
+      "endBP": 534.0451745379877,
+      "label": "Moyen Âge",
+      "start": "0476-09-04T00:00:00Z",
+      "startBP": 1550.1273100616017,
+      "wikidata": "Q12554",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q130975",
+      "end": "-50000-01-01T00:00:00Z",
+      "endBP": 52025.765784,
+      "label": "Homo floresiensis",
+      "start": "-100000-01-01T00:00:00Z",
+      "startBP": 102024.73909,
+      "wikidata": "Q186266",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "Q131092",
+      "end": "-1500000-01-01T00:00:00Z",
+      "endBP": 1500000,
+      "label": "Homo habilis",
+      "start": "-2800000-01-01T00:00:00Z",
+      "startBP": 2800000,
+      "wikidata": "Q101373",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "Q131656",
+      "end": "-0030-01-01T00:00:00Z",
+      "endBP": 2056,
+      "label": "Période ptolémaïque",
+      "start": "-0332-01-01T00:00:00Z",
+      "startBP": 2358,
+      "wikidata": "Q2320005",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q131884",
+      "end": "-200000-01-01T00:00:00Z",
+      "endBP": 202022.685702,
+      "label": "Homo heidelbergensis",
+      "start": "-700000-01-01T00:00:00Z",
+      "startBP": 700000,
+      "wikidata": "Q105784",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "Q131887",
+      "end": "-800000-01-01T00:00:00Z",
+      "endBP": 800000,
+      "label": "Homo antecessor",
+      "start": "-1200000-01-01T00:00:00Z",
+      "startBP": 1200000,
+      "wikidata": "Q310846",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "Q1340401",
+      "end": "-1800000-01-01T00:00:00Z",
+      "endBP": 1800000,
+      "label": "Homo rudolfensis",
+      "start": "-1900000-01-01T00:00:00Z",
+      "startBP": 1900000,
+      "wikidata": "Q107742",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "Q15978631",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Homo sapiens",
+      "start": "-300000-01-01T00:00:00Z",
+      "startBP": 300000,
+      "wikidata": "Q15978631",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "Q170479",
+      "end": "-0509-01-01T00:00:00Z",
+      "endBP": 2535,
+      "label": "Royauté romaine",
+      "start": "-0753-01-01T00:00:00Z",
+      "startBP": 2779,
+      "wikidata": "Q201038",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q1747689",
+      "end": "0476-09-04T00:00:00Z",
+      "endBP": 1550.1273100616017,
+      "label": "Antiquité romaine",
+      "start": "-0753-01-01T00:00:00Z",
+      "startBP": 2779,
+      "wikidata": "Q1747689",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q178274",
+      "end": "-0800-01-01T00:00:00Z",
+      "endBP": 2826,
+      "label": "Âge sombre grec",
+      "start": "-1100-01-01T00:00:00Z",
+      "startBP": 3126,
+      "wikidata": "Q210443",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q180627",
+      "end": "-0480-01-01T00:00:00Z",
+      "endBP": 2506,
+      "label": "Période archaïque grecque",
+      "start": "-0800-01-01T00:00:00Z",
+      "startBP": 2826,
+      "wikidata": "Q271834",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q182895",
+      "end": "-1100-01-01T00:00:00Z",
+      "endBP": 3126,
+      "label": "Période mycénienne",
+      "start": "-1600-01-01T00:00:00Z",
+      "startBP": 3626,
+      "wikidata": "Q181264",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q18343134",
+      "end": "-236000-01-01T00:00:00Z",
+      "endBP": 236000,
+      "label": "Homo naledi",
+      "start": "-335000-01-01T00:00:00Z",
+      "startBP": 335000,
+      "wikidata": "Q20962857",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "Q184742",
+      "end": "-0323-01-01T00:00:00Z",
+      "endBP": 2349,
+      "label": "Période classique grecque",
+      "start": "-0480-01-01T00:00:00Z",
+      "startBP": 2506,
+      "wikidata": "Q843745",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q191935",
+      "end": "-538800000-01-01T00:00:00Z",
+      "endBP": 538800000,
+      "label": "Néoprotérozoïque",
+      "start": "-1000000000-01-01T00:00:00Z",
+      "startBP": 1000002026,
+      "wikidata": "Q191935",
+      "categories": [
+        "Biologie Évolutive",
+        "Géologie"
+      ]
+    },
+    {
+      "id": "Q193262",
+      "end": "-1069-01-01T00:00:00Z",
+      "endBP": 3095,
+      "label": "Nouvel Empire égyptien",
+      "start": "-1550-01-01T00:00:00Z",
+      "startBP": 3576,
+      "wikidata": "Q180568",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q193316",
+      "end": "-0664-01-01T00:00:00Z",
+      "endBP": 2690,
+      "label": "Troisième Période intermédiaire",
+      "start": "-1069-01-01T00:00:00Z",
+      "startBP": 3095,
+      "wikidata": "Q212728",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q193430",
+      "end": "-0332-01-01T00:00:00Z",
+      "endBP": 2358,
+      "label": "Période tardive de l'Égypte antique",
+      "start": "-0664-01-01T00:00:00Z",
+      "startBP": 2690,
+      "wikidata": "Q621917",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q193434",
+      "end": "-2181-01-01T00:00:00Z",
+      "endBP": 4207,
+      "label": "Ancien Empire égyptien",
+      "start": "-2686-01-01T00:00:00Z",
+      "startBP": 4712,
+      "wikidata": "Q177819",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q207569",
+      "end": "-2686-01-01T00:00:00Z",
+      "endBP": 4712,
+      "label": "Période thinite",
+      "start": "-3100-01-01T00:00:00Z",
+      "startBP": 5126,
+      "wikidata": "Q187979",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q207950",
+      "end": "-1650-01-01T00:00:00Z",
+      "endBP": 3676,
+      "label": "Moyen Empire égyptien",
+      "start": "-2055-01-01T00:00:00Z",
+      "startBP": 4081,
+      "wikidata": "Q191324",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q208188",
+      "end": "-2055-01-01T00:00:00Z",
+      "endBP": 4081,
+      "label": "Première Période intermédiaire",
+      "start": "-2181-01-01T00:00:00Z",
+      "startBP": 4207,
+      "wikidata": "Q232211",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q213736",
+      "end": "-1550-01-01T00:00:00Z",
+      "endBP": 3576,
+      "label": "Deuxième Période intermédiaire",
+      "start": "-1650-01-01T00:00:00Z",
+      "startBP": 3676,
+      "wikidata": "Q206715",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q321",
+      "end": "TODAY",
+      "endBP": 0,
+      "label": "Voie Lactée",
+      "start": "-13500000000-01-01T00:00:00Z",
+      "startBP": 13500000000,
+      "wikidata": "Q321",
+      "categories": [
+        "Astrophysique"
+      ]
+    },
+    {
+      "id": "Q361",
+      "end": "1918-11-11T00:00:00Z",
+      "endBP": 108,
+      "label": "Première Guerre mondiale",
+      "start": "1914-07-28T00:00:00Z",
+      "startBP": 112,
+      "wikidata": "Q361",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q362",
+      "end": "1945-09-02T00:00:00Z",
+      "endBP": 80.59111122160748,
+      "label": "Seconde Guerre mondiale",
+      "start": "1939-09-01T00:00:00Z",
+      "startBP": 86.59521799778817,
+      "wikidata": "Q362",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q38486",
+      "end": "-143000-01-01T00:00:00Z",
+      "endBP": 145023.854764,
+      "label": "Homo erectus",
+      "start": "-1890000-01-01T00:00:00Z",
+      "startBP": 1890000,
+      "wikidata": "Q101362",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "Q40244",
+      "end": "0476-09-04T00:00:00Z",
+      "endBP": 1550.1273100616017,
+      "label": "Antiquité",
+      "start": "-3200-01-01T00:00:00Z",
+      "startBP": 5226.72677,
+      "wikidata": "Q41493",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q41176",
+      "end": "-0031-01-01T00:00:00Z",
+      "endBP": 2057,
+      "label": "Période hellénistique",
+      "start": "-0323-01-01T00:00:00Z",
+      "startBP": 2349,
+      "wikidata": "Q428995",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q42767",
+      "end": "-40000-01-01T00:00:00Z",
+      "endBP": 42025.971123,
+      "label": "Homo neanderthalensis",
+      "start": "-400000-01-01T00:00:00Z",
+      "startBP": 400000,
+      "wikidata": "Q40171",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "Q43106",
+      "end": "-1400000-01-01T00:00:00Z",
+      "endBP": 1400000,
+      "label": "Homo ergaster",
+      "start": "-1900000-01-01T00:00:00Z",
+      "startBP": 1900000,
+      "wikidata": "Q105777",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "Q484757",
+      "end": "-3100-01-01T00:00:00Z",
+      "endBP": 5126,
+      "label": "Égypte prédynastique",
+      "start": "-5500-01-01T00:00:00Z",
+      "startBP": 7526,
+      "wikidata": "Q714601",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q607992",
+      "end": "-2800000000-01-01T00:00:00Z",
+      "endBP": 2800000000,
+      "label": "Mésoarchéen",
+      "start": "-3200000000-01-01T00:00:00Z",
+      "startBP": 3200002026,
+      "wikidata": "Q607992",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "Q6114",
+      "end": "-0027-01-01T00:00:00Z",
+      "endBP": 2053,
+      "label": "République romaine",
+      "start": "-0509-01-01T00:00:00Z",
+      "startBP": 2535,
+      "wikidata": "Q17167",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q645135",
+      "end": "-2500000000-01-01T00:00:00Z",
+      "endBP": 2500000000,
+      "label": "Néoarchéen",
+      "start": "-2800000000-01-01T00:00:00Z",
+      "startBP": 2800002026,
+      "wikidata": "Q645135",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "Q731470",
+      "end": "-3600000000-01-01T00:00:00Z",
+      "endBP": 3600000000,
+      "label": "Éoarchéen",
+      "start": "-4031000000-01-01T00:00:00Z",
+      "startBP": 4031002026,
+      "wikidata": "Q731470",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "Q738167",
+      "end": "-3200000000-01-01T00:00:00Z",
+      "endBP": 3200000000,
+      "label": "Paléoarchéen",
+      "start": "-3600000000-01-01T00:00:00Z",
+      "startBP": 3600002026,
+      "wikidata": "Q738167",
+      "categories": [
+        "Géologie"
+      ]
+    },
+    {
+      "id": "Q7432",
+      "end": "1789-01-01T00:00:00Z",
+      "endBP": 237.826017,
+      "label": "Époque moderne",
+      "start": "1492-10-12T00:00:00Z",
+      "startBP": 534.0451745379877,
+      "wikidata": "Q5308718",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    },
+    {
+      "id": "Q838707",
+      "end": "-30000-01-01T00:00:00Z",
+      "endBP": 32026.176462,
+      "label": "Homme de Denisova",
+      "start": "-500000-01-01T00:00:00Z",
+      "startBP": 500000,
+      "wikidata": "Q151055",
+      "categories": [
+        "Anthropologie et Archéologie"
+      ]
+    },
+    {
+      "id": "Q8683",
+      "end": "1991-12-26T00:00:00Z",
+      "endBP": 34.85284052019165,
+      "label": "Guerre froide",
+      "start": "1945-01-01T00:00:00Z",
+      "startBP": 81,
+      "wikidata": "Q8683",
+      "categories": [
+        "Histoire et Civilisations"
+      ]
+    }
+  ],
+  "placements": [
+    {
+      "story": 1,
+      "parent": "PER_SOLAR_SYS",
+      "period": "06c83e55-1748-454a-831d-b459bf909ffa"
+    },
+    {
+      "story": 1,
+      "parent": "PER_SOLAR_SYS",
+      "period": "3af651c4-61ed-45f0-bed0-38d360a68f1d"
+    },
+    {
+      "story": 1,
+      "parent": "PER_SOLAR_SYS",
+      "period": "59fadf1f-4bd5-485d-a92d-a95aec7986b6"
+    },
+    {
+      "story": 1,
+      "parent": null,
+      "period": "8923819c-cc1f-4da3-8503-4a485d186b0f"
+    },
+    {
+      "story": 1,
+      "parent": "8923819c-cc1f-4da3-8503-4a485d186b0f",
+      "period": "b34af765-32cd-4d01-820d-2934fc21c2aa"
+    },
+    {
+      "story": 1,
+      "parent": "PER_SOLAR_SYS",
+      "period": "PER_MILKYWAY"
+    },
+    {
+      "story": 1,
+      "parent": "Q321",
+      "period": "PER_SOLAR_SYS"
+    },
+    {
+      "story": 1,
+      "parent": "8923819c-cc1f-4da3-8503-4a485d186b0f",
+      "period": "Q321"
+    },
+    {
+      "story": 2,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_CAMBRIAN"
+    },
+    {
+      "story": 2,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_CARBONIFEROUS"
+    },
+    {
+      "story": 2,
+      "parent": "Q101313",
+      "period": "PER_CENOZOIC"
+    },
+    {
+      "story": 2,
+      "parent": "PER_MESOZOIC",
+      "period": "PER_CRETACEOUS"
+    },
+    {
+      "story": 2,
+      "parent": "Q191935",
+      "period": "PER_CRYOGENIAN"
+    },
+    {
+      "story": 2,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_DEVONIAN"
+    },
+    {
+      "story": 2,
+      "parent": "PER_MILKYWAY",
+      "period": "PER_HADEAN"
+    },
+    {
+      "story": 2,
+      "parent": "PER_MESOZOIC",
+      "period": "PER_JURASSIC"
+    },
+    {
+      "story": 2,
+      "parent": "Q104162",
+      "period": "PER_MESOPROTEROZOIC"
+    },
+    {
+      "story": 2,
+      "parent": "Q101313",
+      "period": "PER_MESOZOIC"
+    },
+    {
+      "story": 2,
+      "parent": null,
+      "period": "PER_MILKYWAY"
+    },
+    {
+      "story": 2,
+      "parent": "PER_CENOZOIC",
+      "period": "PER_NEOGENE"
+    },
+    {
+      "story": 2,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_ORDOVICIAN"
+    },
+    {
+      "story": 2,
+      "parent": "PER_CENOZOIC",
+      "period": "PER_PALEOGENE"
+    },
+    {
+      "story": 2,
+      "parent": "Q104162",
+      "period": "PER_PALEOPROTEROZOIC"
+    },
+    {
+      "story": 2,
+      "parent": "Q101313",
+      "period": "PER_PALEOZOIC"
+    },
+    {
+      "story": 2,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_PERMIAN"
+    },
+    {
+      "story": 2,
+      "parent": "PER_CENOZOIC",
+      "period": "PER_QUATERNARY"
+    },
+    {
+      "story": 2,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_SILURIAN"
+    },
+    {
+      "story": 2,
+      "parent": "PER_MESOZOIC",
+      "period": "PER_TRIASSIC"
+    },
+    {
+      "story": 2,
+      "parent": "PER_MILKYWAY",
+      "period": "Q101313"
+    },
+    {
+      "story": 2,
+      "parent": "PER_MILKYWAY",
+      "period": "Q104162"
+    },
+    {
+      "story": 2,
+      "parent": "PER_MILKYWAY",
+      "period": "Q104168"
+    },
+    {
+      "story": 2,
+      "parent": "Q104162",
+      "period": "Q191935"
+    },
+    {
+      "story": 2,
+      "parent": "Q104168",
+      "period": "Q607992"
+    },
+    {
+      "story": 2,
+      "parent": "Q104168",
+      "period": "Q645135"
+    },
+    {
+      "story": 2,
+      "parent": "Q104168",
+      "period": "Q731470"
+    },
+    {
+      "story": 2,
+      "parent": "Q104168",
+      "period": "Q738167"
+    },
+    {
+      "story": 3,
+      "parent": null,
+      "period": "PER_BIGBANG"
+    },
+    {
+      "story": 3,
+      "parent": "PER_BIGBANG",
+      "period": "PER_DARK_AGES"
+    },
+    {
+      "story": 3,
+      "parent": "PER_BIGBANG",
+      "period": "PER_ELECTROWEAK"
+    },
+    {
+      "story": 3,
+      "parent": "PER_BIGBANG",
+      "period": "PER_GUT"
+    },
+    {
+      "story": 3,
+      "parent": "PER_BIGBANG",
+      "period": "PER_HADRON"
+    },
+    {
+      "story": 3,
+      "parent": "PER_BIGBANG",
+      "period": "PER_LEPTON"
+    },
+    {
+      "story": 3,
+      "parent": "PER_BIGBANG",
+      "period": "PER_NUCLEOSYN"
+    },
+    {
+      "story": 3,
+      "parent": "PER_BIGBANG",
+      "period": "PER_PLANCK"
+    },
+    {
+      "story": 3,
+      "parent": "PER_BIGBANG",
+      "period": "PER_RECOMB"
+    },
+    {
+      "story": 3,
+      "parent": "PER_BIGBANG",
+      "period": "PER_REION"
+    },
+    {
+      "story": 4,
+      "parent": null,
+      "period": "9fe99ef7-2251-4c40-b392-ff148c816019"
+    },
+    {
+      "story": 4,
+      "parent": null,
+      "period": "PER_WW1_PRELUDE"
+    },
+    {
+      "story": 4,
+      "parent": null,
+      "period": "Q361"
+    },
+    {
+      "story": 4,
+      "parent": null,
+      "period": "Q362"
+    },
+    {
+      "story": 4,
+      "parent": null,
+      "period": "Q8683"
+    },
+    {
+      "story": 5,
+      "parent": null,
+      "period": "e29900d8-67e3-4f49-8907-fa7c86d77021"
+    },
+    {
+      "story": 5,
+      "parent": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "period": "Q130975"
+    },
+    {
+      "story": 5,
+      "parent": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "period": "Q131092"
+    },
+    {
+      "story": 5,
+      "parent": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "period": "Q131884"
+    },
+    {
+      "story": 5,
+      "parent": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "period": "Q131887"
+    },
+    {
+      "story": 5,
+      "parent": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "period": "Q1340401"
+    },
+    {
+      "story": 5,
+      "parent": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "period": "Q15978631"
+    },
+    {
+      "story": 5,
+      "parent": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "period": "Q18343134"
+    },
+    {
+      "story": 5,
+      "parent": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "period": "Q38486"
+    },
+    {
+      "story": 5,
+      "parent": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "period": "Q42767"
+    },
+    {
+      "story": 5,
+      "parent": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "period": "Q43106"
+    },
+    {
+      "story": 5,
+      "parent": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+      "period": "Q838707"
+    },
+    {
+      "story": 7,
+      "parent": "PER_EARTH",
+      "period": "986d377d-aae5-4ba1-bb51-c5cd8d002cbb"
+    },
+    {
+      "story": 7,
+      "parent": "PER_EARTH",
+      "period": "f4427dee-575f-40f5-b674-6997455fed0b"
+    },
+    {
+      "story": 7,
+      "parent": "Q1747689",
+      "period": "PER_EARTH"
+    },
+    {
+      "story": 7,
+      "parent": "Q1747689",
+      "period": "Q170479"
+    },
+    {
+      "story": 7,
+      "parent": null,
+      "period": "Q1747689"
+    },
+    {
+      "story": 7,
+      "parent": "Q1747689",
+      "period": "Q6114"
+    },
+    {
+      "story": 8,
+      "parent": "Q361",
+      "period": "955c3337-fd3f-4303-b8a2-d4da6751189a"
+    },
+    {
+      "story": 8,
+      "parent": "Q361",
+      "period": "fd216ffa-0552-48b2-9dbf-b1a551c8bcb8"
+    },
+    {
+      "story": 8,
+      "parent": null,
+      "period": "PER_WW1_PRELUDE"
+    },
+    {
+      "story": 8,
+      "parent": null,
+      "period": "Q361"
+    },
+    {
+      "story": 9,
+      "parent": "Q362",
+      "period": "223307f6-4c30-49f3-8e85-04426b1b093b"
+    },
+    {
+      "story": 9,
+      "parent": "Q362",
+      "period": "4c7b54fd-8b9d-4365-ae2a-3177815f276f"
+    },
+    {
+      "story": 9,
+      "parent": "Q362",
+      "period": "4fed3a83-74c1-4e19-945e-1333752f517b"
+    },
+    {
+      "story": 9,
+      "parent": "Q362",
+      "period": "69a1b371-b991-4642-af48-10d964c0ad86"
+    },
+    {
+      "story": 9,
+      "parent": "Q362",
+      "period": "703d766f-28a0-400c-b213-9d8c21afce5e"
+    },
+    {
+      "story": 9,
+      "parent": "Q362",
+      "period": "805e293c-f3d7-4d88-a966-31b37c160de3"
+    },
+    {
+      "story": 9,
+      "parent": "Q362",
+      "period": "9f9854f6-2c05-43d3-a1f0-695e0b08a8cb"
+    },
+    {
+      "story": 9,
+      "parent": null,
+      "period": "Q362"
+    },
+    {
+      "story": 10,
+      "parent": null,
+      "period": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story": 10,
+      "parent": "Q40244",
+      "period": "Q11537"
+    },
+    {
+      "story": 10,
+      "parent": "Q40244",
+      "period": "Q11768"
+    },
+    {
+      "story": 10,
+      "parent": "Q11768",
+      "period": "Q131656"
+    },
+    {
+      "story": 10,
+      "parent": "Q1747689",
+      "period": "Q170479"
+    },
+    {
+      "story": 10,
+      "parent": "Q40244",
+      "period": "Q1747689"
+    },
+    {
+      "story": 10,
+      "parent": "Q11537",
+      "period": "Q178274"
+    },
+    {
+      "story": 10,
+      "parent": "Q11537",
+      "period": "Q180627"
+    },
+    {
+      "story": 10,
+      "parent": "Q11537",
+      "period": "Q182895"
+    },
+    {
+      "story": 10,
+      "parent": "Q11537",
+      "period": "Q184742"
+    },
+    {
+      "story": 10,
+      "parent": "Q11768",
+      "period": "Q193262"
+    },
+    {
+      "story": 10,
+      "parent": "Q11768",
+      "period": "Q193316"
+    },
+    {
+      "story": 10,
+      "parent": "Q11768",
+      "period": "Q193430"
+    },
+    {
+      "story": 10,
+      "parent": "Q11768",
+      "period": "Q193434"
+    },
+    {
+      "story": 10,
+      "parent": "Q11768",
+      "period": "Q207569"
+    },
+    {
+      "story": 10,
+      "parent": "Q11768",
+      "period": "Q207950"
+    },
+    {
+      "story": 10,
+      "parent": "Q11768",
+      "period": "Q208188"
+    },
+    {
+      "story": 10,
+      "parent": "Q11768",
+      "period": "Q213736"
+    },
+    {
+      "story": 10,
+      "parent": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "period": "Q40244"
+    },
+    {
+      "story": 10,
+      "parent": "Q11537",
+      "period": "Q41176"
+    },
+    {
+      "story": 10,
+      "parent": "Q11768",
+      "period": "Q484757"
+    },
+    {
+      "story": 10,
+      "parent": "Q1747689",
+      "period": "Q6114"
+    },
+    {
+      "story": 11,
+      "parent": "PER_QUATERNARY",
+      "period": "3f664826-3a21-419f-a040-55b62803bca4"
+    },
+    {
+      "story": 11,
+      "parent": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "period": "771a1b53-5ffe-474e-85a4-b62e12dbdab8"
+    },
+    {
+      "story": 11,
+      "parent": "PER_QUATERNARY",
+      "period": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story": 11,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_CAMBRIAN"
+    },
+    {
+      "story": 11,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_CARBONIFEROUS"
+    },
+    {
+      "story": 11,
+      "parent": "Q101313",
+      "period": "PER_CENOZOIC"
+    },
+    {
+      "story": 11,
+      "parent": "PER_MESOZOIC",
+      "period": "PER_CRETACEOUS"
+    },
+    {
+      "story": 11,
+      "parent": "Q191935",
+      "period": "PER_CRYOGENIAN"
+    },
+    {
+      "story": 11,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_DEVONIAN"
+    },
+    {
+      "story": 11,
+      "parent": "PER_MILKYWAY",
+      "period": "PER_HADEAN"
+    },
+    {
+      "story": 11,
+      "parent": "PER_MESOZOIC",
+      "period": "PER_JURASSIC"
+    },
+    {
+      "story": 11,
+      "parent": "Q104162",
+      "period": "PER_MESOPROTEROZOIC"
+    },
+    {
+      "story": 11,
+      "parent": "Q101313",
+      "period": "PER_MESOZOIC"
+    },
+    {
+      "story": 11,
+      "parent": null,
+      "period": "PER_MILKYWAY"
+    },
+    {
+      "story": 11,
+      "parent": "PER_CENOZOIC",
+      "period": "PER_NEOGENE"
+    },
+    {
+      "story": 11,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_ORDOVICIAN"
+    },
+    {
+      "story": 11,
+      "parent": "PER_CENOZOIC",
+      "period": "PER_PALEOGENE"
+    },
+    {
+      "story": 11,
+      "parent": "Q104162",
+      "period": "PER_PALEOPROTEROZOIC"
+    },
+    {
+      "story": 11,
+      "parent": "Q101313",
+      "period": "PER_PALEOZOIC"
+    },
+    {
+      "story": 11,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_PERMIAN"
+    },
+    {
+      "story": 11,
+      "parent": "PER_CENOZOIC",
+      "period": "PER_QUATERNARY"
+    },
+    {
+      "story": 11,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_SILURIAN"
+    },
+    {
+      "story": 11,
+      "parent": "PER_MESOZOIC",
+      "period": "PER_TRIASSIC"
+    },
+    {
+      "story": 11,
+      "parent": "PER_MILKYWAY",
+      "period": "Q101313"
+    },
+    {
+      "story": 11,
+      "parent": "PER_MILKYWAY",
+      "period": "Q104162"
+    },
+    {
+      "story": 11,
+      "parent": "PER_MILKYWAY",
+      "period": "Q104168"
+    },
+    {
+      "story": 11,
+      "parent": "Q104162",
+      "period": "Q191935"
+    },
+    {
+      "story": 11,
+      "parent": "Q104168",
+      "period": "Q607992"
+    },
+    {
+      "story": 11,
+      "parent": "Q104168",
+      "period": "Q645135"
+    },
+    {
+      "story": 11,
+      "parent": "Q104168",
+      "period": "Q731470"
+    },
+    {
+      "story": 11,
+      "parent": "Q104168",
+      "period": "Q738167"
+    },
+    {
+      "story": 12,
+      "parent": null,
+      "period": "Q8683"
+    },
+    {
+      "story": 14,
+      "parent": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+      "period": "06c82523-2a50-46ee-a322-04c3ec7c87a1"
+    },
+    {
+      "story": 14,
+      "parent": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+      "period": "10159b05-8732-40f4-bda9-20efd9f1f2e8"
+    },
+    {
+      "story": 14,
+      "parent": "fa5c357a-0750-43f4-9351-10a255374c62",
+      "period": "2f74243a-643a-4632-9bfc-ff83ed3d1b2d"
+    },
+    {
+      "story": 14,
+      "parent": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+      "period": "38f93ea1-ad8e-4f4f-8bd4-3deab5d9c2e3"
+    },
+    {
+      "story": 14,
+      "parent": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+      "period": "98335b7d-b9e5-454a-9b3d-92d139c3900d"
+    },
+    {
+      "story": 14,
+      "parent": "fa5c357a-0750-43f4-9351-10a255374c62",
+      "period": "a3e84bb3-a20e-4dd4-8799-0e6c00eab321"
+    },
+    {
+      "story": 14,
+      "parent": null,
+      "period": "bfcd2499-f121-4998-aa27-f75c08a3fd24"
+    },
+    {
+      "story": 14,
+      "parent": "fa5c357a-0750-43f4-9351-10a255374c62",
+      "period": "c6709134-0ed2-4dc2-802e-c1ebf70b0559"
+    },
+    {
+      "story": 14,
+      "parent": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+      "period": "d24bce08-5f19-4c6f-ad71-d34f8ede81cc"
+    },
+    {
+      "story": 14,
+      "parent": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+      "period": "fa5c357a-0750-43f4-9351-10a255374c62"
+    },
+    {
+      "story": 15,
+      "parent": "Q12554",
+      "period": "a664a308-316b-4b14-9a5f-68dce9e3e249"
+    },
+    {
+      "story": 15,
+      "parent": "Q12554",
+      "period": "d5c571fb-43bb-435d-b9fc-a77c46e2d319"
+    },
+    {
+      "story": 15,
+      "parent": null,
+      "period": "Q12554"
+    },
+    {
+      "story": 16,
+      "parent": null,
+      "period": "Q11769"
+    },
+    {
+      "story": 16,
+      "parent": null,
+      "period": "Q7432"
+    },
+    {
+      "story": 17,
+      "parent": null,
+      "period": "e00cf6f6-a795-4810-bda3-ed726296c822"
+    },
+    {
+      "story": 18,
+      "parent": null,
+      "period": "9fe99ef7-2251-4c40-b392-ff148c816019"
+    },
+    {
+      "story": 19,
+      "parent": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd",
+      "period": "0682aee4-1e91-42fc-b85a-345d4d2c1b70"
+    },
+    {
+      "story": 19,
+      "parent": "43ad65a9-3365-4110-8a25-079d1b8522bd",
+      "period": "09b75ef7-c101-4176-a510-7e465ac4e4b1"
+    },
+    {
+      "story": 19,
+      "parent": "0682aee4-1e91-42fc-b85a-345d4d2c1b70",
+      "period": "1322e5b2-1cce-4ceb-af43-96b34912ed6e"
+    },
+    {
+      "story": 19,
+      "parent": null,
+      "period": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd"
+    },
+    {
+      "story": 19,
+      "parent": "43ad65a9-3365-4110-8a25-079d1b8522bd",
+      "period": "1c73542f-c195-40d2-a81b-d0aa9728bc8e"
+    },
+    {
+      "story": 19,
+      "parent": null,
+      "period": "3ddd9c5d-4308-44b4-9b40-73a3324c317a"
+    },
+    {
+      "story": 19,
+      "parent": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "period": "4223b878-d545-46fd-afc8-15bf9627664a"
+    },
+    {
+      "story": 19,
+      "parent": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd",
+      "period": "43ad65a9-3365-4110-8a25-079d1b8522bd"
+    },
+    {
+      "story": 19,
+      "parent": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "period": "56b0f980-fc39-44a1-b647-2ecfd4689793"
+    },
+    {
+      "story": 19,
+      "parent": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "period": "7107b409-b8a5-45d8-832b-077a1ec5a6cd"
+    },
+    {
+      "story": 19,
+      "parent": "43ad65a9-3365-4110-8a25-079d1b8522bd",
+      "period": "7467acc7-913f-4f0d-b282-ac2317457deb"
+    },
+    {
+      "story": 19,
+      "parent": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd",
+      "period": "7cf4100b-8d33-450a-84dc-0af1c1aac6ca"
+    },
+    {
+      "story": 19,
+      "parent": "0682aee4-1e91-42fc-b85a-345d4d2c1b70",
+      "period": "80b51412-4ff5-4f15-8c53-99047fe52681"
+    },
+    {
+      "story": 19,
+      "parent": "d1d763df-312d-4c4e-8df0-8d6bd0b4059c",
+      "period": "9729cb6c-f444-4281-846c-ec78c5b3c573"
+    },
+    {
+      "story": 19,
+      "parent": null,
+      "period": "a15a25f7-7e81-45cd-a7b1-192def228c33"
+    },
+    {
+      "story": 19,
+      "parent": "d1d763df-312d-4c4e-8df0-8d6bd0b4059c",
+      "period": "ac29c7dc-679a-4393-a6af-de0125af25ca"
+    },
+    {
+      "story": 19,
+      "parent": "43ad65a9-3365-4110-8a25-079d1b8522bd",
+      "period": "c01c8370-fd8f-479e-b7da-8575a630df7c"
+    },
+    {
+      "story": 19,
+      "parent": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "period": "ce637529-1c39-48ce-80a0-79a3b9e59185"
+    },
+    {
+      "story": 19,
+      "parent": null,
+      "period": "d1d763df-312d-4c4e-8df0-8d6bd0b4059c"
+    },
+    {
+      "story": 19,
+      "parent": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "period": "ee0d6158-29d5-4228-9961-3e035f0a270b"
+    },
+    {
+      "story": 19,
+      "parent": "7cf4100b-8d33-450a-84dc-0af1c1aac6ca",
+      "period": "fdabc7c6-cd28-414b-a738-8510831f688b"
+    },
+    {
+      "story": 20,
+      "parent": null,
+      "period": "3ddd9c5d-4308-44b4-9b40-73a3324c317a"
+    },
+    {
+      "story": 20,
+      "parent": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "period": "4223b878-d545-46fd-afc8-15bf9627664a"
+    },
+    {
+      "story": 20,
+      "parent": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "period": "56b0f980-fc39-44a1-b647-2ecfd4689793"
+    },
+    {
+      "story": 20,
+      "parent": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "period": "7107b409-b8a5-45d8-832b-077a1ec5a6cd"
+    },
+    {
+      "story": 20,
+      "parent": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "period": "ce637529-1c39-48ce-80a0-79a3b9e59185"
+    },
+    {
+      "story": 20,
+      "parent": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "period": "ee0d6158-29d5-4228-9961-3e035f0a270b"
+    },
+    {
+      "story": 21,
+      "parent": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd",
+      "period": "0682aee4-1e91-42fc-b85a-345d4d2c1b70"
+    },
+    {
+      "story": 21,
+      "parent": "43ad65a9-3365-4110-8a25-079d1b8522bd",
+      "period": "09b75ef7-c101-4176-a510-7e465ac4e4b1"
+    },
+    {
+      "story": 21,
+      "parent": "0682aee4-1e91-42fc-b85a-345d4d2c1b70",
+      "period": "1322e5b2-1cce-4ceb-af43-96b34912ed6e"
+    },
+    {
+      "story": 21,
+      "parent": null,
+      "period": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd"
+    },
+    {
+      "story": 21,
+      "parent": "43ad65a9-3365-4110-8a25-079d1b8522bd",
+      "period": "1c73542f-c195-40d2-a81b-d0aa9728bc8e"
+    },
+    {
+      "story": 21,
+      "parent": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd",
+      "period": "43ad65a9-3365-4110-8a25-079d1b8522bd"
+    },
+    {
+      "story": 21,
+      "parent": "43ad65a9-3365-4110-8a25-079d1b8522bd",
+      "period": "7467acc7-913f-4f0d-b282-ac2317457deb"
+    },
+    {
+      "story": 21,
+      "parent": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd",
+      "period": "7cf4100b-8d33-450a-84dc-0af1c1aac6ca"
+    },
+    {
+      "story": 21,
+      "parent": "0682aee4-1e91-42fc-b85a-345d4d2c1b70",
+      "period": "80b51412-4ff5-4f15-8c53-99047fe52681"
+    },
+    {
+      "story": 21,
+      "parent": "43ad65a9-3365-4110-8a25-079d1b8522bd",
+      "period": "c01c8370-fd8f-479e-b7da-8575a630df7c"
+    },
+    {
+      "story": 21,
+      "parent": "7cf4100b-8d33-450a-84dc-0af1c1aac6ca",
+      "period": "fdabc7c6-cd28-414b-a738-8510831f688b"
+    },
+    {
+      "story": 22,
+      "parent": "PER_DEVONIAN",
+      "period": "092c5cb7-1142-44e2-b6fc-2e0f2e598270"
+    },
+    {
+      "story": 22,
+      "parent": "Q101313",
+      "period": "213d4f29-b839-4493-87e2-ab566d74734f"
+    },
+    {
+      "story": 22,
+      "parent": "Q101313",
+      "period": "418dcf15-402a-42fa-b335-7e5984106dba"
+    },
+    {
+      "story": 22,
+      "parent": "Q101313",
+      "period": "48ba8ead-0f0f-4d67-bbcd-ff4d95ae2ee7"
+    },
+    {
+      "story": 22,
+      "parent": "PER_ORDOVICIAN",
+      "period": "4cae203f-2aea-43af-8419-23fd4fe6b4fa"
+    },
+    {
+      "story": 22,
+      "parent": "PER_QUATERNARY",
+      "period": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story": 22,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_CAMBRIAN"
+    },
+    {
+      "story": 22,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_CARBONIFEROUS"
+    },
+    {
+      "story": 22,
+      "parent": "Q101313",
+      "period": "PER_CENOZOIC"
+    },
+    {
+      "story": 22,
+      "parent": "PER_MESOZOIC",
+      "period": "PER_CRETACEOUS"
+    },
+    {
+      "story": 22,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_DEVONIAN"
+    },
+    {
+      "story": 22,
+      "parent": "PER_MESOZOIC",
+      "period": "PER_JURASSIC"
+    },
+    {
+      "story": 22,
+      "parent": "Q101313",
+      "period": "PER_MESOZOIC"
+    },
+    {
+      "story": 22,
+      "parent": "PER_CENOZOIC",
+      "period": "PER_NEOGENE"
+    },
+    {
+      "story": 22,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_ORDOVICIAN"
+    },
+    {
+      "story": 22,
+      "parent": "PER_CENOZOIC",
+      "period": "PER_PALEOGENE"
+    },
+    {
+      "story": 22,
+      "parent": "Q101313",
+      "period": "PER_PALEOZOIC"
+    },
+    {
+      "story": 22,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_PERMIAN"
+    },
+    {
+      "story": 22,
+      "parent": "PER_CENOZOIC",
+      "period": "PER_QUATERNARY"
+    },
+    {
+      "story": 22,
+      "parent": "PER_PALEOZOIC",
+      "period": "PER_SILURIAN"
+    },
+    {
+      "story": 22,
+      "parent": "PER_MESOZOIC",
+      "period": "PER_TRIASSIC"
+    },
+    {
+      "story": 22,
+      "parent": null,
+      "period": "Q101313"
+    },
+    {
+      "story": 23,
+      "parent": null,
+      "period": "1bed4622-1d47-46da-9249-a7e10b676ab8"
+    },
+    {
+      "story": 23,
+      "parent": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "period": "2418eb78-4792-48b6-a1e0-9f458f010655"
+    },
+    {
+      "story": 23,
+      "parent": "PER_QUATERNARY",
+      "period": "3f664826-3a21-419f-a040-55b62803bca4"
+    },
+    {
+      "story": 23,
+      "parent": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "period": "430dd9d5-3756-458c-80b6-0ad34c2e844f"
+    },
+    {
+      "story": 23,
+      "parent": null,
+      "period": "49650a85-b139-494f-83e3-866700a9631d"
+    },
+    {
+      "story": 23,
+      "parent": null,
+      "period": "4cae203f-2aea-43af-8419-23fd4fe6b4fa"
+    },
+    {
+      "story": 23,
+      "parent": null,
+      "period": "55988cb3-56e7-490e-b6fe-a53aadfa173e"
+    },
+    {
+      "story": 23,
+      "parent": "3f664826-3a21-419f-a040-55b62803bca4",
+      "period": "6bd93f0b-228e-443e-bbbe-ee0d3eb9b05e"
+    },
+    {
+      "story": 23,
+      "parent": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "period": "6fa87489-6d36-423a-a5a9-7eda1ab9badd"
+    },
+    {
+      "story": 23,
+      "parent": "PER_CRYOGENIAN",
+      "period": "8659fa39-5cde-421f-92ca-f10aa20e8299"
+    },
+    {
+      "story": 23,
+      "parent": "PER_QUATERNARY",
+      "period": "9729cb6c-f444-4281-846c-ec78c5b3c573"
+    },
+    {
+      "story": 23,
+      "parent": null,
+      "period": "9cf0a438-f17c-4dbd-a00c-8d01305c711c"
+    },
+    {
+      "story": 23,
+      "parent": "3f664826-3a21-419f-a040-55b62803bca4",
+      "period": "bdfa109a-864c-4ae8-adb9-b7e9aec9443f"
+    },
+    {
+      "story": 23,
+      "parent": "3f664826-3a21-419f-a040-55b62803bca4",
+      "period": "bfe9a9f1-0ec3-49da-9517-581d5dde2c35"
+    },
+    {
+      "story": 23,
+      "parent": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "period": "cf42e843-25b9-4750-a520-b33fb66e759e"
+    },
+    {
+      "story": 23,
+      "parent": "PER_QUATERNARY",
+      "period": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story": 23,
+      "parent": null,
+      "period": "PER_CRYOGENIAN"
+    },
+    {
+      "story": 23,
+      "parent": null,
+      "period": "PER_QUATERNARY"
+    }
+  ],
+  "schema": {
+    "indexes": [
+      {
+        "table": "stories",
+        "definition": "CREATE INDEX stories_owner_user_id_idx ON public.stories USING btree (owner_user_id)"
+      },
+      {
+        "table": "stories",
+        "definition": "CREATE UNIQUE INDEX stories_id_owner_unique ON public.stories USING btree (id, owner_user_id)"
+      },
+      {
+        "table": "stories",
+        "definition": "CREATE UNIQUE INDEX stories_pkey ON public.stories USING btree (id)"
+      },
+      {
+        "table": "stories",
+        "definition": "CREATE INDEX idx_stories_is_public ON public.stories USING btree (is_public)"
+      },
+      {
+        "table": "stories",
+        "definition": "CREATE INDEX idx_stories_parent_story_id ON public.stories USING btree (parent_story_id)"
+      },
+      {
+        "table": "story_anchors",
+        "definition": "CREATE UNIQUE INDEX story_anchors_pkey ON public.story_anchors USING btree (id)"
+      },
+      {
+        "table": "story_anchors",
+        "definition": "CREATE UNIQUE INDEX story_anchors_story_id_anchor_type_anchor_id_key ON public.story_anchors USING btree (story_id, anchor_type, anchor_id)"
+      },
+      {
+        "table": "story_entry_points",
+        "definition": "CREATE INDEX story_entry_points_event_idx ON public.story_entry_points USING btree (source_story_id, event_id) WHERE (event_id IS NOT NULL)"
+      },
+      {
+        "table": "story_entry_points",
+        "definition": "CREATE UNIQUE INDEX story_entry_points_pkey ON public.story_entry_points USING btree (id)"
+      },
+      {
+        "table": "story_entry_points",
+        "definition": "CREATE UNIQUE INDEX story_entry_points_unique ON public.story_entry_points USING btree (source_story_id, target_story_id, period_id, event_id) NULLS NOT DISTINCT"
+      },
+      {
+        "table": "story_entry_points",
+        "definition": "CREATE INDEX story_entry_points_target_idx ON public.story_entry_points USING btree (target_story_id)"
+      },
+      {
+        "table": "story_entry_points",
+        "definition": "CREATE INDEX story_entry_points_period_idx ON public.story_entry_points USING btree (source_story_id, period_id) WHERE (period_id IS NOT NULL)"
+      },
+      {
+        "table": "story_periods",
+        "definition": "CREATE INDEX story_periods_parent_period_id_idx ON public.story_periods USING btree (parent_period_id, story_id)"
+      },
+      {
+        "table": "story_periods",
+        "definition": "CREATE UNIQUE INDEX story_periods_pkey ON public.story_periods USING btree (story_id, period_id)"
+      }
+    ],
+    "policies": [
+      {
+        "name": "ut_delete_stories",
+        "qual": "((( SELECT auth.uid() AS uid) = owner_user_id) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+        "check": null,
+        "roles": [
+          "authenticated"
+        ],
+        "table": "stories",
+        "command": "DELETE"
+      },
+      {
+        "name": "ut_insert_stories",
+        "qual": null,
+        "check": "((( SELECT auth.uid() AS uid) = owner_user_id) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+        "roles": [
+          "authenticated"
+        ],
+        "table": "stories",
+        "command": "INSERT"
+      },
+      {
+        "name": "ut_read_stories",
+        "qual": "((is_public IS TRUE) OR (( SELECT auth.uid() AS uid) = owner_user_id))",
+        "check": null,
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "table": "stories",
+        "command": "SELECT"
+      },
+      {
+        "name": "ut_update_stories",
+        "qual": "((( SELECT auth.uid() AS uid) = owner_user_id) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+        "check": "((( SELECT auth.uid() AS uid) = owner_user_id) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+        "roles": [
+          "authenticated"
+        ],
+        "table": "stories",
+        "command": "UPDATE"
+      },
+      {
+        "name": "ut_read_story_anchors",
+        "qual": "(EXISTS ( SELECT 1\n   FROM stories s\n  WHERE (s.id = story_anchors.story_id)))",
+        "check": null,
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "table": "story_anchors",
+        "command": "SELECT"
+      },
+      {
+        "name": "ut_write_story_anchors",
+        "qual": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_anchors.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+        "check": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_anchors.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+        "roles": [
+          "authenticated"
+        ],
+        "table": "story_anchors",
+        "command": "ALL"
+      },
+      {
+        "name": "entry_points_delete",
+        "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.source_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.target_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))))",
+        "check": null,
+        "roles": [
+          "authenticated"
+        ],
+        "table": "story_entry_points",
+        "command": "DELETE"
+      },
+      {
+        "name": "entry_points_insert",
+        "qual": null,
+        "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.source_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.target_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))))",
+        "roles": [
+          "authenticated"
+        ],
+        "table": "story_entry_points",
+        "command": "INSERT"
+      },
+      {
+        "name": "entry_points_read",
+        "qual": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE (s.id = story_entry_points.source_story_id))) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE (s.id = story_entry_points.target_story_id))))",
+        "check": null,
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "table": "story_entry_points",
+        "command": "SELECT"
+      },
+      {
+        "name": "ut_read_story_periods",
+        "qual": "(EXISTS ( SELECT 1\n   FROM stories s\n  WHERE (s.id = story_periods.story_id)))",
+        "check": null,
+        "roles": [
+          "anon",
+          "authenticated"
+        ],
+        "table": "story_periods",
+        "command": "SELECT"
+      },
+      {
+        "name": "ut_write_story_periods",
+        "qual": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_periods.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+        "check": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_periods.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+        "roles": [
+          "authenticated"
+        ],
+        "table": "story_periods",
+        "command": "ALL"
+      }
+    ],
+    "triggers": [
+      {
+        "table": "stories",
+        "trigger": "trg_stories_updated_at",
+        "statement": "EXECUTE FUNCTION set_updated_at()"
+      },
+      {
+        "table": "story_periods",
+        "trigger": "trg_story_period_hierarchy",
+        "statement": "EXECUTE FUNCTION check_story_period_hierarchy()"
+      },
+      {
+        "table": "story_periods",
+        "trigger": "trg_story_period_hierarchy",
+        "statement": "EXECUTE FUNCTION check_story_period_hierarchy()"
+      }
+    ],
+    "constraints": [
+      {
+        "name": "stories_id_owner_unique",
+        "table": "stories",
+        "definition": "UNIQUE (id, owner_user_id)"
+      },
+      {
+        "name": "stories_owner_user_id_fkey",
+        "table": "stories",
+        "definition": "FOREIGN KEY (owner_user_id) REFERENCES auth.users(id) ON DELETE RESTRICT"
+      },
+      {
+        "name": "stories_parent_same_owner",
+        "table": "stories",
+        "definition": "FOREIGN KEY (parent_story_id, owner_user_id) REFERENCES stories(id, owner_user_id)"
+      },
+      {
+        "name": "stories_parent_story_id_fkey",
+        "table": "stories",
+        "definition": "FOREIGN KEY (parent_story_id) REFERENCES stories(id)"
+      },
+      {
+        "name": "stories_pkey",
+        "table": "stories",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "name": "story_anchors_anchor_type_check",
+        "table": "story_anchors",
+        "definition": "CHECK ((anchor_type = ANY (ARRAY['period'::text, 'event'::text])))"
+      },
+      {
+        "name": "story_anchors_pkey",
+        "table": "story_anchors",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "name": "story_anchors_story_id_anchor_type_anchor_id_key",
+        "table": "story_anchors",
+        "definition": "UNIQUE (story_id, anchor_type, anchor_id)"
+      },
+      {
+        "name": "story_anchors_story_id_fkey",
+        "table": "story_anchors",
+        "definition": "FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE"
+      },
+      {
+        "name": "story_entry_points_distinct_stories",
+        "table": "story_entry_points",
+        "definition": "CHECK ((source_story_id <> target_story_id))"
+      },
+      {
+        "name": "story_entry_points_event",
+        "table": "story_entry_points",
+        "definition": "FOREIGN KEY (source_story_id, event_id) REFERENCES story_events(story_id, event_id) ON DELETE CASCADE"
+      },
+      {
+        "name": "story_entry_points_location",
+        "table": "story_entry_points",
+        "definition": "CHECK ((num_nonnulls(period_id, event_id) = 1))"
+      },
+      {
+        "name": "story_entry_points_period",
+        "table": "story_entry_points",
+        "definition": "FOREIGN KEY (source_story_id, period_id) REFERENCES story_periods(story_id, period_id) ON DELETE CASCADE"
+      },
+      {
+        "name": "story_entry_points_pkey",
+        "table": "story_entry_points",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "name": "story_entry_points_source_story_id_fkey",
+        "table": "story_entry_points",
+        "definition": "FOREIGN KEY (source_story_id) REFERENCES stories(id) ON DELETE CASCADE"
+      },
+      {
+        "name": "story_entry_points_target_story_id_fkey",
+        "table": "story_entry_points",
+        "definition": "FOREIGN KEY (target_story_id) REFERENCES stories(id) ON DELETE CASCADE"
+      },
+      {
+        "name": "story_entry_points_unique",
+        "table": "story_entry_points",
+        "definition": "UNIQUE NULLS NOT DISTINCT (source_story_id, target_story_id, period_id, event_id)"
+      },
+      {
+        "name": "story_periods_no_self_parent",
+        "table": "story_periods",
+        "definition": "CHECK (((parent_period_id)::text IS DISTINCT FROM (period_id)::text))"
+      },
+      {
+        "name": "story_periods_parent_in_same_story",
+        "table": "story_periods",
+        "definition": "FOREIGN KEY (story_id, parent_period_id) REFERENCES story_periods(story_id, period_id) DEFERRABLE INITIALLY DEFERRED"
+      },
+      {
+        "name": "story_periods_period_id_fkey",
+        "table": "story_periods",
+        "definition": "FOREIGN KEY (period_id) REFERENCES periods(id) ON DELETE CASCADE"
+      },
+      {
+        "name": "story_periods_pkey",
+        "table": "story_periods",
+        "definition": "PRIMARY KEY (story_id, period_id)"
+      },
+      {
+        "name": "story_periods_story_id_fkey",
+        "table": "story_periods",
+        "definition": "FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE"
+      }
+    ]
+  }
+}
