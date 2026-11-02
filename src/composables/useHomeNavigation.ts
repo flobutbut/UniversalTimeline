@@ -28,7 +28,6 @@ export function useHomeNavigation() {
   const storySuggestions = ref<StorySuggestion[]>([]);
   // Frises quittées, chacune avec le chemin de périodes ouvert au moment du départ.
   const storyStack = ref<StoryFrame[]>([]);
-  const allowCatalogueFallback = ref(true);
   const crumbs = computed(() => buildTimelineBreadcrumb(
     [...storyStack.value, { id: currentStoryId.value, path: [...parentStack.value, ...(currentPeriod.value ? [currentPeriod.value] : [])] }],
     id => { const title = stories.value.find(story => story.id === id)?.title; return title?.fr || title?.en || 'Timeline'; },
@@ -48,9 +47,7 @@ export function useHomeNavigation() {
   }
 
   function childrenOf(parentId: string | null) {
-    return currentStoryPeriods.value.length || !allowCatalogueFallback.value
-      ? storyChildrenOf(parentId, currentStoryPeriods.value)
-      : parentId ? dataStore.childrenOf(parentId) : dataStore.rootPeriods;
+    return storyChildrenOf(parentId, currentStoryPeriods.value);
   }
 
   // Cached HomeView remains subscribed to canonical saves and deletions.
@@ -91,10 +88,6 @@ export function useHomeNavigation() {
         dataStore.ensureStoriesLoaded(),
       ]);
       if (!isCurrent()) return;
-      if (!storyPeriods.length && allowCatalogueFallback.value) {
-        await dataStore.ensureRootsLoaded();
-        if (!isCurrent()) return;
-      }
       currentStoryPeriods.value = storyPeriods;
       currentStoryAllEvents.value = storyEventRows;
       const bounds = [...storyPeriods.flatMap(period => [period.startYearsBP, period.endYearsBP]), ...storyEventRows.map(event => event.dateYearsBP)]
@@ -132,10 +125,10 @@ export function useHomeNavigation() {
         storySuggestions.value = suggestions;
         return;
       }
-      const children = currentStoryPeriods.value.length ? childrenOf(period.id) : await dataStore.ensureChildrenLoaded(period.id);
+      const children = childrenOf(period.id);
       if (!isCurrent() || !dataStore.periodById(period.id)) return;
       if (currentPeriod.value) parentStack.value.push(currentPeriod.value);
-      currentPeriod.value = dataStore.periodById(period.id);
+      currentPeriod.value = currentStoryPeriods.value.find(p => p.id === period.id) ?? null;
       displayedPeriods.value = children;
       storyEvents.value = eventsForPeriod(currentPeriod.value);
     } catch (cause) {
@@ -168,7 +161,6 @@ export function useHomeNavigation() {
   };
 
   const loadStory = async (id: string, restorePeriodNav?: StoryPeriodNavSnapshot, verifyStory = false) => {
-    allowCatalogueFallback.value = false;
     currentStoryId.value = id;
     storySuggestions.value = [];
     currentStoryBounds.value = null;

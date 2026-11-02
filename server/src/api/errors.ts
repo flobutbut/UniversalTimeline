@@ -25,6 +25,7 @@ export function publicApiError(error: unknown, fallback: string, messages: Error
   switch (fields.code) {
     case '42501': return { status: 403, message: 'Vous n’avez pas accès à cette opération.' };
     case '23505': return { status: 409, message: messages.conflict ?? 'Cet identifiant est déjà utilisé.' };
+    case '23514': return { status: 409, message: 'Ce classement est invalide ou créerait un cycle dans la frise.' };
     case '23503': return { status: 409, message: messages.foreignKey ?? 'Cet élément est encore lié à d’autres données ou référence un élément absent.' };
     case '22P02': return { status: 400, message: 'Un identifiant ou une valeur est invalide.' };
     case '55P03': case '40P01': case '40001': return { status: 503, message: messages.busy ?? 'Le service est occupé. Réessayez.' };

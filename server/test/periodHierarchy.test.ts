@@ -1,55 +1,34 @@
 // @vitest-environment node
-import { it, expect, vi } from 'vitest';
-import { changePeriodParent } from '../src/services/periodHierarchy';
-import { runInTransaction } from '../src/api/transaction';
-
-it('serializes crossed moves so only one commits (in-memory lock simulation)', async () => {
-  const parents = new Map<string, string | null>([['a', null], ['b', null]]);
-  let lockTail = Promise.resolve();
-  const connections: any[] = [];
-  const provider = {
-    async connect() {
-      let unlock: (() => void) | undefined;
-      const client = { release: vi.fn(), query: vi.fn(async (sql: string, params?: any[]) => {
-        if (sql.startsWith('LOCK TABLE')) {
-          const previous = lockTail;
-          lockTail = new Promise<void>(resolve => { unlock = resolve; });
-          await previous;
-        } else if (sql === 'COMMIT' || sql === 'ROLLBACK') {
-          unlock?.();
-        } else if (sql.startsWith('SELECT id FROM')) {
-          return { rows: parents.has(params![0]) ? [{ id: params![0] }] : [] };
-        } else if (sql.includes('WITH RECURSIVE')) {
-          const rows: { id: string; parent_id: string | null }[] = [];
-          const visited = new Set<string>();
-          let id: string | null = params![0];
-          while (id !== null && parents.has(id) && !visited.has(id)) {
-            visited.add(id);
-            const parent_id = parents.get(id)!;
-            rows.push({ id, parent_id });
-            id = parent_id;
-          }
-          return { rows };
-        } else if (sql.includes('UPDATE public.periods')) {
-          parents.set(params![1], params![0]);
-          return { rows: [{ id: params![1], parent_id: params![0] }] };
-        }
-        return { rows: [] };
-      }) };
-      connections.push(client);
-      return client as any;
-    },
-  };
-  const results = await Promise.allSettled([
-    runInTransaction(provider, client => changePeriodParent(client, 'a', 'b')),
-    runInTransaction(provider, client => changePeriodParent(client, 'b', 'a')),
-  ]);
-  expect(results.filter(result => result.status === 'fulfilled')).toHaveLength(1);
-  const rejected = results.find(result => result.status === 'rejected') as PromiseRejectedResult;
-  expect(rejected.reason).toMatchObject({ status: 409 });
-  expect(parents.get('a') === 'b' && parents.get('b') === 'a').toBe(false);
-  const statements = connections.flatMap(client => client.query.mock.calls.map((args: any[]) => args[0]));
-  expect(statements.filter(sql => sql === 'COMMIT')).toHaveLength(1);
-  expect(statements.filter(sql => sql === 'ROLLBACK')).toHaveLength(1);
-  connections.forEach(client => expect(client.release).toHaveBeenCalledOnce());
+import { beforeEach, it, expect, vi } from 'vitest';
+import { changeStoryAssociations } from '../src/services/storyAssociations';
+import * as relations from '../src/repositories/storyRelationsRepository';
+vi.mock('../src/repositories/storyRelationsRepository', () => ({
+  setRelationLockTimeout: vi.fn(), lockWritableStory: vi.fn(), lockAssociationTargets: vi.fn(),
+  hasAssociation: vi.fn(), insertAssociations: vi.fn(), setPeriodPlacements: vi.fn(), readPeriodPlacements: vi.fn(),
+}));
+const client = { query: vi.fn() };
+beforeEach(() => {
+  vi.resetAllMocks();
+  vi.mocked(relations.lockWritableStory).mockResolvedValue({ id: 1 });
+  vi.mocked(relations.lockAssociationTargets).mockImplementation(async (_c, _k, ids) => ids.map(id => ({id})));
+  vi.mocked(relations.hasAssociation).mockResolvedValue(true);
+  vi.mocked(relations.readPeriodPlacements).mockResolvedValue([{id:'child',parent_id:'root'},{id:'root',parent_id:null}]);
+});
+it('requires a parent inside the writable frise before inserting or moving', async () => {
+  vi.mocked(relations.hasAssociation).mockResolvedValue(false);
+  await expect(changeStoryAssociations(client,'1','period',['child'],false,'outside')).rejects.toMatchObject({status:409});
+  expect(relations.insertAssociations).not.toHaveBeenCalled(); expect(relations.setPeriodPlacements).not.toHaveBeenCalled();
+});
+it('leaves the previous placement intact when an association is added without a parent instruction', async () => {
+  await changeStoryAssociations(client,'1','period',['child'],false);
+  expect(relations.setPeriodPlacements).not.toHaveBeenCalled(); expect(client.query).not.toHaveBeenCalled();
+});
+it('refuses a corrupt local ancestor chain instead of treating a missing parent as a root', async () => {
+  vi.mocked(relations.readPeriodPlacements).mockResolvedValue([{id:'child',parent_id:'missing'}]);
+  await expect(changeStoryAssociations(client,'1','period',['child'],false)).rejects.toMatchObject({status:409});
+});
+it('does not read or write associations in a frise that is not writable', async () => {
+  vi.mocked(relations.lockWritableStory).mockResolvedValue(undefined as never);
+  await expect(changeStoryAssociations(client,'1','period',['child'],false,'root')).rejects.toMatchObject({status:404});
+  expect(relations.insertAssociations).not.toHaveBeenCalled();
 });

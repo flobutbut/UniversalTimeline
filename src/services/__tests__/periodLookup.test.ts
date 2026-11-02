@@ -47,9 +47,9 @@ it('distinguishes a missing event from a failed event lookup', async () => {
   await expect(EventApiService.getInstance().getEventById('Q123')).rejects.toThrow('Network');
 });
 
-it('maps the authoritative parent response', async () => {
-  vi.mocked(apiClient.patch).mockResolvedValue({ id: 'child', parent_id: 'new-parent', has_children: true, categories: [{ id: 'cat' }] });
-  expect(await periods.updateParent('child', 'new-parent')).toMatchObject({ parentId: 'new-parent', hasChildren: true, categories: [{ id: 'cat' }] });
+it('refuses global moves without calling the API', async () => {
+  await expect(periods.updateParent('child','new-parent')).rejects.toThrow('frise');
+  expect(apiClient.patch).not.toHaveBeenCalled();
 });
 
 it('finds an event by its stored Wikidata link only, never by an internal ID shaped like a Q-id', async () => {

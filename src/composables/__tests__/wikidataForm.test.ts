@@ -43,30 +43,20 @@ it('keeps the draft and original error after an import failure, then retries the
 });
 
 it('keeps loading until categories and parent enrichment finish, including a zero child count', async () => {
-  const classes = deferred<string[]>(); const parent = deferred<string | null>();
+  const classes = deferred<string[]>();
   vi.mocked(WikidataQueryService.getInstance().getEntityClasses).mockReturnValue(classes.promise);
-  vi.mocked(WikidataQueryService.getInstance().getPartOfParentQid).mockReturnValue(parent.promise);
   const { form, flow, count } = setup('period');
   const importing = flow.importCurrent(); await flushPromises();
   expect(flow.loading.value).toBe(true); expect(form.title.fr).toBe('Mon brouillon');
-  classes.resolve([]); await flushPromises(); expect(flow.loading.value).toBe(true);
-  parent.resolve(null); await importing;
+  classes.resolve([]); await importing;
   expect(flow.loading.value).toBe(false); expect(form.title.fr).toBe('Période importée'); expect(count).toHaveBeenCalledWith(0);
 });
 
 it('displays optional enrichment failures without discarding the main data or manual categories', async () => {
   vi.mocked(WikidataQueryService.getInstance().getEntityClasses).mockRejectedValue(new Error('Catégories inaccessibles'));
-  vi.mocked(WikidataQueryService.getInstance().getPartOfParentQid).mockRejectedValue(new Error('P361 inaccessible'));
   const { form, flow } = setup('period'); await flow.importCurrent();
   expect(form.title.fr).toBe('Période importée'); expect(form.categories).toEqual(['manual']); expect(form.parentId).toBe('chosen');
-  expect(flow.notice.value).toContain('catégories'); expect(flow.notice.value).toContain('parent'); expect(flow.error.value).toBeNull();
-});
-
-it('keeps a chosen parent and warns when catalogue resolution fails', async () => {
-  vi.mocked(WikidataQueryService.getInstance().getPartOfParentQid).mockResolvedValue('Q2');
-  vi.mocked(PeriodApiService.getInstance().getPeriodByWikidataId).mockRejectedValue(new Error('Base hors ligne'));
-  const { form, flow } = setup('period'); await flow.importCurrent();
-  expect(form.title.fr).toBe('Période importée'); expect(form.parentId).toBe('chosen'); expect(flow.notice.value).toContain('conservé');
+  expect(flow.notice.value).toContain('catégories'); expect(flow.error.value).toBeNull();
 });
 
 it('ignores an older import error while a newer import is loading', async () => {
@@ -90,16 +80,6 @@ it.each(['edit', 'close', 'context', 'dispose'] as const)('ignores a late import
   pending.resolve(event); await importing;
   expect(form.title.fr).toBe(action === 'edit' ? 'Ma correction' : 'Mon brouillon');
   expect(flow.notice.value).toBeNull(); expect(flow.error.value).toBeNull(); expect(flow.loading.value).toBe(false);
-});
-
-it('does not assign a stale parent or payload after a manual edit during catalogue lookup', async () => {
-  const pending = deferred<any>();
-  vi.mocked(WikidataQueryService.getInstance().getPartOfParentQid).mockResolvedValue('Q2');
-  vi.mocked(PeriodApiService.getInstance().getPeriodByWikidataId).mockReturnValue(pending.promise);
-  const { form, flow } = setup('period'); const importing = flow.importCurrent(); await flushPromises();
-  form.parentId = 'new-choice'; form.title.fr = 'Saisie récente';
-  pending.resolve({ id: 'old-parent' }); await importing;
-  expect(form.parentId).toBe('new-choice'); expect(form.title.fr).toBe('Saisie récente'); expect(flow.notice.value).toBeNull();
 });
 
 it('propagates mandatory import errors and rejects invalid Q-ids before any request', async () => {
@@ -132,8 +112,10 @@ it.each(['edit','close','dispose'] as const)('aborts an import signal after %s w
   if(action==='edit') form.title.fr='Ma saisie';if(action==='close') context.open=false;if(action==='dispose') scope.stop();
   expect(signal.aborted).toBe(true);pending.resolve(event);await importing;expect(form.title.fr).toBe(action==='edit'?'Ma saisie':'Mon brouillon');
 });
-it('aborts catalogue lookup on a new draft without allowing a stale parent assignment',async()=>{
-  const pending=deferred<any>();vi.mocked(WikidataQueryService.getInstance().getPartOfParentQid).mockResolvedValue('Q2');const lookup=vi.mocked(PeriodApiService.getInstance().getPeriodByWikidataId).mockReturnValue(pending.promise);
-  const {form,flow}=setup('period');const importing=flow.importCurrent();await flushPromises();const signal=lookup.mock.calls[0][1]!.signal!;
-  form.parentId='manual';expect(signal.aborted).toBe(true);pending.resolve({id:'stale'});await importing;expect(form.parentId).toBe('manual');
+
+it('imports shared facts without reading or overwriting a frise placement', async () => {
+  const {form,flow}=setup('period'); await flow.importCurrent();
+  expect(form.parentId).toBe('chosen'); expect(form.title.fr).toBe('Période importée');
+  expect(WikidataQueryService.getInstance().getPartOfParentQid).not.toHaveBeenCalled();
+  expect(PeriodApiService.getInstance().getPeriodByWikidataId).not.toHaveBeenCalled();
 });

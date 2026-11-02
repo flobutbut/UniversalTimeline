@@ -52,35 +52,6 @@ it('loads roots only when opened, sorts them, formats their dates and filters th
   await view.get('input[type="search"]').setValue('absent'); expect(view.text()).toContain('Aucun résultat');
 });
 
-it('navigates children and back without changing the selected filter, then chooses and clears a period', async () => {
-  view = mount(PeriodSelect, { props: { modelValue: '' } }); await open();
-  await drill('Âge ancien').trigger('click'); await flushPromises();
-  expect(view.get('.period-select__back').text()).toBe('Âge ancien');
-  expect(choose('Branche').exists()).toBe(true);
-  expect(view.emitted('change')).toBeUndefined();
-  await drill('Branche').trigger('click'); await flushPromises();
-  expect(choose('Feuille').exists()).toBe(true);
-  await view.get('.period-select__back').trigger('click');
-  await choose('Branche').trigger('click'); await view.setProps({ modelValue: 'child' });
-  expect(view.emitted('update:modelValue')).toEqual([['child']]);
-  expect(view.find('[role="dialog"]').exists()).toBe(false);
-  expect(view.get('.period-select__summary').text()).toContain('Branche');
-  await open(); await button('Toutes les périodes').trigger('click');
-  expect(view.emitted('change')).toEqual([['child'], ['']]);
-});
-
-it('reopens a selected nested period at its parent level using the shared store cache', async () => {
-  useDataStore().updatePeriods([root, child, leaf].map(PeriodApiService.mapPeriod));
-  view = mount(PeriodSelect, { props: { modelValue: 'leaf' } }); await open();
-  expect(view.get('.period-select__back').text()).toBe('Branche');
-  expect(choose('Feuille').attributes('aria-pressed')).toBe('true');
-  await choose('Feuille').trigger('click');
-  expect(view.emitted('change')).toEqual([['']]);
-  await view.setProps({ modelValue: '' }); await open();
-  expect(view.find('.period-select__back').exists()).toBe(false);
-  expect(apiClient.get).toHaveBeenCalledTimes(4);
-});
-
 it('shows root failures and retries without treating them as an empty list', async () => {
   vi.mocked(apiClient.get).mockRejectedValueOnce(new Error('Racines hors ligne')).mockResolvedValueOnce([]);
   view = mount(PeriodSelect, { props: { modelValue: '' } }); await open();
@@ -89,49 +60,6 @@ it('shows root failures and retries without treating them as an empty list', asy
   await button('Réessayer').trigger('click'); await flushPromises();
   expect(view.find('[role="alert"]').exists()).toBe(false); expect(view.text()).toContain('Aucune période');
   expect(view.find('[role="status"]').exists()).toBe(false);
-});
-
-it('retries the failed children request and distinguishes a successful empty child level', async () => {
-  let failed = true;
-  vi.mocked(apiClient.get).mockImplementation(async url => {
-    if (url === '/periods') return [root] as any;
-    if (failed) { failed = false; throw new Error('Enfants hors ligne'); }
-    return [] as any;
-  });
-  view = mount(PeriodSelect, { props: { modelValue: '' } }); await open();
-  await drill('Âge ancien').trigger('click'); await flushPromises();
-  expect(view.get('[role="alert"]').text()).toContain('Enfants hors ligne');
-  await button('Réessayer').trigger('click'); await flushPromises();
-  expect(view.get('.period-select__back').text()).toBe('Âge ancien'); expect(view.text()).toContain('Aucune sous-période');
-});
-
-it('cancels local navigation when the panel closes during a pending children request', async () => {
-  const pending = deferred<any[]>();
-  vi.mocked(apiClient.get).mockImplementation(async url => url === '/periods' ? [root] as any : pending.promise);
-  view = mount(PeriodSelect, { props: { modelValue: '' }, attachTo: document.body }); await open();
-  await drill('Âge ancien').trigger('click'); await flushPromises();
-  expect(view.find('[role="status"]').exists()).toBe(true);
-  document.body.click(); await flushPromises();
-  pending.resolve([child]); await flushPromises(); await open();
-  expect(view.find('.period-select__back').exists()).toBe(false);
-  expect(choose('Âge ancien').exists()).toBe(true);
-});
-
-it('does not publish an older navigation after reopening and choosing a different branch', async () => {
-  const first = deferred<any[]>(); const second = deferred<any[]>();
-  const otherRoot = { ...other, has_children: true };
-  vi.mocked(apiClient.get).mockImplementation(async url => {
-    if (url === '/periods') return [root, otherRoot] as any;
-    return url === '/periods/root/children' ? first.promise : second.promise;
-  });
-  view = mount(PeriodSelect, { props: { modelValue: '' } }); await open();
-  await drill('Âge ancien').trigger('click'); await flushPromises();
-  await view.get('button.base-select__trigger').trigger('click'); await open();
-  await drill('Zoologie').trigger('click'); await flushPromises();
-  second.resolve([{ ...leaf, parent_id: 'other' }]); await flushPromises();
-  first.resolve([child]); await flushPromises();
-  expect(view.get('.period-select__back').text()).toBe('Zoologie');
-  expect(choose('Feuille').exists()).toBe(true); expect(view.text()).not.toContain('Branche');
 });
 
 it('does not update its navigation after the owning scope is disposed', async () => {
@@ -157,7 +85,7 @@ it('keeps disabled period controls closed, then dismisses an enabled panel with 
 
 it('keeps the period and category filters working together in the real events view', async () => {
   vi.mocked(apiClient.get).mockImplementation(async url => {
-    if (url === '/periods') return [root] as any;
+    if (url === '/periods') return [root,child] as any;
     if (url === '/periods/root/children') return [child] as any;
     if (url === '/events') return [
       { id: 'inside', label_fr: 'Inclus', date: 'M20', date_years_bp: 20000000, categories: [{ id: 'cat', label: { fr: 'Catégorie', en: '' } }] },
@@ -167,7 +95,7 @@ it('keeps the period and category filters working together in the real events vi
     throw new Error(`Unexpected read ${url}`);
   });
   view = mount(EventsView); await flushPromises();
-  await open(); await drill('Âge ancien').trigger('click'); await flushPromises(); await choose('Branche').trigger('click'); await flushPromises();
+  await open(); await choose('Branche').trigger('click'); await flushPromises();
   expect(view.text()).toContain('Inclus'); expect(view.text()).toContain('Sans catégorie'); expect(view.text()).not.toContain('Hors période');
   const category = view.getComponent(Select);
   await category.get('[role="combobox"]').trigger('click');
@@ -224,4 +152,14 @@ it('ignores catalogue search results after the parent picker is closed', async (
   await open();
   expect(view.text()).not.toContain('Ancien résultat');
   vi.useRealTimers();
+});
+
+it('selects and clears any catalogue period directly without reading a global hierarchy', async () => {
+  vi.mocked(apiClient.get).mockResolvedValue([root,child,leaf,other]);
+  view = mount(PeriodSelect,{props:{modelValue:''}}); await open();
+  expect(view.findAll('.period-select__drill')).toHaveLength(0);
+  await choose('Feuille').trigger('click'); await view.setProps({modelValue:'leaf'});
+  expect(view.emitted('change')).toEqual([['leaf']]);
+  await open(); await button('Toutes les périodes').trigger('click');
+  expect(view.emitted('change')).toEqual([['leaf'],['']]); expect(apiClient.get).toHaveBeenCalledOnce();
 });

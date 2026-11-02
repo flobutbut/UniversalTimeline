@@ -7,7 +7,7 @@ export interface ListPeriod {
   categories: Category[];
   /** Champs enrichis (API mapToPeriod, finder, enfants Wikidata virtuels) */
   parentId?: string | null;
-  /** Parent inside this frise; undefined means catalogue hierarchy. */
+  /** Parent inside this frise; catalogue records have no hierarchy. */
   storyParentId?: string | null;
   hasParent?: boolean;
   hasChildren?: boolean;
@@ -72,7 +72,7 @@ export interface Category {
 // Types pour les périodes
 export interface Period extends ListPeriod {
   hasParent: boolean;
-  children: string[];  // Identifiants du catalogue des enfants.
+  children: string[];  // Identifiants des enfants dans le contexte de la frise.
   temporalLocation: string;
 }
 

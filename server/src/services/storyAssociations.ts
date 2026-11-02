@@ -1,4 +1,3 @@
-import * as legacyAssociations from '../repositories/storyRepository.js';
 import type { TransactionClient } from '../api/transaction.js';
 import { StoryAssociationError } from '../domain/errors.js';
 import { checkAncestorChain } from '../domain/hierarchy.js';
@@ -13,7 +12,6 @@ async function requireWritableStory(client: TransactionClient, storyId: string) 
 export async function changeRootPeriod(client: TransactionClient, storyId: string, periodId: string) {
   await relations.setRelationLockTimeout(client);
   await requireWritableStory(client, storyId);
-  await relations.lockCatalogueHierarchyForRead(client);
   if ((await relations.lockAssociationTargets(client, 'period', [periodId])).length !== 1) {
     throw new StoryAssociationError(404, 'La période choisie est introuvable.');
   }
@@ -27,11 +25,13 @@ export async function changeStoryAssociations(client: TransactionClient, storyId
   if (remove) {
     await relations.removeAssociations(client, storyId, kind, ids);
   } else {
-    if (kind === 'period') await relations.lockCatalogueHierarchyForRead(client);
     const targets = [...new Set([...ids, ...(kind === 'period' && parentId ? [parentId] : [])])].sort();
     if (kind === 'period' && parentId && ids.includes(parentId)) throw new StoryAssociationError(409, 'Une période ne peut pas être son propre parent.');
     const entities = await relations.lockAssociationTargets(client, kind, targets);
     if (entities.length !== targets.length) throw new StoryAssociationError(404, 'Un des éléments à rattacher est introuvable.');
+    if (kind === 'period' && parentId && !await relations.hasAssociation(client, storyId, 'period', parentId)) {
+      throw new StoryAssociationError(409, 'La période parente doit appartenir à cette frise.');
+    }
     await relations.insertAssociations(client, storyId, kind, ids);
     if (kind === 'period') {
       await completePeriodPlacements(client, storyId, ids, parentId);
@@ -40,22 +40,16 @@ export async function changeStoryAssociations(client: TransactionClient, storyId
   return { storyId, kind, ids, operation: remove ? 'remove' : 'add' };
 }
 async function completePeriodPlacements(client: TransactionClient, storyId: string, ids: string[], parentId?: string | null) {
-  await relations.freezePeriodPlacements(client, storyId);
   if (parentId !== undefined) await relations.setPeriodPlacements(client, storyId, ids, parentId);
   const rows = await relations.readPeriodPlacements(client, storyId);
-  const present = new Set(rows.map(row => row.id));
-  const parents = new Map(rows.map(row => [row.id, row.parent_id && present.has(row.parent_id) ? row.parent_id : null]));
+  const parents = new Map(rows.map(row => [row.id, row.parent_id]));
   for (const id of ids) {
     if (checkAncestorChain(parents, id, new Set())) throw new StoryAssociationError(409, 'Ce placement créerait un cycle dans les périodes de la frise.');
   }
 }
 export async function changeSingleStoryAssociation(client: TransactionClient, storyId: string, kind: relations.AssociationKind, id: string, remove: boolean) {
-  await relations.setRelationLockTimeout(client);
-  await requireWritableStory(client, storyId);
-  if (kind === 'period' && !remove) await relations.lockCatalogueHierarchyForRead(client);
-  const result = await legacyAssociations.changeSingleAssociation(client, storyId, kind, id, remove);
-  if (kind === 'period' && !remove) await completePeriodPlacements(client, storyId, [id]);
-  return result;
+  await changeStoryAssociations(client, storyId, kind, [id], remove);
+  return { story_id: Number(storyId), [kind === 'period' ? 'period_id' : 'event_id']: id };
 }
 export async function linkChildStories(client: TransactionClient, parentId: string, childIds: string[], anchor?: { anchorType: 'period' | 'event'; anchorId: string }) {
   if (!childIds.every(id => /^[1-9]\d*$/.test(id))) throw new StoryAssociationError(400, 'Identifiant de frise enfant invalide.');

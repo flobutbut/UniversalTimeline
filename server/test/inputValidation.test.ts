@@ -83,7 +83,7 @@ it('normalizes recognized keys without accepting a client-supplied owner or iden
 });
 it('preserves free historical dates, explicit null parents and omitted/empty category semantics', () => {
   const data=parsePeriodWrite({...entity,start_date:'8. millennium BCE',end_date:'',parent_id:null},true);
-  expect(data.start_date).toBe('8. millennium BCE');expect(data.end_date).toBe('NOW');expect(data.parentId).toBeNull();expect(data.categories).toBeUndefined();
+  expect(data.start_date).toBe('8. millennium BCE');expect(data.end_date).toBe('NOW');expect(data).not.toHaveProperty('parentId');expect(data.categories).toBeUndefined();
   expect(parsePeriodWrite({...entity,categories:[]},false).categories).toEqual([]);
   expect(parsePeriodWrite({...entity,wikidata_id:' q123 '},true).wikidata_id).toBe('Q123');
   expect(parseEntityId('PER_SOLAR_SYS')).toBe('PER_SOLAR_SYS');

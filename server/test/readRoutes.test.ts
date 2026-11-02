@@ -31,7 +31,7 @@ async function get(path: string, params = {}, query = {}) {
   await route.stack[0].handle({ params, query }, res);
   return { status: res.status.mock.calls[0]?.[0] ?? 200, body: res.json.mock.calls[0]?.[0] };
 }
-it.each(['/periods', '/periods/:id/children'])('folds categories into one period and keeps the list contract: %s', async path => {
+it.each(['/periods'])('folds categories into one period and keeps the list contract: %s', async path => {
   rows([{ ...period, ...category }, { ...period, category_id: 'other', category_label_fr: 'Autre', category_label_en: 'Other' }]);
   const { body, status } = await get(path, { id: 'parent' });
   expect(status).toBe(200); expect(body).toEqual([{
@@ -150,4 +150,8 @@ it('resolves semantic IDs in one scoped catalogue query with bound parameters', 
 it('rejects invalid semantic identifiers before any catalogue query', async () => {
   expect((await get('/search/by-wikidata', {}, { ids: 'bad-id', only: 'events' })).status).toBe(400);
   expect(db).not.toHaveBeenCalled();
+});
+
+it('retires global children reads and never queries the database for them', async () => {
+  expect((await get('/periods/:id/children',{id:'parent'})).status).toBe(410); expect(db).not.toHaveBeenCalled();
 });

@@ -9,7 +9,6 @@ import { mutationErrorMessage } from '@/lib/mutationErrorMessage';
 import { useToast } from './useToast';
 import type { Story, StoryAnchor, ListPeriod, ListEvent, ListStory } from '@/types/database';
 import { useLatestRequest } from './useLatestRequest';
-import { collectStoryPeriodSubtreeIds } from '@/lib/storyPeriodFinderColumns';
 import type { EditableItem } from '@/types/editForm';
 import { previewStoryFromPeriod, type StoryFromPeriodPreview } from '@/lib/storyFromPeriod';
 
@@ -258,7 +257,7 @@ export function useDatabaseView() {
   };
   const handleDragOver = (_event: DragEvent) => { if (dragDropState.value.draggedItem) dragDropState.value.isDragOver = true; };
   const handleDragLeave = (_event: DragEvent) => { dragDropState.value.isDragOver = false; };
-  const removePeriodFromStory = (id: string) => mutateAssociations('period', collectStoryPeriodSubtreeIds(selectedStory.value?.periods ?? [], id), true);
+  const removePeriodFromStory = (id: string) => mutateAssociations('period', [id], true);
   // ─── Frise créée depuis une période : copie, la frise d'origine reste intacte ───
   const storyFromPeriod = ref<{ storyId: string; preview: StoryFromPeriodPreview; busy: boolean; error: string | null } | null>(null);
   const openStoryFromPeriod = (periodId: string) => {

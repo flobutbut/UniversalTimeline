@@ -3,7 +3,6 @@ import { before, beforeEach, after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import pg from 'pg';
 import { deleteUnusedPeriod } from '../dist/services/periodDeletion.js';
-import { changePeriodParent } from '../dist/services/periodHierarchy.js';
 import { runInTransaction } from '../dist/api/transaction.js';
 
 const socket = process.env.TIMELINE_TEST_SOCKET;
@@ -26,7 +25,7 @@ async function waitForLock(pid) {
 before(async () => {
   // Mirror the real FK actions: SET NULL for children, CASCADE for category/story links.
   await pool.query(`
-    CREATE TABLE public.periods (id varchar(255) PRIMARY KEY, parent_id varchar(255) REFERENCES public.periods(id) ON DELETE SET NULL, updated_at timestamptz);
+    CREATE TABLE public.periods (id varchar(255) PRIMARY KEY, updated_at timestamptz);
     CREATE TABLE public.categories (id text PRIMARY KEY);
     CREATE TABLE public.period_categories (period_id varchar(255) REFERENCES public.periods(id) ON DELETE CASCADE, category_id text REFERENCES public.categories(id), PRIMARY KEY(period_id, category_id));
     CREATE TABLE public.stories (id integer PRIMARY KEY);
@@ -36,31 +35,21 @@ before(async () => {
 });
 beforeEach(async () => {
   await pool.query('TRUNCATE public.story_periods, public.period_categories, public.stories, public.categories, public.periods, public.events');
-  await pool.query("INSERT INTO public.periods(id, parent_id) VALUES ('root', null), ('parent', 'root'), ('leaf', 'parent'), ('other', null)");
+  await pool.query("INSERT INTO public.periods(id) VALUES ('root'), ('parent'), ('leaf'), ('other')");
   await pool.query("INSERT INTO public.categories VALUES ('cat'); INSERT INTO public.period_categories VALUES ('leaf', 'cat'); INSERT INTO public.stories VALUES (1); INSERT INTO public.events VALUES ('event')");
 });
 after(() => pool.end());
 
 test('deletes an unused leaf and only its category associations, returning the real parent flag', async () => {
-  assert.deepEqual(await remove('leaf'), { id: 'leaf', parent: { id: 'parent', hasChildren: false } });
+  assert.deepEqual(await remove('leaf'), { id: 'leaf', parent: null });
   assert.equal((await pool.query("SELECT 1 FROM public.periods WHERE id='leaf'")).rowCount, 0);
   assert.equal((await pool.query('SELECT 1 FROM public.period_categories')).rowCount, 0);
   assert.equal((await pool.query('SELECT 1 FROM public.categories')).rowCount, 1);
   assert.equal((await pool.query('SELECT 1 FROM public.events')).rowCount, 1);
 });
 
-test('preserves the parent hasChildren flag while a sibling remains', async () => {
-  await pool.query("INSERT INTO public.periods(id, parent_id) VALUES ('sibling', 'parent')");
-  assert.deepEqual((await remove('leaf')).parent, { id: 'parent', hasChildren: true });
-});
-
 test('deletes a root only when it is unused and has no children', async () => {
   assert.deepEqual(await remove('other'), { id: 'other', parent: null });
-});
-
-test('refuses a parent instead of letting ON DELETE SET NULL detach children', async () => {
-  await assert.rejects(remove('parent'), { status: 409 });
-  assert.equal((await pool.query("SELECT parent_id FROM public.periods WHERE id='leaf'")).rows[0].parent_id, 'parent');
 });
 
 test('refuses a story period instead of letting ON DELETE CASCADE remove its links', async () => {
@@ -78,9 +67,9 @@ test('reports a missing period, including a second deletion', async () => {
 
 test('restores both the period and category associations if the final parent read fails', async () => {
   await assert.rejects(runInTransaction(pool, client => deleteUnusedPeriod({ query(sql, params) {
-    if (sql.includes('AS has_children')) throw new Error('Simulated response failure');
+    if (sql.startsWith('DELETE FROM public.periods WHERE')) throw new Error('Simulated deletion failure');
     return client.query(sql, params);
-  } }, 'leaf')), /Simulated response failure/);
+  } }, 'leaf')), /Simulated deletion failure/);
   assert.equal((await pool.query("SELECT 1 FROM public.periods WHERE id='leaf'")).rowCount, 1);
   assert.equal((await pool.query('SELECT 1 FROM public.period_categories')).rowCount, 1);
 });
@@ -123,24 +112,4 @@ test('a deletion in progress blocks new story references until its commit', asyn
     await linkingClient.query('ROLLBACK'); linkingClient.release();
   }
   assert.equal((await pool.query('SELECT 1 FROM public.story_periods')).rowCount, 0);
-});
-
-test('a deletion in progress blocks reparenting and the later move reports a missing parent', async () => {
-  const checked = pause(), finish = pause();
-  const deleting = runInTransaction(pool, client => deleteUnusedPeriod({ async query(sql, params) {
-    const result = await client.query(sql, params);
-    if (sql.includes('AS children')) { checked.resolve(); await finish.promise; }
-    return result;
-  } }, 'leaf'));
-  await checked.promise;
-  const movingClient = await pool.connect();
-  const moving = runInTransaction({ connect: async () => movingClient }, client => changePeriodParent(client, 'other', 'leaf')).then(value => ({ value }), error => ({ error }));
-  try {
-    await waitForLock(movingClient.processID);
-    finish.resolve(); await deleting;
-    assert.equal((await moving).error.status, 404);
-  } finally {
-    finish.resolve(); await deleting; await moving;
-  }
-  assert.equal((await pool.query("SELECT parent_id FROM public.periods WHERE id='other'")).rows[0].parent_id, null);
 });

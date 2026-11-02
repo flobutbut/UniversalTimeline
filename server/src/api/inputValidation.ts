@@ -87,6 +87,7 @@ export function parsePeriodWrite(value: unknown, create: true): PeriodWriteInput
 export function parsePeriodWrite(value: unknown, create: false): PeriodWriteInput;
 export function parsePeriodWrite(value: unknown, create: boolean): PeriodWriteInput {
   const body = inputObject(value);
+  if (body.parent_id != null) throw new InputValidationError('parent_id', 'Organisez les périodes dans une frise, pas dans le catalogue.');
   const parsed = {
     id: create ? parseEntityId(body.id) : undefined,
     wikidata_id: parseQid(body.wikidata_id, true)!,
@@ -94,8 +95,6 @@ export function parsePeriodWrite(value: unknown, create: boolean): PeriodWriteIn
     start_date: dateText(body.start_date, 'start_date', true)!,
     end_date: dateText(body.end_date, 'end_date') || (create ? 'NOW' : 'TODAY'),
     categories: body.categories,
-    parentId: Object.prototype.hasOwnProperty.call(body, 'parent_id')
-      ? (body.parent_id === null ? null : parseEntityId(body.parent_id, 'parent_id')) : undefined,
   };
   const errors = periodDateErrors(parsed.start_date, parsed.end_date);
   if (errors.start) throw new InputValidationError('start_date', errors.start);

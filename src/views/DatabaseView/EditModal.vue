@@ -229,23 +229,6 @@
 
         <div class="form-row" v-if="type === 'period'">
           <div class="form-group">
-            <PeriodSelect
-              v-model="parentPeriodModel"
-              :error="fieldError('parentId')"
-              label="Parent (catalogue)"
-              placeholder="Aucun — période racine"
-              size="sm"
-              search-remote
-              :exclude-id="mode === 'edit' && props.data?.id ? String(props.data.id) : null"
-            />
-            <p v-if="mode === 'create'" class="edit-modal__parent-hint">
-              Wikidata (P361) peut préremplir si le parent existe déjà en base. Sinon recherchez et choisissez le parent ici.
-            </p>
-            <p v-else class="edit-modal__parent-hint">
-              Choisissez le parent dans le catalogue ou laissez vide pour une période racine.
-            </p>
-          </div>
-          <div class="form-group">
             <Input
               v-model="form.location"
               label="Temporal location"
@@ -368,7 +351,6 @@ import Input from '@/components/base/Input.vue';
 import SearchInput from '@/components/base/SearchInput.vue';
 import Switch from '@/components/base/Switch.vue';
 import BaseSelect from '@/components/base/Select.vue';
-import PeriodSelect from '@/components/PeriodSelect.vue';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -460,15 +442,6 @@ const wikidataSearchInputRef = ref<{ focus: () => void } | null>(null);
 const wikidataDropdownRef = ref<HTMLElement | null>(null);
 const wikidataPanelOpen = ref(false);
 let wikidataFocusOutTimer: ReturnType<typeof setTimeout> | undefined;
-
-/** Le formulaire garde null pour une période racine. */
-const parentPeriodModel = computed({
-  get: () => form.parentId ?? null,
-  set: (v: string | number | (string | number)[] | null) => {
-    const raw = Array.isArray(v) ? '' : String(v ?? '');
-    form.parentId = raw.trim() ? raw.trim() : null;
-  },
-});
 
 const wikidataEntityImportType = computed<'period' | 'event' | null>(() =>
   props.type === 'period' || props.type === 'event' ? props.type : null,

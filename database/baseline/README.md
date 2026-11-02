@@ -1,14 +1,14 @@
-# Installation vide — état applicatif du 29 octobre 2026
+# Installation vide — état applicatif du 2 novembre 2026
 
-`application.sql` prépare les dix tables applicatives d’un **nouveau projet Supabase PostgreSQL 17 ou ultérieur**. Il reprend les types, colonnes, identité des stories, contraintes, index, quatre triggers et 21 policies observés dans le projet actuel. Il ne contient aucun compte, contenu, mot de passe ni compteur de la base distante.
+`application.sql` prépare les dix tables applicatives d’un **nouveau projet Supabase PostgreSQL 17 ou ultérieur**. Il reprend les types, colonnes, identité des stories, contraintes, index, cinq triggers et 21 policies observés dans le projet actuel. Il ne contient aucun compte, contenu, mot de passe ni compteur de la base distante.
 
 Le script est transactionnel et refuse de s’appliquer si un objet applicatif existe déjà. Il exige l’infrastructure Auth et les rôles gérés par Supabase. Il n’est jamais lancé au démarrage de l’API, ni par les tests sur le projet distant. Ne pas l’utiliser pour réparer ou réinitialiser le projet Universal-Timeline existant.
 
-Les trois fichiers de `../migrations/` sont l’historique des changements déjà inclus dans cet état initial ; **ne pas les rejouer après la baseline**. Les changements futurs devront avoir leurs propres migrations revues. Aucune ligne d’historique de migration distante n’est inventée par cette préparation.
+Les fichiers de `../migrations/` sont l’historique des changements déjà inclus dans cet état initial ; **ne pas les rejouer après la baseline**. Les changements futurs devront avoir leurs propres migrations revues. Aucune ligne d’historique de migration distante n’est inventée par cette préparation.
 
 Différences volontaires pour une nouvelle installation :
 
-- La routine historique inutilisée `maintain_period_relations`, incompatible avec le modèle courant, n’est pas réinstallée. Le projet existant conserve sa routine restreinte.
+- La routine historique inutilisée `maintain_period_relations`, incompatible avec le modèle courant, n’est pas réinstallée. La migration vers les relations propres aux frises retire également cette routine du projet existant.
 - Aucune colonne applicative n’utilise PostGIS. Cette extension facultative et les schémas internes Supabase ne sont pas copiés. S’il est nécessaire d’installer PostGIS, utiliser le schéma extensions, hors des schémas exposés.
 - Les séquences ne donnent aucun accès à anon ; authenticated reçoit seulement USAGE, suffisant pour les créations. Le modèle historique donnait des droits supplémentaires inutiles. Le schéma public n’est pas créable par les rôles clients. Ces restrictions s’appliquent à la baseline, sans modifier les droits du projet existant.
 

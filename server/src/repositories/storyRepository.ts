@@ -19,7 +19,7 @@ export async function listStories(db: TransactionClient) {
         (SELECT COALESCE(json_agg(json_build_object(
           'id', p.id, 'label_fr', p.label_fr, 'label_en', p.label_en,
           'start_date', p.start_date, 'end_date', p.end_date,
-          'start_years_bp', p.start_years_bp, 'end_years_bp', p.end_years_bp, 'parent_id', p.parent_id, 'story_parent_id', CASE WHEN COALESCE((to_jsonb(sp)->>'parent_override')::boolean, false) THEN to_jsonb(sp)->>'parent_period_id' ELSE p.parent_id END
+          'start_years_bp', p.start_years_bp, 'end_years_bp', p.end_years_bp, 'parent_id', NULL, 'story_parent_id', sp.parent_period_id
         ) ORDER BY p.id), '[]') FROM public.story_periods sp JOIN public.periods p ON p.id = sp.period_id WHERE sp.story_id = s.id) AS preview_periods,
         (SELECT COALESCE(json_agg(json_build_object(
           'id', e.id, 'date', e.date, 'date_years_bp', e.date_years_bp
@@ -53,7 +53,7 @@ export async function findStory(db: TransactionClient, id: string) {
 export async function listStoryPeriods(db: TransactionClient, id: string) {
   return (await db.query<JoinedPeriodRow>(`
       SELECT
-        p.*, CASE WHEN COALESCE((to_jsonb(sp)->>'parent_override')::boolean, false) THEN to_jsonb(sp)->>'parent_period_id' ELSE p.parent_id END AS story_parent_id,
+        p.*, NULL::varchar AS parent_id, sp.parent_period_id AS story_parent_id,
         c.id as category_id,
         c.label_fr as category_label_fr,
         c.label_en as category_label_en
@@ -97,9 +97,9 @@ export async function listStoryEvents(db: TransactionClient, id: string) {
 export async function listAssociatedPeriods(db: TransactionClient, storyId: string) {
   return (await db.query<Pick<PeriodRow, 'id' | 'wikidata_id' | 'label_fr' | 'label_en' | 'description_fr' | 'description_en' | 'start_date' | 'end_date' | 'parent_id' | 'story_parent_id' | 'start_years_bp' | 'end_years_bp' | 'has_children'>>(`
       SELECT p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
-             p.start_date, p.end_date, p.parent_id, CASE WHEN COALESCE((to_jsonb(sp)->>'parent_override')::boolean, false) THEN to_jsonb(sp)->>'parent_period_id' ELSE p.parent_id END AS story_parent_id,
+             p.start_date, p.end_date, NULL::varchar AS parent_id, sp.parent_period_id AS story_parent_id,
              p.start_years_bp, p.end_years_bp,
-             EXISTS(SELECT 1 FROM public.periods c WHERE c.parent_id = p.id) AS has_children
+             EXISTS(SELECT 1 FROM public.story_periods c WHERE c.story_id = sp.story_id AND c.parent_period_id = p.id) AS has_children
       FROM public.periods p
       JOIN public.story_periods sp ON p.id = sp.period_id
       WHERE sp.story_id = $1

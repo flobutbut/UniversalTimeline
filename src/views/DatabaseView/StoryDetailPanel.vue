@@ -140,8 +140,8 @@
                         @click="onFinderPeriodSelect(row.item, colIdx)"
                       >
                         <template #actions>
-                          <StoryItemActionsMenu v-if="row.inStory" :label="storyPeriodLabelForFinder(row.item).fr" :disabled="panelBusy" create-story
-                            @edit="emit('edit-period', row.item.id)" @remove="emit('remove-period', row.item.id)"
+                          <StoryItemActionsMenu v-if="row.inStory" :label="storyPeriodLabelForFinder(row.item).fr" :disabled="panelBusy" create-story movable
+                            @move="movingPeriodId = row.item.id" @edit="emit('edit-period', row.item.id)" @remove="emit('remove-period', row.item.id)"
                             @create-story="emit('create-story-from-period', row.item.id)" />
                           <button
                             v-else
@@ -291,6 +291,8 @@
     <EditModal v-if="periodImportDraft" :is-open="true" type="period" mode="create" :data="periodImportDraft"
       :loading="periodImportBusy" :error="periodImportError" allow-existing-periods :search-bounds="storySearchBounds" :excluded-period-ids="periodCreationExcludedIds"
       @close="closePeriodImport" @submit="submitPeriodImport" @select-period="selectExistingStoryPeriod" />
+    <MoveStoryPeriodModal v-if="movingPeriodId && story" :period-id="movingPeriodId" :periods="story.periods" :busy="panelBusy" :error="error"
+      @close="movingPeriodId = null" @confirm="movePeriod" />
     <!-- Modales de sélection -->
     <RootPeriodModal v-if="showRootPicker" :current-root-id="firstStoryRootPeriodId" :current-root-label="story?.periods.find(p => p.id === firstStoryRootPeriodId)?.label.fr" :busy="panelBusy" :error="error" @close="showRootPicker = false" @confirm="onChangeRoot" />
     <EditModal v-if="eventCreationDraft" :is-open="true" type="event" mode="create" :data="eventCreationDraft"
@@ -309,10 +311,10 @@
 import { resolveYearsBeforePresent } from '@temporal';
 import { ref, computed, watch } from 'vue';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
-import { storeToRefs } from 'pinia';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
 import RootPeriodModal from './RootPeriodModal.vue';
+import MoveStoryPeriodModal from './MoveStoryPeriodModal.vue';
 import StorySettingsForm from './StorySettingsForm.vue';
 import StoryCategoriesForm from './StoryCategoriesForm.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -390,6 +392,12 @@ const {
   draft: eventCreationDraft, busy: eventCreationBusy, error: eventCreationError,
   open: openEventCreator, close: closeEventCreator, submit: submitEventCreation, selectExisting: selectExistingStoryEvent,
 } = useStoryEventCreation(() => props.story, () => emit('event-added'));
+const movingPeriodId = ref<string | null>(null);
+function movePeriod(parentId: string | null) {
+  if (movingPeriodId.value && !panelBusy.value) emit('add-periods', [movingPeriodId.value], parentId);
+}
+// Keep the dialog on a refused write; close only once its placement is confirmed.
+watch(() => props.story?.periods.map(p => `${p.id}:${getStoryPeriodParentId(p)}`).join(','), () => { movingPeriodId.value = null; });
 const panelBusy = computed(() => props.updating || periodImportBusy.value || eventCreationBusy.value);
 const showRootPicker = ref(false);
 const periodCreationParentId = ref<string | null>(null);
@@ -415,8 +423,7 @@ const eventHeaderSearch = ref('');
 const eventFilterCategoryId = ref('');
 
 const dataStore = useDataStore();
-const { periods: storePeriods } = storeToRefs(dataStore);
-const finderPeriods = computed(() => [...storePeriods.value.filter(p => !p.id.startsWith('wikidata:')), ...wikidataPeriods.value]);
+const finderPeriods = computed(() => wikidataPeriods.value);
 function requiresParentImport(item: StoryPeriodInput) {
   return item.id.startsWith('wikidata:') && (!item.parentId || item.parentId.startsWith('wikidata:'));
 }
@@ -606,15 +613,14 @@ function finderColumnHeader(colIdx: number): string {
 }
 
 function finderRowHasChildren(item: StoryPeriodInput, inStory: boolean): boolean {
-  if (inStory && !showExternalInFinder.value) {
-    return storyPeriodHasChildrenInStory((props.story?.periods ?? []) as StoryPeriodInput[], item.id);
-  }
+  if (inStory && storyPeriodHasChildrenInStory((props.story?.periods ?? []) as StoryPeriodInput[], item.id)) return true;
   const p = finderPeriods.value.find(p => p.id === item.id) ?? props.story?.periods.find(period => period.id === item.id);
   if (p?.hasChildren) return true;
   return finderPeriods.value.some((x) => x.parentId === item.id);
 }
 
 watch(() => props.story?.id, () => {
+  movingPeriodId.value = null;
   periodHeaderSearch.value = ''; periodFilterCategoryId.value = '';
   eventHeaderSearch.value = ''; eventFilterCategoryId.value = '';
   selectedEventId.value = null;

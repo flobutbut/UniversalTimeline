@@ -4,7 +4,6 @@ import { useLatestRequest } from './useLatestRequest';
 import { useDebouncedSearch } from './useDebouncedSearch';
 import { useWikidataImport } from './useWikidataImport';
 import { SearchApiService, type WikidataEntityLabelHit } from '@/services/SearchApiService';
-import { PeriodApiService } from '@/services/PeriodApiService';
 import { applyWikidataImportPayloadToFormDraft } from '@/lib/wikidataImportFormMerge';
 import { normalizeWikidataId } from '@/services/wikidataTransport';
 
@@ -53,20 +52,10 @@ export function useWikidataForm(options: {
       const payload = await importer.importAndTransform(qid, context.type, { force });
       if (!isCurrent()) return;
       const warnings = [...payload.warnings ?? []];
-      let parentId: string | undefined;
-      if (payload.parentWikidataId) {
-        try {
-          const parent = await PeriodApiService.getInstance().getPeriodByWikidataId(payload.parentWikidataId, { signal: active.signal });
-          if (parent) parentId = parent.id;
-          else warnings.push(`Le parent Wikidata (${payload.parentWikidataId}) n’est pas en base. Choisissez un parent manuellement.`);
-        } catch { warnings.push('Le parent n’a pas pu être résolu dans le catalogue. Votre choix est conservé.'); }
-      }
-      if (!isCurrent()) return;
       applying = true;
       try {
         applyWikidataImportPayloadToFormDraft(form, payload, { availableCategoryIds: options.categoryIds(), onChildrenCount: options.onChildrenCount });
         form.qid = normalizeWikidataId(qid);
-        if (parentId !== undefined) form.parentId = parentId;
       } finally { applying = false; }
       retryAvailable.value = warnings.length > 0;
       notice.value = warnings.join(' ') || 'Données chargées depuis Wikidata.';

@@ -6,7 +6,6 @@ import { flushPromises } from '@vue/test-utils';
 import { useDataStore } from '@/stores/useDataStore';
 import { useDatabaseView } from '@/composables/useDatabaseView';
 import { useHomeNavigation } from '@/composables/useHomeNavigation';
-import { useGraphView } from '@/composables/useGraphView';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { EventApiService } from '@/services/EventApiService';
 import { StoryApiService } from '@/services/StoryApiService';
@@ -100,56 +99,12 @@ it('reports a refused batch without claiming that some associations were saved',
   expect(view.relationsBusy.value).toBe(false);
 });
 
-it('keeps timeline selection and history consistent when children arrive in reverse order', async () => {
-  const a = deferred<any[]>(); const b = deferred<any[]>();
-  const store = useDataStore(); store.updatePeriods([period('a'), period('b')]);
-  vi.spyOn(PeriodApiService.getInstance(), 'loadChildren').mockImplementation(id => id === 'a' ? a.promise : b.promise);
-  const nav = scoped(useHomeNavigation);
-  const first = nav.handlePeriodClick(period('a')); const second = nav.handlePeriodClick(period('b'));
-  b.resolve([{ ...period('b-child'), parentId: 'b' }]); await second;
-  a.resolve([{ ...period('a-child'), parentId: 'a' }]); await first;
-  expect(nav.currentPeriod.value?.id).toBe('b'); expect(nav.displayedPeriods.value.map(p => p.id)).toEqual(['b-child']);
-  expect(nav.parentStack.value).toEqual([]); expect(nav.loading.value).toBe(false);
-});
-
-it('keeps the current timeline and retries the failed destination without duplicating history', async () => {
-  const store = useDataStore(); store.updatePeriods([period('root'), period('a')]);
-  vi.spyOn(PeriodApiService.getInstance(), 'loadChildren').mockRejectedValueOnce(new Error('Hors ligne')).mockResolvedValueOnce([]);
-  const nav = scoped(useHomeNavigation); nav.currentPeriod.value = period('root');
-  await nav.handlePeriodClick(period('a'));
-  expect(nav.currentPeriod.value?.id).toBe('root'); expect(nav.error.value).toBe('Hors ligne');
-  await nav.retryLoad();
-  expect(nav.currentPeriod.value?.id).toBe('a'); expect(nav.parentStack.value.map(p => p.id)).toEqual(['root']);
-});
-
 it('handles event loading errors in the timeline initial load', async () => {
   vi.spyOn(StoryApiService.getInstance(), 'getStoryPeriods').mockResolvedValue([]);
   vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([]);
   vi.spyOn(EventApiService.getInstance(), 'getStoryListEvents').mockRejectedValue(new Error('Événements hors ligne'));
   const nav = scoped(useHomeNavigation); await nav.loadInitialData();
   expect(nav.error.value).toBe('Événements hors ligne'); expect(nav.loading.value).toBe(false);
-});
-
-it.each(['navigation', 'disposal'] as const)('ignores old Wikidata suggestions after %s', async action => {
-  const pending = deferred<any[]>();
-  const a = { ...period('a'), wikidata_id: 'Q123' }; const b = period('b');
-  const store = useDataStore(); store.updatePeriods([a, b]);
-  vi.spyOn(PeriodApiService.getInstance(), 'loadChildren').mockResolvedValue([]);
-  vi.spyOn(WikidataQueryService.getInstance(), 'loadPeriodChildrenByWikidataId').mockReturnValue(pending.promise);
-  const graph = scoped(useGraphView); const reading = graph.handleSelect(a, 0); await flushPromises();
-  if (action === 'navigation') await graph.handleSelect(b, 0); else scope.stop();
-  pending.resolve([{ id: 'Q999', label: { fr: 'Suggestion', en: '' }, temporalData: [], hasChildren: false }]); await reading;
-  expect(store.periodById('wikidata:Q999')).toBeNull();
-});
-
-it('shows a database children error without falling back to Wikidata as if the list were empty', async () => {
-  const a = { ...period('a'), wikidata_id: 'Q123' };
-  useDataStore().updatePeriods([a]);
-  vi.spyOn(PeriodApiService.getInstance(), 'loadChildren').mockRejectedValue(new Error('API indisponible'));
-  const wikidata = vi.spyOn(WikidataQueryService.getInstance(), 'loadPeriodChildrenByWikidataId');
-  const graph = scoped(useGraphView); await graph.handleSelect(a, 0);
-  expect(graph.childrenError.value).toEqual({ column: 1, message: 'API indisponible' });
-  expect(wikidata).not.toHaveBeenCalled(); expect(graph.loadingChildrenColumnIndex.value).toBeNull();
 });
 
 it('retries the story list as well as the details after a mutation refresh failed', async () => {
@@ -228,4 +183,13 @@ it('keeps the original story after a root replacement fails and releases the pen
   expect(view.selectedStory.value).toBe(previous);
   expect(view.state.value.storyError).toBe('Racine indisponible');
   expect(view.relationsBusy.value).toBe(false);
+});
+
+it('keeps an empty frise empty instead of falling back to the catalogue tree', async () => {
+  vi.spyOn(StoryApiService.getInstance(),'getStoryPeriods').mockResolvedValue([]);
+  vi.spyOn(StoryApiService.getInstance(),'getListStories').mockResolvedValue([]);
+  vi.spyOn(EventApiService.getInstance(),'getStoryListEvents').mockResolvedValue([]);
+  const catalogue=vi.spyOn(PeriodApiService.getInstance(),'getListPeriods');
+  const nav=scoped(useHomeNavigation); await nav.loadInitialData();
+  expect(nav.displayedPeriods.value).toEqual([]); expect(catalogue).not.toHaveBeenCalled();
 });

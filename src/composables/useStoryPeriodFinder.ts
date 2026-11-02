@@ -4,7 +4,6 @@ import type { Story, ListPeriod } from '@/types/database';
 import { useDataStore } from '@/stores/useDataStore';
 import { WikidataQueryService } from '@/services/WikidataQueryService';
 import { normalizeWikidataQId, mapWikidataGeologicalChildToListPeriod } from '@/lib/wikidataPeriodSuggestions';
-import { PeriodApiService } from '@/services/PeriodApiService';
 import { buildStoryFinderPathFromSelectedPeriodId, getStoryPeriodRoots } from '@/lib/storyPeriodFinderColumns';
 import { useLatestRequest } from './useLatestRequest';
 
@@ -27,7 +26,7 @@ export function useStoryPeriodFinder(story: () => Story | null | undefined) {
     const rows = new Map<string, ListPeriod>();
     for (const period of Object.values(suggestionsByParent.value).flat()) {
       const parentId = resolveId(period.parentId!);
-      if (associatedQids.has(period.wikidata_id!) || savedPeriods().some(p => p.parentId === parentId && normalizeWikidataQId(p.wikidata_id) === period.wikidata_id)) continue;
+      if (associatedQids.has(period.wikidata_id!)) continue;
       rows.set(`${parentId}:${period.id}`, { ...period, parentId });
     }
     return [...rows.values()];
@@ -50,14 +49,12 @@ export function useStoryPeriodFinder(story: () => Story | null | undefined) {
   }
   const retry = () => retryTask?.();
 
-  async function loadChildren(target: string[], isCurrent: () => boolean, signal: AbortSignal, force: boolean, extra: ListPeriod[] = []) {
+  async function loadChildren(target: string[], isCurrent: () => boolean, signal: AbortSignal, force: boolean) {
     for (const originalId of new Set(target)) {
       if (!isCurrent()) return;
       const id = resolveId(originalId);
-      // Virtual suggestions have no database ID. Their descendants come only from Wikidata.
-      if (!id.startsWith('wikidata:')) await store.ensureChildrenLoaded(id);
-      if (!isCurrent()) return;
-      const parent = savedPeriods().find(p => p.id === id) ?? extra.find(p => p.id === id)
+      // Suggested relations come only from Wikidata, never from catalogue placement.
+      const parent = savedPeriods().find(p => p.id === id)
         ?? Object.values(suggestionsByParent.value).flat().find(p => p.id === id);
       const qid = normalizeWikidataQId(parent?.wikidata_id);
       if (!qid) continue;
@@ -70,33 +67,6 @@ export function useStoryPeriodFinder(story: () => Story | null | undefined) {
     }
   }
 
-  async function scopedSearchPath(id: string, isCurrent: () => boolean, signal: AbortSignal, force: boolean): Promise<string[] | null> {
-    const outsideMessage = 'Cette période est hors de la frise. Choisissez une sous-période de ses périodes.';
-    if (!story()?.periods.length) throw new Error(outsideMessage);
-    const suffix: string[] = [];
-    const seen = new Set<string>();
-    const fetched: ListPeriod[] = [];
-    let current: string | null = id;
-    for (let depth = 0; current && depth < 100; depth++) {
-      if (!isCurrent()) return null;
-      if (seen.has(current)) throw new Error('Le chemin de cette période contient un cycle.');
-      seen.add(current);
-      if (inStory(current)) {
-        const target = [...storyPath(current), ...suffix];
-        await loadChildren(target, isCurrent, signal, force, fetched);
-        if (!isCurrent()) return null;
-        for (const period of fetched) store.cachePeriod(period);
-        return target;
-      }
-      const period: ListPeriod = store.periodById(current) ?? await PeriodApiService.getInstance().getPeriod(current);
-      if (!isCurrent()) return null;
-      fetched.push(period);
-      suffix.unshift(current);
-      current = getStoryPeriodParentId(period);
-    }
-    throw new Error(outsideMessage);
-  }
-
   const pick = (period: ListPeriod) => run(async (isCurrent, signal, force) => {
     if (inStory(period.id)) {
       const existingIndex = showExternal.value ? path.value.indexOf(period.id) : -1;
@@ -106,9 +76,7 @@ export function useStoryPeriodFinder(story: () => Story | null | undefined) {
       path.value = target; selectedId.value = period.id;
       return;
     }
-    const target = await scopedSearchPath(period.id, isCurrent, signal, force);
-    if (!target || !isCurrent()) return;
-    showExternal.value = true; path.value = target; selectedId.value = period.id;
+    throw new Error('Cette période est hors de la frise. Utilisez « Ajouter une période » pour l’y organiser.');
   });
 
   const selectRow = (id: string, column: number) => {
