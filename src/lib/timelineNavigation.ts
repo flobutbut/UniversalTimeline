@@ -28,16 +28,31 @@ export function timelineLevel(periods: ListPeriod[], depth: number, now = Date.n
     .map(child => ({ period: child, stack: [...stack, period] })));
   return level.flatMap(entry => {
     const start = comparableYearsBeforePresent(entry.period.startDate, entry.period.startYearsBP, now);
-    return start === null ? [] : [{ ...entry, start }];
+    const end = comparableYearsBeforePresent(entry.period.endDate, entry.period.endYearsBP, now);
+    return start === null ? [] : [{ ...entry, start, end }];
   }).sort((a,b) => compareYearsOldestFirst(a.start, b.start) || a.period.id.localeCompare(b.period.id));
+}
+
+/**
+ * Voisins chronologiques d'un niveau trié par début : une période contenue ou simultanée
+ * (même fin) n'est pas une suite. Un chevauchement partiel entre phases reste accepté.
+ */
+export function levelNeighbors<T extends { period: ListPeriod; end: number | null }>(ordered: T[], periodId: string) {
+  const index = ordered.findIndex(entry => entry.period.id === periodId);
+  if (index < 0) return { previous: null, next: null };
+  const end = ordered[index].end;
+  const endsBefore = (entry: T) => end === null || entry.end === null || compareYearsOldestFirst(entry.end, end) < 0;
+  const endsAfter = (entry: T) => end === null || entry.end === null || compareYearsOldestFirst(entry.end, end) > 0;
+  return {
+    previous: ordered.slice(0, index).reverse().find(endsBefore) ?? null,
+    next: ordered.slice(index + 1).find(endsAfter) ?? null,
+  };
 }
 
 /** The context defines the peers; ordinary entry points never select a detail view. */
 export function contextPeriodNeighbors(context: NavigationContext, periodId: string) {
   const path = timelinePeriodPath(context.periods, periodId);
-  const ordered = path ? timelineLevel(context.periods, path.length - 1) : [];
-  const index = ordered.findIndex(entry => entry.period.id === periodId);
-  return { previous: index > 0 ? ordered[index - 1] : null, next: index >= 0 ? ordered[index + 1] ?? null : null };
+  return levelNeighbors(path ? timelineLevel(context.periods, path.length - 1) : [], periodId);
 }
 
 export function periodPresentationTargets(context: NavigationContext, periodId: string): Array<TimelineTarget & { title: string }> {

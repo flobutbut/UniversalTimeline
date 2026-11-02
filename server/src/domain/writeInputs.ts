@@ -12,3 +12,6 @@ export interface StoryWrite {
   title: LocalizedText; description: Description; author: string | null;
   isPublic?: boolean; categories?: string[];
 }
+/** Importance d'un événement dans une frise : majeur, normal ou détail. */
+export const EVENT_IMPORTANCES = ['major', 'normal', 'minor'] as const;
+export type EventImportance = typeof EVENT_IMPORTANCES[number];

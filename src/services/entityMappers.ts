@@ -1,6 +1,7 @@
 import type { ApiId, ApiText, ApiTimestamp, CategoryDto, PeriodDto, EventDto, StoryDto } from '@/types/api';
 import type { Category, MultilingualText, Period, Event, Story, StorySummary, StorySuggestion } from '@/types/database';
 import { resolveYearsBeforePresent } from '@temporal';
+import { EVENT_IMPORTANCES } from '@/lib/eventImportance';
 
 export function apiId(value: ApiId): string {
   if (typeof value === 'number' && Number.isFinite(value)) return String(value);
@@ -62,7 +63,10 @@ export function mapToPeriod(row: PeriodDto): Period {
 }
 export function mapToEvent(row: EventDto): Event {
   const date = temporal(row.date);
-  return { ...metadata(row), wikidata_id: row.wikidata_id ?? '', label: text(row.label, row.label_fr, row.label_en), date, dateYearsBP: years(row.date_years_bp ?? row.dateYearsBP, date) };
+  // Absente hors détail de frise ; une valeur inconnue n'est pas transformée en niveau.
+  const importance = EVENT_IMPORTANCES.find(level => level === row.importance);
+  return { ...metadata(row), wikidata_id: row.wikidata_id ?? '', label: text(row.label, row.label_fr, row.label_en), date, dateYearsBP: years(row.date_years_bp ?? row.dateYearsBP, date),
+    ...(importance ? { importance } : {}) };
 }
 function parentStoryId(row: StoryDto): string | null {
   return row.parent_story_id == null || row.parent_story_id === '' ? null : apiId(row.parent_story_id);

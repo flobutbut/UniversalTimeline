@@ -728,7 +728,7 @@
           <p class="design-system__lead">
             <code class="design-system__code-inline">src/components/StoryTimeline.vue</code> — frise compacte périodes + marqueurs d'événements pour le détail d'une frise. Émissions <code class="design-system__code-inline">select-period</code>,
             <code class="design-system__code-inline">select-event</code>,
-            <code class="design-system__code-inline">deselect</code> ; tooltips en Teleport.
+            <code class="design-system__code-inline">deselect</code> ; tooltips en Teleport. La taille des losanges suit l’importance de l’événement dans la frise (majeur, normal, mineur).
           </p>
         </header>
         <div class="design-system__story-timeline-wrap">
@@ -1059,8 +1059,11 @@ const stDemoPeriods = [
     parentId: null as string | null,
   },
 ];
+// Trois niveaux d'importance : le losange grandit ou s'estompe, l'infobulle le précise.
 const stDemoEvents = [
+  { id: 'ste-0', label: { fr: 'Événement majeur', en: 'Major event' }, date: '1960-03-01', importance: 'major' as const },
   { id: 'ste-1', label: { fr: 'Événement clé', en: 'Key event' }, date: '1985-06-01' },
+  { id: 'ste-2', label: { fr: 'Détail', en: 'Detail' }, date: '1975-09-01', importance: 'minor' as const },
 ];
 const stSelPeriod = ref<string | null>(null);
 const stSelEvent = ref<string | null>(null);

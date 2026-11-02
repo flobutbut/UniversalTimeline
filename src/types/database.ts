@@ -21,6 +21,9 @@ export interface ListPeriod {
   updatedAt?: Date;
 }
 
+/** Importance d'un événement dans une frise : majeur, normal ou détail. */
+export type EventImportance = 'major' | 'normal' | 'minor';
+
 export interface ListEvent {
   id: string; // Identifiant texte historique ou UUID.
   label: MultilingualText;
@@ -31,6 +34,8 @@ export interface ListEvent {
   updatedAt?: Date;
   wikidata_id?: string;
   description?: MultilingualText;
+  /** Seulement dans le détail d'une frise : propre au lien frise–événement. */
+  importance?: EventImportance;
 }
 
 export interface ListStory {

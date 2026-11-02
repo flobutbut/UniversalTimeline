@@ -6,7 +6,7 @@
     <FeedbackState v-else-if="!loading && !currentPeriod && periods.length === 0 && events.length === 0" message="Aucune période à afficher" />
     <div v-else class="timeline-container">
       <div class="periods-container">
-        <nav v-if="props.currentPeriod && !loading && (previousPeriod || nextPeriod)" class="period-grid__navigation" aria-label="Périodes de même niveau">
+        <nav v-if="props.currentPeriod && !loading && (previousPeriod || nextPeriod || currentPeriodEnd)" class="period-grid__navigation" aria-label="Périodes de même niveau">
           <Button v-if="previousPeriod" variant="ghost" size="sm" data-period-direction="previous"
             :title="`Période précédente : ${previousPeriod.label.fr || previousPeriod.label.en}`"
             @click="navigatePeriod('previous')">
@@ -19,6 +19,8 @@
             Période suivante<span> - {{ nextPeriod.label.fr || nextPeriod.label.en }}</span>
             <Icon icon="mdi:arrow-right" class="period-grid__next-icon" aria-hidden="true" />
           </Button>
+          <!-- Sans période suivante, la vue s'arrête au présent ou à la fin de la frise : annoncer cette borne. -->
+          <span v-else-if="currentPeriodEnd" class="period-grid__end-label">{{ currentPeriodEnd }}</span>
         </nav>
         <div ref="periodSurfaceRef" class="period-grid__surface">
           <PeriodCard
@@ -105,6 +107,7 @@
           :event="event"
           :undated="listEventYearsBP(event) === null"
           :is-selected="selectedEvent?.id === event.id"
+          :is-default-open="defaultOpenEventIds.has(event.id)"
           :is-category-active="isCategoryActive(event)"
           :card-style="getEventStyles(event)"
           :align="getEventAlign(event)"
@@ -114,6 +117,7 @@
           :suggestions-error="selectedEvent?.id === event.id ? eventSuggestionsError : null"
           @retry-suggestions="retryEventSuggestions"
           @click="selectEvent(event)"
+          @active-change="(isActive: boolean) => setActiveEvent(event.id, isActive)"
           @story-select="(id: string) => emit('story-select', id, { type: 'event', id: event.id })"
         />
       </div>
@@ -125,7 +129,7 @@
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import Button from '@/components/base/Button.vue';
 import { Icon } from '@iconify/vue';
-import { ref, computed, watch, onActivated, onDeactivated } from 'vue';
+import { ref, computed, watch, onActivated, onDeactivated, onScopeDispose } from 'vue';
 
 import type { ListPeriod, ListEvent, Story, StoryAnchor } from '@/types/database';
 import { compareYearsOldestFirst } from '@temporal';
@@ -135,7 +139,9 @@ import { useTimelineScaling } from '@/composables/useTimelineScaling';
 import { usePeriodFlip } from '@/composables/usePeriodFlip';
 import { useTimelinePeriodTooltip } from '@/composables/useTimelinePeriodTooltip';
 import { useTimelinePeriodExpansion } from '@/composables/useTimelinePeriodExpansion';
-import { formatPeriodDateRange } from '@/lib/formatTemporalBoundLabel';
+import { formatPeriodDateRange, formatTemporalBoundLabel } from '@/lib/formatTemporalBoundLabel';
+import { defaultOpenEvents, withoutCoveredTooltips } from '@/lib/timelineEventDensity';
+import { compareEventPriority, eventPrioritySignals } from '@/lib/timelineEventPriority';
 import {
   timelineEventCardAlign,
   timelineFocusTransform,
@@ -225,6 +231,13 @@ const { minimumPct, laneHeight, wrapContent } = useTimelinePeriodExpansion(
   id => periodElMap.get(id) ?? null,
   periodRowRef,
 );
+/** Borne de fin de la vue affichée à la place de « Période suivante » quand il n'y en a pas. */
+const currentPeriodEnd = computed(() => {
+  const end = props.currentPeriod?.endDate?.trim();
+  if (!end) return null;
+  const label = formatTemporalBoundLabel(end);
+  return label === "aujourd'hui" ? "Aujourd'hui" : `Fin : ${label}`;
+});
 const tooltipDateRange = computed(() => tooltipPeriod.value ? formatPeriodDateRange(tooltipPeriod.value) : '');
 const tooltipDescription = computed(() => (tooltipPeriod.value?.description?.fr || tooltipPeriod.value?.description?.en || '').trim());
 /** Seules les périodes avec enfants se parcourent au clic. */
@@ -353,6 +366,52 @@ const getEventRawLeft = (event: ListEvent): number => {
   return parseFloat(base.left as string);
 };
 
+// ─── Tooltips ouverts par défaut (prototype) ──────────────────────────────────
+
+/** Les tooltips compacts qui tiennent côte à côte restent ouverts ; les autres au survol. */
+const eventsWidth = ref(0);
+let eventsObserver: ResizeObserver | undefined;
+watch(eventsSurfaceRef, element => {
+  eventsObserver?.disconnect();
+  eventsWidth.value = element?.getBoundingClientRect().width ?? 0;
+  if (element && typeof ResizeObserver !== 'undefined') {
+    eventsObserver = new ResizeObserver(() => { eventsWidth.value = element.getBoundingClientRect().width; });
+    eventsObserver.observe(element);
+  }
+}, { flush: 'post' });
+onScopeDispose(() => eventsObserver?.disconnect());
+
+/** Bords de la vue et des périodes affichées, en % : un événement qui y tombe structure la frise. */
+const boundariesPct = computed(() => [0, 100, ...[...rawLayouts.value.values()].flatMap(({ left, width }) => [left, left + width])]);
+const eventSlots = computed(() => props.events.filter(event => listEventYearsBP(event) !== null).map(event => {
+  const leftPct = getEventRawLeft(event);
+  // Liens inconnus pendant le chargement ou après une erreur : seuls les signaux de dates comptent.
+  const links = associationsLoading.value || associationsError.value ? [] : associatedByEvent.value.get(event.id) ?? [];
+  const hasDescription = !!(event.description?.fr || event.description?.en || '').trim();
+  return { id: event.id, leftPct, align: timelineEventCardAlign(leftPct),
+    signals: eventPrioritySignals(leftPct, boundariesPct.value, links, props.currentStoryId, hasDescription, event.importance) };
+}));
+const pinnedEventIds = computed(() => defaultOpenEvents(eventSlots.value, eventsWidth.value, (a, b) => compareEventPriority(a.signals, b.signals)));
+/** Événement survolé ou focalisé : son tooltip complet masque les tooltips figés qu'il recouvre. */
+const activeEventId = ref<string | null>(null);
+/** Délai avant de rouvrir les tooltips figés : passer d'un point à l'autre ne les fait pas clignoter. */
+const REOPEN_DELAY_MS = 200;
+let reopenTimer: ReturnType<typeof setTimeout> | undefined;
+function setActiveEvent(id: string, isActive: boolean) {
+  clearTimeout(reopenTimer);
+  if (isActive) { activeEventId.value = id; return; }
+  if (activeEventId.value !== id) return;
+  reopenTimer = setTimeout(() => { if (activeEventId.value === id) activeEventId.value = null; }, REOPEN_DELAY_MS);
+}
+function resetActiveEvent() { clearTimeout(reopenTimer); activeEventId.value = null; }
+onScopeDispose(() => clearTimeout(reopenTimer));
+const defaultOpenEventIds = computed(() => withoutCoveredTooltips(
+  pinnedEventIds.value,
+  eventSlots.value,
+  new Set([activeEventId.value, selectedEvent.value?.id].filter((id): id is string => !!id)),
+  eventsWidth.value,
+));
+
 const getEventAlign = (event: ListEvent): 'start' | 'center' | 'end' =>
   timelineEventCardAlign(getEventRawLeft(event));
 
@@ -393,7 +452,7 @@ const selectEvent = (event: ListEvent) => {
   }
 };
 
-watch([() => props.currentStoryId, () => props.currentPeriod?.id], () => { selectedEvent.value = null; }, { flush: 'sync' });
+watch([() => props.currentStoryId, () => props.currentPeriod?.id], () => { selectedEvent.value = null; resetActiveEvent(); }, { flush: 'sync' });
 watch(() => props.events, events => {
   if (selectedEvent.value && !events.some(event => event.id === selectedEvent.value!.id)) selectedEvent.value = null;
 });
@@ -402,6 +461,7 @@ onActivated(() => { active.value = true; });
 onDeactivated(() => {
   active.value = false;
   selectedEvent.value = null;
+  resetActiveEvent();
   periodDetails.reset();
   periodFlip.cancel();
 });
@@ -439,6 +499,14 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
 .period-grid__navigation :deep(.base-button) { max-width: 100%; height: auto; }
 .period-grid__navigation :deep(.base-button__text) { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 .period-grid__next-control { margin-left: auto; }
+.period-grid__end-label {
+  margin-left: auto;
+  align-self: center;
+  /* Recul optique : le texte collé au bord paraît dépasser de la frise. */
+  padding: 1px 2px 1px 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
 .period-grid__next-icon { margin-left: var(--spacing-xs); vertical-align: middle; }
 .period-grid__undated-item { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
 .period-grid__tooltip {

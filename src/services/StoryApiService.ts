@@ -1,5 +1,5 @@
 import { apiClient } from './ApiClient';
-import type { Story, StorySummary, StorySuggestion, StoryAnchor } from '../types/database';
+import type { EventImportance, Story, StorySummary, StorySuggestion, StoryAnchor } from '../types/database';
 
 import type { StoryDto, PeriodDto, StoryFormPayload, StoryLinkDto } from '@/types/api';
 import { mapToListStory, mapToStory, mapToStorySuggestion } from './entityMappers';
@@ -104,6 +104,11 @@ export class StoryApiService {
       childStoryIds: [...new Set(targetIds)], operation: remove ? 'remove' : 'add',
       ...(anchor ? { anchor: { anchorType: anchor.type, anchorId: anchor.id } } : {}),
     });
+  }
+
+  /** Importance d'un événement dans cette frise ; aucune relance automatique (écriture). */
+  async setEventImportance(storyId: string, eventId: string, importance: EventImportance): Promise<void> {
+    await apiClient.put(`/stories/${storyId}/events/${encodeURIComponent(eventId)}/importance`, { importance });
   }
 
   /** Ajoute une ancre (période ou événement) à une story enfant. */

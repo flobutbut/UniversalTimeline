@@ -105,8 +105,8 @@ function countsOf(story: StorySummary) {
 .story-gallery__views { display: flex; gap: var(--spacing-xs); }
 .story-gallery__notice { margin: 0; padding: 0 var(--spacing-lg) var(--spacing-sm); color: var(--color-status-error-foreground); }
 .story-gallery__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--spacing-lg); margin: 0; padding: 0 var(--spacing-lg) var(--spacing-xl); list-style: none; align-content: start; }
-.story-card { position: relative; display: flex; flex-direction: column; gap: var(--spacing-lg); min-width: 0; padding: var(--spacing-lg); background: var(--color-surface-raised); border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); overflow: hidden; transition: border-color var(--transition-fast), background-color var(--transition-fast); }
-.story-card:hover { background: var(--color-surface-raised-hover); border-color: var(--color-border-strong); }
+.story-card { --story-timeline-background: var(--color-surface-raised); position: relative; display: flex; flex-direction: column; gap: var(--spacing-lg); min-width: 0; padding: var(--spacing-lg); background: var(--story-timeline-background); border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); overflow: hidden; transition: border-color var(--transition-fast), background-color var(--transition-fast); }
+.story-card:hover { --story-timeline-background: var(--color-surface-raised-hover); background: var(--story-timeline-background); border-color: var(--color-border-strong); }
 .story-card:has(.story-card__open:focus-visible) { outline: 2px solid var(--color-border-focus); outline-offset: 3px; }
 /* Room for four period lines and the event line, so every card's text starts at the same height. */
 .story-card__preview { height: 58px; border-radius: var(--radius-sm); overflow: hidden; }

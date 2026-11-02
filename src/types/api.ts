@@ -41,6 +41,7 @@ export type StoryLinkDto = { story_id: string | number } & ({ event_id: string }
 export interface EventDto extends EntityDto {
   date?: ApiTimestamp;
   date_years_bp?: number | string | null; dateYearsBP?: number | string | null;
+  importance?: string | null;
 }
 export interface ChildStoryDto {
   id: ApiId; title?: ApiText | null;

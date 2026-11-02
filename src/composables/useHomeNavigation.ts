@@ -6,7 +6,7 @@ import { useDataStore } from '@/stores/useDataStore';
 import type { ListPeriod, ListEvent, StoryAnchor, NavigationContext } from '@/types/database';
 import { storyChildrenOf, resolvePeriodNavFromSnapshot, type StoryPeriodNavSnapshot } from '@/lib/homeStoryPeriodNav';
 
-import { timelineLevel, timelinePeriodPath, contextPeriodNeighbors, periodPresentationTargets, type TimelineTarget } from '@/lib/timelineNavigation';
+import { timelineLevel, levelNeighbors, timelinePeriodPath, contextPeriodNeighbors, periodPresentationTargets, type TimelineTarget } from '@/lib/timelineNavigation';
 import { universeStoryTrail } from '@/lib/universeStoryTrail';
 
 const ENTRY_STORY_ID = '1';
@@ -73,12 +73,7 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
     if (!currentPeriod.value) return { previous: null, next: null };
     const context = selectedContext.value;
     if (usesContextNeighbors.value && context) return contextPeriodNeighbors(context, currentPeriod.value.id);
-    const ordered = timelineLevel(currentStoryPeriods.value, parentStack.value.length);
-    const index = ordered.findIndex(entry => entry.period.id === currentPeriod.value!.id);
-    return {
-      previous: index > 0 ? ordered[index - 1] : null,
-      next: index >= 0 ? ordered[index + 1] ?? null : null,
-    };
+    return levelNeighbors(timelineLevel(currentStoryPeriods.value, parentStack.value.length), currentPeriod.value.id);
   });
   const previousPeriod = computed(() => adjacentPeriods.value.previous?.period ?? null);
   const nextPeriod = computed(() => adjacentPeriods.value.next?.period ?? null);
@@ -123,7 +118,11 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   });
   watch(events, () => {
     const byId = new Map(events.value.map(event => [event.id, event]));
-    currentStoryAllEvents.value = currentStoryAllEvents.value.map(event => byId.get(event.id) ?? event);
+    // L'importance appartient au lien frise–événement, absent des fiches du catalogue.
+    currentStoryAllEvents.value = currentStoryAllEvents.value.map(event => {
+      const updated = byId.get(event.id);
+      return updated ? { ...updated, ...(event.importance ? { importance: event.importance } : {}) } : event;
+    });
     storyEvents.value = eventsForPeriod(currentPeriod.value);
   });
 

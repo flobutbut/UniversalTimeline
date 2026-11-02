@@ -19,6 +19,11 @@ describe('API entity boundaries', () => {
     expect(mapToEvent({ id: 'e', date: '2000', dateYearsBP: -50 }).dateYearsBP).toBe(-50);
     expect(mapToEvent({ id: 'e', date: 'M65', date_years_bp: ' ' }).dateYearsBP).toBe(65000000);
   });
+  it('keeps a known frise importance and never invents one', () => {
+    expect(mapToEvent({ id: 'e', importance: 'major' }).importance).toBe('major');
+    expect(mapToEvent({ id: 'e' })).not.toHaveProperty('importance');
+    expect(mapToEvent({ id: 'e', importance: 'critical' })).not.toHaveProperty('importance');
+  });
   it('does not invent timestamps, dates or child counts for sparse responses', () => {
     const period = mapToPeriod({ id: 'p' });
     expect(period.createdAt).toBeUndefined(); expect(period.updatedAt).toBeUndefined();

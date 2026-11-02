@@ -1,11 +1,11 @@
 import type { TransactionClient } from '../api/transaction.js';
-import type { StoryWrite } from '../domain/writeInputs.js';
+import type { EventImportance, StoryWrite } from '../domain/writeInputs.js';
 import type { StoryRow, JoinedStoryRow, JoinedPeriodRow, JoinedEventRow, ChildStoryRow, TemporalCandidate, PeriodRow, CategoryRow } from './rows.js';
 
 interface StorySnapshotRow extends StoryRow {
   categories: CategoryRow[];
   periods: Array<JoinedPeriodRow & Pick<PeriodRow, 'has_children'>>;
-  events: JoinedEventRow[];
+  events: Array<JoinedEventRow & { importance: EventImportance }>;
   child_stories: ChildStoryRow[];
   parent_stories?: Array<Pick<StoryRow, 'id' | 'title_fr' | 'title_en' | 'owner_user_id'> & { anchors: Array<{ type: 'period' | 'event'; id: string; label_fr: string; label_en: string | null }> }>;
   navigation_contexts?: Array<{
@@ -60,7 +60,7 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
         WHERE sp.story_id = s.id
       ) p) AS periods,
       (SELECT COALESCE(jsonb_agg(to_jsonb(e) ORDER BY e.date, e.id, e.category_id), '[]') FROM (
-        SELECT e.*, c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
+        SELECT e.*, se.importance, c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
         FROM public.story_events se JOIN public.events e ON e.id = se.event_id
         LEFT JOIN public.event_categories ec ON ec.event_id = e.id
         LEFT JOIN public.categories c ON c.id = ec.category_id
@@ -255,6 +255,13 @@ export async function insertAnchor(db: TransactionClient, storyId: string, ancho
 }
 export async function deleteAnchor(db: TransactionClient, storyId: string, anchorType: 'period' | 'event', anchorId: string) {
   await db.query('DELETE FROM public.story_anchors WHERE story_id = $1 AND anchor_type = $2 AND anchor_id = $3', [storyId, anchorType, anchorId]);
+}
+/** Importance de l'événement dans cette frise ; aucune ligne si l'événement n'y figure pas. */
+export async function updateEventImportance(db: TransactionClient, storyId: string, eventId: string, importance: EventImportance) {
+  return (await db.query<{ importance: EventImportance }>(
+    'UPDATE public.story_events SET importance = $3 WHERE story_id = $1 AND event_id = $2 RETURNING importance',
+    [storyId, eventId, importance],
+  )).rows[0];
 }
 /** Compatibility endpoints use the same fixed relation map as batch writes. */
 export async function changeSingleAssociation(db: TransactionClient, storyId: string, kind: 'period' | 'event', id: string, remove: boolean) {

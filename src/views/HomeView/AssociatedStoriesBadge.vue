@@ -106,7 +106,7 @@ onScopeDispose(() => { window.removeEventListener('resize', position); window.re
 .associated-stories__badge:focus-visible, .associated-stories__panel button:focus-visible { outline: 2px solid var(--color-border-focus); }
 .associated-stories__panel button:focus-visible { outline-offset: 2px; }
 .associated-stories__backdrop { position: fixed; inset: 0; z-index: var(--z-index-dropdown, 100); }
-.associated-stories__panel { position: fixed; z-index: calc(var(--z-index-dropdown, 100) + 1); max-height: calc(100dvh - 24px); overflow-y: auto;  }
+.associated-stories__panel { position: fixed; z-index: calc(var(--z-index-dropdown, 100) + 1); max-height: calc(100dvh - 24px); overflow-y: auto; background: var(--color-surface-default); }
 .associated-stories__item { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); width: 100%; padding: 10px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-primary); text-align: left; cursor: pointer; }
 .associated-stories__item:hover { background: var(--color-interaction-hover); }
 .associated-stories__item strong { display: block; font-size: var(--font-size-base); font-weight: var(--font-weight-medium); overflow-wrap: anywhere; }

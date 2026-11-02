@@ -29,7 +29,11 @@
         v-for="e in positionedEvents"
         :key="e.id"
         class="story-timeline__event-marker"
-        :class="{ 'story-timeline__event-marker--selected': selectedEventId === e.id }"
+        :class="{
+          'story-timeline__event-marker--selected': selectedEventId === e.id,
+          'story-timeline__event-marker--major': e.importance === 'major',
+          'story-timeline__event-marker--minor': e.importance === 'minor',
+        }"
         :style="{ left: e.left + '%' }"
         @click="emit('select-event', e.id)"
         @mouseenter="showTooltip($event, e.label, e.detail)"
@@ -67,6 +71,8 @@
 import Button from '@/components/base/Button.vue';
 import { computed, ref } from 'vue';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
+import { EVENT_IMPORTANCE_LABELS } from '@/lib/eventImportance';
+import type { EventImportance } from '@/types/database';
 import { COMPACT_BAR_HEIGHT, COMPACT_LANE_GAP, COMPACT_ROOT_HEIGHT, layoutCompactLanes } from '@/lib/compactStoryTimeline';
 import { resolveYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
 import {
@@ -90,6 +96,8 @@ interface InEvent {
   label?: { fr: string; en: string } | string;
   date?: string;
   dateYearsBP?: number;
+  /** Importance dans la frise affichée ; absente = normal. */
+  importance?: EventImportance;
 }
 
 const props = defineProps<{
@@ -250,7 +258,7 @@ const compactPeriodsHeight = computed(() => props.compact ? Math.max(0, ...posit
 
 // ─── Événements positionnés ───────────────────────────────────────────────────
 
-interface PosEvent { id: string; label: string; detail: string; left: number }
+interface PosEvent { id: string; label: string; detail: string; left: number; importance: EventImportance }
 
 const positionedEvents = computed<PosEvent[]>(() => {
   const b = bounds.value;
@@ -258,8 +266,11 @@ const positionedEvents = computed<PosEvent[]>(() => {
   return datedEvents.value.map(e => {
     const ybp = e.dateYbp;
     const label = typeof e.label === 'string' ? e.label : (e.label?.fr ?? '');
-    const detail = e.date ? formatStoryTimelineBoundLabel(e.date) : '';
-    return { id: e.id, label, detail, left: toLeft(ybp) };
+    const importance = e.importance ?? 'normal';
+    const date = e.date ? formatStoryTimelineBoundLabel(e.date) : '';
+    // Le niveau par défaut n'est pas annoncé : seuls les écarts sont utiles.
+    const detail = [date, importance === 'normal' ? '' : EVENT_IMPORTANCE_LABELS[importance]].filter(Boolean).join(' · ');
+    return { id: e.id, label, detail, left: toLeft(ybp), importance };
   });
 });
 
@@ -350,16 +361,24 @@ const trackRef = ref<HTMLElement | null>(null);
 }
 
 .story-timeline__event-marker {
+  /* Taille selon l'importance dans la frise ; le losange, bordure comprise, reste centré sur l'axe. */
+  --marker-size: var(--spacing-sm);
   position: absolute;
-  bottom: -4px;
-  width: var(--spacing-sm);
-  height: var(--spacing-sm);
+  bottom: calc((var(--marker-size) + 2px) / -2);
+  box-sizing: content-box;
+  width: var(--marker-size);
+  height: var(--marker-size);
+  /* Bordure couleur du fond : sépare les losanges qui se touchent ou chevauchent l'axe. */
+  border: 1px solid var(--story-timeline-background, var(--color-background-default));
   transform: translateX(-50%) rotate(45deg);
   background: var(--color-data-event);
   border-radius: calc(var(--radius-sm) / 4);
   cursor: pointer;
   transition: opacity var(--transition-fast), box-shadow var(--transition-fast);
 }
+
+.story-timeline__event-marker--major { --marker-size: var(--spacing-md); z-index: 1; }
+.story-timeline__event-marker--minor { --marker-size: 6px; opacity: 0.55; }
 
 .story-timeline__event-marker:hover {
   opacity: 0.85;
@@ -388,7 +407,9 @@ const trackRef = ref<HTMLElement | null>(null);
 .story-timeline--compact .story-timeline__period-bar { width: max(2px, calc(var(--story-period-width) - 2px)); height: 8px; border-radius: 3px; }
 .story-timeline--compact .story-timeline__period-bar--root { height: 10px; }
 .story-timeline--compact .story-timeline__axis { bottom: 8px; }
-.story-timeline--compact .story-timeline__event-marker { width: 6px; height: 6px; bottom: 5px; }
+.story-timeline--compact .story-timeline__event-marker { --marker-size: 6px; bottom: calc(8px - (var(--marker-size) + 2px) / 2); }
+.story-timeline--compact .story-timeline__event-marker--major { --marker-size: 9px; }
+.story-timeline--compact .story-timeline__event-marker--minor { --marker-size: 4px; }
 .story-timeline--compact .story-timeline__undated { display: none; }
 </style>
 

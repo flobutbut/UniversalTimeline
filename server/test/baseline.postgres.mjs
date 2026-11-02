@@ -150,6 +150,22 @@ test('writes associations and generated anchors only for the story owner', async
   assert.equal((await call('post','/stories/:storyId/events',{ids:['event'],operation:'add'},{storyId:'1'},bob)).statusCode,404);
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM story_events WHERE story_id=1')).rows[0].n,0);
 });
+test('stores an event importance per frise, for the frise owner only', async () => {
+  const path = '/stories/:storyId/events/:eventId/importance';
+  const importance = async () => (await pool.query("SELECT importance FROM story_events WHERE story_id=2 AND event_id='event'")).rows[0].importance;
+  assert.equal(await importance(), 'normal');
+  const saved = await call('put', path, { importance: 'major' }, { storyId: '2', eventId: 'event' });
+  assert.equal(saved.statusCode, 200);
+  assert.deepEqual(saved.payload, { storyId: '2', eventId: 'event', importance: 'major' });
+  assert.equal((await call('get', '/stories/:id', {}, { id: '2' })).payload.events[0].importance, 'major');
+  // Un autre compte ne voit pas la frise privée ; une valeur hors liste ou un événement absent sont refusés.
+  assert.equal((await call('put', path, { importance: 'minor' }, { storyId: '2', eventId: 'event' }, bob)).statusCode, 404);
+  assert.equal((await call('put', path, { importance: 'critical' }, { storyId: '2', eventId: 'event' })).statusCode, 400);
+  assert.equal((await call('put', path, { importance: 'minor' }, { storyId: '1', eventId: 'event' })).statusCode, 404);
+  assert.equal(await importance(), 'major');
+  // La contrainte protège aussi les écritures directes.
+  await assert.rejects(pool.query("UPDATE story_events SET importance='critical' WHERE story_id=2"), /story_events_importance_check/);
+});
 test('rolls back metadata when a referenced category does not exist', async () => {
   const result=await call('post','/periods',{id:'refused',wikidata_id:'Q999906',label:{fr:'Refusée'},start_date:'M65',end_date:'NOW',categories:[{id:'00000000-0000-0000-0000-000000000099'}]});
   assert.ok(result.statusCode>=400); assert.equal((await pool.query("SELECT * FROM periods WHERE id='refused'")).rowCount,0);

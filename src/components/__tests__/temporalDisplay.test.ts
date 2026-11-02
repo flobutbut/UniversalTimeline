@@ -33,3 +33,20 @@ it('distinguishes undated events from the present, sorting unknowns last',()=>{
   expect(listEventYearsBP({date:'NOW',dateYearsBP:50})).toBe(0);
   expect([null,0,65,null,54].sort(compareYearsOldestFirst)).toEqual([65,54,0,null,null]);
 });
+
+it('sizes event markers by their importance in the frise and names it in the tooltip', async () => {
+  const view = mount(StoryTimeline, { attachTo: document.body, props: { periods: [{ id: 'p', label: { fr: 'P', en: '' }, startDate: 'M65', endDate: 'M50' }], events: [
+    { id: 'major', label: 'Majeur', date: 'M60', importance: 'major' as const },
+    { id: 'normal', label: 'Normal', date: 'M58' },
+    { id: 'minor', label: 'Mineur', date: 'M55', importance: 'minor' as const },
+  ] } });
+  const markers = view.findAll('.story-timeline__event-marker');
+  expect(markers.map(marker => marker.classes().filter(name => /--(major|minor)$/.test(name)))).toEqual([
+    ['story-timeline__event-marker--major'], [], ['story-timeline__event-marker--minor'],
+  ]);
+  await markers[0].trigger('mouseenter');
+  expect(document.body.querySelector('.story-timeline-tooltip__detail')?.textContent).toMatch(/· Majeur$/);
+  await markers[1].trigger('mouseenter');
+  expect(document.body.querySelector('.story-timeline-tooltip__detail')?.textContent).not.toContain('·');
+  view.unmount();
+});

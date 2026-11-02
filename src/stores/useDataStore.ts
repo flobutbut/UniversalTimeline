@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed, reactive } from 'vue';
-import type { ListPeriod, ListEvent, StorySummary, Story, DeletePeriodResult } from '@/types/database';
+import type { ListPeriod, ListEvent, StorySummary, Story, DeletePeriodResult, EventImportance } from '@/types/database';
+import { withEventImportance } from '@/lib/eventImportance';
 import { isPeriodDescendant } from '@/lib/periodHierarchy';
 import { createRequestCache, type RequestStatus } from '@/lib/requestCache';
 import { PeriodApiService } from '@/services/PeriodApiService';
@@ -90,7 +91,8 @@ export const useDataStore = defineStore('data', () => {
     await reads.load(`story-detail:${storyId}`, () => StoryApiService.getInstance().getStory(storyId), story => {
       mergePeriods(story.periods);
       const byId = new Map(events.value.map(event => [event.id, event]));
-      for (const event of story.events) byId.set(event.id, event);
+      // L'importance appartient à cette frise : le catalogue partagé n'en garde pas trace.
+      for (const { importance: _importance, ...event } of story.events) byId.set(event.id, event);
       events.value = [...byId.values()];
       storyDetailsCache.set(storyId, story);
     });
@@ -186,6 +188,12 @@ export const useDataStore = defineStore('data', () => {
     invalidateStory(story.id);
   }
 
+  /** Après une écriture confirmée : corrige le détail en cache sans relire la frise ni la liste. */
+  function patchStoryEventImportance(storyId: string, eventId: string, importance: EventImportance) {
+    const story = storyDetailsCache.get(storyId);
+    if (story) storyDetailsCache.set(storyId, withEventImportance(story, eventId, importance));
+  }
+
   function resetData() {
     reads.clear();
     for (const key of Object.keys(requests)) delete requests[key];
@@ -206,5 +214,6 @@ export const useDataStore = defineStore('data', () => {
     cachePeriod: (period: ListPeriod) => mergePeriods([period]),
     updatePeriods, updateEvents, updateStories, resetData, addPeriodSuggestions,
     upsertSavedPeriod, removeDeletedPeriod, upsertSavedEvent, upsertSavedStory, invalidateStory, invalidateStories,
+    patchStoryEventImportance,
   };
 });

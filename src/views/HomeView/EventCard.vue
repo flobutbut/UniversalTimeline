@@ -3,14 +3,17 @@
     class="event-card"
     :class="{
       'is-selected': isSelected,
+      'is-default-open': isDefaultOpen && !undated,
       'event-card--undated': undated,
       'is-category-active': isCategoryActive,
       'align-start': align === 'start',
       'align-end': align === 'end',
     }"
     :style="undated ? undefined : cardStyle"
+    @focusin="setFocused(true)"
+    @focusout="setFocused(false)"
   >
-    <button :class="undated ? 'event-undated-trigger' : 'event-dot'" type="button" :aria-label="`Afficher l’événement ${displayLabel}`" :aria-pressed="isSelected" @click.stop="$emit('click', $event)">{{ undated ? displayLabel : '' }}</button>
+    <button :class="undated ? 'event-undated-trigger' : 'event-dot'" type="button" :aria-label="`Afficher l’événement ${displayLabel}`" :aria-pressed="isSelected" @click.stop="$emit('click', $event)" @mouseenter="setHovered(true)" @mouseleave="setHovered(false)">{{ undated ? displayLabel : '' }}</button>
 
     <!-- Ligne toujours ancrée sur le dot, indépendante du décalage du tooltip -->
     <div class="event-vertical-line"></div>
@@ -21,7 +24,8 @@
       <div class="event-date">{{ displayDate }}</div>
       <!-- Au survol seulement : la sélection liste directement ces frises -->
       <div v-if="!isSelected && otherStoryCount" class="event-meta">{{ otherStoryCount }} {{ otherStoryCount > 1 ? 'autres frises associées' : 'autre frise associée' }}</div>
-      <p v-if="isSelected && event.description" class="event-description">{{ event.description.fr || event.description.en }}</p>
+      <!-- Au survol, une courte description ; le texte complet à la sélection. -->
+      <p v-if="displayDescription" class="event-description" :class="{ 'event-description--clamped': !isSelected }">{{ displayDescription }}</p>
       <div v-if="suggestionsLoading" class="event-meta" role="status">Chargement des frises…</div>
       <div v-else-if="suggestionsError" class="event-meta event-meta--error" role="alert">
         {{ suggestionsError }} <Button variant="tertiary" size="sm" type="button" @click.stop="$emit('retry-suggestions')">Réessayer</Button>
@@ -42,7 +46,7 @@
 
 <script setup lang="ts">
 import Button from '@/components/base/Button.vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { ListEvent, StorySuggestion } from '@/types/database';
 import { DateService } from '@/services/DateService';
 
@@ -50,6 +54,8 @@ const props = withDefaults(
   defineProps<{
     event: ListEvent;
     isSelected: boolean;
+    /** Tooltip compact visible sans survol ; le survol et la sélection l'enrichissent. */
+    isDefaultOpen?: boolean;
     isCategoryActive: boolean;
     align?: 'start' | 'center' | 'end';
     undated?: boolean;
@@ -63,14 +69,21 @@ const props = withDefaults(
     suggestionsLoading?: boolean;
     suggestionsError?: string | null;
   }>(),
-  { storySuggestions: () => [], otherStoryCount: null, suggestionsLoading: false, suggestionsError: null }
+  { isDefaultOpen: false, storySuggestions: () => [], otherStoryCount: null, suggestionsLoading: false, suggestionsError: null }
 );
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'click', ev: MouseEvent): void;
   (e: 'story-select', storyId: string): void;
   (e: 'retry-suggestions'): void;
+  /** Tooltip complet affiché par survol ou focus : la grille libère sa place. */
+  (e: 'active-change', active: boolean): void;
 }>();
+
+const hovered = ref(false);
+const focused = ref(false);
+function setHovered(value: boolean) { hovered.value = value; emit('active-change', hovered.value || focused.value); }
+function setFocused(value: boolean) { focused.value = value; emit('active-change', hovered.value || focused.value); }
 
 const displayLabel = computed(() => {
   const raw = props.event.label as unknown;
@@ -81,6 +94,8 @@ const displayLabel = computed(() => {
   }
   return '';
 });
+
+const displayDescription = computed(() => (props.event.description?.fr || props.event.description?.en || '').trim());
 
 const displayDate = computed(() => {
   const d = props.event.date?.trim() || '';
@@ -98,6 +113,13 @@ const displayDate = computed(() => {
   color: var(--color-text-secondary);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+.event-description--clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
 }
 .event-card.event-card--undated { position: relative; top: auto; height: auto; width: auto; pointer-events: auto; margin-top: var(--spacing-sm); }
 .event-undated-trigger { border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-surface-default); color: var(--color-text-primary); padding: var(--spacing-xs) var(--spacing-sm); cursor: pointer; }
@@ -174,7 +196,7 @@ const displayDate = computed(() => {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+  transition: opacity var(--transition-normal), visibility var(--transition-normal);
   z-index: var(--z-index-tooltip);
 }
 
@@ -183,15 +205,19 @@ const displayDate = computed(() => {
   top: calc(var(--spacing-2xl) + var(--spacing-md) / 2);
   left: 0;
   transform: translateX(-50%);
+  /* Fondu et léger glissement : les bulles se relaient sans à-coup. */
+  translate: 0 calc(var(--spacing-xs) * -1);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+  transition: opacity var(--transition-normal), visibility var(--transition-normal), translate var(--transition-normal),
+    background-color var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
   z-index: var(--z-index-tooltip);
   background-color: var(--color-surface-default);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-md);
+  /* Marges et typographie de PeriodCard, identiques dans tous les états. */
+  padding: var(--spacing-xs) var(--spacing-sm);
   box-shadow: var(--shadow-lg);
   width: max-content;
   max-width: calc(var(--spacing-xs) * 60);
@@ -212,13 +238,61 @@ const displayDate = computed(() => {
 .event-card:focus-within .event-info-box {
   opacity: 1;
   visibility: visible;
+  translate: 0 0;
 }
 
 .is-selected .event-vertical-line,
 .is-selected .event-info-box {
   opacity: 1;
   visibility: visible;
+  translate: 0 0;
   pointer-events: auto;
+}
+
+/* Ouvert par défaut : titre et date seulement, sous la bulle survolée ou sélectionnée. */
+.is-default-open .event-vertical-line,
+.is-default-open .event-info-box {
+  opacity: 1;
+  visibility: visible;
+  translate: 0 0;
+}
+/* Figé : texte nu sous un simple trait gris ; la bulle complète revient au survol. */
+.event-card.is-default-open:not(:hover, :focus-within, .is-selected) .event-info-box {
+  max-width: 160px;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+/* Trait limité à la largeur du texte (padding de la bulle déduit), effacé quand la bulle revient. */
+.event-info-box::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: var(--spacing-sm);
+  right: var(--spacing-sm);
+  height: 1px;
+  background-color: color-mix(in srgb, var(--color-border-default) 60%, var(--color-border-strong));
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+.event-card.is-default-open:not(:hover, :focus-within, .is-selected) .event-info-box::before {
+  opacity: 1;
+}
+.event-card.is-default-open:not(:hover, :focus-within, .is-selected) :is(.event-description, .event-meta) {
+  display: none;
+}
+/* Mêmes tailles qu'à l'état complet : seul le nombre de lignes change. */
+.event-card.is-default-open:not(:hover, :focus-within, .is-selected) .event-label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.event-card:hover,
+.event-card:focus-within,
+.event-card.is-selected {
+  z-index: calc(var(--z-index-tooltip) + 1);
 }
 
 .event-label {
@@ -237,9 +311,6 @@ const displayDate = computed(() => {
   line-height: var(--line-height-small);
 }
 
-.event-date {
-  margin-top: 2px;
-}
 
 .event-meta {
   margin-top: var(--spacing-xs);

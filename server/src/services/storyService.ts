@@ -1,7 +1,7 @@
 import { readEntityCategories } from './entityCategories.js';
 import { query, withTransaction } from '../api/database.js';
-import { NotFoundError } from '../domain/errors.js';
-import type { StoryWrite } from '../domain/writeInputs.js';
+import { NotFoundError, StoryAssociationError } from '../domain/errors.js';
+import type { EventImportance, StoryWrite } from '../domain/writeInputs.js';
 import * as stories from '../repositories/storyRepository.js';
 import { replaceEntityCategories } from '../repositories/categoryRepository.js';
 import { description, localized, groupCategories, mapCategory, mapPeriodDetail, mapEventDetail } from './mappers.js';
@@ -9,7 +9,7 @@ import { aggregateStoryTemporalBounds } from '../domain/storyTemporalBounds.js';
 import * as associations from './storyAssociations.js';
 import type { AssociationKind } from '../repositories/storyRelationsRepository.js';
 import { changeEntryPoints } from './storyEntryPoints.js';
-import { changePresentation } from '../repositories/storyRelationsRepository.js';
+import { changePresentation, lockWritableStory, setRelationLockTimeout } from '../repositories/storyRelationsRepository.js';
 import { creatorAuthor, editorAuthor } from './storyAuthor.js';
 
 const db = { query };
@@ -35,7 +35,7 @@ export async function getStory(id: string) {
   if (!row) throw new NotFoundError('Frise non trouvée');
   const categories = row.categories.map(mapCategory);
   const periods = groupCategories(row.periods, period => ({ ...mapPeriodDetail(period), hasChildren: period.has_children }));
-  const events = groupCategories(row.events, event => ({ ...mapEventDetail(event), wikidata_id: event.wikidata_id, dateYearsBP: event.date_years_bp == null ? null : Number(event.date_years_bp) }));
+  const events = groupCategories(row.events, event => ({ ...mapEventDetail(event), wikidata_id: event.wikidata_id, dateYearsBP: event.date_years_bp == null ? null : Number(event.date_years_bp), importance: event.importance }));
   const childStories = row.child_stories.map(child => ({
     id: String(child.id), title: localized(child.title_fr, child.title_en), anchors: child.anchors ?? [],
   }));
@@ -105,6 +105,13 @@ export const changeRootPeriod = (id: string, periodId: string) => withTransactio
 export const createFromPeriod = (sourceId: string, periodId: string, title: string) => withTransaction(client => associations.createStoryFromPeriod(client, sourceId, periodId, title));
 export const linkChildren = (id: string, children: string[], anchor?: { anchorType: 'period' | 'event'; anchorId: string }) => withTransaction(client => associations.linkChildStories(client, id, children, anchor));
 export const unlinkChild = (id: string, child: string) => withTransaction(client => associations.unlinkChildStory(client, id, child));
+export const changeEventImportance = (storyId: string, eventId: string, importance: EventImportance) => withTransaction(async client => {
+  await setRelationLockTimeout(client);
+  if (!await lockWritableStory(client, storyId)) throw new StoryAssociationError(404, 'Frise introuvable ou non modifiable.');
+  const updated = await stories.updateEventImportance(client, storyId, eventId, importance);
+  if (!updated) throw new StoryAssociationError(404, 'Cet événement n’appartient pas à la frise.');
+  return { storyId, eventId, importance: updated.importance };
+});
 export const changeEntries = (sourceId: string, ids: string[], anchor: { anchorType: 'period' | 'event'; anchorId: string } | undefined, remove: boolean) => withTransaction(client => changeEntryPoints(client, sourceId, ids, anchor, remove));
 
 export const changePeriodPresentation = (contextId: string, periodId: string, targetId: string, remove: boolean) => withTransaction(async client => {

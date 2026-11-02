@@ -312,3 +312,17 @@ it('opens the shared event creator, excludes existing events, and attaches the c
   expect(associate).toHaveBeenCalledExactlyOnceWith('one', 'event', ['other-event']);
   expect(view.emitted('event-added')).toHaveLength(1); expect(view.findComponent(EditModal).exists()).toBe(false);
 });
+
+it('edits the event importance for this frise from the event detail', async () => {
+  const data = story('one'); data.events[0].importance = 'minor';
+  await start(data);
+  view.getComponent(Tabs).vm.$emit('update:modelValue', 'events'); await flushPromises();
+  view.findAllComponents(FinderItem).find(row => row.props('itemId') === 'event')!.vm.$emit('click'); await flushPromises();
+  const importance = view.findAllComponents(Tabs).find(item => item.attributes('aria-labelledby') === 'event-importance-event')!;
+  expect(view.get('#event-importance-event').text()).toBe('Importance dans cette frise');
+  expect(importance.findAll('button').map(button => button.text())).toEqual(['Majeur', 'Normal', 'Mineur']);
+  expect(importance.get('.tab-button--active').text()).toBe('Mineur');
+  await importance.findAll('button')[2].trigger('click');
+  await importance.findAll('button')[0].trigger('click');
+  expect(view.emitted('change-event-importance')).toEqual([['event', 'major']]);
+});

@@ -85,6 +85,7 @@ it('places ghost navigation above the parent and emits a separate same-level act
 
 it('hides unavailable directions, all directions while loading, and the overview navigation', async () => {
   render();
+  await view.setProps({ currentPeriod: { ...period('root', true), endDate: undefined } });
   expect(view.find('nav').exists()).toBe(false);
   await view.setProps({ nextPeriod: period('newer') });
   expect(view.get('nav').findAll('button').map(button => button.text())).toEqual(['Période suivante - newer']);
@@ -92,4 +93,14 @@ it('hides unavailable directions, all directions while loading, and the overview
   expect(view.find('nav').exists()).toBe(false);
   await view.setProps({ currentPeriod: null, loading: false });
   expect(view.find('nav').exists()).toBe(false);
+});
+
+it('shows the end of the view instead of a missing next period', async () => {
+  render();
+  expect(view.get('nav').findAll('button')).toHaveLength(0);
+  expect(view.get('.period-grid__end-label').text()).toBe("Aujourd'hui");
+  await view.setProps({ currentPeriod: { ...period('root', true), endDate: '476' } });
+  expect(view.get('.period-grid__end-label').text()).toMatch(/^Fin : 476/);
+  await view.setProps({ nextPeriod: period('newer') });
+  expect(view.find('.period-grid__end-label').exists()).toBe(false);
 });

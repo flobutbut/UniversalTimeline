@@ -193,3 +193,24 @@ it('keeps an empty frise empty instead of falling back to the catalogue tree', a
   const nav=scoped(useHomeNavigation); await nav.loadInitialData();
   expect(nav.displayedPeriods.value).toEqual([]); expect(catalogue).not.toHaveBeenCalled();
 });
+
+it('shows an importance change at once with a single write, then reloads the story only after a failure', async () => {
+  const service = StoryApiService.getInstance();
+  const withEvent = (id: string) => ({ ...detail(id), events: [{ id: 'e', label: { fr: 'e', en: '' }, date: 'M65', categories: [], importance: 'normal' as const }] });
+  const read = vi.spyOn(service, 'getStory').mockImplementation(async id => withEvent(id));
+  const list = vi.spyOn(service, 'getListStories').mockResolvedValue([story('a')]);
+  const pending = deferred<void>();
+  const write = vi.spyOn(service, 'setEventImportance').mockReturnValueOnce(pending.promise).mockRejectedValueOnce(new Error('Refusé'));
+  const view = scoped(useDatabaseView); await view.selectStory(story('a'));
+  const saving = view.changeEventImportance('e', 'major');
+  expect(view.selectedStory.value?.events[0].importance).toBe('major');
+  expect(view.selectedStory.value?.periods).toEqual([]);
+  pending.resolve(); await saving;
+  expect(write).toHaveBeenCalledExactlyOnceWith('a', 'e', 'major');
+  expect(read).toHaveBeenCalledTimes(1); expect(list).not.toHaveBeenCalled();
+  expect((await useDataStore().ensureStoryLoaded('a')).events[0].importance).toBe('major');
+  // Échec : l'état enregistré est relu au lieu de garder la valeur affichée.
+  await view.changeEventImportance('e', 'minor');
+  expect(read).toHaveBeenCalledTimes(2);
+  expect(view.selectedStory.value?.events[0].importance).toBe('normal');
+});

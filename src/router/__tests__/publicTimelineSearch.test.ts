@@ -158,7 +158,7 @@ it('updates the address when a period ancestor is chosen in the breadcrumb', asy
 
 it('closes a choice between detail frises when leaving the cached timeline', async () => {
   const reference = period('subject');
-  const older = {...period('older'),startDate:'M100',startYearsBP:1e8};
+  const older = {...period('older'),startDate:'M100',startYearsBP:1e8,endDate:'M65',endYearsBP:65e6};
   const context = { id:'8', title:{fr:'Parcours',en:''}, periods:[older,reference], presentations:[
     {storyId:'7',periodId:'subject',title:{fr:'Première vue',en:''}},
     {storyId:'2',periodId:'subject',title:{fr:'Autre vue',en:''}},

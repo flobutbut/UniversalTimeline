@@ -87,7 +87,7 @@ IDs de catalogue/catégories = textes bornés à 200 caractères ; IDs stories =
 
 - **Période** ↔ **parent** : `parent_id` sur `periods`.
 - **Période / événement** ↔ **catégories** : tables de liaison `period_categories`, `event_categories`.
-- **Story** ↔ **périodes / événements** : `story_periods`, `story_events` ; **story** ↔ **catégories** : `story_categories` ; **story** ↔ **stories liées** : `story_related_stories` (`story_id` → `related_story_id`, pas de lien réflexif).
+- **Story** ↔ **périodes / événements** : `story_periods`, `story_events` (avec `importance` `major`/`normal`/`minor`, propre à la frise, exposée comme `ListEvent.importance` dans le détail d’une frise) ; **story** ↔ **catégories** : `story_categories` ; **story** ↔ **stories liées** : `story_related_stories` (`story_id` → `related_story_id`, pas de lien réflexif).
 
 Le schéma historique Prisma ne décrivait qu’un ancien modèle Event. Il est désormais conservé dans `database/archive/server/prisma/schema.prisma.txt`, hors compilation et migrations. Aucun client Prisma ni script update-dates actif. Le serveur utilise pg et les tables bilingues existantes de Supabase.
 

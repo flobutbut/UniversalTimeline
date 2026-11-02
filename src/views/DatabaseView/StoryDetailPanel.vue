@@ -224,6 +224,13 @@
                       <div class="event-detail-date">{{ formatStoryEventDateLabel(event) }}</div>
                     </div>
 
+                    <div class="event-detail-section event-detail-importance">
+                      <div :id="`event-importance-${event.id}`" class="event-detail-section-title">Importance dans cette frise</div>
+                      <p class="event-detail-section-description">Sur la timeline, les étiquettes des événements majeurs s’affichent en priorité.</p>
+                      <Tabs :model-value="event.importance ?? 'normal'" :tabs="eventImportanceTabs" role="group" :aria-labelledby="`event-importance-${event.id}`"
+                        @update:model-value="value => changeEventImportance(event, value)" />
+                    </div>
+
                     <div class="event-detail-section">
                       <div class="event-detail-section-title">Frises associées</div>
                       <p class="event-detail-section-description">Elles servent à la redirection</p>
@@ -331,6 +338,8 @@ import EditModal from './EditModal.vue';
 import { useStoryWikidataPeriodImport } from '@/composables/useStoryWikidataPeriodImport';
 import AnchoredStoryRow from './AnchoredStoryRow.vue';
 import Tabs from '@/components/base/Tabs.vue';
+import type { Tab } from '@/types/global';
+import { EVENT_IMPORTANCES, EVENT_IMPORTANCE_LABELS } from '@/lib/eventImportance';
 import Switch from '@/components/base/Switch.vue';
 import StoryTimeline from '@/components/StoryTimeline.vue';
 import FinderItem from '@/views/GraphView/FinderItem.vue';
@@ -357,7 +366,7 @@ import {
   storyPeriodCategories,
   storyPeriodHasChildrenInStory,
 } from '@/lib/storyPeriodFinderColumns';
-import type { Story, StoryAnchor, ChildStorySummary, ListEvent, ListPeriod } from '@/types/database';
+import type { EventImportance, Story, StoryAnchor, ChildStorySummary, ListEvent, ListPeriod } from '@/types/database';
 import type { StoryPeriodInput } from '@/types/periodTree';
 import type { EditFormSubmission } from '@/types/editForm';
 
@@ -393,7 +402,15 @@ const emit = defineEmits<{
   (e: 'remove-parent-entry', sourceId: string, anchor?: StoryAnchor): void;
   (e: 'add-event-anchor', childStoryId: string, eventId: string): void;
   (e: 'remove-event-anchor', childStoryId: string, eventId: string): void;
+  (e: 'change-event-importance', eventId: string, importance: EventImportance): void;
 }>();
+
+/** Même composant que le menu principal (Tabs en pastilles) ; bloqué pendant une écriture. */
+const eventImportanceTabs = computed<Tab<EventImportance>[]>(() => EVENT_IMPORTANCES
+  .map(value => ({ value, label: EVENT_IMPORTANCE_LABELS[value], disabled: panelBusy.value })));
+function changeEventImportance(event: ListEvent, importance: EventImportance) {
+  if (importance !== (event.importance ?? 'normal')) emit('change-event-importance', event.id, importance);
+}
 
 const {
   draft: periodImportDraft, busy: periodImportBusy, error: periodImportError,
@@ -988,6 +1005,7 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .event-detail-section-description { font-size: var(--font-size-sm); line-height: var(--line-height-small); color: var(--color-text-secondary); margin: 0 0 var(--spacing-md); }
 .event-detail-section { align-items: stretch; gap: var(--spacing-xs); }
 .event-detail-section > .base-button { align-self: flex-start; margin-top: var(--spacing-md); }
+.event-detail-importance { margin-bottom: var(--spacing-lg); }
 .story-settings-panel { padding: var(--spacing-xl); background: var(--color-surface-default); min-height: 100%; }
 @media (max-width: 1000px) { .story-detail-panel__meta { flex-wrap: wrap; } .story-detail-panel__meta-actions { flex-wrap: wrap; } }
 @media (max-width: 600px) { .story-detail-panel__meta-actions { width: 100%; } .events-finder-layout { grid-template-columns: 160px minmax(0,1fr); }  }

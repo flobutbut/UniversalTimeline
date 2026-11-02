@@ -5,7 +5,7 @@ import {
   InputValidationError, inputObject, parseEntityId, parseStoryId, parseQid, parseEventWrite, parsePeriodWrite,
   parseStoryWrite, parseAnchor, parseChildStories, parseAssociationOperation,
   parseSearchText, parseSearchScope, parseCsvIds, parseParentId, parseAssociationIds, parseStoryFromPeriod,
-  parseUsername, parseProfileWrite, parseTermsAcceptance, parseUserId, parseFlag,
+  parseUsername, parseProfileWrite, parseTermsAcceptance, parseUserId, parseFlag, parseEventImportance,
 } from './inputValidation.js';
 import type { Response } from 'express';
 import * as catalogue from '../services/catalogueService.js';
@@ -106,6 +106,11 @@ router.post('/stories/:storyId/events/:eventId', endpoint("Erreur lors de l'ajou
   const event = parseEntityId(req.params.eventId, 'eventId');
   const result = await stories.changeSingleAssociation(id, 'event', event, false);
   res.status(201).json(result);
+}));
+router.put('/stories/:storyId/events/:eventId/importance', endpoint("Impossible de modifier l'importance de l'événement.", async (req, res) => {
+  const id = parseStoryId(req.params.storyId, 'storyId');
+  const event = parseEntityId(req.params.eventId, 'eventId');
+  res.json(await stories.changeEventImportance(id, event, parseEventImportance(inputObject(req.body).importance)));
 }));
 router.delete('/stories/:storyId/periods/:periodId', endpoint('Erreur lors de la suppression de la période de la frise', async (req, res) => {
   const id = parseStoryId(req.params.storyId, 'storyId');

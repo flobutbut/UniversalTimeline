@@ -1,6 +1,6 @@
 import { USERNAME_MAX, usernameError, isAvatarColor, isAvatarIcon } from '../shared/accountRules.js';
 import { parseTemporal, periodDateErrors } from '../shared/temporal.js';
-import type { EventWrite, PeriodWrite } from '../domain/writeInputs.js';
+import { EVENT_IMPORTANCES, type EventImportance, type EventWrite, type PeriodWrite } from '../domain/writeInputs.js';
 import { PeriodHierarchyError, StoryAssociationError } from '../domain/errors.js';
 /** Untrusted HTTP input becomes a small, explicitly typed object before any database call. */
 export class InputValidationError extends Error {
@@ -129,6 +129,12 @@ export function parseChildStories(value: unknown) {
   const raw = multiple ? body.childStoryIds : [body.childStoryId];
   if (!Array.isArray(raw) || !raw.length || raw.length > 500) throw new InputValidationError('childStoryIds', 'Sélectionnez de 1 à 500 frises.');
   return { multiple, ids: [...new Set(raw.map(id => parseStoryId(id, 'childStoryIds')))].sort(), anchor: body.anchor === undefined ? undefined : parseAnchor(body.anchor) };
+}
+
+/** Importance d'un événement dans une frise : majeur, normal ou détail. */
+export function parseEventImportance(value: unknown): EventImportance {
+  if (!EVENT_IMPORTANCES.includes(value as EventImportance)) throw new InputValidationError('importance', 'importance doit être major, normal ou minor.');
+  return value as EventImportance;
 }
 
 export function parseAssociationOperation(value: unknown): 'add' | 'remove' {

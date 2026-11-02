@@ -798,6 +798,13 @@
           "notNull": true,
           "default": null,
           "identity": ""
+        },
+        {
+          "name": "importance",
+          "type": "text",
+          "notNull": true,
+          "default": "'normal'::text",
+          "identity": ""
         }
       ],
       "constraints": [
@@ -805,6 +812,11 @@
           "name": "story_events_event_id_fkey",
           "definition": "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE",
           "kind": "f"
+        },
+        {
+          "name": "story_events_importance_check",
+          "definition": "CHECK (importance = ANY (ARRAY['major'::text, 'normal'::text, 'minor'::text]))",
+          "kind": "c"
         },
         {
           "name": "story_events_pkey",

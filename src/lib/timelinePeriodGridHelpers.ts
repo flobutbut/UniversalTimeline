@@ -8,12 +8,14 @@ export function timelineFocusTransform(val: number, t1: number, t2: number, minP
   return t1 * f + ((val - t1) / w) * minPct;
 }
 
+export type EventCardAlign = 'start' | 'center' | 'end';
+
 /** Alignement de la bulle événement selon la position % sur la frise. */
 export function timelineEventCardAlign(
   leftPct: number,
   edgeLo = 12,
   edgeHi = 88
-): 'start' | 'center' | 'end' {
+): EventCardAlign {
   if (leftPct < edgeLo) return 'start';
   if (leftPct > edgeHi) return 'end';
   return 'center';

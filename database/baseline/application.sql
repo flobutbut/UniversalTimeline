@@ -108,7 +108,8 @@ CREATE TABLE public."story_categories" (
 
 CREATE TABLE public."story_events" (
   "story_id" integer NOT NULL,
-  "event_id" character varying NOT NULL
+  "event_id" character varying NOT NULL,
+  "importance" text NOT NULL DEFAULT 'normal'::text
 );
 
 CREATE TABLE public."story_periods" (
@@ -131,6 +132,7 @@ ALTER TABLE public."periods" ADD CONSTRAINT "periods_wikidata_id_key" UNIQUE (wi
 ALTER TABLE public."stories" ADD CONSTRAINT "stories_id_owner_unique" UNIQUE (id, owner_user_id);
 ALTER TABLE public."story_anchors" ADD CONSTRAINT "story_anchors_story_id_anchor_type_anchor_id_key" UNIQUE (story_id, anchor_type, anchor_id);
 ALTER TABLE public."story_anchors" ADD CONSTRAINT "story_anchors_anchor_type_check" CHECK (anchor_type = ANY (ARRAY['period'::text, 'event'::text]));
+ALTER TABLE public."story_events" ADD CONSTRAINT "story_events_importance_check" CHECK (importance = ANY (ARRAY['major'::text, 'normal'::text, 'minor'::text]));
 ALTER TABLE public."categories" ADD CONSTRAINT "categories_parent_id_fkey" FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL;
 ALTER TABLE public."event_categories" ADD CONSTRAINT "event_categories_category_id_fkey" FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE;
 ALTER TABLE public."event_categories" ADD CONSTRAINT "event_categories_event_id_fkey" FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE;

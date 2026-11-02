@@ -121,3 +121,46 @@ it('uses the singular and keeps counts unknown after a failed snapshot', async (
   view = mount(PeriodGrid, { props }); await settle();
   expect(view.findAllComponents(EventCard).map(card => card.props('otherStoryCount'))).toEqual([null, null]);
 });
+
+it('shows a short description on hover and the full text once selected', async () => {
+  const card = mount(EventCard, { props: {
+    event: { ...event('a'), description: { fr: '  Longue description  ', en: '' } },
+    isSelected: false, isCategoryActive: false, cardStyle: { width: '0', left: '0' },
+  } });
+  expect(card.get('.event-description').text()).toBe('Longue description');
+  expect(card.get('.event-description').classes()).toContain('event-description--clamped');
+  await card.setProps({ isSelected: true });
+  expect(card.get('.event-description').classes()).not.toContain('event-description--clamped');
+  await card.setProps({ event: { ...event('a'), description: { fr: ' ', en: '' } } });
+  expect(card.find('.event-description').exists()).toBe(false);
+  card.unmount();
+});
+
+it('opens by default only the compact tooltips that fit side by side', async () => {
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 20));
+  view = mount(PeriodGrid, { props: { ...props, events: [event('a'), event('b'), { ...event('c'), date: 'M10' }] } });
+  await settle();
+  const open = view.findAllComponents(EventCard).filter(card => card.classes('is-default-open')).map(card => card.props('event').id);
+  expect(open).toEqual(['a', 'c']);
+  expect(view.findAllComponents(EventCard)).toHaveLength(3);
+});
+
+it('closes the pinned tooltip next to a hovered event, and reopens it afterwards', async () => {
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 20));
+  view = mount(PeriodGrid, { props: { ...props, events: [event('a'), { ...event('b'), date: 'M39' }, { ...event('c'), date: 'M10' }] } });
+  await settle();
+  const open = () => view.findAllComponents(EventCard).filter(card => card.classes('is-default-open')).map(card => card.props('event').id);
+  expect(open()).toEqual(['a', 'c']);
+  await view.findAllComponents(EventCard)[1].get('.event-dot').trigger('mouseenter');
+  expect(open()).toEqual(['c']);
+  await view.findAllComponents(EventCard)[1].get('.event-dot').trigger('mouseleave');
+  // Réouverture différée : passer à un point voisin ne fait pas clignoter le tooltip figé.
+  await vi.advanceTimersByTimeAsync(100);
+  expect(open()).toEqual(['c']);
+  await view.findAllComponents(EventCard)[0].get('.event-dot').trigger('mouseenter');
+  await vi.advanceTimersByTimeAsync(300);
+  expect(open()).toEqual(['a', 'c']);
+  await view.findAllComponents(EventCard)[0].get('.event-dot').trigger('mouseleave');
+  await vi.advanceTimersByTimeAsync(200);
+  expect(open()).toEqual(['a', 'c']);
+});

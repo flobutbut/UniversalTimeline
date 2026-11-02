@@ -6,8 +6,9 @@ import { EventApiService } from '@/services/EventApiService';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { StoryApiService } from '@/services/StoryApiService';
 import { mutationErrorMessage } from '@/lib/mutationErrorMessage';
+import { withEventImportance } from '@/lib/eventImportance';
 import { useToast } from './useToast';
-import type { Story, StoryAnchor, ListPeriod, ListEvent, ListStory } from '@/types/database';
+import type { EventImportance, Story, StoryAnchor, ListPeriod, ListEvent, ListStory } from '@/types/database';
 import { useLatestRequest } from './useLatestRequest';
 import type { EditableItem } from '@/types/editForm';
 import { previewStoryFromPeriod, type StoryFromPeriodPreview } from '@/lib/storyFromPeriod';
@@ -356,6 +357,26 @@ export function useDatabaseView() {
     await StoryApiService.getInstance().changeEntryPoints(parentId, [childId], { type: 'event', id: eventId }, true);
     return 'Ancre retirée';
   });
+  // L'importance ne change ni la liste des frises ni leurs relations : affichage immédiat, une seule
+  // écriture, cache corrigé sur place. Les écritures restent dans l'ordre des clics.
+  let importanceWrites: Promise<void> = Promise.resolve();
+  const changeEventImportance = (eventId: string, importance: EventImportance) => {
+    const storyId = selectedStory.value?.id;
+    if (!storyId) return importanceWrites;
+    selectedStory.value = withEventImportance(selectedStory.value!, eventId, importance);
+    importanceWrites = importanceWrites.then(async () => {
+      try {
+        await StoryApiService.getInstance().setEventImportance(storyId, eventId, importance);
+        dataStore.patchStoryEventImportance(storyId, eventId, importance);
+      } catch (cause) {
+        // Pas de nouvel envoi automatique : la frise est relue pour afficher l'état enregistré.
+        toast.show(mutationErrorMessage(cause, 'Impossible d’enregistrer l’importance de l’événement.'), 'error');
+        dataStore.invalidateStory(storyId);
+        await refreshSelectedStory(storyId).catch(() => undefined);
+      }
+    });
+    return importanceWrites;
+  };
   const addParentEntryToStory = (sourceId: string, periodId: string) => mutateRelatedStories(async targetId => {
     await StoryApiService.getInstance().changeEntryPoints(sourceId, [targetId], { type: 'period', id: periodId });
     return 'Point d’entrée ajouté';
@@ -384,6 +405,7 @@ export function useDatabaseView() {
     removeChildStoryFromStory,
     addEventAnchorToStory,
     removeEventAnchorFromStory,
+    changeEventImportance,
     addParentEntryToStory,
     removeParentEntryFromStory,
     sharedLoading, sharedError,
