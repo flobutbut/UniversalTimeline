@@ -81,7 +81,7 @@ it.each([false, true])('restores the appropriate workspace navigation for a veri
 });
 
 it('collapses navigation when space runs out, keeps navigation usable and expands again when space returns', async () => {
-  let availableWidth = 1400;
+  let availableWidth = 1800;
   let resize = () => {};
   const disconnect = vi.fn();
   vi.stubGlobal('ResizeObserver', class {
@@ -102,7 +102,24 @@ it('collapses navigation when space runs out, keeps navigation usable and expand
   const header = view.getComponent(Header);
   expect(view.find('.header-nav-select').exists()).toBe(false);
 
+  availableWidth = 1600; resize(); await flushPromises();
+  expect(view.find('.header-nav-select').exists()).toBe(false);
+  expect(view.get('.header-content').attributes('style')).toContain('--header-search-width: 248px');
+
+  // Les trois groupes tiendraient côte à côte, mais décentreraient la recherche.
+  availableWidth = 1400; resize(); await flushPromises();
+  expect(view.find('.header-nav-select').exists()).toBe(true);
+
+  availableWidth = 604; resize(); await flushPromises();
+  expect(view.get('.header-content').attributes('style')).toContain('--header-search-width: 172px');
+  expect(view.find('.header-search-open').exists()).toBe(false);
+
+  availableWidth = 602; resize(); await flushPromises();
+  expect(view.find('.header-search-wrap').exists()).toBe(false);
+  expect(view.get('.header-search-open').attributes('href')).toBe('/search?from=/timeline');
+
   availableWidth = 1060; resize(); await flushPromises();
+  expect(view.find('.header-search-open').exists()).toBe(false);
   expect(view.get('.header-nav-wrap').attributes('inert')).toBeDefined();
   expect(view.get('.header-nav-wrap').attributes('aria-hidden')).toBe('true');
   expect(view.get('[role="combobox"]').attributes('aria-label')).toBe('Navigation principale');
@@ -113,8 +130,12 @@ it('collapses navigation when space runs out, keeps navigation usable and expand
   await view.get('[role="combobox"]').trigger('keydown', { key: 'Enter' });
   expect(header.emitted('change-view')).toEqual([['database']]);
 
-  // Sans recherche, les onglets peuvent tenir dans la même largeur.
+  // Frises conserve exactement la même recherche et le même repli.
   await view.setProps({ currentView: 'database' });
+  expect(view.find('.header-nav-select').exists()).toBe(true);
+  expect(view.find('.header-search-wrap').exists()).toBe(true);
+  // Sans recherche, les onglets peuvent tenir dans la même largeur.
+  await view.setProps({ currentView: 'graph' });
   expect(view.find('.header-nav-select').exists()).toBe(false);
   expect(view.find('.header-search-wrap').exists()).toBe(false);
   await view.setProps({ currentView: 'timeline' });
@@ -126,9 +147,28 @@ it('collapses navigation when space runs out, keeps navigation usable and expand
   auth.account = { id: 'alice', isAdmin: true }; await flushPromises();
   expect(view.find('.header-nav-select').exists()).toBe(true);
 
-  availableWidth = 1400; resize(); await flushPromises();
+  availableWidth = 1800; resize(); await flushPromises();
   expect(view.find('.header-nav-select').exists()).toBe(false);
   expect(view.get('.header-nav-wrap').attributes('inert')).toBeUndefined();
   view.unmount();
   expect(disconnect).toHaveBeenCalledOnce();
+});
+
+it.each(['timeline', 'database'] as const)('opens dedicated search on mobile from %s even when a field could still fit', async currentView => {
+  vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} });
+  vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(550);
+  vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (this: HTMLElement) {
+    if (this.classList.contains('header-brand')) return 32;
+    if (this.classList.contains('header-nav')) return 400;
+    if (this.classList.contains('header-controls')) return 40;
+    return 0;
+  });
+  const path = currentView === 'timeline' ? '/timeline?story=9&entry=universe' : '/database?story=9';
+  await start({ account: { id: 'alice', isAdmin: true }, path });
+  await view.setProps({ currentView });
+  expect(view.find('.header-search-wrap').exists()).toBe(false);
+  expect(view.find('.header-nav-select').exists()).toBe(true);
+  await view.get('.header-search-open').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.name).toBe('search');
+  expect(router.currentRoute.value.query.from).toBe(path);
 });

@@ -58,7 +58,7 @@
         <StoryMembershipField
           :story-ids="storyLinks.storyIdsOf(selectedPeriod.id)"
           :stories="stories"
-          :owns-story="auth.ownsStory"
+          :owns-story="auth.canEditStory"
           empty-text="Cette période n’appartient à aucune frise visible."
           :loading="storyLinks.loading.value"
           :load-error="storyLinks.error.value"

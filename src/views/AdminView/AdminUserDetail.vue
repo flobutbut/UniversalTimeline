@@ -18,7 +18,7 @@
         <dt>Dernière connexion</dt><dd>{{ formatAdminDate(user.lastSignInAt, true) }}</dd>
         <dt>Adresse e-mail</dt><dd>{{ user.confirmed ? 'Confirmée' : 'Non confirmée' }}</dd>
         <dt>Conditions</dt><dd>{{ user.termsVersion ? `Version du ${user.termsVersion}, acceptée le ${formatAdminDate(user.termsAcceptedAt)}` : 'Non acceptées' }}</dd>
-        <dt>Rôle</dt><dd>{{ user.isAdmin ? 'Administrateur' : 'Compte personnel' }}</dd>
+        <dt>Rôle</dt><dd>{{ user.isAdmin ? 'Administrateur' : user.isEditor ? 'Éditeur' : 'Compte personnel' }}</dd>
         <dt>Identifiant</dt><dd class="admin-user__id">{{ user.id }}</dd>
       </dl>
 
@@ -31,6 +31,8 @@
           <Button variant="secondary" size="sm" :disabled="busy || !user.email || !user.confirmed" @click="sendReset">Envoyer un lien de réinitialisation du mot de passe</Button>
           <Button variant="secondary" size="sm" :disabled="busy || isSelf || (!user.isAdmin && (!user.confirmed || user.suspended))" @click="toggleAdmin">
             {{ user.isAdmin ? 'Retirer le rôle administrateur' : 'Nommer administrateur' }}</Button>
+          <Button v-if="!user.isAdmin" variant="secondary" size="sm" :disabled="busy || isSelf || (!user.isEditor && (!user.confirmed || user.suspended))" @click="toggleEditor">
+            {{ user.isEditor ? 'Retirer le rôle éditeur' : 'Nommer éditeur' }}</Button>
           <Button variant="secondary" size="sm" :disabled="busy || isSelf || user.isAdmin" @click="toggleSuspension">{{ user.suspended ? 'Réactiver le compte' : 'Suspendre le compte' }}</Button>
           <Button variant="danger" size="sm" :disabled="busy || isSelf || user.isAdmin" @click="remove">Supprimer le compte et ses frises</Button>
         </div>
@@ -92,7 +94,7 @@ onBeforeUnmount(() => { request++; });
 const isSelf = computed(() => user.value?.id === auth.account?.id);
 const statuses = computed(() => {
   const u = user.value; if (!u) return [];
-  return [u.isAdmin && 'Admin', u.suspended && 'Suspendu', !u.confirmed && 'Non confirmé', !u.username && 'Sans profil'].filter((value): value is string => !!value);
+  return [u.isAdmin && 'Admin', u.isEditor && 'Éditeur', u.suspended && 'Suspendu', !u.confirmed && 'Non confirmé', !u.username && 'Sans profil'].filter((value): value is string => !!value);
 });
 
 async function load(focus = false) {
@@ -128,6 +130,12 @@ const toggleSuspension = () => {
   return act(suspending ? 'Suspendre ce compte ?' : 'Réactiver ce compte ?',
     suspending ? `${label()} sera déconnecté et ne pourra plus se connecter. Ses frises restent en place et visibles selon leur réglage.` : `${label()} pourra de nouveau se connecter.`,
     () => adminApi.setSuspended(props.userId, suspending), suspending ? 'Compte suspendu.' : 'Compte réactivé.');
+};
+const toggleEditor = () => {
+  const granting = !user.value!.isEditor;
+  return act(granting ? 'Nommer éditeur ?' : 'Retirer le rôle éditeur ?',
+    granting ? `${label()} pourra modifier le contenu et l’organisation de toutes les frises publiques. Leur suppression et leur visibilité restent réservées à leur propriétaire.` : `${label()} pourra seulement modifier ses propres frises.`,
+    () => adminApi.setEditor(props.userId, granting), granting ? 'Rôle éditeur accordé.' : 'Rôle éditeur retiré.');
 };
 async function remove() {
   if (busy.value || !await confirm('Supprimer définitivement ce compte ?',

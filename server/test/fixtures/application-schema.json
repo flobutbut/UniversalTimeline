@@ -592,6 +592,7 @@
         "CREATE INDEX stories_owner_user_id_idx ON public.stories USING btree (owner_user_id)"
       ],
       "triggers": [
+        "CREATE TRIGGER guard_story_ownership BEFORE UPDATE ON stories FOR EACH ROW EXECUTE FUNCTION access_private.guard_story_ownership()",
         "CREATE TRIGGER trg_stories_updated_at BEFORE UPDATE ON stories FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
       ],
       "rls": true
@@ -1127,8 +1128,8 @@
         "authenticated"
       ],
       "command": "UPDATE",
-      "using": "((( SELECT auth.uid() AS uid) = owner_user_id) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
-      "check": "((( SELECT auth.uid() AS uid) = owner_user_id) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text) AND ((owner_user_id = ( SELECT auth.uid() AS uid)) OR ((is_public IS TRUE) AND ( SELECT access_private.is_public_editor() AS is_public_editor))))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text) AND ((owner_user_id = ( SELECT auth.uid() AS uid)) OR ((is_public IS TRUE) AND ( SELECT access_private.is_public_editor() AS is_public_editor))))"
     },
     {
       "table": "story_anchors",
@@ -1150,8 +1151,8 @@
         "authenticated"
       ],
       "command": "ALL",
-      "using": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_anchors.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
-      "check": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_anchors.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+      "using": "access_private.can_edit_story(story_id)",
+      "check": "access_private.can_edit_story(story_id)"
     },
     {
       "table": "story_categories",
@@ -1173,8 +1174,8 @@
         "authenticated"
       ],
       "command": "ALL",
-      "using": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_categories.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
-      "check": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_categories.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+      "using": "access_private.can_edit_story(story_id)",
+      "check": "access_private.can_edit_story(story_id)"
     },
     {
       "table": "story_entry_points",
@@ -1184,7 +1185,7 @@
         "authenticated"
       ],
       "command": "DELETE",
-      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.source_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.target_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))))",
+      "using": "(access_private.can_edit_story(source_story_id) AND access_private.can_edit_story(target_story_id))",
       "check": null
     },
     {
@@ -1196,7 +1197,7 @@
       ],
       "command": "INSERT",
       "using": null,
-      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.source_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_entry_points.target_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))))"
+      "check": "(access_private.can_edit_story(source_story_id) AND access_private.can_edit_story(target_story_id))"
     },
     {
       "table": "story_entry_points",
@@ -1230,8 +1231,8 @@
         "authenticated"
       ],
       "command": "ALL",
-      "using": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_events.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
-      "check": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_events.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+      "using": "access_private.can_edit_story(story_id)",
+      "check": "access_private.can_edit_story(story_id)"
     },
     {
       "table": "story_period_presentations",
@@ -1241,7 +1242,7 @@
         "authenticated"
       ],
       "command": "DELETE",
-      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_period_presentations.context_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_period_presentations.target_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))))",
+      "using": "(access_private.can_edit_story(context_story_id) AND access_private.can_edit_story(target_story_id))",
       "check": null
     },
     {
@@ -1253,7 +1254,7 @@
       ],
       "command": "INSERT",
       "using": null,
-      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_period_presentations.context_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_period_presentations.target_story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))))"
+      "check": "(access_private.can_edit_story(context_story_id) AND access_private.can_edit_story(target_story_id))"
     },
     {
       "table": "story_period_presentations",
@@ -1287,8 +1288,8 @@
         "authenticated"
       ],
       "command": "ALL",
-      "using": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_periods.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
-      "check": "((EXISTS ( SELECT 1\n   FROM stories s\n  WHERE ((s.id = story_periods.story_id) AND (s.owner_user_id = ( SELECT auth.uid() AS uid))))) AND (( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+      "using": "access_private.can_edit_story(story_id)",
+      "check": "access_private.can_edit_story(story_id)"
     }
   ]
 }

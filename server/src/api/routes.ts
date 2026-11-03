@@ -311,6 +311,12 @@ router.put('/admin/users/:id/suspension', endpoint('Changement de statut impossi
   await admin.setSuspended(id, suspended);
   res.status(204).send();
 }));
+router.put('/admin/users/:id/editor', endpoint('Changement du rôle éditeur impossible', async (req, res) => {
+  const id = parseUserId(req.params.id); const enabled = parseFlag(req.body, 'editor');
+  if (!isAdmin(res)) return;
+  await admin.setEditor(id, enabled);
+  res.status(204).send();
+}));
 // Deletes the account and its frises in one transaction. Never retried automatically.
 router.delete('/admin/users/:id', endpoint('Suppression du compte impossible', async (req, res) => {
   const id = parseUserId(req.params.id);

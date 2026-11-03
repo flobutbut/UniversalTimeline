@@ -94,6 +94,7 @@ export interface ParentStorySummary {
   id: string;
   title: MultilingualText;
   ownerUserId?: string | null;
+  isPublic?: boolean;
   anchors: Array<StoryAnchor & { label: MultilingualText }>;
 }
 

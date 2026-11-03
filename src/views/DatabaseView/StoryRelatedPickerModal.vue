@@ -80,7 +80,7 @@ const excludedIds = computed(() => new Set(props.excludeStoryIds));
 const filteredStories = computed(() => {
   const q = search.value.trim().toLowerCase();
   return stories.value.filter((s: ListStory) => {
-    if (!auth.ownsStory(s)) return false;
+    if (!auth.canEditStory(s)) return false;
     if (excludedIds.value.has(s.id)) return false;
     if (q && !s.title.fr.toLowerCase().includes(q)) return false;
     return true;

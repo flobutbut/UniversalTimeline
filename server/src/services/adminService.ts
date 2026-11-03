@@ -26,5 +26,6 @@ export const dashboard = () => run(client => admin.dashboard(client));
 export const listUsers = () => run(client => admin.listUsers(client));
 export const userDetail = (id: string) => run(client => admin.userDetail(client, id));
 export const setAdmin = (id: string, enabled: boolean) => run(client => admin.setAdmin(client, id, enabled));
+export const setEditor = (id: string, enabled: boolean) => run(client => admin.setEditor(client, id, enabled));
 export const setSuspended = (id: string, suspended: boolean) => run(client => admin.setSuspended(client, id, suspended));
 export const deleteUser = (id: string) => run(client => admin.deleteUser(client, id));

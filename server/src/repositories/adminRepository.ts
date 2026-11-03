@@ -11,6 +11,9 @@ export const userDetail = (client: TransactionClient, id: string) => read<Record
 export async function setAdmin(client: TransactionClient, id: string, enabled: boolean) {
   await client.query('SELECT admin_private.set_admin($1, $2)', [id, enabled]);
 }
+export async function setEditor(client: TransactionClient, id: string, enabled: boolean) {
+  await client.query('SELECT admin_private.set_editor($1, $2)', [id, enabled]);
+}
 export async function setSuspended(client: TransactionClient, id: string, suspended: boolean) {
   await client.query('SELECT admin_private.set_suspended($1, $2)', [id, suspended]);
 }

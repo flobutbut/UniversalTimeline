@@ -2,6 +2,26 @@ import { expect, it } from 'vitest';
 import { TimelineScalingService, type ScalablePeriod } from '@/services/TimelineScalingService';
 
 const scaling = new TimelineScalingService();
+
+it('frames the parent and every displayed period, independently of input order', () => {
+  const parent = { startYearsBP: 86, endYearsBP: 80 };
+  const longerChild = { startYearsBP: 89, endYearsBP: 79 };
+  const insideChild = { startYearsBP: 85, endYearsBP: 84 };
+  for (const periods of [[insideChild, longerChild], [longerChild, insideChild]]) {
+    const duration = scaling.calculateTotalDuration(periods, parent);
+    const start = scaling.getWindowStart(periods, parent);
+    expect(duration).toBe(10); expect(start).toBe(89);
+    expect(scaling.calculatePeriodStyles(longerChild, duration, start)).toEqual({ left: '0%', width: '100%' });
+    expect(scaling.calculatePeriodStyles(parent, duration, start)).toEqual({ left: '30%', width: '60%' });
+  }
+});
+
+it('keeps the whole parent in view when children fit or have no usable dates', () => {
+  const parent = { startYearsBP: 100, endYearsBP: 0 };
+  expect(scaling.calculateTotalDuration([{ startYearsBP: 80, endYearsBP: 20 }], parent)).toBe(100);
+  expect(scaling.getWindowStart([{ startDate: 'unknown', endDate: 'unknown' }], parent)).toBe(100);
+  expect(scaling.calculateTotalDuration([], parent)).toBe(100);
+});
 function interval(period: ScalablePeriod, duration = 100, start = 100) {
   const styles = scaling.calculatePeriodStyles(period, duration, start);
   const left = parseFloat(styles.left);

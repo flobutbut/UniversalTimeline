@@ -78,3 +78,22 @@ it('clears cached data when verified permissions change for the same account', a
   expect(auth.account).toEqual({id:'alice',isAdmin:true});expect(auth.identityVersion).toBe(2);
   expect(useDataStore().stories).toEqual([]);
 });
+
+
+it('an editor edits all public frises without acquiring ownership or private access', async () => {
+  vi.mocked(authService.getAccount).mockResolvedValue({ id:'alice',isAdmin:false,isEditor:true });
+  const auth=useAuthStore();await auth.initialize();
+  expect(auth.roleLabel).toBe('Éditeur');expect(auth.isAdmin).toBe(false);
+  expect(auth.canEditStory({ownerUserId:'bob',isPublic:true})).toBe(true);
+  expect(auth.ownsStory({ownerUserId:'bob'})).toBe(false);
+  expect(auth.canEditStory({ownerUserId:'bob',isPublic:false})).toBe(false);
+  expect(auth.canEditStory({ownerUserId:'alice',isPublic:false})).toBe(true);
+});
+it('revoking editor clears cached public editing data for the same identity', async () => {
+  vi.mocked(authService.getAccount).mockResolvedValue({id:'alice',isAdmin:false,isEditor:true});
+  const auth=useAuthStore();await auth.initialize();
+  useDataStore().updateStories([{id:'public',title:{fr:'Public',en:''},categories:[],ownerUserId:'bob',isPublic:true}]);
+  vi.mocked(authService.getAccount).mockResolvedValue({id:'alice',isAdmin:false,isEditor:false});
+  await auth.refreshAccount();expect(auth.identityVersion).toBe(2);expect(useDataStore().stories).toEqual([]);
+  expect(auth.canEditStory({ownerUserId:'bob',isPublic:true})).toBe(false);
+});

@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function setAccount(next: typeof account.value) {
     const previous = account.value?.id ?? null;
-    const permissionsChanged = account.value?.isAdmin !== next?.isAdmin;
+    const permissionsChanged = account.value?.isAdmin !== next?.isAdmin || account.value?.isEditor !== next?.isEditor;
     account.value = next;
     if (previous !== (next?.id ?? null) || (previous !== null && permissionsChanged)) {
       identityVersion.value++; profile.value = undefined; profileError.value = null; profileRequest = null;
@@ -104,7 +104,14 @@ export const useAuthStore = defineStore('auth', () => {
   function ownsStory(story: { ownerUserId?: string | null }): boolean {
     return enabled.value !== true || (!!account.value && story.ownerUserId === account.value.id);
   }
+  /** Editors (and admins) can edit public content, while ownership still controls deletion and privacy. */
+  function canEditStory(story: { ownerUserId?: string | null; isPublic?: boolean }): boolean {
+    return ownsStory(story) || (!!account.value && (account.value.isEditor === true || account.value.isAdmin) && story.isPublic === true);
+  }
   return { enabled, account, ready, error, identityVersion, initialize, refreshAccount, signOut, ownsStory,
+    canEditStory,
+    isEditor: computed(() => account.value?.isEditor === true),
+    roleLabel: computed(() => account.value?.isAdmin ? 'Administrateur' : account.value?.isEditor ? 'Éditeur' : 'Compte personnel'),
     profile, profileError, ensureProfile, saveProfile, acceptTerms, deleteAccount,
     /** A frise is signed with the username: a known missing profile blocks creation (the API refuses it too). */
     canCreateStories: computed(() => enabled.value !== true || profile.value !== null),

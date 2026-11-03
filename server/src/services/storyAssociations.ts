@@ -1,4 +1,5 @@
 import type { TransactionClient } from '../api/transaction.js';
+import { principalContext } from '../auth/context.js';
 import { StoryAssociationError } from '../domain/errors.js';
 import { checkAncestorChain } from '../domain/hierarchy.js';
 import * as relations from '../repositories/storyRelationsRepository.js';
@@ -82,7 +83,7 @@ export async function unlinkChildStory(client: TransactionClient, parentId: stri
 /** Creates a child frise anchored on one period, with its sub-periods and the events in its time range. */
 export async function createStoryFromPeriod(client: TransactionClient, sourceId: string, periodId: string, title: string) {
   await relations.setRelationLockTimeout(client);
-  const source = await relations.lockSplitSource(client, sourceId);
+  const source = await relations.lockSplitSource(client, sourceId, principalContext.getStore()?.userId);
   if (!source) throw new StoryAssociationError(404, 'Frise introuvable ou non modifiable.');
   const placements = await relations.readEffectivePeriodPlacements(client, sourceId);
   const subtree = periodSubtree(placements, periodId);

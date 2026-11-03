@@ -44,6 +44,15 @@ it('keeps the back control available when the current period has no remaining it
   expect(view.emitted('go-back')).toHaveLength(1);
 });
 
+it('keeps the back control visible when the parent dates are unknown', async () => {
+  render();
+  await view.setProps({ currentPeriod: { ...period('root', true), endDate: 'unknown' } });
+  const parent = view.get('.period-card--parent');
+  expect((parent.element as HTMLElement).style.width).toBe('');
+  await parent.trigger('click');
+  expect(view.emitted('go-back')).toHaveLength(1);
+});
+
 it('uses the initial spinner only when there is no timeline context yet', async () => {
   render();
   await view.setProps({ periods: [], currentPeriod: null, loading: true });
@@ -99,8 +108,28 @@ it('shows the end of the view instead of a missing next period', async () => {
   render();
   expect(view.get('nav').findAll('button')).toHaveLength(0);
   expect(view.get('.period-grid__end-label').text()).toBe("Aujourd'hui");
-  await view.setProps({ currentPeriod: { ...period('root', true), endDate: '476' } });
+  await view.setProps({ currentPeriod: { ...period('root', true), endDate: '476' }, periods: [{ ...period('leaf'), endDate: '476' }] });
   expect(view.get('.period-grid__end-label').text()).toMatch(/^Fin : 476/);
   await view.setProps({ nextPeriod: period('newer') });
   expect(view.find('.period-grid__end-label').exists()).toBe(false);
+});
+
+it('shows the full longer child and scales the parent, events and end label to the same interval', async () => {
+  // Legacy numeric coordinates were imported at a different reference date.
+  vi.spyOn(Date, 'now').mockReturnValue(Date.UTC(2026, 10, 3));
+  const parent = { ...period('ww2', true), startDate: '1939-09-01', endDate: '1945-09-02', startYearsBP: 86.59521799778817, endYearsBP: 80.59111122160748 };
+  const child = { ...period('sino-japanese'), startDate: '1937-07-07', endDate: '1945-09-09', startYearsBP: 88.75835484371436, endYearsBP: 80.58313239333789 };
+  view = mount(PeriodGrid, { props: { periods: [child], events: [
+    { id: 'start', label: { fr: 'Début de la période parente', en: '' }, date: parent.startDate, categories: [] },
+  ], loading: false, currentPeriod: parent, parentPeriod: null, currentStoryId: '9' } });
+  const childElement = view.get('.period-card--timeline').element as HTMLElement;
+  expect(parseFloat(childElement.style.getPropertyValue('--period-left'))).toBeCloseTo(0, 6);
+  expect(parseFloat(childElement.style.getPropertyValue('--period-width'))).toBeCloseTo(100, 6);
+  const parentElement = view.get('.period-card--parent').element as HTMLElement;
+  expect(parseFloat(parentElement.style.marginLeft)).toBeGreaterThan(20);
+  expect(parseFloat(parentElement.style.width)).toBeLessThan(80);
+  const event = view.get('.event-card').element as HTMLElement;
+  expect(parseFloat(event.style.left)).toBeCloseTo(parseFloat(parentElement.style.marginLeft), 6);
+  expect(view.get('.period-grid__end-label').text()).toBe('Fin : 9 septembre 1945');
+  expect(view.get('.period-card--parent').text()).toContain('1 septembre 1939');
 });

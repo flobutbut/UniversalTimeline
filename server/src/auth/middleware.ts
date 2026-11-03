@@ -21,7 +21,7 @@ export function createAccessMiddleware(verify: VerifyToken): RequestHandler {
           res.status(401).json({ error: 'Session expirée ou invalide. Reconnectez-vous.' }); return;
         }
         if (isSuspended(user)) { res.status(403).json({ error: 'Ce compte est suspendu.' }); return; }
-        principal = { userId: user.id, isAdmin: user.app_metadata?.role === 'admin' };
+        principal = { userId: user.id, isAdmin: user.app_metadata?.role === 'admin', isEditor: user.app_metadata?.role === 'editor' };
       }
       if (!principal.userId && !['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
         res.status(401).json({ error: 'Connexion requise.' }); return;

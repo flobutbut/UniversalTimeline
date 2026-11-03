@@ -6,6 +6,7 @@ L’organisation actuelle est décrite dans [Relations au sein des frises](../Do
 
 ## Fichiers actifs
 
+- `migrations/20261103143455_public_story_editors.sql` : rôle éditeur et édition des frises publiques ; préparée et validée localement. Déployer l’API avec son contrôle de propriété avant suppression, puis appliquer cette migration et déployer le frontend. Aucune attribution de rôle ni application distante automatique.
 - `migrations/20261029090427_story_access.sql` : accès et propriété des stories, appliqué après autorisation.
 - `migrations/20261029093707_harden_public_functions.sql` : privilèges et search_path des fonctions, appliqué.
 - `migrations/20261029093923_isolate_postgis.sql` : déplacement de PostGIS vers extensions, appliqué.

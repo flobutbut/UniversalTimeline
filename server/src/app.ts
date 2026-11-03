@@ -18,7 +18,7 @@ export function createApp(options: { routes: Router; healthcheck: () => Promise<
     res.set('Cache-Control', 'no-store');
     const principal = res.locals.principal;
     if (!principal?.userId) { res.status(401).json({ error: 'Connexion requise.' }); return; }
-    res.json({ id: principal.userId, isAdmin: principal.isAdmin });
+    res.json({ id: principal.userId, isAdmin: principal.isAdmin, isEditor: principal.isEditor === true });
   });
   app.use('/api', options.routes);
   app.get('/health', async (_req, res) => {

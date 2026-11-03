@@ -120,7 +120,7 @@
                   <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">Ajouter une période racine</Button>
                 </template>
                 <template #actions="{ period, inStory }">
-                  <StoryItemActionsMenu v-if="inStory" :label="period.label.fr || period.label.en" :disabled="panelBusy" movable create-story :convert-to="periodConvertTo(period.id)"
+                  <StoryItemActionsMenu v-if="inStory" :label="period.label.fr || period.label.en" :disabled="panelBusy" movable :create-story="auth.ownsStory(story)" :convert-to="periodConvertTo(period.id)"
                     @move="movingPeriodId = period.id" @edit="emit('edit-period', period.id)" @remove="emit('remove-period', period.id)" @create-story="emit('create-story-from-period', period.id)" @convert="convertPeriod(period.id)" />
                   <Button v-else variant="ghost" size="sm" icon-only :disabled="panelBusy || requiresParentImport(period)" :aria-label="`Ajouter ${period.label.fr || period.label.en} à la frise`" @click.stop="onTreePeriodAction(period.id)"><template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template></Button>
                 </template>
@@ -128,6 +128,7 @@
             </div>
             <div class="story-period-tree-workspace__detail">
               <StoryPeriodDetail :period="selectedTreePeriod" :in-story="!!selectedTreeNode?.inStory"
+                :can-create-story="auth.ownsStory(story)"
                 :children="selectedTreeChildren" :stories="selectedTreeStories" :summaries="dataStore.stories" :busy="!!panelBusy"
                 :can-add="!!selectedTreePeriod && !requiresParentImport(selectedTreePeriod)"
                 @select="onTreePeriodSelect" @edit="emit('edit-period', $event)" @move="movingPeriodId = $event" @remove="emit('remove-period', $event)"
@@ -172,7 +173,7 @@
                         @click="onFinderPeriodSelect(row.item, colIdx)"
                       >
                         <template #actions>
-                          <StoryItemActionsMenu v-if="row.inStory" :label="storyPeriodLabelForFinder(row.item).fr" :disabled="panelBusy" create-story movable :convert-to="periodConvertTo(row.item.id)"
+                          <StoryItemActionsMenu v-if="row.inStory" :label="storyPeriodLabelForFinder(row.item).fr" :disabled="panelBusy" :create-story="auth.ownsStory(story)" movable :convert-to="periodConvertTo(row.item.id)"
                             @move="movingPeriodId = row.item.id" @edit="emit('edit-period', row.item.id)" @remove="emit('remove-period', row.item.id)"
                             @create-story="emit('create-story-from-period', row.item.id)" @convert="convertPeriod(row.item.id)" />
                           <button
@@ -353,14 +354,14 @@
 
         <!-- Aperçu : paramètres, points d’entrée, catégories et parcours de la frise -->
         <div v-else class="story-settings-panel story-overview">
-          <StorySettingsForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
+          <StorySettingsForm :story="story" :editable="auth.canEditStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
           <div class="story-overview__section">
             <StoryRelationsPanel :story="story" :busy="panelBusy" :error="error"
               @add-parent="(sourceId, periodId) => emit('add-parent-entry', sourceId, periodId)"
               @remove-parent="(sourceId, anchor) => emit('remove-parent-entry', sourceId, anchor)" />
           </div>
           <div class="story-overview__section">
-            <StoryCategoriesForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
+            <StoryCategoriesForm :story="story" :editable="auth.canEditStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
           </div>
           <StoryNavigationPanel :story="story" :busy="panelBusy" @saved="emit('retry')" />
           <!-- Les actions destructrices restent en fin de page, après tout le contenu modifiable. -->

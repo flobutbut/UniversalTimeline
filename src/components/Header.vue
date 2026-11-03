@@ -3,15 +3,19 @@
     <div
       ref="contentRef"
       class="header-content"
-      :class="{ 'header-content--no-search': currentView !== 'timeline' }"
+      :class="{ 'header-content--no-search': !hasSearch || searchMinified }"
+      :style="{ '--header-search-width': `${searchWidth}px` }"
     >
       <div ref="brandRef" class="header-brand">
         <RouterLink to="/" class="header-title header-title--wordmark" aria-label="Universal Timeline — accueil"><span class="header-title-full">Universal Timeline</span><span class="header-title-short" aria-hidden="true">UT</span></RouterLink>
       </div>
-      <div v-if="currentView === 'timeline'" class="header-search-wrap">
+      <div v-if="hasSearch && !searchMinified" class="header-search-wrap">
         <GlobalSearch :key="auth.identityVersion" @select="emit('select-search', $event)" />
       </div>
-      <div class="header-right">
+      <div ref="rightRef" class="header-right">
+        <Button v-if="hasSearch && searchMinified" class="header-search-open" :to="{ name: 'search', query: { from: route.fullPath } }" variant="tertiary" size="sm" icon-only aria-label="Rechercher une frise ou un sujet Wikidata" title="Rechercher">
+          <template #icon><DesignIcon name="search" /></template>
+        </Button>
         <div v-if="tabs.length" class="header-nav-wrap" :class="{ 'header-nav-wrap--collapsed': navCollapsed }" :inert="navCollapsed ? true : undefined" :aria-hidden="navCollapsed || undefined">
           <nav ref="navRef" class="header-nav" aria-label="Navigation principale">
             <RouterLink v-for="tab in tabs" :key="tab.value" :to="tab.value === 'timeline' && timelineDestination ? timelineDestination : { name: tab.value }" custom v-slot="{ href }">
@@ -64,27 +68,41 @@ const contentRef = ref<HTMLElement | null>(null);
 const brandRef = ref<HTMLElement | null>(null);
 const navRef = ref<HTMLElement | null>(null);
 const controlsRef = ref<HTMLElement | null>(null);
+const rightRef = ref<HTMLElement | null>(null);
 const navCollapsed = ref(false);
+const hasSearch = computed(() => props.currentView === 'timeline' || props.currentView === 'database');
+const searchWidth = ref(320);
+const searchMinified = ref(false);
 let resizeObserver: ResizeObserver | undefined;
 
 function updateNavigationLayout() {
   const content = contentRef.value;
-  if (!content || !navRef.value || !brandRef.value || !controlsRef.value) return;
+  if (!content?.clientWidth || !brandRef.value || !controlsRef.value) return;
   const style = getComputedStyle(content);
   const gap = parseFloat(style.columnGap) || 0;
   const available = content.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0);
-  // Conserver une recherche confortable avant de replier les onglets. Le nav
-  // garde sa largeur intrinsèque, même masqué, pour pouvoir aussi se déplier.
-  const hasSearch = props.currentView === 'timeline';
-  const required = brandRef.value.offsetWidth + navRef.value.offsetWidth + controlsRef.value.offsetWidth
-    + gap * (hasSearch ? 3 : 2) + (hasSearch ? 320 : 0);
-  navCollapsed.value = available < required;
+  // Réserver autant d'espace de chaque côté pour centrer la recherche dans
+  // le viewport. Le nav garde sa largeur intrinsèque même quand il est masqué.
+  const navWidth = navRef.value?.offsetWidth ?? 0;
+  const controlsWidth = controlsRef.value.offsetWidth;
+  const navigationWidth = navWidth + controlsWidth + (tabs.value.length ? gap : 0);
+  const required = hasSearch.value
+    ? 2 * Math.max(brandRef.value.offsetWidth, navigationWidth) + 172 + gap * 2
+    : brandRef.value.offsetWidth + navigationWidth + gap;
+  navCollapsed.value = tabs.value.length > 0 && available < required;
+  const visibleNavWidth = navCollapsed.value
+    ? (content.querySelector<HTMLElement>('.header-nav-select')?.offsetWidth || 140)
+    : navWidth;
+  const rightWidth = controlsWidth + (tabs.value.length ? visibleNavWidth + gap : 0);
+  const roomForSearch = available - 2 * Math.max(brandRef.value.offsetWidth, rightWidth) - gap * 2;
+  searchMinified.value = hasSearch.value && (content.clientWidth <= 600 || roomForSearch < 172);
+  searchWidth.value = Math.max(172, Math.min(320, roomForSearch));
 }
 
 onMounted(() => {
   if (typeof ResizeObserver === 'undefined') return;
   resizeObserver = new ResizeObserver(updateNavigationLayout);
-  for (const element of [contentRef.value, brandRef.value, navRef.value, controlsRef.value]) {
+  for (const element of [contentRef.value, brandRef.value, navRef.value, controlsRef.value, rightRef.value]) {
     if (element) resizeObserver.observe(element);
   }
   updateNavigationLayout();
@@ -130,7 +148,7 @@ function changeView(event: MouseEvent, view: NavigationView) {
   padding: 0 var(--spacing-lg);
   position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) var(--header-search-width, 320px) minmax(0, 1fr);
   align-items: center;
   column-gap: var(--header-gap);
 }
@@ -140,6 +158,7 @@ function changeView(event: MouseEvent, view: NavigationView) {
 }
 
 .header-brand {
+  width: max-content;
   justify-self: start;
   display: flex;
   align-items: center;
@@ -180,7 +199,7 @@ function changeView(event: MouseEvent, view: NavigationView) {
 
 .header-search-wrap {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   width: 100%;
   min-width: 0;
 }
