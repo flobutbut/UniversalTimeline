@@ -58,17 +58,19 @@ Convention : noms en anglais `objet_action` (snake_case), propriétés en snake_
 | Événement / Action | Déclencheur | Propriétés | Où |
 | --- | --- | --- | --- |
 | `$pageview` (auto) | Chaque page, navigation SPA comprise | `$pathname`, `$referrer`, UTM | déjà actif |
-| Action `CTA landing` | Clic sur un `data-attr="landing-cta-*"` | `cta` : `explore`, `create`, `login`, `footer_explore`, `footer_signup`, `journey_story`, `journey_create`, `journey_outro` | `LandingView.vue`, `ScrollLandingView.vue` |
-| `landing_section_viewed` | Section visible à 50 % (une fois par visite) | `page` (`landing`, `voyage`), `section` (`experience`, `comprendre`, `creer`) | `LandingView.vue` |
-| `landing_demo_scale_changed` | Onglet d’échelle de la démo | `scale` (`IntroScaleId` : `universe`, `earth`, `dinosaurs`, `humans`, `inventions`) | `LandingTimeDemo` (`changeScale`) |
-| `journey_step_reached` | Étape atteinte sur /voyage | `step_index`, `step_id`, `method` (`scroll`, `button`) | `ScrollLandingView.vue` |
-| `signup_form_viewed` | Affichage du mode inscription | `redirect` (chemin cible) | `LoginView.vue` |
-| `signup_blocked` | Envoi impossible côté client | `reason` (`username_invalid`, `username_taken`, `terms_unchecked`) | `LoginView.vue` |
+| Action `CTA landing` | Clic sur un `data-attr="landing-cta-<cta>"` (autocapture, ventilation par `cta` via `elements_chain`) | `cta` : `login`, `explore`, `create`, `footer_explore`, `footer_signup` sur `/` ; `journey_story`, `journey_create`, `journey_explore`, `journey_outro`, `journey_outro_create`, `journey_footer` sur `/voyage` | `LandingView.vue`, `ScrollLandingView.vue` |
+| `landing_section_viewed` | Moitié de la section visible (ou moitié de l’écran pour une section plus haute), une fois par affichage | `page` (`landing`), `section` (`experience`, `comprendre`, `creer`) | `LandingView.vue` |
+| `landing_demo_scale_changed` | Changement d’échelle de la démo (onglet ou bouton suivant) | `scale` (`IntroScaleId` : `universe`, `earth`, `dinosaurs`, `humans`, `inventions`) | `LandingTimeDemo` (`changeScale`) |
+| `journey_step_reached` | Première arrivée sur une étape de /voyage pendant l’affichage ; l’étape 1 est le `$pageview` | `step_index` (à partir de 2, comme l’affichage « 02 / N »), `step_id`, `method` (`button` si un bouton a été pressé dans les 1,5 s, sinon `scroll`) | `ScrollLandingView.vue` |
+| `signup_form_viewed` | Affichage du mode inscription (pas pour un visiteur déjà connecté, redirigé) | `redirect` (chemin cible, sans paramètres) | `LoginView.vue` |
+| `signup_abandoned` | Formulaire d’inscription quitté sans envoi alors qu’un champ était rempli (autre page, passage à la connexion, fermeture de l’onglet par `sendBeacon`). Remplace `signup_blocked` : le bouton désactivé empêche toute tentative d’envoi bloquée. | `blocked_by` : `username_missing`, `username_invalid`, `username_checking`, `username_taken`, `terms_unchecked` ou `null` (rien ne bloquait) | `LoginView.vue` |
 | `signup_submitted` | Envoi du formulaire | — | `LoginView.vue` |
-| `signup_failed` | Erreur renvoyée par Supabase | `reason` = code d’erreur déjà distingué par `signupError` (`weak_password`, `over_email_send_rate_limit`, `over_request_rate_limit`, `email_address_invalid`, `unexpected_failure` = nom pris entre-temps…) | `LoginView.vue` |
-| `signup_succeeded` | Compte créé, confirmation attendue | — | `LoginView.vue` |
-| `login_succeeded` / `login_failed` | Connexion | `reason` pour l’échec | `LoginView.vue` |
-| `username_set` | Nom d’utilisateur enregistré depuis le profil | `first_time` | `ProfileView.vue` |
+| `signup_failed` | Erreur renvoyée par Supabase | `reason` = code d’erreur Supabase (`weak_password`, `over_email_send_rate_limit`, `over_request_rate_limit`, `email_address_invalid`, `unexpected_failure` = nom pris entre-temps…), `unavailable` si le service ne répond pas | `LoginView.vue` |
+| `signup_succeeded` | Compte créé | `confirmation_required` (confirmation par e-mail attendue) | `LoginView.vue` |
+| `login_succeeded` / `login_failed` | Connexion | `reason` pour l’échec : code Supabase (`invalid_credentials`, `email_not_confirmed`…), `session_unverified`, `unavailable` | `LoginView.vue` |
+| `username_set` | Nom d’utilisateur enregistré ou changé depuis le profil | `first_time` | `ProfileView.vue` |
+
+Les événements passent par `track()` (`src/lib/analytics.ts`), typé par `AnalyticsEvents` : sans consentement, ils sont ignorés, jamais mis en file. Statut : **implémenté** (phase 1, code) le 3 novembre 2026.
 
 ### 4.2 Création et contribution (phase 2)
 
@@ -101,18 +103,22 @@ Convention : noms en anglais `objet_action` (snake_case), propriétés en snake_
 - Activer **« Capture dead clicks »** (clics sans effet) et garder les **rage clicks** de l’autocapture.
 - Activer la **capture des exceptions JavaScript** (`$exception`), pour relier une erreur à un abandon.
 - Garder les **Web Vitals** (lenteurs sur mobile = cause fréquente d’abandon).
-- Fuseau horaire du projet en **Europe/Paris** (actuellement UTC).
+- Fuseau horaire du projet en **Europe/Paris**.
+
+Statut : **appliqué** le 3 novembre 2026 (Web Vitals et attribut `data-attr` étaient déjà actifs).
 
 ## 5. Tableaux de bord
 
 ### Dashboard 1 — « Landing & inscription » (phase 1)
+
+Créé le 3 novembre 2026 : dashboard PostHog 1079515. Les points 1 à 7 sont couverts (le 7 par la colonne `page` du tableau des CTA). Données de test exclues (127.0.0.1, localhost).
 
 1. Visiteurs uniques par jour, `/` et `/voyage` séparés.
 2. Provenance : domaines référents et UTM des visites de landing.
 3. Profondeur de lecture : part des visiteurs atteignant chaque section (`landing_section_viewed`) et chaque étape de /voyage.
 4. Clics sur les CTA par bouton (Action `CTA landing`, ventilée par `cta`).
 5. **Entonnoir d’acquisition** : landing vue → CTA création → formulaire vu → inscription envoyée → inscription réussie → première connexion. Ventilé par page de landing et par type d’appareil, avec temps de conversion.
-6. Raisons d’échec : `signup_blocked` et `signup_failed` par `reason`.
+6. Raisons d’échec : `signup_abandoned` par `blocked_by`, `signup_failed` par `reason`.
 7. Comparaison des deux landings : taux de clic « Explorer » et « Créer » sur `/` et `/voyage`.
 
 ### Dashboard 2 — « Activation & contribution » (phase 2)
@@ -134,13 +140,15 @@ Convention : noms en anglais `objet_action` (snake_case), propriétés en snake_
 
 ### Dashboard 4 — « Frictions » (phase 1 puis enrichi)
 
+Créé le 3 novembre 2026 : dashboard PostHog 1079516 (clics répétés/sans effet par page, éléments concernés, erreurs JavaScript, Web Vitals p75). Les échecs de chargement de la timeline arrivent en phase 2.
+
 Rage clicks et clics sans effet par page et élément, exceptions par page, échecs de chargement de la timeline, Web Vitals par page.
 
 ## 6. Comprendre le « pourquoi »
 
 Du plus simple au plus intrusif :
 
-1. **Raisons d’échec instrumentées** (`signup_blocked`, `signup_failed`, `timeline_load_failed`) : elles expliquent une bonne partie des abandons de formulaire.
+1. **Raisons d’échec instrumentées** (`signup_abandoned`, `signup_failed`, `timeline_load_failed`) : elles expliquent une bonne partie des abandons de formulaire.
 2. **Clics sans effet, rage clicks, exceptions** : ils montrent ce que les gens essaient de faire sans y arriver.
 3. **Sondages PostHog d’une question**, affichés seulement aux visiteurs consentants :
    - après `story_created` : « À quoi va servir cette frise ? » → *pour moi*, *pour la partager*, *pour enseigner*, *pour un travail ou une étude*, *autre*. C’est la réponse directe à Q4.

@@ -1,4 +1,4 @@
-import type { CaptureResult, PostHog } from 'posthog-js';
+import type { CaptureOptions, CaptureResult, PostHog } from 'posthog-js';
 import type { ConsentTracker } from '@/stores/useConsentStore';
 
 export interface PostHogSettings { token: string; host: string }
@@ -41,6 +41,35 @@ export function scrubAuthSecrets(event: CaptureResult | null): CaptureResult | n
   return event;
 }
 
+/** Client-side reason that keeps the sign-up form from being sent. */
+export type SignupBlock = 'username_missing' | 'username_invalid' | 'username_checking' | 'username_taken' | 'terms_unchecked';
+
+/**
+ * Product events of Documentation/PLAN-ANALYSE.md (section 4). Values stay short and never carry personal
+ * data: no e-mail, username, typed text or private title.
+ */
+export interface AnalyticsEvents {
+  landing_section_viewed: { page: 'landing'; section: string };
+  landing_demo_scale_changed: { scale: string };
+  journey_step_reached: { step_index: number; step_id: string; method: 'scroll' | 'button' };
+  signup_form_viewed: { redirect: string };
+  signup_abandoned: { blocked_by: SignupBlock | null };
+  signup_submitted: Record<string, never>;
+  signup_failed: { reason: string };
+  signup_succeeded: { confirmation_required: boolean };
+  login_succeeded: Record<string, never>;
+  login_failed: { reason: string };
+  username_set: { first_time: boolean };
+}
+
+/** The initialised client while consent is given; null otherwise, so events are dropped, never queued. */
+let capturing: PostHog | null = null;
+
+/** Sends a product event only while audience measurement is accepted. */
+export function track<E extends keyof AnalyticsEvents>(event: E, properties: AnalyticsEvents[E], options?: CaptureOptions) {
+  capturing?.capture(event, properties, options);
+}
+
 type LoadPostHog = () => Promise<PostHog>;
 const loadPostHog: LoadPostHog = () => import('posthog-js').then(module => module.default);
 
@@ -53,18 +82,18 @@ export function createPostHogTracker({ token, host }: PostHogSettings, load: Loa
   return {
     async start() {
       wanted = true;
-      if (client) { client.set_config({ persistence: 'localStorage+cookie' }); client.opt_in_capturing(); return; }
+      if (client) { client.set_config({ persistence: 'localStorage+cookie' }); client.opt_in_capturing(); capturing = client; return; }
       loading ??= load().then(posthog => {
         loading = null;
         // Consent withdrawn while the script was downloading: never initialise.
         if (!wanted) return;
         posthog.init(token, { api_host: host, defaults: '2026-08-30', disable_session_recording: true, before_send: scrubAuthSecrets });
-        client = posthog;
+        client = posthog; capturing = posthog;
       }).catch(() => { loading = null; });
       await loading;
     },
     stop() {
-      wanted = false;
+      wanted = false; capturing = null;
       if (client) { client.opt_out_capturing(); client.reset(true); client.set_config({ persistence: 'memory' }); }
       purgePostHogStorage(token);
     },

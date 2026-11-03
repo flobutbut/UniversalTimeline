@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import Button from '@/components/base/Button.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
@@ -11,6 +11,7 @@ import { storyTimelineLocation } from '@/router/storyTarget';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { canUseWorkspace } from '@/router/access';
 import type { StorySummary } from '@/types/database';
+import { track } from '@/lib/analytics';
 
 const { root, runway, stage, frame, reducedMotion, schedule, goTo } = useScrollJourney();
 const chapter = computed(() => journeyChapters[frame.value.index]);
@@ -19,6 +20,16 @@ const relatedStory = computed(() => chapter.value.stories.map(id => publicStorie
 const auth = useAuthStore();
 const accountTarget = computed(() => canUseWorkspace(auth) ? { name: 'database' } : { name: 'login', query: { mode: 'signup', redirect: '/database' } });
 const transcriptOpen = ref(false);
+/** Steps reached during this visit, each reported once; the first one is the page view itself. */
+const reachedSteps = new Set<number>([0]);
+// A step crossed shortly after a button press (smooth scroll included) was reached by button.
+let buttonUntil = 0;
+function goToStep(index: number) { buttonUntil = performance.now() + 1500; goTo(index); }
+watch(() => frame.value.index, index => {
+  if (reachedSteps.has(index)) return;
+  reachedSteps.add(index);
+  track('journey_step_reached', { step_index: index + 1, step_id: journeyChapters[index].id, method: performance.now() < buttonUntil ? 'button' : 'scroll' });
+});
 let alive = true;
 onMounted(async () => {
   try {
@@ -55,9 +66,9 @@ onBeforeUnmount(() => { alive = false; });
             <p class="chapter-date">{{ chapter.date }}</p>
             <a v-if="chapter.source" :href="chapter.source.url" target="_blank" rel="noopener noreferrer" class="chapter-source">Source : {{ chapter.source.name }}<span class="sr-only"> (nouvel onglet)</span></a>
             <div class="chapter-action">
-              <Button v-if="relatedStory" :to="storyTimelineLocation(relatedStory.id)" class="journey-action" :aria-label="`Explorer la frise ${relatedStory.title.fr || relatedStory.title.en}`">Explorer cette frise</Button>
-              <Button v-else-if="chapter.example" :to="accountTarget" class="journey-action">Raconter ma propre histoire</Button>
-              <Button v-else to="/timeline" class="journey-action">Explorer les frises</Button>
+              <Button v-if="relatedStory" :to="storyTimelineLocation(relatedStory.id)" class="journey-action" data-attr="landing-cta-journey_story" :aria-label="`Explorer la frise ${relatedStory.title.fr || relatedStory.title.en}`">Explorer cette frise</Button>
+              <Button v-else-if="chapter.example" :to="accountTarget" class="journey-action" data-attr="landing-cta-journey_create">Raconter ma propre histoire</Button>
+              <Button v-else to="/timeline" class="journey-action" data-attr="landing-cta-journey_explore">Explorer les frises</Button>
               <span v-if="relatedStory" class="related-title">{{ relatedStory.title.fr || relatedStory.title.en }}</span>
               <span v-else-if="chapter.example" class="related-title">Frises publiques ou privées, à votre échelle.</span>
             </div>
@@ -67,13 +78,13 @@ onBeforeUnmount(() => { alive = false; });
         <div class="stage-navigation">
           <span class="scroll-invitation">{{ frame.index === journeyChapters.length - 1 ? 'Vous êtes arrivé à une seconde.' : 'Faites défiler pour vous rapprocher.' }}</span>
           <div class="stage-controls">
-            <Button size="sm" variant="tertiary" :disabled="frame.index === 0" @click="goTo(frame.index - 1)">Précédent</Button>
-            <Button v-if="frame.index < journeyChapters.length - 1" size="sm" variant="tertiary" @click="goTo(frame.index + 1)">Suivant</Button>
+            <Button size="sm" variant="tertiary" :disabled="frame.index === 0" @click="goToStep(frame.index - 1)">Précédent</Button>
+            <Button v-if="frame.index < journeyChapters.length - 1" size="sm" variant="tertiary" @click="goToStep(frame.index + 1)">Suivant</Button>
             <a v-else href="#votre-histoire" class="finish-link">Et votre histoire ?</a>
           </div>
         </div>
         <nav class="chapter-navigation" aria-label="Étapes du voyage">
-          <button v-for="(item, index) in journeyChapters" :key="item.id" type="button" :aria-label="`Étape ${index + 1} : ${item.label}`" :aria-current="frame.index === index ? 'step' : undefined" :title="item.label" @click="goTo(index)"><span>{{ String(index + 1).padStart(2, '0') }}</span></button>
+          <button v-for="(item, index) in journeyChapters" :key="item.id" type="button" :aria-label="`Étape ${index + 1} : ${item.label}`" :aria-current="frame.index === index ? 'step' : undefined" :title="item.label" @click="goToStep(index)"><span>{{ String(index + 1).padStart(2, '0') }}</span></button>
         </nav>
         <div class="journey-progress" aria-hidden="true"><span :style="{ transform: `scaleX(${frame.progress})` }" /></div>
         <span class="sr-only" role="status" aria-live="polite">Étape {{ frame.index + 1 }} sur {{ journeyChapters.length }} : {{ chapter.label }}.</span>
@@ -84,7 +95,7 @@ onBeforeUnmount(() => { alive = false; });
       <span class="outro-kicker">DE L’IMMENSE AU FAMILIER</span>
       <h2 id="outro-title">À quelle échelle<br />commence votre histoire ?</h2>
       <p>Une époque, une recherche, une vie, un événement. Universal Timeline donne une place aux histoires qui vous intéressent. Explorez les frises publiques ou composez les vôtres, publiques ou privées.</p>
-      <div class="outro-actions"><Button to="/timeline" class="journey-action">Explorer les frises</Button><RouterLink :to="accountTarget" class="outro-secondary">{{ canUseWorkspace(auth) ? 'Mes frises' : 'Créer ma première frise' }}</RouterLink></div>
+      <div class="outro-actions"><Button to="/timeline" class="journey-action" data-attr="landing-cta-journey_outro">Explorer les frises</Button><RouterLink :to="accountTarget" class="outro-secondary" data-attr="landing-cta-journey_outro_create">{{ canUseWorkspace(auth) ? 'Mes frises' : 'Créer ma première frise' }}</RouterLink></div>
       <span class="outro-note">Exploration sans compte. Aucun abonnement payant actuellement.</span>
       <div class="journey-data">Connecté à <a href="https://www.wikidata.org" target="_blank" rel="noopener noreferrer">Wikidata<span class="sr-only"> (nouvel onglet)</span></a> · données structurées ouvertes sous CC0.</div>
     </section>
@@ -96,7 +107,7 @@ onBeforeUnmount(() => { alive = false; });
         <li v-for="item in journeyChapters" :key="item.id"><h3>{{ item.label }}</h3><p>{{ item.date }}</p><p>{{ item.description }}</p><a v-if="item.source" :href="item.source.url" target="_blank" rel="noopener noreferrer">Source : {{ item.source.name }}<span class="sr-only"> (nouvel onglet)</span></a></li>
       </ol>
     </details>
-    <footer class="journey-footer"><RouterLink to="/">Revoir le premier concept</RouterLink><a href="#lecture" @click="transcriptOpen = true">Repères et sources</a><RouterLink to="/timeline">Entrer dans l’application</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">Mentions légales</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">Confidentialité</RouterLink><RouterLink :to="{ name: 'contact' }">Contact</RouterLink></footer>
+    <footer class="journey-footer"><RouterLink to="/">Revoir le premier concept</RouterLink><a href="#lecture" @click="transcriptOpen = true">Repères et sources</a><RouterLink to="/timeline" data-attr="landing-cta-journey_footer">Entrer dans l’application</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">Mentions légales</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">Confidentialité</RouterLink><RouterLink :to="{ name: 'contact' }">Contact</RouterLink></footer>
   </div>
 </template>
 

@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import Button from '@/components/base/Button.vue';
 import Tabs from '@/components/base/Tabs.vue';
+import { track as trackEvent } from '@/lib/analytics';
 import { createIntroScales, HUMAN_AGE, introBandLayout, introLandmarks, type IntroScaleId } from '@/lib/landingTimeline';
 
 const mode = ref<IntroScaleId>('universe');
@@ -23,6 +24,7 @@ const chartBands = computed(() => scale.value.bands.map(band => {
 let observer: ResizeObserver | undefined;
 
 function changeScale(value: IntroScaleId) {
+  if (value !== mode.value) trackEvent('landing_demo_scale_changed', { scale: value });
   mode.value = value;
   if (!scale.value.landmarks.includes(selectedId.value)) selectedId.value = scale.value.landmarks[0];
 }

@@ -1,14 +1,39 @@
 <script setup lang="ts">
 import Button from '@/components/base/Button.vue';
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import LandingTimeDemo from '@/components/LandingTimeDemo.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import Tabs from '@/components/base/Tabs.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { canUseWorkspace } from '@/router/access';
+import { track } from '@/lib/analytics';
 
 const auth = useAuthStore();
+const page = ref<HTMLElement>();
+/** Sections whose reading depth is measured, each reported once per visit. */
+const MEASURED_SECTIONS = ['experience', 'comprendre', 'creer'];
+let sectionObserver: IntersectionObserver | undefined;
+onMounted(() => {
+  if (typeof IntersectionObserver === 'undefined' || !page.value) return;
+  const seen = new Set<string>();
+  sectionObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      // Half of the section, or half of the screen for a section taller than the screen.
+      const visible = entry.intersectionRect.height;
+      const needed = Math.min(entry.boundingClientRect.height, entry.rootBounds?.height ?? Infinity) / 2;
+      const section = entry.target.id;
+      if (!entry.isIntersecting || visible < needed || seen.has(section)) continue;
+      seen.add(section); sectionObserver?.unobserve(entry.target);
+      track('landing_section_viewed', { page: 'landing', section });
+    }
+  }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+  for (const id of MEASURED_SECTIONS) {
+    const section = page.value.querySelector(`#${id}`);
+    if (section) sectionObserver.observe(section);
+  }
+});
+onBeforeUnmount(() => sectionObserver?.disconnect());
 const accountTarget = computed(() => canUseWorkspace(auth) ? { name: 'database' } : { name: 'login', query: { mode: 'signup', redirect: '/database' } });
 const visibility = ref<'public' | 'private'>('public');
 const visibilityTabs = [{ value: 'public' as const, label: 'Publique' }, { value: 'private' as const, label: 'Privée' }];
@@ -21,7 +46,7 @@ const questions = [
 </script>
 
 <template>
-  <div class="landing-page">
+  <div ref="page" class="landing-page">
     <header class="landing-header">
       <div class="landing-container header-inner">
         <RouterLink to="/" class="landing-brand" aria-label="Universal Timeline — accueil">Universal Timeline</RouterLink>
@@ -31,7 +56,7 @@ const questions = [
           <a href="#questions">Questions</a>
         </nav>
         <div class="landing-account">
-          <RouterLink :to="canUseWorkspace(auth) ? '/database' : '/login'">{{ canUseWorkspace(auth) ? 'Mon espace' : 'Se connecter' }}</RouterLink>
+          <RouterLink :to="canUseWorkspace(auth) ? '/database' : '/login'" data-attr="landing-cta-login">{{ canUseWorkspace(auth) ? 'Mon espace' : 'Se connecter' }}</RouterLink>
           <ThemeToggle />
         </div>
       </div>
@@ -45,7 +70,7 @@ const questions = [
           <p class="hero-description">L’Univers, la Terre, la vie, notre espèce.<br />Commencez par tout le temps disponible, puis explorez-le.</p>
         </div>
         <div class="hero-actions">
-          <Button to="/timeline" class="action-link">Explorer les frises</Button>
+          <Button to="/timeline" class="action-link" data-attr="landing-cta-explore">Explorer les frises</Button>
           <span>Sans compte. À votre rythme.</span>
         </div>
       </div>
@@ -78,7 +103,7 @@ const questions = [
         <p>Un cours à préparer, une recherche à situer, une évolution à raconter. Réunissez des périodes et des événements pour composer vos propres frises.</p>
         <p>Partagez-les pour enrichir les frises publiques, ou conservez-les dans votre espace privé, pour un usage personnel ou professionnel.</p>
         <div class="create-bottom">
-          <Button :to="accountTarget" class="action-link">{{ canUseWorkspace(auth) ? 'Accéder à mes frises' : 'Créer ma première frise' }}</Button>
+          <Button :to="accountTarget" class="action-link" data-attr="landing-cta-create">{{ canUseWorkspace(auth) ? 'Accéder à mes frises' : 'Créer ma première frise' }}</Button>
           <span>Compte gratuit actuellement.</span>
         </div>
       </div>
@@ -108,7 +133,7 @@ const questions = [
     <footer class="landing-footer landing-container">
       <RouterLink to="/" class="landing-brand">Universal Timeline</RouterLink>
       <span>Le temps, une question d’échelle.</span>
-      <nav aria-label="Liens de pied de page"><RouterLink to="/timeline">Explorer les frises</RouterLink><RouterLink :to="accountTarget">{{ canUseWorkspace(auth) ? 'Mes frises' : 'Créer un compte' }}</RouterLink></nav>
+      <nav aria-label="Liens de pied de page"><RouterLink to="/timeline" data-attr="landing-cta-footer_explore">Explorer les frises</RouterLink><RouterLink :to="accountTarget" data-attr="landing-cta-footer_signup">{{ canUseWorkspace(auth) ? 'Mes frises' : 'Créer un compte' }}</RouterLink></nav>
       <nav class="landing-legal" aria-label="Informations légales"><RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">Mentions légales</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">Confidentialité</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'cookies' } }">Cookies</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'conditions' } }">Conditions d’utilisation</RouterLink><RouterLink :to="{ name: 'contact' }">Contact</RouterLink></nav>
     </footer>
   </div>
