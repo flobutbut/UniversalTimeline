@@ -5,6 +5,7 @@ import {useAuthStore} from '@/stores/useAuthStore';
 import {adminApi} from '@/services/AdminApiService';
 import AdminRelations from '../AdminRelations.vue';
 import Switch from '@/components/base/Switch.vue';
+import Button from '@/components/base/Button.vue';
 import {graphKey} from '../relationGraph';
 import type {RelationEntity,RelationsContent,RelationsNetwork} from '@/types/adminRelations';
 import {network,leafNetwork} from './networkFixture';
@@ -53,6 +54,17 @@ it('shows the complete network immediately and selection/deselection never chang
   canvas.vm.$emit('deselect');await flushPromises();
   expect(canvas.props('selected')).toBeNull();expect(canvas.props('graph')).toBe(before);
   expect(view.get('.admin-relations__detail').text()).toContain('Explorer le réseau');
+});
+
+it.each([['story','1'],['period','p'],['event','unused']] as const)('offers the selected %s fiche in Frises, including unused records and expanded mode',async(kind,id)=>{
+  if(kind!=='story')vi.spyOn(adminApi,'relationEntity').mockResolvedValue({kind,id,title:'Fiche',startDate:'1900',endDate:null,wikidataId:null,stories:[]});
+  await start();const canvas=view.findComponent({name:'RelationGraphCanvas'});
+  canvas.vm.$emit('selectNode',graphKey(kind,id));await flushPromises();
+  const link=()=>view.findAllComponents(Button).find(button=>button.text()==='Ouvrir la fiche dans Frises');
+  expect(link()?.props('to')).toEqual({name:'database',query:{[kind]:id}});
+  await view.get('[data-relation-expand]').trigger('click');await flushPromises();
+  expect(link()?.isVisible()).toBe(true);
+  canvas.vm.$emit('deselect');await flushPromises();expect(link()).toBeUndefined();
 });
 
 async function toggle(label:string){

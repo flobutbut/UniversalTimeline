@@ -12,6 +12,7 @@
     <template v-else-if="overview">
       <div class="admin-relations__toolbar">
         <div class="admin-relations__search"><SearchInput v-model="query" placeholder="Rechercher un objet" /></div>
+        <Button v-if="selectedRecordLocation" variant="tertiary" size="sm" wrap :to="selectedRecordLocation">Ouvrir la fiche dans Frises</Button>
         <Button v-if="selectedId" variant="ghost" size="sm" @click="deselect">Désélectionner</Button>
       </div>
       <div class="admin-relations__filters" role="group" aria-label="Filtres du réseau">
@@ -71,6 +72,7 @@ import Switch from '@/components/base/Switch.vue';
 import Tag from '@/components/base/Tag.vue';
 import ItemSummary from '@/components/base/ItemSummary.vue';
 import {storyTimelineLocation} from '@/router/storyTarget';
+import {databaseRecordLocation} from '@/router/searchTarget';
 import {DateService} from '@/services/DateService';
 import {useDialog} from '@/composables/useDialog';
 import {relationLinkLabels,type RelationEntityKind} from '@/types/adminRelations';
@@ -113,6 +115,7 @@ const scopedUses=computed(()=>{const uses=new Map<string,Set<string>>();for(cons
 const usageCount=(kind:RelationEntityKind,id:string)=>scopedUses.value.get(graphKey(kind,id))?.size??0;
 const visibleCounts=computed(()=>({story:graph.value.nodes.filter(n=>n.kind==='story').length,period:graph.value.nodes.filter(n=>n.kind==='period').length,event:graph.value.nodes.filter(n=>n.kind==='event').length}));
 const results=computed(()=>graph.value.nodes.filter(node=>node.title.toLocaleLowerCase('fr').includes(query.value.trim().toLocaleLowerCase('fr'))));
+const selectedRecordLocation=computed(()=>{const node=graph.value.nodes.find(node=>node.id===selectedId.value);return node?databaseRecordLocation(node.kind,node.entityId):undefined;});
 const selectedEdge=computed(()=>graph.value.edges.find(edge=>edge.id===selectedId.value)??null);
 const edgeLinks=computed(()=>overview.value?.links.filter(link=>selectedEdge.value?.linkIds.includes(link.id))??[]);
 const storyLinks=computed(()=>filteredNetwork.value.links.filter(link=>link.source===selectedStory.value?.id||link.target===selectedStory.value?.id));

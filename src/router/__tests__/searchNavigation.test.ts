@@ -13,7 +13,7 @@ import { EventApiService } from '@/services/EventApiService';
 import { CategoryService } from '@/services/CategoryService';
 import { apiClient } from '@/services/ApiClient';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
-import { searchHitLocation } from '@/router/searchTarget';
+import { databaseRecordLocation, searchHitLocation } from '@/router/searchTarget';
 import type { Period, ListEvent } from '@/types/database';
 
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() } }));
@@ -57,6 +57,38 @@ beforeEach(() => {
   vi.mocked(apiClient.get).mockResolvedValue([]);
 });
 afterEach(() => { view?.unmount(); router?.options.history.destroy(); document.body.innerHTML = ''; vi.useRealTimers(); vi.restoreAllMocks(); vi.clearAllMocks(); });
+
+it('opens period and event fiches in Frises and follows a new object without changing tabs', async () => {
+  await start('/database');
+  await router.push(databaseRecordLocation('period', 'leaf')); await flushPromises();
+  expect(router.currentRoute.value.name).toBe('database');
+  expect(view.getComponent(EditModal).props('data')).toMatchObject({id:'leaf',description:{fr:'Détail canonique leaf'}});
+  await router.push(databaseRecordLocation('event', event.id)); await flushPromises();
+  expect(router.currentRoute.value.name).toBe('database');
+  expect(view.getComponent(EditModal).props('data')).toMatchObject(event);
+  expect(view.getComponent(EditModal).props('type')).toBe('event');
+  expect(apiClient.post).not.toHaveBeenCalled();expect(apiClient.put).not.toHaveBeenCalled();
+});
+
+it('does not reopen an older period fiche after another object was requested in Frises', async () => {
+  const old=deferred<Period>();vi.mocked(periods.getPeriod).mockReturnValueOnce(old.promise);
+  await start('/database?period=old');
+  await router.push('/database?event=event-canonical');await flushPromises();
+  old.resolve(period('old'));await flushPromises();
+  expect(view.getComponent(EditModal).props('type')).toBe('event');
+  expect(view.getComponent(EditModal).props('data')).toMatchObject(event);
+});
+
+it('keeps a failed fiche in Frises retryable and rejects ambiguous destinations', async () => {
+  vi.mocked(periods.getPeriod).mockRejectedValueOnce(new Error('Lecture indisponible'));
+  await start('/database?period=leaf');
+  expect(view.findComponent(EditModal).exists()).toBe(false);
+  await view.get('[role="alert"] button').trigger('click');await flushPromises();
+  expect(view.getComponent(EditModal).props('data')).toMatchObject({id:'leaf'});
+  await router.push('/database?period=leaf&event=event-canonical');await flushPromises();
+  expect(view.findComponent(EditModal).exists()).toBe(false);
+  expect(view.get('[role="alert"]').text()).toContain('ambiguë');
+});
 
 it('opens a period catalogue fiche directly without navigating global ancestors', async () => {
   await start(); await choose(local('period', 'leaf'));

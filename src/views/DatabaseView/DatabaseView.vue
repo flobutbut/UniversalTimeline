@@ -3,6 +3,8 @@
     <FeedbackState v-if="state.loading" kind="loading" message="Chargement des données…" />
     <FeedbackState v-else-if="state.error" kind="error" :message="state.error" retryable @retry="loadInitialData" />
     <template v-else>
+      <FeedbackState v-if="targetLoading" kind="loading" layout="inline" message="Ouverture de la fiche…" />
+      <FeedbackState v-else-if="targetError" kind="error" layout="inline" :message="targetError" retryable @retry="retryTarget" />
       <StoryTabsBar :tabs="openTabs" :active-id="selectedStoryId" @select="onTabSelect" @close="onTabClose" />
       <StoryGallery v-if="!selectedStoryId" v-model:search="storySearch" v-model:visibility="storyVisibility" v-model:time-range="storyTimeRange" v-model:period="storyPeriodFilter" v-model:categories="storyCategories" :stories="visibleStories" :total-stories="filteredStories.length" :category-options="storyCategoryOptions" :error="state.storyError" :can-create="auth.canCreateStories" class="database-view__content" @open="openStory" @create="handleAddStory" />
       <div v-else class="database-story-detail-wrap database-view__content">
@@ -74,6 +76,7 @@ import { useDatabaseSave } from '@/composables/useDatabaseSave';
 import { useDatabaseDelete } from '@/composables/useDatabaseDelete';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToast } from '@/composables/useToast';
+import { useSearchTarget } from '@/composables/useSearchTarget';
 
 // Utilisation des composables
 const {
@@ -91,6 +94,7 @@ const {
   handleEditEvent,
   closeAddModal,
   closeEditModal,
+  openEditModal,
   loadInitialData,
   selectStory,
   removePeriodFromStory,
@@ -109,6 +113,17 @@ const {
 
 const route = inject(routeLocationKey, undefined);
 const router = inject(routerKey, undefined);
+const initialized = ref(false);
+const recordType = computed(() => route?.query.event !== undefined ? 'event' as const : 'period' as const);
+const { loading: targetLoading, error: targetError, retry: retryTarget } = useSearchTarget(
+  recordType, () => initialized.value && !state.value.loading && !state.value.error && !state.value.loadingStoryDetails,
+  async (target, isCurrent) => {
+    if (route?.query.period !== undefined && route.query.event !== undefined) throw new Error('La fiche demandée est ambiguë.');
+    if (target.kind !== 'local') throw new Error('Cette destination doit désigner une fiche existante.');
+    await openEditModal(recordType.value, { id: target.id });
+    if (isCurrent() && state.value.loadingError) throw new Error(state.value.loadingError);
+  }, closeEditModal,
+);
 const storySearch = ref('');
 const storyVisibility = ref<'all' | 'public' | 'private'>('all');
 /** One reference instant per evaluation, so story bounds and the range are read at the same time. */
@@ -277,6 +292,7 @@ const handleDelete = async () => {
 // Charger les données au montage du composant
 onMounted(async () => {
   await loadInitialData();
+  initialized.value = true;
   if (state.value.error) return;
   storyTabs.retain(new Set(filteredStories.value.map(story => story.id)));
   if (route) await openRouteStory();
