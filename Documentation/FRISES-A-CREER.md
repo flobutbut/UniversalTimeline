@@ -15,7 +15,7 @@ Univers moderne (1)
       ├─ Les cinq grandes extinctions (22)
       ├─ Le temps des dinosaures (29)
       └─ Genre Homo (5)                              portail des époques humaines, sur Homo sapiens
-         ├─ Néolithique et âges des métaux (19)
+         ├─ Néolithique et âges des métaux (19)      portail
          │  ├─ Néolithique (20)
          │  └─ Âges des métaux (21)
          ├─ Antiquité et premières civilisations (10)
@@ -29,6 +29,7 @@ Univers moderne (1)
          ├─ Époque moderne (16)
          │  ├─ Grandes découvertes et empires coloniaux (34)
          │  └─ L'âge des révolutions (27)
+         │     └─ Révolution française (30)
          └─ Époque contemporaine (37)
             ├─ Révolutions industrielles et énergie (25)
             ├─ Régimes politiques en France depuis l'Empire (35)
@@ -40,10 +41,9 @@ Univers moderne (1)
                ├─ Guerre froide (12)
                └─ Invasion de l'Ukraine par la Russie (18)
 Parcours : Grandes périodes de l'histoire européenne (24) — Antiquité → Moyen Âge → Époque moderne → Époque contemporaine
-Hors arbre (autre session) : Révolution française (30), Révolution industrielle (31)
 ```
 
-Points d'entrée supplémentaires : Âges des métaux → Mésopotamie (période d'Uruk), Histoire du climat → Révolutions industrielles (réchauffement actuel), Révolutions industrielles → L'âge des révolutions (première révolution industrielle), Empire romain → Empire byzantin (Bas-Empire romain), Les cinq grandes extinctions → Le temps des dinosaures (Mésozoïque), Empire byzantin → Les croisades (événement « Sac de Constantinople »), Moyen Âge et Renaissance → Grandes découvertes (événement « Arrivée de Colomb »), L'âge des révolutions → Grandes découvertes (événement « Première abolition de l'esclavage »), L'âge des révolutions → Régimes politiques et → Napoléon et le Premier Empire (Premier Empire), Seconde Guerre mondiale → Régimes politiques (événement « Armistice du 22 juin 1940 »).
+Points d'entrée supplémentaires : Âges des métaux → Mésopotamie (période d'Uruk), Histoire du climat → Révolutions industrielles (réchauffement actuel), Révolutions industrielles → L'âge des révolutions (première révolution industrielle), Empire romain → Empire byzantin (Bas-Empire romain), Les cinq grandes extinctions → Le temps des dinosaures (Mésozoïque), Empire byzantin → Les croisades (événement « Sac de Constantinople »), Moyen Âge et Renaissance → Grandes découvertes (événement « Arrivée de Colomb »), L'âge des révolutions → Grandes découvertes (événement « Première abolition de l'esclavage »), L'âge des révolutions → Régimes politiques et → Napoléon et le Premier Empire (Premier Empire), Seconde Guerre mondiale → Régimes politiques (événement « Armistice du 22 juin 1940 »), Époque moderne → Révolutions industrielles (événement « Révolution industrielle »), Époque contemporaine → L'âge des révolutions (événement « Révolution française »).
 
 ## Prochaines frises demandées (3 novembre 2026)
 
@@ -129,13 +129,14 @@ Audit du 3 novembre 2026 : ancres, rattachements et hiérarchie des frises sont 
 
 - **Dates négatives ISO** (`-9600-01-01…`) : 60 dates, environ un an de décalage et un « 1 janvier » parasite à l'affichage (Marathon en 491, Hammurabi au « 1 janvier 1755 av. J.-C. »). Revue au cas par cas : certaines fiches ont déjà été décalées à la main (Rome, César, Actium). Le défaut touche aussi les espèces de la frise Genre Homo (« 1 janvier 143001 av. J.-C. »), à convertir au format `K…`.
 - **Deux formats géologiques mélangés** : les anciennes fiches en ISO (`-201400000-01-01…`) et les nouvelles en `M201.4` diffèrent de 2 026 ans ; 4 sous-périodes de la frise 29 dépassent ainsi leur parent de 0,003 %, sans effet visible. Correction de fond : convertir les fiches géologiques ISO au format `G`/`M`/`K`.
-- **Frises 30 « Révolution française » et 31 « Révolution industrielle »** (autre session) : publiques sans parent, ancre ni catégorie. La 30 a 10 racines qui se chevauchent, des libellés bruts de Wikidata (dont un en anglais) et une période « Révolution française » au 14 juillet qui double celle de la frise 27 (5 mai) ; la 31 n'a qu'une période et aucun événement.
-- **Points d'entrée Genre Homo → Mésopotamie, Révolutions industrielles, L'âge des révolutions** (par *Homo sapiens*) : ils sautent plusieurs niveaux de l'arbre ; depuis la réorganisation, la même période sert aussi d'ancre aux cinq époques humaines.
-- **Structure en double** : la frise 19 contient encore toutes les périodes de 20 et 21.
 - **Frises maigres** : Ukraine (aucun événement), Guerre froide (1 période), Big Bang (2 événements). Les six ères primordiales de la frise 3 ont un début égal à leur fin (durées inférieures à quelques minutes) ; gardées ainsi.
 - **Libellés incohérents avec l'identifiant** : `PER_MILKYWAY` (« Terre »), `PER_EARTH` (« Empire romain »), `EVT_DINOSAURS` (« Premiers reptiles », 318 Ma : le libellé et la date sont justes, seul l'identifiant trompe).
 
-Réorganisation du 3 novembre 2026 (SQL inverse conservé) : Histoire de la vie (2) rangée sous Histoire géologique (11) et réduite à un squelette de 7 périodes, l'arbre géologique détaillé restant dans 11 ; Époque moderne (16) scindée, « Époque contemporaine » (37) créée avec ses quatre sous-frises et sa place dans le parcours 24 ; Moyen Âge, Époque moderne et Époque contemporaine rattachés à Genre Homo, comme l'Antiquité.
+Réorganisation du 3 novembre 2026 (SQL inverse conservé) : Histoire de la vie (2) rangée sous Histoire géologique (11) et réduite à un squelette de 7 périodes, l'arbre géologique détaillé restant dans 11 ; Époque moderne (16) scindée, « Époque contemporaine » (37) créée avec ses quatre sous-frises et sa place dans le parcours 24 ; Moyen Âge, Époque moderne et Époque contemporaine rattachés à Genre Homo, comme l'Antiquité. Ensuite :
+- **Frise 19** devenue portail : 6 périodes (Épipaléolithique et ses deux sous-périodes, Mésolithique, et les ancres Néolithique et Âges des métaux) et 3 événements de bascule ; le détail vit dans 20 et 21.
+- **Raccourcis** de Genre Homo (par *Homo sapiens*) vers Mésopotamie, Révolutions industrielles et L'âge des révolutions retirés ; remplacés un niveau plus bas par Époque moderne → Révolutions industrielles et Époque contemporaine → L'âge des révolutions.
+- **Frise 30 « Révolution française »** (essai de génération Wikidata) rangée sous L'âge des révolutions, ancrée sur sa période « Révolution française », qui remplace le doublon et reprend son Q-id (Q6534). Phases (États généraux, Monarchie constitutionnelle, Convention, Directoire) sur une ligne, « Insurrections contre-révolutionnaires » et guerres extérieures sur deux autres ; « ère républicaine » retirée, 18 Brumaire devenu un événement ; libellés français corrigés et traduits en anglais.
+- **Frise 31 « Révolution industrielle »** supprimée (une période, aucun événement, doublon de la frise 25) ; sa fiche reste au catalogue.
 
 Corrigé lors de l'audit : années stockées recalculées (68 périodes, 21 événements) ; Hadéen aligné sur la formation de la Terre ; Antiquité égyptienne ramenée à 3150–30 av. J.-C., Égypte prédynastique retirée de la frise 10 ; limite Pléistocène/Holocène à 9700 av. J.-C. et Dryas récent rangé dans le Pléistocène (frise 23) ; guerre arméno-azerbaïdjanaise retirée de la Première Guerre mondiale ; « Guerre civile espagnole » et « Guerre d'indépendance espagnole » distinguées ; descriptions des frises 16, 17 et 18 ; abolitions de 1833, 1848, 1865 et 1888 ajoutées à la frise 34.
 
