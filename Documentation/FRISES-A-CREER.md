@@ -14,7 +14,11 @@ Univers moderne (1)
    └─ Histoire de la vie sur Terre (2)               squelette : éons, ères, Quaternaire
       ├─ Les cinq grandes extinctions (22)
       ├─ Le temps des dinosaures (29)
+      ├─ Les premiers hominines (38)                 ancrée sur le Cénozoïque
       └─ Genre Homo (5)                              portail des époques humaines, sur Homo sapiens
+         ├─ Histoire des techniques (39)             thématique, ancrée sur Homo
+         ├─ Histoire de l'art (40)                   thématique
+         ├─ L'esclavage (41)                         thématique
          ├─ Néolithique et âges des métaux (19)      portail
          │  ├─ Néolithique (20)
          │  └─ Âges des métaux (21)
@@ -43,20 +47,17 @@ Univers moderne (1)
 Parcours : Grandes périodes de l'histoire européenne (24) — Antiquité → Moyen Âge → Époque moderne → Époque contemporaine
 ```
 
-Points d'entrée supplémentaires : Âges des métaux → Mésopotamie (période d'Uruk), Histoire du climat → Révolutions industrielles (réchauffement actuel), Révolutions industrielles → L'âge des révolutions (première révolution industrielle), Empire romain → Empire byzantin (Bas-Empire romain), Les cinq grandes extinctions → Le temps des dinosaures (Mésozoïque), Empire byzantin → Les croisades (événement « Sac de Constantinople »), Moyen Âge et Renaissance → Grandes découvertes (événement « Arrivée de Colomb »), L'âge des révolutions → Grandes découvertes (événement « Première abolition de l'esclavage »), L'âge des révolutions → Régimes politiques et → Napoléon et le Premier Empire (Premier Empire), Seconde Guerre mondiale → Régimes politiques (événement « Armistice du 22 juin 1940 »), Époque moderne → Révolutions industrielles (événement « Révolution industrielle »), Époque contemporaine → L'âge des révolutions (événement « Révolution française »).
+Points d'entrée supplémentaires : Âges des métaux → Mésopotamie (période d'Uruk), Histoire du climat → Révolutions industrielles (réchauffement actuel), Révolutions industrielles → L'âge des révolutions (première révolution industrielle), Empire romain → Empire byzantin (Bas-Empire romain), Les cinq grandes extinctions → Le temps des dinosaures (Mésozoïque), Empire byzantin → Les croisades (événement « Sac de Constantinople »), Moyen Âge et Renaissance → Grandes découvertes (événement « Arrivée de Colomb »), L'âge des révolutions → Grandes découvertes (événement « Première abolition de l'esclavage »), L'âge des révolutions → Régimes politiques et → Napoléon et le Premier Empire (Premier Empire), Seconde Guerre mondiale → Régimes politiques (événement « Armistice du 22 juin 1940 »), Époque moderne → Révolutions industrielles (événement « Révolution industrielle »), Époque contemporaine → L'âge des révolutions (événement « Révolution française »), Les premiers hominines → Genre Homo (événement « Apparition du genre Homo ») et → Histoire des techniques (« Outils de Lomekwi »), Histoire des techniques → Néolithique, → Âges des métaux et → Révolutions industrielles (périodes partagées), Histoire de l'art → Renaissance (période « Renaissance »), Grandes découvertes → L'esclavage (période « Traite atlantique »).
 
 ## Prochaines frises demandées (3 novembre 2026)
 
-Ordre convenu : esclavage, aviation et automobile. Les régimes politiques (35) et la sous-frise « Napoléon et le Premier Empire » (36) sont faits ; une sous-frise Second Empire reste possible.
+Ordre convenu : esclavage (fait, frise 41), aviation et automobile. Les régimes politiques (35) et la sous-frise « Napoléon et le Premier Empire » (36) sont faits ; une sous-frise Second Empire reste possible.
 
 | Frise | Parent / ancre | Déjà en base | À ajouter |
 | --- | --- | --- | --- |
 | **Le Second Empire** (sous-frise, facultative) | Régimes politiques (35), ancrée sur « Second Empire » | Second Empire, Empire autoritaire, Empire libéral, coup d'État de 1851, Sedan | Haussmann, expositions universelles, guerre de Crimée, expédition du Mexique, guerre de 1870 |
-| **L'esclavage** | Genre Homo (5) ; point d'entrée depuis Grandes découvertes (34) par la traite atlantique | Traite atlantique, Code noir, abolitions de 1794, 1807 et 1848 | Esclavage antique, traites orientale et transsaharienne, abolitions de 1833, 1865 et 1888, convention de 1926, Déclaration universelle de 1948, Mauritanie 1981. Plus large que la frise 34 pour ne pas la dupliquer |
 | **L'aviation** | Révolutions industrielles (25) ; points d'entrée vers Conquête spatiale (14) et les deux guerres mondiales | — | Montgolfier, Ader, frères Wright, Blériot, Lindbergh, avion à réaction, Concorde, A380 |
 | **L'automobile** | Révolutions industrielles (25) | Automobile de Benz, chaîne de Ford | Cugnot, moteur à explosion, Michelin, Coccinelle, 2 CV, chocs pétroliers, voiture électrique |
-
-À raccorder quand elles seront rangées : « Révolution française » (30) et « Révolution industrielle » (31), créées par ailleurs, sans parent pour l'instant.
 
 ## Priorité 1 — combler les trous de la chaîne chronologique
 
@@ -84,7 +85,6 @@ Les frises existantes couvrent ces périodes à grands traits ; aucun thème n'y
 
 | Frise | Parent / ancre | Déjà en base | À ajouter |
 | --- | --- | --- | --- |
-| **Hominines, avant le genre *Homo*** (≈ 7–2,8 Ma) | Histoire de la vie (2) ; point d'entrée vers Genre Homo (5) | Premiers représentants de la lignée humaine (7 Ma) | Toumaï, *Orrorin*, *Ardipithecus*, australopithèques (Lucy), empreintes de Laetoli, premiers outils de pierre |
 | **L'âge des mammifères** (Cénozoïque) | Histoire de la vie (2), ancrée sur le Cénozoïque | Premiers mammifères, premiers primates, Paléogène, Néogène | Radiation des mammifères, retour des cétacés à la mer, chevaux, prairies, mégafaune et son extinction |
 | **La sortie des eaux** (≈ 470–300 Ma) | Histoire de la vie (2) | Plantes terrestres, premiers poissons, insectes, amphibiens | *Tiktaalik*, premiers tétrapodes, premières forêts, insectes géants du Carbonifère, œuf amniotique |
 | **Évolution des plantes** | Histoire de la vie (2) | Colonisation des terres par les plantes, apparition des plantes à fleurs (frise Dinosaures) | Mousses, fougères, premières graines, conifères, graminées |
@@ -95,7 +95,6 @@ Les frises existantes couvrent ces périodes à grands traits ; aucun thème n'y
 ### Frises à compléter
 
 - **Big Bang et ères primordiales (3)** : 10 périodes mais seulement 2 événements. Ajouter le rayonnement fossile, les premières étoiles et galaxies, la formation de la Voie lactée, la domination de l'énergie sombre.
-- **Genre Homo (5)** : ajouter les grandes migrations (sortie d'Afrique, Australie, Amériques).
 - **Histoire de la vie (2)** : regrouper ses nombreuses périodes pour une lecture plus claire, comme pour « Ère industrielle ».
 
 ### À vérifier avant d'aller plus loin
@@ -108,10 +107,8 @@ Elles réutilisent beaucoup de fiches existantes et se relient aux frises chrono
 
 | Frise | Parent / ancre | Déjà en base | À ajouter |
 | --- | --- | --- | --- |
-| **Histoire des techniques** | Genre Homo (5) | Feu, agriculture, roue, cuivre et fer, écriture, imprimerie, machine de Watt, transistor | Poterie, voile, papier, boussole, horloge mécanique, électricité, Internet |
 | **Révolutions scientifiques** | Époque moderne (16) | Arrhenius (1896) | Copernic, Galilée, Newton, Lavoisier, Darwin, Pasteur, Einstein, ADN, Big Bang (théorie) |
 | **Religions et philosophies** | Antiquité (10) | Bouddha, naissance de Jésus, Hégire, édit de Milan | Zoroastre, Confucius, philosophes grecs, conciles, Réforme |
-| **Histoire de l'art** | Genre Homo (5) | Peintures pariétales, Renaissance, Gilgamesh, ziggourat d'Ur | Art roman et gothique, baroque, impressionnisme, art moderne |
 | **Épidémies et santé** | Époque moderne (16) | Peste noire | Peste de Justinien, variole, choléra, grippe espagnole, vaccination, antibiotiques, Covid-19 |
 | **Énergie** (sous-frise possible de Révolutions industrielles) | Révolutions industrielles (25) | Puits de Drake, Pearl Street, Obninsk, choc pétrolier | Charbon, hydroélectricité, solaire, éolien, transition énergétique |
 
@@ -141,6 +138,14 @@ Réorganisation du 3 novembre 2026 (SQL inverse conservé) : Histoire de la vie 
 Corrigé lors de l'audit : années stockées recalculées (68 périodes, 21 événements) ; Hadéen aligné sur la formation de la Terre ; Antiquité égyptienne ramenée à 3150–30 av. J.-C., Égypte prédynastique retirée de la frise 10 ; limite Pléistocène/Holocène à 9700 av. J.-C. et Dryas récent rangé dans le Pléistocène (frise 23) ; guerre arméno-azerbaïdjanaise retirée de la Première Guerre mondiale ; « Guerre civile espagnole » et « Guerre d'indépendance espagnole » distinguées ; descriptions des frises 16, 17 et 18 ; abolitions de 1833, 1848, 1865 et 1888 ajoutées à la frise 34.
 
 ## Frises créées récemment
+
+- **Genre Homo (5)** complétée le 3 novembre 2026 par cinq migrations d'*Homo sapiens* : sortie d'Afrique (70 000 ans), grotte Mandrin (54 000 ans), Australie (50 000 ans), Amérique (16 000 ans), Nouvelle-Zélande (1280) ; 12 événements.
+- **Les premiers hominines (38)**, sous Histoire de la vie (2), ancrée sur le Cénozoïque : *Sahelanthropus*, *Orrorin*, ardipithèques, australopithèques, *Kenyanthropus* et paranthropes, avec leurs espèces ; Laetoli, Lomekwi, Lucy, enfant de Taung, *A. sediba* ; 13 périodes, 7 événements.
+- **Histoire des techniques (39)**, sous Genre Homo, ancrée sur « Homo » : Paléolithique (Oldowayen, Acheuléen, Moustérien, Paléolithique supérieur), Néolithique, Âges des métaux et Ère industrielle reprises telles quelles ; du feu au Web ; 8 périodes, 21 événements. Pistes : voile, arc, aqueducs, moulins.
+- **Histoire de l'art (40)**, sous Genre Homo, ancrée sur *Homo sapiens* : neuf grands styles de l'art préhistorique à l'art contemporain, sous-styles pour l'Antiquité, le Moyen Âge et l'art moderne ; de Blombos au Manifeste du surréalisme ; 16 périodes, 20 événements. Surtout européenne : arts d'Asie, d'Afrique et des Amériques à ajouter.
+- **L'esclavage (41)**, sous Genre Homo, ancrée sur *Homo sapiens* : Antiquité (Grèce, Rome, Spartacus), traites orientales, traite atlantique, abolitionnisme, esclavage contemporain ; du Code de Hammurabi à la loi Taubira ; 8 périodes, 15 événements.
+
+Lecture : sur les techniques et l'art, la préhistoire occupe presque tout l'axe ; l'histoire depuis l'écriture n'est lisible qu'en zoomant.
 
 - **Les croisades (32)**, 3 novembre 2026 : les huit croisades sur une ligne, les États latins d'Orient sur une seconde ; 10 périodes, 9 événements.
 - **La guerre de Cent Ans (33)** : phases édouardienne, caroline, longue trêve et lancastrienne sur une ligne, guerre civile Armagnacs-Bourguignons sur une seconde ; 6 périodes, 13 événements.
