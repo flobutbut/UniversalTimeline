@@ -23,6 +23,19 @@ async function run<T>(operation: (client: TransactionClient) => Promise<T>): Pro
 }
 
 export const dashboard = () => run(client => admin.dashboard(client));
+export const relations = () => run(client => admin.relations(client));
+export const relationNetwork = () => run(client => admin.relationNetwork(client));
+// P0002 from these read-only functions refers to a missing frise/catalogue fiche, not an account.
+async function readRelation(operation: (client: TransactionClient) => Promise<Record<string, unknown>>) {
+  try { return await withTransaction(operation); }
+  catch (error) {
+    if ((error as { code?: string })?.code === 'P0002') throw new AdminError(404, 'Cet élément n’existe plus. Actualisez la carte.');
+    throw error;
+  }
+}
+export const relationStory = (id: string) => readRelation(client => admin.relationStory(client, id));
+export const relationEntity = (kind: string, id: string) => readRelation(client => admin.relationEntity(client, kind, id));
+export const relationCatalogue = (kind: string, usage: string, q: string, offset: number) => run(client => admin.relationCatalogue(client, kind, usage, q, offset));
 export const listUsers = () => run(client => admin.listUsers(client));
 export const userDetail = (id: string) => run(client => admin.userDetail(client, id));
 export const setAdmin = (id: string, enabled: boolean) => run(client => admin.setAdmin(client, id, enabled));

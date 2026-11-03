@@ -1,5 +1,6 @@
 import { apiClient } from './ApiClient';
 import type { AvatarColor, AvatarIcon } from '@account-rules';
+import type { RelationsNetwork, RelationsContent, RelationEntity, RelationEntityKind, RelationCatalogue } from '@/types/adminRelations';
 
 export type AdminAction = 'grant_admin' | 'revoke_admin' | 'grant_editor' | 'revoke_editor' | 'suspend' | 'reactivate' | 'delete_user';
 
@@ -28,6 +29,11 @@ export interface AdminUserDetail extends AdminUser {
 
 /** Admin console: every route is refused to non-admins by the API and again by the database. */
 export const adminApi = {
+  relations: (signal?: AbortSignal) => apiClient.get<RelationsNetwork>('/admin/relations/network', { signal }),
+  relationStory: (id: string, signal?: AbortSignal) => apiClient.get<RelationsContent>(`/admin/relations/stories/${encodeURIComponent(id)}`, { signal }),
+  relationEntity: (kind: RelationEntityKind, id: string, signal?: AbortSignal) => apiClient.get<RelationEntity>(`/admin/relations/entities/${kind}/${encodeURIComponent(id)}`, { signal }),
+  relationCatalogue: (kind: RelationEntityKind, usage: string, q: string, offset: number, signal?: AbortSignal) =>
+    apiClient.get<RelationCatalogue>('/admin/relations/catalogue', { params: { kind, usage, q, offset }, signal }),
   dashboard: () => apiClient.get<AdminDashboard>('/admin/dashboard'),
   users: () => apiClient.get<AdminUser[]>('/admin/users'),
   user: (id: string) => apiClient.get<AdminUserDetail>(`/admin/users/${encodeURIComponent(id)}`),

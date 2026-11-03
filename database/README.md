@@ -6,6 +6,8 @@ L’organisation actuelle est décrite dans [Relations au sein des frises](../Do
 
 ## Fichiers actifs
 
+- `migrations/20261103183154_admin_relations_network.sql` : instantané complet du réseau D3 admin (toutes les frises, périodes, événements et appartenances, sans dépliage ni duplication des fiches partagées) ; appliquée au projet actif le 3 novembre 2026 après validation locale. Lecture uniquement, avec contrôle admin API + base ; incluse dans la baseline.
+- `migrations/20261103172801_admin_relations_graph.sql` : graphe admin en lecture seule, quatre fonctions privées protégées par `require_admin()` et index pour les utilisations des fiches ; appliquée au projet actif le 3 novembre 2026, après validation PostgreSQL 17 locale. La baseline contient les mêmes fonctions. Voir [le graphe des relations](../Documentation/GRAPHE-RELATIONS-ADMIN.md).
 - `migrations/20261103143455_public_story_editors.sql` : rôle éditeur et édition des frises publiques ; préparée et validée localement. Déployer l’API avec son contrôle de propriété avant suppression, puis appliquer cette migration et déployer le frontend. Aucune attribution de rôle ni application distante automatique.
 - `migrations/20261029090427_story_access.sql` : accès et propriété des stories, appliqué après autorisation.
 - `migrations/20261029093707_harden_public_functions.sql` : privilèges et search_path des fonctions, appliqué.

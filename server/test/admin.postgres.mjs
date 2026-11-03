@@ -18,13 +18,13 @@ mock.module(new URL('../dist/api/database.js', import.meta.url), { namedExports:
   withTransaction: tx, query: (sql, params) => tx(client => client.query(sql, params)),
 } });
 const { default: router } = await import('../dist/api/routes.js');
-async function call(method, path, { body = {}, params = {}, userId = alice, isAdmin = true } = {}) {
+async function call(method, path, { body = {}, params = {}, query = {}, userId = alice, isAdmin = true } = {}) {
   const route = router.stack.find(layer => layer.route?.path === path && layer.route.methods[method]);
   assert.ok(route, `${method} ${path}`);
   const principal = { userId, isAdmin };
   const res = { statusCode: 200, payload: undefined, locals: { principal },
     status(code) { this.statusCode = code; return this; }, json(data) { this.payload = data; return this; }, send() { return this; } };
-  await principalContext.run(principal, () => route.route.stack[0].handle({ body, params, query: {} }, res));
+  await principalContext.run(principal, () => route.route.stack[0].handle({ body, params, query }, res));
   return res;
 }
 const signUp = (id, username, metadata = {}) => pool.query(
@@ -124,5 +124,102 @@ test('admin routines are definer functions with a fixed search path, executable 
     assert.equal(row.prosecdef, true, row.proname); assert.deepEqual(row.proconfig, ['search_path=""'], row.proname);
     assert.equal(row.anon, false, row.proname); assert.equal(row.authenticated, !internal.has(row.proname), row.proname);
   }
-  assert.equal(rows.length, 10);
+  assert.equal(rows.length, 15);
+});
+
+test('relation readers refuse anonymous, regular, editor and stale admin claims', async () => {
+  const paths = [
+    ['/admin/relations/network', {}],
+    ['/admin/relations', {}], ['/admin/relations/stories/:id', {id:'2'}],
+    ['/admin/relations/entities/:kind/:id', {kind:'period',id:'root'}], ['/admin/relations/catalogue',{}],
+  ];
+  for (const [path,params] of paths) {
+    assert.equal((await call('get',path,{params,userId:null,isAdmin:false})).statusCode,401,path);
+    assert.equal((await call('get',path,{params,userId:bob,isAdmin:false})).statusCode,403,path);
+    assert.equal((await call('get',path,{params,userId:bob,isAdmin:true,query:{kind:'event'}})).statusCode,403,path);
+  }
+  await pool.query(`UPDATE auth.users SET raw_app_meta_data='{"role":"editor"}' WHERE id=$1`,[bob]);
+  const routines=["relations_network()","relations_overview()","relations_story(2)","relations_entity('period','root')","relations_catalogue('event','shared','',0)"];
+  for (const routine of routines) await assert.rejects(tx(async client => {
+    await applyPrincipal(client,{userId:bob,isAdmin:true}); await client.query('SELECT admin_private.'+routine);
+  }),{code:'42501'});
+});
+
+test('overview keeps private stories and each distinct provenance and anchor', async () => {
+  await pool.query("INSERT INTO story_entry_points(source_story_id,target_story_id,period_id) VALUES(1,2,'root')");
+  await pool.query("INSERT INTO story_period_presentations(context_story_id,period_id,target_story_id) VALUES(1,'root',2)");
+  await pool.query('UPDATE stories SET parent_story_id=1 WHERE id=2');
+  await pool.query("INSERT INTO story_anchors(story_id,anchor_type,anchor_id) VALUES(2,'period','root')");
+  const result=await call('get','/admin/relations'); assert.equal(result.statusCode,200);
+  assert.deepEqual(result.payload.stories.map(s=>[s.id,s.isPublic,s.periods]),[['2',false,1],['1',true,1]]);
+  assert.deepEqual(result.payload.links.map(l=>l.type).sort(),['entry','legacy','presentation']);
+  for (const link of result.payload.links) {
+    assert.equal(link.source,'1'); assert.equal(link.target,'2');
+    assert.deepEqual(link.anchor,{kind:'period',id:'root',title:'Racine'});
+  }
+});
+
+test('the network contains all catalogue objects once, unused objects and every private/public membership',async()=>{
+  await pool.query("INSERT INTO events(id,label_fr,label_en,date) VALUES('shared','Commun','Shared','1900'),('free','Libre','Unused','1901')");
+  await pool.query("INSERT INTO story_events(story_id,event_id,importance) VALUES(1,'shared','major'),(2,'shared','minor')");
+  const result=await call('get','/admin/relations/network');assert.equal(result.statusCode,200);
+  assert.equal(result.payload.stories.length,2);
+  assert.deepEqual(result.payload.periods.map(p=>p.id),['root','unused']);
+  assert.deepEqual(result.payload.events.map(e=>e.id),['free','shared']);
+  assert.equal(result.payload.memberships.length,4);
+  assert.deepEqual(result.payload.memberships.filter(m=>m.kind==='event').map(m=>[m.storyId,m.entityId,m.importance]),[['1','shared','major'],['2','shared','minor']]);
+});
+
+test('shared periods retain different local parents and shared events retain local importance', async () => {
+  await pool.query("INSERT INTO periods(id,label_fr,label_en,start_date,end_date) VALUES('parent','Parent','Parent','M80','NOW')");
+  await pool.query("INSERT INTO story_periods(story_id,period_id) VALUES(1,'parent')");
+  await pool.query("UPDATE story_periods SET parent_period_id='parent' WHERE story_id=1 AND period_id='root'");
+  await pool.query("INSERT INTO events(id,label_fr,label_en,date) VALUES('shared','Commun','Shared','1900')");
+  await pool.query("INSERT INTO story_events(story_id,event_id,importance) VALUES(1,'shared','major'),(2,'shared','minor')");
+  const first=(await call('get','/admin/relations/stories/:id',{params:{id:'1'}})).payload;
+  const second=(await call('get','/admin/relations/stories/:id',{params:{id:'2'}})).payload;
+  assert.equal(first.periods.find(p=>p.id==='root').parentId,'parent');
+  assert.equal(second.periods.find(p=>p.id==='root').parentId,null);
+  assert.equal(first.events[0].importance,'major');assert.equal(second.events[0].importance,'minor');
+  assert.equal(first.events[0].uses,2);
+  const usages=(await call('get','/admin/relations/entities/:kind/:id',{params:{kind:'event',id:'shared'}})).payload;
+  assert.equal(usages.stories.length,2);assert.deepEqual(usages.stories.map(s=>s.importance).sort(),['major','minor']);
+  const period=(await call('get','/admin/relations/entities/:kind/:id',{params:{kind:'period',id:'root'}})).payload;
+  assert.deepEqual(period.stories.map(s=>s.parentId).sort(),[null,'parent'].sort());
+});
+
+test('catalogue paging and usage filters have complete totals, including unused and private usages', async () => {
+  const shared=(await call('get','/admin/relations/catalogue',{query:{kind:'period',usage:'shared'}})).payload;
+  assert.equal(shared.total,1); assert.deepEqual(shared.items,[{id:'root',title:'Racine',uses:2}]);
+  const unused=(await call('get','/admin/relations/catalogue',{query:{kind:'period',usage:'unused'}})).payload;
+  assert.deepEqual(unused.items,[{id:'unused',title:'Libre',uses:0}]);
+  await pool.query("INSERT INTO events(id,label_fr,label_en,date) SELECT 'event-'||n,'Événement '||lpad(n::text,3,'0'),'Event','1900' FROM generate_series(1,57)n");
+  const page=(await call('get','/admin/relations/catalogue',{query:{kind:'event',usage:'unused',offset:'50',q:'Événement'}})).payload;
+  assert.equal(page.total,57);assert.equal(page.items.length,7);assert.equal(page.items[0].title,'Événement 051');
+  const empty=(await call('get','/admin/relations/catalogue',{query:{kind:'event',q:'absent'}})).payload;
+  assert.deepEqual(empty,{total:0,items:[]});
+});
+
+test('relation inputs are validated and missing entities are reported without fallback', async () => {
+  for (const id of ['0','1;SELECT','2147483648']) assert.equal((await call('get','/admin/relations/stories/:id',{params:{id}})).statusCode,400);
+  assert.equal((await call('get','/admin/relations/entities/:kind/:id',{params:{kind:'user',id:'root'}})).statusCode,400);
+  assert.equal((await call('get','/admin/relations/catalogue',{query:{kind:'period',offset:'-1'}})).statusCode,400);
+  assert.equal((await call('get','/admin/relations/catalogue',{query:{kind:'event',usage:'invalid'}})).statusCode,400);
+  assert.equal((await call('get','/admin/relations/stories/:id',{params:{id:'99'}})).statusCode,404);
+  assert.equal((await call('get','/admin/relations/entities/:kind/:id',{params:{kind:'event',id:'absent'}})).statusCode,404);
+});
+
+test('incremental relation migration creates the same read-only entry points as the baseline', async () => {
+  await pool.query(`DROP FUNCTION admin_private.relations_overview(),admin_private.relations_story(integer),admin_private.relations_entity(text,text),admin_private.relations_catalogue(text,text,text,integer)`);
+  await pool.query(await readFile(new URL('../../database/migrations/20261103172801_admin_relations_graph.sql',import.meta.url),'utf8'));
+  assert.equal((await call('get','/admin/relations')).payload.stories.length,2);
+  assert.equal((await call('get','/admin/relations/stories/:id',{params:{id:'2'}})).payload.periods[0].uses,2);
+});
+
+test('incremental full-network migration matches the baseline and retains all entities',async()=>{
+  const before=(await call('get','/admin/relations/network')).payload;
+  await pool.query('DROP FUNCTION admin_private.relations_network()');
+  await pool.query(await readFile(new URL('../../database/migrations/20261103183154_admin_relations_network.sql',import.meta.url),'utf8'));
+  const after=(await call('get','/admin/relations/network')).payload;
+  assert.deepEqual(after.periods,before.periods);assert.deepEqual(after.events,before.events);assert.deepEqual(after.memberships,before.memberships);
 });

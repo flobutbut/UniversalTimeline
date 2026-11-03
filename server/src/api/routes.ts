@@ -292,6 +292,30 @@ const isAdmin = (res: Response) => {
 router.get('/admin/dashboard', endpoint('Lecture du tableau de bord impossible', async (_req, res) => {
   if (isAdmin(res)) res.json(await admin.dashboard());
 }));
+router.get('/admin/relations', endpoint('Lecture des relations impossible', async (_req, res) => {
+  if (isAdmin(res)) res.json(await admin.relations());
+}));
+router.get('/admin/relations/network', endpoint('Lecture du réseau impossible', async (_req, res) => {
+  if (isAdmin(res)) res.json(await admin.relationNetwork());
+}));
+router.get('/admin/relations/stories/:id', endpoint('Lecture du contenu impossible', async (req, res) => {
+  if (!isAdmin(res)) return;
+  res.json(await admin.relationStory(parseStoryId(req.params.id)));
+}));
+router.get('/admin/relations/entities/:kind/:id', endpoint('Lecture des utilisations impossible', async (req, res) => {
+  if (!isAdmin(res)) return;
+  const kind = req.params.kind;
+  if (kind !== 'period' && kind !== 'event') throw new InputValidationError('kind', 'Type de fiche invalide.');
+  res.json(await admin.relationEntity(kind, parseEntityId(req.params.id)));
+}));
+router.get('/admin/relations/catalogue', endpoint('Lecture du catalogue impossible', async (req, res) => {
+  if (!isAdmin(res)) return;
+  const { kind, usage = 'shared', offset = '0' } = req.query;
+  if (kind !== 'period' && kind !== 'event') throw new InputValidationError('kind', 'Type de fiche invalide.');
+  if (usage !== 'shared' && usage !== 'unused' && usage !== 'all') throw new InputValidationError('usage', 'Filtre invalide.');
+  if (typeof offset !== 'string' || !/^\d{1,7}$/.test(offset) || Number(offset)>1000000) throw new InputValidationError('offset', 'Page invalide.');
+  res.json(await admin.relationCatalogue(kind, usage, parseSearchText(req.query.q, 'q', 200), Number(offset)));
+}));
 router.get('/admin/users', endpoint('Lecture des utilisateurs impossible', async (_req, res) => {
   if (isAdmin(res)) res.json(await admin.listUsers());
 }));
