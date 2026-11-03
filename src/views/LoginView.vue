@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import { CURRENT_TERMS_VERSION, USERNAME_MAX, usernameError } from '@account-rules';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { canUseWorkspace, safeReturnPath } from '@/router/access';
 import { useUsernameAvailability } from '@/composables/useUsernameAvailability';
 import { rateLimitError, weakPasswordError } from '@/lib/authErrors';
+import { track, type SignupBlock } from '@/lib/analytics';
 
 const auth = useAuthStore(); const route = useRoute(); const router = useRouter();
 const email = ref(''); const password = ref(''); const creating = ref(route.query.mode === 'signup');
@@ -32,12 +33,39 @@ if (route.query.code !== undefined) void authService.settleUrlSession().finally(
 // Sign-up only: the username is unique (checked live, enforced by the database) and the terms must be accepted.
 const username = ref(''); const termsAccepted = ref(false);
 const availability = useUsernameAvailability(username);
-const signupBlocked = computed(() => creating.value && (!!usernameError(username.value) || availability.blocking.value || !termsAccepted.value));
-onBeforeUnmount(() => { alive = false; password.value = ''; });
+/** Client-side reason that keeps "Créer mon compte" disabled, if any. */
+const signupBlock = computed<SignupBlock | null>(() => {
+  if (!username.value.trim()) return 'username_missing';
+  if (usernameError(username.value)) return 'username_invalid';
+  if (availability.state.value === 'taken') return 'username_taken';
+  if (availability.state.value === 'checking') return 'username_checking';
+  return termsAccepted.value ? null : 'terms_unchecked';
+});
+const signupBlocked = computed(() => creating.value && signupBlock.value !== null);
+// Each display of the sign-up form ends either in a submission or in an abandonment, reported with what still blocked it.
+let signupViewOpen = false;
+function startSignupView() {
+  // A signed-in visitor is sent on to the workspace and never sees the form.
+  signupViewOpen = creating.value && !canUseWorkspace(auth);
+  if (signupViewOpen) track('signup_form_viewed', { redirect: safeReturnPath(route.query.redirect).split(/[?#]/)[0] });
+}
+function endSignupView(transport?: 'sendBeacon') {
+  if (!signupViewOpen) return;
+  signupViewOpen = false;
+  // An untouched form is a bounce, already visible in the funnel.
+  if (username.value.trim() || email.value.trim() || password.value || termsAccepted.value)
+    track('signup_abandoned', { blocked_by: signupBlock.value }, transport ? { transport } : undefined);
+}
+const leavePage = () => endSignupView('sendBeacon');
+startSignupView();
+onMounted(() => window.addEventListener('pagehide', leavePage));
+onBeforeUnmount(() => { alive = false; window.removeEventListener('pagehide', leavePage); endSignupView(); password.value = ''; });
 watch(() => canUseWorkspace(auth), verified => { if (verified) void router.replace(safeReturnPath(route.query.redirect)); }, { immediate: true });
 watch(() => route.query.mode, mode => {
+  endSignupView();
   creating.value = mode === 'signup'; password.value = ''; error.value = ''; message.value = ''; termsAccepted.value = false;
   sentTo.value = ''; unconfirmed.value = false; resendMessage.value = ''; resendError.value = '';
+  startSignupView();
 });
 
 function signupError(providerError: { code?: string; name?: string }): string {
@@ -62,6 +90,8 @@ function signupError(providerError: { code?: string; name?: string }): string {
 async function submit() {
   if (busy.value || signupBlocked.value) return;
   busy.value = true; error.value = ''; message.value = ''; unconfirmed.value = false;
+  const signingUp = creating.value;
+  if (signingUp) { signupViewOpen = false; track('signup_submitted', {}); }
   try {
     await auth.initialize();
     const client = authService.getClient();
@@ -73,6 +103,7 @@ async function submit() {
       : await client.auth.signInWithPassword(credentials);
     if (!alive) return;
     if (result.error) {
+      track(signingUp ? 'signup_failed' : 'login_failed', { reason: result.error.code ?? 'unknown' });
       if (!creating.value && result.error.code === 'email_not_confirmed') {
         unconfirmed.value = true;
         error.value = 'Votre adresse e-mail n’est pas encore confirmée. Cliquez sur le lien reçu par e-mail, ou demandez-en un nouveau.';
@@ -80,14 +111,17 @@ async function submit() {
       return;
     }
     password.value = '';
+    if (signingUp) track('signup_succeeded', { confirmation_required: !result.data.session });
     if (creating.value && !result.data.session) {
       sentTo.value = credentials.email;
     } else {
       await auth.refreshAccount();
+      if (!signingUp) track(auth.signedIn ? 'login_succeeded' : 'login_failed', auth.signedIn ? {} : { reason: 'session_unverified' });
       if (alive && auth.signedIn) await router.replace(safeReturnPath(route.query.redirect));
       else if (alive) error.value = auth.error ?? 'La session n’a pas pu être vérifiée. Réessayez.';
     }
   } catch {
+    track(signingUp ? 'signup_failed' : 'login_failed', { reason: 'unavailable' });
     if (alive) error.value = 'La connexion est indisponible. Réessayez dans un instant.';
   } finally { if (alive) busy.value = false; }
 }

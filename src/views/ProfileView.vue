@@ -114,6 +114,7 @@ import { useDataStore } from '@/stores/useDataStore';
 import { useToast } from '@/composables/useToast';
 import { useUsernameAvailability } from '@/composables/useUsernameAvailability';
 import { mutationErrorMessage } from '@/lib/mutationErrorMessage';
+import { track } from '@/lib/analytics';
 import { formatRecordDate } from '@/lib/storyListDates';
 import { LEGAL_PAGES, legalDocuments } from '@/lib/legalDocuments';
 
@@ -144,8 +145,10 @@ watch(() => auth.profile, () => { if (!saving.value) resetDraft(); }, { immediat
 async function saveProfile() {
   if (saving.value || availability.blocking.value || !draft.username.trim()) return;
   saving.value = true; saveError.value = '';
+  const previous = auth.profile?.username ?? '';
   try {
     await auth.saveProfile({ username: draft.username.trim(), avatarColor: draft.avatarColor, avatarIcon: draft.avatarIcon });
+    if (draft.username.trim() !== previous) track('username_set', { first_time: !previous });
     toast.show('Profil enregistré.', 'success');
   } catch (error) { saveError.value = mutationErrorMessage(error, 'Enregistrement du profil impossible. Réessayez.'); }
   finally { saving.value = false; }

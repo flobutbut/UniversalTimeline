@@ -9,6 +9,8 @@ const sdk = vi.hoisted(() => ({ signInWithPassword:vi.fn(),signUp:vi.fn(),resend
 vi.mock('@/services/AuthService',()=>({authService:{getClient:()=>({auth:sdk})}}));
 const profiles = vi.hoisted(() => ({ usernameAvailable: vi.fn() }));
 vi.mock('@/services/ProfileApiService',()=>({profileApi:profiles}));
+const analytics = vi.hoisted(() => ({ track: vi.fn() }));
+vi.mock('@/lib/analytics',()=>analytics);
 import { CURRENT_TERMS_VERSION } from '@account-rules';
 let pinia:Pinia; let router:Router; let view:ReturnType<typeof mount>; let auth:ReturnType<typeof useAuthStore>;
 beforeEach(async()=>{
@@ -154,4 +156,27 @@ it('welcomes the return from the confirmation link',async()=>{
   view.unmount();await router.push('/login?confirmed=1');
   view=mount(LoginView,{global:{plugins:[pinia,router]},attachTo:document.body});await flushPromises();
   expect(view.get('[role="status"]').text()).toContain('Adresse e-mail confirmée');
+});
+it('reports the sign-up funnel without personal data and no abandonment after sending',async()=>{
+  await view.findAll('button').find(b=>b.text()==='Créer un compte')!.trigger('click');await flushPromises();
+  expect(analytics.track).toHaveBeenCalledExactlyOnceWith('signup_form_viewed',{redirect:'/database'});
+  await fillSignup();sdk.signUp.mockResolvedValue({data:{session:null},error:null});
+  await view.get('form').trigger('submit');await flushPromises();view.unmount();
+  expect(analytics.track.mock.calls.map(call=>call[0])).toEqual(['signup_form_viewed','signup_submitted','signup_succeeded']);
+  expect(analytics.track).toHaveBeenLastCalledWith('signup_succeeded',{confirmation_required:true});
+  expect(JSON.stringify(analytics.track.mock.calls)).not.toMatch(/example\.test|Explorer|password/);
+  view=mount({template:'<div />'});
+});
+it('reports a started sign-up left for the sign-in form with what still blocked it',async()=>{
+  await view.findAll('button').find(b=>b.text()==='Créer un compte')!.trigger('click');await flushPromises();
+  await view.findAll('button').find(b=>b.text()==='J’ai déjà un compte')!.trigger('click');await flushPromises();
+  expect(analytics.track).not.toHaveBeenCalledWith('signup_abandoned',expect.anything(),undefined);
+  await view.findAll('button').find(b=>b.text()==='Créer un compte')!.trigger('click');await flushPromises();
+  await fill();await view.findAll('button').find(b=>b.text()==='J’ai déjà un compte')!.trigger('click');await flushPromises();
+  expect(analytics.track).toHaveBeenCalledWith('signup_abandoned',{blocked_by:'username_missing'},undefined);
+});
+it('reports a sign-in failure by its provider code only',async()=>{
+  sdk.signInWithPassword.mockResolvedValue({error:{code:'invalid_credentials',message:'private provider details'}});
+  await fill();await view.get('form').trigger('submit');await flushPromises();
+  expect(analytics.track).toHaveBeenCalledExactlyOnceWith('login_failed',{reason:'invalid_credentials'});
 });

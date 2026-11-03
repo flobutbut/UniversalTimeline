@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createPinia, disposePinia, setActivePinia, type Pinia } from 'pinia';
 import type { PostHog } from 'posthog-js';
-import { createPostHogTracker, installAnalytics, purgePostHogStorage, readPostHogSettings, scrubAuthSecrets } from '@/lib/analytics';
+import { createPostHogTracker, installAnalytics, purgePostHogStorage, readPostHogSettings, scrubAuthSecrets, track } from '@/lib/analytics';
 import { useConsentStore } from '@/stores/useConsentStore';
 
 const token = 'phc_testtoken';
 const settings = { token, host: 'https://eu.i.posthog.com' };
 const env = (values: Record<string, string>) => values as unknown as ImportMetaEnv;
 function fakePostHog() {
-  return { init: vi.fn(), opt_in_capturing: vi.fn(), opt_out_capturing: vi.fn(), reset: vi.fn(), set_config: vi.fn() };
+  return { init: vi.fn(), capture: vi.fn(), opt_in_capturing: vi.fn(), opt_out_capturing: vi.fn(), reset: vi.fn(), set_config: vi.fn() };
 }
 
 let pinia: Pinia;
@@ -76,4 +76,19 @@ it('redacts one-time auth secrets from captured URLs', () => {
 it('leaves unrelated storage untouched', () => {
   localStorage.setItem('ut-consent', '{}'); purgePostHogStorage(token);
   expect(localStorage.getItem('ut-consent')).toBe('{}');
+});
+
+it('sends product events only while consent is given', async () => {
+  const posthog = fakePostHog(); const tracker = createPostHogTracker(settings, async () => posthog as unknown as PostHog);
+  track('signup_submitted', {});
+  await tracker.start();
+  track('signup_failed', { reason: 'weak_password' });
+  tracker.stop();
+  track('login_succeeded', {});
+  expect(posthog.capture).toHaveBeenCalledOnce();
+  expect(posthog.capture).toHaveBeenCalledWith('signup_failed', { reason: 'weak_password' }, undefined);
+  await tracker.start();
+  track('login_succeeded', {});
+  expect(posthog.capture).toHaveBeenCalledTimes(2);
+  tracker.stop();
 });
