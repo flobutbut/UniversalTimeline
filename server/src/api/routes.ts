@@ -3,7 +3,7 @@ import { endpoint } from './handler.js';
 import { parseWriteCategories } from './entityCategories.js';
 import {
   InputValidationError, inputObject, parseEntityId, parseStoryId, parseQid, parseEventWrite, parsePeriodWrite,
-  parseStoryWrite, parseAnchor, parseChildStories, parseAssociationOperation,
+  parseStoryWrite, parseStoryPlacement, parseAnchor, parseChildStories, parseAssociationOperation,
   parseSearchText, parseSearchScope, parseCsvIds, parseParentId, parseAssociationIds, parseStoryFromPeriod,
   parseUsername, parseProfileWrite, parseTermsAcceptance, parseUserId, parseFlag, parseEventImportance,
 } from './inputValidation.js';
@@ -91,7 +91,7 @@ router.get('/stories/suggestions', endpoint('Erreur lors de la récupération de
 }));
 router.post('/stories', endpoint('Erreur lors de la création de la frise', async (req, res) => {
   const data = parseWriteCategories(parseStoryWrite(req.body));
-  const result = await stories.createStory(data);
+  const result = await stories.createStory(data, parseStoryPlacement(req.body));
   res.status(201).json(result);
 }));
 for (const [path, kind] of [['periods', 'period'], ['events', 'event']] as const) {

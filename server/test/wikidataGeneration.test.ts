@@ -77,11 +77,10 @@ it('looks up accessible existing frises with bound Q-id and title parameters', a
   expect(client.query.mock.calls.find(([sql]) => /WITH candidates AS/.test(sql))?.[1]).toEqual(['Q1', 'Révolution']);
 });
 
-it('honors an explicit public visibility choice', async () => {
+it('refuses a public generated frise: without a parent it stays a private draft', async () => {
   const res = await call({ ...payload(), isPublic: true });
-  expect(res.status).toHaveBeenCalledWith(201);
-  const insert = client.query.mock.calls.find(([sql]) => /INSERT INTO public.stories/.test(sql));
-  expect(insert?.[1][5]).toBe(true);
+  expect(res.status).toHaveBeenCalledWith(400);
+  expect(client.query.mock.calls.some(([sql]) => /INSERT INTO public.stories/.test(sql))).toBe(false);
 });
 
 it.each(['Description modifiée\nDeuxième ligne.', '', '  Texte conservé  '])('saves the edited description exactly (%j)', async description => {

@@ -123,6 +123,16 @@ export function parseAnchor(value: unknown): { anchorType: 'period' | 'event'; a
   return { anchorType: body.anchorType, anchorId: parseEntityId(body.anchorId, 'anchorId') };
 }
 
+/** Optional place of a new frise: its parent and, within that parent, its anchor. */
+export function parseStoryPlacement(value: unknown): { parentStoryId: string; anchor?: { anchorType: 'period' | 'event'; anchorId: string } } | null {
+  const body = inputObject(value);
+  if (body.parentStoryId === undefined || body.parentStoryId === null) {
+    if (body.anchor !== undefined && body.anchor !== null) throw new InputValidationError('anchor', 'Choisissez d’abord la frise parente.');
+    return null;
+  }
+  return { parentStoryId: parseStoryId(body.parentStoryId, 'parentStoryId'), ...(body.anchor === undefined || body.anchor === null ? {} : { anchor: parseAnchor(body.anchor) }) };
+}
+
 export function parseChildStories(value: unknown) {
   const body = inputObject(value);
   const multiple = Object.prototype.hasOwnProperty.call(body, 'childStoryIds');

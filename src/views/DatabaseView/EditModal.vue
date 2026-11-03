@@ -252,11 +252,18 @@
           </div>
         </div>
 
+        <div class="form-row" v-if="isStoryCreation">
+          <div class="form-group full-width">
+            <StoryPlacementFields v-model="storyPlacement" :candidates="storyParentCandidates ?? []" :disabled="loading" />
+          </div>
+        </div>
+
         <div class="form-row" v-if="type === 'story'">
           <div class="form-group">
             <div class="switch-group">
-              <Switch v-model="form.isPublic" label="Mode public" label-first />
+              <Switch v-model="form.isPublic" label="Mode public" label-first :disabled="publicLocked" />
             </div>
+            <p v-if="publicLocked" class="edit-modal__parent-hint">Une frise sans frise parente reste privée.</p>
           </div>
         </div>
 
@@ -311,7 +318,7 @@
       <Button
         variant="primary"
         type="button"
-        :disabled="loading || wikidataApplyLoading || (!selectedExistingEntity && (!editState.isValid || !!editState.qidError || editState.categoriesLoading || !!editState.categoriesError))"
+        :disabled="loading || wikidataApplyLoading || (isStoryCreation && !storyPlacement.complete) || (!selectedExistingEntity && (!editState.isValid || !!editState.qidError || editState.categoriesLoading || !!editState.categoriesError))"
         @click="handleSubmit"
       >
         {{ selectedExistingEntity ? 'Ajouter à la frise' : mode === 'edit' ? 'Mettre à jour' : convertFrom ? 'Convertir' : 'Créer' }}
@@ -323,7 +330,9 @@
 <script setup lang="ts">
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import { watch, ref, reactive, computed, onMounted, onUnmounted } from 'vue';
-import type { EditInitialData, EditFormSubmission } from '@/types/editForm';
+import type { EditInitialData, EditFormSubmission, StoryPlacementDraft } from '@/types/editForm';
+import type { StorySummary } from '@/types/database';
+import StoryPlacementFields from './StoryPlacementFields.vue';
 import { Icon } from '@iconify/vue';
 import { useEditModal } from '@/composables/useEditModal';
 import { validateEntityQid } from '@/services/validateEntityQid';
@@ -359,6 +368,8 @@ const props = defineProps<{
   searchBounds?: SearchTimeBounds | null;
   /** Création qui remplace partout une fiche de l'autre type (conversion période ↔ événement). */
   convertFrom?: 'period' | 'event';
+  /** Création d’une frise : frises modifiables proposées comme parente. */
+  storyParentCandidates?: StorySummary[];
 }>();
 
 const emit = defineEmits<{
@@ -523,8 +534,14 @@ const validateQid = async () => {
 };
 
 // Gestion de la soumission du formulaire
+const isStoryCreation = computed(() => props.type === 'story' && props.mode === 'create');
+const storyPlacement = ref<StoryPlacementDraft>({ parentStoryId: null, anchorPeriodId: null, complete: true });
+/** Règle 1 : une frise sans parente est un brouillon privé. */
+const publicLocked = computed(() => isStoryCreation.value && !storyPlacement.value.parentStoryId);
+watch(publicLocked, locked => { if (locked) form.isPublic = false; }, { immediate: true });
 const handleSubmit = () => {
   if (props.loading || wikidataApplyLoading.value) return;
+  if (isStoryCreation.value && !storyPlacement.value.complete) return;
   if (selectedExistingEntity.value) {
     if (props.type === 'period') emit('select-period', selectedExistingEntity.value.id);
     else if (props.type === 'event') emit('select-event', selectedExistingEntity.value.id);
@@ -535,7 +552,8 @@ const handleSubmit = () => {
   if (!validation.value.isValid || editState.qidError) return;
   try {
     const formData = prepareSubmitData();
-    emit('submit', formData);
+    const { parentStoryId, anchorPeriodId } = storyPlacement.value;
+    emit('submit', isStoryCreation.value && parentStoryId ? { ...formData, storyPlacement: { parentStoryId, anchorPeriodId } } : formData);
   } catch (error: unknown) {
     console.error('[EditModal] Erreur lors de la préparation des données:', error);
     toast.show('Erreur lors de la préparation des données', 'error');

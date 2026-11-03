@@ -76,3 +76,31 @@ test('a leaf period is copied without moving anything', async () => {
   assert.equal(result.payload.movedPeriodCount, 0);
   assert.equal((await memberships(1)).length, 5);
 });
+
+const storyBody = extra => ({ title: { fr: 'Nouvelle' }, categories: [{ id: category }], ...extra });
+test('a new frise is created with its parent and anchor in one transaction', async () => {
+  const created = await call('post', '/stories', { body: storyBody({ isPublic: true, parentStoryId: '1', anchor: { anchorType: 'period', anchorId: 'q' } }) });
+  assert.equal(created.statusCode, 201);
+  assert.equal(created.payload.parent_story_id, 1);
+  assert.deepEqual(await rows('SELECT parent_story_id, is_public FROM stories WHERE id=$1', [created.payload.id]), [{ parent_story_id: 1, is_public: true }]);
+  assert.deepEqual(await rows('SELECT anchor_type, anchor_id FROM story_anchors WHERE story_id=$1', [created.payload.id]), [{ anchor_type: 'period', anchor_id: 'q' }]);
+});
+test('a new frise refuses an anchor outside its parent, or without a parent, and creates nothing', async () => {
+  const before = await rows('SELECT count(*)::int n FROM stories');
+  assert.equal((await call('post', '/stories', { body: storyBody({ parentStoryId: '3', anchor: { anchorType: 'period', anchorId: 'q' } }) })).statusCode, 409);
+  assert.equal((await call('post', '/stories', { body: storyBody({ anchor: { anchorType: 'period', anchorId: 'q' } }) })).statusCode, 400);
+  assert.equal((await call('post', '/stories', { body: storyBody({ parentStoryId: '5' }), userId: alice })).statusCode, 404);
+  assert.deepEqual(await rows('SELECT count(*)::int n FROM stories'), before);
+});
+test('a frise without a parent stays private, while an already public one keeps its visibility', async () => {
+  const before = await rows('SELECT count(*)::int n FROM stories');
+  assert.equal((await call('post', '/stories', { body: storyBody({ isPublic: true }) })).statusCode, 400);
+  assert.deepEqual(await rows('SELECT count(*)::int n FROM stories'), before);
+  const draft = await call('post', '/stories', { body: storyBody({ isPublic: false }) });
+  assert.equal(draft.statusCode, 201);
+  assert.equal((await call('put', '/stories/:id', { params: { id: String(draft.payload.id) }, body: storyBody({ isPublic: true }) })).statusCode, 400);
+  assert.deepEqual(await rows('SELECT is_public FROM stories WHERE id=$1', [draft.payload.id]), [{ is_public: false }]);
+  assert.equal((await call('put', '/stories/:id', { params: { id: '3' }, body: storyBody({ isPublic: true }) })).statusCode, 200);
+  await pool.query('UPDATE stories SET parent_story_id = 1 WHERE id = $1', [draft.payload.id]);
+  assert.equal((await call('put', '/stories/:id', { params: { id: String(draft.payload.id) }, body: storyBody({ isPublic: true }) })).statusCode, 200);
+});

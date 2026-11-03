@@ -30,6 +30,12 @@ export interface EditFormSubmission {
   description: { fr: string | null; en: string | null };
   startDate: string; endDate: string; date: string; location: string | null;
   author: string; isPublic: boolean; parentId: string | null; categories: Array<{ id: string }>;
+  /** Création d’une frise : sa parente et son ancre. */
+  storyPlacement?: StoryPlacement | null;
 }
 
 export interface EditableItem extends EditInitialData { id: string }
+
+/** Place d’une nouvelle frise. `complete` : aucune parente, ou parente chargée avec son ancre (sauf si elle n’a aucune période). */
+export interface StoryPlacementDraft { parentStoryId: string | null; anchorPeriodId: string | null; complete: boolean }
+export interface StoryPlacement { parentStoryId: string; anchorPeriodId: string | null }

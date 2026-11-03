@@ -18,9 +18,15 @@ it('changes the visibility and deletes the frise from the saved state', async ()
   expect(view.emitted('toggle-visibility')).toHaveLength(1);
   await button('Supprimer la frise')!.trigger('click');
   expect(view.emitted('delete')).toHaveLength(1);
-  await view.setProps({ story: { ...story, isPublic: false } });
+  await view.setProps({ story: { ...story, isPublic: false, parentStoryId: '7' } });
   expect(view.text()).toContain('Visibilité : privée');
-  expect(button('Rendre publique')?.exists()).toBe(true);
+  expect(button('Rendre publique')?.attributes('disabled')).toBeUndefined();
+});
+
+it('keeps a private frise without a parent as a draft', () => {
+  view = mount(StoryDangerZone, { props: { story: { ...story, isPublic: false, parentStoryId: null } } });
+  expect(button('Rendre publique')?.attributes('disabled')).toBeDefined();
+  expect(view.text()).toContain('Sans frise parente, la frise reste un brouillon privé');
 });
 
 it('blocks both actions while a write is in progress', () => {

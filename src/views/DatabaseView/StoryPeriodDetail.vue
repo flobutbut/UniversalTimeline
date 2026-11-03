@@ -10,7 +10,7 @@
           <div class="story-period-detail__actions">
             <template v-if="inStory">
               <Button variant="tertiary" size="sm" :disabled="busy" @click="emit('edit', period.id)">Modifier la période</Button>
-              <Button v-if="canCreateStory" variant="tertiary" size="sm" :disabled="busy" @click="emit('create-story', period.id)">Créer une frise</Button>
+              <Button v-if="canCreateStory" variant="tertiary" size="sm" :disabled="busy" @click="emit('create-story', period.id)">{{ promote ? 'Promouvoir en sous-frise' : 'Créer une frise' }}</Button>
               <Button variant="tertiary" size="sm" :disabled="busy || children.length > 0" :title="children.length > 0 ? 'Déplacez d’abord ses sous-périodes.' : undefined" @click="emit('convert', period.id)">Convertir en événement</Button>
               <StoryItemActionsMenu :label="label(period)" :disabled="busy" movable :convert-to="children.length ? undefined : 'event'" @edit="emit('edit', period.id)"
                 @move="emit('move', period.id)" @remove="emit('remove', period.id)" @create-story="emit('create-story', period.id)" @convert="emit('convert', period.id)" />
@@ -76,7 +76,8 @@ import { formatRecordDate } from '@/lib/storyListDates';
 const props = withDefaults(defineProps<{
   period: ListPeriod | null; inStory: boolean; children: ListPeriod[];
   stories: ChildStorySummary[]; summaries: StorySummary[]; busy?: boolean; canAdd?: boolean; canCreateStory?: boolean;
-}>(), { busy: false, canAdd: true, canCreateStory: true });
+  /** Règle 3 : la période devrait devenir une sous-frise. */ promote?: boolean;
+}>(), { busy: false, canAdd: true, canCreateStory: true, promote: false });
 const emit = defineEmits<{
   select: [id: string]; edit: [id: string]; move: [id: string]; remove: [id: string]; 'create-story': [id: string]; convert: [id: string];
   add: [id: string]; 'add-child': [id: string]; 'associate-story': [id: string]; 'remove-story': [storyId: string, periodId: string];

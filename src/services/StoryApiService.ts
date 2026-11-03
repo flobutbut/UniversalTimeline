@@ -44,7 +44,10 @@ export class StoryApiService {
   }
 
   async createStory(storyData: StoryFormPayload): Promise<StorySummary> {
-    return mapToListStory(await apiClient.post<StoryDto>('/stories', storyPayload(storyData)));
+    const placement = storyData.storyPlacement;
+    return mapToListStory(await apiClient.post<StoryDto>('/stories', { ...storyPayload(storyData), ...(placement ? {
+      parentStoryId: placement.parentStoryId, ...(placement.anchorPeriodId ? { anchor: { anchorType: 'period', anchorId: placement.anchorPeriodId } } : {}),
+    } : {}) }));
   }
 
   async findWikidataStories(qid: string, title: string, signal?: AbortSignal): Promise<ExistingWikidataStory[]> {

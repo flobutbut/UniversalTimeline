@@ -382,6 +382,11 @@ export function useDatabaseView() {
     await StoryApiService.getInstance().changeEntryPoints(sourceId, [targetId], { type: 'period', id: periodId });
     return 'Point d’entrée ajouté';
   });
+  /** Rattache la frise à sa parente, sur une ancre ; les ancres d’une ancienne parente sont retirées. */
+  const setParentOfStory = (parentId: string, periodId: string) => mutateRelatedStories(async storyId => {
+    await StoryApiService.getInstance().linkChildStories(parentId, [storyId], { type: 'period', id: periodId });
+    return 'Frise parente enregistrée';
+  });
   const removeParentEntryFromStory = (sourceId: string, anchor?: StoryAnchor) => mutateRelatedStories(async targetId => {
     await StoryApiService.getInstance().changeEntryPoints(sourceId, [targetId], anchor, true);
     return 'Point d’entrée retiré';
@@ -409,6 +414,7 @@ export function useDatabaseView() {
     changeEventImportance,
     addParentEntryToStory,
     removeParentEntryFromStory,
+    setParentOfStory,
     sharedLoading, sharedError,
   };
 }

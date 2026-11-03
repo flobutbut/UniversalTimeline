@@ -63,6 +63,8 @@ export function useDatabaseSave() {
         const updatedItem = await (currentMode === 'edit' && currentItem
           ? service.updateStory(currentItem.id, submission) : service.createStory(submission));
         dataStore.upsertSavedStory(updatedItem);
+        // The parent now proposes the new frise on its anchor.
+        if (submission.storyPlacement) dataStore.invalidateStory(submission.storyPlacement.parentStoryId);
       }
 
       toast.hide();
