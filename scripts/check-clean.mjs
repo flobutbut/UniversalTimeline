@@ -95,7 +95,7 @@ try {
     ['hierarchy', 'periodHierarchy.postgres.mjs'], ['deletion', 'periodDeletion.postgres.mjs'],
     ['privileges', 'functionPrivileges.postgres.mjs'], ['atomic', 'atomicWrites.postgres.mjs'],
     ['profiles', 'profiles.postgres.mjs'], ['admin', 'admin.postgres.mjs'],
-    ['wikidata-generation', 'wikidataGeneration.postgres.mjs'], ['conversion', 'catalogueConversion.postgres.mjs'],
+    ['wikidata_generation', 'wikidataGeneration.postgres.mjs'], ['conversion', 'catalogueConversion.postgres.mjs'],
   ]) await postgresSuite(name, file, restore);
   console.log('\nInstallation vierge, tests, audits, builds et restauration de test réussis.');
 } catch (cause) {
