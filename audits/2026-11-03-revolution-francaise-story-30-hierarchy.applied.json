@@ -1,0 +1,347 @@
+{
+  "appliedOn": "2026-11-03",
+  "storyId": 30,
+  "verification": {
+    "periodCountPreserved": true,
+    "eventCountPreserved": true,
+    "sharedPeriodFactsPreserved": true,
+    "eventsPreserved": true,
+    "otherStoriesPeriodAssociationsPreserved": true,
+    "allParentsMatch": true,
+    "updatedRelations": 14,
+    "rootPeriods": 10
+  },
+  "appliedChanges": [
+    {
+      "childQid": "Q219825",
+      "parentQid": "Q6534",
+      "childId": "9b4f9c69-8b1b-452c-9002-379bc86ac8cd",
+      "parentId": "b7e57449-fe71-4400-affb-a11324f864b3",
+      "childLabel": "Convention nationale",
+      "parentLabel": "Révolution française",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q219817",
+      "parentQid": "Q6534",
+      "childId": "70d2c990-e8fc-4522-b28c-43671b2eacab",
+      "parentId": "b7e57449-fe71-4400-affb-a11324f864b3",
+      "childLabel": "Directoire",
+      "parentLabel": "Révolution française",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q474757",
+      "parentQid": "Q219825",
+      "childId": "493177bc-5e49-4a44-9f0f-e2b356c1ea3f",
+      "parentId": "9b4f9c69-8b1b-452c-9002-379bc86ac8cd",
+      "childLabel": "Convention thermidorienne",
+      "parentLabel": "Convention nationale",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q193547",
+      "parentQid": "Q219825",
+      "childId": "0aabd8fb-e9f1-48e5-af88-74ad48592460",
+      "parentId": "9b4f9c69-8b1b-452c-9002-379bc86ac8cd",
+      "childLabel": "Terreur",
+      "parentLabel": "Convention nationale",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q15784403",
+      "parentQid": "Q219825",
+      "childId": "4db10543-aeae-4ce3-b9e9-562fb481ae56",
+      "parentId": "9b4f9c69-8b1b-452c-9002-379bc86ac8cd",
+      "childLabel": "Journées du 31 mai et du 2 juin 1793",
+      "parentLabel": "Convention nationale",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q2998928",
+      "parentQid": "Q219817",
+      "childId": "1cb60738-6db4-4d68-9dcc-582f68c526a0",
+      "parentId": "70d2c990-e8fc-4522-b28c-43671b2eacab",
+      "childLabel": "coup d'État du 30 prairial an VII",
+      "parentLabel": "Directoire",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q13644774",
+      "parentQid": "Q207318",
+      "childId": "331170f9-9989-4006-b79c-d6b129a1b146",
+      "parentId": "e0f69ebe-e03d-45a0-a5af-3c52479c46cd",
+      "childLabel": "siège de Maubeuge",
+      "parentLabel": "guerres de la Révolution française",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q776609",
+      "parentQid": "Q207318",
+      "childId": "1ea24a2b-3c8c-4913-9fdc-ea8dad6d3652",
+      "parentId": "e0f69ebe-e03d-45a0-a5af-3c52479c46cd",
+      "childLabel": "bataille du pont d'Arcole",
+      "parentLabel": "guerres de la Révolution française",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q370029",
+      "parentQid": "Q107483093",
+      "childId": "98bbb7c3-eaba-46c5-88ee-59467334b981",
+      "parentId": "a2f740c2-75fd-4aa6-a179-7f830b14ca72",
+      "childLabel": "grande Peur",
+      "parentLabel": "ère de la liberté",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q1151917",
+      "parentQid": "Q107483093",
+      "childId": "f98de3c7-5b4f-441e-aa8c-a921318b42af",
+      "parentId": "a2f740c2-75fd-4aa6-a179-7f830b14ca72",
+      "childLabel": "journées des 5 et 6 octobre 1789",
+      "parentLabel": "ère de la liberté",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q2935567",
+      "parentQid": "Q107483093",
+      "childId": "a508143f-d8b6-484d-be08-ef29e2a85959",
+      "parentId": "a2f740c2-75fd-4aa6-a179-7f830b14ca72",
+      "childLabel": "camps de Jalès",
+      "parentLabel": "ère de la liberté",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q162463",
+      "parentQid": "Q107483093",
+      "childId": "78d2ca10-124c-4f5d-b4f7-fe49fd058239",
+      "parentId": "a2f740c2-75fd-4aa6-a179-7f830b14ca72",
+      "childLabel": "affaire de Nancy",
+      "parentLabel": "ère de la liberté",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q140190588",
+      "parentQid": "Q107483093",
+      "childId": "b298d52e-d6be-491c-9519-6e93649b6964",
+      "parentId": "a2f740c2-75fd-4aa6-a179-7f830b14ca72",
+      "childLabel": "provisional suspension of Louis XVI",
+      "parentLabel": "ère de la liberté",
+      "oldParentId": null
+    },
+    {
+      "childQid": "Q862586",
+      "parentQid": "Q107483093",
+      "childId": "5d6f6b62-be13-4556-bbd8-1450fbe8370d",
+      "parentId": "a2f740c2-75fd-4aa6-a179-7f830b14ca72",
+      "childLabel": "massacres de Septembre",
+      "parentLabel": "ère de la liberté",
+      "oldParentId": null
+    }
+  ],
+  "beforeFile": "/Users/florianbutour/Desktop/Developpement/web-chronologie-univers-2/audits/2026-11-03-revolution-francaise-story-30-hierarchy.before.json",
+  "after": {
+    "story": {
+      "id": 30,
+      "title_fr": "Révolution française"
+    },
+    "periods": [
+      {
+        "id": "0aabd8fb-e9f1-48e5-af88-74ad48592460",
+        "end_date": "1794-07-28",
+        "label_fr": "Terreur",
+        "start_date": "1793-09-02",
+        "wikidata_id": "Q193547",
+        "parent_period_id": "9b4f9c69-8b1b-452c-9002-379bc86ac8cd"
+      },
+      {
+        "id": "0d31b3e2-d112-4fb2-be9b-119ef206fe51",
+        "end_date": "1793-09-06",
+        "label_fr": "Petite Vendée comtoise",
+        "start_date": "1793-08-31",
+        "wikidata_id": "Q109041266",
+        "parent_period_id": null
+      },
+      {
+        "id": "11177ae2-95bd-44ff-86bc-3a8b6c335a53",
+        "end_date": "1799-11-10",
+        "label_fr": "coup d'État du 18 Brumaire an VIII",
+        "start_date": "1799-11-09",
+        "wikidata_id": "Q620965",
+        "parent_period_id": null
+      },
+      {
+        "id": "1cb60738-6db4-4d68-9dcc-582f68c526a0",
+        "end_date": "1799-06-18",
+        "label_fr": "coup d'État du 30 prairial an VII",
+        "start_date": "1799-06-17",
+        "wikidata_id": "Q2998928",
+        "parent_period_id": "70d2c990-e8fc-4522-b28c-43671b2eacab"
+      },
+      {
+        "id": "1ea24a2b-3c8c-4913-9fdc-ea8dad6d3652",
+        "end_date": "1796-11-17",
+        "label_fr": "bataille du pont d'Arcole",
+        "start_date": "1796-11-15",
+        "wikidata_id": "Q776609",
+        "parent_period_id": "e0f69ebe-e03d-45a0-a5af-3c52479c46cd"
+      },
+      {
+        "id": "2e2d2c0d-e2aa-442a-91bd-a4f5a646533d",
+        "end_date": "1804-05-18",
+        "label_fr": "ère républicaine",
+        "start_date": "1792-09-21",
+        "wikidata_id": "Q3577291",
+        "parent_period_id": null
+      },
+      {
+        "id": "331170f9-9989-4006-b79c-d6b129a1b146",
+        "end_date": "1793-10-16",
+        "label_fr": "siège de Maubeuge",
+        "start_date": "1793-09-30",
+        "wikidata_id": "Q13644774",
+        "parent_period_id": "e0f69ebe-e03d-45a0-a5af-3c52479c46cd"
+      },
+      {
+        "id": "39e41891-368a-4fdc-b7d6-e6924c1180d1",
+        "end_date": "1789-06-20",
+        "label_fr": "États généraux de 1789",
+        "start_date": "1789-01-24",
+        "wikidata_id": "Q1463941",
+        "parent_period_id": null
+      },
+      {
+        "id": "493177bc-5e49-4a44-9f0f-e2b356c1ea3f",
+        "end_date": "1795-10-26",
+        "label_fr": "Convention thermidorienne",
+        "start_date": "1794-07-27",
+        "wikidata_id": "Q474757",
+        "parent_period_id": "9b4f9c69-8b1b-452c-9002-379bc86ac8cd"
+      },
+      {
+        "id": "4db10543-aeae-4ce3-b9e9-562fb481ae56",
+        "end_date": "1793-06-02",
+        "label_fr": "Journées du 31 mai et du 2 juin 1793",
+        "start_date": "1793-05-31",
+        "wikidata_id": "Q15784403",
+        "parent_period_id": "9b4f9c69-8b1b-452c-9002-379bc86ac8cd"
+      },
+      {
+        "id": "576a3536-afca-4e9a-bcd5-5f26dd076671",
+        "end_date": "1793-12-23",
+        "label_fr": "virée de Galerne",
+        "start_date": "1793-10-18",
+        "wikidata_id": "Q599663",
+        "parent_period_id": null
+      },
+      {
+        "id": "5d6f6b62-be13-4556-bbd8-1450fbe8370d",
+        "end_date": "1792-09-07",
+        "label_fr": "massacres de Septembre",
+        "start_date": "1792-09-02",
+        "wikidata_id": "Q862586",
+        "parent_period_id": "a2f740c2-75fd-4aa6-a179-7f830b14ca72"
+      },
+      {
+        "id": "5e5cedf7-f00d-4c45-8ab0-2b709b2bb812",
+        "end_date": "1789-04-29",
+        "label_fr": "affaire Réveillon",
+        "start_date": "1789-04-26",
+        "wikidata_id": "Q1073320",
+        "parent_period_id": null
+      },
+      {
+        "id": "70d2c990-e8fc-4522-b28c-43671b2eacab",
+        "end_date": "1799-11-09",
+        "label_fr": "Directoire",
+        "start_date": "1795-10-26",
+        "wikidata_id": "Q219817",
+        "parent_period_id": "b7e57449-fe71-4400-affb-a11324f864b3"
+      },
+      {
+        "id": "78d2ca10-124c-4f5d-b4f7-fe49fd058239",
+        "end_date": "1790-08-30",
+        "label_fr": "affaire de Nancy",
+        "start_date": "1790-08-05",
+        "wikidata_id": "Q162463",
+        "parent_period_id": "a2f740c2-75fd-4aa6-a179-7f830b14ca72"
+      },
+      {
+        "id": "7f7db3df-a690-43ad-ba8a-03095b422ba9",
+        "end_date": "1800",
+        "label_fr": "chouannerie",
+        "start_date": "1794",
+        "wikidata_id": "Q249960",
+        "parent_period_id": null
+      },
+      {
+        "id": "98bbb7c3-eaba-46c5-88ee-59467334b981",
+        "end_date": "1789-08-06",
+        "label_fr": "grande Peur",
+        "start_date": "1789-07-20",
+        "wikidata_id": "Q370029",
+        "parent_period_id": "a2f740c2-75fd-4aa6-a179-7f830b14ca72"
+      },
+      {
+        "id": "9b4f9c69-8b1b-452c-9002-379bc86ac8cd",
+        "end_date": "1795-10-26",
+        "label_fr": "Convention nationale",
+        "start_date": "1792-09-20",
+        "wikidata_id": "Q219825",
+        "parent_period_id": "b7e57449-fe71-4400-affb-a11324f864b3"
+      },
+      {
+        "id": "a2f740c2-75fd-4aa6-a179-7f830b14ca72",
+        "end_date": "1792-09-21",
+        "label_fr": "ère de la liberté",
+        "start_date": "1789-07",
+        "wikidata_id": "Q107483093",
+        "parent_period_id": null
+      },
+      {
+        "id": "a508143f-d8b6-484d-be08-ef29e2a85959",
+        "end_date": "1792-07",
+        "label_fr": "camps de Jalès",
+        "start_date": "1790-08",
+        "wikidata_id": "Q2935567",
+        "parent_period_id": "a2f740c2-75fd-4aa6-a179-7f830b14ca72"
+      },
+      {
+        "id": "b298d52e-d6be-491c-9519-6e93649b6964",
+        "end_date": "1791-09-14",
+        "label_fr": "provisional suspension of Louis XVI",
+        "start_date": "1791-06-25",
+        "wikidata_id": "Q140190588",
+        "parent_period_id": "a2f740c2-75fd-4aa6-a179-7f830b14ca72"
+      },
+      {
+        "id": "b7e57449-fe71-4400-affb-a11324f864b3",
+        "end_date": "1799-11-09",
+        "label_fr": "Révolution française",
+        "start_date": "1789-07-14",
+        "wikidata_id": "Q6534",
+        "parent_period_id": null
+      },
+      {
+        "id": "e0f69ebe-e03d-45a0-a5af-3c52479c46cd",
+        "end_date": "1802-03-25",
+        "label_fr": "guerres de la Révolution française",
+        "start_date": "1792-04-20",
+        "wikidata_id": "Q207318",
+        "parent_period_id": null
+      },
+      {
+        "id": "f98de3c7-5b4f-441e-aa8c-a921318b42af",
+        "end_date": "1789-10-06",
+        "label_fr": "journées des 5 et 6 octobre 1789",
+        "start_date": "1789-10-05",
+        "wikidata_id": "Q1151917",
+        "parent_period_id": "a2f740c2-75fd-4aa6-a179-7f830b14ca72"
+      }
+    ],
+    "event_count": 28,
+    "events_hash": "3fd141f8d2e526a112bd9c9eb28417bf",
+    "shared_periods_hash": "fee5d151cb589b96b1c12e69bcfe5329",
+    "other_period_associations_hash": "b5b98e72ee86e429bdc7da927e83ddb6"
+  }
+}
