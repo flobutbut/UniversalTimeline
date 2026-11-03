@@ -51,7 +51,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Contenus : les frises que vous créez, leur visibilité et leurs liens avec le catalogue. Une frise publique affiche votre nom d’utilisateur.',
         'Données techniques : journaux de connexion et d’erreur des hébergeurs (adresse IP, date, requête), utilisés pour la sécurité.',
         'Modération : si l’administrateur suspend ou supprime un compte, ou modifie son rôle, l’action est enregistrée avec la date et le nom d’utilisateur concerné.',
-        'Mesure d’audience, seulement avec votre accord : pages consultées, clics, étapes franchies (par exemple l’envoi du formulaire d’inscription ou le motif technique d’un échec, sans son contenu), erreurs techniques de la page, provenance, type de navigateur et d’appareil, associés à un identifiant pseudonyme. L’adresse IP n’est pas conservée et les sessions ne sont pas enregistrées.',
+        'Mesure d’audience, seulement avec votre accord : pages consultées, clics (sans le texte affiché), étapes franchies (par exemple l’envoi du formulaire d’inscription ou le motif technique d’un échec, sans son contenu), frises publiques, périodes et événements consultés (une frise privée est seulement comptée, jamais nommée), utilisation de la recherche et, lorsqu’aucune frise n’est trouvée, les termes recherchés (sans adresse, lien ni numéro), erreurs techniques de la page, provenance, type de navigateur et d’appareil, associés à un identifiant pseudonyme. L’adresse IP n’est pas conservée et les sessions ne sont pas enregistrées.',
       ] },
       { title: 'Finalités et bases légales', paragraphs: [], items: [
         'Créer et gérer votre compte, publier vos frises : exécution du contrat (article 6.1.b du RGPD).',

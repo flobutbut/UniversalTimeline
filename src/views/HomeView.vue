@@ -2,23 +2,23 @@
   <div class="home-view">
     <div class="home-view__header">
       <div class="home-view__breadcrumbs">
-        <StoryBreadcrumb class="home-view__story-breadcrumb" :items="storyBreadcrumb" label="Fil d’Ariane des frises" :loading="loading" @navigate="navigateToStoryBreadcrumb" />
-        <StoryBreadcrumb class="home-view__period-breadcrumb" :items="breadcrumb" :loading="loading" @navigate="navigateToBreadcrumb" />
+        <StoryBreadcrumb class="home-view__story-breadcrumb" :items="storyBreadcrumb" label="Fil d’Ariane des frises" :loading="loading" @navigate="onStoryBreadcrumb" />
+        <StoryBreadcrumb class="home-view__period-breadcrumb" :items="breadcrumb" :loading="loading" @navigate="onBreadcrumb" />
       </div>
       <Button v-if="!routeError && !error" class="home-view__story-detail" variant="tertiary" size="sm" :disabled="loading"
         :to="{ name: 'database', query: { story: currentStoryId } }">Voir le détail de la frise</Button>
     </div>
     <div v-if="routeError || error" role="alert">
-      {{ routeError || error }} <Button variant="tertiary" size="sm" v-if="!routeError" type="button" :disabled="loading" @click="retryLoad">Réessayer</Button><RouterLink v-else :to="{ name: 'timeline' }">Revenir à la timeline</RouterLink>
+      {{ routeError || error }} <Button variant="tertiary" size="sm" v-if="!routeError" type="button" :disabled="loading" @click="retry">Réessayer</Button><RouterLink v-else :to="{ name: 'timeline' }">Revenir à la timeline</RouterLink>
     </div>
     <Select v-if="navigationContexts.length > 1" :model-value="contextId" label="Parcours chronologique" placeholder="Choisir un parcours"
       :options="navigationContexts.map(context => ({ value: context.id, label: context.title.fr || context.title.en }))"
-      :disabled="loading" @update:model-value="value => typeof value === 'string' && selectNavigationContext(value)" />
+      :disabled="loading" @update:model-value="value => typeof value === 'string' && onContext(value)" />
     <Teleport to="body">
       <ModalShell v-if="navigationChoices.length" title="Choisir une frise pour cette période" height="auto" @close="closeNavigationChoices">
         <p>Plusieurs frises présentent cette période.</p>
         <div class="home-view__choices">
-          <Button v-for="choice in navigationChoices" :key="choice.storyId" variant="tertiary" size="sm" @click="chooseNavigationTarget(choice)">{{ choice.title }}</Button>
+          <Button v-for="choice in navigationChoices" :key="choice.storyId" variant="tertiary" size="sm" @click="onChoice(choice)">{{ choice.title }}</Button>
         </div>
       </ModalShell>
     </Teleport>
@@ -41,11 +41,11 @@
         :current-story-id="currentStoryId"
         :load-story-details="dataStore.ensureStoryLoaded"
         period-tooltips
-        @period-click="handlePeriodClick"
-        @event-click="handleEventClick"
-        @go-back="goBack"
+        @period-click="onPeriodClick"
+        @event-click="onEventClick"
+        @go-back="onGoBack"
         @navigate-period="slideToAdjacentPeriod"
-        @story-select="selectStory"
+        @story-select="onStorySelect"
       />
     </div>
   </div>
@@ -66,9 +66,17 @@ import PeriodGrid from './HomeView/PeriodGrid.vue';
 import { useHomeNavigation } from '@/composables/useHomeNavigation';
 import { useTimelineSlide } from '@/composables/useTimelineSlide';
 import { useDataStore } from '@/stores/useDataStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { track, type TimelineVia } from '@/lib/analytics';
+import { entryVia, eventProperties, periodProperties, storyProperties, takeAnnouncedEntry, type StoryScope } from '@/lib/explorationAnalytics';
+import type { ListEvent } from '@/types/database';
 
 const dataStore = useDataStore();
+const auth = useAuthStore();
 const router = useRouter();
+// Cause of the next in-page navigation: set by the action, handed to the route change it pushes.
+let actionVia: TimelineVia | null = null;
+let routeVia: TimelineVia | null = null;
 
 const {
   loading,
@@ -94,7 +102,55 @@ const {
   selectStory,
   navigateToBreadcrumb,
   navigateToStoryBreadcrumb,
-} = useHomeNavigation(target => { void router.push(timelineLocation(target)); });
+} = useHomeNavigation(target => {
+  routeVia = actionVia ?? 'app'; actionVia = null;
+  // A refused or duplicate navigation changes no route: its cause must not label the next one.
+  void router.push(timelineLocation(target)).then(failure => { if (failure) routeVia = null; });
+});
+function as<A extends unknown[]>(via: TimelineVia, run: (...args: A) => unknown) {
+  return (...args: A) => { actionVia = via; return run(...args); };
+}
+const onPeriodClick = as('period', handlePeriodClick);
+const onGoBack = as('back', goBack);
+const onBreadcrumb = as('breadcrumb', navigateToBreadcrumb);
+const onStoryBreadcrumb = as('story_breadcrumb', navigateToStoryBreadcrumb);
+const onContext = as('context', selectNavigationContext);
+const onChoice = as('story_choice', chooseNavigationTarget);
+async function onStorySelect(...args: Parameters<typeof selectStory>) {
+  actionVia = 'associated_story';
+  await selectStory(...args);
+  // Still unconsumed after an error: the associated frise could not be opened.
+  if (actionVia === 'associated_story' && error.value) {
+    actionVia = null;
+    track('timeline_load_failed', { reason: 'story_unavailable', via: 'associated_story' });
+  }
+}
+
+const storyScope = (): StoryScope => ({
+  story: dataStore.stories.find(story => String(story.id) === currentStoryId.value),
+  username: auth.profile?.username, signedIn: auth.signedIn,
+});
+const depth = () => parentStack.value.length + (currentPeriod.value ? 1 : 0);
+function onEventClick(event: ListEvent) {
+  const scope = storyScope();
+  track('timeline_event_opened', { ...storyProperties(scope), ...eventProperties(scope, event), depth: depth() });
+  return handleEventClick(event);
+}
+/** One event per position actually displayed; a navigation replaced by a newer one reports nothing. */
+let positionToken = 0;
+async function reportPosition(loaded: Promise<unknown>, via: TimelineVia) {
+  const token = ++positionToken;
+  await loaded;
+  if (token !== positionToken) return;
+  if (error.value) { track('timeline_load_failed', { reason: 'load_failed', via }); return; }
+  const scope = storyScope();
+  track('timeline_position_viewed', {
+    ...storyProperties(scope), ...periodProperties(scope, currentPeriod.value),
+    view: currentPeriod.value ? 'period' : 'overview', depth: depth(), via, has_context: !!contextId.value,
+  });
+}
+function retry() { actionVia = 'retry'; void reportPosition(retryLoad(), 'retry'); }
+
 
 const route = useRoute();
 const routeError = ref('');
@@ -112,13 +168,19 @@ function slideToAdjacentPeriod(direction: 'previous' | 'next') {
   const destination = direction === 'previous' ? previousPeriod.value : nextPeriod.value;
   if (loading.value || !destination) return;
   slide.prepare(direction, destination.id);
+  actionVia = 'slide';
   navigateAdjacentPeriod(direction);
 }
 function closeNavigationChoices() { slide.cancel(); navigationChoices.value = []; }
 let initialized = false;
 let consumedPosition = '';
+let previousRouteName: unknown = null;
 watch([() => route.query.story, () => route.query.period, () => route.query.context, () => route.query.view, () => route.query.entry, () => route.name], () => {
+  const from = previousRouteName; previousRouteName = route.name;
   if (route.name !== 'timeline') return;
+  // An in-page action, an announced search, the browser history inside the page, or an entry from elsewhere.
+  const via = routeVia ?? takeAnnouncedEntry() ?? (initialized && from === 'timeline' ? 'history' : entryVia(window.history.state?.back));
+  routeVia = null;
   routeError.value = '';
   try {
     const storyId = readStoryTarget(route.query.story);
@@ -127,9 +189,10 @@ watch([() => route.query.story, () => route.query.period, () => route.query.cont
     if (initialized && key === consumedPosition) return;
     consumedPosition = key;
     initialized = true;
-    void openStory(storyId ?? '1', { storyId: storyId ?? '1', ...position });
+    void reportPosition(openStory(storyId ?? '1', { storyId: storyId ?? '1', ...position }), via);
   } catch (cause) {
     routeError.value = cause instanceof Error ? cause.message : 'La frise demandée est invalide.';
+    track('timeline_load_failed', { reason: 'invalid_link', via });
   }
 }, { immediate: true });
 
