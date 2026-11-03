@@ -28,6 +28,7 @@ Univers moderne (1)
                ├─ Grandes découvertes et empires coloniaux (34)
                ├─ L'âge des révolutions (27)
                ├─ Régimes politiques en France depuis l'Empire (35)
+               │  └─ Napoléon et le Premier Empire (36)
                ├─ Révolutions industrielles et énergie (25)
                ├─ Conquête spatiale (14)
                └─ Guerres modernes (4)
@@ -38,15 +39,15 @@ Univers moderne (1)
 Grandes périodes de l'histoire européenne (24), racine indépendante
 ```
 
-Points d'entrée supplémentaires : Âges des métaux → Mésopotamie (période d'Uruk), Histoire du climat → Révolutions industrielles (réchauffement actuel), Révolutions industrielles → L'âge des révolutions (première révolution industrielle), Empire romain → Empire byzantin (Bas-Empire romain), Les cinq grandes extinctions → Le temps des dinosaures (Mésozoïque), Empire byzantin → Les croisades (événement « Sac de Constantinople »), Moyen Âge et Renaissance → Grandes découvertes (événement « Arrivée de Colomb »), L'âge des révolutions → Grandes découvertes (événement « Première abolition de l'esclavage »), L'âge des révolutions → Régimes politiques (Premier Empire), Seconde Guerre mondiale → Régimes politiques (événement « Armistice du 22 juin 1940 »).
+Points d'entrée supplémentaires : Âges des métaux → Mésopotamie (période d'Uruk), Histoire du climat → Révolutions industrielles (réchauffement actuel), Révolutions industrielles → L'âge des révolutions (première révolution industrielle), Empire romain → Empire byzantin (Bas-Empire romain), Les cinq grandes extinctions → Le temps des dinosaures (Mésozoïque), Empire byzantin → Les croisades (événement « Sac de Constantinople »), Moyen Âge et Renaissance → Grandes découvertes (événement « Arrivée de Colomb »), L'âge des révolutions → Grandes découvertes (événement « Première abolition de l'esclavage »), L'âge des révolutions → Régimes politiques et → Napoléon et le Premier Empire (Premier Empire), Seconde Guerre mondiale → Régimes politiques (événement « Armistice du 22 juin 1940 »).
 
 ## Prochaines frises demandées (3 novembre 2026)
 
-Ordre convenu : la sous-frise Empire, puis esclavage, aviation et automobile. La frise des régimes politiques (35) est faite.
+Ordre convenu : esclavage, aviation et automobile. Les régimes politiques (35) et la sous-frise « Napoléon et le Premier Empire » (36) sont faits ; une sous-frise Second Empire reste possible.
 
 | Frise | Parent / ancre | Déjà en base | À ajouter |
 | --- | --- | --- | --- |
-| **L'Empire** (sous-frise) | Régimes politiques (35), ancrée sur « Premier Empire » | Premier Empire, Code civil, sacre, Waterloo, première abdication, Cent-Jours | Consulat, campagnes (Austerlitz, Iéna, Espagne, Russie), Sainte-Hélène. À préciser : Premier Empire seul, ou aussi une sous-frise Second Empire |
+| **Le Second Empire** (sous-frise, facultative) | Régimes politiques (35), ancrée sur « Second Empire » | Second Empire, Empire autoritaire, Empire libéral, coup d'État de 1851, Sedan | Haussmann, expositions universelles, guerre de Crimée, expédition du Mexique, guerre de 1870 |
 | **L'esclavage** | Genre Homo (5) ; point d'entrée depuis Grandes découvertes (34) par la traite atlantique | Traite atlantique, Code noir, abolitions de 1794, 1807 et 1848 | Esclavage antique, traites orientale et transsaharienne, abolitions de 1833, 1865 et 1888, convention de 1926, Déclaration universelle de 1948, Mauritanie 1981. Plus large que la frise 34 pour ne pas la dupliquer |
 | **L'aviation** | Révolutions industrielles (25) ; points d'entrée vers Conquête spatiale (14) et les deux guerres mondiales | — | Montgolfier, Ader, frères Wright, Blériot, Lindbergh, avion à réaction, Concorde, A380 |
 | **L'automobile** | Révolutions industrielles (25) | Automobile de Benz, chaîne de Ford | Cugnot, moteur à explosion, Michelin, Coccinelle, 2 CV, chocs pétroliers, voiture électrique |
@@ -131,6 +132,7 @@ Elles réutilisent beaucoup de fiches existantes et se relient aux frises chrono
 - **La guerre de Cent Ans (33)** : phases édouardienne, caroline, longue trêve et lancastrienne sur une ligne, guerre civile Armagnacs-Bourguignons sur une seconde ; 6 périodes, 13 événements.
 - **Grandes découvertes et empires coloniaux (34)** : quatre racines (Grandes découvertes, Conquista, Traite atlantique, Compagnies des Indes) ; 12 périodes, 17 événements. Pistes : Nouvelle-France et empire portugais en périodes, Compagnie française des Indes après 1769.
 - **Régimes politiques en France depuis l'Empire (35)** : les dix régimes sur une ligne (Premier Empire → Cinquième République), règnes de la Restauration, deux phases du Second Empire, huit présidences de la Ve ; 22 périodes, 28 événements. Elle remplace l'ancienne piste « Monarchie de Juillet à la Belle Époque ». Les fiches partagées « Premier Empire » (jusqu'au 22 juin 1815) et « Restauration » (dès le 8 juillet 1815) sont gardées telles quelles : la Première Restauration et les Cent-Jours sont des événements.
+- **Napoléon et le Premier Empire (36)**, sous-frise de 35 ancrée sur « Premier Empire » : Consulat puis Empire sur une ligne, guerre d'Espagne sur une seconde ; dans l'Empire, coalitions, campagnes de Russie, d'Allemagne et de France, exil à l'île d'Elbe et Cent-Jours sur une ligne ; 11 périodes, 19 événements.
 
 ## Frises révisées
 
