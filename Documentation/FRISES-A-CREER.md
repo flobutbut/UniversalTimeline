@@ -1,6 +1,6 @@
 # Frises à créer — feuille de route
 
-État au 2 novembre 2026. Ce document recense les frises qu'il serait utile d'ajouter, avec leur place dans l'arbre et ce que la base contient déjà pour les construire. Les règles de fabrication sont dans [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md).
+État au 3 novembre 2026. Ce document recense les frises qu'il serait utile d'ajouter, avec leur place dans l'arbre et ce que la base contient déjà pour les construire. Les règles de fabrication sont dans [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md).
 
 ## Arbre actuel
 
@@ -109,3 +109,8 @@ Elles réutilisent beaucoup de fiches existantes et se relient aux frises chrono
 - **Dates négatives ISO** (`-9600-01-01…`) : environ un an de décalage à l'affichage dans les anciennes fiches (voir la règle des dates dans [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md)). Une migration au cas par cas est nécessaire : certaines fiches ont déjà été décalées à la main (Rome).
 - **Libellés incohérents avec l'identifiant** : `PER_MILKYWAY` (« Terre »), `PER_EARTH` (« Empire romain »), `EVT_DINOSAURS` (« Premiers reptiles », 318 Ma : le libellé et la date sont justes, seul l'identifiant trompe ; les premiers dinosaures sont l'événement Eoraptor de la frise 29).
 - **Frise Époque moderne** ancrée sur la période « Moyen Âge » ; la frise « Invasion de l'Ukraine » n'a aucun événement.
+- **Années stockées périmées** : les `*_years_bp` des anciennes fiches ont été calculés à une autre date (environ 0,6 an d'écart pour le XXe siècle). La timeline relit les dates, mais la miniature des cartes (`StoryTimeline.vue`, via `resolveYearsBeforePresent`) utilise les nombres stockés. Corrigé pour la Seconde Guerre mondiale ; à recalculer ailleurs, ou à traiter dans la miniature avec `comparableYearsBeforePresent`.
+
+## Frises révisées
+
+- **Seconde Guerre mondiale (9)**, 3 novembre 2026 : la guerre sino-japonaise (1937) n'est plus rangée dans la guerre mondiale (1939) ; trois racines (« Montée vers la guerre », la guerre mondiale, la guerre sino-japonaise) ; six fronts (Ouest, Europe du Nord, Méditerranée, Asie-Pacifique, Est, Shoah) avec leurs batailles ; 36 périodes et 36 événements. Apostrophes doublées corrigées dans 18 événements de toutes les frises.

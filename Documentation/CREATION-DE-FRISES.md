@@ -51,6 +51,7 @@ Il n'y a **qu'un seul moteur de dates** : `server/src/shared/temporal.ts`. Ne ja
 - **Choisir la précision réelle de la source.** Pas de jour inventé quand seule l'année est connue.
 - **`start_years_bp`, `end_years_bp` et `date_years_bp`** se calculent avec `yearsBeforePresent()`, arrondis à 3 décimales pour éviter les artefacts du type `66400000.00000001`.
 - **Le début doit être strictement antérieur à la fin.**
+- **Les années stockées dépendent de la date du calcul.** Pour une frise au jour près, recalculer les `*_years_bp` des anciennes fiches réutilisées en même temps que les nouvelles, sinon une sous-période semble déborder de son parent de quelques mois.
 - **Mélanger une date calendaire et une date géologique crée un petit écart.** Exemple : le Cryogénien stocké en ISO et une glaciation en `M635`, soit environ 2 000 ans. Dans les contrôles d'imbrication, tolérer environ 1e-5 de l'âge du parent.
 
 ## 5. Identifiants Wikidata
