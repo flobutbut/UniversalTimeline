@@ -21,8 +21,11 @@ Univers moderne (1)
          ├─ Mésopotamie (26)
          └─ Moyen Âge (15)
             ├─ Empire byzantin (28)
+            ├─ Les croisades (32)
+            ├─ La guerre de Cent Ans (33)
             ├─ Renaissance (17)
             └─ Époque moderne (16)
+               ├─ Grandes découvertes et empires coloniaux (34)
                ├─ L'âge des révolutions (27)
                ├─ Révolutions industrielles et énergie (25)
                ├─ Conquête spatiale (14)
@@ -34,15 +37,13 @@ Univers moderne (1)
 Grandes périodes de l'histoire européenne (24), racine indépendante
 ```
 
-Points d'entrée supplémentaires : Âges des métaux → Mésopotamie (période d'Uruk), Histoire du climat → Révolutions industrielles (réchauffement actuel), Révolutions industrielles → L'âge des révolutions (première révolution industrielle), Empire romain → Empire byzantin (Bas-Empire romain), Les cinq grandes extinctions → Le temps des dinosaures (Mésozoïque).
+Points d'entrée supplémentaires : Âges des métaux → Mésopotamie (période d'Uruk), Histoire du climat → Révolutions industrielles (réchauffement actuel), Révolutions industrielles → L'âge des révolutions (première révolution industrielle), Empire romain → Empire byzantin (Bas-Empire romain), Les cinq grandes extinctions → Le temps des dinosaures (Mésozoïque), Empire byzantin → Les croisades (événement « Sac de Constantinople »), Moyen Âge et Renaissance → Grandes découvertes (événement « Arrivée de Colomb »), L'âge des révolutions → Grandes découvertes (événement « Première abolition de l'esclavage »).
 
 ## Priorité 1 — combler les trous de la chaîne chronologique
 
 | Frise | Parent / ancre | Déjà en base | À ajouter |
 | --- | --- | --- | --- |
 | **Monde islamique médiéval** (622–1517) | Moyen Âge (15) ; point d'entrée depuis Empire byzantin (28) | Début de l'Hégire, bataille du Yarmouk, siège arabe de Constantinople, bataille de Manzikert, chute de Constantinople | Califats rachidun, omeyyade, abbasside ; al-Andalus ; Maison de la sagesse ; empires seldjoukide et ottoman |
-| **Croisades et Guerre de Cent Ans** | Moyen Âge (15) | Peste noire, Magna Carta | Appel de Clermont, prise de Jérusalem, croisades successives ; Crécy, Azincourt, Jeanne d'Arc |
-| **Grandes découvertes et empires coloniaux** (1415–1800) | Époque moderne (16) | Arrivée de Colomb en Amérique | Vasco de Gama, Magellan, Tordesillas, conquêtes aztèque et inca, traite atlantique, Compagnies des Indes |
 | **Réformes et guerres de religion** (1517–1648) | Époque moderne (16) ou Renaissance (17) | Imprimerie à caractères mobiles | Luther, Calvin, concile de Trente, Saint-Barthélemy, édit de Nantes, guerre de Trente Ans, traités de Westphalie |
 | **Les Lumières** (1680–1789) | Époque moderne (16) ; point d'entrée vers L'âge des révolutions | — | Newton (Principia), Encyclopédie, Voltaire, Rousseau, Kant, despotes éclairés |
 | **Décolonisation** (1945–1975) | Guerre froide (12) ou Époque moderne (16) | Guerre froide | Indépendance de l'Inde, guerres d'Indochine et d'Algérie, conférence de Bandung, année de l'Afrique (1960) |
@@ -110,6 +111,12 @@ Elles réutilisent beaucoup de fiches existantes et se relient aux frises chrono
 - **Libellés incohérents avec l'identifiant** : `PER_MILKYWAY` (« Terre »), `PER_EARTH` (« Empire romain »), `EVT_DINOSAURS` (« Premiers reptiles », 318 Ma : le libellé et la date sont justes, seul l'identifiant trompe ; les premiers dinosaures sont l'événement Eoraptor de la frise 29).
 - **Frise Époque moderne** ancrée sur la période « Moyen Âge » ; la frise « Invasion de l'Ukraine » n'a aucun événement.
 - **Années stockées périmées** : les `*_years_bp` des anciennes fiches ont été calculés à une autre date (environ 0,6 an d'écart pour le XXe siècle). La timeline relit les dates, mais la miniature des cartes (`StoryTimeline.vue`, via `resolveYearsBeforePresent`) utilise les nombres stockés. Corrigé pour la Seconde Guerre mondiale ; à recalculer ailleurs, ou à traiter dans la miniature avec `comparableYearsBeforePresent`.
+
+## Frises créées récemment
+
+- **Les croisades (32)**, 3 novembre 2026 : les huit croisades sur une ligne, les États latins d'Orient sur une seconde ; 10 périodes, 9 événements.
+- **La guerre de Cent Ans (33)** : phases édouardienne, caroline, longue trêve et lancastrienne sur une ligne, guerre civile Armagnacs-Bourguignons sur une seconde ; 6 périodes, 13 événements.
+- **Grandes découvertes et empires coloniaux (34)** : quatre racines (Grandes découvertes, Conquista, Traite atlantique, Compagnies des Indes) ; 12 périodes, 17 événements. Pistes : Nouvelle-France et empire portugais en périodes, Compagnie française des Indes après 1769.
 
 ## Frises révisées
 
