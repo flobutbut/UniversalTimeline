@@ -24,3 +24,9 @@ it('selection highlights neighbours without rebuilding or moving simulation node
   expect(view.findAll('[data-node-id]').map(n=>n.attributes('transform'))).toEqual(positions);
   expect(view.get('[data-node-id=\'["event","unused"]\']').attributes('opacity')).toBe('0.13');
 });
+
+it('requests reduction instead of deselection when Escape is used on the expanded graph',async()=>{
+  start();await view.setProps({expanded:true,selected:graphKey('event','e')});
+  await view.get('.relation-canvas__plot > svg').trigger('keydown',{key:'Escape'});
+  expect(view.emitted('toggleExpand')).toHaveLength(1);expect(view.emitted('deselect')).toBeUndefined();
+});
