@@ -3,7 +3,7 @@ import type { Tab } from '@/types/global';
 export type NavigationView = 'timeline' | 'database' | 'graph' | 'events' | 'admin';
 
 export const navigationTabs: Tab<NavigationView>[] = [
-  { label: 'Timeline', value: 'timeline', icon: 'mdi:timeline' },
+  { label: 'Exploration', value: 'timeline', icon: 'mdi:timeline' },
   { label: 'Frises', value: 'database', icon: 'mdi:book-open-page-variant' },
   { label: 'Périodes', value: 'graph', icon: 'mdi:chart-tree' },
   { label: 'Événements', value: 'events', icon: 'mdi:calendar-clock' },

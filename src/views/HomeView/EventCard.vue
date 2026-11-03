@@ -10,10 +10,12 @@
       'align-end': align === 'end',
     }"
     :style="undated ? undefined : cardStyle"
+    @mouseenter="setHovered(true)"
+    @mouseleave="setHovered(false)"
     @focusin="setFocused(true)"
     @focusout="setFocused(false)"
   >
-    <button :class="undated ? 'event-undated-trigger' : 'event-dot'" type="button" :aria-label="`Afficher l’événement ${displayLabel}`" :aria-pressed="isSelected" @click.stop="$emit('click', $event)" @mouseenter="setHovered(true)" @mouseleave="setHovered(false)">{{ undated ? displayLabel : '' }}</button>
+    <button :class="undated ? 'event-undated-trigger' : 'event-dot'" type="button" :aria-label="`Afficher l’événement ${displayLabel}`" :aria-pressed="isSelected" @click.stop="$emit('click', $event)">{{ undated ? displayLabel : '' }}</button>
 
     <!-- Ligne toujours ancrée sur le dot, indépendante du décalage du tooltip -->
     <div class="event-vertical-line"></div>
@@ -201,6 +203,7 @@ const displayDate = computed(() => {
 }
 
 .event-info-box {
+  --event-tooltip-anchor: 50%;
   position: absolute;
   top: calc(var(--spacing-2xl) + var(--spacing-md) / 2);
   left: 0;
@@ -225,20 +228,44 @@ const displayDate = computed(() => {
 }
 
 .align-start .event-info-box {
+  --event-tooltip-anchor: 6px;
   transform: translateX(-6px);
 }
 
 .align-end .event-info-box {
+  --event-tooltip-anchor: calc(100% - 6px);
   transform: translateX(calc(-100% + 6px));
 }
 
-.event-dot:hover ~ .event-vertical-line,
-.event-dot:hover ~ .event-info-box,
+.event-card:hover .event-vertical-line,
+.event-card:hover .event-info-box,
 .event-card:focus-within .event-vertical-line,
 .event-card:focus-within .event-info-box {
   opacity: 1;
   visibility: visible;
   translate: 0 0;
+}
+
+.event-card:hover .event-info-box,
+.event-card:focus-within .event-info-box,
+.is-default-open .event-info-box {
+  pointer-events: auto;
+}
+
+/* Passage du point vers toute la bulle, sans recouvrir les points voisins sur l'axe.
+   Le sommet suit l'ancrage de la bulle, y compris aux extrémités de la frise. */
+.event-card:not(.event-card--undated) .event-info-box::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  bottom: 100%;
+  height: calc(var(--spacing-2xl) + var(--spacing-md) / 2 + 1px - (var(--font-size-base) - var(--spacing-xs) / 2) / 2);
+  clip-path: polygon(
+    calc(var(--event-tooltip-anchor) - var(--spacing-xs) / 2) 0,
+    calc(var(--event-tooltip-anchor) + var(--spacing-xs) / 2) 0,
+    100% 100%, 0 100%
+  );
 }
 
 .is-selected .event-vertical-line,

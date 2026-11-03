@@ -151,16 +151,16 @@ it('closes the pinned tooltip next to a hovered event, and reopens it afterwards
   await settle();
   const open = () => view.findAllComponents(EventCard).filter(card => card.classes('is-default-open')).map(card => card.props('event').id);
   expect(open()).toEqual(['a', 'c']);
-  await view.findAllComponents(EventCard)[1].get('.event-dot').trigger('mouseenter');
+  await view.findAllComponents(EventCard)[1].trigger('mouseenter');
   expect(open()).toEqual(['c']);
-  await view.findAllComponents(EventCard)[1].get('.event-dot').trigger('mouseleave');
+  await view.findAllComponents(EventCard)[1].trigger('mouseleave');
   // Réouverture différée : passer à un point voisin ne fait pas clignoter le tooltip figé.
   await vi.advanceTimersByTimeAsync(100);
   expect(open()).toEqual(['c']);
-  await view.findAllComponents(EventCard)[0].get('.event-dot').trigger('mouseenter');
+  await view.findAllComponents(EventCard)[0].trigger('mouseenter');
   await vi.advanceTimersByTimeAsync(300);
   expect(open()).toEqual(['a', 'c']);
-  await view.findAllComponents(EventCard)[0].get('.event-dot').trigger('mouseleave');
+  await view.findAllComponents(EventCard)[0].trigger('mouseleave');
   await vi.advanceTimersByTimeAsync(200);
   expect(open()).toEqual(['a', 'c']);
 });

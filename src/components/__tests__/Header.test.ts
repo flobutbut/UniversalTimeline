@@ -65,7 +65,7 @@ it('opens signup from the header and preserves the original destination when swi
 });
 it.each([false, true])('restores the appropriate workspace navigation for a verified account (admin: %s)', async isAdmin => {
   const auth = await start({ account: { id: 'alice', isAdmin } });
-  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Timeline', 'Frises', ...(isAdmin ? ['Périodes', 'Événements', 'Administration'] : [])]);
+  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Exploration', 'Frises', ...(isAdmin ? ['Périodes', 'Événements', 'Administration'] : [])]);
   expect(view.find('.header-account-actions').exists()).toBe(false);
   const trigger = view.get('button[aria-haspopup="menu"]');
   expect(trigger.attributes('aria-label')).toBe('Compte : Mon compte'); expect(view.text()).not.toContain('Se déconnecter');
@@ -106,7 +106,7 @@ it('collapses navigation when space runs out, keeps navigation usable and expand
   expect(view.get('.header-nav-wrap').attributes('inert')).toBeDefined();
   expect(view.get('.header-nav-wrap').attributes('aria-hidden')).toBe('true');
   expect(view.get('[role="combobox"]').attributes('aria-label')).toBe('Navigation principale');
-  expect(view.get('[role="combobox"]').text()).toBe('Timeline');
+  expect(view.get('[role="combobox"]').text()).toBe('Exploration');
   await view.get('[role="combobox"]').trigger('keydown', { key: 'ArrowDown' });
   await view.get('[role="combobox"]').trigger('keydown', { key: 'ArrowDown' });
   await view.get('[role="combobox"]').trigger('keydown', { key: 'ArrowDown' });
