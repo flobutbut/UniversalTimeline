@@ -9,12 +9,12 @@ Implémentation du 3 novembre 2026, corrigée à la demande de l’utilisateur :
 - Les cercles se distinguent par leur taille et les tokens `--color-data-frise`, `--color-data-period`, `--color-data-event`.
 - D3 anime la simulation de forces, qui se stabilise naturellement. Glisser un cercle fait réagir le réseau ; zoom et déplacement du fond permettent de l’explorer. Les boutons Pause/Reprendre, Relancer les forces et Tout cadrer restent disponibles.
 - Les libellés des frises sont visibles ; ceux des autres objets apparaissent à la sélection ou avec le zoom. « Tous les libellés » les affiche tous. Le survol donne le titre complet.
-- Sélectionner un objet souligne ses voisins et charge ses détails sans retirer ni reconstruire les autres nœuds. Cliquer dans le vide ou appuyer sur Échap désélectionne sans modifier le réseau.
-- À la sélection, « Ouvrir la fiche dans Frises » devient disponible près de la recherche, y compris en vue agrandie. Une frise ouvre son panneau dans `/database?story=…` ; une période ou un événement ouvre sa fiche canonique dans le même onglet, via `period=…` ou `event=…`. Les fiches partagées et inutilisées n’exigent aucun choix de frise hôte. L’ouverture réutilise les formulaires et les gardes de chargement existants, sans écriture automatique.
+- Sélectionner un objet souligne ses voisins et affiche une infobulle ancrée à son cercle, sans ajout dans le flux de la page ni reconstruction des nœuds. Elle suit la simulation, le zoom et les déplacements, et reste bornée au graphe. Cliquer dans le vide, fermer l’infobulle ou appuyer sur Échap désélectionne.
+- L’infobulle contient le nom, le type et « Ouvrir », qui ouvre la fiche dans l’onglet Frises (`/database?story=…`, `period=…` ou `event=…`). Pour les périodes et événements sans appartenance à une frise, l’action est désactivée et l’état orphelin est indiqué. Les frises parentes sont listées avec des liens propres vers leurs fiches et, pour une sous-période, le contexte de parenté connu. La liste suit les filtres de frises, même si le type Frises est masqué. Pour une frise, seuls les rattachements historiques définissent les parents, pas les passerelles. Aucun panneau de sélection n’est ajouté au-dessus ni au-dessous du graphe.
 - Les trois types d’objets sont activés par défaut. Les interrupteurs Frises, Périodes et Événements permettent de masquer un type. Les compteurs sont placés directement sous le titre. La recherche, large de 248 px, se place à l’intérieur du graphe en haut à gauche. Tous les interrupteurs, y compris « Tous les libellés », restent regroupés au-dessus du graphe et se replient sur petit écran. La recherche propose dès la saisie des suggestions en overlay sous le champ, sans déplacer la page ni filtrer implicitement le graphe. Les accents sont ignorés et les titres commençant par la saisie sont prioritaires. Les flèches et Entrée sélectionnent une suggestion ; Échap, Tab ou un clic extérieur ferment le panneau ; la fonction de liste complète des objets a été retirée.
 - La préférence de réduction des mouvements met la simulation en pause initialement. Les déplacements manuels restent possibles.
 
-L’ancienne exploration par dépliage de frise et le moteur Cytoscape ont été retirés de l’interface. Le détail d’une frise conserve une liste de ses périodes et événements, mais cette liste ne commande plus la présence des objets dans le réseau.
+L’ancienne exploration par dépliage de frise et le moteur Cytoscape ont été retirés de l’interface. La sélection exploite directement l’instantané du réseau et ne déclenche aucune lecture de détail supplémentaire.
 
 ## Filtres d’exploration
 
@@ -29,7 +29,7 @@ Les compteurs, les résultats de recherche, les usages dans le détail d’une f
 
 ## Vue agrandie
 
-Le bouton « Agrandir le graphe », à droite des commandes du graphe, étend l’espace de travail à la fenêtre du navigateur sans utiliser l’API de plein écran. La recherche, les filtres, les commandes et le graphe restent visibles ; le titre, les métadonnées, la navigation et le panneau de détail sont masqués. L’overlay de suggestions reste disponible pour sélectionner un objet. Un premier Échap ferme les suggestions ; un second réduit le graphe.
+Le bouton « Agrandir le graphe », à droite des commandes du graphe, étend l’espace de travail à la fenêtre du navigateur sans utiliser l’API de plein écran. La recherche, les filtres, les commandes et le graphe restent visibles ; le titre, les métadonnées, la navigation et le panneau de détail sont masqués. L’overlay de suggestions reste disponible pour sélectionner un objet. Échap ferme d’abord les suggestions, puis l’infobulle de sélection si elle est ouverte, avant de réduire le graphe.
 
 Le composant D3 reste monté : les filtres et la sélection sont conservés. Le ResizeObserver adapte le cadrage à l’espace disponible. Le bouton « Réduire le graphe » ou Échap ramène à la vue normale et restaure le focus. L’isolation du fond et la gestion du clavier réutilisent `useDialog`. Les commandes restent accessibles si les filtres ne laissent aucun objet. Le démontage ou un changement d’identité libère l’isolation.
 
@@ -54,7 +54,7 @@ Aucune relation événement → période n’est inventée à partir des dates. 
 
 La fonction est `STABLE SECURITY DEFINER`, avec `search_path=''`, schéma non exposé et exécution réservée à `authenticated`. Elle appelle `require_admin()` : le claim et le rôle stocké doivent tous deux être admin. Le contrôle API reste aussi actif. Les réponses restent `no-store`. Un changement d’identité annule les lectures et purge les données de la vue.
 
-Les détails continuent d’utiliser les endpoints admin existants pour les frises et les fiches. Ils sont annulables et protégés contre les réponses obsolètes. Les liens vers la timeline sont proposés pour les frises publiques ; afficher un détail privé dans l’administration ne modifie aucun droit sur les routes ordinaires.
+Les informations de l’infobulle proviennent de l’instantané déjà chargé. Ouvrir la fiche réutilise les gardes de lecture des vues Frises existantes, sans écriture automatique ni modification des accès ordinaires.
 
 Les migrations appliquées au projet actif sont :
 
@@ -69,14 +69,15 @@ La baseline inclut les mêmes fonctions. Aucune fiche, association ou règle d�
 - `RelationGraphCanvas.vue` utilise D3 (`forceSimulation`, liens, répulsion, collision et forces de rappel), avec zoom et drag. D3 reçoit des copies : ses mutations ne touchent ni le transport ni la projection. La simulation est arrêtée au démontage.
 - `useAdminRelations.ts` porte les lectures et leurs gardes d’annulation.
 - `RelationGraphSearch.vue` compose SearchInput, PopoverSurface, ItemSummary et useSuggestionNavigation pour les suggestions locales des objets affichés, avec focus conservé et hauteur bornée au graphe.
-- `AdminRelations.vue` assemble le réseau, les contrôles et les détails.
+- `RelationGraphSelection.vue` réutilise PopoverSurface, Button et Tag pour la sélection et les parents, avec action désactivée pour les objets orphelins.
+- `AdminRelations.vue` assemble le réseau, les contrôles et les infobulles.
 
 Réutilisation : SidebarLayout, SearchInput, Switch, Button, Tag, ItemSummary et FeedbackState ; surfaces, couleurs, typographie et espacements du design system. Le moteur D3 est chargé uniquement avec la section Relations.
 
 ## Validation
 
 - `yarn verify` : tests isolés, design system, configuration, symboles inutilisés et builds réussis.
-- Filtres : distinction hiérarchie/passerelles, partage recompté entre frises finales, usages distincts, contextes exclus, absence de résultat, retour au réseau complet, sélection masquée et détails cohérents. Les quatre fichiers de tests de projection, d’interface, de rendu et d’autocomplétion totalisent 31 tests réussis, incluant la vue agrandie, la sélection conservée, Échap, le retour du focus et le nettoyage de l’isolation.
+- Filtres : distinction hiérarchie/passerelles, partage recompté entre frises finales, usages distincts, contextes exclus, absence de résultat, retour au réseau complet, sélection masquée et détails cohérents. Les quatre fichiers de tests de projection, d’interface, de rendu et d’autocomplétion totalisent 34 tests réussis, incluant la vue agrandie, la sélection conservée, Échap, le retour du focus et le nettoyage de l’isolation.
 - 15 tests admin PostgreSQL 17 sur cluster jetable : refus anonyme/utilisateur/éditeur/claim périmé, données privées, objets partagés et inutilisés, importance locale et migrations incrémentales.
 - 17 tests de baseline PostgreSQL 17 réussis sur une deuxième base vierge ; aucun changement des accès ordinaires. Repli contrôlé à 390 px, sans débordement et avec les 652 objets conservés.
 - Tests du réseau : tous les objets au premier rendu, une identité par fiche partagée, liens contextuels, filtres explicites sans arête orpheline ; sélection et désélection sans modification du graphe ; réponses obsolètes et purge des identités.
