@@ -121,10 +121,18 @@ Elles réutilisent beaucoup de fiches existantes et se relient aux frises chrono
 
 ## Corrections de données à prévoir
 
-- **Dates négatives ISO** (`-9600-01-01…`) : environ un an de décalage à l'affichage dans les anciennes fiches (voir la règle des dates dans [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md)). Une migration au cas par cas est nécessaire : certaines fiches ont déjà été décalées à la main (Rome).
-- **Libellés incohérents avec l'identifiant** : `PER_MILKYWAY` (« Terre »), `PER_EARTH` (« Empire romain »), `EVT_DINOSAURS` (« Premiers reptiles », 318 Ma : le libellé et la date sont justes, seul l'identifiant trompe ; les premiers dinosaures sont l'événement Eoraptor de la frise 29).
-- **Frise Époque moderne** ancrée sur la période « Moyen Âge » ; la frise « Invasion de l'Ukraine » n'a aucun événement.
-- **Années stockées périmées** : les `*_years_bp` des anciennes fiches ont été calculés à une autre date (environ 0,6 an d'écart pour le XXe siècle). La timeline relit les dates, mais la miniature des cartes (`StoryTimeline.vue`, via `resolveYearsBeforePresent`) utilise les nombres stockés. Corrigé pour la Seconde Guerre mondiale ; à recalculer ailleurs, ou à traiter dans la miniature avec `comparableYearsBeforePresent`.
+Audit du 3 novembre 2026 : ancres, rattachements et hiérarchie des frises sont cohérents. Restent à décider :
+
+- **Dates négatives ISO** (`-9600-01-01…`) : 60 dates, environ un an de décalage et un « 1 janvier » parasite à l'affichage (Marathon en 491, Hammurabi au « 1 janvier 1755 av. J.-C. »). Revue au cas par cas : certaines fiches ont déjà été décalées à la main (Rome, César, Actium).
+- **Deux formats géologiques mélangés** : les anciennes fiches en ISO (`-201400000-01-01…`) et les nouvelles en `M201.4` diffèrent de 2 026 ans ; 4 sous-périodes de la frise 29 dépassent ainsi leur parent de 0,003 %, sans effet visible. Correction de fond : convertir les fiches géologiques ISO au format `G`/`M`/`K`.
+- **Frises 30 « Révolution française » et 31 « Révolution industrielle »** (autre session) : publiques sans parent, ancre ni catégorie. La 30 a 10 racines qui se chevauchent, des libellés bruts de Wikidata (dont un en anglais) et une période « Révolution française » au 14 juillet qui double celle de la frise 27 (5 mai) ; la 31 n'a qu'une période et aucun événement.
+- **Points d'entrée Genre Homo → Mésopotamie, Révolutions industrielles, L'âge des révolutions** (par *Homo sapiens*) : ils sautent plusieurs niveaux de l'arbre.
+- **Structures en double** : la frise 19 contient encore toutes les périodes de 20 et 21 ; les frises 2 et 11 partagent tout l'arbre géologique.
+- **Frise 16** : « Époque moderne » contient aussi l'histoire contemporaine.
+- **Frises maigres** : Ukraine (aucun événement), Guerre froide (1 période), Big Bang (2 événements). Les six ères primordiales de la frise 3 ont un début égal à leur fin (durées inférieures à quelques minutes) ; gardées ainsi.
+- **Libellés incohérents avec l'identifiant** : `PER_MILKYWAY` (« Terre »), `PER_EARTH` (« Empire romain »), `EVT_DINOSAURS` (« Premiers reptiles », 318 Ma : le libellé et la date sont justes, seul l'identifiant trompe).
+
+Corrigé lors de l'audit : années stockées recalculées (68 périodes, 21 événements) ; Hadéen aligné sur la formation de la Terre ; Antiquité égyptienne ramenée à 3150–30 av. J.-C., Égypte prédynastique retirée de la frise 10 ; limite Pléistocène/Holocène à 9700 av. J.-C. et Dryas récent rangé dans le Pléistocène (frise 23) ; guerre arméno-azerbaïdjanaise retirée de la Première Guerre mondiale ; « Guerre civile espagnole » et « Guerre d'indépendance espagnole » distinguées ; descriptions des frises 16, 17 et 18 ; abolitions de 1833, 1848, 1865 et 1888 ajoutées à la frise 34.
 
 ## Frises créées récemment
 
