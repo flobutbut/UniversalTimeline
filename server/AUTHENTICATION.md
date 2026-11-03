@@ -112,3 +112,19 @@ L’API refuse un démarrage de production sans AUTH_ENABLED=true, même si le f
 La passe vierge Docker exécute 798 tests Vitest, quatre tests de configuration TLS, les builds et 85 tests PostgreSQL 17 : 11 baseline, 3 restauration fictive, 19 accès/attributions, 4 privilèges, 8 hiérarchie, 10 suppressions et 30 handlers/écritures atomiques. Les rôles et auth.users y sont une doublure minimale isolée ; aucun compte Supabase réel ni e-mail n’est créé. Les migrations historiques sont testées séparément de la baseline finale.
 
 Le domaine de production n’est pas encore défini. La protection des mots de passe compromis est vérifiée active et les URL locales sont finalisées ; définir Site URL et la redirection exacte /login du futur domaine avant exposition publique. Les résultats locaux n’attestent pas une confirmation par e-mail sur ce futur domaine. Le travail UI/UX qui suit ne doit pas supprimer ces contrôles d’accès.
+
+## Rôle éditeur — implémentation du 3 novembre 2026
+
+Le terme **Éditeur** distingue le droit de corriger les frises publiques des autres comptes de la contribution ordinaire : tout utilisateur peut déjà créer et publier ses propres frises.
+
+- **Compte personnel** : crée et modifie ses propres frises, publiques ou privées.
+- **Éditeur** (`app_metadata.role = editor`) : mêmes droits, plus l’édition du contenu, des catégories, des associations, des placements de périodes, des ancres et des parcours des frises publiques. Les deux frises d’une relation doivent être modifiables. Les contraintes de parenté entre propriétaires sont conservées.
+- **Administrateur** : bénéficie aussi de l’édition publique et peut accorder/retirer le rôle éditeur depuis la fiche d’un autre compte confirmé et actif. Les changements sont journalisés. L’éditeur n’accède pas à l’administration, au Design system ou aux pages d’administration du catalogue.
+
+La lecture des frises privées ne change pas. Pour une frise publique d’un autre compte, la suppression, la visibilité, le propriétaire, la signature, l’identité et la date de création sont protégés, y compris via la Data API. La création d’une frise dérivée avec parent historique reste réservée au propriétaire de la source. Les nouveaux droits ne changent pas la propriété des fiches du catalogue partagé.
+
+L’API vérifie le rôle depuis les métadonnées Auth vérifiées, puis le transmet à la transaction. `access_private.is_public_editor()` revérifie également le rôle stocké et la suspension, de sorte qu’un ancien JWT ou un rôle forgé ne suffit pas. Le frontend sépare `canEditStory` de `ownsStory`, et vide les données mises en cache lors d’un changement de rôle.
+
+**Déploiement** : la migration `20261103143455_public_story_editors.sql` est préparée, intégrée à la baseline et testée sur PostgreSQL 17 local. Elle n’est pas appliquée automatiquement à la base distante. Déployer d’abord l’API mise à jour (contrôle du propriétaire avant toute suppression des associations), puis appliquer la migration et déployer le frontend. Aucun compte existant n’est promu par la migration.
+
+Vérification : `server/test/publicEditors.postgres.mjs` couvre les handlers et la RLS après migration incrémentale : édition publique, refus d’accès privé, conservation de la propriété, suppression sans effet de bord, relations, révocation immédiate, suspension et attribution du rôle par un admin. Ces tests n’envoient aucun e-mail et n’utilisent que des comptes fictifs en base locale jetable.

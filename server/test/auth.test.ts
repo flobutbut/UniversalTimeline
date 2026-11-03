@@ -41,8 +41,8 @@ describe('request authentication', () => {
     expect(lifted.next).toHaveBeenCalledOnce();
   });
   it('uses verified app_metadata, never user-editable metadata, for admin access', async () => {
-    expect((await access('Bearer token', 'POST', { id: alice, user_metadata: { role: 'admin' } })).next.mock.results[0].value).toEqual({ userId: alice, isAdmin: false });
-    expect((await access('Bearer token', 'POST', { id: alice, app_metadata: { role: 'admin' } })).next.mock.results[0].value).toEqual({ userId: alice, isAdmin: true });
+    expect((await access('Bearer token', 'POST', { id: alice, user_metadata: { role: 'admin' } })).next.mock.results[0].value).toEqual({ userId: alice, isAdmin: false, isEditor: false });
+    expect((await access('Bearer token', 'POST', { id: alice, app_metadata: { role: 'admin' } })).next.mock.results[0].value).toEqual({ userId: alice, isAdmin: true, isEditor: false });
   });
   it('does not turn an Auth outage into an invalid session or expose its details', async () => {
     const res = response(); const next = vi.fn();
@@ -99,6 +99,15 @@ it('reports access mode publicly but exposes account identity only after verific
   expect(anonymous.status).toHaveBeenCalledWith(401);
   const verified = response(); verified.locals = { principal:{userId:alice,isAdmin:true} };
   route('/api/account')({},verified);
-  expect(verified.json).toHaveBeenCalledWith({id:alice,isAdmin:true});
+  expect(verified.json).toHaveBeenCalledWith({id:alice,isAdmin:true,isEditor:false});
   expect(verified.set).toHaveBeenCalledWith('Cache-Control','no-store');
+});
+
+
+it('propagates only the verified editor role to database claims', async () => {
+  expect((await access('Bearer token','PUT',{id:alice,user_metadata:{role:'editor'}})).next.mock.results[0].value.isEditor).toBe(false);
+  const principal=(await access('Bearer token','PUT',{id:alice,app_metadata:{role:'editor'}})).next.mock.results[0].value;
+  expect(principal).toEqual({userId:alice,isAdmin:false,isEditor:true});
+  const client={query:vi.fn().mockResolvedValue({rows:[]})};await applyPrincipal(client as any,principal);
+  expect(JSON.parse(client.query.mock.calls[1][1][0]).app_metadata).toEqual({role:'editor'});
 });

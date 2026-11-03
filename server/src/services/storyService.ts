@@ -11,6 +11,7 @@ import type { AssociationKind } from '../repositories/storyRelationsRepository.j
 import { changeEntryPoints } from './storyEntryPoints.js';
 import { changePresentation, lockWritableStory, setRelationLockTimeout } from '../repositories/storyRelationsRepository.js';
 import { creatorAuthor, editorAuthor } from './storyAuthor.js';
+import { principalContext } from '../auth/context.js';
 
 const db = { query };
 export async function listStories() {
@@ -49,7 +50,7 @@ export async function getStory(id: string) {
       presentations: context.presentations.map(view => ({ periodId: view.period_id, storyId: String(view.story_id), title: localized(view.title_fr, view.title_en) })),
     })),
     parentStories: (row.parent_stories ?? []).map(parent => ({
-      id: String(parent.id), title: localized(parent.title_fr, parent.title_en), ownerUserId: parent.owner_user_id,
+      id: String(parent.id), title: localized(parent.title_fr, parent.title_en), ownerUserId: parent.owner_user_id, isPublic: parent.is_public,
       anchors: parent.anchors.map(anchor => ({ type: anchor.type, id: anchor.id, label: localized(anchor.label_fr, anchor.label_en) })),
     })),
     relatedStories: row.related_stories.map(related => ({
@@ -77,7 +78,12 @@ export async function updateStory(id: string, data: StoryWrite) {
   return row;
 }
 export async function deleteStory(id: string) {
-  const row = await withTransaction(client => stories.deleteStory(client, id));
+  const row = await withTransaction(async client => {
+    const userId = principalContext.getStore()?.userId;
+    // Check ownership before deleting associations: an editor may edit these, but cannot delete the frise.
+    if (userId && !await stories.lockOwnedStory(client, id, userId)) return undefined;
+    return stories.deleteStory(client, id);
+  });
   if (!row) throw new NotFoundError('Frise non trouvée');
 }
 export function getSuggestions(storyId: string, periodIds: string[], eventIds: string[]) {

@@ -127,6 +127,18 @@ it('preserves shared boundaries and keeps an event at the same date aligned whil
   expect(parseFloat((view.get('.event-card').element as HTMLElement).style.left)).toBeCloseTo(boundary);
 });
 
+it('keeps a shorter parent aligned with the child and event at its start during expansion', async () => {
+  await view.setProps({ currentPeriod: { ...first, id: 'root', startDate: 'M99', endDate: 'NOW' } });
+  const parent = view.get('.period-card--parent').element as HTMLElement;
+  expect(parseFloat(parent.style.marginLeft)).toBeCloseTo(1);
+  expect(parseFloat(parent.style.width)).toBeCloseTo(99);
+  await card().trigger('focusin'); await settled();
+  const boundary = pct('first', '--period-left') + pct('first', '--period-width');
+  expect(parseFloat(parent.style.marginLeft)).toBeCloseTo(boundary);
+  expect(parseFloat(parent.style.width) + boundary).toBeCloseTo(100);
+  expect(parseFloat((view.get('.event-card').element as HTMLElement).style.left)).toBeCloseTo(boundary);
+});
+
 it('leaves an already readable period at its natural width', async () => {
   vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(400);
   await card('second').trigger('focusin'); await settled();

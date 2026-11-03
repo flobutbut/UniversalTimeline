@@ -28,6 +28,7 @@
             ref="parentBarRef"
             variant="parent"
             :period="props.currentPeriod"
+            :style="parentBarStyle"
             :is-selected="false"
             :aria-describedby="tooltipPeriod?.id === props.currentPeriod.id ? tooltipId : undefined"
             @back="goBack"
@@ -233,8 +234,14 @@ const { minimumPct, laneHeight, wrapContent } = useTimelinePeriodExpansion(
 );
 /** Borne de fin de la vue affichée à la place de « Période suivante » quand il n'y en a pas. */
 const currentPeriodEnd = computed(() => {
-  const end = props.currentPeriod?.endDate?.trim();
-  if (!end) return null;
+  const period = props.currentPeriod;
+  if (!period?.endDate?.trim()) return null;
+  const now = Date.now();
+  const latest = [period, ...props.periods].flatMap(candidate => {
+    const end = periodCoordinates(candidate, now).end;
+    return end !== null && candidate.endDate?.trim() ? [{ end, raw: candidate.endDate }] : [];
+  }).sort((a, b) => a.end - b.end)[0];
+  const end = latest?.raw ?? period.endDate;
   const label = formatTemporalBoundLabel(end);
   return label === "aujourd'hui" ? "Aujourd'hui" : `Fin : ${label}`;
 });
@@ -258,11 +265,15 @@ const periodFlip = usePeriodFlip(
 
 // ─── Tri et lanes ─────────────────────────────────────────────────────────────
 
-const periodRows = computed(() => props.periods.map(p => ({ p, ...periodCoordinates(p) })));
+const periodRows = computed(() => {
+  const now = Date.now();
+  return props.periods.map(p => ({ p, ...periodCoordinates(p, now) }));
+});
 const datedPeriodRows = computed(() => periodRows.value.flatMap(({p,start,end}) => start !== null && end !== null ? [{p,start,end}] : []));
 const undatedPeriods = computed(() => periodRows.value.filter(row => row.start === null || row.end === null).map(row => row.p));
 const undatedEvents = computed(() => props.events.filter(e => listEventYearsBP(e) === null));
-const sortedPeriods = computed(() => [...datedPeriodRows.value].sort((a,b) => compareYearsOldestFirst(a.start,b.start)).map(row => row.p));
+const sortedPeriodRows = computed(() => [...datedPeriodRows.value].sort((a,b) => compareYearsOldestFirst(a.start,b.start)));
+const sortedPeriods = computed(() => sortedPeriodRows.value.map(row => row.p));
 
 const laneMap = computed((): Map<string, number> => {
   const result = new Map<string, number>();
@@ -272,9 +283,7 @@ const laneMap = computed((): Map<string, number> => {
   const span = allBP.length ? Math.max(...allBP) - Math.min(...allBP) : 0;
   const tolerance = span * 0.001;
 
-  for (const period of sortedPeriods.value) {
-    const { start: startBP, end: endBP } = periodCoordinates(period);
-    if (startBP === null || endBP === null) continue;
+  for (const { p: period, start: startBP, end: endBP } of sortedPeriodRows.value) {
 
     let assigned = -1;
     for (let lane = 0; lane < laneMinEnds.length; lane++) {
@@ -306,8 +315,7 @@ const periodRowHeight = computed(() => numLanes.value * laneHeight.value);
 watch(
   [sortedPeriods, () => props.currentPeriod, () => props.storyBounds],
   ([p]) => {
-    // currentPeriod définit la fenêtre quand on navigue dans une période ;
-    // sinon on utilise les bornes de la story pour cadrer toute la frise.
+    // Le cadre inclut la référence et les périodes affichées, même si un enfant déborde.
     const framingPeriod = props.currentPeriod ?? props.storyBounds ?? undefined;
     try { updateFromPeriods(p, framingPeriod); }
     catch (e) { error.value = e instanceof Error ? e.message : 'Erreur de calcul'; }
@@ -333,33 +341,41 @@ const rawLayouts = computed(() => {
   return map;
 });
 
-const getPeriodCssVars = (period: ListPeriod): Record<string, string> => {
-  const raw = rawLayouts.value.get(period.id);
-  if (!raw) return {};
-  const { left, width, top } = raw;
-
+const projectPosition = (position: number): number => {
   if (activePeriodId.value) {
     const hov = rawLayouts.value.get(activePeriodId.value);
     if (hov && hov.width < minimumPct.value) {
-      const t1 = hov.left;
-      const t2 = hov.left + hov.width;
-      const newLeft  = timelineFocusTransform(left, t1, t2, minimumPct.value);
-      const newRight = timelineFocusTransform(left + width, t1, t2, minimumPct.value);
-      return {
-        '--period-left': `${newLeft}%`,
-        '--period-width': `${Math.max(0, newRight - newLeft)}%`,
-        '--period-top': `${top}px`,
-        '--period-z': String(period.id === activePeriodId.value ? 2 : 1),
-      };
+      return timelineFocusTransform(position, hov.left, hov.left + hov.width, minimumPct.value);
     }
   }
+  return position;
+};
 
+const getPeriodCssVars = (period: ListPeriod): Record<string, string> => {
+  const raw = rawLayouts.value.get(period.id);
+  if (!raw) return {};
+  const left = projectPosition(raw.left);
+  const right = projectPosition(raw.left + raw.width);
   return {
     '--period-left': `${left}%`,
-    '--period-width': `${width}%`,
-    '--period-top': `${top}px`,
+    '--period-width': `${Math.max(0, right - left)}%`,
+    '--period-top': `${raw.top}px`,
+    '--period-z': String(period.id === activePeriodId.value ? 2 : 1),
   };
 };
+
+// The parent uses the same dates and hover projection as its children and events.
+const parentBarStyle = computed(() => {
+  if (!props.currentPeriod) return {};
+  const { start, end } = periodCoordinates(props.currentPeriod);
+  // Keep back navigation available when the parent's dates cannot be projected.
+  if (start === null || end === null) return {};
+  const base = getPeriodLayoutStyle(props.currentPeriod);
+  const rawLeft = parseFloat(base.left);
+  const left = projectPosition(rawLeft);
+  const right = projectPosition(rawLeft + parseFloat(base.width));
+  return { width: `${Math.max(0, right - left)}%`, marginLeft: `${left}%` };
+});
 
 const getEventRawLeft = (event: ListEvent): number => {
   const base = getEventLayoutStyle(event.date);
@@ -417,21 +433,7 @@ const getEventAlign = (event: ListEvent): 'start' | 'center' | 'end' =>
 
 const getEventStyles = (event: ListEvent): { width: string; left: string } => {
   const base = getEventLayoutStyle(event.date);
-  const rawLeft = parseFloat(String(base.left));
-
-  if (activePeriodId.value) {
-    const hov = rawLayouts.value.get(activePeriodId.value);
-    if (hov && hov.width < minimumPct.value) {
-      const t1 = hov.left;
-      const t2 = hov.left + hov.width;
-      return {
-        width: String(base.width),
-        left: `${timelineFocusTransform(rawLeft, t1, t2, minimumPct.value)}%`,
-      };
-    }
-  }
-
-  return { width: String(base.width), left: String(base.left) };
+  return { width: String(base.width), left: `${projectPosition(parseFloat(base.left))}%` };
 };
 
 // ─── Actions ──────────────────────────────────────────────────────────────────

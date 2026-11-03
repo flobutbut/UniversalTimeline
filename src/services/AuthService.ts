@@ -5,7 +5,7 @@ let enabled: boolean | null = null;
 let initialization: Promise<void> | null = null;
 let rejectedToken: string | undefined;
 
-export interface Account { id: string; isAdmin: boolean }
+export interface Account { id: string; isAdmin: boolean; isEditor?: boolean }
 
 async function initialize(): Promise<void> {
   if (enabled !== null) return;
@@ -46,6 +46,7 @@ export const authService = {
     if (!response.ok) throw new Error('Impossible de vérifier votre compte. Réessayez.');
     const account: unknown = await response.json();
     if (!account || typeof (account as { id?: unknown }).id !== 'string' || typeof (account as { isAdmin?: unknown }).isAdmin !== 'boolean') throw new Error('Réponse de connexion invalide.');
+    if ('isEditor' in (account as Account) && typeof (account as Account).isEditor !== 'boolean') throw new Error('Réponse de connexion invalide.');
     return account as Account;
   },
   /** Resolves once the SDK has consumed a one-time `code` from the URL (PKCE return); the code can then leave the URL. */

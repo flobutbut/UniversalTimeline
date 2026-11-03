@@ -15,7 +15,7 @@
         <UserAvatar :username="auth.profile?.username" :color="auth.profile?.avatarColor" :icon="auth.profile?.avatarIcon" />
         <span class="user-menu__identity-text">
           <span class="user-menu__name">{{ name }}</span>
-          <span class="user-menu__role">{{ auth.profile === null ? 'Nom d’utilisateur à choisir' : auth.isAdmin ? 'Administrateur' : 'Compte personnel' }}</span>
+          <span class="user-menu__role">{{ auth.profile === null ? 'Nom d’utilisateur à choisir' : auth.roleLabel }}</span>
         </span>
       </div>
       <RouterLink :to="{ name: 'profile' }" role="menuitem" tabindex="-1" class="user-menu__item" @click="close()">

@@ -48,9 +48,10 @@ import { mutationErrorMessage } from '@/lib/mutationErrorMessage';
 import type { SelectValue } from '@/lib/selectOptions';
 import { formatAdminDate } from './adminFormat';
 
-type Filter = 'all' | 'admins' | 'creators' | 'unconfirmed' | 'suspended' | 'no-profile';
+type Filter = 'all' | 'admins' | 'editors' | 'creators' | 'unconfirmed' | 'suspended' | 'no-profile';
 const filterOptions: { value: Filter; label: string }[] = [
   { value: 'all', label: 'Tous les comptes' }, { value: 'creators', label: 'Avec des frises' }, { value: 'admins', label: 'Administrateurs' },
+  { value: 'editors', label: 'Éditeurs' },
   { value: 'unconfirmed', label: 'Adresse non confirmée' }, { value: 'suspended', label: 'Suspendus' }, { value: 'no-profile', label: 'Sans nom d’utilisateur' },
 ];
 const users = ref<AdminUser[] | null>(null); const loading = ref(false); const error = ref('');
@@ -66,7 +67,7 @@ async function load() {
 onMounted(load);
 
 const matchesFilter: Record<Filter, (user: AdminUser) => boolean> = {
-  all: () => true, admins: user => user.isAdmin, creators: user => user.stories > 0,
+  all: () => true, admins: user => user.isAdmin, editors: user => user.isEditor === true, creators: user => user.stories > 0,
   unconfirmed: user => !user.confirmed, suspended: user => user.suspended, 'no-profile': user => !user.username,
 };
 const visible = computed(() => {
@@ -76,7 +77,7 @@ const visible = computed(() => {
     && (!needle || [user.username, user.email].some(value => value?.toLocaleLowerCase('fr').includes(needle))));
 });
 function statuses(user: AdminUser): string[] {
-  return [user.isAdmin && 'Admin', user.suspended && 'Suspendu', !user.confirmed && 'Non confirmé', !user.username && 'Sans profil']
+  return [user.isAdmin && 'Admin', user.isEditor && 'Éditeur', user.suspended && 'Suspendu', !user.confirmed && 'Non confirmé', !user.username && 'Sans profil']
     .filter((value): value is string => !!value);
 }
 </script>

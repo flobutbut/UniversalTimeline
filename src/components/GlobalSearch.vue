@@ -1,5 +1,5 @@
 <template>
-  <div ref="rootRef" class="gs search-bar" :class="{ 'gs--active': focused }" @click="searchRef?.focus()" @focusin="onFocus" @focusout="onBlur">
+  <div ref="rootRef" class="gs search-bar" :class="{ 'gs--active': focused, 'gs--page': page }" @click="!page && searchRef?.focus()" @focusin="onFocus" @focusout="onBlur">
     <SearchInput
       ref="searchRef"
       v-model="query"
@@ -19,7 +19,7 @@
       @keydown.enter.prevent="confirm"
     />
 
-    <PopoverSurface v-if="dropdownVisible" class="gs__dropdown">
+    <component :is="page ? 'div' : PopoverSurface" v-if="dropdownVisible" class="gs__dropdown">
       <div v-if="loading" class="gs__status" role="status">Recherche de frises…</div>
       <div v-else-if="error" class="gs__status" role="alert">
         {{ error }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retrySource">Réessayer</Button>
@@ -50,14 +50,14 @@
       </div>
       <div v-if="!loading && !error && !wikidata.loading.value && !wikidata.error.value && !hasResults" class="gs__status" role="status">Aucune frise ni sujet Wikidata trouvé. Essayez un autre mot-clé.</div>
       <span class="sr-only" role="status">{{ hasResults ? `${allHits.length} résultats. Utilisez les flèches puis Entrée pour choisir.` : '' }}</span>
-    </PopoverSurface>
+    </component>
   </div>
 </template>
 
 <script setup lang="ts">
 import Button from '@/components/base/Button.vue';
 import PopoverSurface from '@/components/base/PopoverSurface.vue';
-import { ref, computed, onScopeDispose } from 'vue';
+import { ref, computed, onMounted, onScopeDispose } from 'vue';
 import SearchInput from './base/SearchInput.vue';
 import ItemSummary from './base/ItemSummary.vue';
 import { Icon } from '@iconify/vue';
@@ -65,6 +65,7 @@ import { SearchApiService, type GlobalSearchResult, type WikidataEntityLabelHit 
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { useSuggestionNavigation } from '@/composables/useSuggestionNavigation';
 
+const props = withDefaults(defineProps<{ page?: boolean; autofocus?: boolean }>(), { page: false, autofocus: false });
 const emit = defineEmits<{ (e: 'select', hit: GlobalSearchResult): void }>();
 const rootRef = ref<HTMLElement | null>(null);
 const query = ref('');
@@ -72,15 +73,15 @@ const focused = ref(false);
 const searchRef = ref<{ focus: () => void; blur: () => void } | null>(null);
 const service = SearchApiService.getInstance();
 const { results: stories, loading, error, retry } = useDebouncedSearch(
-  () => query.value, (q, signal) => service.searchStories(q, { signal }), { delayMs: 250, enabled: () => focused.value },
+  () => query.value, (q, signal) => service.searchStories(q, { signal }), { delayMs: 250, enabled: () => props.page || focused.value },
 );
 const wikidata = useDebouncedSearch(
-  () => query.value, (q, signal) => service.searchWikidataEntityLabels(q, { signal }), { delayMs: 600, enabled: () => focused.value },
+  () => query.value, (q, signal) => service.searchWikidataEntityLabels(q, { signal }), { delayMs: 600, enabled: () => props.page || focused.value },
 );
 function isWikidata(hit: GlobalSearchResult): hit is WikidataEntityLabelHit & { fromWikidata: true } { return 'fromWikidata' in hit && hit.fromWikidata === true; }
 const allHits = computed<GlobalSearchResult[]>(() => [...stories.value, ...wikidata.results.value.map(hit => ({ ...hit, fromWikidata: true as const }))]);
 const hasResults = computed(() => allHits.value.length > 0);
-const dropdownVisible = computed(() => focused.value && query.value.trim().length >= 2);
+const dropdownVisible = computed(() => (props.page || focused.value) && query.value.trim().length >= 2);
 const { listId, optionId, cursor, activeId, move, reset, current } = useSuggestionNavigation(() => allHits.value, () => dropdownVisible.value);
 let blurTimer: ReturnType<typeof setTimeout> | undefined;
 function onFocus() { clearTimeout(blurTimer); focused.value = true; }
@@ -91,6 +92,7 @@ function onBlur() {
   }, 150);
 }
 onScopeDispose(() => clearTimeout(blurTimer));
+onMounted(() => { if (props.autofocus) searchRef.value?.focus(); });
 function confirm() { const hit = current(); if (hit) selectHit(hit); }
 function retrySource() { searchRef.value?.focus(); return retry(); }
 function retryWikidata() { searchRef.value?.focus(); return wikidata.retry(); }
@@ -105,18 +107,14 @@ function clear() {
 <style scoped>
 .gs.search-bar {
   position: relative;
-  width: var(--field-height-md);
+  width: 320px;
   max-width: 100%;
-  transition: width var(--transition-normal);
   cursor: text;
 }
 
-.gs.search-bar:hover, .gs.search-bar:focus-within { width: 320px; }
 .gs :deep(.search-input-wrap__icon) { width: 18px; height: 18px; }
-
-@media (prefers-reduced-motion: reduce) {
-  .gs.search-bar { transition: none; }
-}
+.gs.gs--page { width: 100%; }
+.gs--page .gs__dropdown { position: static; margin-top: var(--spacing-lg); max-height: none; overflow: visible; }
 
 /* ─── Dropdown ───────────────────────────────────────────────────────────────── */
 

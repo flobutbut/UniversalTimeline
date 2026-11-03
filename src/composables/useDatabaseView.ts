@@ -98,7 +98,7 @@ export function useDatabaseView() {
   });
 
   const auth = useAuthStore();
-  const filteredStories = computed(() => stories.value.filter(auth.ownsStory));
+  const filteredStories = computed(() => stories.value.filter(auth.canEditStory));
 
   // Modales
   const handleAddPeriod = () => { closeEditModal(); modalState.value = { ...modalState.value, currentType: 'period', currentMode: 'create', showAddModal: true }; };

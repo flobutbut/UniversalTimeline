@@ -25,13 +25,13 @@
         <ul v-if="parent.anchors.length" class="story-relations__locations" aria-label="Points de rattachement">
           <li v-for="anchor in parent.anchors" :key="`${anchor.type}:${anchor.id}`" class="story-relations__location">
             <div><span class="story-relations__caption">{{ anchor.type === 'period' ? 'Période' : 'Événement' }}</span><span>{{ anchor.label.fr || anchor.label.en || anchor.id }}</span></div>
-            <Button v-if="editable && auth.ownsStory(parent)" variant="ghost" size="xs" :disabled="busy"
+            <Button v-if="editable && auth.canEditStory(parent)" variant="ghost" size="xs" :disabled="busy"
               :aria-label="`Retirer le point d’entrée ${anchor.label.fr || anchor.id} depuis ${parent.title.fr}`" @click="emit('remove-parent', parent.id, { type: anchor.type, id: anchor.id })">Retirer</Button>
           </li>
         </ul>
         <div v-else class="story-relations__location">
           <span class="story-relations__description">Depuis les périodes racines de cette frise</span>
-          <Button v-if="editable && auth.ownsStory(parent)" variant="ghost" size="xs" :disabled="busy" @click="emit('remove-parent', parent.id)">Retirer</Button>
+          <Button v-if="editable && auth.canEditStory(parent)" variant="ghost" size="xs" :disabled="busy" @click="emit('remove-parent', parent.id)">Retirer</Button>
         </div>
       </li>
     </ul>
@@ -52,9 +52,9 @@ const props = defineProps<{ story: Story; busy?: boolean; error?: string | null 
 const emit = defineEmits<{ 'add-parent': [sourceId: string, periodId: string]; 'remove-parent': [sourceId: string, anchor?: StoryAnchor] }>();
 const auth = useAuthStore();
 const store = useDataStore();
-const editable = computed(() => auth.ownsStory(props.story));
+const editable = computed(() => auth.canEditStory(props.story));
 const parents = computed(() => props.story.parentStories ?? []);
-const candidates = computed(() => store.stories.filter(story => story.id !== props.story.id && auth.ownsStory(story))
+const candidates = computed(() => store.stories.filter(story => story.id !== props.story.id && auth.canEditStory(story))
   .sort((a, b) => a.title.fr.localeCompare(b.title.fr, 'fr')));
 const showPicker = ref(false);
 const pending = ref<{ sourceId: string; periodId: string } | null>(null);

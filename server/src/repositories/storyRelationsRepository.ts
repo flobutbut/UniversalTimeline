@@ -12,7 +12,7 @@ export async function lockStoryHierarchy(client: TransactionClient) {
   await client.query('LOCK TABLE public.stories IN SHARE ROW EXCLUSIVE MODE');
 }
 export async function lockWritableStory(client: TransactionClient, storyId: string) {
-  // FOR UPDATE applies UPDATE and SELECT policies: public visibility is not ownership.
+  // FOR UPDATE applies UPDATE and SELECT policies: ownership or the public-editor permission is required.
   return (await client.query<{ id: number }>('SELECT id FROM public.stories WHERE id = $1 FOR UPDATE', [storyId])).rows[0];
 }
 export async function removeAssociations(client: TransactionClient, storyId: string, kind: AssociationKind, ids: string[]) {
@@ -102,9 +102,9 @@ export async function detachChildStory(client: TransactionClient, parentId: stri
   await client.query('UPDATE public.stories SET parent_story_id = NULL WHERE id = $1 AND parent_story_id = $2', [childId, parentId]);
 }
 /** Source of a derived frise: only its owner may read it FOR UPDATE (RLS). */
-export async function lockSplitSource(client: TransactionClient, storyId: string) {
+export async function lockSplitSource(client: TransactionClient, storyId: string, userId?: string | null) {
   return (await client.query<{ id: number; author: string; is_public: boolean }>(
-    'SELECT id, author, is_public FROM public.stories WHERE id = $1 FOR UPDATE', [storyId])).rows[0];
+    `SELECT id, author, is_public FROM public.stories WHERE id = $1${userId ? ' AND owner_user_id = $2' : ''} FOR UPDATE`, userId ? [storyId, userId] : [storyId])).rows[0];
 }
 /** The frise is the only authority for period placement. */
 export async function readEffectivePeriodPlacements(client: TransactionClient, storyId: string) {

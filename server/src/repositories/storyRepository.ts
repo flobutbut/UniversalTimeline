@@ -7,7 +7,7 @@ interface StorySnapshotRow extends StoryRow {
   periods: Array<JoinedPeriodRow & Pick<PeriodRow, 'has_children'>>;
   events: Array<JoinedEventRow & { importance: EventImportance }>;
   child_stories: ChildStoryRow[];
-  parent_stories?: Array<Pick<StoryRow, 'id' | 'title_fr' | 'title_en' | 'owner_user_id'> & { anchors: Array<{ type: 'period' | 'event'; id: string; label_fr: string; label_en: string | null }> }>;
+  parent_stories?: Array<Pick<StoryRow, 'id' | 'title_fr' | 'title_en' | 'owner_user_id' | 'is_public'> & { anchors: Array<{ type: 'period' | 'event'; id: string; label_fr: string; label_en: string | null }> }>;
   navigation_contexts?: Array<{
     id: number; title_fr: string; title_en: string;
     periods: Array<Pick<PeriodRow, 'id' | 'label_fr' | 'label_en' | 'start_date' | 'end_date' | 'start_years_bp' | 'end_years_bp'> & { story_parent_id: string | null }>;
@@ -74,7 +74,7 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
           OR EXISTS (SELECT 1 FROM entry_links a WHERE a.source_story_id = s.id AND a.target_story_id = child.id)
       ) child) AS child_stories,
       (SELECT COALESCE(jsonb_agg(to_jsonb(parent) ORDER BY parent.title_fr, parent.id), '[]') FROM (
-        SELECT parent.id, parent.title_fr, parent.title_en, parent.owner_user_id,
+        SELECT parent.id, parent.title_fr, parent.title_en, parent.owner_user_id, parent.is_public,
           (SELECT COALESCE(jsonb_agg(jsonb_build_object('type', a.anchor_type, 'id', a.anchor_id,
             'label_fr', COALESCE(p.label_fr, e.label_fr, a.anchor_id), 'label_en', COALESCE(p.label_en, e.label_en))
             ORDER BY a.anchor_type, a.anchor_id), '[]')
@@ -205,6 +205,9 @@ export async function updateStory(client: TransactionClient, id: string, data: S
     title.fr, title.en || title.fr, description?.fr || null,
     description?.en || description?.fr || null, author, isPublic ?? null, id,
   ])).rows[0];
+}
+export async function lockOwnedStory(client: TransactionClient, id: string, userId: string) {
+  return (await client.query('SELECT id FROM public.stories WHERE id=$1 AND owner_user_id=$2 FOR UPDATE', [id, userId])).rows[0];
 }
 export async function deleteStory(client: TransactionClient, id: string) {
   await client.query('DELETE FROM public.story_events WHERE story_id = $1', [id]);

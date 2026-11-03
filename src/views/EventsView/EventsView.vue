@@ -59,7 +59,7 @@
         <StoryMembershipField
           :story-ids="storyLinks.storyIdsOf(modalState.item.id)"
           :stories="stories"
-          :owns-story="auth.ownsStory"
+          :owns-story="auth.canEditStory"
           empty-text="Cet événement n’appartient à aucune frise visible."
           :loading="storyLinks.loading.value"
           :load-error="storyLinks.error.value"

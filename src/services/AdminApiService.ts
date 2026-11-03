@@ -1,7 +1,7 @@
 import { apiClient } from './ApiClient';
 import type { AvatarColor, AvatarIcon } from '@account-rules';
 
-export type AdminAction = 'grant_admin' | 'revoke_admin' | 'suspend' | 'reactivate' | 'delete_user';
+export type AdminAction = 'grant_admin' | 'revoke_admin' | 'grant_editor' | 'revoke_editor' | 'suspend' | 'reactivate' | 'delete_user';
 
 export interface AdminDashboard {
   generatedAt: string;
@@ -16,7 +16,7 @@ export interface AdminDashboard {
 
 export interface AdminUser {
   id: string; email: string | null; username: string | null; avatarColor: AvatarColor | null; avatarIcon: AvatarIcon | null;
-  createdAt: string; lastSignInAt: string | null; confirmed: boolean; isAdmin: boolean; suspended: boolean;
+  createdAt: string; lastSignInAt: string | null; confirmed: boolean; isAdmin: boolean; isEditor?: boolean; suspended: boolean;
   stories: number; publicStories: number;
 }
 
@@ -32,11 +32,13 @@ export const adminApi = {
   users: () => apiClient.get<AdminUser[]>('/admin/users'),
   user: (id: string) => apiClient.get<AdminUserDetail>(`/admin/users/${encodeURIComponent(id)}`),
   setAdmin: (id: string, admin: boolean) => apiClient.put<void>(`/admin/users/${encodeURIComponent(id)}/role`, { admin }),
+  setEditor: (id: string, editor: boolean) => apiClient.put<void>(`/admin/users/${encodeURIComponent(id)}/editor`, { editor }),
   setSuspended: (id: string, suspended: boolean) => apiClient.put<void>(`/admin/users/${encodeURIComponent(id)}/suspension`, { suspended }),
   deleteUser: (id: string) => apiClient.delete<void>(`/admin/users/${encodeURIComponent(id)}`),
 };
 
 export const adminActionLabels: Record<AdminAction, string> = {
   grant_admin: 'Rôle administrateur accordé', revoke_admin: 'Rôle administrateur retiré',
+  grant_editor: 'Rôle éditeur accordé', revoke_editor: 'Rôle éditeur retiré',
   suspend: 'Compte suspendu', reactivate: 'Compte réactivé', delete_user: 'Compte supprimé',
 };

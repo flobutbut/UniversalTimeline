@@ -1,6 +1,6 @@
-# Installation vide — état applicatif du 2 novembre 2026
+# Installation vide — état applicatif du 3 novembre 2026
 
-`application.sql` prépare les treize tables applicatives d’un **nouveau projet Supabase PostgreSQL 17 ou ultérieur**. Il reprend les types, colonnes, identité des stories, contraintes, index, six triggers applicatifs et 30 policies, y compris les points d’entrée multiples, les présentations de périodes dans leurs parcours et les profils de compte (username unique, avatar, acceptation des conditions). Les routines du compte sont dans le schéma non exposé `account_private`, avec un trigger sur `auth.users` qui crée le profil à l’inscription. Il ne contient aucun compte, contenu, mot de passe ni compteur de la base distante.
+`application.sql` prépare les treize tables applicatives d’un **nouveau projet Supabase PostgreSQL 17 ou ultérieur**. Il reprend les types, colonnes, identité des stories, contraintes, index, les triggers applicatifs et 30 policies, y compris les points d’entrée multiples, les présentations de périodes dans leurs parcours et les profils de compte (username unique, avatar, acceptation des conditions). Les routines du compte sont dans le schéma non exposé `account_private`, avec un trigger sur `auth.users` qui crée le profil à l’inscription. Il ne contient aucun compte, contenu, mot de passe ni compteur de la base distante.
 
 Le script est transactionnel et refuse de s’appliquer si un objet applicatif existe déjà. Il exige l’infrastructure Auth et les rôles gérés par Supabase. Il n’est jamais lancé au démarrage de l’API, ni par les tests sur le projet distant. Ne pas l’utiliser pour réparer ou réinitialiser le projet Universal-Timeline existant.
 
@@ -16,7 +16,9 @@ Différences volontaires pour une nouvelle installation :
 
 Depuis la racine, `yarn verify:clean` (ou `node scripts/check-clean.mjs`) installe les dépendances verrouillées dans une image jetable et utilise PostgreSQL 17 sans port TCP publié. Les tests comparent le catalogue à `server/test/fixtures/application-schema.json`, puis exercent les vrais handlers, RLS, contraintes, triggers et séquences. La baseline est aussi refusée lors d’un second passage, sans changement des données fictives.
 
-La suite sauvegarde les seuls schémas de test public/auth/account_private, avec ACL, puis les restaure dans une autre base jetable et vérifie données, règles d’accès et reprise des compteurs. Le schéma auth de test est une doublure minimale : cette vérification ne constitue pas une restauration d’un projet Supabase complet, de ses comptes réels ou des fichiers Storage. Les autres suites vérifient séparément les migrations historiques.
+La suite sauvegarde les schémas de test public/auth/account_private/admin_private/catalogue_private/access_private, avec ACL, puis les restaure dans une autre base jetable et vérifie données, règles d’accès et reprise des compteurs. Le schéma auth de test est une doublure minimale : cette vérification ne constitue pas une restauration d’un projet Supabase complet, de ses comptes réels ou des fichiers Storage. Les autres suites vérifient séparément les migrations historiques.
+
+La baseline inclut le rôle éditeur : les comptes avec ce rôle (et les admins) peuvent modifier les frises publiques sans en devenir propriétaires. La suppression, la visibilité et la signature restent protégées. Les règles et la routine d’attribution du rôle sont dans les schémas privés ; aucun compte n’est créé ou promu par l’installation.
 
 Les conteneurs, leurs bases et volumes de test sont supprimés après la passe. Aucune variable .env du poste n’entre dans l’image ; aucune copie de travail parallèle du dépôt n’est créée.
 

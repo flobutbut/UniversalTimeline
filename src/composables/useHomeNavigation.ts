@@ -163,7 +163,11 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
       const storyEventRows = story.events;
       currentStoryPeriods.value = storyPeriods;
       currentStoryAllEvents.value = storyEventRows;
-      const bounds = [...storyPeriods.flatMap(period => [period.startYearsBP, period.endYearsBP]), ...storyEventRows.map(event => event.dateYearsBP)]
+      const now = Date.now();
+      const bounds = [...storyPeriods.flatMap(period => [
+        comparableYearsBeforePresent(period.startDate, period.startYearsBP, now),
+        comparableYearsBeforePresent(period.endDate, period.endYearsBP, now),
+      ]), ...storyEventRows.map(event => comparableYearsBeforePresent(event.date, event.dateYearsBP, now))]
         .filter((value): value is number => value != null && Number.isFinite(value));
       currentStoryBounds.value = bounds.length ? { startYearsBP: Math.max(...bounds), endYearsBP: Math.min(...bounds) } : null;
       const restored = focusPath ? { stack: focusPath.slice(0,-1), current: focusPath[focusPath.length-1] } : restorePeriodNav ? resolvePeriodNavFromSnapshot(storyPeriods, restorePeriodNav) : null;

@@ -175,6 +175,7 @@ function handleAddStory() {
   openAddStory();
 }
 function startStoryFromPeriod(periodId: string) {
+  if (!selectedStory.value || !auth.ownsStory(selectedStory.value)) return;
   if (!auth.canCreateStories) { toast.show(usernameRequired, 'error'); return; }
   openStoryFromPeriod(periodId);
 }

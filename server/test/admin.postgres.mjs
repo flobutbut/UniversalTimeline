@@ -124,5 +124,5 @@ test('admin routines are definer functions with a fixed search path, executable 
     assert.equal(row.prosecdef, true, row.proname); assert.deepEqual(row.proconfig, ['search_path=""'], row.proname);
     assert.equal(row.anon, false, row.proname); assert.equal(row.authenticated, !internal.has(row.proname), row.proname);
   }
-  assert.equal(rows.length, 9);
+  assert.equal(rows.length, 10);
 });

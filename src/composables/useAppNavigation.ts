@@ -1,9 +1,8 @@
 import { computed, onScopeDispose, ref } from 'vue';
 import { useRoute, useRouter, type RouteLocationNormalized, type RouteLocationRaw } from 'vue-router';
 import { navigationViewForRoute, type NavigationView } from '@/router/navigation';
-import { storyTimelineLocation } from '@/router/storyTarget';
+import { globalSearchLocation } from '@/router/searchTarget';
 import type { GlobalSearchResult } from '@/services/SearchApiService';
-import { normalizeWikidataId } from '@/services/wikidataTransport';
 
 export function useAppNavigation() {
   const route = useRoute();
@@ -45,8 +44,7 @@ export function useAppNavigation() {
     navigate: (view: NavigationView) => push(view === 'timeline' ? timelineDestination.value : { name: view }),
     selectSearch: (hit: GlobalSearchResult) => {
       try {
-        if ('fromWikidata' in hit && hit.fromWikidata) return push({ name: 'wikidata-generation', query: { wikidata: normalizeWikidataId(hit.id) } });
-        return push(storyTimelineLocation(hit.id));
+        return push(globalSearchLocation(hit));
       }
       catch { failedPath = null; error.value = 'Ce résultat de recherche est invalide. Relancez la recherche.'; return Promise.resolve(); }
     },

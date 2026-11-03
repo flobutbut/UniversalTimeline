@@ -7,7 +7,7 @@
 import { ref, readonly } from 'vue';
 import type { ScalablePeriod } from '@/services/TimelineScalingService';
 import { TimelineScalingService } from '@/services/TimelineScalingService';
-import { DateService } from '@/services/DateService';
+import { comparableYearsBeforePresent } from '@temporal';
 
 const DEFAULT_ROW_HEIGHT = 48;
 
@@ -15,16 +15,18 @@ export function useTimelineScaling() {
   const scalingService = new TimelineScalingService();
   const totalDuration = ref(0);
   const startYears = ref(0);
+  const referenceTime = ref(Date.now());
 
   /**
    * Recalcule l'échelle à partir des périodes affichées.
-   * Si `parent` est fourni, la fenêtre temporelle est calée sur ses bornes
-   * (indépendamment des bornes des enfants).
+   * Le parent est inclus dans le cadrage, ainsi que les enfants qui débordent
+   * de ses dates : aucune période affichée n'est tronquée implicitement.
    */
   const updateFromPeriods = (periods: ScalablePeriod[], parent?: ScalablePeriod) => {
-    totalDuration.value = scalingService.calculateTotalDuration(periods, parent);
+    referenceTime.value = Date.now();
+    totalDuration.value = scalingService.calculateTotalDuration(periods, parent, referenceTime.value);
     if (parent || periods.length > 0) {
-      startYears.value = scalingService.getWindowStart(periods, parent);
+      startYears.value = scalingService.getWindowStart(periods, parent, referenceTime.value);
     } else {
       startYears.value = 0;
     }
@@ -39,7 +41,7 @@ export function useTimelineScaling() {
   ) => {
     const row = options?.row ?? (period as { row?: number }).row ?? 0;
     const rowHeight = options?.rowHeight ?? DEFAULT_ROW_HEIGHT;
-    const base = scalingService.calculatePeriodStyles(period, totalDuration.value, startYears.value);
+    const base = scalingService.calculatePeriodStyles(period, totalDuration.value, startYears.value, referenceTime.value);
     return {
       ...base,
       position: 'absolute' as const,
@@ -51,7 +53,7 @@ export function useTimelineScaling() {
    * Position horizontale d'un événement sur la même échelle que les périodes.
    */
   const getEventLayoutStyle = (date: string, cardWidth = '0px') => {
-    const dateYBP = DateService.tryToYearsBP(date);
+    const dateYBP = comparableYearsBeforePresent(date, undefined, referenceTime.value);
     const positionPct = scalingService.calculateRelativePosition(
       dateYBP,
       totalDuration.value,

@@ -39,7 +39,7 @@
       <EmailChangeCard :email="identity.email" :pending-email="identity.newEmail" @requested="loadIdentity" />
       <dl class="profile-view__card profile-view__facts">
         <dt>Membre depuis</dt><dd>{{ identity.createdAt ? formatRecordDate(identity.createdAt) : '—' }}</dd>
-        <dt>Rôle</dt><dd>{{ auth.isAdmin ? 'Administrateur' : 'Compte personnel' }}</dd>
+        <dt>Rôle</dt><dd>{{ auth.roleLabel }}</dd>
       </dl>
     </section>
 

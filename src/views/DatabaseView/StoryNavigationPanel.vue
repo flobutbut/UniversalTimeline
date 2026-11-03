@@ -36,15 +36,15 @@ import type { Story } from '@/types/database';
 const props = defineProps<{ story: Story; busy?: boolean }>();
 const emit = defineEmits<{ saved: [] }>();
 const auth = useAuthStore(), store = useDataStore();
-const editable = computed(() => auth.ownsStory(props.story));
+const editable = computed(() => auth.canEditStory(props.story));
 const adding = ref(false), saving = ref(false), error = ref('');
 const contextId = ref<string | null>(null), periodId = ref<string | null>(null);
 const memberships = computed(() => (props.story.navigationContexts ?? []).flatMap(context => context.presentations
   .filter(view => view.storyId === props.story.id).map(view => ({ context, periodId: view.periodId }))));
-const candidates = computed(() => store.stories.filter(s => s.id !== props.story.id && auth.ownsStory(s))
+const candidates = computed(() => store.stories.filter(s => s.id !== props.story.id && auth.canEditStory(s))
   .map(s => ({ value: s.id, label: s.title.fr || s.title.en })));
 const periodLabel = (id: string) => props.story.periods.find(p => p.id === id)?.label.fr || id;
-const canEditContext = (id: string) => !!store.stories.find(s => s.id === id && auth.ownsStory(s));
+const canEditContext = (id: string) => !!store.stories.find(s => s.id === id && auth.canEditStory(s));
 async function open() {
   saving.value = true; error.value = '';
   try { await store.ensureStoriesLoaded(); adding.value = true; }
