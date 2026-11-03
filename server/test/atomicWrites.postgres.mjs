@@ -388,13 +388,13 @@ async function seedSplitSource() {
     INSERT INTO story_events(story_id,event_id) VALUES (1,'in'),(1,'edge'),(1,'out'),(1,'undated');
     INSERT INTO story_categories VALUES (1,'${category}');`);
 }
-test('creates a child frise from a period with its branch, in-range events, anchor and visibility, leaving the source intact', async () => {
+test('creates a child frise from a period: its sub-periods move, the period stays as anchor, events are copied', async () => {
   await seedSplitSource();
   const before = await sourceRows(1);
   const result = await call('post', '/stories/:storyId/from-period', { periodId: 'apollo', title: '  Programme Apollo ' }, { storyId: '1' });
   assert.equal(result.statusCode, 201);
-  assert.deepEqual(result.payload, { id: '6', parentStoryId: '1', periodId: 'apollo', periodCount: 2, eventCount: 2 });
-  assert.deepEqual(await sourceRows(1), before);
+  assert.deepEqual(result.payload, { id: '6', parentStoryId: '1', periodId: 'apollo', periodCount: 2, eventCount: 2, movedPeriodCount: 1, linkedStoryCount: 0 });
+  assert.deepEqual(await sourceRows(1), { ...before, periods: before.periods.filter(row => row.period_id !== 'gemini') });
   const created = await sourceRows(6);
   assert.deepEqual(created.story, [{ title_fr: 'Programme Apollo', is_public: true, parent_story_id: 1 }]);
   assert.deepEqual(created.periods, [

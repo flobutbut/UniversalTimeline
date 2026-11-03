@@ -97,6 +97,7 @@ try {
     ['profiles', 'profiles.postgres.mjs'], ['admin', 'admin.postgres.mjs'],
     ['public_editors', 'publicEditors.postgres.mjs'],
     ['wikidata_generation', 'wikidataGeneration.postgres.mjs'], ['conversion', 'catalogueConversion.postgres.mjs'],
+    ['story_structure', 'storyStructure.postgres.mjs'],
   ]) await postgresSuite(name, file, restore);
   console.log('\nInstallation vierge, tests, audits, builds et restauration de test réussis.');
 } catch (cause) {

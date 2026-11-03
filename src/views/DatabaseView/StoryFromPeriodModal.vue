@@ -3,14 +3,15 @@
     <form id="story-from-period-form" class="story-from-period" @submit.prevent="submit">
       <Input v-model="title" label="Titre de la nouvelle frise" required :disabled="busy" :error="titleError" />
       <div class="story-from-period__summary">
-        <p class="story-from-period__heading">Sera copié dans la nouvelle frise</p>
+        <p class="story-from-period__heading">La nouvelle frise contiendra</p>
         <ul>
           <li><strong>{{ preview.label }}</strong><template v-if="preview.rangeLabel"> · {{ preview.rangeLabel }}</template></li>
           <li>{{ subPeriodsLabel }}</li>
           <li v-if="preview.datesKnown">{{ eventsLabel }}</li>
           <li v-else>Aucun événement : les dates de la période ne sont pas connues.</li>
+          <li v-if="preview.linkedStoryCount">{{ linkedLabel }}</li>
         </ul>
-        <p class="story-from-period__hint">La frise actuelle n’est pas modifiée. La nouvelle frise lui est rattachée sur cette période, avec la même visibilité et les mêmes catégories.</p>
+        <p class="story-from-period__hint">La période reste dans la frise actuelle et y ouvre la nouvelle frise, qui lui est rattachée avec la même visibilité et les mêmes catégories.<template v-if="preview.movedPeriodCount"> Les sous-périodes quittent la frise actuelle pour éviter une structure en double.</template></p>
       </div>
       <p v-if="error" role="alert" class="story-from-period__error">{{ error }}</p>
     </form>
@@ -32,11 +33,13 @@ const emit = defineEmits<{ close: []; confirm: [title: string] }>();
 const title = ref(props.preview.label);
 const touched = ref(false);
 const titleError = computed(() => touched.value && !title.value.trim() ? 'Le titre est obligatoire.' : '');
-const subPeriods = computed(() => props.preview.periodCount - 1);
-const subPeriodsLabel = computed(() => subPeriods.value === 0 ? 'Aucune sous-période' : `${subPeriods.value} sous-période${subPeriods.value > 1 ? 's' : ''}`);
+const plural = (count: number, word: string) => `${count} ${word}${count > 1 ? 's' : ''}`;
+const subPeriodsLabel = computed(() => props.preview.movedPeriodCount === 0 ? 'Aucune sous-période'
+  : `${plural(props.preview.movedPeriodCount, 'sous-période')}, déplacée${props.preview.movedPeriodCount > 1 ? 's' : ''} depuis la frise actuelle`);
 const eventsLabel = computed(() => props.preview.eventCount === 0
   ? 'Aucun événement de la frise dans cette plage'
-  : `${props.preview.eventCount} événement${props.preview.eventCount > 1 ? 's' : ''} de la frise dans cette plage`);
+  : `${plural(props.preview.eventCount, 'événement')} de la frise dans cette plage, copié${props.preview.eventCount > 1 ? 's' : ''}`);
+const linkedLabel = computed(() => `${plural(props.preview.linkedStoryCount, 'frise')} reliée${props.preview.linkedStoryCount > 1 ? 's' : ''} à ces sous-périodes, rattachée${props.preview.linkedStoryCount > 1 ? 's' : ''} à la nouvelle frise`);
 function submit() {
   touched.value = true;
   if (!props.busy && title.value.trim()) emit('confirm', title.value.trim());

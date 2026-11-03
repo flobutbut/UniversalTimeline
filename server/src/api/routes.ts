@@ -191,7 +191,7 @@ router.post('/stories/:contextId/presentations', endpoint('Impossible de modifie
 router.get('/stories/:id', endpoint('Erreur lors de la récupération du détail de la frise', async (req, res) => {
   res.json(await stories.getStory(parseStoryId(req.params.id)));
 }));
-// One transaction: create the child frise, copy the period branch and events, anchor it. Never retried automatically.
+// One transaction: create the child frise, move the sub-periods and their links, copy the events, anchor it. Never retried automatically.
 router.post('/stories/:storyId/from-period', endpoint('Impossible de créer la frise depuis cette période.', async (req, res) => {
   const id = parseStoryId(req.params.storyId, 'storyId');
   const { periodId, title } = parseStoryFromPeriod(req.body);

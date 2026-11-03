@@ -80,14 +80,22 @@ export async function unlinkChildStory(client: TransactionClient, parentId: stri
   if (!await relations.lockChildStory(client, parentId, childId)) throw new StoryAssociationError(404, 'Liaison introuvable.');
   await relations.detachChildStory(client, parentId, childId);
 }
-/** Creates a child frise anchored on one period, with its sub-periods and the events in its time range. */
+/** Creates a child frise anchored on one period. Its sub-periods move there with the links that target them;
+ * the period stays in the source as the anchor, and the events in its time range are copied. */
 export async function createStoryFromPeriod(client: TransactionClient, sourceId: string, periodId: string, title: string) {
-  await relations.setRelationLockTimeout(client);
-  const source = await relations.lockSplitSource(client, sourceId, principalContext.getStore()?.userId);
+  await relations.lockStoryHierarchy(client);
+  const userId = principalContext.getStore()?.userId;
+  const source = await relations.lockSplitSource(client, sourceId, userId);
   if (!source) throw new StoryAssociationError(404, 'Frise introuvable ou non modifiable.');
   const placements = await relations.readEffectivePeriodPlacements(client, sourceId);
   const subtree = periodSubtree(placements, periodId);
   if (!subtree) throw new StoryAssociationError(404, 'Cette période n’appartient plus à la frise.');
+  const moved = subtree.slice(1).map(row => row.id);
+  const linked = moved.length ? await relations.readMovedPeriodLinks(client, sourceId, moved) : [];
+  // RLS lets only the owner of both ends rewrite a link: refuse rather than let a cascade drop it.
+  if (userId && linked.some(row => row.owner_user_id !== userId)) {
+    throw new StoryAssociationError(409, 'Une frise liée à ces sous-périodes appartient à un autre compte : la création est refusée.');
+  }
   const root = placements.find(row => row.id === periodId)!;
   // One reference instant: an event on the period's first day must compare equal, not a few ms older.
   const now = Date.now();
@@ -96,11 +104,16 @@ export async function createStoryFromPeriod(client: TransactionClient, sourceId:
   const eventIds = itemsWithinPeriod(events,
     comparableYearsBeforePresent(root.start_date, root.start_years_bp, now), comparableYearsBeforePresent(root.end_date, root.end_years_bp, now));
   const story = await relations.insertDerivedStory(client, sourceId, title, await creatorAuthor(client, source.author), source.is_public);
+  const storyId = String(story.id);
   await relations.insertFrozenPlacements(client, story.id, subtree);
-  if (eventIds.length) await relations.insertAssociations(client, String(story.id), 'event', eventIds);
-  await relations.insertChildAnchor(client, String(story.id), 'period', periodId);
-  await relations.changePresentation(client, sourceId, periodId, String(story.id), false);
+  if (eventIds.length) await relations.insertAssociations(client, storyId, 'event', eventIds);
+  await relations.insertChildAnchor(client, storyId, 'period', periodId);
+  await relations.changePresentation(client, sourceId, periodId, storyId, false);
+  if (moved.length) {
+    await relations.transferMovedPeriodLinks(client, sourceId, storyId, moved, linked.filter(row => row.child).map(row => String(row.id)));
+    await relations.deletePeriodMemberships(client, sourceId, moved);
+  }
   const categories = (await readEntityCategories(client, 'story', sourceId)).map(category => category.id);
   if (categories.length) await replaceEntityCategories(client, 'story', story.id, categories);
-  return { id: String(story.id), parentStoryId: sourceId, periodId, periodCount: subtree.length, eventCount: eventIds.length };
+  return { id: storyId, parentStoryId: sourceId, periodId, periodCount: subtree.length, eventCount: eventIds.length, movedPeriodCount: moved.length, linkedStoryCount: linked.length };
 }

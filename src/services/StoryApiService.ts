@@ -6,6 +6,7 @@ import { mapToListStory, mapToStory, mapToStorySuggestion } from './entityMapper
 import type { WikidataTimelineItem, ExistingWikidataStory } from '@/types/wikidataGeneration';
 import { effectiveWikidataParent } from '@/lib/wikidataHierarchy';
 export { mapToListStory } from './entityMappers';
+export interface StoryFromPeriodResult { id: string; periodCount: number; eventCount: number; movedPeriodCount: number; linkedStoryCount: number }
 
 // Le serveur signe la frise avec le compte connecté ; un auteur vide n'est pas transmis.
 const storyPayload = (data: StoryFormPayload): StoryFormPayload => ({
@@ -92,13 +93,15 @@ export class StoryApiService {
   async changeAssociations(storyId: string, kind: 'period' | 'event', ids: string[], remove = false, parentPeriodId?: string | null): Promise<void> {
     await apiClient.post(`/stories/${storyId}/${kind === 'period' ? 'periods' : 'events'}`, { ids: [...new Set(ids)], operation: remove ? 'remove' : 'add', ...(parentPeriodId !== undefined ? { parentPeriodId } : {}) });
   }
-  /** Crée une frise enfant ancrée sur une période : branche de périodes et événements de sa plage copiés. */
-  async createStoryFromPeriod(storyId: string, periodId: string, title: string): Promise<{ id: string; periodCount: number; eventCount: number }> {
-    const result = await apiClient.post<{ id: string | number; periodCount: number; eventCount: number }>(`/stories/${storyId}/from-period`, { periodId, title });
-    if (!result || (typeof result.id !== 'string' && typeof result.id !== 'number') || !Number.isInteger(result.periodCount) || !Number.isInteger(result.eventCount)) {
+  /** Crée une frise enfant ancrée sur une période : sous-périodes et leurs liens déplacés, événements de sa plage copiés. */
+  async createStoryFromPeriod(storyId: string, periodId: string, title: string): Promise<StoryFromPeriodResult> {
+    const result = await apiClient.post<Partial<Record<keyof StoryFromPeriodResult, unknown>>>(`/stories/${storyId}/from-period`, { periodId, title });
+    const counts = ['periodCount', 'eventCount', 'movedPeriodCount', 'linkedStoryCount'] as const;
+    if (!result || (typeof result.id !== 'string' && typeof result.id !== 'number') || !counts.every(key => Number.isInteger(result[key]))) {
       throw new Error('Réponse invalide après la création de la frise.');
     }
-    return { id: String(result.id), periodCount: result.periodCount, eventCount: result.eventCount };
+    return { id: String(result.id), periodCount: result.periodCount as number, eventCount: result.eventCount as number,
+      movedPeriodCount: result.movedPeriodCount as number, linkedStoryCount: result.linkedStoryCount as number };
   }
   async changePresentation(contextId: string, periodId: string, targetStoryId: string, remove = false): Promise<void> {
     await apiClient.post(`/stories/${contextId}/presentations`, { periodId, targetStoryId, operation: remove ? 'remove' : 'add' });

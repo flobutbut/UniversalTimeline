@@ -4,7 +4,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { effectScope } from 'vue';
 import StoryItemActionsMenu from '@/views/DatabaseView/StoryItemActionsMenu.vue';
 import StoryFromPeriodModal from '@/views/DatabaseView/StoryFromPeriodModal.vue';
-import { previewStoryFromPeriod } from '@/lib/storyFromPeriod';
+import { linkedStoryIds, previewStoryFromPeriod } from '@/lib/storyFromPeriod';
 import { StoryApiService } from '@/services/StoryApiService';
 import { apiClient } from '@/services/ApiClient';
 import { useDatabaseView } from '@/composables/useDatabaseView';
@@ -21,11 +21,24 @@ const event = (id: string, date: string) => ({ id, label: { fr: id, en: '' }, da
 const periods = [period('root', '1957-10-04', 'TODAY'), period('apollo', '1961-05-25', '1972-12-19', 'root'), period('gemini', '1961-12-07', '1966-11-15', 'apollo'), period('mir', '1986-02-20', '2001-03-23', 'root')];
 const events = [event('in', '1969-07-16'), event('edge', '1972-12-19'), event('out', '1986-02-20'), event('undated', '')];
 
-it('previews the copied branch and the frise events within the period, bounds included', () => {
-  expect(previewStoryFromPeriod(periods, events, 'apollo')).toMatchObject({ label: 'apollo', periodCount: 2, eventCount: 2, datesKnown: true });
-  expect(previewStoryFromPeriod(periods, events, 'mir')).toMatchObject({ periodCount: 1, eventCount: 1 });
+it('previews the moved branch and the frise events within the period, bounds included', () => {
+  expect(previewStoryFromPeriod(periods, events, 'apollo')).toMatchObject({ label: 'apollo', periodCount: 2, movedPeriodCount: 1, linkedStoryCount: 0, eventCount: 2, datesKnown: true });
+  expect(previewStoryFromPeriod(periods, events, 'mir')).toMatchObject({ periodCount: 1, movedPeriodCount: 0, eventCount: 1 });
   expect(previewStoryFromPeriod([period('vague', '', '')], events, 'vague')).toMatchObject({ eventCount: 0, datesKnown: false });
   expect(previewStoryFromPeriod(periods, events, 'absent')).toBeNull();
+});
+
+it('counts the frises linked to the moved sub-periods, as the server transfers them', () => {
+  const story = {
+    id: '14',
+    childStories: [
+      { id: '20', title: { fr: '', en: '' }, anchors: [{ type: 'period' as const, id: 'gemini' }] },
+      { id: '21', title: { fr: '', en: '' }, anchors: [{ type: 'period' as const, id: 'apollo' }] },
+    ],
+    navigationContexts: [{ id: '30', title: { fr: '', en: '' }, periods: [], presentations: [{ periodId: 'gemini', storyId: '14', title: { fr: '', en: '' } }] }],
+  };
+  expect(linkedStoryIds(story, ['gemini'])).toEqual(['20', '30']);
+  expect(previewStoryFromPeriod(periods, events, 'apollo', story)?.linkedStoryCount).toBe(2);
 });
 
 it('offers « Créer une frise » only on periods and emits it', async () => {
@@ -41,12 +54,13 @@ it('offers « Créer une frise » only on periods and emits it', async () => {
   expect(view.emitted('create-story')).toHaveLength(1);
 });
 
-it('describes the copy, keeps the source untouched and confirms a trimmed, non-empty title', async () => {
+it('describes the move, keeps the period as anchor and confirms a trimmed, non-empty title', async () => {
   const preview = previewStoryFromPeriod(periods, events, 'apollo')!;
   view = mount(StoryFromPeriodModal, { props: { preview }, attachTo: document.body }); await flushPromises();
   const text = document.body.textContent ?? '';
-  expect(text).toContain('1 sous-période'); expect(text).toContain('2 événements de la frise dans cette plage');
-  expect(text).toContain('La frise actuelle n’est pas modifiée');
+  expect(text).toContain('1 sous-période, déplacée depuis la frise actuelle'); expect(text).toContain('2 événements de la frise dans cette plage, copiés');
+  expect(text).toContain('La période reste dans la frise actuelle');
+  expect(text).toContain('Les sous-périodes quittent la frise actuelle');
   const input = document.querySelector<HTMLInputElement>('input')!;
   expect(input.value).toBe('apollo');
   input.value = '   '; input.dispatchEvent(new Event('input'));
@@ -72,7 +86,7 @@ describe('from the Frises page state', () => {
     return { state, scope };
   }
   it('creates the frise in one request and closes the dialog on success', async () => {
-    const create = vi.spyOn(StoryApiService.getInstance(), 'createStoryFromPeriod').mockResolvedValue({ id: '16', periodCount: 2, eventCount: 2 });
+    const create = vi.spyOn(StoryApiService.getInstance(), 'createStoryFromPeriod').mockResolvedValue({ id: '16', periodCount: 2, eventCount: 2, movedPeriodCount: 1, linkedStoryCount: 0 });
     const { state, scope } = start();
     state.openStoryFromPeriod('apollo');
     expect(state.storyFromPeriod.value?.preview.periodCount).toBe(2);

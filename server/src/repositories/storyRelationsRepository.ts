@@ -133,6 +133,54 @@ export async function insertFrozenPlacements(client: TransactionClient, storyId:
     [storyId, ...placements.flatMap(row => [row.id, row.parent_id])]);
 }
 
+/** Frises linked to periods leaving the source: children anchored on them, entry targets, presentation ends. */
+export async function readMovedPeriodLinks(client: TransactionClient, sourceId: string, periodIds: string[]) {
+  return (await client.query<{ id: number; owner_user_id: string | null; child: boolean }>(`
+    WITH linked AS (
+      SELECT child.id, true AS child FROM public.stories child JOIN public.story_anchors a ON a.story_id = child.id
+      WHERE child.parent_story_id = $1 AND a.anchor_type = 'period' AND a.anchor_id = ANY($2::varchar[])
+      UNION SELECT target_story_id, false FROM public.story_entry_points WHERE source_story_id = $1 AND period_id = ANY($2::varchar[])
+      UNION SELECT target_story_id, false FROM public.story_period_presentations WHERE context_story_id = $1 AND period_id = ANY($2::varchar[])
+      UNION SELECT context_story_id, false FROM public.story_period_presentations WHERE target_story_id = $1 AND period_id = ANY($2::varchar[])
+    )
+    SELECT s.id, s.owner_user_id, bool_or(linked.child) AS child FROM linked JOIN public.stories s ON s.id = linked.id
+    GROUP BY s.id, s.owner_user_id ORDER BY s.id`, [sourceId, periodIds])).rows;
+}
+/** Links on moved periods follow them into the derived frise, before the source memberships are removed. */
+export async function transferMovedPeriodLinks(client: TransactionClient, sourceId: string, targetId: string, periodIds: string[], childIds: string[]) {
+  if (childIds.length) {
+    await client.query('UPDATE public.stories SET parent_story_id = $1 WHERE id = ANY($2::int[]) AND parent_story_id = $3', [targetId, childIds, sourceId]);
+    // Anchors absent from the new parent keep their access from the source as entry points.
+    await client.query(`
+      WITH stale AS (
+        DELETE FROM public.story_anchors a WHERE a.story_id = ANY($3::int[]) AND NOT EXISTS (
+          SELECT 1 FROM public.story_periods sp WHERE a.anchor_type = 'period' AND sp.story_id = $2 AND sp.period_id = a.anchor_id
+          UNION ALL SELECT 1 FROM public.story_events se WHERE a.anchor_type = 'event' AND se.story_id = $2 AND se.event_id = a.anchor_id)
+        RETURNING a.story_id, a.anchor_type, a.anchor_id)
+      INSERT INTO public.story_entry_points (source_story_id, target_story_id, period_id, event_id)
+      SELECT $1, stale.story_id, CASE WHEN anchor_type = 'period' THEN anchor_id END, CASE WHEN anchor_type = 'event' THEN anchor_id END
+      FROM stale WHERE EXISTS (
+        SELECT 1 FROM public.story_periods sp WHERE stale.anchor_type = 'period' AND sp.story_id = $1 AND sp.period_id = stale.anchor_id
+        UNION ALL SELECT 1 FROM public.story_events se WHERE stale.anchor_type = 'event' AND se.story_id = $1 AND se.event_id = stale.anchor_id)
+      ON CONFLICT DO NOTHING`, [sourceId, targetId, childIds]);
+  }
+  await client.query(`
+    WITH moved AS (DELETE FROM public.story_entry_points WHERE source_story_id = $1 AND period_id = ANY($3::varchar[]) RETURNING target_story_id, period_id)
+    INSERT INTO public.story_entry_points (source_story_id, target_story_id, period_id)
+    SELECT $2, target_story_id, period_id FROM moved WHERE target_story_id <> $2 ON CONFLICT DO NOTHING`, [sourceId, targetId, periodIds]);
+  await client.query(`
+    WITH moved AS (DELETE FROM public.story_period_presentations WHERE context_story_id = $1 AND period_id = ANY($3::varchar[]) RETURNING period_id, target_story_id)
+    INSERT INTO public.story_period_presentations (context_story_id, period_id, target_story_id)
+    SELECT $2, period_id, target_story_id FROM moved WHERE target_story_id <> $2 ON CONFLICT DO NOTHING`, [sourceId, targetId, periodIds]);
+  await client.query(`
+    WITH moved AS (DELETE FROM public.story_period_presentations WHERE target_story_id = $1 AND period_id = ANY($3::varchar[]) RETURNING context_story_id, period_id)
+    INSERT INTO public.story_period_presentations (context_story_id, period_id, target_story_id)
+    SELECT context_story_id, period_id, $2 FROM moved WHERE context_story_id <> $2 ON CONFLICT DO NOTHING`, [sourceId, targetId, periodIds]);
+}
+export async function deletePeriodMemberships(client: TransactionClient, storyId: string, periodIds: string[]) {
+  await client.query('DELETE FROM public.story_periods WHERE story_id = $1 AND period_id = ANY($2::varchar[])', [storyId, periodIds]);
+}
+
 /** Explicitly declare a detail view; composite foreign keys validate both memberships. */
 export async function changePresentation(client: TransactionClient, contextId: string, periodId: string, targetId: string, remove: boolean) {
   if (remove) await client.query('DELETE FROM public.story_period_presentations WHERE context_story_id=$1 AND period_id=$2 AND target_story_id=$3', [contextId, periodId, targetId]);
