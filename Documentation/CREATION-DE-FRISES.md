@@ -114,22 +114,27 @@ Autres règles :
 
 Il n'y a **qu'un seul moteur de dates** : `server/src/shared/temporal.ts`. Ne jamais calculer les années à la main.
 
+Le moteur ramène toute date sur un seul axe, en années avant aujourd'hui. Le texte stocké, lui, suit **un format canonique par échelle** ; depuis le 3 novembre 2026, toute la base l'applique.
+
 | Cas | Format à écrire | Affichage |
 | --- | --- | --- |
-| Échelle géologique | `G2.4`, `M445`, `M66.04`, `K11.7` | « il y a 445.0 Ma » |
+| Temps profond (au-delà d'environ 12 000 ans) | `G13.8`, `M66`, `K40` (années avant aujourd'hui) | « il y a 66.0 Ma », « 40 000 ans » |
 | Années avant J.-C. | `3000 BCE` | « 3000 av. J.-C. » |
+| Jour avant J.-C. | ISO sans heure, en année **astronomique** : `-0489-08-12` (an 0 = 1 av. J.-C.) | « 12 août 490 av. J.-C. » |
 | Années après J.-C., précision année | `0950`, `1850` (toujours 4 chiffres) | « 950 », « 1850 » |
 | Précision mois | `1958-03` | « mars 1958 » |
 | Précision jour | `1789-07-14` | « 14 juillet 1789 » |
+| Heure réellement connue | `1969-07-16T13:32:00Z` | avec l'heure |
 | Jusqu'à aujourd'hui | `TODAY` | « aujourd'hui » |
 
-- **Ne pas écrire d'année négative au format ISO** (`-9600-01-01T00:00:00Z`). Le moteur la lit comme une année astronomique, ce qui donne « 9601 av. J.-C. » avec un « 1 janvier » parasite. Ce format reste dans d'anciennes fiches : voir les corrections à prévoir dans [FRISES-A-CREER.md](FRISES-A-CREER.md).
+- **Ne jamais écrire d'horodatage complet** (`…T00:00:00Z`) sans heure réelle : le moteur en déduit une précision à la seconde et affiche un « 1 janvier » parasite.
+- **Deux conventions pour les années négatives.** Le moteur suit la norme ISO, avec un an 0 : `-0490` vaut 491 av. J.-C. L'API JSON de Wikidata (`wbgetentities`) n'en a pas : `-0490` y vaut 490 av. J.-C. ; le SPARQL de Wikidata, lui, suit la norme. Une date reprise du JSON de Wikidata s'écrit donc `490 BCE`, jamais `-0490`.
+- **Temps profond : compter depuis aujourd'hui**, avec `G`, `M` ou `K`. Une année ISO comme `-66000000` compte depuis l'an 0 et décale de 2 026 ans.
 - **Choisir la précision réelle de la source.** Pas de jour inventé quand seule l'année est connue.
 - **Avant 1582, utiliser les dates usuelles (calendrier julien)** : Crécy le 26 août 1346, pas le 3 septembre que donne Wikidata en grégorien proleptique.
 - **`start_years_bp`, `end_years_bp` et `date_years_bp`** se calculent avec `yearsBeforePresent()`, arrondis à 3 décimales pour éviter les artefacts du type `66400000.00000001`.
 - **Le début doit être strictement antérieur à la fin.**
 - **Les années stockées dépendent de la date du calcul.** Pour une frise au jour près, recalculer les `*_years_bp` des anciennes fiches réutilisées en même temps que les nouvelles, sinon une sous-période semble déborder de son parent de quelques mois.
-- **Mélanger une date calendaire et une date géologique crée un petit écart.** Exemple : le Cryogénien stocké en ISO et une glaciation en `M635`, soit environ 2 000 ans. Dans les contrôles d'imbrication, tolérer environ 1e-5 de l'âge du parent.
 
 ## 6. Identifiants Wikidata
 
