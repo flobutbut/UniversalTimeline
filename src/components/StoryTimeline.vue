@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasItems" class="story-timeline" :class="{ 'story-timeline--compact': compact }" @click.self="emit('deselect')">
+  <div v-if="hasItems" class="story-timeline" :class="{ 'story-timeline--compact': compact, 'story-timeline--collapsible': collapsible }" :style="{ '--story-bar-height': barSizes.barHeight + 'px', '--story-root-height': barSizes.rootHeight + 'px' }" @click.self="emit('deselect')">
     <div v-if="bounds" class="story-timeline__track" ref="trackRef" :style="{ height: trackHeight + 'px' }" @click.self="emit('deselect')">
       <!-- Axe -->
       <div v-if="!compact || positionedEvents.length" class="story-timeline__axis" />
@@ -9,26 +9,46 @@
         v-for="p in positionedPeriods"
         :key="p.id"
         :data-period-id="p.id"
-        class="story-timeline__period-bar"
-        :class="{
-          'story-timeline__period-bar--root': p.isRoot,
-          'story-timeline__period-bar--selected': selectedPeriodId === p.id,
-        }"
+        class="story-timeline__period"
+        :class="{ 'story-timeline__period--root': p.isRoot }"
         :style="{
           '--story-period-left': p.left + '%',
           '--story-period-width': Math.max(p.width, 0.5) + '%',
           '--story-period-top': p.top + 'px',
         }"
-        @click="emit('select-period', p.id)"
-        @mouseenter="showTooltip($event, p.label, p.detail)"
-        @mouseleave="hideTooltip"
-      />
+      >
+        <component
+          :is="compact && !collapsible ? 'div' : 'button'"
+          :type="compact && !collapsible ? undefined : 'button'"
+          :aria-label="`${p.label} · ${p.detail}`"
+          :aria-pressed="compact && !collapsible ? undefined : selectedPeriodId === p.id"
+          class="story-timeline__period-bar"
+          :class="{ 'story-timeline__period-bar--root': p.isRoot, 'story-timeline__period-bar--selected': selectedPeriodId === p.id, 'story-timeline__period-bar--has-children': collapsible && parentIds.has(p.id) }"
+          @click="emit('select-period', p.id)"
+          @mouseenter="showTooltip($event, p.label, p.detail)"
+          @mouseleave="hideTooltip"
+        >
+          <span v-if="collapsible" class="story-timeline__period-content" aria-hidden="true">
+            <span class="story-timeline__period-name">{{ p.label }}</span>
+            <span class="story-timeline__period-dates">{{ p.detail }}</span>
+          </span>
+        </component>
+        <button v-if="collapsible && parentIds.has(p.id)" type="button" class="story-timeline__period-toggle"
+          :aria-label="toggleLabel(p.id, p.label)" :title="toggleLabel(p.id, p.label)" :aria-expanded="!collapsedIds.has(p.id)"
+          @click.stop="togglePeriod(p.id)" @mouseenter="hideTooltip">
+          <Icon :icon="collapsedIds.has(p.id) ? 'mdi:chevron-right' : 'mdi:chevron-down'" aria-hidden="true" />
+        </button>
+      </div>
 
       <!-- Marqueurs d'événements -->
-      <div
+      <component
+        :is="compact && !collapsible ? 'div' : 'button'"
+        :type="compact && !collapsible ? undefined : 'button'"
         v-for="e in positionedEvents"
         :key="e.id"
         class="story-timeline__event-marker"
+        :aria-label="`${e.label}${e.detail ? ' · ' + e.detail : ''}`"
+        :aria-pressed="compact && !collapsible ? undefined : selectedEventId === e.id"
         :class="{
           'story-timeline__event-marker--selected': selectedEventId === e.id,
           'story-timeline__event-marker--major': e.importance === 'major',
@@ -49,7 +69,13 @@
 
     <div v-if="undatedPeriods.length || undatedEvents.length" class="story-timeline__undated">
       <span>Dates non déterminées</span>
-      <Button variant="tertiary" size="xs" v-for="p in undatedPeriods" :key="`p:${p.id}`" type="button" @click="emit('select-period', p.id)">{{ p.label?.fr || p.id }}</Button>
+      <span v-for="p in undatedPeriods" :key="`p:${p.id}`" class="story-timeline__undated-group">
+        <Button variant="tertiary" size="xs" type="button" @click="emit('select-period', p.id)">{{ p.label?.fr || p.id }}</Button>
+        <button v-if="collapsible && parentIds.has(p.id)" type="button" class="story-timeline__period-toggle story-timeline__period-toggle--undated"
+          :aria-label="toggleLabel(p.id, p.label?.fr || p.id)" :title="toggleLabel(p.id, p.label?.fr || p.id)" :aria-expanded="!collapsedIds.has(p.id)" @click.stop="togglePeriod(p.id)">
+          <Icon :icon="collapsedIds.has(p.id) ? 'mdi:chevron-right' : 'mdi:chevron-down'" aria-hidden="true" />
+        </button>
+      </span>
       <Button variant="tertiary" size="xs" v-for="e in undatedEvents" :key="`e:${e.id}`" type="button" @click="emit('select-event', e.id)">{{ typeof e.label === 'string' ? e.label : e.label?.fr || e.id }}</Button>
     </div>
 
@@ -69,12 +95,13 @@
 
 <script setup lang="ts">
 import Button from '@/components/base/Button.vue';
-import { computed, ref } from 'vue';
+import { Icon } from '@iconify/vue';
+import { computed, ref, watch } from 'vue';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import { EVENT_IMPORTANCE_LABELS } from '@/lib/eventImportance';
 import type { StoryTimelinePeriod as InPeriod, StoryTimelineEvent as InEvent } from '@/types/storyTimeline';
 import type { EventImportance } from '@/types/database';
-import { COMPACT_BAR_HEIGHT, COMPACT_LANE_GAP, COMPACT_ROOT_HEIGHT, layoutCompactLanes } from '@/lib/compactStoryTimeline';
+import { COMPACT_BAR_HEIGHT, COMPACT_LANE_GAP, COMPACT_ROOT_HEIGHT, INTERACTIVE_BAR_SIZES, layoutCompactLanes } from '@/lib/compactStoryTimeline';
 import { resolveYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
 import {
   formatStoryTimelineBoundLabel,
@@ -83,6 +110,7 @@ import {
 
 const props = defineProps<{
   compact?: boolean;
+  collapsible?: boolean;
   periods?: InPeriod[];
   events?: InEvent[];
   selectedPeriodId?: string | null;
@@ -98,7 +126,43 @@ const emit = defineEmits<{
 // ─── Constantes layout ───────────────────────────────────────────────────────
 
 const ROW_STEP = 12;
-const ROW_OFFSET = 12;
+const ROW_OFFSET = 16;
+const barSizes = computed(() => props.collapsible ? INTERACTIVE_BAR_SIZES : { rootHeight: COMPACT_ROOT_HEIGHT, barHeight: COMPACT_BAR_HEIGHT, gap: COMPACT_LANE_GAP });
+const rowStep = computed(() => props.collapsible ? barSizes.value.rootHeight + barSizes.value.gap : ROW_STEP);
+
+// Folding affects the preview only; bounds and selected catalogue items stay intact.
+const collapsedIds = ref(new Set<string>());
+const periodsById = computed(() => new Map((props.periods ?? []).map(period => [period.id, period])));
+const parentIds = computed(() => new Set((props.periods ?? []).flatMap(period => {
+  const parent = getStoryPeriodParentId(period);
+  return parent && parent !== period.id && periodsById.value.has(parent) ? [parent] : [];
+})));
+const visiblePeriodIds = computed(() => new Set((props.periods ?? []).filter(period => {
+  if (!props.collapsible) return true;
+  const visited = new Set([period.id]);
+  let parent = getStoryPeriodParentId(period);
+  while (parent && !visited.has(parent) && periodsById.value.has(parent)) {
+    if (collapsedIds.value.has(parent)) return false;
+    visited.add(parent);
+    parent = getStoryPeriodParentId(periodsById.value.get(parent)!);
+  }
+  return true;
+}).map(period => period.id)));
+
+watch(parentIds, parents => {
+  const retained = new Set([...collapsedIds.value].filter(id => parents.has(id)));
+  if (retained.size !== collapsedIds.value.size) collapsedIds.value = retained;
+});
+
+function togglePeriod(id: string) {
+  if (!props.collapsible || !parentIds.value.has(id)) return;
+  const next = new Set(collapsedIds.value);
+  if (next.has(id)) next.delete(id); else next.add(id);
+  collapsedIds.value = next;
+  hideTooltip();
+}
+
+const toggleLabel = (id: string, label: string) => `${collapsedIds.value.has(id) ? 'Déplier' : 'Replier'} les sous-périodes de ${label}`;
 
 // ─── Tooltip ─────────────────────────────────────────────────────────────────
 
@@ -129,7 +193,7 @@ const coordinates = computed(() => {
 });
 const datedPeriods = computed(() => coordinates.value.periods.flatMap(({p, start, end}) => start !== null && end !== null ? [{...p, startYbp:start, endYbp:end}] : []));
 const datedEvents = computed(() => coordinates.value.events.flatMap(({e, date}) => date !== null ? [{...e, dateYbp:date}] : []));
-const undatedPeriods = computed(() => coordinates.value.periods.filter(row => row.start === null || row.end === null).map(row => row.p));
+const undatedPeriods = computed(() => coordinates.value.periods.filter(row => visiblePeriodIds.value.has(row.p.id) && (row.start === null || row.end === null)).map(row => row.p));
 const undatedEvents = computed(() => coordinates.value.events.filter(row => row.date === null).map(row => row.e));
 const bounds = computed(() => {
   const ybps = [...datedPeriods.value.flatMap(p => [p.startYbp, p.endYbp]), ...datedEvents.value.map(e => e.dateYbp)];
@@ -159,7 +223,7 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
   const b = bounds.value;
   if (!b) return [];
 
-  const periods = datedPeriods.value;
+  const periods = datedPeriods.value.filter(period => visiblePeriodIds.value.has(period.id));
   const periodIds = new Set(periods.map(p => p.id));
 
   type DatedPeriod = typeof periods[number];
@@ -170,7 +234,7 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
     const recentYbp  = Math.min(sYbp, eYbp);
     return {
       id: p.id,
-      label: p.label?.fr ?? '',
+      label: p.label?.fr || p.label?.en || p.id,
       detail: formatStoryTimelinePeriodDetail(p),
       left: toLeft(ancientYbp),
       width: toLeft(recentYbp) - toLeft(ancientYbp),
@@ -202,14 +266,17 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
   const ordered: PosPeriod[] = [];
   let rowCursor = 0;
   let firstGroup = true;
+  const visited = new Set<string>();
 
   function traverse(p: DatedPeriod, depth: number) {
+    if (visited.has(p.id)) return;
+    visited.add(p.id);
     const isRoot = depth === 0;
     if (isRoot && !firstGroup) rowCursor += GROUP_GAP;
     if (isRoot) firstGroup = false;
     const pos = toPos(p, depth);
     pos.row = rowCursor;
-    pos.top = rowCursor * ROW_STEP + ROW_OFFSET;
+    pos.top = rowCursor * rowStep.value + ROW_OFFSET;
     rowCursor += 1;
     ordered.push(pos);
     const children = (childrenMap.get(p.id) ?? [])
@@ -231,11 +298,17 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
     })
     .forEach(r => traverse(r, 0));
 
-  // Miniature : racines et enfants directs seulement, sur un nombre de lignes borné.
-  if (props.compact) return layoutCompactLanes(ordered.filter(period => period.depth <= 1)).placed.map(period => ({ ...period, row: period.lane }));
+  // Legacy cycles remain bounded and visible instead of recursing indefinitely.
+  periods.filter(period => !visited.has(period.id)).forEach(period => traverse(period, 0));
+
+  // Passive cards stay bounded. Interactive previews expose every expanded level.
+  if (props.compact) {
+    const bars = props.collapsible ? ordered : ordered.filter(period => period.depth <= 1);
+    return layoutCompactLanes(bars, props.collapsible ? bars.length : undefined, barSizes.value).placed.map(period => ({ ...period, row: period.lane }));
+  }
   return ordered;
 });
-const compactPeriodsHeight = computed(() => props.compact ? Math.max(0, ...positionedPeriods.value.map(p => p.top + (p.isRoot ? COMPACT_ROOT_HEIGHT : COMPACT_BAR_HEIGHT))) : 0);
+const compactPeriodsHeight = computed(() => props.compact ? Math.max(0, ...positionedPeriods.value.map(p => p.top + (p.isRoot ? barSizes.value.rootHeight : barSizes.value.barHeight))) : 0);
 
 // ─── Événements positionnés ───────────────────────────────────────────────────
 
@@ -261,8 +334,8 @@ const trackHeight = computed(() => {
   const pp = positionedPeriods.value;
   const maxRow = pp.length === 0 ? 0 : Math.max(...pp.map(p => p.row));
   // Compact : les événements occupent une ligne de 16 px sous les périodes, avec le même écart.
-  if (props.compact) return compactPeriodsHeight.value + (positionedEvents.value.length ? (compactPeriodsHeight.value ? COMPACT_LANE_GAP : 0) + 16 : 0);
-  return Math.max(68, ROW_OFFSET + (maxRow + 1) * ROW_STEP + 8);
+  if (props.compact) return compactPeriodsHeight.value + (positionedEvents.value.length ? (compactPeriodsHeight.value ? barSizes.value.gap : 0) + 16 : 0);
+  return Math.max(68, ROW_OFFSET + (maxRow + 1) * rowStep.value + 8);
 });
 
 // ─── Labels bornes ────────────────────────────────────────────────────────────
@@ -285,7 +358,7 @@ const trackRef = ref<HTMLElement | null>(null);
 
 
 .story-timeline {
-  padding: var(--spacing-lg) var(--spacing-md) var(--spacing-sm);
+  padding: var(--spacing-lg) var(--spacing-md);
   border-bottom: 1px solid var(--color-border-default);
   flex-shrink: 0;
   background: transparent;
@@ -305,12 +378,23 @@ const trackRef = ref<HTMLElement | null>(null);
   background: var(--color-border-default);
 }
 
-.story-timeline__period-bar {
+.story-timeline__period {
+  container-type: inline-size;
   position: absolute;
   left: var(--story-period-left);
   width: var(--story-period-width);
   top: var(--story-period-top);
-  height: var(--spacing-sm);
+  height: var(--story-bar-height);
+}
+.story-timeline__period--root { height: var(--story-root-height); }
+
+.story-timeline__period-bar {
+  border: 0;
+  padding: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   border-radius: calc(var(--radius-md) / 2);
   background: var(--color-data-period);
   opacity: 0.8;
@@ -325,11 +409,19 @@ const trackRef = ref<HTMLElement | null>(null);
 .story-timeline__period-bar--root {
   background: var(--color-data-period-root);
   opacity: 0.8;
-  height: calc(var(--spacing-sm) + var(--spacing-xs) / 2);
 }
 
 .story-timeline__period-bar--root:hover {
   opacity: 1;
+}
+
+.story-timeline--collapsible .story-timeline__period-bar { opacity: 1; color: var(--color-text-on-period); }
+.story-timeline__period-content { display: flex; align-items: center; gap: var(--spacing-sm); width: 100%; height: 100%; min-width: 0; box-sizing: border-box; padding-inline: var(--spacing-xs); overflow: hidden; text-align: left; font: var(--type-micro); }
+.story-timeline__period-bar--has-children .story-timeline__period-content { padding-right: calc(var(--spacing-lg) + var(--spacing-xs)); }
+.story-timeline__period-name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.story-timeline__period-dates { flex: 0 1 auto; min-width: 0; max-width: 65%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; opacity: .7; font-variant-numeric: tabular-nums; }
+@container (max-width: 240px) {
+  .story-timeline__period-dates { display: none; }
 }
 
 .story-timeline__period-bar--selected {
@@ -342,6 +434,7 @@ const trackRef = ref<HTMLElement | null>(null);
 }
 
 .story-timeline__event-marker {
+  padding: 0;
   /* Taille selon l'importance dans la frise ; le losange, bordure comprise, reste centré sur l'axe. */
   --marker-size: var(--spacing-sm);
   position: absolute;
@@ -373,7 +466,16 @@ const trackRef = ref<HTMLElement | null>(null);
 .story-timeline__foot {
   display: flex;
   justify-content: space-between;
-  margin-top: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+/* A rotated marker extends half its bordered diagonal below the axis.
+   Reserve that overflow so the 8px margin remains clear beneath the diamonds. */
+.story-timeline__track:has(.story-timeline__event-marker) + .story-timeline__foot {
+  padding-top: calc((var(--spacing-sm) + 2px) * .707107);
+}
+.story-timeline__track:has(.story-timeline__event-marker--major) + .story-timeline__foot {
+  padding-top: calc((var(--spacing-md) + 2px) * .707107);
 }
 
 .story-timeline__label {
@@ -384,9 +486,16 @@ const trackRef = ref<HTMLElement | null>(null);
 }
 
 .story-timeline--compact { padding: 0; width: 100%; border: 0; overflow: hidden; pointer-events: none; }
+.story-timeline--collapsible { pointer-events: auto; overflow: visible; }
+.story-timeline__period-bar:focus-visible, .story-timeline__event-marker:focus-visible, .story-timeline__period-toggle:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+.story-timeline__period-toggle { position: absolute; inset: 0 0 0 auto; display: flex; align-items: center; justify-content: center; width: var(--spacing-lg); padding: 0; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); background: var(--color-surface-raised); color: var(--color-text-primary); cursor: pointer; }
+.story-timeline__period-toggle:hover { background: var(--color-surface-subtle); }
+.story-timeline__period-toggle svg { width: 14px; height: 14px; }
+.story-timeline__undated-group { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
+.story-timeline__period-toggle--undated { position: static; width: var(--field-height-sm); height: var(--field-height-sm); }
 /* Bars of one line keep a 2px gap between them, like the gap between lines. */
-.story-timeline--compact .story-timeline__period-bar { width: max(2px, calc(var(--story-period-width) - 2px)); height: 8px; border-radius: 3px; }
-.story-timeline--compact .story-timeline__period-bar--root { height: 10px; }
+.story-timeline--compact .story-timeline__period { width: max(2px, calc(var(--story-period-width) - 2px)); }
+.story-timeline--compact .story-timeline__period-bar { border-radius: 3px; }
 .story-timeline--compact .story-timeline__axis { bottom: 8px; }
 .story-timeline--compact .story-timeline__event-marker { --marker-size: 6px; bottom: calc(8px - (var(--marker-size) + 2px) / 2); }
 .story-timeline--compact .story-timeline__event-marker--major { --marker-size: 9px; }

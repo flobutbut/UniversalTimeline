@@ -26,6 +26,7 @@
   --color-text-link: var(--palette-blue-700);
   --color-text-on-accent: var(--palette-neutral-0);
   --color-text-on-selected: var(--palette-blue-900);
+  --color-text-on-period: var(--palette-neutral-950);
   --color-primary: var(--palette-blue-700);
   --color-primary-dark: var(--palette-blue-800);
   --color-primary-light: var(--palette-blue-100);

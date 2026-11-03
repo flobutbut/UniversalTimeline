@@ -29,3 +29,95 @@ it('stacks overlapping roots before any child line with a constant gap', () => {
   expect(placed.map(item => [item.isRoot, item.lane, item.top])).toEqual([[true, 0, 0], [true, 1, 12], [false, 2, 24], [false, 2, 24]]);
   expect(height).toBe(32);
 });
+
+it('folds nested groups independently without selecting the parent or moving the time axis', async () => {
+  const view = mount(StoryTimeline, { props: { collapsible: true, periods: [
+    period('root', null, 'M65', 'NOW'), period('a', 'root'), period('grandchild', 'a'),
+    period('b', 'root'), period('other', null, 'M80', 'M70'),
+  ], events: [{ id: 'event', label: 'Un événement', date: 'M100' }] } });
+  const bar = (id: string) => view.get(`[data-period-id="${id}"]`);
+  const rootLeft = (bar('root').element as HTMLElement).style.getPropertyValue('--story-period-left');
+  const markerLeft = (view.get('.story-timeline__event-marker').element as HTMLElement).style.left;
+  expect(bar('root').get('.story-timeline__period-bar').element.tagName).toBe('BUTTON');
+  expect(bar('root').get('.story-timeline__period-toggle').attributes('aria-expanded')).toBe('true');
+  await bar('a').get('.story-timeline__period-toggle').trigger('click');
+  expect(visible(view)).toEqual(['other', 'root', 'a', 'b']);
+  await bar('root').get('.story-timeline__period-toggle').trigger('click');
+  expect(visible(view)).toEqual(['other', 'root']);
+  expect(bar('root').get('.story-timeline__period-toggle').attributes('aria-expanded')).toBe('false');
+  expect((bar('root').element as HTMLElement).style.getPropertyValue('--story-period-left')).toBe(rootLeft);
+  expect((view.get('.story-timeline__event-marker').element as HTMLElement).style.left).toBe(markerLeft);
+  await bar('root').get('.story-timeline__period-toggle').trigger('click');
+  expect(bar('a').get('.story-timeline__period-toggle').attributes('aria-expanded')).toBe('false');
+  expect(view.find('[data-period-id="grandchild"]').exists()).toBe(false);
+  await bar('a').get('.story-timeline__period-toggle').trigger('click');
+  expect(visible(view)).toContain('grandchild');
+  expect(view.emitted('select-period')).toBeUndefined();
+  await bar('b').get('.story-timeline__period-bar').trigger('click');
+  expect(view.emitted('select-period')).toEqual([['b']]);
+  await view.get('.story-timeline__event-marker').trigger('click');
+  expect(view.emitted('select-event')).toEqual([['event']]);
+  view.unmount();
+});
+
+it('selects a parent from its bar and only folds its children from the separate sibling control', async () => {
+  const view = mount(StoryTimeline, { props: { collapsible: true, periods: [period('root', null, 'M65', 'NOW'), period('child', 'root')] } });
+  const root = view.get('[data-period-id="root"]');
+  const selection = root.get('.story-timeline__period-bar');
+  const toggle = root.get('.story-timeline__period-toggle');
+  expect(selection.element.contains(toggle.element)).toBe(false);
+  expect(toggle.attributes('aria-label')).toBe('Replier les sous-périodes de root');
+  await selection.trigger('click');
+  expect(view.emitted('select-period')).toEqual([['root']]);
+  await view.setProps({ selectedPeriodId: 'root' });
+  expect(selection.attributes('aria-pressed')).toBe('true');
+  expect(visible(view)).toContain('child');
+  await toggle.trigger('click');
+  expect(visible(view)).toEqual(['root']);
+  expect(toggle.attributes('aria-label')).toBe('Déplier les sous-périodes de root');
+  expect(selection.attributes('aria-pressed')).toBe('true');
+  expect(view.emitted('select-period')).toEqual([['root']]);
+  expect(view.emitted('deselect')).toBeUndefined();
+  await toggle.trigger('click');
+  expect(visible(view)).toContain('child');
+  expect(view.emitted('select-period')).toEqual([['root']]);
+  view.unmount();
+});
+
+it('shows every expanded depth in an interactive compact preview, including overlapping children', async () => {
+  const view = mount(StoryTimeline, { props: { compact: true, collapsible: true, periods: [
+    ...periods, period('grandchild', 'child-0'),
+  ] } });
+  expect(visible(view)).toHaveLength(17);
+  await view.get('[data-period-id="root"] .story-timeline__period-toggle').trigger('click');
+  expect(visible(view)).toEqual(['root']);
+  await view.get('[data-period-id="root"] .story-timeline__period-toggle').trigger('click');
+  expect(visible(view)).toHaveLength(17);
+  view.unmount();
+});
+
+it('uses the local hierarchy when a child is moved out of a folded group and clears removed groups', async () => {
+  const root = period('root', null, 'M65', 'NOW'), child = period('child', 'root');
+  const view = mount(StoryTimeline, { props: { collapsible: true, periods: [root, child] } });
+  await view.get('[data-period-id="root"] .story-timeline__period-toggle').trigger('click');
+  await view.setProps({ periods: [root, { ...child, storyParentId: null }] });
+  expect(visible(view)).toContain('child');
+  await view.setProps({ periods: [root, child] });
+  expect(view.get('[data-period-id="root"] .story-timeline__period-toggle').attributes('aria-expanded')).toBe('true');
+  expect(visible(view)).toContain('child');
+  view.unmount();
+});
+
+it('folds undated descendants without assigning invented coordinates and tolerates legacy cycles', async () => {
+  const view = mount(StoryTimeline, { props: { collapsible: true, periods: [
+    period('root', null, 'M65', 'NOW'), period('unknown', 'root', 'unknown', 'NOW'),
+  ] } });
+  expect(view.get('.story-timeline__undated').text()).toContain('unknown');
+  await view.get('[data-period-id="root"] .story-timeline__period-toggle').trigger('click');
+  expect(view.find('.story-timeline__undated').exists()).toBe(false);
+  await view.get('[data-period-id="root"] .story-timeline__period-toggle').trigger('click');
+  expect(view.get('.story-timeline__undated').text()).toContain('unknown');
+  await view.setProps({ periods: [period('a', 'b'), period('b', 'a')] });
+  expect(visible(view)).toHaveLength(2);
+  view.unmount();
+});

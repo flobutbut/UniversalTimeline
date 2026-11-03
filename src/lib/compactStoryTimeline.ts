@@ -3,6 +3,7 @@ export const COMPACT_MAX_LANES = 4;
 export const COMPACT_ROOT_HEIGHT = 10;
 export const COMPACT_BAR_HEIGHT = 8;
 export const COMPACT_LANE_GAP = 2;
+export const INTERACTIVE_BAR_SIZES = { rootHeight: 18, barHeight: 16, gap: 4 };
 /** Largeur minimale (en %) prise en compte pour qu'une période très brève occupe sa place. */
 const MIN_WIDTH = 0.5;
 
@@ -14,7 +15,7 @@ export type CompactPlacement<T> = T & { lane: number; top: number };
  * Une période qui ne trouve aucune place dans les `maxLanes` lignes est omise de la miniature.
  * Chaque ligne est séparée de la suivante par le même écart, quelle que soit sa hauteur.
  */
-export function layoutCompactLanes<T extends CompactBar>(bars: T[], maxLanes = COMPACT_MAX_LANES): { placed: CompactPlacement<T>[]; height: number } {
+export function layoutCompactLanes<T extends CompactBar>(bars: T[], maxLanes = COMPACT_MAX_LANES, sizes = { rootHeight: COMPACT_ROOT_HEIGHT, barHeight: COMPACT_BAR_HEIGHT, gap: COMPACT_LANE_GAP }): { placed: CompactPlacement<T>[]; height: number } {
   const lanes: { end: number; isRoot: boolean }[] = [];
   const placed: (T & { lane: number })[] = [];
   const byLeft = (a: T, b: T) => a.left - b.left || b.width - a.width;
@@ -31,7 +32,7 @@ export function layoutCompactLanes<T extends CompactBar>(bars: T[], maxLanes = C
   let cursor = 0;
   for (const lane of lanes) {
     tops.push(cursor);
-    cursor += (lane.isRoot ? COMPACT_ROOT_HEIGHT : COMPACT_BAR_HEIGHT) + COMPACT_LANE_GAP;
+    cursor += (lane.isRoot ? sizes.rootHeight : sizes.barHeight) + sizes.gap;
   }
-  return { placed: placed.map(bar => ({ ...bar, top: tops[bar.lane] })), height: Math.max(0, cursor - COMPACT_LANE_GAP) };
+  return { placed: placed.map(bar => ({ ...bar, top: tops[bar.lane] })), height: Math.max(0, cursor - sizes.gap) };
 }

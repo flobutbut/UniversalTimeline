@@ -66,6 +66,7 @@ const pairs = [
   ...['default', 'hover', 'pressed'].map(state => ['--color-text-on-accent', `--color-action-primary-${state}`, 4.5]),
   ...['default', 'hover'].map(state => ['--color-text-on-accent', `--color-action-danger-${state}`, 4.5]),
   ['--color-text-on-selected', '--color-interaction-selected', 4.5],
+  ...['period', 'period-root'].map(period => ['--color-text-on-period', `--color-data-${period}`, 4.5]),
   ...['success', 'warning', 'error'].map(status => [`--color-status-${status}-foreground`, `--color-status-${status}-background`, 4.5]),
   ['--color-wikidata-label-on-selected', '--color-interaction-selected', 4.5],
   ['--color-switch-thumb', '--color-switch-track-off', 3],

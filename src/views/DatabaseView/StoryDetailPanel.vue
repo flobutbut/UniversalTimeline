@@ -40,6 +40,8 @@
       <div ref="contentScroll" class="story-detail-panel__scroll-area">
       <!-- Timeline -->
       <StoryTimeline
+        :key="story.id"
+        collapsible
         :periods="story.periods"
         :events="story.events"
         :selected-period-id="selectedPeriodId"
@@ -147,8 +149,8 @@
                       <h2>{{ finderColumnHeader(colIdx) }}</h2>
                     </div>
                     <div class="story-column-header__actions">
-                      <Button variant="tertiary" size="sm" :disabled="panelBusy || (colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? ''))" :title="colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? '') ? 'Ajoutez d’abord cette période à la frise.' : undefined" @click="openChildStoryPicker(colIdx)">Ajouter une frise</Button>
-                      <Button variant="tertiary" size="sm" :disabled="panelBusy || (colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:'))" :title="colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:') ? 'Importez d’abord la période parente.' : undefined" @click="openPeriodCreator(colIdx)">Ajouter une période</Button>
+                      <Button variant="tertiary" size="xs" :disabled="panelBusy || (colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? ''))" :title="colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? '') ? 'Ajoutez d’abord cette période à la frise.' : undefined" @click="openChildStoryPicker(colIdx)">Ajouter une frise</Button>
+                      <Button variant="tertiary" size="xs" :disabled="panelBusy || (colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:'))" :title="colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:') ? 'Importez d’abord la période parente.' : undefined" @click="openPeriodCreator(colIdx)">Ajouter une période</Button>
                     </div>
                   </div>
                   <div class="finder-column-content">
