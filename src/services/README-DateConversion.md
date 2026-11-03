@@ -21,7 +21,7 @@ Référence : [format officiel des temps Wikibase](https://doc.wikimedia.org/Wik
 
 ## Fonctions
 
-`parseTemporal` retourne un résultat typé (âge, calendrier, présent ou inconnu), avec texte conservé et précision déclarée. `yearsBeforePresent` fournit number ou null ; `resolveYearsBeforePresent` applique la priorité des colonnes importées. `periodDateErrors` contrôle les bornes connues, sur l’interface et avant SQL : début strictement antérieur à fin. Les expressions historiques non reconnues restent enregistrables sans coordonnée inventée. Une date calendaire reconnue mais impossible est refusée.
+`parseTemporal` retourne un résultat typé (âge, calendrier, présent ou inconnu), avec texte conservé et précision déclarée. `yearsBeforePresent` fournit number ou null ; `storedYearsBeforePresent` en est la version arrondie à 3 décimales, utilisée pour toutes les colonnes `*_years_bp` écrites ; `resolveYearsBeforePresent` applique la priorité des colonnes importées. `periodDateErrors` contrôle les bornes connues, sur l’interface et avant SQL : début strictement antérieur à fin. Les expressions historiques non reconnues restent enregistrables sans coordonnée inventée. Une date calendaire reconnue mais impossible est refusée.
 
 `temporalBounds` agrège une seule fois les candidats, avec le même instant de référence pour toute la liste. Le calcul des bornes de stories dans l’API et l’interface le réutilise. Tri et filtres distinguent les coordonnées nulles ; une frise conserve les éléments non positionnables dans une zone séparée et accessible, avec les mêmes actions de consultation et de navigation.
 

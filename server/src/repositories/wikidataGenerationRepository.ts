@@ -1,6 +1,6 @@
 import type { TransactionClient } from '../api/transaction.js';
 import type { GeneratedItem } from '../api/wikidataGenerationInput.js';
-import { yearsBeforePresent } from '../shared/temporal.js';
+import { storedYearsBeforePresent } from '../shared/temporal.js';
 
 /** Same ordering for every generation; a fresh lookup follows both locks. */
 export async function lockGeneratedStoryTopic(client: TransactionClient, qid: string, title: string) {
@@ -35,12 +35,12 @@ export async function insertOrReuseGeneratedItem(client: TransactionClient, item
     inserted = (await client.query<{ id: string }>(`
       INSERT INTO public.periods (id, wikidata_id, label_fr, label_en, description_fr, description_en, start_date, end_date, start_years_bp, end_years_bp)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (wikidata_id) DO NOTHING RETURNING id
-    `, [...common, item.data.start_date, item.data.end_date, yearsBeforePresent(item.data.start_date, now), yearsBeforePresent(item.data.end_date, now)])).rows[0]?.id;
+    `, [...common, item.data.start_date, item.data.end_date, storedYearsBeforePresent(item.data.start_date, now), storedYearsBeforePresent(item.data.end_date, now)])).rows[0]?.id;
   } else {
     inserted = (await client.query<{ id: string }>(`
       INSERT INTO public.events (id, wikidata_id, label_fr, label_en, description_fr, description_en, date, date_years_bp)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (wikidata_id) DO NOTHING RETURNING id
-    `, [...common, item.data.date, yearsBeforePresent(item.data.date, now)])).rows[0]?.id;
+    `, [...common, item.data.date, storedYearsBeforePresent(item.data.date, now)])).rows[0]?.id;
   }
   if (inserted) return inserted;
   // A fresh statement sees the committed row after ON CONFLICT waited for another import.

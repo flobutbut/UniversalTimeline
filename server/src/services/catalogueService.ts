@@ -1,7 +1,7 @@
 import { readEntityCategories } from './entityCategories.js';
 import { query, withTransaction } from '../api/database.js';
 import type { EventWrite, PeriodWrite } from '../domain/writeInputs.js';
-import { yearsBeforePresent as computeYearsBP } from '../shared/temporal.js';
+import { storedYearsBeforePresent as computeYearsBP } from '../shared/temporal.js';
 import { NotFoundError } from '../domain/errors.js';
 import * as catalogue from '../repositories/catalogueRepository.js';
 import { replaceEntityCategories, listDetailedCategories, listCategories as readCategories } from '../repositories/categoryRepository.js';

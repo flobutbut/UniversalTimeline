@@ -68,7 +68,9 @@ Au niveau de la période présentée, les boutons suivent le contexte, même ver
 
 L’onglet **Relations → Parcours chronologique** permet de choisir une frise de référence et la période présentée par la frise courante. L’ajout enregistre la période dans le parcours si elle manque (racine locale) et crée la présentation dans la même transaction. Si la période y est déjà placée, sa position est conservée. Dissocier la vue conserve la période dans le parcours : elle reste consultable dans la référence. Retirer aussi cette période se fait dans les périodes de la frise de référence.
 
-`POST /stories/:contextId/presentations` prend `periodId`, `targetStoryId` et `operation` (`add` ou `remove`). La création d’une frise depuis une période enregistre automatiquement une présentation dans sa source, en plus de son ancre historique.
+`POST /stories/:contextId/presentations` prend `periodId`, `targetStoryId` et `operation` (`add` ou `remove`). La création d’une frise depuis une période enregistre automatiquement une présentation dans sa source, en plus de son ancre historique. Depuis le 3 novembre 2026, ses sous-périodes sont déplacées vers la nouvelle frise avec les sous-frises, points d’entrée et présentations qui les visent ; la période reste dans la source comme ancre (voir [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md), section 2).
+
+`POST /stories` accepte `parentStoryId` et `anchor` (`{ anchorType, anchorId }`, dans la parente) : la frise, sa parente et son ancre sont écrites dans la même transaction. Une frise sans parente ne peut pas devenir publique (400) ; une frise déjà publique garde sa visibilité.
 
 Le contexte initial « Grandes périodes de l’histoire européenne » comporte Antiquité, Moyen Âge, Époque moderne et Histoire contemporaine. Pour ajouter la Renaissance : ouvrir sa frise, aller dans Relations, choisir ce parcours et la période Renaissance. Son début en 1400 la place automatiquement après Moyen Âge et avant Époque moderne. Aucun voisin existant n’est à modifier.
 

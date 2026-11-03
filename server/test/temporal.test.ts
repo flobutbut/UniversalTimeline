@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { parseTemporal, yearsBeforePresent, resolveYearsBeforePresent, periodDateErrors, temporalBounds, MS_PER_YEAR, comparableYearsBeforePresent } from '../src/shared/temporal';
+import { parseTemporal, yearsBeforePresent, resolveYearsBeforePresent, periodDateErrors, temporalBounds, MS_PER_YEAR, comparableYearsBeforePresent, storedYearsBeforePresent } from '../src/shared/temporal';
 import { DateService } from '../../src/services/DateService';
 import { aggregateStoryTemporalBounds } from '../src/domain/storyTemporalBounds';
 const now = Date.parse('2026-10-29T12:00:00Z');
@@ -114,4 +114,15 @@ it('compares calendar dates at one instant, whatever the stale stored coordinate
   expect(comparableYearsBeforePresent('', '42', now)).toBe(42);
   expect(comparableYearsBeforePresent('vers la fin du règne', '42', now)).toBeNull();
   expect(comparableYearsBeforePresent('TODAY', null, now)).toBe(0);
+});
+
+it('stores coordinates computed at write time, rounded to 3 decimals, never inventing the present', () => {
+  const now = Date.UTC(2026, 10, 3);
+  expect(storedYearsBeforePresent('M66.4', now)).toBe(66400000);
+  expect(storedYearsBeforePresent('1789-07-14', now)).toBe(Math.round(yearsBeforePresent('1789-07-14', now)! * 1000) / 1000);
+  expect(String(storedYearsBeforePresent('1789-07-14', now)).split('.')[1]?.length ?? 0).toBeLessThanOrEqual(3);
+  expect(Object.is(storedYearsBeforePresent('TODAY', now), 0)).toBe(true);
+  expect(Object.is(storedYearsBeforePresent('2026-11-03T00:00:10Z', now), 0)).toBe(true);
+  expect(storedYearsBeforePresent('vers la fin du règne', now)).toBeNull();
+  expect(storedYearsBeforePresent('', now)).toBeNull();
 });

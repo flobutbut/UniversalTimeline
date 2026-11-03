@@ -103,6 +103,15 @@ export function parseTemporal(input: string | null | undefined, now = Date.now()
 export function yearsBeforePresent(input: string | null | undefined, now = Date.now()): number | null {
   return parseTemporal(input, now).yearsBeforePresent;
 }
+/** Coordinate stored with a record, recomputed at every write and rounded to 3 decimals
+ * (no `66400000.00000001` artefacts). Unknown text stores null, never the present.
+ */
+export function storedYearsBeforePresent(input: string | null | undefined, now = Date.now()): number | null {
+  const value = yearsBeforePresent(input, now);
+  if (value === null) return null;
+  const rounded = Math.round(value * 1000) / 1000;
+  return rounded === 0 ? 0 : rounded;
+}
 /** Existing numerical bounds remain authoritative for imported records. Explicitly
  * unrecognized/impossible text is never interpreted as the present, even with a default 0.
  */

@@ -102,7 +102,7 @@ import { EVENT_IMPORTANCE_LABELS } from '@/lib/eventImportance';
 import type { StoryTimelinePeriod as InPeriod, StoryTimelineEvent as InEvent } from '@/types/storyTimeline';
 import type { EventImportance } from '@/types/database';
 import { COMPACT_BAR_HEIGHT, COMPACT_LANE_GAP, COMPACT_ROOT_HEIGHT, INTERACTIVE_BAR_SIZES, layoutCompactLanes } from '@/lib/compactStoryTimeline';
-import { resolveYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
+import { comparableYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
 import {
   formatStoryTimelineBoundLabel,
   formatStoryTimelinePeriodDetail,
@@ -184,11 +184,13 @@ function hideTooltip() {
 
 // ─── Bornes globales ──────────────────────────────────────────────────────────
 
+// The dates are re-read at one instant: stored coordinates were computed at different times and
+// would make a same-day sub-period overflow its parent. A stored number is used only without text.
 const coordinates = computed(() => {
   const now = Date.now();
   return {
-    periods: (props.periods ?? []).map(p => ({ p, start: resolveYearsBeforePresent(p.startDate, p.startYearsBP, now), end: resolveYearsBeforePresent(p.endDate, p.endYearsBP, now) })),
-    events: (props.events ?? []).map(e => ({ e, date: resolveYearsBeforePresent(e.date, e.dateYearsBP, now) })),
+    periods: (props.periods ?? []).map(p => ({ p, start: comparableYearsBeforePresent(p.startDate, p.startYearsBP, now), end: comparableYearsBeforePresent(p.endDate, p.endYearsBP, now) })),
+    events: (props.events ?? []).map(e => ({ e, date: comparableYearsBeforePresent(e.date, e.dateYearsBP, now) })),
   };
 });
 const datedPeriods = computed(() => coordinates.value.periods.flatMap(({p, start, end}) => start !== null && end !== null ? [{...p, startYbp:start, endYbp:end}] : []));

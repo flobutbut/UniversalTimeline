@@ -2,6 +2,10 @@
 
 # Changelog — documentation agent
 
+## [2026-11-03] — Automatismes d’architecture des frises
+
+Application de la section 2 de `Documentation/CREATION-DE-FRISES.md`. « Créer une frise depuis une période » déplace les sous-périodes et les liens qui les visent (sous-frises ancrées, points d’entrée, présentations), en une transaction, refus si un lien touche une frise d’un autre compte ; les événements restent copiés. Création avec frise parente et ancre (`POST /stories` : `parentStoryId`, `anchor`), ancre proposée d’après les dates ; choix de la parente dans l’aperçu. Une frise sans parente ne peut pas devenir publique (création, PUT, génération Wikidata). Avertissements non bloquants, « Promouvoir en sous-frise » et rôle déduit dans l’en-tête du détail (`StoryArchitecturePanel`, `src/lib/storyArchitecture.ts`). `storedYearsBeforePresent` arrondit les années stockées ; la miniature lit les dates. Nouvelle suite `storyStructure.postgres.mjs`. Aucune migration, aucune donnée de production modifiée.
+
 ## [2026-11-01] — Mise en production Vercel
 
 `vercel.json` en services (`app` Vite avec repli SPA, `server` Express) : `/api/*` vers l’API, le reste vers le front, sans binding. Nouvelle entrée `server/src/vercel.ts` (app exportée, vérification de la base au chargement) et `buildCommand: tsc --noEmit` pour que Vercel n’utilise pas le `dist/` à plat. `testConnection` consigne désormais le code d’erreur (sans message ni URL). Base via le Session pooler IPv4 sur Vercel (`ENOTFOUND` avec l’hôte direct IPv6). Domaine `universaltimeline.net` (Hostinger) relié, `www` en 308, HTTPS actif. Vérifié en production : `/api/access` 200, `/api/account` 401, recherche de stories 200, 404 API, routes SPA rechargées, timeline chargée dans le navigateur. 1079 tests et types validés. Inscription/connexion non testées en production (aucun compte créé).
