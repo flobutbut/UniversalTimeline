@@ -96,7 +96,7 @@ Précisions sur ce qui est appliqué :
 - **Avertissements** : visibles par les comptes qui peuvent modifier la frise, dans son en-tête. Un niveau compte les **périodes** seulement ; les événements ne sont pas rangés par niveau. Un point d'entrée « saute des niveaux » quand sa source et sa cible sont à au moins deux niveaux d'écart dans l'arbre des parentés.
 - **Promotion** : proposée dans le menu de la période et dans les avertissements, sauf pour une période qui sert déjà d'ancre ou la seule racine de la frise. Le critère « un sujet qu'on voudrait ouvrir depuis la recherche » ne peut pas être détecté.
 - **Rôle** : parcours si la frise présente des périodes par d'autres frises ; portail si au moins la moitié de ses périodes racines ouvrent sur une autre frise ; récit sinon. « Brouillon » s'ajoute pour une frise sans parente, sauf la racine (la frise sans parente qui a le plus de descendantes).
-- **Années stockées** : `storedYearsBeforePresent()` les calcule à chaque écriture (catalogue, conversion, import Wikidata), arrondies à 3 décimales. Les anciennes valeurs ne sont pas recalculées en base. La miniature lit les dates à un même instant (`comparableYearsBeforePresent`).
+- **Années stockées** : `storedYearsBeforePresent()` les calcule à chaque écriture (catalogue, conversion, import Wikidata), arrondies à 15 chiffres significatifs : les artefacts disparaissent, mais une date à la seconde garde sa précision, ce qu'un arrondi à 3 décimales (environ 9 heures) ne permettrait pas. Les anciennes valeurs ne sont pas recalculées en base. La miniature lit les dates à un même instant (`comparableYearsBeforePresent`).
 
 ## 3. Avant de créer : partir de l'existant
 
@@ -135,7 +135,7 @@ Il n'y a **qu'un seul moteur de dates** : `server/src/shared/temporal.ts`. Ne ja
 - **Ne pas écrire d'année négative au format ISO** (`-9600-01-01T00:00:00Z`). Le moteur la lit comme une année astronomique, ce qui donne « 9601 av. J.-C. » avec un « 1 janvier » parasite. Ce format reste dans d'anciennes fiches : voir les corrections à prévoir dans [FRISES-A-CREER.md](FRISES-A-CREER.md).
 - **Choisir la précision réelle de la source.** Pas de jour inventé quand seule l'année est connue.
 - **Avant 1582, utiliser les dates usuelles (calendrier julien)** : Crécy le 26 août 1346, pas le 3 septembre que donne Wikidata en grégorien proleptique.
-- **`start_years_bp`, `end_years_bp` et `date_years_bp`** se calculent avec `storedYearsBeforePresent()` (ou `yearsBeforePresent()` arrondi à 3 décimales) pour éviter les artefacts du type `66400000.00000001`.
+- **`start_years_bp`, `end_years_bp` et `date_years_bp`** se calculent avec `storedYearsBeforePresent()`, ou dans un script avec `yearsBeforePresent()` arrondi à 3 décimales, pour éviter les artefacts du type `66400000.00000001`.
 - **Le début doit être strictement antérieur à la fin.**
 - **Les années stockées dépendent de la date du calcul.** Pour une frise au jour près, recalculer les `*_years_bp` des anciennes fiches réutilisées en même temps que les nouvelles, sinon une sous-période semble déborder de son parent de quelques mois.
 - **Mélanger une date calendaire et une date géologique crée un petit écart.** Exemple : le Cryogénien stocké en ISO et une glaciation en `M635`, soit environ 2 000 ans. Dans les contrôles d'imbrication, tolérer environ 1e-5 de l'âge du parent.

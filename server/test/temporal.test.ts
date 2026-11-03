@@ -116,13 +116,14 @@ it('compares calendar dates at one instant, whatever the stale stored coordinate
   expect(comparableYearsBeforePresent('TODAY', null, now)).toBe(0);
 });
 
-it('stores coordinates computed at write time, rounded to 3 decimals, never inventing the present', () => {
+it('stores coordinates computed at write time without float artefacts, never inventing the present', () => {
   const now = Date.UTC(2026, 10, 3);
   expect(storedYearsBeforePresent('M66.4', now)).toBe(66400000);
-  expect(storedYearsBeforePresent('1789-07-14', now)).toBe(Math.round(yearsBeforePresent('1789-07-14', now)! * 1000) / 1000);
-  expect(String(storedYearsBeforePresent('1789-07-14', now)).split('.')[1]?.length ?? 0).toBeLessThanOrEqual(3);
+  expect(Number((66.4 * 1e6 + 1e-8).toPrecision(15))).toBe(66400000);
+  // A timestamp keeps its seconds: one second is about 3e-8 year.
+  const second = storedYearsBeforePresent('1944-06-06T14:32:45Z', now)! - storedYearsBeforePresent('1944-06-06T14:32:46Z', now)!;
+  expect(second).toBeCloseTo(1 / (365.25 * 86400), 12);
   expect(Object.is(storedYearsBeforePresent('TODAY', now), 0)).toBe(true);
-  expect(Object.is(storedYearsBeforePresent('2026-11-03T00:00:10Z', now), 0)).toBe(true);
   expect(storedYearsBeforePresent('vers la fin du règne', now)).toBeNull();
   expect(storedYearsBeforePresent('', now)).toBeNull();
 });

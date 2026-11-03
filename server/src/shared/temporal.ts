@@ -103,13 +103,13 @@ export function parseTemporal(input: string | null | undefined, now = Date.now()
 export function yearsBeforePresent(input: string | null | undefined, now = Date.now()): number | null {
   return parseTemporal(input, now).yearsBeforePresent;
 }
-/** Coordinate stored with a record, recomputed at every write and rounded to 3 decimals
- * (no `66400000.00000001` artefacts). Unknown text stores null, never the present.
+/** Coordinate stored with a record, recomputed at every write. Rounded to 15 significant digits:
+ * no `66400000.00000001` artefacts, while a timestamp keeps its seconds. Unknown text stores null.
  */
 export function storedYearsBeforePresent(input: string | null | undefined, now = Date.now()): number | null {
   const value = yearsBeforePresent(input, now);
   if (value === null) return null;
-  const rounded = Math.round(value * 1000) / 1000;
+  const rounded = Number(value.toPrecision(15));
   return rounded === 0 ? 0 : rounded;
 }
 /** Existing numerical bounds remain authoritative for imported records. Explicitly
