@@ -2,7 +2,7 @@ import { withTransaction } from '../api/database.js';
 import type { TransactionClient } from '../api/transaction.js';
 import type { EventWrite, PeriodWrite } from '../domain/writeInputs.js';
 import { CatalogueConversionError } from '../domain/errors.js';
-import { yearsBeforePresent as computeYearsBP } from '../shared/temporal.js';
+import { storedYearsBeforePresent as computeYearsBP } from '../shared/temporal.js';
 import * as catalogue from '../repositories/catalogueRepository.js';
 import * as conversion from '../repositories/catalogueConversionRepository.js';
 import { deletePeriod } from '../repositories/periodHierarchyRepository.js';

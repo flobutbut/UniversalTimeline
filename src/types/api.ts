@@ -77,6 +77,8 @@ export interface StoryFormPayload {
   author?: string;
   isPublic?: boolean;
   categories?: Array<{ id: string }>;
+  /** Création seulement : frise parente et ancre, enregistrées dans la même transaction. */
+  storyPlacement?: { parentStoryId: string; anchorPeriodId: string | null } | null;
 }
 export interface PeriodFormPayload extends EntityFormPayload { startDate: string }
 export interface EventFormPayload extends EntityFormPayload { date: string }

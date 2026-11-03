@@ -16,7 +16,7 @@
           <Icon icon="mdi:folder-move-outline" width="16" height="16" aria-hidden="true" />Déplacer dans la frise
         </button>
         <button v-if="createStory" type="button" role="menuitem" tabindex="-1" @click="choose('create-story')">
-          <Icon icon="mdi:book-plus-outline" width="16" height="16" aria-hidden="true" />Créer une frise
+          <Icon :icon="promote ? 'mdi:arrow-up-bold-box-outline' : 'mdi:book-plus-outline'" width="16" height="16" aria-hidden="true" />{{ promote ? 'Promouvoir en sous-frise' : 'Créer une frise' }}
         </button>
         <button v-if="convertTo" type="button" role="menuitem" tabindex="-1" @click="choose('convert')">
           <Icon icon="mdi:swap-horizontal" width="16" height="16" aria-hidden="true" />{{ convertTo === 'event' ? 'Convertir en événement' : 'Convertir en période' }}
@@ -39,6 +39,7 @@ import { generateDomUid } from '@/utils/generateDomUid';
 const props = defineProps<{
   label: string; disabled?: boolean; movable?: boolean;
   /** Périodes : proposer une frise créée depuis cet élément. */ createStory?: boolean;
+  /** La période remplit les critères d’une sous-frise (règle 3) : l’action est présentée comme une promotion. */ promote?: boolean;
   /** Type vers lequel la fiche du catalogue peut être convertie. */ convertTo?: 'period' | 'event';
 }>();
 const emit = defineEmits<{ edit: []; remove: []; move: []; 'create-story': []; convert: [] }>();

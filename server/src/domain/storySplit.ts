@@ -1,4 +1,4 @@
-/** Pure rules for creating a frise from one period of another frise (the source is never modified). */
+/** Pure rules for creating a frise from one period of another frise (its sub-periods move to the new frise). */
 export interface Placement { id: string; parent_id: string | null }
 export interface DatedItem { id: string; yearsBP: number | null }
 

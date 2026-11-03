@@ -31,7 +31,6 @@ const subjects = useDebouncedSearch(() => query.value, (q, signal) => SearchApiS
 const draft = ref<WikidataTimelineDraft | null>(null);
 const loading = ref(false); const error = ref<string | null>(null); const saving = ref(false); const saveError = ref<string | null>(null);
 const savedId = ref<string | null>(null);
-const isPublic = ref(false);
 const activeItemQid = ref<string | null>(null);
 const detailPane = ref<HTMLElement | null>(null);
 const navigationPane = ref<HTMLElement | null>(null);
@@ -175,14 +174,13 @@ function changeType(item: WikidataTimelineItem, value: unknown) {
 // Only public Wikidata drafts, in this tab, to keep corrections across sign-in.
 function preserveDraft() {
   if (!draft.value) return;
-  try { sessionStorage.setItem(draftStorageKey, JSON.stringify({ ...draft.value, isPublic: isPublic.value })); } catch { /* Storage may be unavailable. */ }
+  try { sessionStorage.setItem(draftStorageKey, JSON.stringify(draft.value)); } catch { /* Storage may be unavailable. */ }
 }
 
 function restoreDraft(result: WikidataTimelineDraft) {
   try {
     const cached = JSON.parse(sessionStorage.getItem(draftStorageKey) || 'null');
     if (cached?.qid !== result.qid || !Array.isArray(cached.items)) return;
-    if (typeof cached.isPublic === 'boolean') isPublic.value = cached.isPublic;
     if (typeof cached.title === 'string' && cached.title.length <= 255) result.title = cached.title;
     if (typeof cached.description === 'string' && cached.description.length <= 1000) result.description = cached.description;
     for (const item of result.items) {
@@ -207,7 +205,7 @@ async function load(force = false) {
   const isCurrent = requests.begin();
   draft.value = null; error.value = null; saveError.value = null; savedId.value = null; saveUncertain.value = false; existing.value = new Map();
   openEditors.value.clear();
-  activeItemQid.value = null; isPublic.value = false;
+  activeItemQid.value = null;
   const raw = route.query.wikidata;
   if (raw === undefined) { loading.value = false; return; }
   loading.value = true;
@@ -244,8 +242,8 @@ async function save() {
   try {
     const acknowledged = acknowledgeExistingStories.value ? existingStories.value.map(story => story.id) : [];
     const result = acknowledged.length
-      ? await StoryApiService.getInstance().createFromWikidata(subject.qid, subject.title.trim(), selected.value, isPublic.value, subject.description, acknowledged)
-      : await StoryApiService.getInstance().createFromWikidata(subject.qid, subject.title.trim(), selected.value, isPublic.value, subject.description);
+      ? await StoryApiService.getInstance().createFromWikidata(subject.qid, subject.title.trim(), selected.value, false, subject.description, acknowledged)
+      : await StoryApiService.getInstance().createFromWikidata(subject.qid, subject.title.trim(), selected.value, false, subject.description);
     if (identity !== auth.identityVersion) return;
     savedId.value = result.id;
     try { sessionStorage.removeItem(draftStorageKey); } catch { /* Optional tab storage. */ }
@@ -279,10 +277,8 @@ async function save() {
         </div>
       </div>
       <div class="generation-heading-actions">
-        <div class="generation-segmented generation-visibility" role="radiogroup" aria-label="Visibilité de la frise">
-          <label><input type="radio" name="generation-visibility" value="private" :checked="!isPublic" :disabled="!draft || saving || !!savedId || saveUncertain" @change="isPublic = false" /><span>Privé</span></label>
-          <label><input type="radio" name="generation-visibility" value="public" :checked="isPublic" :disabled="!draft || saving || !!savedId || saveUncertain" @change="isPublic = true" /><span>Public</span></label>
-        </div>
+        <!-- Sans frise parente, la frise reste un brouillon privé (règle 1 du guide de création). -->
+        <p class="generation-visibility">Privée jusqu’à son rattachement à une frise parente</p>
         <Button variant="tertiary" size="sm" :to="{ name: 'timeline' }" :disabled="saving" title="Annuler la création et revenir à l’exploration" @click="cancelDraft">Annuler</Button>
         <Button v-if="savedId" size="sm" :to="{ name: 'timeline', query: { story: savedId } }">Ouvrir la frise créée</Button>
         <Button v-else-if="!canUseWorkspace(auth)" size="sm" :disabled="!draft" :to="{ name: 'login', query: { redirect: route.fullPath } }" @click="preserveDraft">Se connecter pour enregistrer</Button>
@@ -427,6 +423,7 @@ async function save() {
 .generation-item-heading input { accent-color: var(--color-primary); }
 .generation-item-fields { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); gap: var(--spacing-md); }
 .generation-selection-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
+.generation-visibility { margin: 0; max-width: 16rem; font: var(--type-compact); color: var(--color-text-secondary); }
 .generation-type-toggle, .generation-segmented { display: flex; width: fit-content; padding: var(--spacing-xs); gap: var(--spacing-xs); border-radius: var(--radius-lg); background: var(--color-background-default); }
 :is(.generation-type-toggle, .generation-segmented) label { position: relative; display: flex; }
 :is(.generation-type-toggle, .generation-segmented) input { position: absolute; width: 1px; height: 1px; opacity: 0; }

@@ -9,7 +9,7 @@
         <StoryDetailPanel :key="selectedStoryId" :story="selectedStory" :loading="state.loadingStoryDetails" :updating="relationsBusy || visibilityBusy || state.loadingDetails || saveLoading || deleteLoading" :error="state.storyError" :settings-error="storySettingsError"
           @retry="retryStory" @period-imported="retryStory" @remove-period="removePeriodFromStory" @remove-event="removeEventFromStory" @add-periods="addPeriodsToStory" @event-added="retryStory" @entity-converted="retryStory"
           @add-child-stories="addChildStoriesToStory" @remove-child-story="removeChildStoryFromStory" @add-event-anchor="addEventAnchorToStory" @remove-event-anchor="removeEventAnchorFromStory" @change-event-importance="changeEventImportance"
-          @add-parent-entry="addParentEntryToStory" @remove-parent-entry="removeParentEntryFromStory"
+          @add-parent-entry="addParentEntryToStory" @remove-parent-entry="removeParentEntryFromStory" @set-parent="setParentOfStory"
           @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @create-story-from-period="startStoryFromPeriod" @edit-event="onEditStoryEvent" @save-story="saveSelectedStory" @delete-story="deleteSelectedStory" @toggle-visibility="toggleStoryVisibility" />
       </div>
     </template>
@@ -20,6 +20,7 @@
       mode="create"
       :loading="saveLoading"
       :error="saveError"
+      :story-parent-candidates="storyParentCandidates"
       @close="closeAddModal"
       @submit="handleSave"
     />
@@ -103,6 +104,7 @@ const {
   changeEventImportance,
   addParentEntryToStory,
   removeParentEntryFromStory,
+  setParentOfStory,
 } = useDatabaseView();
 
 const route = inject(routeLocationKey, undefined);
@@ -169,6 +171,9 @@ if (route) watch(() => route.query.story, () => { if (!state.value.loading) void
 const auth = useAuthStore(); const toast = useToast();
 onMounted(() => { void auth.ensureProfile(); });
 const usernameRequired = 'Choisissez un nom d’utilisateur dans votre profil avant de créer une frise.';
+/** Frises modifiables par le compte : seules elles peuvent recevoir une sous-frise. */
+const storyParentCandidates = computed(() => useDataStore().stories.filter(story => auth.canEditStory(story))
+  .sort((a, b) => a.title.fr.localeCompare(b.title.fr, 'fr')));
 function handleAddStory() {
   if (!auth.canCreateStories) { toast.show(usernameRequired, 'error'); return; }
   saveError.value = null;
@@ -235,6 +240,7 @@ const visibilityBusy = ref(false);
 async function toggleStoryVisibility() {
   const story = selectedStory.value;
   if (!story || relationsBusy.value || visibilityBusy.value || saveLoading.value || deleteLoading.value) return;
+  if (!story.isPublic && !story.parentStoryId) { toast.show('Une frise sans frise parente reste privée : choisissez d’abord sa frise parente.', 'error'); return; }
   const next = story.isPublic ? 'privée' : 'publique';
   const accepted = await confirm(`Rendre la frise ${next}`, story.isPublic
     ? `« ${story.title.fr} » ne sera plus visible que par vous.`

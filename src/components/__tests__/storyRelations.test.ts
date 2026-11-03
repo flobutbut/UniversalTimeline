@@ -64,3 +64,20 @@ it('hides editing controls on a readable frise owned by another account', async 
   expect(view.findAll('button')).toHaveLength(0);
   expect(view.get('a').attributes('href')).toBe('/database?story=1');
 });
+
+it('attaches the frise to a parent, preselecting the period that contains its dates', async () => {
+  const dated = { ...storyFixture('1', [{ id: 'early', label_fr: 'Début', start_date: '1000', end_date: '1200' }, { id: 'late', label_fr: 'Fin', start_date: '1200', end_date: '1500' }]), ownerUserId: 'me' };
+  vi.spyOn(StoryApiService.getInstance(), 'getStory').mockResolvedValue(dated);
+  const story = { ...storyFixture('3', [{ id: 'own', label_fr: 'Sujet', start_date: '1300', end_date: '1350' }]), ownerUserId: 'me', parentStoryId: null, isPublic: false };
+  view = mount(StoryRelationsPanel, { props: { story }, attachTo: document.body });
+  expect(view.text()).toContain('Aucune : brouillon privé');
+  await button('Choisir la frise parente').trigger('click'); await flushPromises();
+  const picker = view.getComponent(ParentStoryPickerModal);
+  expect(picker.props('candidates').map((s: { id: string }) => s.id)).toEqual(['1', '2']);
+  picker.findAllComponents(BaseSelect)[0].vm.$emit('update:modelValue', '1'); await flushPromises();
+  expect(picker.text()).toContain('Proposée : « Fin »');
+  await button('Rattacher').trigger('click');
+  expect(view.emitted('set-parent')).toEqual([['1', 'late']]);
+  await view.setProps({ story: { ...story, parentStoryId: '1' } });
+  expect(view.findComponent(ParentStoryPickerModal).exists()).toBe(false);
+});

@@ -259,11 +259,11 @@ export function useDatabaseView() {
   const handleDragOver = (_event: DragEvent) => { if (dragDropState.value.draggedItem) dragDropState.value.isDragOver = true; };
   const handleDragLeave = (_event: DragEvent) => { dragDropState.value.isDragOver = false; };
   const removePeriodFromStory = (id: string) => mutateAssociations('period', [id], true);
-  // ─── Frise créée depuis une période : copie, la frise d'origine reste intacte ───
+  // ─── Frise créée depuis une période : ses sous-périodes et leurs liens y sont déplacés ───
   const storyFromPeriod = ref<{ storyId: string; preview: StoryFromPeriodPreview; busy: boolean; error: string | null } | null>(null);
   const openStoryFromPeriod = (periodId: string) => {
     const story = selectedStory.value;
-    const preview = story && previewStoryFromPeriod(story.periods, story.events, periodId);
+    const preview = story && previewStoryFromPeriod(story.periods, story.events, periodId, story);
     if (!story || !preview || relationsBusy.value) return;
     storyFromPeriod.value = { storyId: story.id, preview, busy: false, error: null };
   };
@@ -280,8 +280,9 @@ export function useDatabaseView() {
       created = await StoryApiService.getInstance().createStoryFromPeriod(pending.storyId, pending.preview.periodId, title);
       storyFromPeriod.value = null;
       dataStore.invalidateStory(pending.storyId);
-      const events = created.eventCount ? ` et ${created.eventCount} événement${created.eventCount > 1 ? 's' : ''}` : '';
-      toast.show(`Frise « ${title} » créée avec ${created.periodCount} période${created.periodCount > 1 ? 's' : ''}${events}.`, 'success');
+      const plural = (count: number, word: string, verb: string) => `${count} ${word}${count > 1 ? 's' : ''} ${verb}${count > 1 ? 's' : ''}`;
+      const details = [created.movedPeriodCount ? plural(created.movedPeriodCount, 'sous-période', 'déplacée') : '', created.eventCount ? plural(created.eventCount, 'événement', 'copié') : ''].filter(Boolean);
+      toast.show(`Frise « ${title} » créée${details.length ? ` : ${details.join(', ')}` : ''}.`, 'success');
       await Promise.all([dataStore.ensureStoriesLoaded(true), refreshSelectedStory(pending.storyId)]);
     } catch (cause) {
       if (created) toast.show('Frise créée ; impossible de recharger les données. Réessayez le chargement.', 'error');
@@ -381,6 +382,11 @@ export function useDatabaseView() {
     await StoryApiService.getInstance().changeEntryPoints(sourceId, [targetId], { type: 'period', id: periodId });
     return 'Point d’entrée ajouté';
   });
+  /** Rattache la frise à sa parente, sur une ancre ; les ancres d’une ancienne parente sont retirées. */
+  const setParentOfStory = (parentId: string, periodId: string) => mutateRelatedStories(async storyId => {
+    await StoryApiService.getInstance().linkChildStories(parentId, [storyId], { type: 'period', id: periodId });
+    return 'Frise parente enregistrée';
+  });
   const removeParentEntryFromStory = (sourceId: string, anchor?: StoryAnchor) => mutateRelatedStories(async targetId => {
     await StoryApiService.getInstance().changeEntryPoints(sourceId, [targetId], anchor, true);
     return 'Point d’entrée retiré';
@@ -408,6 +414,7 @@ export function useDatabaseView() {
     changeEventImportance,
     addParentEntryToStory,
     removeParentEntryFromStory,
+    setParentOfStory,
     sharedLoading, sharedError,
   };
 }

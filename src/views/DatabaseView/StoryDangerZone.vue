@@ -4,9 +4,10 @@
     <div class="story-danger-zone__row">
       <div>
         <p class="story-danger-zone__label">Visibilité : {{ story.isPublic ? 'publique' : 'privée' }}</p>
-        <p class="story-danger-zone__hint">{{ story.isPublic ? 'Une frise privée n’est visible que par vous.' : 'Une frise publique est visible par tous dans la timeline.' }}</p>
+        <p class="story-danger-zone__hint">{{ draft ? 'Sans frise parente, la frise reste un brouillon privé : choisissez d’abord sa frise parente dans l’aperçu.'
+          : story.isPublic ? 'Une frise privée n’est visible que par vous.' : 'Une frise publique est visible par tous dans la timeline.' }}</p>
       </div>
-      <Button variant="danger" size="sm" type="button" :disabled="busy" @click="emit('toggle-visibility')">{{ story.isPublic ? 'Rendre privée' : 'Rendre publique' }}</Button>
+      <Button variant="danger" size="sm" type="button" :disabled="busy || draft" @click="emit('toggle-visibility')">{{ story.isPublic ? 'Rendre privée' : 'Rendre publique' }}</Button>
     </div>
     <div class="story-danger-zone__row">
       <div>
@@ -19,13 +20,16 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import Button from '@/components/base/Button.vue';
 import type { Story } from '@/types/database';
 
-defineProps<{
+const props = defineProps<{
   story: Story;
   busy?: boolean;
 }>();
+/** Règle 1 : une frise privée sans parente ne peut pas être publiée. */
+const draft = computed(() => !props.story.isPublic && !props.story.parentStoryId);
 
 const emit = defineEmits<{
   (e: 'delete'): void;

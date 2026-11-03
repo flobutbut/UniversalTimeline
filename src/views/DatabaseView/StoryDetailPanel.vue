@@ -19,6 +19,8 @@
             <template v-if="story.createdAt && story.author"> · </template>
             <template v-if="story.author">par {{ story.author }}</template>
           </p>
+          <StoryArchitecturePanel :story="story" :stories="dataStore.stories" :editable="auth.canEditStory(story)" :can-promote="auth.ownsStory(story)" :busy="panelBusy"
+            @promote="emit('create-story-from-period', $event)" />
         </div>
         <div class="story-detail-panel__meta-actions">
           <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openEventCreator">Ajouter un événement</Button>
@@ -120,7 +122,7 @@
                   <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">Ajouter une période racine</Button>
                 </template>
                 <template #actions="{ period, inStory }">
-                  <StoryItemActionsMenu v-if="inStory" :label="period.label.fr || period.label.en" :disabled="panelBusy" movable :create-story="auth.ownsStory(story)" :convert-to="periodConvertTo(period.id)"
+                  <StoryItemActionsMenu v-if="inStory" :label="period.label.fr || period.label.en" :disabled="panelBusy" movable :create-story="auth.ownsStory(story)" :promote="promotableIds.has(period.id)" :convert-to="periodConvertTo(period.id)"
                     @move="movingPeriodId = period.id" @edit="emit('edit-period', period.id)" @remove="emit('remove-period', period.id)" @create-story="emit('create-story-from-period', period.id)" @convert="convertPeriod(period.id)" />
                   <Button v-else variant="ghost" size="sm" icon-only :disabled="panelBusy || requiresParentImport(period)" :aria-label="`Ajouter ${period.label.fr || period.label.en} à la frise`" @click.stop="onTreePeriodAction(period.id)"><template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template></Button>
                 </template>
@@ -128,7 +130,7 @@
             </div>
             <div class="story-period-tree-workspace__detail">
               <StoryPeriodDetail :period="selectedTreePeriod" :in-story="!!selectedTreeNode?.inStory"
-                :can-create-story="auth.ownsStory(story)"
+                :can-create-story="auth.ownsStory(story)" :promote="!!selectedTreePeriod && promotableIds.has(selectedTreePeriod.id)"
                 :children="selectedTreeChildren" :stories="selectedTreeStories" :summaries="dataStore.stories" :busy="!!panelBusy"
                 :can-add="!!selectedTreePeriod && !requiresParentImport(selectedTreePeriod)"
                 @select="onTreePeriodSelect" @edit="emit('edit-period', $event)" @move="movingPeriodId = $event" @remove="emit('remove-period', $event)"
@@ -173,7 +175,7 @@
                         @click="onFinderPeriodSelect(row.item, colIdx)"
                       >
                         <template #actions>
-                          <StoryItemActionsMenu v-if="row.inStory" :label="storyPeriodLabelForFinder(row.item).fr" :disabled="panelBusy" :create-story="auth.ownsStory(story)" movable :convert-to="periodConvertTo(row.item.id)"
+                          <StoryItemActionsMenu v-if="row.inStory" :label="storyPeriodLabelForFinder(row.item).fr" :disabled="panelBusy" :create-story="auth.ownsStory(story)" :promote="promotableIds.has(row.item.id)" movable :convert-to="periodConvertTo(row.item.id)"
                             @move="movingPeriodId = row.item.id" @edit="emit('edit-period', row.item.id)" @remove="emit('remove-period', row.item.id)"
                             @create-story="emit('create-story-from-period', row.item.id)" @convert="convertPeriod(row.item.id)" />
                           <button
@@ -358,7 +360,8 @@
           <div class="story-overview__section">
             <StoryRelationsPanel :story="story" :busy="panelBusy" :error="error"
               @add-parent="(sourceId, periodId) => emit('add-parent-entry', sourceId, periodId)"
-              @remove-parent="(sourceId, anchor) => emit('remove-parent-entry', sourceId, anchor)" />
+              @remove-parent="(sourceId, anchor) => emit('remove-parent-entry', sourceId, anchor)"
+              @set-parent="(parentId, periodId) => emit('set-parent', parentId, periodId)" />
           </div>
           <div class="story-overview__section">
             <StoryCategoriesForm :story="story" :editable="auth.canEditStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
@@ -416,6 +419,8 @@ import StoryRelationsPanel from './StoryRelationsPanel.vue';
 import StoryNavigationPanel from './StoryNavigationPanel.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import StoryItemActionsMenu from './StoryItemActionsMenu.vue';
+import StoryArchitecturePanel from './StoryArchitecturePanel.vue';
+import { promotionCandidates } from '@/lib/storyArchitecture';
 import EditModal from './EditModal.vue';
 import { useStoryWikidataPeriodImport } from '@/composables/useStoryWikidataPeriodImport';
 import AnchoredStoryRow from './AnchoredStoryRow.vue';
@@ -485,6 +490,7 @@ const emit = defineEmits<{
   (e: 'save-story', submission: EditFormSubmission): void;
   (e: 'delete-story'): void;
   (e: 'toggle-visibility'): void;
+  (e: 'set-parent', parentId: string, periodId: string): void;
   (e: 'remove-child-story', id: string, anchor?: StoryAnchor): void;
   (e: 'add-parent-entry', sourceId: string, periodId: string): void;
   (e: 'remove-parent-entry', sourceId: string, anchor?: StoryAnchor): void;
@@ -603,6 +609,8 @@ const eventHeaderSearch = ref('');
 const eventFilterCategoryId = ref('');
 
 const dataStore = useDataStore();
+/** Règle 3 : périodes à proposer en sous-frise. */
+const promotableIds = computed(() => new Set(props.story ? promotionCandidates(props.story).map(candidate => candidate.periodId) : []));
 const finderPeriods = computed(() => wikidataPeriods.value);
 const periodTreeNodes = computed(() => buildStoryPeriodTree(props.story?.periods ?? [], showExternalInFinder.value ? finderPeriods.value : []));
 const selectedTreePath = computed(() => selectedPeriodId.value ? findStoryPeriodTreePath(periodTreeNodes.value, selectedPeriodId.value) : []);

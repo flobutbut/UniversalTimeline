@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { parseTemporal, yearsBeforePresent, resolveYearsBeforePresent, periodDateErrors, temporalBounds, MS_PER_YEAR, comparableYearsBeforePresent } from '../src/shared/temporal';
+import { parseTemporal, yearsBeforePresent, resolveYearsBeforePresent, periodDateErrors, temporalBounds, MS_PER_YEAR, comparableYearsBeforePresent, storedYearsBeforePresent } from '../src/shared/temporal';
 import { DateService } from '../../src/services/DateService';
 import { aggregateStoryTemporalBounds } from '../src/domain/storyTemporalBounds';
 const now = Date.parse('2026-10-29T12:00:00Z');
@@ -114,4 +114,16 @@ it('compares calendar dates at one instant, whatever the stale stored coordinate
   expect(comparableYearsBeforePresent('', '42', now)).toBe(42);
   expect(comparableYearsBeforePresent('vers la fin du règne', '42', now)).toBeNull();
   expect(comparableYearsBeforePresent('TODAY', null, now)).toBe(0);
+});
+
+it('stores coordinates computed at write time without float artefacts, never inventing the present', () => {
+  const now = Date.UTC(2026, 10, 3);
+  expect(storedYearsBeforePresent('M66.4', now)).toBe(66400000);
+  expect(Number((66.4 * 1e6 + 1e-8).toPrecision(15))).toBe(66400000);
+  // A timestamp keeps its seconds: one second is about 3e-8 year.
+  const second = storedYearsBeforePresent('1944-06-06T14:32:45Z', now)! - storedYearsBeforePresent('1944-06-06T14:32:46Z', now)!;
+  expect(second).toBeCloseTo(1 / (365.25 * 86400), 12);
+  expect(Object.is(storedYearsBeforePresent('TODAY', now), 0)).toBe(true);
+  expect(storedYearsBeforePresent('vers la fin du règne', now)).toBeNull();
+  expect(storedYearsBeforePresent('', now)).toBeNull();
 });

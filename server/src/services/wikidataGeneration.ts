@@ -3,8 +3,9 @@ import type { GeneratedStoryInput } from '../api/wikidataGenerationInput.js';
 import { insertStory } from '../repositories/storyRepository.js';
 import { insertAssociations, insertFrozenPlacements, setRelationLockTimeout } from '../repositories/storyRelationsRepository.js';
 import { insertOrReuseGeneratedItem, findGeneratedStoryMatches, lockGeneratedStoryTopic } from '../repositories/wikidataGenerationRepository.js';
-import { WikidataGenerationConflictError } from '../domain/errors.js';
+import { StoryAssociationError, WikidataGenerationConflictError } from '../domain/errors.js';
 import { creatorAuthor } from './storyAuthor.js';
+import { PRIVATE_DRAFT_MESSAGE, refusesPublication } from '../domain/storyVisibility.js';
 
 export function findExistingGeneratedStories(qid: string, title: string) {
   return withTransaction(client => findGeneratedStoryMatches(client, qid, title));
@@ -12,6 +13,8 @@ export function findExistingGeneratedStories(qid: string, title: string) {
 
 /** Same verified principal and transaction for the story, imports and links. */
 export function createGeneratedStory(input: GeneratedStoryInput) {
+  // A generated frise has no parent yet: it starts as a private draft.
+  if (refusesPublication(input.story.isPublic, { isPublic: false, parentStoryId: null })) throw new StoryAssociationError(400, PRIVATE_DRAFT_MESSAGE);
   return withTransaction(async client => {
     await setRelationLockTimeout(client);
     // Serialize equal subjects/titles across requests, then read a fresh RLS snapshot.

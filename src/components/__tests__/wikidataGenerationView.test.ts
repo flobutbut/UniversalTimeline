@@ -292,7 +292,7 @@ it('keeps cancellation, visibility and saving in the header, with tree navigatio
   const header = view.get('.generation-heading');
   expect(header.get('h1').text()).toContain('Créer une frise');
   expect(header.get('a[title*="Annuler"]').exists()).toBe(true);
-  expect(header.get('[aria-label="Visibilité de la frise"] input[value="private"]').element.checked).toBe(true);
+  expect(header.get('.generation-visibility').text()).toContain('Privée jusqu’à son rattachement');
   expect(header.findAll('button').some(element => element.text().includes('Enregistrer la frise'))).toBe(true);
   expect(view.find('.generation-save').exists()).toBe(false);
   expect(view.find('.generation-search').exists()).toBe(false);
@@ -329,22 +329,18 @@ it('restores the edited description across sign-in and still offers subject sear
   expect(view.get('input[aria-label="Rechercher un sujet Wikidata"]').exists()).toBe(true);
 });
 
-it('saves the visibility chosen in the header and disables it while saving', async () => {
-  let resolve!: (value: { id: string; periodCount: number; eventCount: number }) => void;
-  vi.mocked(stories.createFromWikidata).mockReturnValue(new Promise(yes => { resolve = yes; }));
+it('saves a generated frise as a private draft, since it has no parent yet', async () => {
   await start();
-  await view.get('.generation-visibility input[value="public"]').setValue(true);
-  await button('Enregistrer la frise').trigger('click');
-  expect(stories.createFromWikidata).toHaveBeenCalledWith('Q1', 'Révolution', expect.any(Array), true, 'Un sujet');
-  expect(view.get('.generation-visibility input[value="private"]').attributes('disabled')).toBeDefined();
-  resolve({ id: '42', periodCount: 0, eventCount: 1 }); await flushPromises();
+  await button('Enregistrer la frise').trigger('click'); await flushPromises();
+  expect(stories.createFromWikidata).toHaveBeenCalledWith('Q1', 'Révolution', expect.any(Array), false, 'Un sujet');
+  expect(view.find('.generation-visibility input').exists()).toBe(false);
 });
 
-it('preserves the chosen visibility through sign-in and clears a cached draft when cancelling', async () => {
+it('ignores a cached public visibility and clears a cached draft when cancelling', async () => {
   const previous = { ...fixture(), isPublic: true };
   sessionStorage.setItem('wikidata-generation-draft', JSON.stringify(previous));
   await start('/generate?wikidata=Q1', false);
-  expect(view.get('.generation-visibility input[value="public"]').element.checked).toBe(true);
+  expect(view.get('.generation-visibility').text()).toContain('Privée');
   await view.get('.generation-heading a[title*="Annuler"]').trigger('click'); await flushPromises();
   expect(sessionStorage.getItem('wikidata-generation-draft')).toBeNull();
   expect(stories.createFromWikidata).not.toHaveBeenCalled();

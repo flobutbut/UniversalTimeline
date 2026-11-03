@@ -121,3 +121,13 @@ it('folds undated descendants without assigning invented coordinates and tolerat
   expect(visible(view)).toHaveLength(2);
   view.unmount();
 });
+
+it('places bars from their dates, not from stale stored coordinates computed at another time', () => {
+  // Stored a year apart, the second phase would seem to start before the first ends and drop a line.
+  const stale = { ...period('second', 'root', '1850', '1900'), startYearsBP: 177.9, endYearsBP: 126.9 };
+  const view = mount(StoryTimeline, { props: { compact: true, periods: [
+    period('root', null, '1800', '1900'), { ...period('first', 'root', '1800', '1850'), startYearsBP: 226.8, endYearsBP: 176.8 }, stale,
+  ] } });
+  expect(top(view, 'first')).toBe(top(view, 'second'));
+  view.unmount();
+});

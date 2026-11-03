@@ -26,6 +26,8 @@ async function call(payload = body(), userId = alice) {
   return res;
 }
 
+// A generated frise starts private; publishing it later (once attached) is simulated directly.
+const publish = id => pool.query('UPDATE stories SET is_public = true WHERE id = $1', [id]);
 async function lookup(qid, title, userId = alice) {
   const route = router.stack.find(layer => layer.route?.path === '/stories/wikidata-matches' && layer.route.methods.get);
   const res = { statusCode: 200, payload: undefined, set() { return this; },
@@ -67,14 +69,12 @@ test('reuses a stored Wikidata link without overwriting data or confusing a Q-sh
   assert.deepEqual((await pool.query("SELECT label_fr,date FROM events WHERE id='existing'")).rows[0], { label_fr: 'Titre conservé', date: '1789' });
 });
 
-test('creates a public frise only when explicitly selected, retaining the authenticated owner', async () => {
-  const response = await call({ ...body(), isPublic: true }); assert.equal(response.statusCode, 201);
-  const id = response.payload.id;
-  assert.deepEqual((await pool.query('SELECT is_public, owner_user_id FROM stories WHERE id=$1', [id])).rows[0], { is_public: true, owner_user_id: alice });
-  for (const userId of [bob, null]) {
-    const visible = await principalContext.run({ userId, isAdmin: false }, () => tx(async client => (await client.query('SELECT id FROM public.stories WHERE id=$1', [id])).rows));
-    assert.equal(String(visible[0]?.id), id);
-  }
+test('refuses a public generated frise: without a parent it stays a private draft', async () => {
+  const refused = await call({ ...body(), isPublic: true });
+  assert.equal(refused.statusCode, 400);
+  assert.equal((await pool.query('SELECT count(*)::int n FROM stories')).rows[0].n, 0);
+  const response = await call(body()); assert.equal(response.statusCode, 201);
+  assert.deepEqual((await pool.query('SELECT is_public, owner_user_id FROM stories WHERE id=$1', [response.payload.id])).rows[0], { is_public: false, owner_user_id: alice });
 });
 
 test('persists the edited story description, including blank text, without overwriting catalogue descriptions', async () => {
@@ -110,8 +110,9 @@ test('detects an existing subject after renaming and requires acknowledgement wi
 });
 
 test('does not treat a broader frise containing the subject as a duplicate, while still detecting its identical title', async () => {
-  const broader = await call({ ...body(), title: 'Époque moderne', description: 'Une frise plus large', isPublic: true, items: [{ ...period, qid: 'Q6534' }, event] });
+  const broader = await call({ ...body(), title: 'Époque moderne', description: 'Une frise plus large', items: [{ ...period, qid: 'Q6534' }, event] });
   assert.equal(broader.statusCode, 201);
+  await publish(broader.payload.id);
   assert.deepEqual((await lookup('Q6534', 'Révolution française')).payload, []);
   assert.deepEqual((await lookup('Q2', 'Autre sujet')).payload, []);
   const sameTitle = await lookup('Q6534', 'EPOQUE MODERNE');
@@ -131,7 +132,8 @@ test('does not disclose other accounts’ private frises in lookup results or co
 });
 
 test('finds public frises and normalized identical titles, while matching legacy source URLs exactly', async () => {
-  const first = await call({ ...body(), qid: 'Q10', title: 'Révolution française', isPublic: true }); assert.equal(first.statusCode, 201);
+  const first = await call({ ...body(), qid: 'Q10', title: 'Révolution française' }); assert.equal(first.statusCode, 201);
+  await publish(first.payload.id);
   assert.deepEqual((await lookup('Q1', 'Autre titre')).payload, []); // Q1 must not match Q10.
   assert.equal((await lookup('Q10', 'Autre titre', null)).payload[0].reason, 'subject');
   const sameTitle = await lookup('Q999', '  REVOLUTION FRANCAISE  ', bob);
@@ -144,9 +146,10 @@ test('serializes concurrent creations by the same account before checking for a 
   for (const table of ['stories','periods','events']) assert.equal((await pool.query(`SELECT count(*)::int n FROM ${table}`)).rows[0].n, 1);
 });
 
-test('serializes concurrent public creations across accounts without exposing private frises', async () => {
-  const responses = await Promise.all([call({ ...body(), isPublic: true }, alice), call({ ...body(), isPublic: true }, bob)]);
-  assert.deepEqual(responses.map(response => response.statusCode).sort(), [201, 409]);
+test('detects another account’s public frise on the same subject', async () => {
+  const first = await call(body(), alice); assert.equal(first.statusCode, 201);
+  await publish(first.payload.id);
+  assert.equal((await call(body(), bob)).statusCode, 409);
   assert.equal((await pool.query('SELECT count(*)::int n FROM stories')).rows[0].n, 1);
 });
 

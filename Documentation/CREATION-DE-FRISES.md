@@ -76,7 +76,7 @@ Parcours : Grandes périodes de l'histoire européenne (24) enchaîne Antiquité
 
 ### Ce que l'interface doit faire à la place de l'utilisateur
 
-Ces règles doivent être appliquées par l'interface, pour que l'utilisateur n'ait pas à les connaître :
+Ces règles doivent être appliquées par l'interface, pour que l'utilisateur n'ait pas à les connaître. Elles le sont depuis le 3 novembre 2026 ; la logique est dans `src/lib/storyArchitecture.ts` (avertissements, promotion, rôle, ancre proposée) et dans `services/storyAssociations.ts` côté serveur :
 
 - **Créer une frise** : la parente et l'ancre sont demandées. L'ancre est proposée automatiquement, c'est la période de la parente qui contient les dates du sujet. Sans parente, la frise reste privée.
 - **Créer une frise depuis une période** : les sous-périodes sont **déplacées** vers la nouvelle frise au lieu d'être copiées, la période reste dans la parente comme ancre, et la présentation est créée.
@@ -88,6 +88,15 @@ Ces règles doivent être appliquées par l'interface, pour que l'utilisateur n'
 - **Proposer « Promouvoir en sous-frise »** sur une période qui remplit les critères de la règle 3.
 - **Afficher le rôle déduit** (portail, récit, parcours) dans le détail de la frise.
 - **Calculer les années stockées à chaque écriture** avec `temporal.ts`, et faire lire les dates plutôt que les nombres stockés par la miniature des cartes.
+
+Précisions sur ce qui est appliqué :
+
+- **Création** : la parente se choisit dans le formulaire « Créer une frise », ou ensuite dans l'aperçu de la frise (« Choisir la frise parente »). Des dates de sujet facultatives, non enregistrées, servent à proposer l'ancre ; pour une frise déjà remplie, ce sont ses propres bornes. Le serveur refuse de rendre publique une frise sans parente, y compris une frise générée depuis Wikidata ; une frise déjà publique sans parente garde sa visibilité et reçoit un avertissement, sauf la racine.
+- **Depuis une période** : les sous-périodes quittent la frise source dans la même transaction, avec les liens qui les visent (sous-frises ancrées dessus, points d'entrée, présentations). Une ancre d'une sous-frise déplacée qui n'existe pas dans la nouvelle frise devient un point d'entrée depuis la source. Les événements de la plage restent **copiés** : le portail garde ses événements de bascule. Si un lien concerne une frise d'un autre compte, la création est refusée.
+- **Avertissements** : visibles par les comptes qui peuvent modifier la frise, dans son en-tête. Un niveau compte les **périodes** seulement ; les événements ne sont pas rangés par niveau. Un point d'entrée « saute des niveaux » quand sa source et sa cible sont à au moins deux niveaux d'écart dans l'arbre des parentés.
+- **Promotion** : proposée dans le menu de la période et dans les avertissements, sauf pour une période qui sert déjà d'ancre ou la seule racine de la frise. Le critère « un sujet qu'on voudrait ouvrir depuis la recherche » ne peut pas être détecté.
+- **Rôle** : parcours si la frise présente des périodes par d'autres frises ; portail si au moins la moitié de ses périodes racines ouvrent sur une autre frise ; récit sinon. « Brouillon » s'ajoute pour une frise sans parente, sauf la racine (la frise sans parente qui a le plus de descendantes).
+- **Années stockées** : `storedYearsBeforePresent()` les calcule à chaque écriture (catalogue, conversion, import Wikidata), arrondies à 15 chiffres significatifs : les artefacts disparaissent, mais une date à la seconde garde sa précision, ce qu'un arrondi à 3 décimales (environ 9 heures) ne permettrait pas. Les anciennes valeurs ne sont pas recalculées en base. La miniature lit les dates à un même instant (`comparableYearsBeforePresent`).
 
 ## 3. Avant de créer : partir de l'existant
 
@@ -108,7 +117,7 @@ Conséquences :
 Autres règles :
 - **Chaque sous-période doit tenir dans les dates de sa période parente.** Si elle déborde, la remonter d'un niveau ou élargir le parent.
 - **Viser 3 à 10 éléments par niveau.** Au-delà, ajouter un niveau de regroupement ou découper en sous-frises.
-- **Une frise trop large se découpe.** Utiliser « Créer une frise depuis une période » dans l'interface, ou reproduire sa logique : sous-arbre repris, événements compris dans les dates, catégories reprises, ancre sur la période de départ. Puis **retirer les sous-périodes de la frise parente** (règle 2 de la section 2) ; aujourd'hui, l'interface les copie et ce retrait reste à faire à la main.
+- **Une frise trop large se découpe.** Utiliser « Créer une frise depuis une période » dans l'interface, ou reproduire sa logique : sous-arbre repris, événements compris dans les dates, catégories reprises, ancre sur la période de départ. L'interface **déplace les sous-périodes** hors de la frise parente (règle 2 de la section 2) ; un script doit faire de même.
 
 ## 5. Les dates
 
@@ -132,7 +141,7 @@ Le moteur ramène toute date sur un seul axe, en années avant aujourd'hui. Le t
 - **Temps profond : compter depuis aujourd'hui**, avec `G`, `M` ou `K`. Une année ISO comme `-66000000` compte depuis l'an 0 et décale de 2 026 ans.
 - **Choisir la précision réelle de la source.** Pas de jour inventé quand seule l'année est connue.
 - **Avant 1582, utiliser les dates usuelles (calendrier julien)** : Crécy le 26 août 1346, pas le 3 septembre que donne Wikidata en grégorien proleptique.
-- **`start_years_bp`, `end_years_bp` et `date_years_bp`** se calculent avec `yearsBeforePresent()`, arrondis à 3 décimales pour éviter les artefacts du type `66400000.00000001`.
+- **`start_years_bp`, `end_years_bp` et `date_years_bp`** se calculent avec `storedYearsBeforePresent()`, ou dans un script avec `yearsBeforePresent()` arrondi à 3 décimales, pour éviter les artefacts du type `66400000.00000001`.
 - **Le début doit être strictement antérieur à la fin.**
 - **Les années stockées dépendent de la date du calcul.** Pour une frise au jour près, recalculer les `*_years_bp` des anciennes fiches réutilisées en même temps que les nouvelles, sinon une sous-période semble déborder de son parent de quelques mois.
 
