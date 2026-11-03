@@ -1,6 +1,8 @@
 import type { Period, WikidataBinding } from '../types/geological';
 import { sparql, mediaWiki, normalizeWikidataId, type WikidataReadOptions } from './wikidataTransport';
 import { WIKIDATA_MEDIAWIKI_API_URL } from '@/lib/wikidataMediaWikiConstants';
+import { wikibaseTimeToTemporal } from '@/lib/wikidataTime';
+import { compareYearsOldestFirst, yearsBeforePresent } from '@temporal';
 
 const wdLog = (...args: unknown[]) => {
   if (import.meta.env.DEV) console.log(...args);
@@ -24,6 +26,29 @@ const WIKIDATA_TEMPORAL_PERIOD_ROOT_CLASSES = [
   'Q15401633', // archaeological period
 ] as const;
 
+/** `wdt:` perd la précision et le calendrier : on lit le nœud de valeur complet. */
+const timeVars = (name: string) => `?${name} ?${name}Precision ?${name}Calendar`;
+const timeNode = (name: string) => `?${name}Node wikibase:timeValue ?${name}; wikibase:timePrecision ?${name}Precision; wikibase:timeCalendarModel ?${name}Calendar.`;
+/** Valeur de meilleur rang, comme `wdt:`. */
+const bestTime = (subject: string, property: string, name: string) =>
+  `${subject} p:${property} ?${name}Statement. ?${name}Statement a wikibase:BestRank; psv:${property} ?${name}Node. ${timeNode(name)}`;
+const qualifierTime = (statement: string, property: string, name: string) => `${statement} pqv:${property} ?${name}Node. ${timeNode(name)}`;
+
+/** Date SPARQL (années astronomiques) au format de l'application ; '' si elle doit être revue. */
+function bindingTime(binding: WikidataBinding, name: string): string {
+  const time = binding[name]?.value;
+  if (!time) return '';
+  const precision = binding[`${name}Precision`]?.value;
+  return wikibaseTimeToTemporal({ time, precision: precision ? Number(precision) : undefined, calendarmodel: binding[`${name}Calendar`]?.value }, 'astronomical');
+}
+const oldestFirst = (a: string, b: string) => compareYearsOldestFirst(yearsBeforePresent(a), yearsBeforePresent(b));
+/** Dates d'un événement, par priorité (bâtiments / monuments : P571, P1619 souvent plus pertinents que P580). */
+const EVENT_DATES = [
+  ['P585', 'pointInTime'], ['P1619', 'officialOpening'], ['P571', 'inceptionDate'], ['P580', 'startDate'],
+  ['P582', 'endDate'], ['P569', 'birthDate'], ['P1319', 'earliestDate'],
+] as const;
+const UNREAD_DATE_WARNING = 'Une date Wikidata est trop approximative ou incertaine pour être reprise : renseignez-la.';
+
 export class WikidataQueryService {
   private static instance: WikidataQueryService;
   private defaultLanguages: string[];
@@ -41,33 +66,33 @@ export class WikidataQueryService {
 
   private buildTemporalQuery(periodId: string): string {
     return `
-      SELECT ?item ?itemLabelFr ?itemLabelEn ?itemDescriptionfr ?itemDescriptionen ?startDate ?endDate ?startDateQualifier ?endDateQualifier ?inceptionDate ?replacedByDate ?dissolvedDate WHERE {
+      SELECT ?item ?itemLabelFr ?itemLabelEn ?itemDescriptionfr ?itemDescriptionen ${['startDate', 'endDate', 'startDateQualifier', 'endDateQualifier', 'inceptionDate', 'replacedByDate', 'dissolvedDate'].map(timeVars).join(' ')} WHERE {
         VALUES ?item { wd:${periodId} }
 
         # Dates directes (P580/P582) - priorité haute
-        OPTIONAL { ?item wdt:P580 ?startDate. }
-        OPTIONAL { ?item wdt:P582 ?endDate. }
+        OPTIONAL { ${bestTime('?item', 'P580', 'startDate')} }
+        OPTIONAL { ${bestTime('?item', 'P582', 'endDate')} }
 
         # Dates via qualificateurs de P31 (instance of) - fallback
         OPTIONAL {
           ?item p:P31 ?statement.
           ?statement ps:P31 ?class.
-          OPTIONAL { ?statement pq:P580 ?startDateQualifier. }
-          OPTIONAL { ?statement pq:P582 ?endDateQualifier. }
+          OPTIONAL { ${qualifierTime('?statement', 'P580', 'startDateQualifier')} }
+          OPTIONAL { ${qualifierTime('?statement', 'P582', 'endDateQualifier')} }
         }
 
         # Date d'inception (P571) - fallback pour startDate
-        OPTIONAL { ?item wdt:P571 ?inceptionDate. }
+        OPTIONAL { ${bestTime('?item', 'P571', 'inceptionDate')} }
 
         # Date de remplacement (P1366 + P585) - fallback pour endDate
         OPTIONAL {
           ?item p:P1366 ?replacedByStatement.
           ?replacedByStatement ps:P1366 ?replacedBy.
-          OPTIONAL { ?replacedByStatement pq:P585 ?replacedByDate. }
+          OPTIONAL { ${qualifierTime('?replacedByStatement', 'P585', 'replacedByDate')} }
         }
 
         # Date de dissolution/abolition (P576) - fallback pour endDate
-        OPTIONAL { ?item wdt:P576 ?dissolvedDate. }
+        OPTIONAL { ${bestTime('?item', 'P576', 'dissolvedDate')} }
 
         # Labels multilingues
         OPTIONAL { ?item rdfs:label ?itemLabelFr. FILTER(LANG(?itemLabelFr) = "fr") }
@@ -102,28 +127,28 @@ export class WikidataQueryService {
     const childTypeFilter = this.buildTemporalPeriodTypeFilter('?child');
     const grandChildTypeFilter = this.buildTemporalPeriodTypeFilter('?grandChild');
     return `
-      SELECT DISTINCT
-        ?child ?childLabel
-        (MIN(?startDateRaw) AS ?startDate)
-        (MAX(?endDateRaw) AS ?endDate)
-        (COUNT(DISTINCT ?grandChild) AS ?childCount)
-      WHERE {
-        ?child wdt:P361 wd:${periodId}.
-        ${childTypeFilter}
-        OPTIONAL { ?child wdt:P580 ?startDateRaw. }
-        OPTIONAL { ?child wdt:P582 ?endDateRaw. }
+      SELECT ?child ?childLabel ?childCount ${timeVars('startDate')} ${timeVars('endDate')} WHERE {
+        {
+          SELECT ?child (COUNT(DISTINCT ?grandChild) AS ?childCount) WHERE {
+            ?child wdt:P361 wd:${periodId}.
+            ${childTypeFilter}
+            OPTIONAL {
+              ?grandChild wdt:P361 ?child.
+              ${grandChildTypeFilter}
+            }
+          }
+          GROUP BY ?child
+          ORDER BY ?child
+          LIMIT ${MAX_FINDER_CHILDREN_FROM_WIKIDATA}
+        }
+        OPTIONAL { ${bestTime('?child', 'P580', 'startDate')} }
+        OPTIONAL { ${bestTime('?child', 'P582', 'endDate')} }
         SERVICE wikibase:label {
           bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
           ?child rdfs:label ?childLabel.
         }
-        OPTIONAL {
-          ?grandChild wdt:P361 ?child.
-          ${grandChildTypeFilter}
-        }
       }
-      GROUP BY ?child ?childLabel
       ORDER BY ?child
-      LIMIT ${MAX_FINDER_CHILDREN_FROM_WIKIDATA}
     `;
   }
 
@@ -158,8 +183,9 @@ export class WikidataQueryService {
       if (!existing) {
         const fr = lFr || lEn || childId;
         const en = lEn || lFr || childId;
-        const startDate = binding.startDate?.value ?? '';
-        const endDate = binding.endDate?.value ?? 'TODAY';
+        const startDate = bindingTime(binding, 'startDate');
+        // Sans fin déclarée la période court encore ; une fin illisible reste inconnue.
+        const endDate = bindingTime(binding, 'endDate') || (binding.endDate?.value ? '' : 'TODAY');
         byId.set(childId, {
           id: childId,
           label: { fr, en },
@@ -175,6 +201,11 @@ export class WikidataQueryService {
         if (!existing.label.fr && (lEn || lFr)) existing.label.fr = lFr || lEn;
         if (!existing.label.en && (lFr || lEn)) existing.label.en = lEn || lFr;
         existing.hasChildren = existing.hasChildren || hasSub;
+        // Plusieurs valeurs de même rang : on garde l'intervalle le plus large.
+        const bounds = existing.temporalData[0];
+        const start = bindingTime(binding, 'startDate'), end = bindingTime(binding, 'endDate');
+        if (start && (!bounds.startDate || oldestFirst(start, bounds.startDate) < 0)) bounds.startDate = start;
+        if (end && (!bounds.endDate || bounds.endDate === 'TODAY' || oldestFirst(end, bounds.endDate) > 0)) bounds.endDate = end;
       }
     }
 
@@ -199,6 +230,10 @@ export class WikidataQueryService {
     let inceptionDate = '';
     let replacedByDate = '';
     let dissolvedDate = '';
+    let startQualifierDate = '';
+    let endQualifierDate = '';
+    let unreadStart = false;
+    let unreadEnd = false;
 
     bindings.forEach(binding => {
       if (binding.itemLabelFr?.value && !itemLabelFr) {
@@ -213,38 +248,23 @@ export class WikidataQueryService {
       if (binding.itemDescriptionen?.value && !itemDescriptionEn) {
         itemDescriptionEn = binding.itemDescriptionen.value;
       }
-      if (binding.inceptionDate?.value && !inceptionDate) {
-        inceptionDate = binding.inceptionDate.value;
-      }
-      if (binding.replacedByDate?.value && !replacedByDate) {
-        replacedByDate = binding.replacedByDate.value;
-      }
-      if (binding.dissolvedDate?.value && !dissolvedDate) {
-        dissolvedDate = binding.dissolvedDate.value;
-      }
+      for (const name of ['startDate', 'startDateQualifier', 'inceptionDate']) unreadStart ||= !!binding[name]?.value && !bindingTime(binding, name);
+      for (const name of ['endDate', 'endDateQualifier', 'replacedByDate', 'dissolvedDate']) unreadEnd ||= !!binding[name]?.value && !bindingTime(binding, name);
+      inceptionDate ||= bindingTime(binding, 'inceptionDate');
+      replacedByDate ||= bindingTime(binding, 'replacedByDate');
+      dissolvedDate ||= bindingTime(binding, 'dissolvedDate');
       // Pour startDate, priorité aux dates directes (P580), puis qualificateurs, puis inception
-      if (binding.startDate?.value) {
-        if (!startDate || binding.startDate.value < startDate) {
-          startDate = binding.startDate.value;
-        }
-      }
-      if (binding.startDateQualifier?.value && !startDate) {
-        if (!startDate || binding.startDateQualifier.value < startDate) {
-          startDate = binding.startDateQualifier.value;
-        }
-      }
+      const start = bindingTime(binding, 'startDate'), startQualifier = bindingTime(binding, 'startDateQualifier');
+      if (start && (!startDate || oldestFirst(start, startDate) < 0)) startDate = start;
+      if (startQualifier && (!startQualifierDate || oldestFirst(startQualifier, startQualifierDate) < 0)) startQualifierDate = startQualifier;
       // Pour endDate, priorité aux dates directes (P582), puis qualificateurs
-      if (binding.endDate?.value) {
-        if (!endDate || binding.endDate.value > endDate) {
-          endDate = binding.endDate.value;
-        }
-      }
-      if (binding.endDateQualifier?.value && !endDate) {
-        if (!endDate || binding.endDateQualifier.value > endDate) {
-          endDate = binding.endDateQualifier.value;
-        }
-      }
+      const end = bindingTime(binding, 'endDate'), endQualifier = bindingTime(binding, 'endDateQualifier');
+      if (end && (!endDate || oldestFirst(end, endDate) > 0)) endDate = end;
+      if (endQualifier && (!endQualifierDate || oldestFirst(endQualifier, endQualifierDate) > 0)) endQualifierDate = endQualifier;
     });
+
+    startDate ||= startQualifierDate;
+    endDate ||= endQualifierDate;
 
     // Utiliser inceptionDate comme fallback pour startDate si aucune date de début n'est trouvée
     if (!startDate && inceptionDate) {
@@ -276,7 +296,7 @@ export class WikidataQueryService {
       },
       temporalData: [{
         startDate: startDate,
-        endDate: endDate || 'TODAY',
+        endDate: endDate || (unreadEnd ? '' : 'TODAY'),
         location: "Globale"
       }],
       hasChildren: false,
@@ -287,6 +307,8 @@ export class WikidataQueryService {
     wdLog('[WikidataQueryService] Période créée:', period);
 
     let children: Period[] = [];
+    // Une borne illisible reste vide ; l'avertissement n'apparaît que sans date de repli.
+    const unreadDate = (unreadStart && !startDate) || (unreadEnd && !endDate);
     let warnings: string[] | undefined;
     try { children = await this.loadPeriodChildrenByWikidataId(periodId, options); }
     catch (error) {
@@ -303,7 +325,7 @@ export class WikidataQueryService {
       children,
       hasChildren: children.length > 0,
       childrenPreloaded: !warnings,
-      ...(warnings ? { warnings } : {})
+      ...(warnings || unreadDate ? { warnings: [...(unreadDate ? [UNREAD_DATE_WARNING] : []), ...(warnings ?? [])] } : {})
     };
 
     wdLog('[WikidataQueryService] Résultat final:', result);
@@ -328,20 +350,14 @@ export class WikidataQueryService {
   }
 
   // Charger un événement depuis Wikidata par Q-id
-  async loadEvent(eventId: string, options: WikidataReadOptions = {}): Promise<{ label: string | { fr?: string; en?: string }, description?: { fr: string, en: string }, date?: string }> {
+  async loadEvent(eventId: string, options: WikidataReadOptions = {}): Promise<{ label: string | { fr?: string; en?: string }, description?: { fr: string, en: string }, date?: string, warnings?: string[] }> {
     eventId = normalizeWikidataId(eventId);
     const query = `
       SELECT DISTINCT
         ?item ?itemLabel
         ?descriptionfr
         ?descriptionen
-        ?startDate
-        ?endDate
-        ?pointInTime
-        ?birthDate
-        ?earliestDate
-        ?inceptionDate
-        ?officialOpening
+        ${EVENT_DATES.map(([, name]) => timeVars(name)).join(' ')}
         ?historicalEvent
       WHERE {
         VALUES ?item { wd:${eventId} }
@@ -361,13 +377,7 @@ export class WikidataQueryService {
         }
 
         # Dates principales (bâtiments / monuments : P571, P1619 souvent plus pertinents que P580)
-        OPTIONAL { ?item wdt:P580 ?startDate. }    # Date de début
-        OPTIONAL { ?item wdt:P582 ?endDate. }      # Date de fin
-        OPTIONAL { ?item wdt:P585 ?pointInTime. }  # Point dans le temps
-        OPTIONAL { ?item wdt:P569 ?birthDate. }    # Date de naissance
-        OPTIONAL { ?item wdt:P1319 ?earliestDate. } # Date la plus ancienne
-        OPTIONAL { ?item wdt:P571 ?inceptionDate. } # Date de création / construction
-        OPTIONAL { ?item wdt:P1619 ?officialOpening. } # Date d'ouverture officielle
+        ${EVENT_DATES.map(([property, name]) => `OPTIONAL { ${bestTime('?item', property, name)} }`).join('\n        ')}
         OPTIONAL { ?item wdt:P837 ?historicalEvent. }
       }
     `;
@@ -378,22 +388,8 @@ export class WikidataQueryService {
     wdLog('[WikidataQueryService] Binding événement Wikidata:', binding);
 
     // Ordre de priorité : instant ponctuel → ouverture / création → autres
-    let eventDate = '';
-    if (binding.pointInTime?.value) {
-      eventDate = binding.pointInTime.value;
-    } else if (binding.officialOpening?.value) {
-      eventDate = binding.officialOpening.value;
-    } else if (binding.inceptionDate?.value) {
-      eventDate = binding.inceptionDate.value;
-    } else if (binding.startDate?.value) {
-      eventDate = binding.startDate.value;
-    } else if (binding.endDate?.value) {
-      eventDate = binding.endDate.value;
-    } else if (binding.birthDate?.value) {
-      eventDate = binding.birthDate.value;
-    } else if (binding.earliestDate?.value) {
-      eventDate = binding.earliestDate.value;
-    }
+    const eventDate = EVENT_DATES.map(([, name]) => bindingTime(binding, name)).find(Boolean) ?? '';
+    const unreadDate = !eventDate && EVENT_DATES.some(([, name]) => binding[name]?.value);
 
     return {
       label: binding.itemLabel?.value || '',
@@ -401,7 +397,8 @@ export class WikidataQueryService {
         fr: binding['descriptionfr']?.value || binding['descriptionFr']?.value || '',
         en: binding['descriptionen']?.value || binding['descriptionEn']?.value || ''
       },
-      date: eventDate
+      date: eventDate,
+      ...(unreadDate ? { warnings: [UNREAD_DATE_WARNING] } : {})
     };
   }
 

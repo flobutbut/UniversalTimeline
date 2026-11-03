@@ -72,8 +72,8 @@ it('adds start/end dates to label hits, reduced to their Wikidata precision', as
       Q1: { claims: {} },
     } }));
   expect(await api.searchWikidataEntityLabels('stone')).toEqual([
-    { id: 'Q39671', label: 'Stonehenge', description: 'monument', startDate: '-3000', endDate: undefined },
-    { id: 'Q16470', label: 'Débarquement', description: undefined, startDate: '+1944-06-06T00:00:00Z', endDate: '+1944-08-30T00:00:00Z' },
+    { id: 'Q39671', label: 'Stonehenge', description: 'monument', startDate: '3000 BCE', endDate: undefined },
+    { id: 'Q16470', label: 'Débarquement', description: undefined, startDate: '1944-06-06', endDate: '1944-08-30' },
     { id: 'Q1', label: 'Sans date', description: undefined, startDate: undefined, endDate: undefined },
   ]);
 });
