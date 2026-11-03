@@ -120,7 +120,10 @@ it('opens an associated frise explicitly and restores the source period through 
   vi.spyOn(api, 'getStoryPeriods').mockImplementation(async id => [sourcePeriod(`root-${id}`, null, true), sourcePeriod(`leaf-${id}`, `root-${id}`, false)]);
   vi.spyOn(EventApiService.getInstance(), 'getStoryListEvents').mockResolvedValue([]);
   vi.mocked(api.getStory).mockImplementation(async id => storyFixture(id, [sourcePeriod(`root-${id}`, null, true), sourcePeriod(`leaf-${id}`, `root-${id}`, false)], [], id === '1' ? [linked('2', 'leaf-1')] : []));
-  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/timeline', name: 'timeline', component: HomeView }] });
+  const router = createRouter({ history: createMemoryHistory(), routes: [
+    { path: '/timeline', name: 'timeline', component: HomeView },
+    { path: '/database', name: 'database', component: { template: '<div />' } },
+  ] });
   await router.push('/timeline'); await router.isReady();
   view = mount(HomeView, { attachTo: document.body, global: { plugins: [createPinia(), router] } });
   await flushPromises(); await settle();

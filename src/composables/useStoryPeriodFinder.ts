@@ -103,6 +103,18 @@ export function useStoryPeriodFinder(story: () => Story | null | undefined) {
     });
   };
 
+  /** L'arbre conserve sa sélection lorsqu'une autre branche est ouverte. */
+  const loadBranches = (ids: string[]) => showExternal.value
+    ? run((isCurrent, signal, force) => loadChildren(force ? ids : ids.filter(id => suggestionsByParent.value[resolveId(id)] === undefined), isCurrent, signal, force)) : Promise.resolve();
+  const loadedBranchIds = computed(() => Object.keys(suggestionsByParent.value).map(resolveId));
+  function selectTreeRow(id: string) {
+    const periods = [...story()?.periods ?? [], ...additionalPeriods.value];
+    const target = buildStoryFinderPathFromSelectedPeriodId(periods, id);
+    if (!target.length || !inStory(target[0])) return;
+    path.value = target;
+    selectedId.value = id;
+  }
+
   watch(() => story()?.id, () => { clear(); showExternal.value = false; suggestionsByParent.value = {}; }, { flush: 'sync' });
   watch(() => story()?.periods.map(p => `${p.id}:${getStoryPeriodParentId(p) ?? ''}`).sort().join(','), () => {
     cancel();
@@ -117,5 +129,6 @@ export function useStoryPeriodFinder(story: () => Story | null | undefined) {
     else if (id && (!showExternal.value || !inStory(path.value[0]))) clear();
   }, { flush: 'sync' });
   onScopeDispose(cancel);
-  return { additionalPeriods, selectedId, path, showExternal, loading, error, pick, selectRow, toggleExternal, clear, cancel, retry };
+  return { additionalPeriods, selectedId, path, showExternal, loading, error, pick, selectRow, toggleExternal, clear, cancel, retry,
+    loadBranches, loadedBranchIds, selectTreeRow };
 }

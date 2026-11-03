@@ -29,14 +29,15 @@
       <!-- Onglets -->
       <div class="story-detail-panel__tabs-bar">
         <Tabs
-          v-model="activeTab"
+          :model-value="activeTab"
+          @update:model-value="selectContentTab"
           class="story-detail-panel__tabs"
           :tabs="storyContentTabs"
           variant="underline" density="comfortable"
         />
       </div>
 
-      <div class="story-detail-panel__scroll-area">
+      <div ref="contentScroll" class="story-detail-panel__scroll-area">
       <!-- Timeline -->
       <StoryTimeline
         :periods="story.periods"
@@ -50,17 +51,20 @@
 
       <!-- Contenu du tab actif -->
       <div
+        ref="tabContent"
         class="story-detail-panel__tab-content"
+        :style="{ minHeight: contentMinHeight === undefined ? undefined : `${contentMinHeight}px` }"
         :class="{
           'story-detail-panel__tab-content--finder-periods':
-            activeTab === 'periods' && ((story.periods?.length ?? 0) > 0 || showExternalInFinder),
+            displayedTab === 'periods' && ((story.periods?.length ?? 0) > 0 || showExternalInFinder),
           'story-detail-panel__tab-content--finder-events':
-            activeTab === 'events' && (story.events?.length ?? 0) > 0,
+            displayedTab === 'events' && (story.events?.length ?? 0) > 0,
+          'story-detail-panel__tab-content--tree-periods': displayedTab === 'periods' && periodLayout === 'tree',
         }"
       >
 
         <!-- Périodes -->
-        <template v-if="activeTab === 'periods'">
+        <template v-if="displayedTab === 'periods'">
           <div class="story-detail-panel__tab-panel">
             <FilterBar layout="panel"
               hide-title
@@ -77,6 +81,10 @@
               @pick-period="handleStoryPeriodSearchPick"
             >
               <template #actions>
+                <div class="story-period-layout-toggle" role="group" aria-label="Affichage des périodes">
+                  <Button variant="ghost" size="sm" :pressed="periodLayout === 'columns'" @click="switchPeriodLayout('columns')">Colonnes</Button>
+                  <Button variant="ghost" size="sm" :pressed="periodLayout === 'tree'" title="Nouvelle présentation à valider" @click="switchPeriodLayout('tree')">Arbre et détail</Button>
+                </div>
                 <span class="story-finder-activity">
                   <span class="sr-only" role="status">{{ finderLoading ? 'Recherche des sous-périodes…' : '' }}</span>
                   <button v-if="finderLoading" type="button" class="story-finder-activity__cancel" aria-label="Annuler la recherche des sous-périodes" @click="cancelFinder">
@@ -101,6 +109,31 @@
           <div v-if="periodImportError && !periodImportDraft" class="story-finder-feedback" role="alert">
             {{ periodImportError }} <Button variant="tertiary" size="sm" type="button" :disabled="periodImportBusy" @click="retryPeriodImport">Réessayer</Button>
           </div>
+          <div v-if="treeViewVisited" v-show="periodLayout === 'tree'" class="story-period-tree-workspace">
+            <div class="story-period-tree-workspace__navigation">
+              <StoryPeriodTree :story-id="story.id" :periods="story.periods" :additional-periods="finderPeriods" :selected-id="selectedPeriodId"
+                :search="periodHeaderSearch" :category-id="periodFilterCategoryId" :show-additional="showExternalInFinder" :loaded-branch-ids="loadedBranchIds"
+                @select="onTreePeriodSelect" @expanded-change="onTreeExpandedChange">
+                <template #header-actions>
+                  <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">Ajouter une période racine</Button>
+                </template>
+                <template #actions="{ period, inStory }">
+                  <StoryItemActionsMenu v-if="inStory" :label="period.label.fr || period.label.en" :disabled="panelBusy" movable create-story
+                    @move="movingPeriodId = period.id" @edit="emit('edit-period', period.id)" @remove="emit('remove-period', period.id)" @create-story="emit('create-story-from-period', period.id)" />
+                  <Button v-else variant="ghost" size="sm" icon-only :disabled="panelBusy || requiresParentImport(period)" :aria-label="`Ajouter ${period.label.fr || period.label.en} à la frise`" @click.stop="onTreePeriodAction(period.id)"><template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template></Button>
+                </template>
+              </StoryPeriodTree>
+            </div>
+            <div class="story-period-tree-workspace__detail">
+              <StoryPeriodDetail :period="selectedTreePeriod" :in-story="!!selectedTreeNode?.inStory"
+                :children="selectedTreeChildren" :stories="selectedTreeStories" :summaries="dataStore.stories" :busy="!!panelBusy"
+                :can-add="!!selectedTreePeriod && !requiresParentImport(selectedTreePeriod)"
+                @select="onTreePeriodSelect" @edit="emit('edit-period', $event)" @move="movingPeriodId = $event" @remove="emit('remove-period', $event)"
+                @create-story="emit('create-story-from-period', $event)" @add="onTreePeriodAction" @add-child="createTreeChildPeriod" @associate-story="associateTreeStory"
+                @remove-story="(id, periodId) => emit('remove-child-story', id, { type: 'period', id: periodId })" />
+            </div>
+          </div>
+          <div v-show="periodLayout === 'columns'" class="story-period-columns">
           <template v-if="story.periods?.length || showExternalInFinder">
             <div class="story-detail-panel__finder-columns-wrap">
               <div class="finder-columns">
@@ -114,8 +147,8 @@
                       <h2>{{ finderColumnHeader(colIdx) }}</h2>
                     </div>
                     <div class="story-column-header__actions">
-                      <Button variant="tertiary" size="xs" :disabled="panelBusy || (colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? ''))" :title="colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? '') ? 'Ajoutez d’abord cette période à la frise.' : undefined" @click="openChildStoryPicker(colIdx)">Ajouter une frise</Button>
-                      <Button variant="tertiary" size="xs" :disabled="panelBusy || (colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:'))" :title="colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:') ? 'Importez d’abord la période parente.' : undefined" @click="openPeriodCreator(colIdx)">Ajouter une période</Button>
+                      <Button variant="tertiary" size="sm" :disabled="panelBusy || (colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? ''))" :title="colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? '') ? 'Ajoutez d’abord cette période à la frise.' : undefined" @click="openChildStoryPicker(colIdx)">Ajouter une frise</Button>
+                      <Button variant="tertiary" size="sm" :disabled="panelBusy || (colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:'))" :title="colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:') ? 'Importez d’abord la période parente.' : undefined" @click="openPeriodCreator(colIdx)">Ajouter une période</Button>
                     </div>
                   </div>
                   <div class="finder-column-content">
@@ -165,12 +198,13 @@
               </div>
             </div>
           </template>
-          <div v-else-if="!finderLoading && !finderError" class="finder-empty-column">Aucune période associée <Button variant="tertiary" size="xs" :disabled="panelBusy" @click="showRootPicker = true">Choisir la racine</Button></div>
+          <div v-else-if="!finderLoading && !finderError" class="finder-empty-column">Aucune période associée <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="showRootPicker = true">Choisir la racine</Button></div>
+          </div>
           </div>
         </template>
 
         <!-- Événements -->
-        <template v-else-if="activeTab === 'events'">
+        <template v-else-if="displayedTab === 'events'">
           <div class="story-detail-panel__tab-panel">
             <FilterBar layout="panel"
               mode="events"
@@ -185,11 +219,7 @@
               @retry-search="retryEventSearch"
               @add="openEventCreator"
               @pick-event="handleStoryEventSearchPick"
-            >
-              <template #actions>
-                <Switch variant="sm" label-first :model-value="showExternalInFinder" label="Périodes additionnelles" @update:model-value="onShowExternalChange" />
-              </template>
-            </FilterBar>
+            />
           <template v-if="story.events?.length">
             <div class="events-finder-layout">
               <!-- Colonne gauche : liste des événements -->
@@ -219,54 +249,90 @@
               <div class="events-finder-detail">
                 <template v-if="selectedEventId">
                   <template v-for="event in story.events.filter(e => e.id === selectedEventId)" :key="event.id">
-                    <div class="event-detail-header">
-                      <div class="event-detail-label">{{ event.label?.fr ?? event.label }}</div>
-                      <div class="event-detail-date">{{ formatStoryEventDateLabel(event) }}</div>
-                    </div>
-
-                    <div class="event-detail-section event-detail-importance">
-                      <div :id="`event-importance-${event.id}`" class="event-detail-section-title">Importance dans cette frise</div>
-                      <p class="event-detail-section-description">Sur la timeline, les étiquettes des événements majeurs s’affichent en priorité.</p>
-                      <Tabs :model-value="event.importance ?? 'normal'" :tabs="eventImportanceTabs" role="group" :aria-labelledby="`event-importance-${event.id}`"
-                        @update:model-value="value => changeEventImportance(event, value)" />
-                    </div>
-
-                    <div class="event-detail-section">
-                      <div class="event-detail-section-title">Frises associées</div>
-                      <p class="event-detail-section-description">Elles servent à la redirection</p>
-                      <AnchoredStoryRow v-for="cs in childStoriesAnchoredToEvent(event.id)" :key="cs.id" :story="cs" :summary="childStorySummary(cs.id)" :disabled="panelBusy" @remove="emit('remove-event-anchor', cs.id, event.id)" />
-
-                      <div
-                        v-if="childStoriesAnchoredToEvent(event.id).length === 0"
-                        class="event-detail-empty"
-                      > Aucune frise ancrée </div>
-
-                      <Button variant="tertiary" size="xs" :disabled="panelBusy" @click="openChildStoryPicker(undefined, event.id)">Associer une frise</Button>
-                      <!-- Sélecteur inline pour ajouter une ancre -->
-                      <div v-if="childStoriesNotAnchoredToEvent(event.id).length > 0" class="event-anchor-add">
-                        <button
-                          v-if="!showAnchorPickerForEvent"
-                          type="button"
-                          class="finder-child-story-add"
-                          @click="showAnchorPickerForEvent = event.id"
-                        >
-                          <Icon icon="mdi:plus" width="12" height="12" aria-hidden="true" /> Associer une frise liée </button>
-                        <template v-else-if="showAnchorPickerForEvent === event.id">
-                          <div class="event-anchor-picker">
-                            <button type="button"
-                              v-for="cs in childStoriesNotAnchoredToEvent(event.id)"
-                              :key="cs.id"
-                              class="event-anchor-picker-item"
-                              @click="emit('add-event-anchor', cs.id, event.id); showAnchorPickerForEvent = null"
-                            >
-                              {{ cs.title.fr }}
-                            </button>
+                    <div class="event-detail-layout" :class="{ 'event-detail-layout--with-metadata': hasEventMetadata(event) }">
+                      <div class="event-detail-overview">
+                        <header class="event-detail-header">
+                          <div class="event-detail-heading">
+                            <h3 class="event-detail-label">{{ event.label.fr?.trim() || event.label.en?.trim() }}</h3>
+                            <div class="event-detail-date">{{ eventDetailDate(event) }}</div>
                           </div>
-                          <Button variant="tertiary" size="sm" type="button" class="event-anchor-cancel" @click="showAnchorPickerForEvent = null">
-                            Annuler
-                          </Button>
-                        </template>
+                          <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="emit('edit-event', event.id)">Modifier l’événement</Button>
+                          <p v-if="eventDescription(event)" class="event-detail-description" aria-label="Description de l’événement">{{ eventDescription(event) }}</p>
+                          <p v-else class="event-detail-empty event-detail-description">Aucune description renseignée.</p>
+                        </header>
+                        <section class="event-detail-section" aria-label="Catégories de l’événement">
+                          <h4 class="event-detail-section-title">Catégories</h4>
+                          <ul v-if="event.categories.length" class="event-detail-categories">
+                            <li v-for="category in event.categories" :key="category.id"><Tag :label="category.label.fr?.trim() || category.label.en?.trim() || category.id" /></li>
+                          </ul>
+                          <p v-else class="event-detail-empty">Aucune catégorie renseignée.</p>
+                        </section>
+
+                        <div class="event-detail-frise">
+                          <div class="event-detail-section event-detail-importance">
+                            <h4 :id="`event-importance-${event.id}`" class="event-detail-section-title">Importance dans cette frise</h4>
+                            <p class="event-detail-section-description">Les événements majeurs sont affichés en priorité sur la timeline.</p>
+                            <Tabs :model-value="event.importance ?? 'normal'" :tabs="eventImportanceTabs" role="group" :aria-labelledby="`event-importance-${event.id}`"
+                              @update:model-value="value => changeEventImportance(event, value)" />
+                          </div>
+
+                          <section class="event-detail-section event-detail-associations" aria-label="Frises associées à cet événement">
+                            <div class="event-detail-section-heading">
+                              <h4 class="event-detail-section-title">Frises associées</h4>
+                              <span class="event-detail-count">{{ childStoriesAnchoredToEvent(event.id).length }}</span>
+                            </div>
+                            <p class="event-detail-section-description">Des frises à explorer depuis cet événement dans la timeline.</p>
+                            <AnchoredStoryRow v-for="cs in childStoriesAnchoredToEvent(event.id)" :key="cs.id" :story="cs" :summary="childStorySummary(cs.id)" :disabled="panelBusy" @remove="emit('remove-event-anchor', cs.id, event.id)" />
+
+                            <div
+                              v-if="childStoriesAnchoredToEvent(event.id).length === 0"
+                              class="event-detail-empty"
+                            > Aucune frise associée à cet événement. </div>
+
+                            <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openChildStoryPicker(undefined, event.id)">Associer une frise</Button>
+                            <!-- Sélecteur inline pour ajouter une ancre -->
+                            <div v-if="childStoriesNotAnchoredToEvent(event.id).length > 0" class="event-anchor-add">
+                              <Button
+                                v-if="!showAnchorPickerForEvent"
+                                variant="tertiary" size="sm"
+                                class="finder-child-story-add"
+                                :disabled="panelBusy"
+                                @click="showAnchorPickerForEvent = event.id"
+                              >
+                                Associer une frise liée
+                              </Button>
+                              <template v-else-if="showAnchorPickerForEvent === event.id">
+                                <div class="event-anchor-picker">
+                                  <button type="button"
+                                    v-for="cs in childStoriesNotAnchoredToEvent(event.id)"
+                                    :key="cs.id"
+                                    class="event-anchor-picker-item"
+                                    @click="emit('add-event-anchor', cs.id, event.id); showAnchorPickerForEvent = null"
+                                  >
+                                    {{ cs.title.fr }}
+                                  </button>
+                                </div>
+                                <Button variant="ghost" size="sm" :disabled="panelBusy" @click="showAnchorPickerForEvent = null">
+                                  Annuler
+                                </Button>
+                              </template>
+                            </div>
+                          </section>
+                        </div>
                       </div>
+                      <aside v-if="hasEventMetadata(event)" class="event-detail-metadata" aria-label="Métadonnées de l’événement">
+                        <section v-if="eventWikidataId(event)" class="event-detail-section event-detail-reference" aria-label="Référence Wikidata">
+                          <h4 class="event-detail-section-title">Référence Wikidata</h4>
+                          <a :href="`https://www.wikidata.org/wiki/${eventWikidataId(event)}`" target="_blank" rel="noopener noreferrer" :aria-label="`Voir ${eventWikidataId(event)} sur Wikidata (nouvel onglet)`">
+                            <span>{{ eventWikidataId(event) }}</span><Icon icon="mdi:open-in-new" aria-hidden="true" />
+                          </a>
+                        </section>
+
+                        <dl v-if="eventRecordDate(event.createdAt) || eventRecordDate(event.updatedAt)" class="event-detail-record">
+                          <div v-if="eventRecordDate(event.createdAt)"><dt>Créé le</dt><dd>{{ eventRecordDate(event.createdAt) }}</dd></div>
+                          <div v-if="eventRecordDate(event.updatedAt)"><dt>Mis à jour le</dt><dd>{{ eventRecordDate(event.updatedAt) }}</dd></div>
+                        </dl>
+                      </aside>
                     </div>
                   </template>
                 </template>
@@ -280,16 +346,16 @@
           </div>
         </template>
 
-        <div v-else-if="activeTab === 'relations'" class="story-settings-panel">
+        <div v-else-if="displayedTab === 'relations'" class="story-settings-panel">
           <StoryRelationsPanel :story="story" :busy="panelBusy" :error="error"
             @add-parent="(sourceId, periodId) => emit('add-parent-entry', sourceId, periodId)"
             @remove-parent="(sourceId, anchor) => emit('remove-parent-entry', sourceId, anchor)" />
           <StoryNavigationPanel :story="story" :busy="panelBusy" @saved="emit('retry')" />
         </div>
-        <div v-else-if="activeTab === 'categories'" class="story-settings-panel">
+        <div v-else-if="displayedTab === 'categories'" class="story-settings-panel">
           <StoryCategoriesForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
         </div>
-        <div v-else-if="activeTab === 'settings'" class="story-settings-panel">
+        <div v-else-if="displayedTab === 'settings'" class="story-settings-panel">
           <StorySettingsForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError"
             @save="emit('save-story', $event)" @delete="emit('delete-story')" @toggle-visibility="emit('toggle-visibility')" />
         </div>
@@ -322,10 +388,13 @@
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import { resolveYearsBeforePresent } from '@temporal';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
+import Tag from '@/components/base/Tag.vue';
+import { DateService } from '@/services/DateService';
+import { listEventYearsBP } from '@/lib/listEventTableHelpers';
 import RootPeriodModal from './RootPeriodModal.vue';
 import MoveStoryPeriodModal from './MoveStoryPeriodModal.vue';
 import StorySettingsForm from './StorySettingsForm.vue';
@@ -342,6 +411,9 @@ import type { Tab } from '@/types/global';
 import { EVENT_IMPORTANCES, EVENT_IMPORTANCE_LABELS } from '@/lib/eventImportance';
 import Switch from '@/components/base/Switch.vue';
 import StoryTimeline from '@/components/StoryTimeline.vue';
+import StoryPeriodTree from './StoryPeriodTree.vue';
+import StoryPeriodDetail from './StoryPeriodDetail.vue';
+import { buildStoryPeriodTree, findStoryPeriodTreePath } from '@/lib/storyPeriodTree';
 import FinderItem from '@/views/GraphView/FinderItem.vue';
 import FilterBar from "@/components/FilterBar.vue";
 import { useDataStore } from '@/stores/useDataStore';
@@ -412,6 +484,26 @@ function changeEventImportance(event: ListEvent, importance: EventImportance) {
   if (importance !== (event.importance ?? 'normal')) emit('change-event-importance', event.id, importance);
 }
 
+function eventDescription(event: ListEvent): string {
+  return event.description?.fr?.trim() || event.description?.en?.trim() || '';
+}
+function eventWikidataId(event: ListEvent): string | null {
+  const id = event.wikidata_id?.trim() ?? '';
+  return /^Q[1-9]\d*$/.test(id) ? id : null;
+}
+function eventDetailDate(event: ListEvent): string {
+  const date = DateService.parse(event.date);
+  if (date.kind !== 'unknown') return DateService.format(date);
+  const years = listEventYearsBP(event);
+  return years === null ? 'Date non déterminée' : DateService.formatGeological(years);
+}
+function eventRecordDate(value: Date | undefined): string {
+  return value && Number.isFinite(value.getTime()) ? formatRecordDate(value) : '';
+}
+function hasEventMetadata(event: ListEvent): boolean {
+  return !!(eventWikidataId(event) || eventRecordDate(event.createdAt) || eventRecordDate(event.updatedAt));
+}
+
 const {
   draft: periodImportDraft, busy: periodImportBusy, error: periodImportError,
   open: importWikidataPeriod, openCreate: createStoryPeriod, selectExisting: selectExistingStoryPeriod, close: closePeriodImport, submit: submitPeriodImport, retry: retryPeriodImport,
@@ -439,10 +531,46 @@ const showAnchorPickerForEvent = ref<string | null>(null);
 const {
   additionalPeriods: wikidataPeriods, selectedId: selectedPeriodId, path: finderSelectedPath, showExternal: showExternalInFinder,
   loading: finderLoading, error: finderError, retry: retryFinder, cancel: cancelFinder,
-  clear: clearPeriodSelection, pick: pickPeriod, selectRow: selectPeriodRow, toggleExternal: onShowExternalChange,
+  clear: clearPeriodSelection, pick: pickPeriod, selectRow: selectPeriodRow, toggleExternal: toggleAdditionalPeriods,
+  loadBranches, loadedBranchIds, selectTreeRow,
 } = useStoryPeriodFinder(() => props.story);
 const selectedEventId = ref<string | null>(null);
-const activeTab = ref<'periods' | 'events' | 'relations' | 'categories' | 'settings'>('periods');
+type DetailTab = 'periods' | 'events' | 'relations' | 'categories' | 'settings';
+type ContentTab = 'overview' | DetailTab;
+const activeTab = ref<ContentTab>('overview');
+const lastDetailTab = ref<DetailTab>('periods');
+// Aperçu est une ancre de navigation : revenir en haut conserve le contenu consulté.
+const displayedTab = computed(() => activeTab.value === 'overview' ? lastDetailTab.value : activeTab.value);
+watch(activeTab, tab => { if (tab !== 'overview') lastDetailTab.value = tab; }, { flush: 'sync' });
+const contentScroll = ref<HTMLElement | null>(null);
+const tabContent = ref<HTMLElement | null>(null);
+const contentMinHeight = ref<number>();
+let tabScrollRevision = 0;
+async function selectContentTab(tab: ContentTab) {
+  const revision = ++tabScrollRevision;
+  const storyId = props.story?.id;
+  // Même un onglet court doit pouvoir amener sa barre de filtres en haut de la page.
+  if (contentScroll.value) contentMinHeight.value = contentScroll.value.clientHeight;
+  activeTab.value = tab;
+  await nextTick();
+  if (revision !== tabScrollRevision || storyId !== props.story?.id) return;
+  const viewport = contentScroll.value;
+  const content = tabContent.value;
+  if (!viewport || !content) return;
+  const behavior = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth';
+  if (tab === 'overview') {
+    if (viewport.scrollTop > 1) viewport.scrollTo?.({ top: 0, behavior });
+    return;
+  }
+  const top = Math.max(0, viewport.scrollTop + content.getBoundingClientRect().top - viewport.getBoundingClientRect().top - viewport.clientTop);
+  // Ne pas remonter la page ni relancer une animation une fois l'aperçu masqué.
+  if (top - viewport.scrollTop <= 1) return;
+  viewport.scrollTo?.({ top, behavior });
+}
+// La vue existante reste celle par défaut tant que la nouvelle présentation n'est pas validée.
+const periodLayout = ref<'columns' | 'tree'>('columns');
+const treeViewVisited = ref(false);
+const treeExpandedIds = ref<string[]>([]);
 
 const periodHeaderSearch = ref('');
 const periodFilterCategoryId = ref('');
@@ -452,6 +580,43 @@ const eventFilterCategoryId = ref('');
 
 const dataStore = useDataStore();
 const finderPeriods = computed(() => wikidataPeriods.value);
+const periodTreeNodes = computed(() => buildStoryPeriodTree(props.story?.periods ?? [], showExternalInFinder.value ? finderPeriods.value : []));
+const selectedTreePath = computed(() => selectedPeriodId.value ? findStoryPeriodTreePath(periodTreeNodes.value, selectedPeriodId.value) : []);
+const selectedTreeNode = computed(() => selectedTreePath.value[selectedTreePath.value.length - 1]);
+const selectedTreePeriod = computed(() => selectedTreeNode.value?.period ?? null);
+const selectedTreeChildren = computed(() => (props.story?.periods ?? []).filter(period => getStoryPeriodParentId(period) === selectedPeriodId.value).sort(compareStoryPeriodsByStartOldestFirst));
+const selectedTreeStories = computed(() => (props.story?.childStories ?? []).filter(story => story.anchors.some(anchor => anchor.type === 'period' && anchor.id === selectedPeriodId.value)));
+function switchPeriodLayout(layout: 'columns' | 'tree') {
+  if (layout === periodLayout.value) return;
+  if (layout === 'tree') treeViewVisited.value = true;
+  cancelFinder(); periodLayout.value = layout;
+  if (layout === 'tree' && showExternalInFinder.value) void loadBranches(treeExpandedIds.value);
+}
+function onTreeExpandedChange(ids: string[]) {
+  treeExpandedIds.value = ids;
+  if (periodLayout.value === 'tree' && showExternalInFinder.value) void loadBranches(ids);
+}
+function onTreePeriodSelect(id: string) {
+  selectedEventId.value = null;
+  selectTreeRow(id);
+}
+async function onShowExternalChange(enabled: boolean) {
+  await toggleAdditionalPeriods(enabled);
+  if (enabled && showExternalInFinder.value && !finderError.value && periodLayout.value === 'tree') await loadBranches(treeExpandedIds.value);
+}
+function onTreePeriodAction(id: string) {
+  const path = findStoryPeriodTreePath(periodTreeNodes.value, id);
+  const node = path[path.length - 1];
+  if (node && !node.inStory) onPeriodAction({ item: node.period, inStory: false });
+}
+function createTreeChildPeriod(id: string) {
+  if (panelBusy.value || !props.story?.periods.some(period => period.id === id)) return;
+  periodCreationParentId.value = id; createStoryPeriod(id);
+}
+function associateTreeStory(id: string) {
+  if (panelBusy.value || !props.story?.periods.some(period => period.id === id)) return;
+  childStoryAnchor.value = { type: 'period', id }; showChildStoryPicker.value = true;
+}
 function requiresParentImport(item: StoryPeriodInput) {
   return item.id.startsWith('wikidata:') && (!item.parentId || item.parentId.startsWith('wikidata:'));
 }
@@ -464,6 +629,7 @@ function onPeriodAction(row: FinderColumnRow) {
 }
 
 const storyContentTabs = computed(() => [
+  { label: 'Aperçu', value: 'overview' as const },
   { label: 'Périodes', value: 'periods' as const },
   { label: 'Événements', value: 'events' as const },
   { label: 'Relations', value: 'relations' as const },
@@ -585,7 +751,7 @@ const { results: periodSearchSuggestions, loading: periodSearchLoading, error: p
     const hits = await SearchApiService.getInstance().searchLocal(query, { onlyPeriods: true, categoryId: periodFilterCategoryId.value || undefined, signal });
     return hits.filter(hit => hit.type === 'period').map(localSearchHitToPeriod);
   },
-  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, periodFilterCategoryId.value], enabled: () => !!props.story && !props.loading && !props.error && activeTab.value === 'periods' },
+  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, periodFilterCategoryId.value], enabled: () => !!props.story && !props.loading && !props.error && displayedTab.value === 'periods' },
 );
 const { results: eventSearchSuggestions, loading: eventSearchLoading, error: eventSearchError, retry: retryEventSearch } = useDebouncedSearch(
   () => eventHeaderSearch.value,
@@ -593,7 +759,7 @@ const { results: eventSearchSuggestions, loading: eventSearchLoading, error: eve
     const hits = await SearchApiService.getInstance().searchLocal(query, { onlyEvents: true, categoryId: eventFilterCategoryId.value || undefined, signal });
     return hits.filter(hit => hit.type === 'event').map(localSearchHitToEvent);
   },
-  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, eventFilterCategoryId.value], enabled: () => !!props.story && !props.loading && !props.error && activeTab.value === 'events' },
+  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, eventFilterCategoryId.value], enabled: () => !!props.story && !props.loading && !props.error && displayedTab.value === 'events' },
 );
 
 watch([periodHeaderSearch, periodFilterCategoryId, activeTab, () => props.loading, () => props.error], cancelFinder, { flush: 'sync' });
@@ -663,6 +829,9 @@ function onFinderPeriodSelect(period: StoryPeriodInput, colIdx: number) {
 }
 
 function onTimelineSelectPeriod(id: string) {
+  if (periodLayout.value === 'tree') {
+    activeTab.value = 'periods'; onTreePeriodSelect(id); return;
+  }
   if (selectedPeriodId.value === id) clearPeriodSelection();
   else {
     const period = props.story?.periods.find(p => p.id === id);
@@ -680,6 +849,7 @@ function onTimelineSelectEvent(id: string) {
 
 function onStoryEventFinderRowClick(eventId: string) {
   selectedEventId.value = selectedEventId.value === eventId ? null : eventId;
+  showAnchorPickerForEvent.value = null;
   clearPeriodSelection();
 }
 
@@ -740,6 +910,16 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 
 <style scoped>
 .story-finder-feedback { padding: var(--spacing-sm) var(--spacing-md); color: var(--color-text-primary); }
+.story-period-layout-toggle { display: flex; gap: 2px; padding: 2px; border: 1px solid var(--color-border-default); border-radius: var(--radius-md); }
+.story-detail-panel :deep(.filter-bar__slot-actions) { flex-wrap: wrap; max-width: 100%; }
+.story-period-columns { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.story-period-tree-workspace { display: grid; grid-template-columns: clamp(240px, 30%, 340px) minmax(0, 1fr); flex: none; background: var(--color-surface-default); }
+.story-period-tree-workspace__navigation { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--color-border-default); }
+.story-period-tree-workspace__detail { container-type: inline-size; display: flex; flex-direction: column; min-width: 0; }
+@media (max-width: 600px) {
+  .story-period-tree-workspace { grid-template-columns: minmax(0, 1fr); }
+  .story-period-tree-workspace__navigation { border-right: 0; border-bottom: 1px solid var(--color-border-default); }
+}
 .story-finder-feedback button { margin-left: var(--spacing-sm); }
 .story-finder-activity { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: 0 0 20px; }
 .story-finder-activity__cancel { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 2px; border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer; }
@@ -833,8 +1013,7 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   overflow: hidden;
 }
 
-.story-detail-panel__tab-panel .story-detail-panel__finder-columns-wrap,
-.story-detail-panel__tab-panel .events-finder-layout {
+.story-detail-panel__tab-panel .story-detail-panel__finder-columns-wrap {
   flex: 1;
   min-height: 0;
 }
@@ -861,13 +1040,27 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   min-height: 0;
 }
 
-.story-detail-panel__tab-content--finder-periods,
-.story-detail-panel__tab-content--finder-events {
+.story-detail-panel__tab-content--finder-periods {
   flex: 1 0 clamp(320px, 60dvh, 560px);
   min-height: clamp(320px, 60dvh, 560px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Les listes et leurs fiches grandissent avec leur contenu : seule la page défile. */
+.story-detail-panel__tab-content--tree-periods,
+.story-detail-panel__tab-content--finder-events {
+  flex: 1 0 auto;
+  min-height: 0;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}
+.story-detail-panel__tab-content--tree-periods > .story-detail-panel__tab-panel,
+.story-detail-panel__tab-content--finder-events > .story-detail-panel__tab-panel {
+  flex: none;
+  overflow: visible;
 }
 
 .finder-empty-column {
@@ -882,44 +1075,77 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 
 .events-finder-layout {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
+  grid-template-columns: clamp(220px, 24%, 280px) minmax(0, 1fr);
+  flex: none;
 }
 
 .events-finder-list {
-  overflow-y: auto;
-  min-height: 0;
   border-right: 1px solid var(--color-border-default);
   padding: 0;
   background: var(--color-surface-default);
 }
 
 .events-finder-detail {
-  overflow-y: auto;
-  min-height: 0;
-  padding: var(--spacing-md);
+  container-type: inline-size;
+  min-width: 0;
+  padding: var(--spacing-xl);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-xl);
   background: var(--color-surface-default);
 }
 
 .event-detail-header {
-  padding-bottom: var(--spacing-sm);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-sm) var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
   border-bottom: 1px solid var(--color-border-default);
 }
 
+.event-detail-heading { min-width: 0; flex: 1 1 200px; }
 .event-detail-label {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-loose);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
+  overflow-wrap: anywhere;
 }
 
 .event-detail-date {
-  font-size: var(--font-size-xs);
+  font: var(--type-body);
   color: var(--color-text-secondary);
-  margin-top: 2px;
+  margin: 0;
+}
+
+.event-detail-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--spacing-2xl); }
+.event-detail-overview, .event-detail-frise { display: flex; flex-direction: column; gap: var(--spacing-xl); min-width: 0; }
+.event-detail-frise { padding-top: var(--spacing-xl); border-top: 1px solid var(--color-border-default); }
+.event-detail-description { flex: 0 0 100%; margin: 0; color: var(--color-text-primary); font: var(--type-body); white-space: pre-wrap; overflow-wrap: anywhere; }
+.event-detail-categories { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); list-style: none; padding: 0; margin: 0; }
+.event-detail-categories li { min-width: 0; max-width: 100%; }
+.event-detail-categories :deep(.ui-tag__label) { white-space: normal; overflow-wrap: anywhere; }
+.event-detail-reference a { display: inline-flex; align-items: center; gap: var(--spacing-sm); align-self: flex-start; color: var(--color-text-link); font: var(--type-body); text-decoration: none; }
+.event-detail-reference a:hover { text-decoration: underline; }
+.event-detail-reference a:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 3px; }
+.event-detail-record { display: flex; flex-direction: column; gap: var(--spacing-md) var(--spacing-xl); margin: 0; padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border-default); color: var(--color-text-secondary); font: var(--type-meta); }
+.event-detail-record dt { margin-bottom: var(--spacing-xs); }
+.event-detail-record dd { margin: 0; }
+.event-detail-section-heading { display: flex; align-items: center; gap: var(--spacing-sm); }
+.event-detail-count { padding: 0 var(--spacing-xs); min-width: var(--line-height-control); border-radius: var(--radius-sm); background: var(--color-interaction-hover); text-align: center; font: var(--type-meta); color: var(--color-text-secondary); }
+.event-detail-associations { padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border-default); }
+
+.event-detail-metadata { display: flex; flex-direction: column; align-self: start; gap: var(--spacing-xl); min-width: 0; padding-top: var(--spacing-xl); border-top: 1px solid var(--color-border-default); color: var(--color-text-secondary); font: var(--type-meta); }
+.event-detail-metadata .event-detail-section-title { color: var(--color-text-secondary); font: var(--type-label); }
+.event-detail-metadata .event-detail-reference a { font: var(--type-meta); }
+.event-detail-metadata .event-detail-record { border: 0; padding: 0; }
+.event-detail-associations :deep(.anchored-story-row:hover), .event-detail-associations :deep(.anchored-story-row:focus-within) { outline: 1px solid var(--color-border-focus); outline-offset: -1px; }
+@container (min-width: 720px) {
+  .event-detail-layout--with-metadata { grid-template-columns: minmax(0, 1fr) 200px; gap: var(--spacing-2xl); }
+  .event-detail-metadata { padding: 0 0 0 var(--spacing-xl); border-top: 0; border-left: 1px solid var(--color-border-default); }
 }
 
 .event-detail-section {
@@ -928,7 +1154,8 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 }
 
 .event-detail-empty {
-  font-size: var(--font-size-xs);
+  margin: 0;
+  font: var(--type-body);
   color: var(--color-text-secondary);
   font-style: normal;
 }
@@ -959,28 +1186,15 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 
 .event-anchor-picker-item {
   padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-size-xs);
+  min-height: var(--field-height-md);
+  font: var(--type-compact);
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
 
-.event-anchor-picker-item:hover {
+.event-anchor-picker-item:hover, .event-anchor-picker-item:focus-visible {
   background-color: var(--color-interaction-hover);
   color: var(--color-text-link);
-}
-
-.event-anchor-cancel {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.event-anchor-cancel:hover {
-  color: var(--color-text-primary);
 }
 
 
@@ -999,16 +1213,21 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .story-column-header__title h2 { flex: 1; }
 .story-column-header__actions { display: flex; gap: var(--spacing-sm); }
 .story-column-header__actions .base-button { flex: 1; min-width: 0; }
-.event-detail-label { font-size: var(--font-size-lg); line-height: var(--line-height-heading); }
-.event-detail-date { line-height: var(--line-height-small); }
-.event-detail-section-title { font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); text-transform: none; letter-spacing: 0; color: var(--color-text-primary); margin-bottom: 0; }
-.event-detail-section-description { font-size: var(--font-size-sm); line-height: var(--line-height-small); color: var(--color-text-secondary); margin: 0 0 var(--spacing-md); }
-.event-detail-section { align-items: stretch; gap: var(--spacing-xs); }
-.event-detail-section > .base-button { align-self: flex-start; margin-top: var(--spacing-md); }
-.event-detail-importance { margin-bottom: var(--spacing-lg); }
+.event-detail-section-title { font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); text-transform: none; letter-spacing: 0; color: var(--color-text-primary); margin: 0; }
+.event-detail-section-description { font-size: var(--font-size-sm); line-height: var(--line-height-control); color: var(--color-text-secondary); margin: 0; }
+.event-detail-section { align-items: stretch; gap: var(--spacing-sm); }
+.event-detail-section > .base-button { align-self: flex-start; margin-top: var(--spacing-xs); }
+.event-detail-importance :deep(.tabs) { max-width: 100%; background: var(--color-background-default); }
+.event-detail-importance :deep(.tab-button) { flex: 1; justify-content: center; min-height: var(--field-height-md); padding: var(--spacing-xs) var(--spacing-sm); }
+.event-detail-importance :deep(.tab-button:hover:not(:disabled):not(.tab-button--active)) { background: var(--color-interaction-hover); }
 .story-settings-panel { padding: var(--spacing-xl); background: var(--color-surface-default); min-height: 100%; }
 @media (max-width: 1000px) { .story-detail-panel__meta { flex-wrap: wrap; } .story-detail-panel__meta-actions { flex-wrap: wrap; } }
-@media (max-width: 600px) { .story-detail-panel__meta-actions { width: 100%; } .events-finder-layout { grid-template-columns: 160px minmax(0,1fr); }  }
+@media (max-width: 600px) {
+  .story-detail-panel__meta-actions { width: 100%; }
+  .events-finder-layout { grid-template-columns: minmax(0, 1fr); }
+  .events-finder-list { border-right: 0; border-bottom: 1px solid var(--color-border-default); }
+  .events-finder-detail { padding: var(--spacing-lg); }
+}
 
 
 </style>

@@ -1,6 +1,6 @@
 <template>
   <span class="story-item-actions" @click.stop @keydown.stop>
-    <Button ref="triggerComponent" class="story-item-actions__trigger" variant="ghost" size="xs" icon-only
+    <Button ref="triggerComponent" class="story-item-actions__trigger" variant="ghost" size="sm" icon-only
       :disabled="disabled" :aria-label="`Actions pour ${label}`" :title="`Actions pour ${label}`"
       aria-haspopup="menu" :aria-expanded="open" :aria-controls="open ? menuId : undefined"
       @click="toggle" @keydown="onTriggerKeydown">

@@ -1,7 +1,13 @@
 <template>
   <div class="home-view">
-    <StoryBreadcrumb class="home-view__story-breadcrumb" :items="storyBreadcrumb" label="Fil d’Ariane des frises" :loading="loading" @navigate="navigateToStoryBreadcrumb" />
-    <StoryBreadcrumb class="home-view__period-breadcrumb" :items="breadcrumb" :loading="loading" @navigate="navigateToBreadcrumb" />
+    <div class="home-view__header">
+      <div class="home-view__breadcrumbs">
+        <StoryBreadcrumb class="home-view__story-breadcrumb" :items="storyBreadcrumb" label="Fil d’Ariane des frises" :loading="loading" @navigate="navigateToStoryBreadcrumb" />
+        <StoryBreadcrumb class="home-view__period-breadcrumb" :items="breadcrumb" :loading="loading" @navigate="navigateToBreadcrumb" />
+      </div>
+      <Button v-if="!routeError && !error" class="home-view__story-detail" variant="tertiary" size="sm" :disabled="loading"
+        :to="{ name: 'database', query: { story: currentStoryId } }">Voir le détail de la frise</Button>
+    </div>
     <div v-if="routeError || error" role="alert">
       {{ routeError || error }} <Button variant="tertiary" size="sm" v-if="!routeError" type="button" :disabled="loading" @click="retryLoad">Réessayer</Button><RouterLink v-else :to="{ name: 'timeline' }">Revenir à la timeline</RouterLink>
     </div>
@@ -146,7 +152,10 @@ onActivated(() => {
 }
 
 .home-view__choices { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md); }
-.home-view > .story-breadcrumb + .story-breadcrumb { padding-top: 0; }
+.home-view__header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); flex-shrink: 0; padding-right: var(--spacing-md); }
+.home-view__breadcrumbs { flex: 1; min-width: 0; }
+.home-view__story-detail { margin-top: var(--spacing-sm); margin-bottom: var(--spacing-xs); }
+.home-view__breadcrumbs > .story-breadcrumb + .story-breadcrumb { padding-top: 0; }
 .home-view__story-breadcrumb :deep(.story-breadcrumb__item) { padding-bottom: 0; }
 .home-view__period-breadcrumb :deep(.story-breadcrumb__item) { padding-top: 0; }
 .home-view__viewport {

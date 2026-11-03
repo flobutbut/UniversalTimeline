@@ -55,7 +55,7 @@ const switchId = useId();
 .switch {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
 }
 
 .switch__button {
@@ -117,7 +117,7 @@ const switchId = useId();
 /* ─── Variant sm ─────────────────────────────────────────────────────────────── */
 
 .switch--sm {
-  gap: var(--spacing-xs);
+  gap: var(--spacing-md);
 }
 
 .switch--sm .switch__button {
@@ -141,8 +141,8 @@ const switchId = useId();
 .switch--sm .switch__button:disabled { opacity: .5; cursor: not-allowed; }
 
 .switch__label {
-  font-size: var(--font-size-xs);
-  line-height: 1.2;
+  font: var(--type-action);
   white-space: nowrap;
 }
+.switch--sm .switch__label { font: var(--type-compact); }
 </style>

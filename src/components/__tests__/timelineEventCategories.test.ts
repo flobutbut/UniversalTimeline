@@ -30,7 +30,10 @@ beforeEach(async () => {
     if (path.startsWith('/stories/suggestions?')) return [];
     throw new Error(`Lecture inattendue : ${path}`);
   });
-  router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/timeline', name: 'timeline', component: HomeView }] });
+  router = createRouter({ history: createMemoryHistory(), routes: [
+    { path: '/timeline', name: 'timeline', component: HomeView },
+    { path: '/database', name: 'database', component: { template: '<div />' } },
+  ] });
   await router.push('/timeline'); await router.isReady();
   view = mount(HomeView, { global: { plugins: [createPinia(), router] } });
 });

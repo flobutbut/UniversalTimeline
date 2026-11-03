@@ -326,3 +326,231 @@ it('edits the event importance for this frise from the event detail', async () =
   await importance.findAll('button')[0].trigger('click');
   expect(view.emitted('change-event-importance')).toEqual([['event', 'major']]);
 });
+
+it('shows the selected frise event description, categories, reference and record dates', async () => {
+  const data = story('one');
+  Object.assign(data.events[0], {
+    label: { fr: ' ', en: 'Apollo 11' }, description: { fr: ' ', en: 'First crewed Moon landing.\nA historic mission.' },
+    date: '1969-07-21', wikidata_id: 'Q43653',
+    categories: [{ id: 'space', label: { fr: 'Conquête spatiale', en: '' } }, { id: 'science', label: { fr: ' ', en: 'Science' } }],
+    createdAt: new Date('2026-04-05T12:00:00Z'), updatedAt: new Date('2026-10-30T12:00:00Z'),
+  });
+  await start(data);
+  view.getComponent(Tabs).vm.$emit('update:modelValue', 'events'); await flushPromises();
+  view.findAllComponents(FinderItem).find(row => row.props('itemId') === 'event')!.vm.$emit('click'); await flushPromises();
+  const detail = view.get('.events-finder-detail');
+  expect(detail.get('h3').text()).toBe('Apollo 11');
+  expect(detail.get('.event-detail-date').text()).toBe('21 juillet 1969');
+  expect(detail.get('.event-detail-description').text()).toContain('First crewed Moon landing.\nA historic mission.');
+  expect(detail.findAll('.event-detail-categories li').map(item => item.text())).toEqual(['Conquête spatiale', 'Science']);
+  expect(detail.get('.event-detail-reference a').attributes()).toMatchObject({ href: 'https://www.wikidata.org/wiki/Q43653', target: '_blank', rel: 'noopener noreferrer' });
+  expect(detail.get('.event-detail-record').text()).toContain('5 avril 2026');
+  expect(detail.get('.event-detail-record').text()).toContain('30 octobre 2026');
+  await detail.findAll('button').find(item => item.text() === 'Modifier l’événement')!.trigger('click');
+  expect(view.emitted('edit-event')).toEqual([['event']]);
+  expect(selected()).toEqual(['event']);
+});
+
+it('handles missing event information and only links valid Wikidata identifiers', async () => {
+  const data = story('one');
+  Object.assign(data.events[0], { date: 'unknown', wikidata_id: 'https://untrusted.example', createdAt: undefined, updatedAt: new Date('invalid') });
+  await start(data);
+  view.getComponent(Tabs).vm.$emit('update:modelValue', 'events'); await flushPromises();
+  view.findAllComponents(FinderItem).find(row => row.props('itemId') === 'event')!.vm.$emit('click'); await flushPromises();
+  const detail = view.get('.events-finder-detail');
+  expect(detail.get('.event-detail-date').text()).toBe('Date non déterminée');
+  expect(detail.text()).toContain('Aucune description renseignée.');
+  expect(detail.text()).toContain('Aucune catégorie renseignée.');
+  expect(detail.find('.event-detail-reference').exists()).toBe(false);
+  expect(detail.find('.event-detail-record').exists()).toBe(false);
+  await view.setProps({ story: { ...data, events: [{ ...data.events[0], date: '', dateYearsBP: 65_000_000 }] } });
+  expect(view.get('.events-finder-detail .event-detail-date').text()).toBe('il y a 65.0 Ma');
+});
+
+it('disables the selected event edit and importance actions during a save', async () => {
+  await start();
+  view.getComponent(Tabs).vm.$emit('update:modelValue', 'events'); await flushPromises();
+  view.findAllComponents(FinderItem).find(row => row.props('itemId') === 'event')!.vm.$emit('click'); await flushPromises();
+  await view.setProps({ updating: true });
+  const detail = view.get('.events-finder-detail');
+  expect(detail.findAll('button').every(item => item.attributes('disabled') !== undefined)).toBe(true);
+  await detail.findAll('button').find(item => item.text() === 'Modifier l’événement')!.trigger('click');
+  expect(view.emitted('edit-event')).toBeUndefined();
+});
+
+it('keeps columns as the default and lets the tree show a period detail without replacing the original layout', async () => {
+  const data = story('one', [period('inside'), { ...period('child', 'inside'), description: { fr: 'Description complète de la période.', en: '' } }, period('leaf', 'child')]);
+  await start(data);
+  const originalColumns = view.get('.story-detail-panel__finder-columns-wrap').element;
+  expect(view.find('[role="tree"]').exists()).toBe(false);
+  await button('Arbre et détail').trigger('click'); await flushPromises();
+  const child = view.get('[role="treeitem"][data-period-id="child"]');
+  expect(child.attributes('aria-expanded')).toBe('false');
+  await child.trigger('click'); await flushPromises();
+  expect(child.attributes('aria-expanded')).toBe('false');
+  expect(view.get('.story-period-detail h3').text()).toBe('child');
+  expect(view.get('.story-period-detail__description').text()).toBe('Description complète de la période.');
+  expect(view.getComponent({ name: 'StoryTimeline' }).props('selectedPeriodId')).toBe('child');
+  await button('Modifier la période').trigger('click');
+  expect(view.emitted('edit-period')).toEqual([['child']]);
+  view.getComponent({ name: 'StoryTimeline' }).vm.$emit('select-period', 'leaf'); await flushPromises();
+  expect(view.get('.story-period-detail h3').text()).toBe('leaf');
+  expect(child.attributes('aria-expanded')).toBe('true');
+  await button('Colonnes').trigger('click'); await flushPromises();
+  expect(view.get('.story-detail-panel__finder-columns-wrap').element).toBe(originalColumns);
+  expect(view.get('.story-period-columns').isVisible()).toBe(true);
+  expect(view.get('.story-period-tree-workspace').isVisible()).toBe(false);
+  expect(api.getListPeriods).not.toHaveBeenCalled();
+});
+
+it('creates a child under the period selected in the tree and preserves current exclusion rules', async () => {
+  await start(); await button('Arbre et détail').trigger('click');
+  await view.get('[role="treeitem"][data-period-id="inside"]').trigger('click'); await flushPromises();
+  await button('Ajouter une sous-période').trigger('click'); await flushPromises();
+  const editor = view.getComponent(EditModal);
+  expect(editor.props('data')).toMatchObject({ parent_id: 'inside' });
+  expect(editor.props('excludedPeriodIds')).toEqual(expect.arrayContaining(['inside', 'child']));
+});
+
+it('keeps secondary metadata separate and exposes create-frise and scoped removal actions for the selected period', async () => {
+  const data = story('one');
+  data.periods[1].wikidata_id = 'Q47158';
+  await start(data); await button('Arbre et détail').trigger('click');
+  await view.get('[role="treeitem"][data-period-id="child"]').trigger('click'); await flushPromises();
+  const main = view.get('.story-period-detail__main');
+  const metadata = view.get('.story-period-detail__metadata');
+  expect(metadata.text()).toContain('Q47158');
+  expect(main.find('.story-period-detail__reference').exists()).toBe(false);
+  expect(main.get('h3').text()).toBe('child');
+  const create = main.findAll('button').find(item => item.text() === 'Créer une frise')!;
+  const remove = main.get('.story-period-detail__danger button');
+  expect(main.get('.story-period-detail__danger').text()).toContain('restera disponible dans le catalogue');
+  await create.trigger('click');
+  expect(view.emitted('create-story-from-period')).toEqual([['child']]);
+  await remove.trigger('click');
+  expect(view.emitted('remove-period')).toEqual([['child']]);
+  await view.setProps({ updating: true });
+  expect(create.attributes('disabled')).toBeDefined();
+  expect(remove.attributes('disabled')).toBeDefined();
+  await create.trigger('click'); await remove.trigger('click');
+  expect(view.emitted('create-story-from-period')).toHaveLength(1);
+  expect(view.emitted('remove-period')).toHaveLength(1);
+});
+
+it('associates a frise to the selected tree period using the existing picker', async () => {
+  await start(); await button('Arbre et détail').trigger('click');
+  await view.get('[role="treeitem"][data-period-id="child"]').trigger('click'); await flushPromises();
+  await button('Associer une frise').trigger('click'); await flushPromises();
+  view.getComponent({ name: 'StoryRelatedPickerModal' }).vm.$emit('confirm', ['linked']); await flushPromises();
+  expect(view.emitted('add-child-stories')).toEqual([[['linked'], { type: 'period', id: 'child' }]]);
+});
+
+it('loads additional tree branches without changing the selected detail or importing suggestions implicitly', async () => {
+  const root = { ...period('inside', 'global-parent'), wikidata_id: 'Q100' };
+  const childrenApi = vi.mocked(WikidataQueryService.getInstance().loadPeriodChildrenByWikidataId)
+    .mockImplementation(async id => id === 'Q100' ? [wdChild('Q300', true)] : [wdChild('Q400')]);
+  await start(story('one', [root])); await button('Arbre et détail').trigger('click');
+  await view.get('[role="treeitem"][data-period-id="inside"]').trigger('click');
+  view.getComponent(Switch).vm.$emit('update:modelValue', true); await flushPromises();
+  const suggestion = view.get('[role="treeitem"][data-period-id="wikidata:Q300"]');
+  await suggestion.get('button[aria-label="Déplier Wikidata Q300"]').trigger('click'); await flushPromises();
+  expect(view.get('.story-period-detail h3').text()).toBe('inside');
+  expect(view.find('[role="treeitem"][data-period-id="wikidata:Q400"]').exists()).toBe(true);
+  await view.get('[role="treeitem"][data-period-id="wikidata:Q400"]').trigger('click'); await flushPromises();
+  expect(view.get('.story-period-detail h3').text()).toBe('Wikidata Q400');
+  expect(button('Importer cette période').attributes('disabled')).toBeDefined();
+  expect(view.emitted('add-periods')).toBeUndefined();
+  expect(childrenApi.mock.calls.map(call => call[0])).toContain('Q300');
+  expect(api.getListPeriods).not.toHaveBeenCalled();
+});
+
+it('keeps the selected period when a tree suggestion read fails and waits for an explicit retry', async () => {
+  const root = { ...period('inside'), wikidata_id: 'Q100' };
+  const childrenApi = vi.mocked(WikidataQueryService.getInstance().loadPeriodChildrenByWikidataId)
+    .mockRejectedValueOnce(new Error('Suggestions indisponibles')).mockResolvedValueOnce([wdChild('Q300')]);
+  await start(story('one', [root])); await button('Arbre et détail').trigger('click');
+  await view.get('[role="treeitem"][data-period-id="inside"]').trigger('click');
+  view.getComponent(Switch).vm.$emit('update:modelValue', true); await flushPromises();
+  expect(childrenApi).toHaveBeenCalledOnce();
+  expect(view.get('[role="alert"]').text()).toContain('Suggestions indisponibles');
+  expect(view.get('.story-period-detail h3').text()).toBe('inside');
+  await button('Réessayer').trigger('click'); await flushPromises();
+  expect(childrenApi).toHaveBeenCalledTimes(2);
+  expect(view.find('[role="treeitem"][data-period-id="wikidata:Q300"]').exists()).toBe(true);
+  expect(view.find('[role="alert"]').exists()).toBe(false);
+});
+
+function mockTabScrollGeometry() {
+  const viewport = view.get('.story-detail-panel__scroll-area').element as HTMLElement;
+  const content = view.get('.story-detail-panel__tab-content').element as HTMLElement;
+  const scrollTo = vi.fn();
+  Object.defineProperty(viewport, 'clientHeight', { configurable: true, value: 600 });
+  Object.defineProperty(viewport, 'scrollTo', { configurable: true, value: scrollTo });
+  vi.spyOn(viewport, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 200, 900, 600));
+  vi.spyOn(content, 'getBoundingClientRect').mockImplementation(() => new DOMRect(0, 360 - viewport.scrollTop, 900, 900));
+  return { viewport, content, scrollTo };
+}
+
+it('opens a frise on the first Aperçu tab and keeps the existing period layout beneath the preview', async () => {
+  await start();
+  const tabs = view.getComponent(Tabs);
+  expect(tabs.findAll('button')[0].text()).toBe('Aperçu');
+  expect(tabs.props('modelValue')).toBe('overview');
+  expect(view.findComponent({ name: 'StoryTimeline' }).exists()).toBe(true);
+  expect(view.get('.story-period-columns').isVisible()).toBe(true);
+});
+
+it('returns to the preview smoothly without losing the selected event or replaying at the top', async () => {
+  await start();
+  const { viewport, scrollTo } = mockTabScrollGeometry();
+  await button('Événements').trigger('click'); await flushPromises();
+  view.findAllComponents(FinderItem).find(row => row.props('itemId') === 'event')!.vm.$emit('click'); await flushPromises();
+  viewport.scrollTop = 160;
+  await button('Aperçu').trigger('click'); await flushPromises();
+  expect(scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: 'smooth' });
+  expect(view.getComponent(Tabs).props('modelValue')).toBe('overview');
+  expect(view.get('.event-detail-label').text()).toBe('event');
+  viewport.scrollTop = 0;
+  const calls = scrollTo.mock.calls.length;
+  await button('Aperçu').trigger('click'); await flushPromises();
+  expect(scrollTo).toHaveBeenCalledTimes(calls);
+});
+
+it('smoothly scrolls a clicked tab to the filter bar, including when that tab is already active', async () => {
+  await start();
+  const { viewport, content, scrollTo } = mockTabScrollGeometry();
+  await button('Périodes').trigger('click'); await flushPromises();
+  expect(scrollTo).toHaveBeenCalledExactlyOnceWith({ top: 160, behavior: 'smooth' });
+  expect(content.style.minHeight).toBe('600px');
+  viewport.scrollTop = 160;
+  await button('Événements').trigger('click'); await flushPromises();
+  expect(scrollTo).toHaveBeenCalledOnce();
+  viewport.scrollTop = 240;
+  await button('Relations').trigger('click'); await flushPromises();
+  expect(scrollTo).toHaveBeenCalledOnce();
+  viewport.scrollTop = 60;
+  await button('Relations').trigger('click'); await flushPromises();
+  expect(scrollTo).toHaveBeenCalledTimes(2);
+  expect(scrollTo).toHaveBeenLastCalledWith({ top: 160, behavior: 'smooth' });
+});
+
+it('applies only the latest tab click when several clicks arrive before the next render', async () => {
+  await start();
+  const { scrollTo } = mockTabScrollGeometry();
+  const tabs = view.getComponent(Tabs);
+  tabs.vm.$emit('update:modelValue', 'events');
+  tabs.vm.$emit('update:modelValue', 'relations');
+  await flushPromises();
+  expect(view.getComponent(Tabs).props('modelValue')).toBe('relations');
+  expect(scrollTo).toHaveBeenCalledOnce();
+});
+
+it('hides the preview without animation when reduced motion is requested', async () => {
+  vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: true })));
+  try {
+    await start();
+    const { scrollTo } = mockTabScrollGeometry();
+    await button('Événements').trigger('click'); await flushPromises();
+    expect(scrollTo).toHaveBeenCalledExactlyOnceWith({ top: 160, behavior: 'instant' });
+  } finally { vi.unstubAllGlobals(); }
+});
