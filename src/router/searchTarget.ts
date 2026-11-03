@@ -1,7 +1,7 @@
 import type { LocationQuery, RouteLocationRaw } from 'vue-router';
 import type { GlobalSearchResult, SearchHit } from '@/services/SearchApiService';
 import { normalizeWikidataId } from '@/services/wikidataTransport';
-import { storyTimelineLocation } from './storyTarget';
+import { readStoryTarget, storyTimelineLocation } from './storyTarget';
 
 /** The header and dedicated search page share the same validated destinations. */
 export function globalSearchLocation(hit: GlobalSearchResult): RouteLocationRaw {
@@ -31,4 +31,12 @@ export function searchHitLocation(hit: SearchHit): RouteLocationRaw {
   const query = hit.fromWikidata ? { wikidata: hit.id } : { [hit.type]: hit.id };
   readSearchTarget(query, hit.type);
   return { name: hit.type === 'period' ? 'graph' : 'events', query };
+}
+
+/** Open a canonical record in Frises, independently of its memberships. */
+export function databaseRecordLocation(type: 'story' | 'period' | 'event', id: string): RouteLocationRaw {
+  if (type === 'story') return { name: 'database', query: { story: readStoryTarget(id) } };
+  const query = { [type]: id };
+  readSearchTarget(query, type);
+  return { name: 'database', query };
 }
