@@ -1,4 +1,4 @@
-// Legal texts. Every « [À compléter …] » marks content the publisher must supply before going public;
+// Legal texts. A paragraph starting with « [À compléter : …] » marks content the publisher must supply before going public;
 // facts about the current technical setup are written in full. Keep them in sync with
 // Documentation/RGPD.md (register of processing activities).
 import { CURRENT_TERMS_VERSION } from '@account-rules';
@@ -7,8 +7,6 @@ export const LEGAL_PAGES = ['mentions-legales', 'confidentialite', 'cookies', 'c
 export type LegalPage = typeof LEGAL_PAGES[number];
 export interface LegalSection { title: string; paragraphs: string[]; items?: string[] }
 export interface LegalDocument { title: string; summary: string; updated: string; sections: LegalSection[] }
-
-const TODO = (what: string) => `[À compléter : ${what}]`;
 
 /** Single public contact address: legal pages, Contact page and Supabase e-mail templates. */
 export const CONTACT_EMAIL = 'florian@universaltimeline.net';
@@ -73,7 +71,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Supabase Inc. : base de données et authentification, hébergées dans l’Union européenne.',
         'Vercel Inc. : hébergement de l’application et de l’API (États-Unis). Vercel est certifiée au cadre de protection des données UE–États-Unis (Data Privacy Framework), et son accord de traitement des données prévoit aussi les clauses contractuelles types de la Commission européenne.',
         'Hostinger International Ltd. : messagerie (envoi des e-mails du compte, réception des messages adressés au contact), société établie dans l’Union européenne (Chypre).',
-        'PostHog Inc. : mesure d’audience, avec votre accord, hébergée dans l’Union européenne (PostHog Cloud EU). ' + TODO('accord de sous-traitance (DPA) signé avec PostHog'),
+        'PostHog Inc. : mesure d’audience, avec votre accord, hébergée dans l’Union européenne (PostHog Cloud EU), dans le cadre d’un accord de traitement des données (DPA) signé avec PostHog le 3 novembre 2026.',
       ] },
       { title: 'Vos droits', paragraphs: [
         'Vous disposez des droits d’accès, de rectification, d’effacement, de limitation, d’opposition et de portabilité, ainsi que du droit de définir des directives sur le sort de vos données après votre décès.',

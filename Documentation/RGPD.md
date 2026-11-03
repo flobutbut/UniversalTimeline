@@ -45,11 +45,12 @@ Ce document décrit ce qui est en place dans l’application et ce qui reste à 
 - **Âge minimum :** 15 ans pour créer seul un compte, accord parental en dessous (art. 45 loi Informatique et Libertés, décret du 29 mai 2019), déclaré par la case d’inscription, sans pièce d’identité (la CNIL parle d’obligation de moyens). L’interdiction des réseaux sociaux aux moins de 15 ans votée en 2026 a été censurée (décision n° 2026-911 DC du 14 août 2026) : à surveiller si une nouvelle loi est adoptée.
 - **Licence :** frises publiques sous CC BY 4.0 (citer l’auteur et Universal Timeline) ; code, conception et textes éditoriaux : droits réservés à l’éditeur ; catalogue Wikidata en CC0.
 - **Modération :** examen des signalements dans les meilleurs délais, retrait d’une frise manifestement illicite, suspension ou suppression du compte, auteur prévenu par e-mail.
+- **PostHog :** accord de traitement des données (DPA) signé le 3 novembre 2026 par Florian Butour, en son nom propre (« Florian Butour (Universal Timeline) »), via le formulaire du projet PostHog (Settings → Legal documents, copie signée téléchargeable).
 - **Transferts hors UE (Vercel) :** certification Data Privacy Framework UE–États-Unis, et clauses contractuelles types dans l’accord de traitement des données de Vercel (vercel.com/legal/dpa).
 - **Conditions :** ces textes sont rattachés à la version `2026-11-03` de `CURRENT_TERMS_VERSION`, sans nouvelle version : le 3 novembre 2026, seuls les comptes de l’éditeur l’avaient acceptée. Toute modification ultérieure des conditions impose une nouvelle date.
 
 ## Reste à faire hors code
 
-- Accord de traitement des données (DPA) avec PostHog : formulaire sur posthog.com/dpa (signature PandaDoc), puis retirer le marqueur « [À compléter] » de la politique de confidentialité. Vérifier l’acceptation des DPA de Supabase et Vercel dans leurs Dashboards.
+- Vérifier l’acceptation des DPA de Supabase et Vercel dans leurs Dashboards.
 - Suppression des comptes inactifs : à mettre en œuvre (e-mail d’avertissement un mois avant, puis suppression) avant les premiers deux ans d’inactivité, soit au plus tard en octobre 2028. Purger aussi le journal d’administration au-delà d’un an et les messages de contact au-delà d’un an après le dernier échange.
 - Configuration Supabase Auth (vérifiée le 3 novembre 2026) : SMTP Hostinger actif, six modèles français collés depuis `Documentation/emails/`, Site URL et Redirect URLs sur `https://universaltimeline.net`. Notifications de sécurité (mot de passe et adresse modifiés) : voir `Documentation/emails/README.md`.
