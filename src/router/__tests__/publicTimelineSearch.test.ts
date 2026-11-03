@@ -36,6 +36,7 @@ beforeEach(() => {
   vi.spyOn(stories, 'getStoryPeriods').mockImplementation(async id => [period(`root-${id}`), period(`leaf-${id}`, `root-${id}`)]);
   vi.spyOn(stories, 'getSuggestions').mockResolvedValue([]);
   vi.spyOn(searches, 'searchStories').mockResolvedValue([{ id: '7', label: { fr: 'Frise 7', en: '' }, description: { fr: 'Résumé', en: '' }, matchedOn: 'content' }]);
+  vi.spyOn(searches, 'searchWikidataEntityLabels').mockResolvedValue([]);
 });
 afterEach(() => { view?.unmount(); router?.options.history.destroy(); disposePinia(pinia); document.body.innerHTML = ''; vi.restoreAllMocks(); vi.useRealTimers(); });
 async function start(path: string, signedIn = false) {
@@ -46,6 +47,7 @@ async function start(path: string, signedIn = false) {
   vi.spyOn(auth, 'refreshAccount').mockResolvedValue();
   router = createRouter({ history: createMemoryHistory(), routes: [
     { path: '/timeline', name: 'timeline', component: HomeView, meta: { public: true } },
+    { path: '/generate', name: 'wikidata-generation', component: { template: '<div>Aperçu Wikidata</div>' }, meta: { public: true } },
     ...['database', 'graph', 'events', 'design-system'].map(name => ({ path: '/' + name, name, component: { template: '<div />' } })),
     { path: '/login', name: 'login', component: { template: '<div>Login</div>' }, meta: { public: true } },
   ] });
@@ -68,6 +70,18 @@ it.each([false, true])('opens the complete selected story from a real header sea
   expect(grid.props('events').map((e: ListEvent) => e.id)).toEqual(['event-7']);
   expect(periods.getListPeriods).not.toHaveBeenCalled(); expect(events.getListEvents).not.toHaveBeenCalled();
   expect(view.find('[role="dialog"]').exists()).toBe(false);
+});
+
+it.each([false, true])('opens a public generation preview from a Wikidata subject without importing it (signed in: %s)', async signedIn => {
+  vi.useFakeTimers(); await start('/timeline', signedIn);
+  vi.mocked(searches.searchStories).mockResolvedValue([]);
+  vi.mocked(searches.searchWikidataEntityLabels).mockResolvedValue([{ id: 'Q1', label: 'Univers' }]);
+  const input = view.get('header input'); await input.trigger('focus'); await input.setValue('Univers');
+  await vi.advanceTimersByTimeAsync(600); await flushPromises();
+  await view.get('[role="option"]').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/generate?wikidata=Q1');
+  expect(view.text()).toContain('Aperçu Wikidata');
+  expect(apiClient.post).not.toHaveBeenCalled();
 });
 
 it('starts the public timeline at the Universe with its full duration, before exploring Earth', async () => {

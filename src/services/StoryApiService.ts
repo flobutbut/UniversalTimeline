@@ -3,6 +3,8 @@ import type { EventImportance, Story, StorySummary, StorySuggestion, StoryAnchor
 
 import type { StoryDto, PeriodDto, StoryFormPayload, StoryLinkDto } from '@/types/api';
 import { mapToListStory, mapToStory, mapToStorySuggestion } from './entityMappers';
+import type { WikidataTimelineItem, ExistingWikidataStory } from '@/types/wikidataGeneration';
+import { effectiveWikidataParent } from '@/lib/wikidataHierarchy';
 export { mapToListStory } from './entityMappers';
 
 // Le serveur signe la frise avec le compte connecté ; un auteur vide n'est pas transmis.
@@ -42,6 +44,23 @@ export class StoryApiService {
 
   async createStory(storyData: StoryFormPayload): Promise<StorySummary> {
     return mapToListStory(await apiClient.post<StoryDto>('/stories', storyPayload(storyData)));
+  }
+
+  async findWikidataStories(qid: string, title: string, signal?: AbortSignal): Promise<ExistingWikidataStory[]> {
+    const result = await apiClient.get<ExistingWikidataStory[]>(`/stories/wikidata-matches?${new URLSearchParams({ qid, title })}`, { signal });
+    if (!Array.isArray(result) || result.some(story => !story || !/^[1-9]\d*$/.test(story.id) || typeof story.title !== 'string' || !['subject', 'title'].includes(story.reason))) throw new Error('Réponse invalide lors de la vérification des frises.');
+    return result;
+  }
+
+  async createFromWikidata(qid: string, title: string, items: WikidataTimelineItem[], isPublic = false, description?: string, acknowledgedStoryIds?: string[]): Promise<{ id: string; periodCount: number; eventCount: number }> {
+    const result = await apiClient.post<{ id: string; periodCount: number; eventCount: number }>('/stories/from-wikidata', {
+      qid, title, isPublic, ...(description === undefined ? {} : { description }), ...(acknowledgedStoryIds?.length ? { acknowledgedStoryIds } : {}), items: items.map(item => {
+        const { qid, type, title, description, startDate, endDate } = item;
+        return { qid, type, title, description, startDate, endDate, ...(type === 'period' ? { parentQid: effectiveWikidataParent(item, items) } : {}) };
+      }),
+    });
+    if (!result || !/^[1-9]\d*$/.test(result.id) || !Number.isInteger(result.periodCount) || !Number.isInteger(result.eventCount)) throw new Error('Réponse invalide après la création de la frise.');
+    return result;
   }
 
   async updateStory(storyId: string, storyData: StoryFormPayload): Promise<StorySummary> {

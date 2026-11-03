@@ -5,7 +5,7 @@
       {{ editState.categoriesError }} <Button variant="tertiary" size="sm" type="button" :disabled="loading || editState.categoriesLoading" @click="loadCategories">Réessayer</Button>
     </FeedbackState>
     <template
-      v-if="mode === 'create' && (type === 'period' || type === 'event')"
+      v-if="mode === 'create' && !convertFrom && (type === 'period' || type === 'event')"
       #header-bottom
     >
       <div
@@ -85,6 +85,7 @@
       {{ wikidataImportError }}
       <Button variant="tertiary" size="sm" type="button" :disabled="loading || wikidataApplyLoading" @click="retryWikidataImport">Réessayer l’import</Button>
     </FeedbackState>
+    <p v-if="convertFrom" class="edit-modal__existing-notice">{{ conversionNotice }}</p>
     <p v-if="existingQidNotice" class="edit-modal__existing-notice" role="status">{{ existingQidNotice }}</p>
     <p v-if="wikidataApplyLoading" role="status">Chargement depuis Wikidata…</p>
     <p v-else-if="wikidataNotice" role="status">
@@ -188,8 +189,9 @@
 
         <div class="form-row" v-if="type === 'period'">
           <div class="form-group">
-            <Input
+            <DateInput
               v-model="form.startDate"
+              :disabled="loading"
               label="Date de début"
               placeholder="G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32"
               required
@@ -199,8 +201,9 @@
             <span class="date-preview">{{ displayStart }}</span>
           </div>
           <div class="form-group">
-            <Input
+            <DateInput
               v-model="form.endDate"
+              :disabled="loading"
               label="Date de fin (vide = aujourd'hui)"
               placeholder="G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32 · NOW"
               :error="fieldError('endDate')"
@@ -212,8 +215,9 @@
 
         <div class="form-row" v-if="type === 'event'">
           <div class="form-group full-width">
-            <Input
+            <DateInput
               v-model="form.date"
+              :disabled="loading"
               label="Date"
               placeholder="G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32"
               required
@@ -296,7 +300,7 @@
         <span v-if="wikidataImportLoading">Chargement...</span>
         <span v-else>Remplir avec Wikidata</span>
       </Button>
-      <span v-if="type === 'period' && !selectedExistingEntity" class="children-count">
+      <span v-if="type === 'period' && !selectedExistingEntity && !convertFrom" class="children-count">
         <template v-if="editState.directChildrenCount !== null">{{ editState.directChildrenCount }} sous-périodes</template>
         <template v-else>{{ data?.hasChildren ? 'Contient des sous-périodes' : 'Nombre de sous-périodes inconnu' }}</template>
       </span>
@@ -310,7 +314,7 @@
         :disabled="loading || wikidataApplyLoading || (!selectedExistingEntity && (!editState.isValid || !!editState.qidError || editState.categoriesLoading || !!editState.categoriesError))"
         @click="handleSubmit"
       >
-        {{ selectedExistingEntity ? 'Ajouter à la frise' : mode === 'edit' ? 'Mettre à jour' : 'Créer' }}
+        {{ selectedExistingEntity ? 'Ajouter à la frise' : mode === 'edit' ? 'Mettre à jour' : convertFrom ? 'Convertir' : 'Créer' }}
       </Button>
     </template>
   </ModalShell>
@@ -336,6 +340,7 @@ import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import ModalShell from '@/components/base/ModalShell.vue';
 import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';
+import DateInput from '@/components/base/DateInput.vue';
 import SearchInput from '@/components/base/SearchInput.vue';
 import Switch from '@/components/base/Switch.vue';
 import BaseSelect from '@/components/base/Select.vue';
@@ -352,6 +357,8 @@ const props = defineProps<{
   excludedPeriodIds?: string[];
   excludedEventIds?: string[];
   searchBounds?: SearchTimeBounds | null;
+  /** Création qui remplace partout une fiche de l'autre type (conversion période ↔ événement). */
+  convertFrom?: 'period' | 'event';
 }>();
 
 const emit = defineEmits<{
@@ -363,12 +370,17 @@ const emit = defineEmits<{
 }>();
 
 const modalTitle = computed(() => {
+  if (props.convertFrom) return props.type === 'event' ? 'Convertir en événement' : 'Convertir en période';
   const action = props.mode === 'edit' ? 'Modifier' : 'Créer';
   const subject = props.type === 'period' ? 'une période'
                 : props.type === 'event'  ? 'un événement'
                 : 'une frise';
   return `${action} ${subject}`;
 });
+
+const conversionNotice = computed(() => props.convertFrom === 'period'
+  ? 'La période sera remplacée par cet événement dans toutes les frises qui l’utilisent, puis supprimée du catalogue. Sa durée et son classement en sous-période ne sont pas conservés.'
+  : 'L’événement sera remplacé par cette période, à la racine de chaque frise qui l’utilise, puis supprimé du catalogue. Son importance n’est pas conservée.');
 
 // Initialisation des composables
 const { form, state: editState, validation, resetForm, updateForm, prepareSubmitData, loadCategories, setQidError, setQidExists, setChildrenCount } = useEditModal(() => props.type, () => props.mode, props.data);

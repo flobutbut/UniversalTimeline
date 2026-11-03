@@ -3,8 +3,8 @@
     <SearchInput
       ref="searchRef"
       v-model="query"
-      placeholder="Rechercher une frise…"
-      aria-label="Rechercher une frise par titre, période ou événement"
+      placeholder="Rechercher une frise ou un sujet…"
+      aria-label="Rechercher une frise ou un sujet Wikidata"
       autocomplete="off"
       role="combobox"
       aria-autocomplete="list"
@@ -24,11 +24,19 @@
       <div v-else-if="error" class="gs__status" role="alert">
         {{ error }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retrySource">Réessayer</Button>
       </div>
-      <div v-if="hasResults" :id="listId" role="listbox" aria-label="Frises trouvées">
-        <div class="gs__section" aria-hidden="true">Frises</div>
-        <button v-for="(hit, i) in allHits" :key="hit.id" :id="optionId(i)" type="button" role="option" tabindex="-1" :aria-selected="cursor === i" class="gs__item" :class="{ 'gs__item--active': cursor === i }" @mousedown.prevent @click="selectHit(hit)">
-          <Icon icon="mdi:timeline-text-outline" class="gs__icon" aria-hidden="true" />
-          <ItemSummary class="gs__content" :title="hit.label.fr || hit.label.en" :description="hit.description.fr || hit.description.en">
+      <div v-if="wikidata.loading.value" class="gs__status" role="status">Recherche Wikidata…</div>
+      <div v-if="wikidata.error.value" class="gs__status" role="alert">
+        {{ wikidata.error.value }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retryWikidata">Réessayer Wikidata</Button>
+      </div>
+      <div v-if="hasResults" :id="listId" role="listbox" aria-label="Frises et sujets Wikidata trouvés">
+        <template v-for="(hit, i) in allHits" :key="`${isWikidata(hit) ? 'wd' : 'story'}:${hit.id}`">
+        <div v-if="i === 0 || isWikidata(hit) !== isWikidata(allHits[i - 1]!)" class="gs__section" aria-hidden="true">{{ isWikidata(hit) ? 'Wikidata · générer une frise' : 'Frises' }}</div>
+        <button :id="optionId(i)" type="button" role="option" tabindex="-1" :aria-selected="cursor === i" class="gs__item" :class="{ 'gs__item--active': cursor === i }" @mousedown.prevent @click="selectHit(hit)">
+          <Icon :icon="isWikidata(hit) ? 'mdi:earth' : 'mdi:timeline-text-outline'" class="gs__icon" aria-hidden="true" />
+          <ItemSummary v-if="isWikidata(hit)" class="gs__content" :title="hit.label" :description="hit.description">
+            <template #meta>Aperçu d’une frise depuis ce sujet</template>
+          </ItemSummary>
+          <ItemSummary v-else class="gs__content" :title="hit.label.fr || hit.label.en" :description="hit.description.fr || hit.description.en">
             <template v-if="hit.match" #meta>
               <span class="gs__match" :class="`gs__match--${hit.match.type}`">
                 <span class="gs__match-type"><Icon :icon="hit.match.type === 'event' ? 'mdi:circle-small' : 'mdi:minus'" aria-hidden="true" />{{ hit.match.type === 'event' ? 'Événement' : 'Période' }}</span>
@@ -38,9 +46,10 @@
             </template>
           </ItemSummary>
         </button>
+        </template>
       </div>
-      <div v-if="!loading && !error && !hasResults" class="gs__status" role="status">Aucune frise trouvée. Essayez un autre mot-clé.</div>
-      <span class="sr-only" role="status">{{ hasResults ? `${allHits.length} ${allHits.length === 1 ? 'frise' : 'frises'}. Utilisez les flèches puis Entrée pour choisir.` : '' }}</span>
+      <div v-if="!loading && !error && !wikidata.loading.value && !wikidata.error.value && !hasResults" class="gs__status" role="status">Aucune frise ni sujet Wikidata trouvé. Essayez un autre mot-clé.</div>
+      <span class="sr-only" role="status">{{ hasResults ? `${allHits.length} résultats. Utilisez les flèches puis Entrée pour choisir.` : '' }}</span>
     </PopoverSurface>
   </div>
 </template>
@@ -52,19 +61,24 @@ import { ref, computed, onScopeDispose } from 'vue';
 import SearchInput from './base/SearchInput.vue';
 import ItemSummary from './base/ItemSummary.vue';
 import { Icon } from '@iconify/vue';
-import { SearchApiService, type StorySearchResult } from '@/services/SearchApiService';
+import { SearchApiService, type GlobalSearchResult, type WikidataEntityLabelHit } from '@/services/SearchApiService';
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { useSuggestionNavigation } from '@/composables/useSuggestionNavigation';
 
-const emit = defineEmits<{ (e: 'select', hit: StorySearchResult): void }>();
+const emit = defineEmits<{ (e: 'select', hit: GlobalSearchResult): void }>();
 const rootRef = ref<HTMLElement | null>(null);
 const query = ref('');
 const focused = ref(false);
 const searchRef = ref<{ focus: () => void; blur: () => void } | null>(null);
 const service = SearchApiService.getInstance();
-const { results: allHits, loading, error, retry } = useDebouncedSearch(
+const { results: stories, loading, error, retry } = useDebouncedSearch(
   () => query.value, (q, signal) => service.searchStories(q, { signal }), { delayMs: 250, enabled: () => focused.value },
 );
+const wikidata = useDebouncedSearch(
+  () => query.value, (q, signal) => service.searchWikidataEntityLabels(q, { signal }), { delayMs: 600, enabled: () => focused.value },
+);
+function isWikidata(hit: GlobalSearchResult): hit is WikidataEntityLabelHit & { fromWikidata: true } { return 'fromWikidata' in hit && hit.fromWikidata === true; }
+const allHits = computed<GlobalSearchResult[]>(() => [...stories.value, ...wikidata.results.value.map(hit => ({ ...hit, fromWikidata: true as const }))]);
 const hasResults = computed(() => allHits.value.length > 0);
 const dropdownVisible = computed(() => focused.value && query.value.trim().length >= 2);
 const { listId, optionId, cursor, activeId, move, reset, current } = useSuggestionNavigation(() => allHits.value, () => dropdownVisible.value);
@@ -79,8 +93,9 @@ function onBlur() {
 onScopeDispose(() => clearTimeout(blurTimer));
 function confirm() { const hit = current(); if (hit) selectHit(hit); }
 function retrySource() { searchRef.value?.focus(); return retry(); }
+function retryWikidata() { searchRef.value?.focus(); return wikidata.retry(); }
 function dismiss() { query.value = ''; reset(); focused.value = false; searchRef.value?.blur(); }
-function selectHit(hit: StorySearchResult) { emit('select', hit); clear(); }
+function selectHit(hit: GlobalSearchResult) { emit('select', hit); clear(); }
 function clear() {
   query.value = ''; reset(); focused.value = false;
   searchRef.value?.focus();

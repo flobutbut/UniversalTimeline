@@ -22,23 +22,6 @@
           <Button variant="primary" size="sm" type="submit" :disabled="!canSubmit">Enregistrer</Button>
         </div>
       </form>
-      <section class="story-settings-form__danger" aria-labelledby="story-danger-zone-title">
-        <h4 id="story-danger-zone-title">Actions sensibles</h4>
-        <div class="story-settings-form__danger-row">
-          <div>
-            <p class="story-settings-form__danger-label">Visibilité : {{ story.isPublic ? 'publique' : 'privée' }}</p>
-            <p class="story-settings-form__danger-hint">{{ story.isPublic ? 'Une frise privée n’est visible que par vous.' : 'Une frise publique est visible par tous dans la timeline.' }}</p>
-          </div>
-          <Button variant="danger" size="sm" type="button" :disabled="busy" @click="emit('toggle-visibility')">{{ story.isPublic ? 'Rendre privée' : 'Rendre publique' }}</Button>
-        </div>
-        <div class="story-settings-form__danger-row">
-          <div>
-            <p class="story-settings-form__danger-label">Supprimer la frise</p>
-            <p class="story-settings-form__danger-hint">La frise est supprimée définitivement ; ses périodes et événements restent dans le catalogue.</p>
-          </div>
-          <Button variant="danger" size="sm" type="button" :disabled="busy" @click="emit('delete')">Supprimer la frise</Button>
-        </div>
-      </section>
     </template>
     <dl v-else class="story-settings-form__readonly">
       <dt>Titre</dt><dd>{{ story.title.fr || '—' }}</dd>
@@ -65,12 +48,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'save', submission: EditFormSubmission): void;
-  (e: 'delete'): void;
-  (e: 'toggle-visibility'): void;
 }>();
 
 // Les textes anglais et l'auteur ne sont pas affichés : le brouillon conserve leurs valeurs enregistrées.
-// La visibilité (danger zone) et les catégories (onglet Catégories) reprennent toujours la frise enregistrée.
+// La visibilité (StoryDangerZone) et les catégories (StoryCategoriesForm) reprennent toujours la frise enregistrée.
 const { form, validation, dirty, canSubmit, cancel, submit } = useStoryDraft({
   story: () => props.story, busy: () => props.busy, error: () => props.error, fields: ['text'],
 });
@@ -93,12 +74,6 @@ function save() {
 .form-row { display: flex; gap: var(--spacing-md); width: 100%; }
 .form-group { flex: 1; min-width: 0; }
 .story-settings-form__actions { display: flex; justify-content: flex-end; gap: var(--spacing-sm); }
-.story-settings-form__danger { margin-top: var(--spacing-lg); border: 1px solid var(--color-status-error-foreground); border-radius: var(--radius-md); }
-.story-settings-form__danger h4 { margin: 0; padding: var(--spacing-lg); font-size: var(--font-size-base); color: var(--color-status-error-foreground); border-bottom: 1px solid var(--color-border-default); }
-.story-settings-form__danger-row { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-md); padding: var(--spacing-lg); }
-.story-settings-form__danger-row + .story-settings-form__danger-row { border-top: 1px solid var(--color-border-default); }
-.story-settings-form__danger-label { margin-bottom: 0; font-weight: var(--font-weight-semibold); }
-.story-settings-form__danger-hint { margin-bottom: 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
 .story-settings-form__readonly { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: var(--spacing-sm) var(--spacing-lg); }
 .story-settings-form__readonly dt { color: var(--color-text-secondary); }
 .story-settings-form__text { white-space: pre-wrap; }

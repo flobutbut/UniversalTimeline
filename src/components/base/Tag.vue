@@ -11,7 +11,7 @@
 import { RouterLink, type RouteLocationRaw } from 'vue-router';
 import { useLinkDestination } from '@/composables/useLinkDestination';
 import DesignIcon from './DesignIcon.vue';
-const props = withDefaults(defineProps<{ label: string; to?: RouteLocationRaw; removable?: boolean; removeLabel?: string; disabled?: boolean; variant?: 'neutral' | 'accent'; size?: 'sm' | 'md' }>(), { variant: 'neutral', size: 'sm' });
+const props = withDefaults(defineProps<{ label: string; to?: RouteLocationRaw; removable?: boolean; removeLabel?: string; disabled?: boolean; variant?: 'neutral' | 'accent' | 'success' | 'warning' | 'error'; size?: 'sm' | 'md' }>(), { variant: 'neutral', size: 'sm' });
 const { router, plainHref } = useLinkDestination(() => props.to);
 defineEmits<{ remove: [] }>();
 </script>
@@ -19,6 +19,9 @@ defineEmits<{ remove: [] }>();
 .ui-tag { display: inline-flex; flex-shrink: 0; align-items: center; gap: var(--spacing-xs); max-width: 100%; min-height: 24px; padding: 2px var(--spacing-sm); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-surface-default); color: var(--color-text-primary); font: var(--type-meta); }
 .ui-tag--md { min-height: var(--field-height-md); padding-inline: var(--spacing-md); }
 .ui-tag--accent { background: var(--color-interaction-selected); border-color: transparent; color: var(--color-text-on-selected); }
+.ui-tag--success { background: var(--color-status-success-background); border-color: transparent; color: var(--color-status-success-foreground); }
+.ui-tag--warning { background: var(--color-status-warning-background); border-color: transparent; color: var(--color-status-warning-foreground); }
+.ui-tag--error { background: var(--color-status-error-background); border-color: transparent; color: var(--color-status-error-foreground); }
 .ui-tag__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; }
 .ui-tag__link { text-decoration: none; }
 .ui-tag__link:hover { color: inherit; text-decoration: underline; }

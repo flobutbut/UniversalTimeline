@@ -13,7 +13,7 @@ export const navigationTabs: Tab<NavigationView>[] = [
 /** Catalogue tools and administration: admins only (routes carry meta.admin, the guard enforces it). */
 const ADMIN_VIEWS: ReadonlySet<NavigationView> = new Set(['graph', 'events', 'admin']);
 /** Pages without a tab of their own, shown under the tab they belong to. */
-const PARENT_VIEWS: Partial<Record<string, NavigationView>> = { 'design-system': 'admin' };
+const PARENT_VIEWS: Partial<Record<string, NavigationView>> = { 'design-system': 'admin', 'wikidata-generation': 'database' };
 
 export function navigationTabsFor(isAdmin: boolean): Tab<NavigationView>[] {
   return navigationTabs.filter(tab => isAdmin || !ADMIN_VIEWS.has(tab.value));
