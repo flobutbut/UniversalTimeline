@@ -25,6 +25,6 @@ Référence : [format officiel des temps Wikibase](https://doc.wikimedia.org/Wik
 
 `temporalBounds` agrège une seule fois les candidats, avec le même instant de référence pour toute la liste. Le calcul des bornes de stories dans l’API et l’interface le réutilise. Tri et filtres distinguent les coordonnées nulles ; une frise conserve les éléments non positionnables dans une zone séparée et accessible, avec les mêmes actions de consultation et de navigation.
 
-Les formulaires conservent le texte saisi. Les aperçus sont des valeurs calculées, ne réécrivent pas le brouillon et s’effacent dès que le champ est effacé. Aucun appel de sauvegarde n’est relancé automatiquement.
+Les champs de dates de génération et d’édition utilisent `DateInput` : après 800 ms sans frappe, ou à la sortie du champ, une saisie reconnue est normalisée pour l’édition (`14/07/1789` → `1789-07-14`, `65 Ma` → `M65`, `TODAY` → `NOW`). L’année ou le mois seuls gardent leur précision ; les timestamps conservent leur fuseau et toutes leurs décimales. Les saisies invalides, incomplètes ou inconnues restent intactes. Seules les saisies manuelles sont normalisées ; un import ou le remplacement du brouillon annule le traitement en attente. Les aperçus restent des valeurs calculées et s’effacent dès que le champ est effacé. Aucun appel de sauvegarde n’est relancé automatiquement.
 
 Tests : `yarn test --run` ; intégrations locales avec `yarn --cwd server test:atomic` et le socket/base jetables documentés dans SUIVI-AUDIT. Ne jamais exécuter une écriture de test sur Supabase.

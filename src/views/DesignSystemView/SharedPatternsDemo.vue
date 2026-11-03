@@ -9,6 +9,9 @@
       <Tag v-if="tagVisible" label="Catégorie retirable" size="md" removable @remove="tagVisible = false" />
       <Button v-else variant="tertiary" size="sm" @click="tagVisible = true">Rétablir le tag</Button>
       <Tag label="Retrait indisponible" removable disabled />
+      <Tag label="Valide" variant="success" />
+      <Tag label="À vérifier" variant="warning" />
+      <Tag label="Erreur" variant="error" />
     </div>
     <h2>FeedbackState</h2>
     <FeedbackState kind="loading" message="Chargement du catalogue…" />

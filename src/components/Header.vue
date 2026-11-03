@@ -50,7 +50,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 import { navigationTabsFor, type NavigationView } from '@/router/navigation';
 import { canUseWorkspace, safeReturnPath } from '@/router/access';
-import type { StorySearchResult } from '@/services/SearchApiService';
+import type { GlobalSearchResult } from '@/services/SearchApiService';
 
 const auth = useAuthStore(); const route = useRoute();
 const tabs = computed(() => canUseWorkspace(auth) ? navigationTabsFor(auth.isAdmin) : []);
@@ -59,7 +59,7 @@ function accountLocation(signup: boolean) {
 }
 
 const props = defineProps<{ currentView: NavigationView | ''; timelineDestination?: RouteLocationRaw }>();
-const emit = defineEmits<{ (e: 'change-view', view: NavigationView): void; (e: 'select-search', hit: StorySearchResult): void }>();
+const emit = defineEmits<{ (e: 'change-view', view: NavigationView): void; (e: 'select-search', hit: GlobalSearchResult): void }>();
 const contentRef = ref<HTMLElement | null>(null);
 const brandRef = ref<HTMLElement | null>(null);
 const navRef = ref<HTMLElement | null>(null);

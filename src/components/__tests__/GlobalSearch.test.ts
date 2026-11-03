@@ -13,6 +13,7 @@ async function search(q: string) {
 beforeEach(() => {
   vi.useFakeTimers();
   vi.spyOn(api, 'searchStories').mockResolvedValue([]);
+  vi.spyOn(api, 'searchWikidataEntityLabels').mockResolvedValue([]);
   vi.spyOn(api, 'searchLocal'); vi.spyOn(api, 'searchWikidata');
   view = mount(GlobalSearch, { attachTo: document.body });
 });
@@ -48,12 +49,33 @@ it('offers stories with their description and explains a match through associate
 it('distinguishes a pending search, an error and an empty result', async () => {
   const pending = deferred<StorySearchResult[]>(); vi.mocked(api.searchStories).mockReturnValueOnce(pending.promise);
   await search('Terre'); expect(view.text()).toContain('Recherche de frises'); expect(view.text()).not.toContain('Aucune frise');
-  pending.resolve([]); await flushPromises(); expect(view.text()).toContain('Aucune frise trouvée');
+  pending.resolve([]); await vi.advanceTimersByTimeAsync(600); await flushPromises(); expect(view.text()).toContain('Aucune frise ni sujet Wikidata trouvé');
   vi.mocked(api.searchStories).mockRejectedValueOnce(new Error('Recherche indisponible')).mockResolvedValueOnce([story]);
   await search('Marshall'); expect(view.get('[role="alert"]').text()).toContain('Recherche indisponible');
   expect(view.text()).not.toContain('Aucune frise trouvée');
   await view.get('[role="alert"] button').trigger('click'); await flushPromises();
   expect(view.text()).toContain('Guerre froide'); expect(view.find('[role="alert"]').exists()).toBe(false);
+});
+
+it('offers undated Wikidata subjects alongside stories and selects a generation subject with the keyboard', async () => {
+  vi.mocked(api.searchStories).mockResolvedValue([story]);
+  vi.mocked(api.searchWikidataEntityLabels).mockResolvedValue([{ id: 'Q1', label: 'Univers', description: 'Sujet sans date directe' }]);
+  await search('Univers'); await vi.advanceTimersByTimeAsync(350); await flushPromises();
+  expect(view.findAll('[role="option"]')).toHaveLength(2);
+  const input = view.get('input');
+  await input.trigger('keydown', { key: 'ArrowDown' }); await input.trigger('keydown', { key: 'ArrowDown' }); await input.trigger('keydown', { key: 'Enter' });
+  expect(view.emitted('select')?.[0]).toEqual([expect.objectContaining({ id: 'Q1', fromWikidata: true })]);
+});
+
+it('keeps stories usable when Wikidata fails and retries only the failed source', async () => {
+  vi.mocked(api.searchStories).mockResolvedValue([story]);
+  vi.mocked(api.searchWikidataEntityLabels).mockRejectedValueOnce(new Error('Wikidata indisponible')).mockResolvedValueOnce([{ id: 'Q1', label: 'Univers' }]);
+  await search('Univers'); await vi.advanceTimersByTimeAsync(350); await flushPromises();
+  expect(view.get('[role="option"]').text()).toContain('Guerre froide');
+  expect(view.get('[role="alert"]').text()).toContain('Wikidata indisponible');
+  await view.get('[role="alert"] button').trigger('click'); await flushPromises();
+  expect(view.findAll('[role="option"]')).toHaveLength(2);
+  expect(api.searchStories).toHaveBeenCalledOnce();
 });
 it('ignores a previous query after a newer one has completed', async () => {
   const old = deferred<StorySearchResult[]>();

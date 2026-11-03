@@ -73,20 +73,15 @@ it('keeps a failed draft and blocks an invalid one', async () => {
   expect(button('Enregistrer')!.attributes('disabled')).toBeDefined();
 });
 
-it('keeps visibility out of the draft and changes it from the danger zone', async () => {
+it('keeps visibility and destructive actions out of the draft', async () => {
   view = mount(StorySettingsForm, { props: { story, editable: true } });
   await flushPromises();
   expect(view.get('form').text()).not.toContain('Mode public');
-  const danger = view.get('section.story-settings-form__danger');
-  expect(danger.text()).toContain('Visibilité : publique');
-  await danger.findAll('button').find(item => item.text() === 'Rendre privée')!.trigger('click');
-  expect(view.emitted('toggle-visibility')).toHaveLength(1);
-  await danger.findAll('button').find(item => item.text() === 'Supprimer la frise')!.trigger('click');
-  expect(view.emitted('delete')).toHaveLength(1);
+  expect(view.text()).not.toContain('Actions sensibles');
+  expect(button('Supprimer la frise')).toBeUndefined();
   await titleFr().setValue('Brouillon');
   await view.setProps({ story: { ...story, isPublic: false } });
   expect((titleFr().element as HTMLInputElement).value).toBe('Brouillon');
-  expect(view.get('section.story-settings-form__danger').text()).toContain('Rendre publique');
   await view.get('form').trigger('submit');
   expect(view.emitted('save')![0][0]).toMatchObject({ isPublic: false, title: { fr: 'Brouillon' } });
 });

@@ -263,6 +263,8 @@ export interface WikidataEntityLabelHit {
   description?: string;
 }
 
+export type GlobalSearchResult = StorySearchResult | (WikidataEntityLabelHit & { fromWikidata: true });
+
 interface ApiSearchResponse {
   periods: Array<{
     id: string;

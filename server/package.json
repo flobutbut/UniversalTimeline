@@ -12,7 +12,8 @@
     "test:privileges": "node --test test/functionPrivileges.postgres.mjs",
     "test:atomic": "yarn build && node --experimental-test-module-mocks --test test/atomicWrites.postgres.mjs",
     "test:profiles": "yarn build && node --experimental-test-module-mocks --test test/profiles.postgres.mjs",
-    "test:admin": "yarn build && node --experimental-test-module-mocks --test test/admin.postgres.mjs"
+    "test:admin": "yarn build && node --experimental-test-module-mocks --test test/admin.postgres.mjs",
+    "test:wikidata": "yarn build && node --experimental-test-module-mocks --test test/wikidataGeneration.postgres.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",

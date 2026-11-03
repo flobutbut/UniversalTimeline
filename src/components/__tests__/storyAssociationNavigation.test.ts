@@ -38,6 +38,7 @@ async function start() {
   view = mount(DatabaseView, { attachTo: document.body, global: { plugins: [pinia], stubs: { StoryTimeline: true, EditModal: true } } });
   await flushPromises();
   await view.get('.story-card__open').trigger('click'); await flushPromises();
+  await panel().findAll('button').find(button => button.text() === 'Périodes')!.trigger('click'); await flushPromises();
   await panel().getComponent(Switch).get('button').trigger('click'); await flushPromises();
   for (const id of ['root', 'branch', 'leaf']) {
     await row(id).get('.finder-item-content').trigger('click'); await flushPromises();
@@ -157,7 +158,7 @@ it('removes an event through its menu from this frise without deleting its catal
   vi.mocked(api.getStory).mockResolvedValueOnce({ ...detail(), events: [full] }).mockResolvedValueOnce(detail());
   await start(); await panel().findAll('button').find(button => button.text() === 'Événements')!.trigger('click'); await flushPromises();
   await row('ev').get('button[aria-haspopup="menu"]').trigger('click');
-  (document.querySelectorAll('[role="menuitem"]')[1] as HTMLButtonElement).click(); await flushPromises();
+  [...document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')].find(item => item.textContent?.trim() === 'Supprimer')!.click(); await flushPromises();
   expect(api.changeAssociations).toHaveBeenCalledExactlyOnceWith('1', 'event', ['ev'], true);
   expect(destroy).not.toHaveBeenCalled();
   expect(panel().findAllComponents(FinderItem).some(item => item.props('itemId') === 'ev')).toBe(false);

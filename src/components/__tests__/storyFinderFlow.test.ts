@@ -26,11 +26,13 @@ const api = PeriodApiService.getInstance();
 let view: ReturnType<typeof mount>;
 const selected = () => view.findAllComponents(FinderItem).filter(row => row.props('selected')).map(row => row.props('itemId'));
 const button = (name: string) => view.findAll('button').find(b => b.text() === name)!;
-async function start(data = story('one'), realTimeline = false) {
+async function start(data = story('one'), realTimeline = false, tab: 'overview' | 'periods' = 'periods') {
   view = mount(StoryDetailPanel, { props: { story: data }, attachTo: document.body, global: { stubs: {
     StoryTimeline: realTimeline ? false : { name: 'StoryTimeline', props: ['selectedPeriodId', 'selectedEventId'], template: '<div />' },
     StoryRelatedPickerModal: true,
   } } }); await flushPromises();
+  // Les périodes ont leur propre onglet ; l'Aperçu porte paramètres, catégories et relations.
+  if (tab === 'periods') { view.getComponent(Tabs).vm.$emit('update:modelValue', 'periods'); await flushPromises(); }
 }
 async function pick(p: Period) { view.getComponent(FilterBar).vm.$emit('pickPeriod', p); await flushPromises(); }
 async function search(query: string) {
@@ -491,17 +493,24 @@ function mockTabScrollGeometry() {
   return { viewport, content, scrollTo };
 }
 
-it('opens a frise on the first Aperçu tab and keeps the existing period layout beneath the preview', async () => {
-  await start();
+it('opens a frise on the Aperçu tab with its settings, categories and relations beneath the preview', async () => {
+  await start(story('one'), false, 'overview');
   const tabs = view.getComponent(Tabs);
-  expect(tabs.findAll('button')[0].text()).toBe('Aperçu');
+  expect(tabs.findAll('button').map(tab => tab.text())).toEqual(['Aperçu', 'Périodes', 'Événements']);
   expect(tabs.props('modelValue')).toBe('overview');
   expect(view.findComponent({ name: 'StoryTimeline' }).exists()).toBe(true);
+  const overview = view.get('.story-overview');
+  expect(overview.findAll('h3').map(title => title.text())).toEqual(['Paramètres de la frise', 'Points d’entrée vers cette frise', 'Catégories de la frise', 'Parcours chronologique']);
+  expect(overview.element.lastElementChild?.classList.contains('story-danger-zone')).toBe(true);
+  expect(view.find('.story-period-columns').exists()).toBe(false);
+  await button('Périodes').trigger('click'); await flushPromises();
+  expect(view.findComponent({ name: 'StoryTimeline' }).exists()).toBe(true);
   expect(view.get('.story-period-columns').isVisible()).toBe(true);
+  expect(view.find('.story-overview').exists()).toBe(false);
 });
 
 it('returns to the preview smoothly without losing the selected event or replaying at the top', async () => {
-  await start();
+  await start(story('one'), false, 'overview');
   const { viewport, scrollTo } = mockTabScrollGeometry();
   await button('Événements').trigger('click'); await flushPromises();
   view.findAllComponents(FinderItem).find(row => row.props('itemId') === 'event')!.vm.$emit('click'); await flushPromises();
@@ -509,11 +518,13 @@ it('returns to the preview smoothly without losing the selected event or replayi
   await button('Aperçu').trigger('click'); await flushPromises();
   expect(scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: 'smooth' });
   expect(view.getComponent(Tabs).props('modelValue')).toBe('overview');
-  expect(view.get('.event-detail-label').text()).toBe('event');
+  expect(view.find('.story-overview').exists()).toBe(true);
   viewport.scrollTop = 0;
   const calls = scrollTo.mock.calls.length;
   await button('Aperçu').trigger('click'); await flushPromises();
   expect(scrollTo).toHaveBeenCalledTimes(calls);
+  await button('Événements').trigger('click'); await flushPromises();
+  expect(view.get('.event-detail-label').text()).toBe('event');
 });
 
 it('smoothly scrolls a clicked tab to the filter bar, including when that tab is already active', async () => {
@@ -525,11 +536,8 @@ it('smoothly scrolls a clicked tab to the filter bar, including when that tab is
   viewport.scrollTop = 160;
   await button('Événements').trigger('click'); await flushPromises();
   expect(scrollTo).toHaveBeenCalledOnce();
-  viewport.scrollTop = 240;
-  await button('Relations').trigger('click'); await flushPromises();
-  expect(scrollTo).toHaveBeenCalledOnce();
   viewport.scrollTop = 60;
-  await button('Relations').trigger('click'); await flushPromises();
+  await button('Événements').trigger('click'); await flushPromises();
   expect(scrollTo).toHaveBeenCalledTimes(2);
   expect(scrollTo).toHaveBeenLastCalledWith({ top: 160, behavior: 'smooth' });
 });
@@ -539,9 +547,9 @@ it('applies only the latest tab click when several clicks arrive before the next
   const { scrollTo } = mockTabScrollGeometry();
   const tabs = view.getComponent(Tabs);
   tabs.vm.$emit('update:modelValue', 'events');
-  tabs.vm.$emit('update:modelValue', 'relations');
+  tabs.vm.$emit('update:modelValue', 'periods');
   await flushPromises();
-  expect(view.getComponent(Tabs).props('modelValue')).toBe('relations');
+  expect(view.getComponent(Tabs).props('modelValue')).toBe('periods');
   expect(scrollTo).toHaveBeenCalledOnce();
 });
 

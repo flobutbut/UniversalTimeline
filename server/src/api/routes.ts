@@ -9,12 +9,15 @@ import {
 } from './inputValidation.js';
 import type { Response } from 'express';
 import * as catalogue from '../services/catalogueService.js';
+import { convertEventToPeriod, convertPeriodToEvent } from '../services/catalogueConversion.js';
 import * as stories from '../services/storyService.js';
 import { search, searchStoryTimelines } from '../services/searchService.js';
 import { semanticSearch } from '../services/semanticSearch.js';
 import { loadStoryTemporalBounds } from '../services/storyTemporalBounds.js';
 import * as profiles from '../services/profileService.js';
 import * as admin from '../services/adminService.js';
+import { parseGeneratedStory, parseGeneratedStoryLookup } from './wikidataGenerationInput.js';
+import { createGeneratedStory, findExistingGeneratedStories } from '../services/wikidataGeneration.js';
 
 const router = express.Router();
 
@@ -69,6 +72,14 @@ router.get('/stories', endpoint('Erreur lors de la récupération des frises', a
   res.json(await stories.listStories());
 }));
 // Static paths must precede /stories/:id.
+router.get('/stories/wikidata-matches', endpoint('Impossible de vérifier les frises existantes.', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const { qid, title } = parseGeneratedStoryLookup(req.query);
+  res.json(await findExistingGeneratedStories(qid, title));
+}));
+router.post('/stories/from-wikidata', endpoint('Impossible d’enregistrer la frise Wikidata.', async (req, res) => {
+  res.status(201).json(await createGeneratedStory(parseGeneratedStory(req.body)));
+}));
 router.get('/stories/temporal-bounds', endpoint('Erreur lors du calcul des bornes temporelles', async (_req, res) => {
   res.json(await loadStoryTemporalBounds());
 }));
@@ -147,6 +158,17 @@ router.delete('/periods/:id', endpoint('Erreur lors de la suppression de la pér
   foreignKey: 'Cette période est encore utilisée. Retirez ses liens avant de la supprimer.',
   busy: 'La période est occupée. Réessayez la suppression.',
 }));
+// The body describes the new record; its ID must differ from every record of the target type.
+router.post('/periods/:id/convert-to-event', endpoint('Impossible de convertir la période en événement.', async (req, res) => {
+  const id = parseEntityId(req.params.id);
+  const data = parseWriteCategories(parseEventWrite(req.body, true));
+  res.status(201).json(await convertPeriodToEvent(id, data));
+}, { conflict: 'Ce Q-id ou cet identifiant d’événement est déjà utilisé.', busy: 'La période est occupée. Réessayez la conversion.' }));
+router.post('/events/:id/convert-to-period', endpoint('Impossible de convertir l’événement en période.', async (req, res) => {
+  const id = parseEntityId(req.params.id);
+  const data = parseWriteCategories(parsePeriodWrite(req.body, true));
+  res.status(201).json(await convertEventToPeriod(id, data));
+}, { conflict: 'Ce Q-id ou cet identifiant de période est déjà utilisé.', busy: 'L’événement est occupé. Réessayez la conversion.' }));
 router.delete('/events/:id', endpoint("Erreur lors de la suppression de l'événement", async (req, res) => {
   await catalogue.deleteEvent(parseEntityId(req.params.id));
   res.status(204).send();

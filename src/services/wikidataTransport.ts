@@ -4,7 +4,7 @@ import { createReadCache } from '@/lib/readCache';
 import { ReadFailure, readOperation, retryAfterMilliseconds } from '../../server/src/shared/readOperation';
 
 export interface WikidataReadOptions { signal?: AbortSignal; force?: boolean }
-export interface WikidataStatement { mainsnak?: { snaktype?: string; datavalue?: { value?: unknown } } }
+export interface WikidataStatement { rank?: string; mainsnak?: { snaktype?: string; datavalue?: { value?: unknown } } }
 export interface WikidataEntity {
   id?: string; missing?: unknown; redirect?: string;
   labels?: Record<string, { value: string }>;

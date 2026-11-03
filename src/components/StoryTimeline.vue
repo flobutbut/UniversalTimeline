@@ -72,6 +72,7 @@ import Button from '@/components/base/Button.vue';
 import { computed, ref } from 'vue';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import { EVENT_IMPORTANCE_LABELS } from '@/lib/eventImportance';
+import type { StoryTimelinePeriod as InPeriod, StoryTimelineEvent as InEvent } from '@/types/storyTimeline';
 import type { EventImportance } from '@/types/database';
 import { COMPACT_BAR_HEIGHT, COMPACT_LANE_GAP, COMPACT_ROOT_HEIGHT, layoutCompactLanes } from '@/lib/compactStoryTimeline';
 import { resolveYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
@@ -79,26 +80,6 @@ import {
   formatStoryTimelineBoundLabel,
   formatStoryTimelinePeriodDetail,
 } from '@/lib/storyTimelineLabels';
-
-interface InPeriod {
-  id: string;
-  label?: { fr: string; en: string };
-  startDate?: string;
-  endDate?: string;
-  startYearsBP?: number;
-  endYearsBP?: number;
-  parentId?: string | null;
-  storyParentId?: string | null;
-}
-
-interface InEvent {
-  id: string;
-  label?: { fr: string; en: string } | string;
-  date?: string;
-  dateYearsBP?: number;
-  /** Importance dans la frise affichée ; absente = normal. */
-  importance?: EventImportance;
-}
 
 const props = defineProps<{
   compact?: boolean;

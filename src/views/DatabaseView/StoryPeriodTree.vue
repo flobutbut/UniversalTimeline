@@ -43,7 +43,8 @@ import { formatPeriodDateRange } from '@/lib/formatTemporalBoundLabel';
 const props = withDefaults(defineProps<{
   storyId: string; periods: ListPeriod[]; additionalPeriods?: ListPeriod[]; selectedId?: string | null;
   search?: string; categoryId?: string; showAdditional?: boolean; loadedBranchIds?: string[];
-}>(), { additionalPeriods: () => [], search: '', categoryId: '', showAdditional: false, loadedBranchIds: () => [] });
+  scrollSelectedIntoView?: boolean;
+}>(), { additionalPeriods: () => [], search: '', categoryId: '', showAdditional: false, loadedBranchIds: () => [], scrollSelectedIntoView: true });
 const emit = defineEmits<{ select: [id: string]; 'expanded-change': [ids: string[]] }>();
 const nodes = computed(() => buildStoryPeriodTree(props.periods, props.showAdditional ? props.additionalPeriods : []));
 const filtered = computed(() => filterStoryPeriodTree(nodes.value, props.search, props.categoryId));
@@ -127,7 +128,7 @@ watch([() => props.selectedId, nodes], async () => {
   if (revealed) notifyExpanded();
   if (path.length) focusKey.value = path[path.length - 1]!.key;
   await nextTick();
-  if (!tree.value?.contains(document.activeElement)) elements.get(path[path.length - 1]?.key ?? '')?.scrollIntoView?.({ block: 'nearest' });
+  if (props.scrollSelectedIntoView && !tree.value?.contains(document.activeElement)) elements.get(path[path.length - 1]?.key ?? '')?.scrollIntoView?.({ block: 'nearest' });
 }, { immediate: true, flush: 'post' });
 watch(rows, items => { if (!items.some(row => row.node.key === focusKey.value)) focusKey.value = items[0]?.node.key; });
 watch([() => props.search, () => props.categoryId], () => { filterCollapsed.value = new Set(); });

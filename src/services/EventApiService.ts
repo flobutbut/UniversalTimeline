@@ -1,8 +1,8 @@
 import { apiClient } from './ApiClient';
 import { buildNewEntityCoreFields } from '@/lib/buildNewEntityCoreFields';
-import { mapToEvent } from './entityMappers';
-import type { EventDto, EventFormPayload } from '@/types/api';
-import type { Event, ListEvent } from '../types/database';
+import { mapToEvent, mapToPeriod } from './entityMappers';
+import type { EventDto, EventFormPayload, PeriodDto, PeriodFormPayload } from '@/types/api';
+import type { Event, ListEvent, Period } from '../types/database';
 
 export { mapToEvent } from './entityMappers';
 
@@ -54,6 +54,15 @@ export class EventApiService {
       categories: formData.categories,
     };
     return mapToEvent(await apiClient.put<EventDto>(`/events/${eventId}`, payload));
+  }
+
+  /** Replaces the event everywhere by a new root period (frises, entry points, anchors); no automatic retry. */
+  async convertToPeriod(eventId: string, formData: PeriodFormPayload): Promise<Period> {
+    const payload = {
+      ...buildNewEntityCoreFields(formData),
+      start_date: formData.startDate, end_date: formData.endDate || 'NOW', categories: formData.categories || [],
+    };
+    return mapToPeriod(await apiClient.post<PeriodDto>(`/events/${encodeURIComponent(eventId)}/convert-to-period`, payload));
   }
 
   async deleteEvent(eventId: string): Promise<void> {

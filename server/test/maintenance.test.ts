@@ -23,6 +23,7 @@ it('exposes only the reviewed Supabase migrations and explicit ownership operati
   expect(readdirSync(root + 'database/migrations').sort()).toEqual([
     '20261029090427_story_access.sql', '20261029093707_harden_public_functions.sql', '20261029093923_isolate_postgis.sql', '20261031204007_story_period_hierarchy.sql', '20261031220914_hybrid_catalogue_search.sql', '20261102001509_frise_only_period_hierarchy.sql', '20261102075026_story_entry_points.sql', '20261102075524_optimize_story_entry_point_policies.sql',
     '20261102105902_account_profiles.sql', '20261102110027_account_functions_private_schema.sql', '20261102131202_story_period_presentations.sql', '20261102204456_admin_console.sql', '20261102223946_story_event_importance.sql',
+    '20261103112451_catalogue_conversion_guard.sql',
   ]);
   expect(readdirSync(root + 'database/operations').sort()).toEqual(['assign_admin_role.sql', 'assign_legacy_stories.sql']);
   expect(readdirSync(root + 'database').filter(name => /\.(sh|sql)$/.test(name))).toEqual([]);

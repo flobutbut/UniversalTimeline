@@ -10,6 +10,7 @@
           </div>
           <Button v-if="canCreate" size="sm" @click="$emit('create')"><template #icon><DesignIcon name="plus" /></template>Créer une frise</Button>
           <Button v-else size="sm" variant="secondary" :to="{ name: 'profile' }">Choisir un nom d’utilisateur</Button>
+          <Button size="sm" variant="secondary" to="/generate">Depuis Wikidata</Button>
         </template>
       </CatalogueToolbar>
     </div>

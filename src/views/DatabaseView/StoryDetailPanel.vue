@@ -56,15 +56,15 @@
         :style="{ minHeight: contentMinHeight === undefined ? undefined : `${contentMinHeight}px` }"
         :class="{
           'story-detail-panel__tab-content--finder-periods':
-            displayedTab === 'periods' && ((story.periods?.length ?? 0) > 0 || showExternalInFinder),
+            activeTab === 'periods' && ((story.periods?.length ?? 0) > 0 || showExternalInFinder),
           'story-detail-panel__tab-content--finder-events':
-            displayedTab === 'events' && (story.events?.length ?? 0) > 0,
-          'story-detail-panel__tab-content--tree-periods': displayedTab === 'periods' && periodLayout === 'tree',
+            activeTab === 'events' && (story.events?.length ?? 0) > 0,
+          'story-detail-panel__tab-content--tree-periods': activeTab === 'periods' && periodLayout === 'tree',
         }"
       >
 
         <!-- Périodes -->
-        <template v-if="displayedTab === 'periods'">
+        <template v-if="activeTab === 'periods'">
           <div class="story-detail-panel__tab-panel">
             <FilterBar layout="panel"
               hide-title
@@ -118,8 +118,8 @@
                   <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">Ajouter une période racine</Button>
                 </template>
                 <template #actions="{ period, inStory }">
-                  <StoryItemActionsMenu v-if="inStory" :label="period.label.fr || period.label.en" :disabled="panelBusy" movable create-story
-                    @move="movingPeriodId = period.id" @edit="emit('edit-period', period.id)" @remove="emit('remove-period', period.id)" @create-story="emit('create-story-from-period', period.id)" />
+                  <StoryItemActionsMenu v-if="inStory" :label="period.label.fr || period.label.en" :disabled="panelBusy" movable create-story :convert-to="periodConvertTo(period.id)"
+                    @move="movingPeriodId = period.id" @edit="emit('edit-period', period.id)" @remove="emit('remove-period', period.id)" @create-story="emit('create-story-from-period', period.id)" @convert="convertPeriod(period.id)" />
                   <Button v-else variant="ghost" size="sm" icon-only :disabled="panelBusy || requiresParentImport(period)" :aria-label="`Ajouter ${period.label.fr || period.label.en} à la frise`" @click.stop="onTreePeriodAction(period.id)"><template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template></Button>
                 </template>
               </StoryPeriodTree>
@@ -129,7 +129,7 @@
                 :children="selectedTreeChildren" :stories="selectedTreeStories" :summaries="dataStore.stories" :busy="!!panelBusy"
                 :can-add="!!selectedTreePeriod && !requiresParentImport(selectedTreePeriod)"
                 @select="onTreePeriodSelect" @edit="emit('edit-period', $event)" @move="movingPeriodId = $event" @remove="emit('remove-period', $event)"
-                @create-story="emit('create-story-from-period', $event)" @add="onTreePeriodAction" @add-child="createTreeChildPeriod" @associate-story="associateTreeStory"
+                @create-story="emit('create-story-from-period', $event)" @convert="convertPeriod" @add="onTreePeriodAction" @add-child="createTreeChildPeriod" @associate-story="associateTreeStory"
                 @remove-story="(id, periodId) => emit('remove-child-story', id, { type: 'period', id: periodId })" />
             </div>
           </div>
@@ -170,9 +170,9 @@
                         @click="onFinderPeriodSelect(row.item, colIdx)"
                       >
                         <template #actions>
-                          <StoryItemActionsMenu v-if="row.inStory" :label="storyPeriodLabelForFinder(row.item).fr" :disabled="panelBusy" create-story movable
+                          <StoryItemActionsMenu v-if="row.inStory" :label="storyPeriodLabelForFinder(row.item).fr" :disabled="panelBusy" create-story movable :convert-to="periodConvertTo(row.item.id)"
                             @move="movingPeriodId = row.item.id" @edit="emit('edit-period', row.item.id)" @remove="emit('remove-period', row.item.id)"
-                            @create-story="emit('create-story-from-period', row.item.id)" />
+                            @create-story="emit('create-story-from-period', row.item.id)" @convert="convertPeriod(row.item.id)" />
                           <button
                             v-else
                             type="button"
@@ -204,7 +204,7 @@
         </template>
 
         <!-- Événements -->
-        <template v-else-if="displayedTab === 'events'">
+        <template v-else-if="activeTab === 'events'">
           <div class="story-detail-panel__tab-panel">
             <FilterBar layout="panel"
               mode="events"
@@ -239,8 +239,8 @@
                   @click="onStoryEventFinderRowClick(event.id)"
                 >
                   <template #actions>
-                    <StoryItemActionsMenu :label="event.label.fr" :disabled="panelBusy"
-                      @edit="emit('edit-event', event.id)" @remove="emit('remove-event', event.id)" />
+                    <StoryItemActionsMenu :label="event.label.fr" :disabled="panelBusy" convert-to="period"
+                      @edit="emit('edit-event', event.id)" @remove="emit('remove-event', event.id)" @convert="convertEvent(event)" />
                   </template>
                 </FinderItem>
               </div>
@@ -256,7 +256,10 @@
                             <h3 class="event-detail-label">{{ event.label.fr?.trim() || event.label.en?.trim() }}</h3>
                             <div class="event-detail-date">{{ eventDetailDate(event) }}</div>
                           </div>
-                          <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="emit('edit-event', event.id)">Modifier l’événement</Button>
+                          <div class="event-detail-actions">
+                            <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="emit('edit-event', event.id)">Modifier l’événement</Button>
+                            <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="convertEvent(event)">Convertir en période</Button>
+                          </div>
                           <p v-if="eventDescription(event)" class="event-detail-description" aria-label="Description de l’événement">{{ eventDescription(event) }}</p>
                           <p v-else class="event-detail-empty event-detail-description">Aucune description renseignée.</p>
                         </header>
@@ -346,18 +349,21 @@
           </div>
         </template>
 
-        <div v-else-if="displayedTab === 'relations'" class="story-settings-panel">
-          <StoryRelationsPanel :story="story" :busy="panelBusy" :error="error"
-            @add-parent="(sourceId, periodId) => emit('add-parent-entry', sourceId, periodId)"
-            @remove-parent="(sourceId, anchor) => emit('remove-parent-entry', sourceId, anchor)" />
+        <!-- Aperçu : paramètres, points d’entrée, catégories et parcours de la frise -->
+        <div v-else class="story-settings-panel story-overview">
+          <StorySettingsForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
+          <div class="story-overview__section">
+            <StoryRelationsPanel :story="story" :busy="panelBusy" :error="error"
+              @add-parent="(sourceId, periodId) => emit('add-parent-entry', sourceId, periodId)"
+              @remove-parent="(sourceId, anchor) => emit('remove-parent-entry', sourceId, anchor)" />
+          </div>
+          <div class="story-overview__section">
+            <StoryCategoriesForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
+          </div>
           <StoryNavigationPanel :story="story" :busy="panelBusy" @saved="emit('retry')" />
-        </div>
-        <div v-else-if="displayedTab === 'categories'" class="story-settings-panel">
-          <StoryCategoriesForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
-        </div>
-        <div v-else-if="displayedTab === 'settings'" class="story-settings-panel">
-          <StorySettingsForm :story="story" :editable="auth.ownsStory(story)" :busy="panelBusy" :error="settingsError"
-            @save="emit('save-story', $event)" @delete="emit('delete-story')" @toggle-visibility="emit('toggle-visibility')" />
+          <!-- Les actions destructrices restent en fin de page, après tout le contenu modifiable. -->
+          <StoryDangerZone v-if="auth.ownsStory(story)" :story="story" :busy="panelBusy"
+            @delete="emit('delete-story')" @toggle-visibility="emit('toggle-visibility')" />
         </div>
 
       </div>
@@ -374,6 +380,9 @@
     <EditModal v-if="eventCreationDraft" :is-open="true" type="event" mode="create" :data="eventCreationDraft"
       :loading="eventCreationBusy" :error="eventCreationError" allow-existing-events :search-bounds="storySearchBounds" :excluded-event-ids="storyEventIds"
       @close="closeEventCreator" @submit="submitEventCreation" @select-event="selectExistingStoryEvent" />
+    <EditModal v-if="conversionDraft && conversionSource" :is-open="true" :type="conversionSource.kind === 'period' ? 'event' : 'period'" mode="create"
+      :convert-from="conversionSource.kind" :data="conversionDraft" :loading="conversionBusy" :error="conversionError"
+      @close="closeConversion" @submit="submitConversion" />
     <StoryRelatedPickerModal
       v-if="showChildStoryPicker && story"
       :exclude-story-ids="childStoryPickerExcludeIds"
@@ -398,6 +407,7 @@ import { listEventYearsBP } from '@/lib/listEventTableHelpers';
 import RootPeriodModal from './RootPeriodModal.vue';
 import MoveStoryPeriodModal from './MoveStoryPeriodModal.vue';
 import StorySettingsForm from './StorySettingsForm.vue';
+import StoryDangerZone from './StoryDangerZone.vue';
 import StoryCategoriesForm from './StoryCategoriesForm.vue';
 import StoryRelationsPanel from './StoryRelationsPanel.vue';
 import StoryNavigationPanel from './StoryNavigationPanel.vue';
@@ -418,6 +428,7 @@ import FinderItem from '@/views/GraphView/FinderItem.vue';
 import FilterBar from "@/components/FilterBar.vue";
 import { useDataStore } from '@/stores/useDataStore';
 import { useStoryEventCreation } from '@/composables/useStoryEventCreation';
+import { useCatalogueConversion } from '@/composables/useCatalogueConversion';
 import StoryRelatedPickerModal from './StoryRelatedPickerModal.vue';
 import { formatStoryEventDateLabel } from '@/lib/formatTemporalBoundLabel';
 import { formatRecordDate } from '@/lib/storyListDates';
@@ -457,6 +468,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'retry'): void;
   (e: 'period-imported'): void;
+  /** Une période est devenue un événement (ou l'inverse) dans tout le catalogue. */
+  (e: 'entity-converted'): void;
   (e: 'remove-period', id: string): void;
   (e: 'edit-period', id: string): void;
   (e: 'create-story-from-period', id: string): void;
@@ -512,13 +525,25 @@ const {
   draft: eventCreationDraft, busy: eventCreationBusy, error: eventCreationError,
   open: openEventCreator, close: closeEventCreator, submit: submitEventCreation, selectExisting: selectExistingStoryEvent,
 } = useStoryEventCreation(() => props.story, () => emit('event-added'));
+const {
+  draft: conversionDraft, source: conversionSource, busy: conversionBusy, error: conversionError,
+  fromPeriod: openPeriodConversion, fromEvent: convertEvent, close: closeConversion, submit: submitConversion,
+} = useCatalogueConversion(() => props.story?.id, () => { selectedEventId.value = null; clearPeriodSelection(); emit('entity-converted'); });
+/** Une période qui organise des sous-périodes dans la frise ne peut pas devenir un événement. */
+function periodConvertTo(id: string) {
+  return storyPeriodHasChildrenInStory((props.story?.periods ?? []) as StoryPeriodInput[], id) ? undefined : 'event' as const;
+}
+function convertPeriod(id: string) {
+  const period = props.story?.periods.find(item => item.id === id);
+  if (period && periodConvertTo(id)) openPeriodConversion(period);
+}
 const movingPeriodId = ref<string | null>(null);
 function movePeriod(parentId: string | null) {
   if (movingPeriodId.value && !panelBusy.value) emit('add-periods', [movingPeriodId.value], parentId);
 }
 // Keep the dialog on a refused write; close only once its placement is confirmed.
 watch(() => props.story?.periods.map(p => `${p.id}:${getStoryPeriodParentId(p)}`).join(','), () => { movingPeriodId.value = null; });
-const panelBusy = computed(() => props.updating || periodImportBusy.value || eventCreationBusy.value);
+const panelBusy = computed(() => props.updating || periodImportBusy.value || eventCreationBusy.value || conversionBusy.value);
 const showRootPicker = ref(false);
 const periodCreationParentId = ref<string | null>(null);
 const childStoryAnchor = ref<StoryAnchor>();
@@ -535,13 +560,9 @@ const {
   loadBranches, loadedBranchIds, selectTreeRow,
 } = useStoryPeriodFinder(() => props.story);
 const selectedEventId = ref<string | null>(null);
-type DetailTab = 'periods' | 'events' | 'relations' | 'categories' | 'settings';
-type ContentTab = 'overview' | DetailTab;
+// La frise reste visible au-dessus de chaque onglet ; l'Aperçu porte ses paramètres, catégories et relations.
+type ContentTab = 'overview' | 'periods' | 'events';
 const activeTab = ref<ContentTab>('overview');
-const lastDetailTab = ref<DetailTab>('periods');
-// Aperçu est une ancre de navigation : revenir en haut conserve le contenu consulté.
-const displayedTab = computed(() => activeTab.value === 'overview' ? lastDetailTab.value : activeTab.value);
-watch(activeTab, tab => { if (tab !== 'overview') lastDetailTab.value = tab; }, { flush: 'sync' });
 const contentScroll = ref<HTMLElement | null>(null);
 const tabContent = ref<HTMLElement | null>(null);
 const contentMinHeight = ref<number>();
@@ -632,9 +653,6 @@ const storyContentTabs = computed(() => [
   { label: 'Aperçu', value: 'overview' as const },
   { label: 'Périodes', value: 'periods' as const },
   { label: 'Événements', value: 'events' as const },
-  { label: 'Relations', value: 'relations' as const },
-  { label: 'Catégories', value: 'categories' as const },
-  { label: 'Paramètres', value: 'settings' as const },
 ]);
 
 const storySearchBounds = computed(() => {
@@ -751,7 +769,7 @@ const { results: periodSearchSuggestions, loading: periodSearchLoading, error: p
     const hits = await SearchApiService.getInstance().searchLocal(query, { onlyPeriods: true, categoryId: periodFilterCategoryId.value || undefined, signal });
     return hits.filter(hit => hit.type === 'period').map(localSearchHitToPeriod);
   },
-  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, periodFilterCategoryId.value], enabled: () => !!props.story && !props.loading && !props.error && displayedTab.value === 'periods' },
+  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, periodFilterCategoryId.value], enabled: () => !!props.story && !props.loading && !props.error && activeTab.value === 'periods' },
 );
 const { results: eventSearchSuggestions, loading: eventSearchLoading, error: eventSearchError, retry: retryEventSearch } = useDebouncedSearch(
   () => eventHeaderSearch.value,
@@ -759,7 +777,7 @@ const { results: eventSearchSuggestions, loading: eventSearchLoading, error: eve
     const hits = await SearchApiService.getInstance().searchLocal(query, { onlyEvents: true, categoryId: eventFilterCategoryId.value || undefined, signal });
     return hits.filter(hit => hit.type === 'event').map(localSearchHitToEvent);
   },
-  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, eventFilterCategoryId.value], enabled: () => !!props.story && !props.loading && !props.error && displayedTab.value === 'events' },
+  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, eventFilterCategoryId.value], enabled: () => !!props.story && !props.loading && !props.error && activeTab.value === 'events' },
 );
 
 watch([periodHeaderSearch, periodFilterCategoryId, activeTab, () => props.loading, () => props.error], cancelFinder, { flush: 'sync' });
@@ -1106,6 +1124,7 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 }
 
 .event-detail-heading { min-width: 0; flex: 1 1 200px; }
+.event-detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); }
 .event-detail-label {
   margin: 0;
   font-size: var(--font-size-2xl);
@@ -1221,6 +1240,8 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .event-detail-importance :deep(.tab-button) { flex: 1; justify-content: center; min-height: var(--field-height-md); padding: var(--spacing-xs) var(--spacing-sm); }
 .event-detail-importance :deep(.tab-button:hover:not(:disabled):not(.tab-button--active)) { background: var(--color-interaction-hover); }
 .story-settings-panel { padding: var(--spacing-xl); background: var(--color-surface-default); min-height: 100%; }
+.story-overview { display: flex; flex-direction: column; gap: var(--spacing-xl); }
+.story-overview__section { max-width: 960px; padding-top: var(--spacing-xl); border-top: 1px solid var(--color-border-default); }
 @media (max-width: 1000px) { .story-detail-panel__meta { flex-wrap: wrap; } .story-detail-panel__meta-actions { flex-wrap: wrap; } }
 @media (max-width: 600px) {
   .story-detail-panel__meta-actions { width: 100%; }
