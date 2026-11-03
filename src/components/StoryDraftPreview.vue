@@ -21,7 +21,7 @@ const emit = defineEmits<{ 'select-period': [id: string]; 'select-event': [id: s
     <Input v-model="description" label="Description de la frise" type="textarea" :maxlength="1000" :disabled="disabled" />
     <a v-if="sourceUrl" :href="sourceUrl" target="_blank" rel="noopener noreferrer">{{ sourceLabel }}<span class="sr-only"> (nouvel onglet)</span></a>
     <div v-if="periods.length || events.length" class="story-draft-preview__timeline" role="region" aria-label="Aperçu visuel de la frise">
-      <StoryTimeline compact :periods="periods" :events="events" @select-period="emit('select-period', $event)" @select-event="emit('select-event', $event)" />
+      <StoryTimeline compact collapsible :periods="periods" :events="events" @select-period="emit('select-period', $event)" @select-event="emit('select-event', $event)" />
     </div>
     <slot />
   </section>
