@@ -9,7 +9,7 @@ import Button from '@/components/base/Button.vue';
 import {graphKey} from '../relationGraph';
 import type {RelationEntity,RelationsContent,RelationsNetwork} from '@/types/adminRelations';
 import {network,leafNetwork} from './networkFixture';
-vi.mock('../RelationGraphCanvas.vue',()=>({default:{name:'RelationGraphCanvas',props:['graph','selected','expanded'],emits:['deselect','selectNode','toggleExpand'],template:'<div aria-label="Réseau de test"><button data-relation-expand @click="$emit(\'toggleExpand\')">{{expanded?\'Réduire le graphe\':\'Agrandir le graphe\'}}</button></div>'}}));
+vi.mock('../RelationGraphCanvas.vue',()=>({default:{name:'RelationGraphCanvas',props:['graph','selected','expanded'],emits:['deselect','selectNode','toggleExpand'],template:'<div aria-label="Réseau de test"><slot name="search" /><button data-relation-expand @click="$emit(\'toggleExpand\')">{{expanded?\'Réduire le graphe\':\'Agrandir le graphe\'}}</button></div>'}}));
 let pinia:Pinia;let view:ReturnType<typeof mount>;
 async function start(data:RelationsNetwork=network){
   pinia=createPinia();const auth=useAuthStore(pinia);Object.assign(auth,{enabled:true,ready:true,account:{id:'admin',isAdmin:true}});
@@ -135,4 +135,17 @@ it('an overview error remains retryable instead of looking like an empty network
   await start();vi.mocked(adminApi.relations).mockRejectedValueOnce(new Error('Indisponible'));
   await view.findAll('button').find(b=>b.text()==='Actualiser')!.trigger('click');await flushPromises();
   expect(view.find('[role="alert"]').exists()).toBe(true);
+});
+
+it('chooses a search suggestion without rebuilding the graph and lets Escape dismiss suggestions before the expanded view',async()=>{
+  await start();const canvas=view.findComponent({name:'RelationGraphCanvas'});const graph=canvas.props('graph');
+  const input=view.get('[role="combobox"]');(input.element as HTMLInputElement).focus();await input.setValue('Privée');
+  await input.trigger('keydown',{key:'ArrowDown'});await input.trigger('keydown',{key:'Enter'});await flushPromises();
+  expect(canvas.props('selected')).toBe(graphKey('story','2'));expect(canvas.props('graph')).toBe(graph);
+  await view.get('[data-relation-expand]').trigger('click');await flushPromises();
+  (input.element as HTMLInputElement).focus();await input.setValue('Source');
+  await input.trigger('keydown',{key:'Escape'});await flushPromises();
+  expect(view.attributes('role')).toBe('dialog');expect(view.find('[role="listbox"]').exists()).toBe(false);
+  await input.trigger('keydown',{key:'Escape'});await flushPromises();
+  expect(view.attributes('role')).toBeUndefined();expect(canvas.props('selected')).toBe(graphKey('story','2'));
 });

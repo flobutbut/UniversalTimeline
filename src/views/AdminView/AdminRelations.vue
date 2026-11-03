@@ -22,18 +22,9 @@
       </div>
       <p v-if="filtersActive && !expanded" class="admin-relations__muted">{{ filteredNetwork.stories.length }} frises retenues. Les partages sont comptés entre ces frises uniquement.<template v-if="leafStoriesOnly"> Seuls les liens parent–enfant définissent les enfants ; les passerelles sont conservées.</template><template v-if="sharedOnly && !filteredNetwork.periods.length && !filteredNetwork.events.length"> Aucun contenu partagé entre les frises retenues.</template></p>
       <RelationGraphCanvas v-model:all-labels="allLabels" :graph="graph" :selected="selectedId" :expanded="expanded" @toggle-expand="setExpanded(!expanded)" @select-node="selectNode" @select-edge="selectEdge" @deselect="deselect">
-        <template #search><SearchInput v-model="query" placeholder="Rechercher un objet" /></template>
+        <template #search><RelationGraphSearch :nodes="graph.nodes" @select="selectNode" /></template>
         <template #empty><FeedbackState kind="empty" layout="inline" :message="filtersActive?'Aucun objet ne correspond aux filtres et types activés.':'Activez un type d’objet pour l’afficher dans le réseau.'" /></template>
       </RelationGraphCanvas>
-      <section v-if="query.trim()" class="admin-relations__results" aria-label="Résultats de recherche">
-        <p class="admin-relations__muted" role="status">{{ results.length }} résultats</p>
-        <div class="admin-relations__result-grid">
-          <button v-for="node in results" :key="node.id" class="admin-relations__row" type="button" :aria-pressed="selectedId===node.id" :class="{'admin-relations__row--selected':selectedId===node.id}" @click="selectNode(node.id)">
-            <ItemSummary :title="node.title" :description="`${kindLabels[node.kind]} · ${node.subtitle}`" />
-          </button>
-        </div>
-        <FeedbackState v-if="!results.length" kind="empty" layout="inline" message="Aucun objet ne correspond." />
-      </section>
       <section v-show="!expanded" class="admin-relations__detail" aria-labelledby="relation-detail-title" :aria-busy="detailLoading">
         <FeedbackState v-if="detailLoading" kind="loading" layout="inline" />
         <FeedbackState v-else-if="detailError" kind="error" layout="inline" :message="detailError" retryable @retry="retryDetail" />
@@ -67,7 +58,6 @@ import {computed,defineComponent,nextTick,onMounted,ref,watch} from 'vue';
 import {Icon} from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
 import FeedbackState from '@/components/base/FeedbackState.vue';
-import SearchInput from '@/components/base/SearchInput.vue';
 import Switch from '@/components/base/Switch.vue';
 import Tag from '@/components/base/Tag.vue';
 import ItemSummary from '@/components/base/ItemSummary.vue';
@@ -80,9 +70,10 @@ import {formatAdminDate} from './adminFormat';
 import {buildRelationGraph,filterRelationNetwork,graphKey,importanceLabel,type GraphKind} from './relationGraph';
 import {useAdminRelations} from './useAdminRelations';
 import RelationGraphCanvas from './RelationGraphCanvas.vue';
+import RelationGraphSearch from './RelationGraphSearch.vue';
 
 const {overview,content,entity,selectedStory,overviewLoading,overviewError,detailLoading,detailError,selectStory,selectEntity,clearDetail,load,retryDetail}=useAdminRelations();
-const selectedId=ref<string|null>(null);const query=ref('');const allLabels=ref(false);
+const selectedId=ref<string|null>(null);const allLabels=ref(false);
 const workspace=ref<HTMLElement>();const expanded=ref(false);
 let expansionTrigger:HTMLElement|null=null;
 // Mount only the focus scope on expansion; the canvas and its simulation stay mounted.
@@ -114,7 +105,6 @@ const visibleContent=computed(()=>({periods:content.value?.periods.filter(p=>sco
 const scopedUses=computed(()=>{const uses=new Map<string,Set<string>>();for(const membership of filteredNetwork.value.memberships){const key=graphKey(membership.kind,membership.entityId);const ids=uses.get(key)??new Set<string>();ids.add(membership.storyId);uses.set(key,ids);}return uses;});
 const usageCount=(kind:RelationEntityKind,id:string)=>scopedUses.value.get(graphKey(kind,id))?.size??0;
 const visibleCounts=computed(()=>({story:graph.value.nodes.filter(n=>n.kind==='story').length,period:graph.value.nodes.filter(n=>n.kind==='period').length,event:graph.value.nodes.filter(n=>n.kind==='event').length}));
-const results=computed(()=>graph.value.nodes.filter(node=>node.title.toLocaleLowerCase('fr').includes(query.value.trim().toLocaleLowerCase('fr'))));
 const selectedRecordLocation=computed(()=>{const node=graph.value.nodes.find(node=>node.id===selectedId.value);return node?databaseRecordLocation(node.kind,node.entityId):undefined;});
 const selectedEdge=computed(()=>graph.value.edges.find(edge=>edge.id===selectedId.value)??null);
 const edgeLinks=computed(()=>overview.value?.links.filter(link=>selectedEdge.value?.linkIds.includes(link.id))??[]);
@@ -145,18 +135,15 @@ onMounted(load);
 .admin-relations__header {justify-content:space-between;}
 .admin-relations__muted {color:var(--color-text-secondary);font:var(--type-compact);}
 .admin-relations__toolbar,.admin-relations__filters {gap:var(--spacing-sm);flex-shrink:0;}
-.admin-relations__detail,.admin-relations__results {padding:var(--spacing-lg);border:1px solid var(--color-border-default);border-radius:var(--radius-md);background:var(--color-surface-raised);min-width:0;overflow-wrap:anywhere;}
+.admin-relations__detail {padding:var(--spacing-lg);border:1px solid var(--color-border-default);border-radius:var(--radius-md);background:var(--color-surface-raised);min-width:0;overflow-wrap:anywhere;}
 .admin-relations__links {display:flex;flex-direction:column;gap:var(--spacing-sm);padding:0;list-style:none;}
 .admin-relations__links li {display:flex;flex-wrap:wrap;align-items:center;gap:var(--spacing-sm);}
-.admin-relations__result-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));max-height:300px;overflow:auto;}
 .admin-relations__row {display:flex;min-width:0;width:100%;padding:var(--spacing-md);border:0;border-bottom:1px solid var(--color-border-light);background:transparent;color:var(--color-text-primary);font:var(--type-compact);text-align:left;cursor:pointer;}
 .admin-relations__row > * {min-width:0;}
 .admin-relations__row:hover {background:var(--color-interaction-hover);}
-.admin-relations__row--selected,.admin-relations__row--selected:hover {background:var(--color-interaction-selected);color:var(--color-text-on-selected);}
 .admin-relations__row:focus-visible,.admin-relations summary:focus-visible {outline:2px solid var(--color-border-focus);outline-offset:-2px;}
 .admin-relations summary {padding:var(--spacing-sm);cursor:pointer;font:var(--type-label);}
 .admin-relations__content-lists {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:var(--spacing-lg);}
 .admin-relations__content-lists > div {min-width:0;max-height:300px;overflow:auto;}
 .admin-relations--expanded {position:fixed;inset:0;z-index:var(--z-index-modal);height:100dvh;box-sizing:border-box;padding:var(--spacing-md);gap:var(--spacing-sm);overflow:auto;background:var(--color-background-default);color:var(--color-text-primary);}
-.admin-relations--expanded .admin-relations__results {flex-shrink:0;max-height:30dvh;overflow:auto;}
 </style>
