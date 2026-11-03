@@ -30,10 +30,17 @@ it('keeps an unknown end empty and excludes the incomplete interval until correc
   item.endDate = '1799'; expect(wikidataTimelineItemError(item)).toBeNull();
 });
 
+it('reads JSON years before Christ without a year 0 and keeps Julian days as written', async () => {
+  const julian = (value: string, precision: number) => ({ mainsnak: { snaktype: 'value', datavalue: { value: { time: value, precision, calendarmodel: 'http://www.wikidata.org/entity/Q1985786' } } } });
+  entities.Q1.claims = { P580: [julian('-0490-00-00T00:00:00Z', 9)], P582: [julian('-0044-03-15T00:00:00Z', 11)] };
+  const item = (await generateWikidataTimeline('Q1')).items[0];
+  expect(item).toMatchObject({ startDate: '490 BCE', endDate: '-0043-03-15', selected: true });
+});
+
 it.each([
   [time('+1789-07-14T00:00:00Z'), time('+1790-07-14T00:00:00Z')],
   [time('+1700-01-01T00:00:00Z', 7)],
-  [{ mainsnak: { snaktype: 'value', datavalue: { value: { time: '+1789-07-14T00:00:00Z', precision: 11, calendarmodel: 'http://www.wikidata.org/entity/Q1985786' } } } }],
+  [{ mainsnak: { snaktype: 'value', datavalue: { value: { time: '+1789-07-14T00:00:00Z', precision: 11, calendarmodel: 'http://www.wikidata.org/entity/Q28892' } } } }],
   [{ mainsnak: { snaktype: 'value', datavalue: { value: { time: '+1789-07-14T00:00:00Z', precision: 11, before: 1, after: 0 } } } }],
 ].map(claims => ({ claims })))('requires review of conflicting, coarse, non-Gregorian or uncertain dates (%j)', async ({ claims }) => {
   entities.Q1.claims = { P585: claims };

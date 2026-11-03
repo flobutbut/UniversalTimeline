@@ -1,6 +1,7 @@
 import { mediaWiki, type WikidataReadOptions, type WikidataEntity, type WikidataStatement } from './wikidataTransport';
 import { apiClient } from './ApiClient';
 import { formatSearchResultDateBound } from '@/lib/formatTemporalBoundLabel';
+import { wikibaseTimeToTemporal, type WikibaseTime } from '@/lib/wikidataTime';
 import { WIKIDATA_MEDIAWIKI_API_URL } from '@/lib/wikidataMediaWikiConstants';
 
 
@@ -149,17 +150,12 @@ async function loadP279AncestorGraphForClassSeeds(seedClassIds: string[], signal
   return graph;
 }
 
-/** First Wikibase time of a claim, reduced to its known precision ("+1944-00-00…" → "1944"). */
+/** Best-ranked Wikibase time of a claim, in the app's canonical notation ("-0490-00-00…" → "490 BCE"). */
 function wikidataClaimTime(entity: WikidataEntity | undefined, prop: string): string | undefined {
-  const value = entity?.claims?.[prop]?.find(row => row.mainsnak?.snaktype === 'value')?.mainsnak?.datavalue?.value;
+  const claims = (entity?.claims?.[prop] ?? []).filter(row => row.rank !== 'deprecated' && row.mainsnak?.snaktype === 'value');
+  const value = (claims.find(row => row.rank === 'preferred') ?? claims[0])?.mainsnak?.datavalue?.value;
   if (!value || typeof value !== 'object' || !('time' in value) || typeof value.time !== 'string') return undefined;
-  const match = /^([+-])(\d+)-(\d{2})-(\d{2})T/.exec(value.time);
-  if (!match) return value.time;
-  const [, sign, year, month, day] = match;
-  const signedYear = `${sign === '-' ? '-' : ''}${year.padStart(4, '0')}`;
-  if (month === '00') return signedYear;
-  if (day === '00') return `${signedYear}-${month}`;
-  return value.time;
+  return wikibaseTimeToTemporal(value as WikibaseTime, 'historical') || undefined;
 }
 
 /** Start/end shown in search lists: period bounds, point in time, or inception/dissolution. */
@@ -443,7 +439,7 @@ export class SearchApiService {
       const type: 'period' | 'event' = (hasStart || hasEnd) ? 'period' : 'event';
       const time = (property: string) => {
         const value = claims[property]?.[0]?.mainsnak?.datavalue?.value;
-        return value && typeof value === 'object' && 'time' in value && typeof value.time === 'string' ? value.time : '';
+        return value && typeof value === 'object' && 'time' in value && typeof value.time === 'string' ? wikibaseTimeToTemporal(value as WikibaseTime, 'historical') : '';
       };
       const rawDate = time('P580') || time('P585');
       const rawEnd = time('P582');

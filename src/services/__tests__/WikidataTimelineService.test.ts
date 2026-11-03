@@ -27,7 +27,7 @@ describe('Wikidata detailed periods', () => {
     get.mockResolvedValueOnce(response([temporal()])).mockResolvedValueOnce(response([]));
     const result = await WikidataQueryService.getInstance().loadPeriod('Q123');
     expect(result.label).toEqual({ fr: 'Période', en: 'Period' });
-    expect(result.temporalData).toEqual([{ startDate: '-541000000-01-01T00:00:00Z', endDate: '-485400000-01-01T00:00:00Z', location: 'Globale' }]);
+    expect(result.temporalData).toEqual([{ startDate: 'M541', endDate: 'M485.4', location: 'Globale' }]);
     expect(result.children).toEqual([]);
     expect(get).toHaveBeenCalledTimes(2);
   });
@@ -44,6 +44,36 @@ describe('Wikidata detailed periods', () => {
     expect(result.label).toEqual({ fr: '', en: '' });
     expect(result.temporalData[0]).toMatchObject({ startDate: '', endDate: 'TODAY' });
     expect(result.hasChildren).toBe(false);
+  });
+  it('reads SPARQL times with their precision, astronomical year and Julian day', async () => {
+    const julian = 'http://www.wikidata.org/entity/Q1985786';
+    get.mockResolvedValueOnce(response([{ item: temporal().item,
+      startDate: { value: '-0489-01-01T00:00:00Z' }, startDatePrecision: { value: '9' }, startDateCalendar: { value: julian },
+      endDate: { value: '1066-10-20T00:00:00Z' }, endDatePrecision: { value: '11' }, endDateCalendar: { value: julian } }])).mockResolvedValueOnce(response([]));
+    const result = await WikidataQueryService.getInstance().loadPeriod('Q123');
+    expect(result.temporalData[0]).toMatchObject({ startDate: '490 BCE', endDate: '1066-10-14' });
+    expect(get.mock.calls[0][1]?.params.query).toContain('a wikibase:BestRank; psv:P580');
+  });
+  it('leaves a coarse end unknown and visible instead of turning it into the present', async () => {
+    get.mockResolvedValueOnce(response([{ item: temporal().item,
+      startDate: { value: '1789-01-01T00:00:00Z' }, startDatePrecision: { value: '9' },
+      endDate: { value: '1800-01-01T00:00:00Z' }, endDatePrecision: { value: '7' } }])).mockResolvedValueOnce(response([]));
+    const result = await WikidataQueryService.getInstance().loadPeriod('Q123');
+    expect(result.temporalData[0]).toMatchObject({ startDate: '1789', endDate: '' });
+    expect(result.warnings?.join()).toContain('approximative');
+    expect(result.childrenPreloaded).toBe(true);
+  });
+  it('falls back to the next readable event date', async () => {
+    get.mockResolvedValueOnce(response([{ item: temporal().item,
+      pointInTime: { value: '-3000-01-01T00:00:00Z' }, pointInTimePrecision: { value: '6' },
+      inceptionDate: { value: '-0043-03-13T00:00:00Z' }, inceptionDatePrecision: { value: '11' }, inceptionDateCalendar: { value: 'http://www.wikidata.org/entity/Q1985786' } }]));
+    const event = await WikidataQueryService.getInstance().loadEvent('Q123');
+    expect(event.date).toBe('-0043-03-15');
+    expect(event.warnings).toBeUndefined();
+    get.mockResolvedValueOnce(response([{ item: temporal('Q124').item, pointInTime: { value: '-3000-01-01T00:00:00Z' }, pointInTimePrecision: { value: '6' } }]));
+    const coarse = await WikidataQueryService.getInstance().loadEvent('Q124');
+    expect(coarse.date).toBe('');
+    expect(coarse.warnings?.join()).toContain('renseignez');
   });
   it('retries a persistent network failure and propagates the original cause', async () => {
     vi.useFakeTimers();
