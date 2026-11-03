@@ -49,6 +49,7 @@ Il n'y a **qu'un seul moteur de dates** : `server/src/shared/temporal.ts`. Ne ja
 
 - **Ne pas écrire d'année négative au format ISO** (`-9600-01-01T00:00:00Z`). Le moteur la lit comme une année astronomique, ce qui donne « 9601 av. J.-C. » avec un « 1 janvier » parasite. Ce format reste dans d'anciennes fiches : voir les corrections à prévoir dans [FRISES-A-CREER.md](FRISES-A-CREER.md).
 - **Choisir la précision réelle de la source.** Pas de jour inventé quand seule l'année est connue.
+- **Avant 1582, utiliser les dates usuelles (calendrier julien)** : Crécy le 26 août 1346, pas le 3 septembre que donne Wikidata en grégorien proleptique.
 - **`start_years_bp`, `end_years_bp` et `date_years_bp`** se calculent avec `yearsBeforePresent()`, arrondis à 3 décimales pour éviter les artefacts du type `66400000.00000001`.
 - **Le début doit être strictement antérieur à la fin.**
 - **Les années stockées dépendent de la date du calcul.** Pour une frise au jour près, recalculer les `*_years_bp` des anciennes fiches réutilisées en même temps que les nouvelles, sinon une sous-période semble déborder de son parent de quelques mois.
@@ -67,7 +68,7 @@ Il n'y a **qu'un seul moteur de dates** : `server/src/shared/temporal.ts`. Ne ja
 
 - **Titre et description en français et en anglais.** La description de frise tient en une ou deux phrases et dit ce que la frise montre. Celle de chaque fiche est factuelle et courte (une phrase), sans dates répétées.
 - **Catégories** : deux ou trois catégories existantes par fiche et par frise, parmi `CAT_ANTHRO`, `CAT_ART`, `CAT_ASTRO`, `CAT_BIO_EVO`, `CAT_BOT`, `CAT_CHEM`, `CAT_COSMO`, `CAT_ECO` (économie), `CAT_ECO_SYS` (écologie), `CAT_GEO`, `CAT_HIST`, `CAT_MICRO`, `CAT_OCEAN`, `CAT_PALEO`, `CAT_PART`, `CAT_PHILO`, `CAT_PHYS`, `CAT_TECH`. Ne pas créer de catégorie au passage.
-- **Auteur** : le nom d'utilisateur du compte propriétaire. L'API l'impose à la création ; un script doit écrire le même nom, aujourd'hui « Flobutbut ».
+- **Auteur** : le nom d'utilisateur du compte propriétaire. L'API l'impose à la création ; un script doit écrire le même nom, aujourd'hui « flobutbut » (compte `727252ea-…`, propriétaire de toutes les frises).
 - **Propriétaire et visibilité** : `owner_user_id` du compte. `is_public = true` seulement pour une frise relue.
 - **Événements de contexte** : relier aussi les causes et conséquences. Exemples : volcanisme et impact pour les extinctions, Arrhenius et la courbe de Keeling pour le climat.
 
