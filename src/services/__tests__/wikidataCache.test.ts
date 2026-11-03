@@ -36,10 +36,10 @@ it('loads period children with one summary query and no per-child fan-out',async
   expect(get.mock.calls[1][1]?.params.query).toContain('LIMIT 400');
 });
 it('projects temporal qualifiers used by the period fallback',async()=>{
-  get.mockResolvedValueOnce(response([{item:temporal.item,itemLabelFr:temporal.itemLabelFr,startDateQualifier:{value:'M65'},endDateQualifier:{value:'M8'}}])).mockResolvedValueOnce(response([]));
+  get.mockResolvedValueOnce(response([{item:temporal.item,itemLabelFr:temporal.itemLabelFr,startDateQualifier:{value:'-65000000-01-01T00:00:00Z'},startDateQualifierPrecision:{value:'3'},endDateQualifier:{value:'-8000000-01-01T00:00:00Z'},endDateQualifierPrecision:{value:'3'}}])).mockResolvedValueOnce(response([]));
   const period=await WikidataQueryService.getInstance().loadPeriod('Q123');
   expect(period.temporalData[0]).toMatchObject({startDate:'M65',endDate:'M8'});
-  expect(get.mock.calls[0][1]?.params.query.split('WHERE')[0]).toContain('?startDateQualifier ?endDateQualifier');
+  expect(get.mock.calls[0][1]?.params.query.split('WHERE')[0]).toContain('?startDateQualifier ?startDateQualifierPrecision ?startDateQualifierCalendar ?endDateQualifier');
 });
 it('returns the main period with an explicit unknown child count after an optional failure',async()=>{
   get.mockImplementation(async(_url,config)=>String(config?.params?.query).includes('?child ?childLabel')?{data:{}}:response([temporal]));

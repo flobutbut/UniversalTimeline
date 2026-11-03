@@ -2,6 +2,7 @@ import { mediaWiki, normalizeWikidataId, sparql, type WikidataEntity, type Wikid
 import { WIKIDATA_MEDIAWIKI_API_URL } from '@/lib/wikidataMediaWikiConstants';
 import type { WikidataTimelineDraft, WikidataTimelineItem } from '@/types/wikidataGeneration';
 import { compareYearsOldestFirst, parseTemporal, periodDateErrors } from '@temporal';
+import { wikibaseTimeToTemporal, type WikibaseTime } from '@/lib/wikidataTime';
 import { wouldCreateWikidataCycle } from '@/lib/wikidataHierarchy';
 
 const MAX_RELATED_ITEMS = 80;
@@ -10,17 +11,7 @@ const MAX_RELATED_ITEMS = 80;
 function timeValue(statement: WikidataStatement): string {
   const value = statement.mainsnak?.datavalue?.value;
   if (!value || typeof value !== 'object' || !('time' in value) || typeof value.time !== 'string') return '';
-  // The app uses Gregorian dates. Other calendars and coarse dates need review.
-  if ('calendarmodel' in value && value.calendarmodel !== 'http://www.wikidata.org/entity/Q1985727') return '';
-  if (('before' in value && value.before !== 0) || ('after' in value && value.after !== 0)) return '';
-  const match = /^([+-])(\d+)-(\d{2})-(\d{2})T/.exec(value.time);
-  if (!match) return '';
-  const [, sign, digits, month, day] = match;
-  const precision = 'precision' in value && typeof value.precision === 'number' ? value.precision : month === '00' ? 9 : day === '00' ? 10 : 11;
-  if (precision < 9) return '';
-  const year = `${sign === '-' ? '-' : ''}${digits.padStart(4, '0')}`;
-  const date = precision === 9 ? year : precision === 10 ? `${year}-${month}` : `${year}-${month}-${day}`;
-  return parseTemporal(date).kind === 'unknown' ? '' : date;
+  return wikibaseTimeToTemporal(value as WikibaseTime, 'historical');
 }
 
 function claimDate(entity: WikidataEntity, property: string): { date: string; ambiguous: boolean } {

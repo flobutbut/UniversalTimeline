@@ -10,7 +10,8 @@
       { 'base-button--sm': size === 'sm' },
       { 'base-button--xs': size === 'xs' },
       { 'base-button--disabled': disabled },
-      { 'base-button--toggled': pressed }
+      { 'base-button--toggled': pressed },
+      { 'base-button--wrap': wrap }
     ]"
     @click="$emit('click', $event)"
   >
@@ -35,6 +36,8 @@ interface Props {
   iconOnly?: boolean;
   disabled?: boolean;
   pressed?: boolean;
+  /** Permet aux libellés métier longs de se replier dans les petits conteneurs. */
+  wrap?: boolean;
   /** Destination interne : le bouton devient un lien (désactivé, il redevient un bouton inerte). */
   to?: RouteLocationRaw;
 }
@@ -46,6 +49,7 @@ const props = withDefaults(defineProps<Props>(), {
   iconOnly: false,
   disabled: false,
   pressed: undefined,
+  wrap: false,
   to: undefined,
 });
 const isLink = computed(() => props.to !== undefined && !props.disabled);
@@ -65,6 +69,9 @@ defineEmits<{
   text-decoration: none; cursor: pointer; transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 .base-button__text { padding: 1px var(--spacing-sm); line-height: var(--line-height-small); white-space: nowrap; }
+.base-button--wrap { min-width:0; max-width:100%; height:auto; }
+.base-button--wrap .base-button__text { white-space:normal; overflow-wrap:anywhere; }
+.base-button--sm.base-button--wrap { height:auto; }
 .base-button__leading { display: inline-flex; align-items: center; justify-content: center; line-height: 0; }
 .base-button--primary { background: var(--color-action-primary-default); border-color: var(--color-action-primary-default); color: var(--color-text-on-accent); }
 .base-button--primary:hover:not(:disabled) { background: var(--color-action-primary-hover); border-color: var(--color-action-primary-hover); }

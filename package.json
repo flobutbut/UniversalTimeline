@@ -28,6 +28,7 @@
     "@iconify/vue": "^5.0.0",
     "@supabase/supabase-js": "2.118.0",
     "axios": "1.21.0",
+    "d3": "7.9.0",
     "pinia": "^3.0.4",
     "posthog-js": "^1.444.3",
     "uuid": "11.1.1",
@@ -35,6 +36,7 @@
     "vue-router": "4"
   },
   "devDependencies": {
+    "@types/d3": "7.4.3",
     "@types/node": "^22.13.13",
     "@vitejs/plugin-vue": "5.2.4",
     "@vitest/coverage-v8": "4.1.12",

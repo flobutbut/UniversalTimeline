@@ -830,7 +830,9 @@
           "kind": "f"
         }
       ],
-      "indexes": [],
+      "indexes": [
+        "CREATE INDEX story_events_entity_story_idx ON public.story_events USING btree (event_id, story_id)"
+      ],
       "triggers": [],
       "rls": true
     },
@@ -940,6 +942,7 @@
         }
       ],
       "indexes": [
+        "CREATE INDEX story_periods_entity_story_idx ON public.story_periods USING btree (period_id, story_id)",
         "CREATE INDEX story_periods_parent_period_id_idx ON public.story_periods USING btree (parent_period_id, story_id)"
       ],
       "triggers": [

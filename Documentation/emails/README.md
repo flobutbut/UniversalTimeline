@@ -11,7 +11,20 @@
 | Reset password | [reinitialisation-mot-de-passe.html](reinitialisation-mot-de-passe.html) | Réinitialisation de votre mot de passe — Universal Timeline |
 | Reauthentication | [reauthentification.html](reauthentification.html) | Votre code de vérification — Universal Timeline |
 
+Notifications de sécurité (section **Security** des modèles), à activer avec « Enable notification » :
+
+| Modèle Supabase | Fichier | Objet |
+| --- | --- | --- |
+| Password changed | [mot-de-passe-modifie.html](mot-de-passe-modifie.html) | Votre mot de passe a été modifié — Universal Timeline |
+| Email address changed | [adresse-modifiee.html](adresse-modifiee.html) | Votre adresse e-mail a été modifiée — Universal Timeline |
+
+Les autres notifications (téléphone, méthode de connexion, MFA) restent désactivées : l’application n’utilise ni téléphone, ni fournisseur externe, ni MFA.
+
 Le modèle « Reset password » n’utilise pas `{{ .ConfirmationURL }}` mais `{{ .SiteURL }}/reset-password?token_hash={{ .TokenHash }}&type=recovery` : la page `/reset-password` vérifie ce jeton avec `verifyOtp`, ce qui fonctionne même si le lien est ouvert dans un autre navigateur que celui de la demande (le flux PKCE de `{{ .ConfirmationURL }}` l’exige). Le lien pointe toujours vers la Site URL, donc vers la production, même pour une demande faite en local.
+
+## État du Dashboard (vérifié le 3 novembre 2026)
+
+SMTP Hostinger actif (`smtp.hostinger.com:465`, expéditeur `florian@universaltimeline.net`, « Universal Timeline »), six modèles français collés, Site URL `https://universaltimeline.net`, Redirect URLs `https://universaltimeline.net`, `https://universaltimeline.net/**` et `http://127.0.0.1:5173/login`, confirmation d’e-mail activée, limite d’envoi 30 e-mails par heure.
 
 ## Points à vérifier
 

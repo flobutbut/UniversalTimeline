@@ -17,7 +17,7 @@ it('uses related spaceflights as event candidates when a descriptive query retri
   };
   fetchMock.mockImplementation(async (url: string) => ({ ok: true, json: async () => ({ entities: Object.fromEntries(new URL(url).searchParams.get('ids')!.split('|').map(id => [id, entities[id]])) }) }));
   const hits = await api.searchWikidataByMeaning('premier homme à marcher sur la lune', { type: 'event' });
-  expect(hits).toEqual([{ id: 'Q43653', label: 'Apollo 11', description: 'Mission lunaire', searchOrigin: 'semantic', startDate: '+1969-07-21T00:00:00Z', endDate: undefined }]);
+  expect(hits).toEqual([{ id: 'Q43653', label: 'Apollo 11', description: 'Mission lunaire', searchOrigin: 'semantic', startDate: '1969-07-21', endDate: undefined }]);
   expect(fetchMock).toHaveBeenCalledTimes(2);
   expect(apiClient.get).toHaveBeenCalledWith(expect.stringContaining('/search/semantic?'), expect.objectContaining({ timeout: 20000 }));
 });
