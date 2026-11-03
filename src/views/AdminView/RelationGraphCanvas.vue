@@ -14,6 +14,7 @@
         <g ref="scene"><g ref="linkLayer" /><g ref="nodeLayer" /></g>
       </svg>
       <div v-if="!graph.nodes.length" class="relation-canvas__empty"><slot name="empty" /></div>
+      <div v-if="$slots.search" class="relation-canvas__search"><slot name="search" /></div>
     </div>
     <div class="relation-canvas__legend">
       <span><i class="relation-canvas__mark--story" />Frises</span><span><i class="relation-canvas__mark--period" />Périodes</span><span><i class="relation-canvas__mark--event" />Événements</span>
@@ -123,6 +124,7 @@ onBeforeUnmount(()=>{simulation?.stop();resize?.disconnect();if(svg.value)select
 .relation-canvas { min-width:0; background:var(--color-surface-default); border:1px solid var(--color-border-default); border-radius:var(--radius-lg); overflow:hidden; }
 .relation-canvas__tools { display:flex; flex-wrap:wrap; align-items:center; gap:var(--spacing-sm); padding:var(--spacing-sm); border-bottom:1px solid var(--color-border-default); }
 .relation-canvas__plot { position:relative; height:clamp(360px,calc(100dvh - 370px),820px); min-width:0; }
+.relation-canvas__search {position:absolute;top:var(--spacing-md);left:var(--spacing-md);width:248px;max-width:calc(100% - var(--spacing-md) * 2);z-index:var(--z-index-local-bump);}
 .relation-canvas__expand {margin-inline-start:auto;}
 .relation-canvas__empty {position:absolute;inset:0;display:grid;place-items:center;padding:var(--spacing-md);box-sizing:border-box;}
 .relation-canvas--expanded {display:flex;flex-direction:column;flex:1;min-height:160px;}

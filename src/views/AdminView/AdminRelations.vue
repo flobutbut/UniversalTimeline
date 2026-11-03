@@ -10,8 +10,7 @@
     <FeedbackState v-if="overviewLoading" kind="loading" layout="inline" />
     <FeedbackState v-else-if="overviewError" kind="error" layout="inline" :message="overviewError" retryable @retry="refresh" />
     <template v-else-if="overview">
-      <div class="admin-relations__toolbar">
-        <div class="admin-relations__search"><SearchInput v-model="query" placeholder="Rechercher un objet" /></div>
+      <div v-if="selectedId" class="admin-relations__toolbar">
         <Button v-if="selectedRecordLocation" variant="tertiary" size="sm" wrap :to="selectedRecordLocation">Ouvrir la fiche dans Frises</Button>
         <Button v-if="selectedId" variant="ghost" size="sm" @click="deselect">Désélectionner</Button>
       </div>
@@ -23,6 +22,7 @@
       </div>
       <p v-if="filtersActive && !expanded" class="admin-relations__muted">{{ filteredNetwork.stories.length }} frises retenues. Les partages sont comptés entre ces frises uniquement.<template v-if="leafStoriesOnly"> Seuls les liens parent–enfant définissent les enfants ; les passerelles sont conservées.</template><template v-if="sharedOnly && !filteredNetwork.periods.length && !filteredNetwork.events.length"> Aucun contenu partagé entre les frises retenues.</template></p>
       <RelationGraphCanvas v-model:all-labels="allLabels" :graph="graph" :selected="selectedId" :expanded="expanded" @toggle-expand="setExpanded(!expanded)" @select-node="selectNode" @select-edge="selectEdge" @deselect="deselect">
+        <template #search><SearchInput v-model="query" placeholder="Rechercher un objet" /></template>
         <template #empty><FeedbackState kind="empty" layout="inline" :message="filtersActive?'Aucun objet ne correspond aux filtres et types activés.':'Activez un type d’objet pour l’afficher dans le réseau.'" /></template>
       </RelationGraphCanvas>
       <section v-if="query.trim()" class="admin-relations__results" aria-label="Résultats de recherche">
@@ -145,7 +145,6 @@ onMounted(load);
 .admin-relations__header {justify-content:space-between;}
 .admin-relations__muted {color:var(--color-text-secondary);font:var(--type-compact);}
 .admin-relations__toolbar,.admin-relations__filters {gap:var(--spacing-sm);flex-shrink:0;}
-.admin-relations__search {flex:0 1 170px;min-width:0;max-width:100%;}
 .admin-relations__detail,.admin-relations__results {padding:var(--spacing-lg);border:1px solid var(--color-border-default);border-radius:var(--radius-md);background:var(--color-surface-raised);min-width:0;overflow-wrap:anywhere;}
 .admin-relations__links {display:flex;flex-direction:column;gap:var(--spacing-sm);padding:0;list-style:none;}
 .admin-relations__links li {display:flex;flex-wrap:wrap;align-items:center;gap:var(--spacing-sm);}
