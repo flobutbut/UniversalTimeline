@@ -1,4 +1,4 @@
-# Conformité RGPD — état au 2 novembre 2026
+# Conformité RGPD — état au 3 novembre 2026
 
 Ce document décrit ce qui est en place dans l’application et ce qui reste à fournir par l’éditeur avant une ouverture publique. Les textes affichés aux visiteurs sont dans `src/lib/legalDocuments.ts` (pages `/legal/...`) ; chaque passage « [À compléter : …] » y est signalé visuellement et ne doit pas être publié en l’état.
 
@@ -27,20 +27,29 @@ Ce document décrit ce qui est en place dans l’application et ce qui reste à 
 - **Changer d’outil ou de finalité :** mettre à jour la politique cookies et la politique de confidentialité (`src/lib/legalDocuments.ts`), puis incrémenter `CONSENT_VERSION` pour redemander le choix (passé à 2 à l’installation de PostHog).
 - Un outil exempté de consentement selon la CNIL (mesure strictement anonyme) devrait être documenté ici avant de se passer du bandeau.
 
-## Registre des traitements (à compléter)
+## Registre des traitements
 
 | Traitement | Finalité | Base légale | Données | Durée | Sous-traitants |
 | --- | --- | --- | --- | --- | --- |
-| Comptes et profils | Gérer l’accès et signer les frises | Contrat | E-mail, mot de passe chiffré, nom d’utilisateur, avatar, acceptation des conditions | Jusqu’à suppression du compte ; [À compléter : comptes inactifs] | Supabase (UE), Hostinger (envoi des e-mails, société chypriote) |
-| Journal d’administration | Sécurité et modération (traçabilité des actions sur les comptes) | Intérêt légitime | Identifiants des comptes concernés, nom d’utilisateur au moment de l’action, action, date | [À compléter : durée de conservation du journal] | Supabase (UE) |
-| Contact | Répondre aux messages | Intérêt légitime | Adresse e-mail et contenu du message | [À compléter : durée de conservation des échanges] | Hostinger (messagerie, société chypriote) |
+| Comptes et profils | Gérer l’accès et signer les frises | Contrat | E-mail, mot de passe chiffré, nom d’utilisateur, avatar, acceptation des conditions | Jusqu’à suppression du compte ; compte sans connexion pendant 2 ans supprimé avec ses frises, après un e-mail d’avertissement un mois avant (recommandation CNIL sur les comptes inactifs) | Supabase (UE), Hostinger (envoi des e-mails, société chypriote) |
+| Journal d’administration | Sécurité et modération (traçabilité des actions sur les comptes) | Intérêt légitime | Identifiants des comptes concernés, nom d’utilisateur au moment de l’action, action, date | 1 an après l’action (recommandation CNIL sur la journalisation : 6 mois à 1 an) | Supabase (UE) |
+| Contact | Répondre aux messages | Intérêt légitime | Adresse e-mail et contenu du message | 1 an après le dernier échange | Hostinger (messagerie, société chypriote) |
 | Frises | Créer, publier, partager | Contrat | Contenus, visibilité, auteur | Jusqu’à suppression de la frise ou du compte | Supabase (UE), Vercel |
-| Journaux techniques | Sécurité | Intérêt légitime | IP, horodatage, requête | [À compléter] | Vercel, Supabase |
+| Journaux techniques | Sécurité | Intérêt légitime | IP, horodatage, requête | 7 jours au plus, fixés par les hébergeurs (Supabase Pro : 7 jours ; Vercel : 1 heure en Hobby, 1 jour en Pro), sans export | Vercel, Supabase |
 | Mesure d’audience | Statistiques d’usage pour améliorer le site | Consentement | Pages vues, clics, provenance, navigateur et appareil, identifiant pseudonyme (IP anonymisée) | Cookie 12 mois au plus ; données 1 an | PostHog Inc. (Cloud EU) |
+
+## Décisions de l’éditeur (3 novembre 2026)
+
+- **Éditeur, directeur de publication et responsable du traitement :** Florian Butour, particulier, projet non commercial (pas de SIREN) ; adresse postale non publiée au titre de l’article 6, III, 2 de la LCEN.
+- **Hébergement :** Vercel héberge le site et l’API, c’est l’hébergeur à nommer au titre de la LCEN ; Hostinger fournit le nom de domaine et la messagerie, Supabase la base et l’authentification. Les trois figurent dans les mentions légales.
+- **Âge minimum :** 15 ans pour créer seul un compte, accord parental en dessous (art. 45 loi Informatique et Libertés, décret du 29 mai 2019), déclaré par la case d’inscription, sans pièce d’identité (la CNIL parle d’obligation de moyens). L’interdiction des réseaux sociaux aux moins de 15 ans votée en 2026 a été censurée (décision n° 2026-911 DC du 14 août 2026) : à surveiller si une nouvelle loi est adoptée.
+- **Licence :** frises publiques sous CC BY 4.0 (citer l’auteur et Universal Timeline) ; code, conception et textes éditoriaux : droits réservés à l’éditeur ; catalogue Wikidata en CC0.
+- **Modération :** examen des signalements dans les meilleurs délais, retrait d’une frise manifestement illicite, suspension ou suppression du compte, auteur prévenu par e-mail.
+- **Transferts hors UE (Vercel) :** certification Data Privacy Framework UE–États-Unis, et clauses contractuelles types dans l’accord de traitement des données de Vercel (vercel.com/legal/dpa).
+- **Conditions :** ces textes sont rattachés à la version `2026-11-03` de `CURRENT_TERMS_VERSION`, sans nouvelle version : le 3 novembre 2026, seuls les comptes de l’éditeur l’avaient acceptée. Toute modification ultérieure des conditions impose une nouvelle date.
 
 ## Reste à faire hors code
 
-- Éditeur, directeur de publication et responsable du traitement : Florian Butour, particulier, projet non commercial (pas de SIREN) ; adresse postale non publiée au titre de l’article 6, III, 2 de la LCEN. Âge minimum : 15 ans pour créer seul un compte, accord parental en dessous (art. 45 loi Informatique et Libertés), déclaré par la case d’inscription. L’interdiction des réseaux sociaux aux moins de 15 ans votée en juillet 2026 a été censurée (décision n° 2026-911 DC) : à surveiller si une nouvelle loi est adoptée.
-- Accords de sous-traitance (DPA) avec Supabase, Vercel et PostHog ; garanties de transfert hors UE pour Vercel.
-- Durées de conservation (comptes inactifs, journaux), âge minimum, licence des contenus publiés, modération.
-- Configuration Supabase Auth : SMTP Hostinger puis modèles d’e-mails en français à coller depuis `Documentation/emails/` (ils mentionnent la politique de confidentialité et le contact).
+- Accord de traitement des données (DPA) avec PostHog : formulaire sur posthog.com/dpa (signature PandaDoc), puis retirer le marqueur « [À compléter] » de la politique de confidentialité. Vérifier l’acceptation des DPA de Supabase et Vercel dans leurs Dashboards.
+- Suppression des comptes inactifs : à mettre en œuvre (e-mail d’avertissement un mois avant, puis suppression) avant les premiers deux ans d’inactivité, soit au plus tard en octobre 2028. Purger aussi le journal d’administration au-delà d’un an et les messages de contact au-delà d’un an après le dernier échange.
+- Configuration Supabase Auth (vérifiée le 3 novembre 2026) : SMTP Hostinger actif, six modèles français collés depuis `Documentation/emails/`, Site URL et Redirect URLs sur `https://universaltimeline.net`. Notifications de sécurité (mot de passe et adresse modifiés) : voir `Documentation/emails/README.md`.

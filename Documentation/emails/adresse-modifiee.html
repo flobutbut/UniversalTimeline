@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Votre adresse e-mail a été modifiée</title></head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#18181b;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid #e4e4e7;border-radius:8px;">
+        <tr><td style="padding:24px 32px 0;font-size:15px;font-weight:600;letter-spacing:0.02em;">Universal Timeline</td></tr>
+        <tr><td style="padding:16px 32px 8px;">
+          <h1 style="margin:0 0 16px;font-size:20px;line-height:1.3;">Votre adresse e-mail a été modifiée</h1>
+          <p style="margin:0 0 12px;font-size:15px;line-height:1.6;">L’adresse de votre compte Universal Timeline a été remplacée : <strong>{{ .OldEmail }}</strong> devient <strong>{{ .Email }}</strong>.</p>
+          <p style="margin:0 0 12px;font-size:15px;line-height:1.6;">Si vous êtes à l’origine de ce changement, vous n’avez rien à faire.</p>
+        </td></tr>
+        <tr><td style="padding:8px 32px 24px;font-size:14px;line-height:1.6;color:#3f3f46;">
+          <p style="margin:0 0 8px;">Vous n’avez pas demandé ce changement ? Écrivez-nous sans attendre à <a href="mailto:florian@universaltimeline.net" style="color:#1d4ed8;">florian@universaltimeline.net</a> pour sécuriser votre compte.</p>
+        </td></tr>
+        <tr><td style="padding:16px 32px 24px;border-top:1px solid #e4e4e7;font-size:12px;line-height:1.5;color:#71717a;">
+          Cet e-mail vous est envoyé par Universal Timeline (universaltimeline.net) à la suite d’une action sur votre compte.
+          Vos données sont traitées selon notre <a href="{{ .SiteURL }}/legal/confidentialite" style="color:#71717a;">politique de confidentialité</a>.
+          Une question : <a href="mailto:florian@universaltimeline.net" style="color:#71717a;">florian@universaltimeline.net</a>.
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>

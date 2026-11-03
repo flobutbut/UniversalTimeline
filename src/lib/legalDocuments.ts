@@ -32,7 +32,8 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
       ] },
       { title: 'Propriété intellectuelle', paragraphs: [
         'Les données du catalogue issues de Wikidata sont publiées sous licence Creative Commons CC0.',
-        TODO('licence du code, des textes éditoriaux et des frises publiées par les utilisateurs'),
+        'Le code, la conception et les textes éditoriaux du site appartiennent à l’éditeur : leur reproduction demande son accord.',
+        'Les frises publiques sont diffusées par leurs auteurs sous licence Creative Commons Attribution 4.0 (CC BY 4.0) : chacun peut les réutiliser, y compris en les modifiant, à condition de citer l’auteur (son nom d’utilisateur) et Universal Timeline.',
       ] },
     ],
   },
@@ -59,8 +60,10 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Mesurer l’audience avec des cookies (PostHog) pour améliorer le site : votre consentement (article 6.1.a), retirable à tout moment.',
       ] },
       { title: 'Durées de conservation', paragraphs: [], items: [
-        'Compte, profil et frises : jusqu’à la suppression de votre compte. ' + TODO('durée de conservation des comptes inactifs'),
-        'Journaux techniques : ' + TODO('durée fixée avec les hébergeurs'),
+        'Compte, profil et frises : jusqu’à la suppression de votre compte. Un compte sans aucune connexion pendant deux ans est supprimé avec ses frises ; un e-mail vous prévient un mois avant.',
+        'Journaux techniques : sept jours au plus, durée fixée par les hébergeurs (Vercel et Supabase).',
+        'Journal d’administration : un an après l’action.',
+        'Messages adressés au contact : un an après le dernier échange.',
         'Choix relatif aux cookies : six mois, puis la question vous est reposée.',
         'Mesure d’audience : cookie conservé douze mois au plus et supprimé dès le retrait de votre accord ; statistiques conservées un an.',
       ] },
@@ -68,7 +71,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Vos données ne sont ni vendues ni cédées. Elles sont traitées pour notre compte par :',
       ], items: [
         'Supabase Inc. : base de données et authentification, hébergées dans l’Union européenne.',
-        'Vercel Inc. : hébergement de l’application et de l’API (États-Unis). ' + TODO('garanties de transfert hors UE : Data Privacy Framework ou clauses contractuelles types'),
+        'Vercel Inc. : hébergement de l’application et de l’API (États-Unis). Vercel est certifiée au cadre de protection des données UE–États-Unis (Data Privacy Framework), et son accord de traitement des données prévoit aussi les clauses contractuelles types de la Commission européenne.',
         'Hostinger International Ltd. : messagerie (envoi des e-mails du compte, réception des messages adressés au contact), société établie dans l’Union européenne (Chypre).',
         'PostHog Inc. : mesure d’audience, avec votre accord, hébergée dans l’Union européenne (PostHog Cloud EU). ' + TODO('accord de sous-traitance (DPA) signé avec PostHog'),
       ] },
@@ -127,7 +130,8 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Une frise publique est visible par tous. Vous restez responsable des textes que vous publiez et vous engagez à respecter la loi et les droits des tiers.',
         'Les périodes et événements du catalogue sont partagés entre les utilisateurs et sont conservés après la suppression d’un compte.',
         `Pour signaler un contenu qui vous semble illicite ou porter atteinte à vos droits, écrivez à ${CONTACT_EMAIL} (objet « Signalement ») ou passez par la page Contact, en indiquant l’adresse de la frise.`,
-        TODO('licence accordée sur les contenus publiés, règles et délais de modération'),
+        'En publiant une frise, vous la diffusez sous licence CC BY 4.0 (voir les mentions légales) et vous garantissez disposer des droits sur ses textes. Une frise privée n’est ni affichée publiquement ni diffusée sous cette licence.',
+        'Chaque signalement est examiné dans les meilleurs délais. L’éditeur peut retirer une frise manifestement illicite ou contraire à ces conditions, et suspendre ou supprimer le compte en cause ; son auteur en est informé par e-mail.',
       ] },
       { title: 'Responsabilité et disponibilité', paragraphs: [
         'Universal Timeline est fourni tel quel, sans garantie de disponibilité continue, d’exactitude des contenus ni de durée. Le service peut être interrompu, modifié ou arrêté à tout moment ; exportez régulièrement vos frises depuis votre profil.',
