@@ -1,22 +1,23 @@
 <template>
-  <div class="relation-canvas">
+  <div class="relation-canvas" :class="{'relation-canvas--expanded':expanded}">
     <div class="relation-canvas__tools">
       <Button variant="tertiary" size="sm" aria-label="Zoom avant" icon-only @click="scale(1.3)"><template #icon><Icon icon="mdi:plus" width="18" height="18" aria-hidden="true" /></template></Button>
       <Button variant="tertiary" size="sm" aria-label="Zoom arrière" icon-only @click="scale(1/1.3)"><template #icon><Icon icon="mdi:minus" width="18" height="18" aria-hidden="true" /></template></Button>
       <Button variant="tertiary" size="sm" @click="fit">Tout cadrer</Button>
       <Button variant="tertiary" size="sm" :pressed="paused" @click="toggleAnimation">{{ paused?'Reprendre':'Pause' }}</Button>
       <Button variant="ghost" size="sm" @click="restart">Relancer les forces</Button>
-      <Switch v-model="allLabels" variant="sm" label="Tous les libellés" />
+      <Button class="relation-canvas__expand" data-relation-expand variant="tertiary" size="sm" icon-only :pressed="!!expanded" :aria-label="expanded?'Réduire le graphe':'Agrandir le graphe'" :title="expanded?'Réduire le graphe (Échap)':'Agrandir le graphe'" @click="$emit('toggleExpand')"><template #icon><Icon :icon="expanded?'mdi:arrow-collapse':'mdi:arrow-expand'" width="18" height="18" aria-hidden="true" /></template></Button>
     </div>
     <div ref="host" class="relation-canvas__plot">
-      <svg ref="svg" tabindex="0" role="img" :aria-label="`Réseau D3 : ${graph.nodes.length} objets, ${graph.edges.length} liens. Déplacez les cercles ; clic dans le vide ou Échap pour désélectionner.`" @keydown.esc.prevent="$emit('deselect')">
+      <svg v-show="graph.nodes.length" ref="svg" tabindex="0" role="img" :aria-label="`Réseau D3 : ${graph.nodes.length} objets, ${graph.edges.length} liens. Déplacez les cercles ; clic dans le vide pour désélectionner. ${expanded?'Échap pour réduire le graphe.':'Échap pour désélectionner.'}`" @keydown.esc.prevent="handleEscape">
         <defs><marker :id="markerId" viewBox="0 -5 10 10" refX="13" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,-5L10,0L0,5" fill="var(--color-border-strong)" /></marker></defs>
         <g ref="scene"><g ref="linkLayer" /><g ref="nodeLayer" /></g>
       </svg>
+      <div v-if="!graph.nodes.length" class="relation-canvas__empty"><slot name="empty" /></div>
     </div>
     <div class="relation-canvas__legend">
       <span><i class="relation-canvas__mark--story" />Frises</span><span><i class="relation-canvas__mark--period" />Périodes</span><span><i class="relation-canvas__mark--event" />Événements</span>
-      <span>Tous les objets sont présents · survol pour le titre · glisser pour déplacer</span>
+      <span>Survol pour le titre · glisser pour déplacer · clic dans le vide pour désélectionner</span>
     </div>
   </div>
 </template>
@@ -27,15 +28,14 @@ import { select,forceSimulation,forceLink,forceManyBody,forceCenter,forceCollide
   type Simulation,type SimulationNodeDatum,type SimulationLinkDatum,type Selection,type ZoomBehavior } from 'd3';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
-import Switch from '@/components/base/Switch.vue';
 import type { RelationGraph,GraphNode,GraphEdge } from './relationGraph';
 
 interface NetworkNode extends GraphNode,SimulationNodeDatum {}
 interface NetworkLink extends Omit<GraphEdge,'source'|'target'>,SimulationLinkDatum<NetworkNode> {}
-const props=defineProps<{graph:RelationGraph;selected:string|null}>();
-const emit=defineEmits<{selectNode:[id:string];selectEdge:[id:string];deselect:[]}>();
+const props=defineProps<{graph:RelationGraph;selected:string|null;expanded?:boolean}>();
+const emit=defineEmits<{selectNode:[id:string];selectEdge:[id:string];deselect:[];toggleExpand:[]}>();
 const host=ref<HTMLElement>();const svg=ref<SVGSVGElement>();const scene=ref<SVGGElement>();const linkLayer=ref<SVGGElement>();const nodeLayer=ref<SVGGElement>();
-const markerId=`network-arrow-${useId()}`;const allLabels=ref(false);const paused=ref(false);
+const markerId=`network-arrow-${useId()}`;const allLabels=defineModel<boolean>('allLabels',{default:false});const paused=ref(false);
 let simulation:Simulation<NetworkNode,NetworkLink>|undefined;let resize:ResizeObserver|undefined;
 let nodes:NetworkNode[]=[];let links:NetworkLink[]=[];let width=800;let height=560;let zoomLevel=1;let interacted=false;
 let zoomer:ZoomBehavior<SVGSVGElement,unknown>;
@@ -70,6 +70,7 @@ function fit(){
 function scale(factor:number){if(svg.value)select(svg.value).call(zoomer.scaleBy,factor);interacted=true;}
 function toggleAnimation(){paused.value=!paused.value;if(paused.value)simulation?.stop();else simulation?.alpha(.35).restart();}
 function restart(){paused.value=false;simulation?.alpha(.9).alphaTarget(0).restart();}
+function handleEscape(){if(props.expanded)emit('toggleExpand');else emit('deselect');}
 
 function draw(){
   if(!nodeLayer.value||!linkLayer.value)return;
@@ -121,7 +122,12 @@ onBeforeUnmount(()=>{simulation?.stop();resize?.disconnect();if(svg.value)select
 <style scoped>
 .relation-canvas { min-width:0; background:var(--color-surface-default); border:1px solid var(--color-border-default); border-radius:var(--radius-lg); overflow:hidden; }
 .relation-canvas__tools { display:flex; flex-wrap:wrap; align-items:center; gap:var(--spacing-sm); padding:var(--spacing-sm); border-bottom:1px solid var(--color-border-default); }
-.relation-canvas__plot { height:clamp(360px,calc(100dvh - 370px),820px); min-width:0; }
+.relation-canvas__plot { position:relative; height:clamp(360px,calc(100dvh - 370px),820px); min-width:0; }
+.relation-canvas__expand {margin-inline-start:auto;}
+.relation-canvas__empty {position:absolute;inset:0;display:grid;place-items:center;padding:var(--spacing-md);box-sizing:border-box;}
+.relation-canvas--expanded {display:flex;flex-direction:column;flex:1;min-height:160px;}
+.relation-canvas--expanded .relation-canvas__plot {flex:1;min-height:0;height:auto;}
+.relation-canvas--expanded .relation-canvas__tools,.relation-canvas--expanded .relation-canvas__legend {flex-shrink:0;}
 .relation-canvas__plot svg { width:100%; height:100%; display:block; touch-action:none; }
 .relation-canvas__plot svg:focus-visible { outline:2px solid var(--color-border-focus); outline-offset:-2px; }
 .relation-canvas__legend { display:flex; flex-wrap:wrap; gap:var(--spacing-md); padding:var(--spacing-md); border-top:1px solid var(--color-border-default); color:var(--color-text-secondary); font:var(--type-meta); }

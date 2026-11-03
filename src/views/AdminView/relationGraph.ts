@@ -11,17 +11,41 @@ export interface RelationGraph {nodes:GraphNode[];edges:GraphEdge[]}
 export const graphKey=(kind:GraphKind,id:string)=>JSON.stringify([kind,id]);
 export const importanceLabel=(importance:string)=>({major:'Majeur',normal:'Normal',minor:'Détail'}[importance]??importance);
 
+export interface RelationGraphFilters {leafStoriesOnly?:boolean;sharedOnly?:boolean}
+
+/** Only historical parent/child links define children; access points and presentations are navigation. */
+export function filterRelationNetwork(network:RelationsNetwork,filters:RelationGraphFilters={}):RelationsNetwork {
+  if(!filters.leafStoriesOnly&&!filters.sharedOnly)return network;
+  const parents=new Set(network.links.filter(link=>link.type==='legacy').map(link=>link.source));
+  const stories=network.stories.filter(story=>!filters.leafStoriesOnly||!parents.has(story.id));
+  const storyIds=new Set(stories.map(story=>story.id));
+  const memberships=network.memberships.filter(membership=>storyIds.has(membership.storyId));
+  const uses=new Map<string,Set<string>>();
+  for(const membership of memberships){
+    const id=graphKey(membership.kind,membership.entityId);const sources=uses.get(id)??new Set<string>();
+    sources.add(membership.storyId);uses.set(id,sources);
+  }
+  const keep=(kind:'period'|'event',id:string)=>filters.sharedOnly?(uses.get(graphKey(kind,id))?.size??0)>=2:uses.has(graphKey(kind,id));
+  return {...network,stories,
+    periods:network.periods.filter(period=>keep('period',period.id)),
+    events:network.events.filter(event=>keep('event',event.id)),
+    memberships:memberships.filter(membership=>keep(membership.kind,membership.entityId)),
+    links:network.links.filter(link=>storyIds.has(link.source)&&storyIds.has(link.target)),
+  };
+}
+
 /** Complete canonical network: selection is deliberately absent from this projection. */
 export function buildRelationGraph(network:RelationsNetwork,visibleKinds:GraphKind[]=['story','period','event']):RelationGraph {
-  const uses=new Map<string,number>();
+  const uses=new Map<string,Set<string>>();
   for (const membership of network.memberships) {
-    const key=graphKey(membership.kind,membership.entityId);uses.set(key,(uses.get(key)??0)+1);
+    const key=graphKey(membership.kind,membership.entityId);const sources=uses.get(key)??new Set<string>();
+    sources.add(membership.storyId);uses.set(key,sources);
   }
   const nodes:GraphNode[]=[
     ...network.stories.map(story=>({id:graphKey('story',story.id),kind:'story' as const,entityId:story.id,title:story.title,
       subtitle:`${story.isPublic?'Publique':'Privée'} · ${story.periods} périodes · ${story.events} événements`})),
     ...(['period','event'] as const).flatMap(kind=>(kind==='period'?network.periods:network.events).map(entity=>({
-      id:graphKey(kind,entity.id),kind,entityId:entity.id,title:entity.title,subtitle:`Dans ${uses.get(graphKey(kind,entity.id))??0} frise(s)`,
+      id:graphKey(kind,entity.id),kind,entityId:entity.id,title:entity.title,subtitle:`Dans ${uses.get(graphKey(kind,entity.id))?.size??0} frise(s)`,
     }))),
   ].filter(node=>visibleKinds.includes(node.kind));
   const ids=new Set(nodes.map(node=>node.id));const edges:GraphEdge[]=[];const groups=new Map<string,GraphEdge>();

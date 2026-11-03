@@ -10,10 +10,27 @@ Implémentation du 3 novembre 2026, corrigée à la demande de l’utilisateur :
 - D3 anime la simulation de forces, qui se stabilise naturellement. Glisser un cercle fait réagir le réseau ; zoom et déplacement du fond permettent de l’explorer. Les boutons Pause/Reprendre, Relancer les forces et Tout cadrer restent disponibles.
 - Les libellés des frises sont visibles ; ceux des autres objets apparaissent à la sélection ou avec le zoom. « Tous les libellés » les affiche tous. Le survol donne le titre complet.
 - Sélectionner un objet souligne ses voisins et charge ses détails sans retirer ni reconstruire les autres nœuds. Cliquer dans le vide ou appuyer sur Échap désélectionne sans modifier le réseau.
-- Les trois types d’objets sont activés par défaut. Seuls les interrupteurs explicites permettent de masquer un type. La recherche et la liste des objets permettent la sélection au clavier sans filtrer implicitement le graphe.
+- Les trois types d’objets sont activés par défaut. Les interrupteurs Frises, Périodes et Événements permettent de masquer un type. Les compteurs sont placés directement sous le titre. La recherche compacte occupe une première ligne, puis tous les interrupteurs, y compris « Tous les libellés », une seconde ligne qui se replie sur petit écran. La recherche propose des résultats sélectionnables au clavier sans filtrer implicitement le graphe ; la fonction de liste complète des objets a été retirée.
 - La préférence de réduction des mouvements met la simulation en pause initialement. Les déplacements manuels restent possibles.
 
 L’ancienne exploration par dépliage de frise et le moteur Cytoscape ont été retirés de l’interface. Le détail d’une frise conserve une liste de ses périodes et événements, mais cette liste ne commande plus la présence des objets dans le réseau.
+
+## Filtres d’exploration
+
+Deux interrupteurs du design system se combinent, désactivés par défaut pour garder le réseau complet à l’ouverture :
+
+- **Frises sans enfants** conserve les frises finales et les fiches qui leur appartiennent. Les enfants sont définis uniquement par `stories.parent_story_id`, transporté par les liens `legacy`. Les points d’entrée et vues détaillées sont des passerelles : ils ne rendent pas une frise « parent ».
+- **Contenus partagés seulement** conserve les périodes et événements appartenant à au moins deux frises retenues. Les usages sont comptés par frise distincte après le premier filtre. Un événement présent dans un parent et un seul de ses enfants ne constitue donc plus un partage entre frises finales.
+
+Les deux options sont indépendantes des interrupteurs de type : masquer les cercles des frises ne change pas le calcul des partages. Les frises retenues sans contenu partagé restent visibles, éventuellement isolées. Un message indique l’absence de contenu partagé.
+
+Les compteurs, les résultats de recherche, les usages dans le détail d’une fiche et les contenus proposés dans le détail d’une frise suivent le périmètre retenu. Les usages totaux restent indiqués séparément dans le détail d’une fiche. Les hiérarchies des périodes perdent leurs contextes exclus et aucune arête ne pointe vers un objet absent. Une sélection masquée par un filtre est désélectionnée ; désactiver les filtres restitue le réseau initial sans modifier les données ni nécessiter de nouvelle lecture serveur.
+
+## Vue agrandie
+
+Le bouton « Agrandir le graphe », à droite des commandes du graphe, étend l’espace de travail à la fenêtre du navigateur sans utiliser l’API de plein écran. La recherche, les filtres, les commandes et le graphe restent visibles ; le titre, les métadonnées, la navigation et le panneau de détail sont masqués. Les résultats d’une recherche restent disponibles pour sélectionner un objet.
+
+Le composant D3 reste monté : les filtres et la sélection sont conservés. Le ResizeObserver adapte le cadrage à l’espace disponible. Le bouton « Réduire le graphe » ou Échap ramène à la vue normale et restaure le focus. L’isolation du fond et la gestion du clavier réutilisent `useDialog`. Les commandes restent accessibles si les filtres ne laissent aucun objet. Le démontage ou un changement d’identité libère l’isolation.
 
 ## Sens des liens
 
@@ -43,7 +60,7 @@ Les migrations appliquées au projet actif sont :
 - `20261103172801_admin_relations_graph.sql` : lectures admin détaillées et index d’utilisation.
 - `20261103183154_admin_relations_network.sql` : lecture complète du réseau en un instantané.
 
-La baseline inclut les mêmes fonctions. Aucune fiche, association ou règle d’accès ordinaire n’est modifiée par ces migrations. La fusion dans `main` déclenche le déploiement Git/Vercel habituel de l’interface et de l’API. Les deux migrations sont déjà appliquées au projet actif ; elles ne doivent pas être rejouées lors de ce déploiement.
+La baseline inclut les mêmes fonctions. Aucune fiche, association ou règle d’accès ordinaire n’est modifiée par ces migrations. Les filtres d’exploration utilisent l’instantané existant dans le navigateur et ne nécessitent aucune migration supplémentaire.
 
 ## Organisation du code
 
@@ -56,7 +73,8 @@ Réutilisation : SidebarLayout, SearchInput, Switch, Button, Tag, ItemSummary et
 
 ## Validation
 
-- `yarn verify` : 1 392 tests isolés, design system, configuration, symboles inutilisés et builds réussis.
+- `yarn verify` : tests isolés, design system, configuration, symboles inutilisés et builds réussis.
+- Filtres : distinction hiérarchie/passerelles, partage recompté entre frises finales, usages distincts, contextes exclus, absence de résultat, retour au réseau complet, sélection masquée et détails cohérents. Les trois fichiers de tests de projection, d’interface et de rendu totalisent 23 tests réussis, incluant la vue agrandie, la sélection conservée, Échap, le retour du focus et le nettoyage de l’isolation.
 - 15 tests admin PostgreSQL 17 sur cluster jetable : refus anonyme/utilisateur/éditeur/claim périmé, données privées, objets partagés et inutilisés, importance locale et migrations incrémentales.
 - 17 tests de baseline PostgreSQL 17 réussis sur une deuxième base vierge ; aucun changement des accès ordinaires. Repli contrôlé à 390 px, sans débordement et avec les 652 objets conservés.
 - Tests du réseau : tous les objets au premier rendu, une identité par fiche partagée, liens contextuels, filtres explicites sans arête orpheline ; sélection et désélection sans modification du graphe ; réponses obsolètes et purge des identités.
