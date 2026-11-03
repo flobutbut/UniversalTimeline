@@ -108,14 +108,14 @@ it('preserves the actual timeline instance, current period and back stack across
   await button('child').trigger('click'); await flushPromises();
   expect(view.get('[data-context]').text()).toBe('child');
   await go('/database'); expect(view.find('[data-page="timeline"]').exists()).toBe(false);
-  await button('Timeline').trigger('click'); await flushPromises();
+  await button('Exploration').trigger('click'); await flushPromises();
   expect(router.currentRoute.value.fullPath).toBe('/timeline?story=1&period=child');
   expect(view.getComponent(HomeView).element).toBe(original);
   expect(view.get('[data-context]').text()).toBe('child');
   await button('Remonter').trigger('click'); await flushPromises();
   expect(view.get('[data-context]').text()).toBe('entry');
   await go('/events'); await historyMove('back');
-  expect(view.getComponent(HomeView).element).toBe(original); expect(activeTab()).toBe('Timeline');
+  expect(view.getComponent(HomeView).element).toBe(original); expect(activeTab()).toBe('Exploration');
   await historyMove('forward'); expect(activeTab()).toBe('Événements');
   expect(StoryApiService.getInstance().getStory).toHaveBeenCalledOnce();
 });
@@ -142,7 +142,7 @@ it('shows loading while a lazy page is pending and updates the active tab only a
   await start('/timeline', withEventsLoader(() => pending.promise));
   await button('Événements').trigger('click'); await flushPromises();
   expect(view.get('[role="status"]').text()).toContain('Chargement de la page');
-  expect(activeTab()).toBe('Timeline'); expect(view.find('[data-page="timeline"]').exists()).toBe(true);
+  expect(activeTab()).toBe('Exploration'); expect(view.find('[data-page="timeline"]').exists()).toBe(true);
   pending.resolve(defineComponent({ template: '<section data-page="events">Événements chargés</section>' }));
   await flushPromises();
   expect(activeTab()).toBe('Événements'); expect(view.find('[role="status"]').exists()).toBe(false);
@@ -153,7 +153,7 @@ it('keeps the current page after a loading failure and retries the failed route'
   await start('/timeline', withEventsLoader(load));
   await button('Événements').trigger('click'); await flushPromises();
   expect(view.get('[role="alert"]').text()).toContain('Impossible de charger cette page');
-  expect(activeTab()).toBe('Timeline'); expect(view.find('[data-page="timeline"]').exists()).toBe(true);
+  expect(activeTab()).toBe('Exploration'); expect(view.find('[data-page="timeline"]').exists()).toBe(true);
   await button('Réessayer').trigger('click'); await flushPromises();
   expect(load).toHaveBeenCalledTimes(2); expect(view.find('[role="alert"]').exists()).toBe(false); expect(activeTab()).toBe('Événements');
 });
@@ -223,7 +223,7 @@ it('does not clear a newer loader when a cancelled request targeted the same URL
   const second = router.push('/events'); await flushPromises();
   expect(load).toHaveBeenCalledTimes(2);
   old.resolve(defineComponent({ template: '<p>Ancienne réponse</p>' })); await first; await flushPromises();
-  expect(view.find('[role="status"]').exists()).toBe(true); expect(activeTab()).toBe('Timeline');
+  expect(view.find('[role="status"]').exists()).toBe(true); expect(activeTab()).toBe('Exploration');
   fresh.resolve(defineComponent({ template: '<section data-page="events">Événements chargés</section>' })); await second; await flushPromises();
   expect(view.find('[role="status"]').exists()).toBe(false); expect(activeTab()).toBe('Événements');
 });
@@ -251,7 +251,7 @@ it('rebuilds a changed local parent path while preserving an explicitly addresse
     { ...period('entry'), story_parent_id: 'univers' },
   ]));
   useDataStore().invalidateStory('1');
-  await button('Timeline').trigger('click'); await flushPromises();
+  await button('Exploration').trigger('click'); await flushPromises();
   expect(router.currentRoute.value.fullPath).toBe('/timeline?story=1&period=entry');
   expect(view.get('[data-context]').text()).toBe('entry');
   expect(view.get('[aria-label="Fil d’Ariane de la timeline"]').text()).toContain('univers');
