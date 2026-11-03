@@ -44,9 +44,39 @@ export function scrubAuthSecrets(event: CaptureResult | null): CaptureResult | n
 /** Client-side reason that keeps the sign-up form from being sent. */
 export type SignupBlock = 'username_missing' | 'username_invalid' | 'username_checking' | 'username_taken' | 'terms_unchecked';
 
+/** How a timeline position was reached: the entry into the page, or the action taken inside it. */
+export type TimelineVia = 'link' | 'landing' | 'search' | 'app' | 'history' | 'period' | 'slide' | 'back'
+  | 'breadcrumb' | 'story_breadcrumb' | 'associated_story' | 'story_choice' | 'context' | 'retry';
+
+/** A public frise is named; a private or unknown one is only counted, never identified. */
+export interface TimelineStoryProperties {
+  story_visibility: 'public' | 'private' | 'unknown';
+  story_id?: string;
+  story_title?: string;
+  own_story: boolean;
+  signed_in: boolean;
+}
+
+export interface SearchCompletedProperties {
+  surface: 'header' | 'page';
+  outcome: 'story' | 'wikidata' | 'abandon';
+  query_length: number;
+  reformulations: number;
+  /** Results of the last settled query; null while unknown or when that source failed. */
+  story_results: number | null;
+  wikidata_results: number | null;
+  position?: number;
+  matched_on?: 'title' | 'description' | 'content';
+  wikidata_id?: string;
+  wikidata_label?: string;
+  /** Only for a search that found no frise, after the guard of searchTermForAnalytics. */
+  query?: string;
+  query_redacted?: boolean;
+}
+
 /**
  * Product events of Documentation/PLAN-ANALYSE.md (section 4). Values stay short and never carry personal
- * data: no e-mail, username, typed text or private title.
+ * data: no e-mail, username, private title, and typed text only as the guarded term of a search without frise.
  */
 export interface AnalyticsEvents {
   landing_section_viewed: { page: 'landing'; section: string };
@@ -60,7 +90,19 @@ export interface AnalyticsEvents {
   login_succeeded: Record<string, never>;
   login_failed: { reason: string };
   username_set: { first_time: boolean };
+  timeline_position_viewed: TimelineStoryProperties & {
+    view: 'overview' | 'period'; depth: number; via: TimelineVia; has_context: boolean; period_id?: string; period_title?: string;
+  };
+  timeline_event_opened: TimelineStoryProperties & { depth: number; event_id?: string; event_title?: string };
+  timeline_load_failed: { reason: 'invalid_link' | 'load_failed' | 'story_unavailable'; via: TimelineVia };
+  search_completed: SearchCompletedProperties;
 }
+
+/**
+ * Autocapture keeps clicks and data-attr markers but no visible text nor descriptive attribute: they can hold a
+ * private frise title, a username or other user content.
+ */
+const ELEMENT_ATTRIBUTE_IGNORELIST = ['aria-label', 'aria-description', 'title', 'alt', 'placeholder', 'value'];
 
 /** The initialised client while consent is given; null otherwise, so events are dropped, never queued. */
 let capturing: PostHog | null = null;
@@ -87,7 +129,12 @@ export function createPostHogTracker({ token, host }: PostHogSettings, load: Loa
         loading = null;
         // Consent withdrawn while the script was downloading: never initialise.
         if (!wanted) return;
-        posthog.init(token, { api_host: host, defaults: '2026-08-30', disable_session_recording: true, before_send: scrubAuthSecrets });
+        posthog.init(token, {
+          api_host: host, defaults: '2026-08-30', disable_session_recording: true, before_send: scrubAuthSecrets,
+          mask_all_text: true,
+          autocapture: { element_attribute_ignorelist: ELEMENT_ATTRIBUTE_IGNORELIST },
+          capture_dead_clicks: { element_attribute_ignorelist: ELEMENT_ATTRIBUTE_IGNORELIST },
+        });
         client = posthog; capturing = posthog;
       }).catch(() => { loading = null; });
       await loading;

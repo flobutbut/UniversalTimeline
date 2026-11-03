@@ -64,6 +64,7 @@ import { Icon } from '@iconify/vue';
 import { SearchApiService, type GlobalSearchResult, type WikidataEntityLabelHit } from '@/services/SearchApiService';
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { useSuggestionNavigation } from '@/composables/useSuggestionNavigation';
+import { useSearchAnalytics } from '@/composables/useSearchAnalytics';
 
 const props = withDefaults(defineProps<{ page?: boolean; autofocus?: boolean }>(), { page: false, autofocus: false });
 const emit = defineEmits<{ (e: 'select', hit: GlobalSearchResult): void }>();
@@ -83,12 +84,23 @@ const allHits = computed<GlobalSearchResult[]>(() => [...stories.value, ...wikid
 const hasResults = computed(() => allHits.value.length > 0);
 const dropdownVisible = computed(() => (props.page || focused.value) && query.value.trim().length >= 2);
 const { listId, optionId, cursor, activeId, move, reset, current } = useSuggestionNavigation(() => allHits.value, () => dropdownVisible.value);
+const analytics = useSearchAnalytics({
+  surface: () => props.page ? 'page' : 'header', query: () => query.value, enabled: () => props.page || focused.value,
+  stories: { results: stories, loading, error }, wikidata: wikidata,
+});
 let blurTimer: ReturnType<typeof setTimeout> | undefined;
-function onFocus() { clearTimeout(blurTimer); focused.value = true; }
+function onFocus() {
+  clearTimeout(blurTimer);
+  if (!focused.value) analytics.resumed();
+  focused.value = true;
+}
 function onBlur() {
   clearTimeout(blurTimer);
   blurTimer = setTimeout(() => {
-    if (!rootRef.value?.contains(document.activeElement)) focused.value = false;
+    if (rootRef.value?.contains(document.activeElement)) return;
+    // The header closes its results when it loses focus; the dedicated page keeps them.
+    if (!props.page && focused.value) analytics.abandoned();
+    focused.value = false;
   }, 150);
 }
 onScopeDispose(() => clearTimeout(blurTimer));
@@ -96,8 +108,8 @@ onMounted(() => { if (props.autofocus) searchRef.value?.focus(); });
 function confirm() { const hit = current(); if (hit) selectHit(hit); }
 function retrySource() { searchRef.value?.focus(); return retry(); }
 function retryWikidata() { searchRef.value?.focus(); return wikidata.retry(); }
-function dismiss() { query.value = ''; reset(); focused.value = false; searchRef.value?.blur(); }
-function selectHit(hit: GlobalSearchResult) { emit('select', hit); clear(); }
+function dismiss() { analytics.abandoned(); query.value = ''; reset(); focused.value = false; searchRef.value?.blur(); }
+function selectHit(hit: GlobalSearchResult) { analytics.selected(hit, allHits.value.indexOf(hit) + 1); emit('select', hit); clear(); }
 function clear() {
   query.value = ''; reset(); focused.value = false;
   searchRef.value?.focus();

@@ -84,19 +84,22 @@ Les événements passent par `track()` (`src/lib/analytics.ts`), typé par `Anal
 | `child_story_linked` | Frise rattachée à une autre | `anchor_type` | `linkChildStories` (appelant) |
 | `story_deleted` | Suppression | — | `useDatabaseSave` |
 
-### 4.3 Timeline (phase 2)
+### 4.3 Exploration et recherche (phase 2)
+
+Implémenté le 3 novembre 2026 (`src/lib/explorationAnalytics.ts`, `HomeView.vue`, `src/composables/useSearchAnalytics.ts`). La navigation de l’Exploration ne change que les paramètres de l’URL : PostHog n’y compte pas de `$pageview`, ces événements la décrivent.
 
 | Événement | Déclencheur | Propriétés | Où |
 | --- | --- | --- | --- |
-| `timeline_story_opened` | Frise affichée | `story_id`, `source` (`search`, `landing`, `link`, `breadcrumb`, `associated`, `choice`), `own_story`, `signed_in` | `HomeView.vue` / `useHomeNavigation` |
-| `timeline_period_opened` | Clic sur une période | `depth`, `has_children` | `handlePeriodClick` |
-| `timeline_period_slid` | Précédent/suivant | `direction` | `slideToAdjacentPeriod` |
-| `timeline_back` | Retour en arrière | `via` (`button`, `breadcrumb`, `story_breadcrumb`) | `goBack`, `navigateToBreadcrumb` |
-| `timeline_event_opened` | Clic sur un événement | `depth` | `handleEventClick` |
-| `timeline_story_choice_shown` / `…_selected` | Plusieurs frises pour une période | `choices_count` | `navigationChoices` |
-| `timeline_load_failed` | Erreur de chargement | `reason` (catégorie, pas le message) | `HomeView.vue` |
-| `search_performed` | Recherche globale aboutie | `results_count`, `has_results` | `GlobalSearch` |
-| `search_result_selected` | Résultat choisi | `position` | `GlobalSearch` / `useAppNavigation` |
+| `timeline_position_viewed` | Une fois par position réellement affichée (chargement réussi) ; ni le retour sur l’onglet ni une navigation remplacée par une plus récente ne comptent | frise (voir ci-dessous), `period_id`/`period_title` (frise publique), `view` (`overview`, `period`), `depth` (0 = vue d’ensemble, 1 = première période…), `has_context`, `via` | `HomeView.vue` |
+| `timeline_event_opened` | Clic qui sélectionne un événement (le survol ne compte pas) | frise, `event_id`/`event_title` (frise publique), `depth` | `HomeView.vue` |
+| `timeline_load_failed` | Lien invalide, chargement en erreur, frise associée impossible à ouvrir | `reason` (`invalid_link`, `load_failed`, `story_unavailable`), `via` | `HomeView.vue` |
+| `search_completed` | Une fois par recherche, du premier texte de 2 caractères au résultat choisi ou à l’abandon (Échap, sortie du champ, départ de la page) | `surface` (`header`, `page`), `outcome` (`story`, `wikidata`, `abandon`), `query_length`, `reformulations`, `story_results`/`wikidata_results` (dernière saisie, `null` si inconnue ou source en panne), `position`, `matched_on` (`title`, `description`, `content`), `wikidata_id`/`wikidata_label`, `query` ou `query_redacted` | `GlobalSearch.vue` |
+
+- **Frise** : `story_visibility` (`public`, `private`, `unknown`), `story_id` et `story_title` seulement si publique, `own_story` (signée par le nom d’utilisateur du visiteur), `signed_in`. Une frise privée ou inconnue n’est jamais identifiée, ni ses périodes et événements.
+- **`via`** : entrée `link` (direct ou externe), `landing` (depuis `/` ou `/voyage`), `search` (résultat de recherche), `app` (autre page de l’application) ; dans la page `period`, `slide` (précédent/suivant), `back`, `breadcrumb`, `story_breadcrumb`, `associated_story`, `story_choice`, `context`, `retry`, `history` (boutons du navigateur).
+- **Frise choisie dans la recherche** : `search_completed` ne l’identifie pas ; le `timeline_position_viewed` suivant (`via: search`) le fait si elle est publique.
+- **Terme recherché** : envoyé seulement si aucune frise n’est trouvée (`story_results = 0`), dernière saisie normalisée (minuscules, espaces), 50 caractères au plus. Refusé (`query_redacted: true`) s’il contient `@`, un lien ou un numéro (6 chiffres d’affilée, ou 6 chiffres et plus en groupes de 2-3) ; les années et fourchettes (1914-1918) passent.
+- **Autocapture** : `mask_all_text` et attributs descriptifs ignorés (`aria-label`, `title`, `alt`, `placeholder`, `value`) pour ne jamais envoyer un titre privé ou un nom d’utilisateur ; les `data-attr` restent.
 
 ### 4.4 Réglages PostHog sans code
 
@@ -129,7 +132,9 @@ Créé le 3 novembre 2026 : dashboard PostHog 1079515. Les points 1 à 7 sont co
 4. Contributions au catalogue : périodes et événements créés, part venant de Wikidata.
 5. Échecs d’import Wikidata par raison.
 
-### Dashboard 3 — « Usage de la timeline » (phase 2)
+### Dashboard 3 — « Exploration » (phase 2)
+
+Remplace « Usage de la timeline ». Créé le 3 novembre 2026 : dashboard PostHog 1081248 (12 graphiques, données de test exclues). Contenu : frises visitées, profondeur maximale par session, entonnoir de profondeur, parcours « Frise › Période », dernières positions, modes de navigation (`via`), événements ouverts, entrées, et section recherche (volume et part sans frise, issues, position choisie, `matched_on`, sujets Wikidata demandés, recherches sans frise à reporter dans `FRISES-A-CREER.md`).
 
 1. Frises les plus ouvertes et source d’ouverture.
 2. Profondeur atteinte (`depth` maximal par session).
@@ -140,7 +145,7 @@ Créé le 3 novembre 2026 : dashboard PostHog 1079515. Les points 1 à 7 sont co
 
 ### Dashboard 4 — « Frictions » (phase 1 puis enrichi)
 
-Créé le 3 novembre 2026 : dashboard PostHog 1079516 (clics répétés/sans effet par page, éléments concernés, erreurs JavaScript, Web Vitals p75). Les échecs de chargement de la timeline arrivent en phase 2.
+Créé le 3 novembre 2026 : dashboard PostHog 1079516 (clics répétés/sans effet par page, éléments concernés — repérés par `data-attr`, lien ou balise depuis le masquage des textes —, erreurs JavaScript, Web Vitals p75). L’erreur bénigne « ResizeObserver loop completed… » est écartée par une règle de suppression d’Error tracking. Les échecs de chargement de la timeline arrivent en phase 2.
 
 Rage clicks et clics sans effet par page et élément, exceptions par page, échecs de chargement de la timeline, Web Vitals par page.
 
