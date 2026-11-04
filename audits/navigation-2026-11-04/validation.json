@@ -96,7 +96,8 @@
       "pinnedHomoAssociatedStoryCount": 3,
       "smallPeriodMenuPreservesExpandedWidth": true,
       "quaternaryExpandedWidthPct": 26.144455747711092,
-      "screenshot": "event-pin-and-period-menu.jpg"
+      "screenshot": "event-pin-and-period-menu.jpg",
+      "associatedMenuAbovePinnedTooltip": true
     }
   }
 }

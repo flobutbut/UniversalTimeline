@@ -66,3 +66,5 @@ Le [correctif de cadrage des origines](temporal-origin-review.md) remplace l’a
 Cliquer sur le contenu d’une infobulle, y compris sa date ou sa description, fige l’événement ; son titre offre la même action au clavier. Les liens vers les frises gardent leur action propre. Le nombre de frises associées reste visible à l’état figé ; zéro ou nombre inconnu ne sont pas affichés. Une petite période reste étendue tant que son menu de frises associées est ouvert, y compris lorsque le focus passe dans le panneau téléporté.
 
 Contrôle sur l’onglet utilisateur, Cénozoïque : clic sur la date d’« Apparition du genre Homo », compteur de trois autres frises, ouverture puis fermeture du menu du Quaternaire sans changement de sa largeur étendue (26,14446 %). [Capture](event-pin-and-period-menu.jpg).
+
+Le menu reste au-dessus de l’infobulle figée dans leur zone de chevauchement : les événements possèdent leur contexte de superposition local. Ce point est vérifié dans le DOM du navigateur et dans la capture.

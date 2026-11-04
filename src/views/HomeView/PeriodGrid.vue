@@ -625,6 +625,8 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
 .events-container {
   flex: 1 1 0;
   position: relative;
+  /* Les infobulles figées restent sous les menus téléportés de l’application. */
+  z-index: var(--z-index-timeline-item);
   width: 100%;
 }
 
