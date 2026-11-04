@@ -1,5 +1,6 @@
 import {afterEach,expect,it,vi} from 'vitest';
 import {mount,flushPromises} from '@vue/test-utils';
+import {createMemoryHistory,createRouter} from 'vue-router';
 import {createPinia,disposePinia,type Pinia} from 'pinia';
 import {useAuthStore} from '@/stores/useAuthStore';
 import {adminApi} from '@/services/AdminApiService';
@@ -7,19 +8,20 @@ import AdminRelations from '../AdminRelations.vue';
 import Switch from '@/components/base/Switch.vue';
 import Button from '@/components/base/Button.vue';
 import {graphKey} from '../relationGraph';
-import type {RelationEntity,RelationsContent,RelationsNetwork} from '@/types/adminRelations';
+import type {RelationsNetwork} from '@/types/adminRelations';
 import {network,leafNetwork} from './networkFixture';
-vi.mock('../RelationGraphCanvas.vue',()=>({default:{name:'RelationGraphCanvas',props:['graph','selected','expanded'],emits:['deselect','selectNode','toggleExpand'],template:'<div aria-label="Réseau de test"><button data-relation-expand @click="$emit(\'toggleExpand\')">{{expanded?\'Réduire le graphe\':\'Agrandir le graphe\'}}</button></div>'}}));
+vi.mock('../RelationGraphCanvas.vue',()=>({default:{name:'RelationGraphCanvas',props:['graph','selected','expanded'],emits:['deselect','selectNode','selectEdge','toggleExpand'],template:'<div aria-label="Réseau de test"><slot name="search" /><slot v-if="selected" name="selection" :close="()=> $emit(\'deselect\')" /><button data-relation-expand @click="$emit(\'toggleExpand\')">{{expanded?\'Réduire le graphe\':\'Agrandir le graphe\'}}</button></div>'}}));
 let pinia:Pinia;let view:ReturnType<typeof mount>;
 async function start(data:RelationsNetwork=network){
   pinia=createPinia();const auth=useAuthStore(pinia);Object.assign(auth,{enabled:true,ready:true,account:{id:'admin',isAdmin:true}});
   vi.spyOn(adminApi,'relations').mockResolvedValue(data);
   if(!vi.isMockFunction(adminApi.relationStory))vi.spyOn(adminApi,'relationStory').mockResolvedValue({storyId:'1',periods:[],events:[]});
-  view=mount(AdminRelations,{attachTo:document.body,global:{plugins:[pinia]}});await flushPromises();return auth;
+  const router=createRouter({history:createMemoryHistory(),routes:[{path:'/',component:{template:'<div />'}},{path:'/database',name:'database',component:{template:'<div />'}}]});await router.push('/');await router.isReady();
+  view=mount(AdminRelations,{attachTo:document.body,global:{plugins:[pinia,router]}});await flushPromises();return auth;
 }
 afterEach(()=>{view?.unmount();if(pinia)disposePinia(pinia);vi.restoreAllMocks();});
 
-it('expands the existing network, isolates the background and restores focus and selection on Escape',async()=>{
+it('expands the existing network, isolates the background and restores focus and selection on reduction',async()=>{
   const background=document.createElement('button');background.textContent='Navigation extérieure';document.body.append(background);
   try{
     await start(leafNetwork());await toggle('Frises sans enfants');
@@ -27,9 +29,9 @@ it('expands the existing network, isolates the background and restores focus and
     canvas.vm.$emit('selectNode',graphKey('story','2'));await flushPromises();
     const trigger=view.get('[data-relation-expand]');(trigger.element as HTMLElement).focus();await trigger.trigger('click');await flushPromises();
     expect(view.attributes('role')).toBe('dialog');expect(background.hasAttribute('inert')).toBe(true);
-    expect(view.get('header').isVisible()).toBe(false);expect(view.get('.admin-relations__detail').isVisible()).toBe(false);
+    expect(view.get('header').isVisible()).toBe(false);expect(view.find('.admin-relations__detail').exists()).toBe(false);
     expect(canvas.props('graph')).toBe(graph);expect(canvas.props('selected')).toBe(graphKey('story','2'));
-    document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await flushPromises();
+    await trigger.trigger('click');await flushPromises();
     expect(view.attributes('role')).toBeUndefined();expect(view.attributes('inert')).toBeUndefined();expect(background.hasAttribute('inert')).toBe(false);
     expect(view.get('header').isVisible()).toBe(true);expect(canvas.props('selected')).toBe(graphKey('story','2'));
     expect(document.activeElement).toBe(trigger.element);
@@ -53,18 +55,26 @@ it('shows the complete network immediately and selection/deselection never chang
   expect(canvas.props('graph')).toBe(before);expect(canvas.props('selected')).toBe(graphKey('story','1'));
   canvas.vm.$emit('deselect');await flushPromises();
   expect(canvas.props('selected')).toBeNull();expect(canvas.props('graph')).toBe(before);
-  expect(view.get('.admin-relations__detail').text()).toContain('Explorer le réseau');
+  expect(view.find('[aria-label="Objet sélectionné"]').exists()).toBe(false);
 });
 
-it.each([['story','1'],['period','p'],['event','unused']] as const)('offers the selected %s fiche in Frises, including unused records and expanded mode',async(kind,id)=>{
-  if(kind!=='story')vi.spyOn(adminApi,'relationEntity').mockResolvedValue({kind,id,title:'Fiche',startDate:'1900',endDate:null,wikidataId:null,stories:[]});
+it.each([['story','1'],['period','p'],['event','e']] as const)('opens the selected %s fiche from the popover in normal and expanded mode',async(kind,id)=>{
   await start();const canvas=view.findComponent({name:'RelationGraphCanvas'});
   canvas.vm.$emit('selectNode',graphKey(kind,id));await flushPromises();
-  const link=()=>view.findAllComponents(Button).find(button=>button.text()==='Ouvrir la fiche dans Frises');
-  expect(link()?.props('to')).toEqual({name:'database',query:{[kind]:id}});
-  await view.get('[data-relation-expand]').trigger('click');await flushPromises();
-  expect(link()?.isVisible()).toBe(true);
+  const link=()=>view.findAllComponents(Button).find(button=>button.text()==='Ouvrir');
+  expect(link()?.props('to')).toEqual({name:'database',query:{[kind]:id}});expect(link()?.get('a').attributes('href')).toBe(`/database?${kind}=${id}`);
+  expect(view.find('.admin-relations__toolbar').exists()).toBe(false);expect(view.find('.admin-relations__detail').exists()).toBe(false);
+  await view.get('[data-relation-expand]').trigger('click');await flushPromises();expect(link()?.isVisible()).toBe(true);
   canvas.vm.$emit('deselect');await flushPromises();expect(link()).toBeUndefined();
+});
+
+it.each(['period','event'] as const)('disables opening an orphan %s and explains why',async kind=>{
+  const data={...network,periods:[...network.periods,{id:'unused',title:'Période orpheline'}]};
+  await start(data);const canvas=view.findComponent({name:'RelationGraphCanvas'});
+  canvas.vm.$emit('selectNode',graphKey(kind,'unused'));await flushPromises();
+  const open=view.findAllComponents(Button).find(button=>button.text()==='Ouvrir')!;
+  expect(open.props('disabled')).toBe(true);expect(open.get('button').attributes('disabled')).toBeDefined();expect(open.find('a').exists()).toBe(false);
+  expect(view.get('[aria-label="Objet sélectionné"]').text()).toContain('Objet orphelin · aucune frise parente');
 });
 
 async function toggle(label:string){
@@ -88,43 +98,38 @@ it('combines scope filters, clears an excluded selection, and restores the full 
   expect(canvas.props('graph')).toEqual(full);
 });
 
-it('keeps retained entity details consistent with the filtered sharing count',async()=>{
-  vi.spyOn(adminApi,'relationEntity').mockResolvedValue({kind:'period',id:'p',title:'Période partagée',startDate:'1900',endDate:'2000',wikidataId:null,stories:[
-    {id:'1',title:'Parent thématique',isPublic:true},{id:'2',title:'Privée',isPublic:false},{id:'3',title:'Autre finale',isPublic:true},
-  ]});
-  await start(leafNetwork());await toggle('Frises sans enfants');await toggle('Contenus partagés seulement');
-  view.findComponent({name:'RelationGraphCanvas'}).vm.$emit('selectNode',graphKey('period','p'));await flushPromises();
-  const detail=view.get('.admin-relations__detail');
-  expect(detail.text()).toContain('Partagé dans 2 frises');expect(detail.text()).toContain('2 utilisations dans les frises retenues · 3 au total');
-  expect(detail.text()).not.toContain('Parent thématique');expect(detail.text()).toContain('Autre finale');
+it('lists distinct parent frises and their period contexts, even when frise nodes are hidden',async()=>{
+  await start();const canvas=view.findComponent({name:'RelationGraphCanvas'});
+  canvas.vm.$emit('selectNode',graphKey('period','p'));await flushPromises();
+  const popup=()=>view.get('[aria-label="Objet sélectionné"]');
+  expect(popup().text()).toContain('Frises parentes');expect(popup().text()).toContain('Sous Parent');
+  expect(popup().findAll('li').map(item=>item.text())).toEqual(['SourceSous Parent','Privée']);
+  expect(popup().findAll('li a').map(link=>link.attributes('href'))).toEqual(['/database?story=1','/database?story=2']);
+  await toggle('Frises');expect(popup().findAll('li')).toHaveLength(2);
+  expect(popup().get('.relation-selection__actions a').attributes('href')).toBe('/database?period=p');
 });
 
-it('does not offer hidden parent-only content from the filtered story details',async()=>{
-  vi.spyOn(adminApi,'relationStory').mockResolvedValue({storyId:'2',periods:[],events:[
-    {id:'e',title:'Partagé avec le parent seulement',date:'1900',wikidataId:null,importance:'normal',uses:2},
-    {id:'leaf-shared',title:'Partagé entre finales',date:'1901',wikidataId:null,importance:'normal',uses:2},
-  ]});
+it('limits the parents to retained frises when filtering thematic parents',async()=>{
   await start(leafNetwork());await toggle('Frises sans enfants');await toggle('Contenus partagés seulement');
-  view.findComponent({name:'RelationGraphCanvas'}).vm.$emit('selectNode',graphKey('story','2'));await flushPromises();
-  expect(view.get('details').text()).toContain('Partagé entre finales');expect(view.get('details').text()).not.toContain('Partagé avec le parent seulement');
-  expect(view.get('details').text()).toContain('Dans 2 frise(s) retenues');
+  view.findComponent({name:'RelationGraphCanvas'}).vm.$emit('selectNode',graphKey('period','p'));await flushPromises();
+  const popup=view.get('[aria-label="Objet sélectionné"]');
+  expect(popup.findAll('li').map(item=>item.text())).toEqual(['Privée','Autre finale']);
 });
-it('a late entity response cannot replace a newer story selection',async()=>{
-  let resolve!:(value:RelationEntity)=>void;vi.spyOn(adminApi,'relationEntity').mockImplementation(()=>new Promise(r=>{resolve=r;}));
-  await start();const canvas=view.findComponent({name:'RelationGraphCanvas'});
-  canvas.vm.$emit('selectNode',graphKey('event','e'));await flushPromises();
-  canvas.vm.$emit('selectNode',graphKey('story','1'));await flushPromises();
-  resolve({kind:'event',id:'e',title:'Obsolète',startDate:'1900',endDate:null,wikidataId:null,stories:[]});await flushPromises();
-  expect(view.get('.admin-relations__detail').text()).toContain('Source');expect(view.text()).not.toContain('Obsolète');
+
+it('keeps selection local without fetching details and closes the popover with its close button',async()=>{
+  const readEntity=vi.spyOn(adminApi,'relationEntity');await start();
+  const canvas=view.findComponent({name:'RelationGraphCanvas'});const graph=canvas.props('graph');
+  for(const id of [graphKey('event','e'),graphKey('story','1')]){canvas.vm.$emit('selectNode',id);await flushPromises();}
+  expect(readEntity).not.toHaveBeenCalled();expect(adminApi.relationStory).not.toHaveBeenCalled();
+  await view.get('[aria-label="Fermer la sélection"]').trigger('click');
+  expect(canvas.props('selected')).toBeNull();expect(canvas.props('graph')).toBe(graph);
 });
-it('deselection cancels pending details while preserving the complete network',async()=>{
-  let resolve!:(value:RelationsContent)=>void;vi.spyOn(adminApi,'relationStory').mockImplementation(()=>new Promise(r=>{resolve=r;}));
-  await start();const canvas=view.findComponent({name:'RelationGraphCanvas'});
-  canvas.vm.$emit('selectNode',graphKey('story','1'));await flushPromises();canvas.vm.$emit('deselect');await flushPromises();
-  resolve({storyId:'1',periods:[],events:[]});await flushPromises();
-  expect(canvas.props('selected')).toBeNull();expect(canvas.props('graph').nodes).toHaveLength(6);
-  expect(view.get('.admin-relations__detail').text()).toContain('Explorer le réseau');
+
+it('lists historical parents of a frise without treating navigation links as parents',async()=>{
+  await start(leafNetwork());view.findComponent({name:'RelationGraphCanvas'}).vm.$emit('selectNode',graphKey('story','3'));await flushPromises();
+  expect(view.get('[aria-label="Objet sélectionné"]').findAll('li').map(item=>item.text())).toEqual(['Source']);
 });
+
 it('purges privileged graph data on identity change and ignores pending reads',async()=>{
   const auth=await start();let resolve!:(value:RelationsNetwork)=>void;
   vi.mocked(adminApi.relations).mockImplementation(()=>new Promise(r=>{resolve=r;}));
@@ -135,4 +140,18 @@ it('an overview error remains retryable instead of looking like an empty network
   await start();vi.mocked(adminApi.relations).mockRejectedValueOnce(new Error('Indisponible'));
   await view.findAll('button').find(b=>b.text()==='Actualiser')!.trigger('click');await flushPromises();
   expect(view.find('[role="alert"]').exists()).toBe(true);
+});
+
+it('chooses a search suggestion without rebuilding the graph and lets Escape dismiss suggestions before the expanded view',async()=>{
+  await start();const canvas=view.findComponent({name:'RelationGraphCanvas'});const graph=canvas.props('graph');
+  const input=view.get('[role="combobox"]');(input.element as HTMLInputElement).focus();await input.setValue('Privée');
+  await input.trigger('keydown',{key:'ArrowDown'});await input.trigger('keydown',{key:'Enter'});await flushPromises();
+  expect(canvas.props('selected')).toBe(graphKey('story','2'));expect(canvas.props('graph')).toBe(graph);
+  await view.get('[data-relation-expand]').trigger('click');await flushPromises();
+  (input.element as HTMLInputElement).focus();await input.setValue('Source');
+  await input.trigger('keydown',{key:'Escape'});await flushPromises();
+  expect(view.attributes('role')).toBe('dialog');expect(view.find('[role="listbox"]').exists()).toBe(false);
+  await input.trigger('keydown',{key:'Escape'});await flushPromises();
+  expect(view.attributes('role')).toBe('dialog');expect(canvas.props('selected')).toBeNull();
+  await input.trigger('keydown',{key:'Escape'});await flushPromises();expect(view.attributes('role')).toBeUndefined();
 });

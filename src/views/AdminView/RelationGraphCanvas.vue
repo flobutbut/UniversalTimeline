@@ -9,12 +9,13 @@
       <Button class="relation-canvas__expand" data-relation-expand variant="tertiary" size="sm" icon-only :pressed="!!expanded" :aria-label="expanded?'Réduire le graphe':'Agrandir le graphe'" :title="expanded?'Réduire le graphe (Échap)':'Agrandir le graphe'" @click="$emit('toggleExpand')"><template #icon><Icon :icon="expanded?'mdi:arrow-collapse':'mdi:arrow-expand'" width="18" height="18" aria-hidden="true" /></template></Button>
     </div>
     <div ref="host" class="relation-canvas__plot">
-      <svg v-show="graph.nodes.length" ref="svg" tabindex="0" role="img" :aria-label="`Réseau D3 : ${graph.nodes.length} objets, ${graph.edges.length} liens. Déplacez les cercles ; clic dans le vide pour désélectionner. ${expanded?'Échap pour réduire le graphe.':'Échap pour désélectionner.'}`" @keydown.esc.prevent="handleEscape">
+      <svg v-show="graph.nodes.length" ref="svg" tabindex="0" role="img" :aria-label="`Réseau D3 : ${graph.nodes.length} objets, ${graph.edges.length} liens. Déplacez les cercles ; clic dans le vide pour désélectionner. ${expanded&&!selected?'Échap pour réduire le graphe.':'Échap pour désélectionner.'}`" @keydown.esc.prevent="handleEscape">
         <defs><marker :id="markerId" viewBox="0 -5 10 10" refX="13" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,-5L10,0L0,5" fill="var(--color-border-strong)" /></marker></defs>
         <g ref="scene"><g ref="linkLayer" /><g ref="nodeLayer" /></g>
       </svg>
       <div v-if="!graph.nodes.length" class="relation-canvas__empty"><slot name="empty" /></div>
       <div v-if="$slots.search" class="relation-canvas__search"><slot name="search" /></div>
+      <div v-if="selected && $slots.selection" ref="selectionPopover" class="relation-canvas__selection" @keydown.esc.stop.prevent="dismissSelection"><slot name="selection" :close="dismissSelection" /></div>
     </div>
     <div class="relation-canvas__legend">
       <span><i class="relation-canvas__mark--story" />Frises</span><span><i class="relation-canvas__mark--period" />Périodes</span><span><i class="relation-canvas__mark--event" />Événements</span>
@@ -26,7 +27,7 @@
 <script setup lang="ts">
 import { onMounted,onBeforeUnmount,ref,useId,watch } from 'vue';
 import { select,forceSimulation,forceLink,forceManyBody,forceCenter,forceCollide,forceX,forceY,zoom,zoomIdentity,drag,
-  type Simulation,type SimulationNodeDatum,type SimulationLinkDatum,type Selection,type ZoomBehavior } from 'd3';
+  zoomTransform,type Simulation,type SimulationNodeDatum,type SimulationLinkDatum,type Selection,type ZoomBehavior } from 'd3';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
 import type { RelationGraph,GraphNode,GraphEdge } from './relationGraph';
@@ -36,6 +37,7 @@ interface NetworkLink extends Omit<GraphEdge,'source'|'target'>,SimulationLinkDa
 const props=defineProps<{graph:RelationGraph;selected:string|null;expanded?:boolean}>();
 const emit=defineEmits<{selectNode:[id:string];selectEdge:[id:string];deselect:[];toggleExpand:[]}>();
 const host=ref<HTMLElement>();const svg=ref<SVGSVGElement>();const scene=ref<SVGGElement>();const linkLayer=ref<SVGGElement>();const nodeLayer=ref<SVGGElement>();
+const selectionPopover=ref<HTMLElement>();let selectionResize:ResizeObserver|undefined;let margin=12;
 const markerId=`network-arrow-${useId()}`;const allLabels=defineModel<boolean>('allLabels',{default:false});const paused=ref(false);
 let simulation:Simulation<NetworkNode,NetworkLink>|undefined;let resize:ResizeObserver|undefined;
 let nodes:NetworkNode[]=[];let links:NetworkLink[]=[];let width=800;let height=560;let zoomLevel=1;let interacted=false;
@@ -49,7 +51,34 @@ const endpoint=(value:string|number|NetworkNode)=>value as NetworkNode;
 function paint(){
   circles?.attr('transform',node=>`translate(${node.x??0},${node.y??0})`);
   paths?.attr('d',link=>{const a=endpoint(link.source);const b=endpoint(link.target);return `M${a.x??0},${a.y??0}L${b.x??0},${b.y??0}`;});
+  positionSelection();
 }
+function selectionAnchor(){
+  const node=nodes.find(node=>node.id===props.selected);
+  if(node)return {x:node.x??0,y:node.y??0,r:radius(node)};
+  const link=links.find(link=>link.id===props.selected);
+  if(!link)return;
+  const a=endpoint(link.source);const b=endpoint(link.target);
+  return {x:((a.x??0)+(b.x??0))/2,y:((a.y??0)+(b.y??0))/2,r:0};
+}
+function positionSelection(){
+  const panel=selectionPopover.value;if(!panel||!svg.value)return;
+  const anchor=selectionAnchor();if(!anchor)return;
+  const transform=zoomTransform(svg.value);const [x,y]=transform.apply([anchor.x,anchor.y]);
+  panel.style.visibility=x<0||x>width||y<0||y>height?'hidden':'visible';
+  panel.style.maxHeight=`${Math.max(0,height-margin*2)}px`;
+  const panelWidth=panel.offsetWidth;const panelHeight=panel.offsetHeight;const gap=margin+anchor.r*transform.k;
+  const left=x+gap+panelWidth<=width-margin?x+gap:x-gap-panelWidth;
+  panel.style.transform=`translate(${Math.max(margin,Math.min(width-panelWidth-margin,left))}px,${Math.max(margin,Math.min(height-panelHeight-margin,y-24))}px)`;
+}
+function revealSelection(){
+  const anchor=selectionAnchor();if(!anchor||!svg.value)return;
+  const transform=zoomTransform(svg.value);const [x,y]=transform.apply([anchor.x,anchor.y]);
+  if(x<margin||x>width-margin||y<margin||y>height-margin){
+    select(svg.value).call(zoomer.transform,zoomIdentity.translate(width/2-transform.k*anchor.x,height/2-transform.k*anchor.y).scale(transform.k));
+  }
+}
+function dismissSelection(){emit('deselect');svg.value?.focus({preventScroll:true});}
 function highlight(){
   if(!circles)return;
   const neighborhood=new Set<string>();const selected=props.selected;
@@ -71,7 +100,7 @@ function fit(){
 function scale(factor:number){if(svg.value)select(svg.value).call(zoomer.scaleBy,factor);interacted=true;}
 function toggleAnimation(){paused.value=!paused.value;if(paused.value)simulation?.stop();else simulation?.alpha(.35).restart();}
 function restart(){paused.value=false;simulation?.alpha(.9).alphaTarget(0).restart();}
-function handleEscape(){if(props.expanded)emit('toggleExpand');else emit('deselect');}
+function handleEscape(){if(props.selected||!props.expanded)emit('deselect');else emit('toggleExpand');}
 
 function draw(){
   if(!nodeLayer.value||!linkLayer.value)return;
@@ -110,21 +139,25 @@ onMounted(()=>{
   paused.value=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false;
   zoomer=zoom<SVGSVGElement,unknown>().extent(()=>[[0,0],[width,height]]).scaleExtent([.08,5])
     .on('start',event=>{if(event.sourceEvent)interacted=true;})
-    .on('zoom',event=>{select(scene.value!).attr('transform',event.transform.toString());zoomLevel=event.transform.k;highlight();});
+    .on('zoom',event=>{select(scene.value!).attr('transform',event.transform.toString());zoomLevel=event.transform.k;highlight();positionSelection();});
   select(svg.value!).call(zoomer).on('dblclick.zoom',null).on('click',event=>{if(event.target===svg.value)emit('deselect');});
   width=host.value!.clientWidth||800;height=host.value!.clientHeight||560;select(svg.value!).attr('viewBox',`0 0 ${width} ${height}`);
   resize=new ResizeObserver(()=>{width=host.value!.clientWidth||800;height=host.value!.clientHeight||560;select(svg.value!).attr('viewBox',`0 0 ${width} ${height}`);fit();});
   resize.observe(host.value!);draw();
+  margin=parseFloat(getComputedStyle(host.value!).getPropertyValue('--spacing-md'))||12;
+  selectionResize=new ResizeObserver(positionSelection);if(selectionPopover.value)selectionResize.observe(selectionPopover.value);
 });
-watch(()=>props.graph,draw);watch(()=>props.selected,highlight);watch(allLabels,highlight);
-onBeforeUnmount(()=>{simulation?.stop();resize?.disconnect();if(svg.value)select(svg.value).on('.zoom',null);});
+watch(()=>props.graph,draw);watch(()=>props.selected,()=>{highlight();revealSelection();positionSelection();},{flush:'post'});watch(allLabels,highlight);
+watch(selectionPopover,(panel,previous)=>{if(previous)selectionResize?.unobserve(previous);if(panel)selectionResize?.observe(panel);positionSelection();},{flush:'post'});
+onBeforeUnmount(()=>{simulation?.stop();resize?.disconnect();selectionResize?.disconnect();if(svg.value)select(svg.value).on('.zoom',null);});
 </script>
 
 <style scoped>
 .relation-canvas { min-width:0; background:var(--color-surface-default); border:1px solid var(--color-border-default); border-radius:var(--radius-lg); overflow:hidden; }
 .relation-canvas__tools { display:flex; flex-wrap:wrap; align-items:center; gap:var(--spacing-sm); padding:var(--spacing-sm); border-bottom:1px solid var(--color-border-default); }
-.relation-canvas__plot { position:relative; height:clamp(360px,calc(100dvh - 370px),820px); min-width:0; }
-.relation-canvas__search {position:absolute;top:var(--spacing-md);left:var(--spacing-md);width:248px;max-width:calc(100% - var(--spacing-md) * 2);z-index:var(--z-index-local-bump);}
+.relation-canvas__plot { position:relative; height:clamp(360px,calc(100dvh - 370px),820px); min-width:0; isolation:isolate; }
+.relation-canvas__search {position:absolute;top:var(--spacing-md);left:var(--spacing-md);width:248px;max-width:calc(100% - var(--spacing-md) * 2);z-index:var(--z-index-dropdown);}
+.relation-canvas__selection {position:absolute;top:0;left:0;width:280px;max-width:calc(100% - var(--spacing-md) * 2);visibility:hidden;z-index:var(--z-index-local-bump);}
 .relation-canvas__expand {margin-inline-start:auto;}
 .relation-canvas__empty {position:absolute;inset:0;display:grid;place-items:center;padding:var(--spacing-md);box-sizing:border-box;}
 .relation-canvas--expanded {display:flex;flex-direction:column;flex:1;min-height:160px;}
