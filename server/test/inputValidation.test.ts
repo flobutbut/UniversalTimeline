@@ -16,6 +16,23 @@ async function call(method: string, path: string, body: unknown, params: Record<
 }
 beforeEach(() => { vi.clearAllMocks(); vi.mocked(query).mockResolvedValue({rows:[]} as never); });
 const noSql = () => { expect(withTransaction).not.toHaveBeenCalled(); expect(query).not.toHaveBeenCalled(); };
+it.each([
+  {targetStoryId:'2',location:null,asPeriod:'true'},
+  {targetStoryId:'2',asPeriod:true},
+  {targetStoryId:'2',location:{anchorType:'period'},asPeriod:true},
+])('refuses malformed display preferences before SQL (%j)',async body=>{
+  const res=await call('post','/stories/:sourceId/entry-points/display',body,{sourceId:'1'});
+  expect(res.status).toHaveBeenCalledWith(400);noSql();
+});
+
+it.each([
+  { targetStoryId: '2', to: null }, { targetStoryId: '2', from: null },
+  { targetStoryId: '2', from: {}, to: null }, { targetStoryId: '2', from: null, to: { anchorType: 'period' } },
+  { targetStoryId: 'invalid', from: null, to: null },
+])('refuses incomplete or malformed relocation locations before opening a transaction (%j)', async body => {
+  const res = await call('post', '/stories/:sourceId/entry-points/move', body, { sourceId: '1' });
+  expect(res.status).toHaveBeenCalledWith(400); noSql();
+});
 
 for(const [path,valid] of [['/periods',entity],['/events',entity],['/stories',story]] as const) {
   it.each([null,[],1,'invalid'])(`POST ${path} refuses non-object bodies before SQL (%j)`, async body => {

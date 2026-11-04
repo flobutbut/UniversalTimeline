@@ -8,6 +8,38 @@ const periods = [period('root', null, 'M65', 'NOW'), ...Array.from({ length: 15 
 const visible = (view: ReturnType<typeof mount>) => view.findAll('[data-period-id]').map(row => row.attributes('data-period-id'));
 const top = (view: ReturnType<typeof mount>, id: string) => (view.get(`[data-period-id="${id}"]`).element as HTMLElement).style.getPropertyValue('--story-period-top');
 
+it('keeps successive periods on the same line, including touching boundaries and gaps, regardless of input order',()=>{
+  const view=mount(StoryTimeline,{props:{collapsible:true,periods:[
+    period('last',null,'1920','1950'),period('middle',null,'1850','1900'),period('first',null,'1800','1850'),
+  ]}});
+  expect(visible(view)).toEqual(['first','middle','last']);
+  expect(top(view,'first')).toBe(top(view,'middle'));expect(top(view,'middle')).toBe(top(view,'last'));
+  view.unmount();
+});
+
+it('only moves downward after overlaps and never reuses an earlier free line for subsequent periods or frises',()=>{
+  const view=mount(StoryTimeline,{props:{collapsible:true,periods:[
+    period('a',null,'1800','1840'),period('b',null,'1820','1900'),period('c',null,'1850','1860'),
+    period('linked-story:2:root',null,'1900','1920'),period('e',null,'1910','1930'),period('f',null,'1940','1950'),
+  ]}});
+  const y=(id:string)=>parseFloat(top(view,id));
+  expect(y('b')).toBeGreaterThan(y('a'));expect(y('c')).toBeGreaterThan(y('b'));
+  expect(y('linked-story:2:root')).toBe(y('c'));
+  expect(y('e')).toBeGreaterThan(y('linked-story:2:root'));expect(y('f')).toBe(y('e'));
+  view.unmount();
+});
+
+it('keeps periods and linked frises below an overlapping parent and applies the same floor to later roots',()=>{
+  const view=mount(StoryTimeline,{props:{collapsible:true,periods:[
+    period('root',null,'1800','2000'),period('phase','root','1800','1850'),
+    period('linked-story:2:period:root','root','1850','1900'),period('later-root',null,'1910','1950'),
+  ]}});
+  expect(parseFloat(top(view,'phase'))).toBeGreaterThan(parseFloat(top(view,'root')));
+  expect(top(view,'phase')).toBe(top(view,'linked-story:2:period:root'));
+  expect(top(view,'later-root')).toBe(top(view,'phase'));
+  view.unmount();
+});
+
 it('clips a cosmic preview to a recent date window without stretching offscreen periods or events',()=>{
   const view=mount(StoryTimeline,{props:{compact:true,proportional:true,referenceTime:Date.UTC(2026,10,4),timeBounds:{start:30,end:0},periods:[
     period('universe',null,'G13.8','NOW'),period('ancient','universe','G10','G4'),period('recent','universe','2000','NOW'),

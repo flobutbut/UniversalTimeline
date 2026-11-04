@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import PeriodGrid from '@/views/HomeView/PeriodGrid.vue';
+import PeriodCard from '@/views/HomeView/PeriodCard.vue';
 import { StoryApiService } from '@/services/StoryApiService';
 import type { ListPeriod } from '@/types/database';
 import {h} from 'vue';
@@ -66,6 +67,38 @@ it.each([
 it.each([['M7','M3'],['2100','2200'],['','']])('does not render an origin with no visible temporal intersection (%s to %s)',(start,end)=>{
   view=mount(PeriodGrid,{props:{periods:[{...period('homo'),startDate:'M2.8',endDate:'TODAY'}],events:[],loading:false,currentPeriod:null,parentPeriod:null,currentStoryId:'1',storyBounds:{startYearsBP:2800000,endYearsBP:0},overviewPeriod:{...period('origin'),startDate:start,endDate:end}},slots:{'overview-context':()=>h('div',{class:'source-reference'},'Origin')}});
   expect(view.find('.source-reference').exists()).toBe(false);
+});
+
+it.each([
+  ['M66', 'TODAY', true, false],
+  ['M2', '2100', false, true],
+  ['M66', '2100', true, true],
+  ['M2.8', 'TODAY', false, false],
+  ['M2', 'M1', false, false],
+])('marks only the clipped ends of the source period (%s to %s)', (start, end, before, after) => {
+  const origin = { ...period('origin'), startDate: start as string, endDate: end as string };
+  view = mount(PeriodGrid, {
+    props: { periods: [{ ...period('homo'), startDate: 'M2.8', endDate: 'TODAY' }], events: [], loading: false, currentPeriod: null, parentPeriod: null, currentStoryId: '1', overviewPeriod: origin },
+    slots: { 'overview-context': ({ style, continuation }) => h(PeriodCard, { period: origin, variant: 'parent', isSelected: false, style, continuesBefore: continuation.before, continuesAfter: continuation.after }) },
+  });
+  const source = view.get('.period-card--parent');
+  expect(source.classes().includes('period-card--continues-before')).toBe(before);
+  expect(source.classes().includes('period-card--continues-after')).toBe(after);
+  expect((view.get('[data-period-id="homo"]').element as HTMLElement).style.getPropertyValue('--period-width')).toBe('100%');
+});
+
+it('shows the Cenozoic continuing past both ends of the hominin window, updating when the frame reaches the present', async () => {
+  const origin = { ...period('cenozoic'), startDate: 'M66', endDate: 'TODAY' };
+  view = mount(PeriodGrid, {
+    props: { periods: [{ ...period('hominins'), startDate: 'M7', endDate: 'M1.2' }], events: [], loading: false, currentPeriod: null, parentPeriod: null, currentStoryId: '1', overviewPeriod: origin },
+    slots: { 'overview-context': ({ style, continuation }) => h(PeriodCard, { period: origin, variant: 'parent', isSelected: false, style, continuesBefore: continuation.before, continuesAfter: continuation.after }) },
+  });
+  const source = () => view.get('.period-card--parent');
+  expect(source().classes()).toEqual(expect.arrayContaining(['period-card--continues-before', 'period-card--continues-after']));
+  expect((source().element as HTMLElement).style.width).toBe('100%');
+  await view.setProps({ periods: [{ ...period('hominins'), startDate: 'M7', endDate: 'TODAY' }] });
+  expect(source().classes()).toContain('period-card--continues-before');
+  expect(source().classes()).not.toContain('period-card--continues-after');
 });
 
 it('keeps the back control visible when the parent dates are unknown', async () => {

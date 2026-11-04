@@ -9,6 +9,7 @@ import { storyChildrenOf, resolvePeriodNavFromSnapshot, type StoryPeriodNavSnaps
 import { timelineLevel, levelNeighbors, timelinePeriodPath, contextPeriodNeighbors, periodPresentationTargets, type TimelineTarget, type TimelineReturnFrame } from '@/lib/timelineNavigation';
 import { universeStoryTrail } from '@/lib/universeStoryTrail';
 import { storyNavigationLinks, indexStoryNavigationLinks, rootStoryNavigationLinks } from '@/lib/storyNavigationLinks';
+import { linkedStoryPeriods } from '@/lib/linkedStoryPeriods';
 
 const ENTRY_STORY_ID = '1';
 
@@ -63,6 +64,7 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   const usesContextNeighbors = computed(() => !!chronologicalPeriodId.value && !!selectedContext.value &&
     (selectedContext.value.id === currentStoryId.value || selectedContext.value.presentations.some(view => view.storyId === currentStoryId.value && view.periodId === chronologicalPeriodId.value)));
   const rootStories = computed(() => currentStory.value ? rootStoryNavigationLinks(currentStory.value) : []);
+  const linkedPeriods = computed(() => linkedStoryPeriods(currentStory.value,currentPeriod.value?.id ?? null,stories.value));
   const navigationReference = computed(() => {
     if (currentPeriod.value) return null;
     const context=selectedContext.value;
@@ -393,7 +395,7 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   return {
     loading, error, retryLoad, parentStack, currentPeriod, displayedPeriods, storyEvents,
     currentStoryId, breadcrumb, storyBreadcrumb, currentStoryBounds, previousPeriod, nextPeriod, navigationContexts, contextId, referencePeriodId, returnPath,
-    contextBar, contextStories, rootStories, returnTitle, navigationChoices, chooseNavigationTarget, selectNavigationContext,
+    contextBar, contextStories, rootStories, linkedPeriods, returnTitle, navigationChoices, chooseNavigationTarget, selectNavigationContext,
     loadInitialData, openStory, handlePeriodClick, handleEventClick, goBack, selectStory, navigateToBreadcrumb, navigateToStoryBreadcrumb, navigateAdjacentPeriod,
   };
 }

@@ -10,7 +10,7 @@
       <div v-else class="database-story-detail-wrap database-view__content">
         <StoryDetailPanel :key="selectedStoryId" :story="selectedStory" :loading="state.loadingStoryDetails" :updating="relationsBusy || visibilityBusy || state.loadingDetails || saveLoading || deleteLoading" :error="state.storyError" :settings-error="storySettingsError"
           @retry="retryStory" @period-imported="retryStory" @remove-period="removePeriodFromStory" @remove-event="removeEventFromStory" @add-periods="addPeriodsToStory" @event-added="retryStory" @entity-converted="retryStory"
-          @add-child-stories="addChildStoriesToStory" @remove-child-story="removeChildStoryFromStory" @add-event-anchor="addEventAnchorToStory" @remove-event-anchor="removeEventAnchorFromStory" @change-event-importance="changeEventImportance"
+          @add-child-stories="addChildStoriesToStory" @move-child-story="moveChildStoryToColumn" @display-child-story="displayChildStory" @remove-child-story="removeChildStoryFromStory" @add-event-anchor="addEventAnchorToStory" @remove-event-anchor="removeEventAnchorFromStory" @change-event-importance="changeEventImportance"
           @add-parent-entry="addParentEntryToStory" @remove-parent-entry="removeParentEntryFromStory" @set-parent="setParentOfStory"
           @change-root="changeRootPeriod" @edit-period="onEditStoryPeriod" @create-story-from-period="startStoryFromPeriod" @edit-event="onEditStoryEvent" @save-story="saveSelectedStory" @delete-story="deleteSelectedStory" @toggle-visibility="toggleStoryVisibility" />
       </div>
@@ -102,6 +102,8 @@ const {
   removeEventFromStory,
   addPeriodsToStory,
   addChildStoriesToStory,
+  moveChildStoryToColumn,
+  displayChildStory,
   removeChildStoryFromStory,
   addEventAnchorToStory,
   removeEventAnchorFromStory,

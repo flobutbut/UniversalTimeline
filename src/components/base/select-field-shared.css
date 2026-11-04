@@ -23,7 +23,8 @@
   border-color: var(--color-border-dark);
 }
 
-.base-select__trigger:focus {
+.base-select__trigger:focus,
+.base-select__trigger:focus-within {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px var(--color-primary-light);
 }
@@ -125,7 +126,8 @@
   border-color: var(--color-status-error-foreground);
 }
 
-.base-select--error .base-select__trigger:focus {
+.base-select--error .base-select__trigger:focus,
+.base-select--error .base-select__trigger:focus-within {
   box-shadow: 0 0 0 2px var(--color-status-error-background);
 }
 

@@ -6,7 +6,7 @@
 
 import { ref, readonly } from 'vue';
 import type { ScalablePeriod } from '@/services/TimelineScalingService';
-import { TimelineScalingService } from '@/services/TimelineScalingService';
+import { periodCoordinates, TimelineScalingService } from '@/services/TimelineScalingService';
 import { comparableYearsBeforePresent } from '@temporal';
 
 const DEFAULT_ROW_HEIGHT = 48;
@@ -65,11 +65,21 @@ export function useTimelineScaling() {
     };
   };
 
+  /** Distinguish a clipped reference from a true boundary, using the same clock as its layout. */
+  const getPeriodContinuation = (period: ScalablePeriod) => {
+    const { start, end } = periodCoordinates(period, referenceTime.value);
+    return {
+      before: totalDuration.value > 0 && start !== null && start > startYears.value,
+      after: totalDuration.value > 0 && end !== null && startYears.value - end > totalDuration.value,
+    };
+  };
+
   return {
     totalDuration: readonly(totalDuration),
     startYears: readonly(startYears),
     updateFromPeriods,
     getPeriodLayoutStyle,
+    getPeriodContinuation,
     getEventLayoutStyle,
   };
 }

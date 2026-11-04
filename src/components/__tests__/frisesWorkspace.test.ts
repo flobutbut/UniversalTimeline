@@ -55,7 +55,9 @@ it('opens on the frise cards and opens a frise in its own tab', async () => {
   expect(view.get('.story-detail-panel__meta-actions a').attributes('href')).toBe('/timeline?story=1&entry=universe');
   expect(view.findAll('.story-detail-panel__meta-actions > *').map(item => item.text())).toEqual(['Ajouter un événement', 'Voir dans la timeline']);
   expect(view.get('.story-detail-panel__meta-actions a').find('svg').exists()).toBe(false);
-  expect(view.findAll('.story-detail-panel__tabs-bar button').map(item => item.text())).toEqual(['Aperçu', 'Périodes', 'Événements']);
+  expect(view.findAll('.story-detail-panel__tabs-bar button').map(item => item.text())).toEqual(['Périodes', 'Événements', 'Propriétés']);
+  expect(view.find('.story-period-columns').exists()).toBe(true);
+  await button('Propriétés').trigger('click'); await flushPromises();
   expect(view.text()).toContain('Paramètres de la frise');
   await button('Toutes les frises').trigger('click'); await flushPromises();
   expect(router.currentRoute.value.query.story).toBeUndefined();
@@ -230,12 +232,13 @@ it('filters the frise list by time overlap and clears it from the chip', async (
   expect(cards()).toEqual(['Guerre froide', 'Histoire de France']);
   expect(view.find('.filter-chip').exists()).toBe(false);
 });
-it('saves the frise settings from the Aperçu tab and reloads the frise', async () => {
+it('saves the frise settings from the Propriétés tab and reloads the frise', async () => {
   vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
   const update = vi.spyOn(api, 'updateStory').mockImplementation(async (id, data) => ({ ...summaries[0], title: data.title }));
   vi.mocked(api.getStory).mockImplementation(async id => ({ ...story(id), title: update.mock.calls.length ? { fr: 'Guerre froide renommée', en: 'Cold War' } : story(id).title }));
   await start('/database?story=1');
   expect(button('Enregistrer')).toBeUndefined();
+  await button('Propriétés').trigger('click'); await flushPromises();
   await view.get('.story-settings-form input[placeholder="Titre en français"]').setValue('Guerre froide renommée');
   expect(button('Enregistrer').exists()).toBe(true);
   await view.get('.story-settings-form form').trigger('submit'); await flushPromises();
@@ -250,6 +253,7 @@ it('changes the frise visibility from the danger zone after confirmation', async
   await start('/database?story=1');
   expect(view.find('.story-detail-panel__meta-actions [aria-pressed]').exists()).toBe(false);
   const ui = useUiStore();
+  await button('Propriétés').trigger('click'); await flushPromises();
   await button('Rendre privée').trigger('click'); await flushPromises();
   expect(ui.confirmation?.title).toBe('Rendre la frise privée');
   ui.settleConfirmation(ui.confirmation!.id, false); await flushPromises();

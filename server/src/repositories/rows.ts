@@ -39,5 +39,5 @@ export type JoinedStoryRow = StorySummaryRow & Pick<StoryRow, 'parent_story_id'>
   preview_events?: Array<Pick<EventRow, 'id' | 'date' | 'date_years_bp'>>;
 };
 export interface Anchor { type: 'period' | 'event'; id: string }
-export interface ChildStoryRow { id: number; title_fr: string; title_en: string | null; anchors: Anchor[] | null; at_root?: boolean }
+export interface ChildStoryRow { id: number; title_fr: string; title_en: string | null; anchors: Array<Anchor & { displayAsPeriod?: boolean }> | null; at_root?: boolean; root_display_as_period?: boolean }
 export type { TemporalCandidate } from '../domain/storyTemporalBounds.js';

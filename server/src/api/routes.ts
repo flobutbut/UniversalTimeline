@@ -203,6 +203,23 @@ router.post('/stories/:parentId/child-stories', endpoint('Erreur lors du rattach
   const rows = await stories.linkChildren(id, ids, anchor);
   res.json(multiple ? { ids: rows.map(row => String(row.id)) } : rows[0]);
 }));
+router.post('/stories/:sourceId/entry-points/display', endpoint('Impossible de modifier l’affichage du lien.', async (req,res) => {
+  const sourceId = parseStoryId(req.params.sourceId,'sourceId'), body = inputObject(req.body);
+  const targetId = parseStoryId(body.targetStoryId,'targetStoryId');
+  const location = body.location === null ? null : parseAnchor(body.location);
+  if (typeof body.asPeriod !== 'boolean') throw new InputValidationError('asPeriod','Un booléen est requis.');
+  await stories.setEntryDisplay(sourceId,targetId,location,body.asPeriod);
+  res.status(204).send();
+}));
+router.post('/stories/:sourceId/entry-points/move', endpoint('Impossible de déplacer le rattachement.', async (req, res) => {
+  const sourceId = parseStoryId(req.params.sourceId, 'sourceId');
+  const body = inputObject(req.body);
+  const targetId = parseStoryId(body.targetStoryId, 'targetStoryId');
+  const from = body.from === null ? null : parseAnchor(body.from);
+  const to = body.to === null ? null : parseAnchor(body.to);
+  await stories.moveEntry(sourceId, targetId, from, to);
+  res.status(204).send();
+}));
 router.post('/stories/:sourceId/entry-points', endpoint('Impossible de modifier les points d’entrée.', async (req, res) => {
   const sourceId = parseStoryId(req.params.sourceId, 'sourceId');
   const body=inputObject(req.body);

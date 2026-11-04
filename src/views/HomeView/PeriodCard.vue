@@ -9,6 +9,8 @@
         'has-children': period.hasChildren,
         'period-card--expanded': expanded,
         'period-card--wrap': wrapContent,
+        'period-card--continues-before': continuesBefore,
+        'period-card--continues-after': continuesAfter,
       },
     ]"
     :data-period-id="period.id"
@@ -62,6 +64,8 @@ const props = withDefaults(
     variant?: 'timeline' | 'parent';
     expanded?: boolean;
     wrapContent?: boolean;
+    continuesBefore?: boolean;
+    continuesAfter?: boolean;
   }>(),
   { variant: 'timeline' }
 );
@@ -141,6 +145,7 @@ const handleClick = () => {
 }
 
 .main-container {
+  position: relative;
   background: var(--color-surface-raised);
   border: none;
   border-radius: var(--radius-sm);
@@ -155,6 +160,21 @@ const handleClick = () => {
   transition: box-shadow var(--transition-normal), background-color var(--transition-normal);
   box-shadow: var(--shadow-sm);
 }
+
+/* A clipped reference runs into the screen edge; a real temporal bound keeps its gutter. */
+.period-card--continues-before .main-container { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.period-card--continues-after .main-container { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.period-card--continues-before .main-container::before,
+.period-card--continues-after .main-container::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  width: calc(var(--spacing-md) + 1px);
+  background: inherit;
+  pointer-events: none;
+}
+.period-card--continues-before .main-container::before { right: 100%; }
+.period-card--continues-after .main-container::after { left: 100%; }
 
 @media (min-width: 769px) {
   .period-card--timeline {

@@ -86,8 +86,48 @@ it('closes on Escape and outside click and returns keyboard focus to its trigger
 it('updates its displayed selection from parent props and closes when disabled while open', async () => {
   view = mount(Select, { props: { modelValue: null, options, label: 'Choix', error: 'Erreur de choix', hint: 'Aide' } });
   await view.setProps({ modelValue: '1' });
-  expect(view.get('.base-select__selected-text').text()).toBe('Option texte');
+  expect((view.get('input').element as HTMLInputElement).value).toBe('Option texte');
   expect(view.text()).toContain('Erreur de choix'); expect(view.text()).toContain('Aide');
   await open(); await view.setProps({ disabled: true });
   expect(view.find('[role="listbox"]').exists()).toBe(false);
+});
+
+it('searches in the original field with a single combobox and selects a match by keyboard', async () => {
+  view = mount(Select, { props: { modelValue: '1', options, label: 'Choix' }, attachTo: document.body });
+  const input = view.get('input');
+  expect((input.element as HTMLInputElement).value).toBe('Option texte');
+  await input.trigger('focus');
+  await input.setValue('Une autre');
+  expect(view.findAll('input')).toHaveLength(1);
+  expect(view.findAll('[role="combobox"]')).toHaveLength(1);
+  expect(view.get('input').element).toBe(input.element);
+  expect(input.element.closest('.base-select__trigger')).not.toBeNull();
+  expect(view.findAll('[role="option"]')).toHaveLength(1);
+  await input.trigger('keydown', { key: 'ArrowDown' });
+  await input.trigger('keydown', { key: 'Enter' }); await flushPromises();
+  expect(view.emitted('change')).toEqual([['other']]);
+  expect(view.find('[role="listbox"]').exists()).toBe(false);
+  expect(document.activeElement).toBe(input.element);
+  await view.setProps({ modelValue: 'other' });
+  expect((input.element as HTMLInputElement).value).toBe('Une autre option');
+});
+
+it('restores the selected label when an inline search is dismissed without a selection', async () => {
+  view = mount(Select, { props: { modelValue: '1', options }, attachTo: document.body });
+  const input = view.get('input');
+  await input.setValue('introuvable');
+  expect(view.get('[role="status"]').text()).toBe('Aucun résultat trouvé');
+  document.body.click(); await flushPromises();
+  expect(view.find('[role="listbox"]').exists()).toBe(false);
+  expect((input.element as HTMLInputElement).value).toBe('Option texte');
+  expect(view.emitted('change')).toBeUndefined();
+});
+
+it('does not select or close the field while confirming composed text', async () => {
+  view = mount(Select, { props: { modelValue: null, options } });
+  await view.get('input').setValue('Option');
+  view.get('input').element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', isComposing: true, bubbles: true }));
+  await flushPromises();
+  expect(view.emitted('change')).toBeUndefined();
+  expect(view.find('[role="listbox"]').exists()).toBe(true);
 });

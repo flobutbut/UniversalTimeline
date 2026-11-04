@@ -31,8 +31,8 @@ async function start(data = story('one'), realTimeline = false, tab: 'overview' 
     StoryTimeline: realTimeline ? false : { name: 'StoryTimeline', props: ['selectedPeriodId', 'selectedEventId'], template: '<div />' },
     StoryRelatedPickerModal: true,
   } } }); await flushPromises();
-  // Les périodes ont leur propre onglet ; l'Aperçu porte paramètres, catégories et relations.
-  if (tab === 'periods') { view.getComponent(Tabs).vm.$emit('update:modelValue', 'periods'); await flushPromises(); }
+  // Périodes est l’onglet par défaut ; Propriétés porte paramètres, catégories et relations.
+  if (tab === 'overview') { view.getComponent(Tabs).vm.$emit('update:modelValue', 'overview'); await flushPromises(); }
 }
 async function pick(p: Period) { view.getComponent(FilterBar).vm.$emit('pickPeriod', p); await flushPromises(); }
 async function search(query: string) {
@@ -493,10 +493,13 @@ function mockTabScrollGeometry() {
   return { viewport, content, scrollTo };
 }
 
-it('opens a frise on the Aperçu tab with its settings, categories and relations beneath the preview', async () => {
-  await start(story('one'), false, 'overview');
+it('opens on periods and puts properties last, with settings, categories and relations beneath the preview', async () => {
+  await start(story('one'));
   const tabs = view.getComponent(Tabs);
-  expect(tabs.findAll('button').map(tab => tab.text())).toEqual(['Aperçu', 'Périodes', 'Événements']);
+  expect(tabs.findAll('button').map(tab => tab.text())).toEqual(['Périodes', 'Événements', 'Propriétés']);
+  expect(tabs.props('modelValue')).toBe('periods');
+  expect(view.get('.story-period-columns').isVisible()).toBe(true);
+  await button('Propriétés').trigger('click'); await flushPromises();
   expect(tabs.props('modelValue')).toBe('overview');
   expect(view.findComponent({ name: 'StoryTimeline' }).exists()).toBe(true);
   const overview = view.get('.story-overview');
@@ -515,13 +518,13 @@ it('returns to the preview smoothly without losing the selected event or replayi
   await button('Événements').trigger('click'); await flushPromises();
   view.findAllComponents(FinderItem).find(row => row.props('itemId') === 'event')!.vm.$emit('click'); await flushPromises();
   viewport.scrollTop = 160;
-  await button('Aperçu').trigger('click'); await flushPromises();
+  await button('Propriétés').trigger('click'); await flushPromises();
   expect(scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: 'smooth' });
   expect(view.getComponent(Tabs).props('modelValue')).toBe('overview');
   expect(view.find('.story-overview').exists()).toBe(true);
   viewport.scrollTop = 0;
   const calls = scrollTo.mock.calls.length;
-  await button('Aperçu').trigger('click'); await flushPromises();
+  await button('Propriétés').trigger('click'); await flushPromises();
   expect(scrollTo).toHaveBeenCalledTimes(calls);
   await button('Événements').trigger('click'); await flushPromises();
   expect(view.get('.event-detail-label').text()).toBe('event');

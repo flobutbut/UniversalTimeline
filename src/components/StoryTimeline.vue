@@ -104,6 +104,7 @@ import type { StoryTimelinePeriod as InPeriod, StoryTimelineEvent as InEvent } f
 import type { EventImportance } from '@/types/database';
 import { COMPACT_BAR_HEIGHT, COMPACT_LANE_GAP, COMPACT_ROOT_HEIGHT, INTERACTIVE_BAR_SIZES, layoutCompactLanes } from '@/lib/compactStoryTimeline';
 import { comparableYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
+import { layoutSequentialLanes } from '@/lib/sequentialTimelineLanes';
 import {
   formatStoryTimelineBoundLabel,
   formatStoryTimelinePeriodDetail,
@@ -227,7 +228,7 @@ function toLeft(ybp: number): number {
   return ((b.max - ybp) / b.range) * 100;
 }
 
-// ─── Périodes positionnées + stagger vertical ─────────────────────────────────
+// ─── Périodes positionnées dans l’ordre chronologique ──────────────────────────
 
 interface PosPeriod { id: string; label: string; detail: string; left: number; width: number; startYbp: number; endYbp:number; row: number; top: number; depth: number; isRoot: boolean }
 
@@ -280,25 +281,14 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
     }
   }
 
-  // Parcours en profondeur : racine → enfants (du plus vieux au plus récent)
-  // row est un flottant : on ajoute GROUP_GAP avant chaque nouveau groupe (sauf le premier)
-  const GROUP_GAP = 0.6;
+  // La hiérarchie fournit la profondeur et le pliage, pas une ligne par élément.
   const ordered: PosPeriod[] = [];
-  let rowCursor = 0;
-  let firstGroup = true;
   const visited = new Set<string>();
 
   function traverse(p: DatedPeriod, depth: number) {
     if (visited.has(p.id)) return;
     visited.add(p.id);
-    const isRoot = depth === 0;
-    if (isRoot && !firstGroup) rowCursor += GROUP_GAP;
-    if (isRoot) firstGroup = false;
-    const pos = toPos(p, depth);
-    pos.row = rowCursor;
-    pos.top = rowCursor * rowStep.value + ROW_OFFSET;
-    rowCursor += 1;
-    ordered.push(pos);
+    ordered.push(toPos(p, depth));
     const children = (childrenMap.get(p.id) ?? [])
       .slice()
       .sort((a, b_) => {
@@ -331,7 +321,8 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
       return {...period,left,width:right-left,row:period.lane};
     });
   }
-  return ordered;
+  return layoutSequentialLanes(ordered.map(period => ({ period, start: period.startYbp, end: period.endYbp, depth: period.depth })))
+    .map(({ period, lane }) => ({ ...period, row: lane, top: ROW_OFFSET + lane * rowStep.value }));
 });
 const compactPeriodsHeight = computed(() => props.compact ? Math.max(0, ...positionedPeriods.value.map(p => p.top + (p.isRoot ? barSizes.value.rootHeight : barSizes.value.barHeight))) : 0);
 

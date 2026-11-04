@@ -131,6 +131,14 @@ export class StoryApiService {
     });
   }
 
+  async moveEntryPoint(sourceId: string, targetStoryId: string, from: StoryAnchor | null, to: StoryAnchor | null): Promise<void> {
+    const location = (anchor: StoryAnchor | null) => anchor ? { anchorType: anchor.type, anchorId: anchor.id } : null;
+    await apiClient.post(`/stories/${sourceId}/entry-points/move`, { targetStoryId, from: location(from), to: location(to) });
+  }
+  async setEntryDisplay(sourceId: string, targetStoryId: string, anchor: StoryAnchor | null, asPeriod: boolean): Promise<void> {
+    await apiClient.post(`/stories/${sourceId}/entry-points/display`, { targetStoryId, location: anchor ? { anchorType: anchor.type, anchorId: anchor.id } : null, asPeriod });
+  }
+
   /** Importance d'un événement dans cette frise ; aucune relance automatique (écriture). */
   async setEventImportance(storyId: string, eventId: string, importance: EventImportance): Promise<void> {
     await apiClient.put(`/stories/${storyId}/events/${encodeURIComponent(eventId)}/importance`, { importance });

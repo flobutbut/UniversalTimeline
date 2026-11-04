@@ -164,9 +164,9 @@ export async function transferMovedPeriodLinks(client: TransactionClient, source
       ON CONFLICT DO NOTHING`, [sourceId, targetId, childIds]);
   }
   await client.query(`
-    WITH moved AS (DELETE FROM public.story_entry_points WHERE source_story_id = $1 AND period_id = ANY($3::varchar[]) RETURNING target_story_id, period_id)
-    INSERT INTO public.story_entry_points (source_story_id, target_story_id, period_id)
-    SELECT $2, target_story_id, period_id FROM moved WHERE target_story_id <> $2 ON CONFLICT DO NOTHING`, [sourceId, targetId, periodIds]);
+    WITH moved AS (DELETE FROM public.story_entry_points WHERE source_story_id = $1 AND period_id = ANY($3::varchar[]) RETURNING target_story_id, period_id, display_as_period)
+    INSERT INTO public.story_entry_points (source_story_id, target_story_id, period_id, display_as_period)
+    SELECT $2, target_story_id, period_id, display_as_period FROM moved WHERE target_story_id <> $2 ON CONFLICT DO NOTHING`, [sourceId, targetId, periodIds]);
   await client.query(`
     WITH moved AS (DELETE FROM public.story_period_presentations WHERE context_story_id = $1 AND period_id = ANY($3::varchar[]) RETURNING period_id, target_story_id)
     INSERT INTO public.story_period_presentations (context_story_id, period_id, target_story_id)
