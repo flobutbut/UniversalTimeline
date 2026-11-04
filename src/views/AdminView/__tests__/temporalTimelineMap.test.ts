@@ -68,3 +68,30 @@ it('packs rows using measured preview heights and keeps only a small gap when ev
   expect(withoutEvents.height).toBe(withEvents.height-54);
   expect(withoutEvents.rows.map(row=>[row.left,row.width])).toEqual(withEvents.rows.map(row=>[row.left,row.width]));
 });
+it('juxtaposes Antiquity and contemporary history on the same level using their actual date intervals',()=>{
+  const network=leafNetwork();
+  const contents=new Map([['1',content('1','M3','NOW')],['2',content('2','-3300','0476')],['3',content('3','1789','NOW')]]);
+  const map=buildTemporalTimelineMap(network,contents,new Set(),now,new Map([['1',64],['2',76],['3',46]]));
+  const parent=map.rows.find(row=>row.story.id==='1')!;
+  const antiquity=map.rows.find(row=>row.story.id==='2')!;
+  const contemporary=map.rows.find(row=>row.story.id==='3')!;
+  expect(antiquity.top).toBe(contemporary.top);
+  expect(antiquity.top).toBe(parent.top+64+8);
+  expect(antiquity.left+antiquity.width).toBeLessThan(contemporary.left);
+  expect(map.height).toBe(antiquity.top+76+8); // The tallest preview defines the shared lane's height.
+  const hiddenEvents=buildTemporalTimelineMap(network,contents,new Set(),now,new Map([['1',46],['2',58],['3',28]]));
+  expect(hiddenEvents.height).toBe(map.height-36);
+  expect(hiddenEvents.rows.find(row=>row.story.id==='2')!.top).toBe(hiddenEvents.rows.find(row=>row.story.id==='3')!.top);
+});
+it('separates overlapping frises but reuses the same lane for a following interval with a shared boundary',()=>{
+  const network=leafNetwork();network.links=network.links.filter(link=>link.type==='legacy');
+  network.stories.push({id:'4',title:'Suite',isPublic:true,periods:1,events:0});
+  network.links.push({id:'fourth',type:'legacy',source:'1',target:'4',anchor:null});
+  const contents=new Map([['1',content('1','M100','NOW')],['2',content('2','M90','M50')],['3',content('3','M70','M20')],['4',content('4','M50','NOW')]]);
+  const map=buildTemporalTimelineMap(network,contents,new Set(),now);
+  const first=map.rows.find(row=>row.story.id==='2')!,overlapping=map.rows.find(row=>row.story.id==='3')!,following=map.rows.find(row=>row.story.id==='4')!;
+  expect(first.top).not.toBe(overlapping.top);
+  expect(first.top).toBe(following.top);
+  expect(first.left+first.width).toBeCloseTo(following.left,10);
+  expect(map.rows).toHaveLength(4);
+});

@@ -20,12 +20,12 @@
         <template #search><RelationGraphSearch :nodes="graph.nodes" @select="locateObject" /></template>
         <span class="sr-only" role="status">{{ selectionStatus }}</span>
         <div class="admin-timelines__map" :style="{'--map-width':layout.width+'px','--map-height':layout.height+'px'}">
-          <span v-if="layout.undatedTop!==null" class="admin-timelines__undated" :style="{top:`calc(${layout.undatedTop}px * var(--canvas-row-scale, 1))`}">Dates non déterminées</span>
+          <span v-if="layout.undatedTop!==null" class="admin-timelines__undated" :style="{top:layout.undatedTop+'px'}">Dates non déterminées</span>
           <div v-for="row in projectedRows" :key="row.story.id" class="admin-timelines__position" :data-temporal-story="row.story.id"
             :data-start="row.bounds?.start" :data-end="row.bounds?.end" :data-dated="!!row.bounds"
-            :style="{'--row-left':row.left+'px','--row-width':row.width+'px','--row-top':row.top+'px',left:row.projected.left+'px',width:row.projected.width+'px',visibility:row.projected.visible?'visible':'hidden',top:`calc(${row.top}px * var(--canvas-row-scale, 1))`}">
+            :style="{'--row-left':row.left+'px','--row-width':row.width+'px','--row-top':row.top+'px',left:row.projected.left+'px',width:row.projected.width+'px',visibility:row.projected.visible?'visible':'hidden',top:row.top+'px'}">
             <TimelineMapCard :ref="value=>registerCard(row.story.id,value)" :story="row.story" :content="contents.get(row.story.id)" :show-events="showEvents"
-              :child-count="row.childCount" :collapsed="collapsed.has(row.story.id)" :selected="selectedNode" :bounds="row.projected.bounds" :reference-time="layout.referenceTime" :align-title-end="viewport.width-row.projected.left<240"
+              :child-count="row.childCount" :collapsed="collapsed.has(row.story.id)" :selected="selectedNode" :bounds="row.projected.bounds" :full-bounds="row.bounds" :reference-time="layout.referenceTime" :align-title-end="viewport.width-row.projected.left<240"
               @select="selectedId=$event" @toggle="toggleBranch" @resize="setCardHeight(row.story.id,$event)" />
           </div>
         </div>
@@ -133,9 +133,9 @@ onMounted(load);
 .admin-timelines__header > div {flex:1;min-width:240px;}
 .admin-timelines h2 {margin:0;font-size:var(--font-size-2xl);}
 .admin-timelines p {margin:var(--spacing-sm) 0;color:var(--color-text-secondary);font:var(--type-compact);}
-.admin-timelines__map {position:relative;width:var(--map-width);height:calc(var(--map-height) * var(--canvas-row-scale, 1));}
+.admin-timelines__map {position:relative;width:var(--map-width);height:var(--map-height);}
 .admin-timelines__position {position:absolute;}
-.admin-timelines__position > :deep(.timeline-map-card) {width:calc(100% / var(--canvas-row-scale, 1));transform:scale(var(--canvas-row-scale, 1));transform-origin:top left;}
-.admin-timelines__undated {position:absolute;left:var(--canvas-offset-x, 0px);transform:scale(var(--canvas-row-scale, 1));transform-origin:top left;white-space:nowrap;font:var(--type-meta);color:var(--color-text-secondary);}
+.admin-timelines__position > :deep(.timeline-map-card) {width:100%;}
+.admin-timelines__undated {position:absolute;left:var(--canvas-offset-x, 0px);white-space:nowrap;font:var(--type-meta);color:var(--color-text-secondary);}
 .admin-timelines--expanded {position:fixed;inset:0;z-index:var(--z-index-modal);height:100dvh;box-sizing:border-box;padding:var(--spacing-md);overflow:auto;background:var(--color-background-default);color:var(--color-text-primary);}
 </style>

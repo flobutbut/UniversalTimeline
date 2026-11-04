@@ -7,7 +7,7 @@ export const TEMPORAL_MAP_ROW_HEIGHT=72;
 export const TEMPORAL_MAP_ROW_GAP=8;
 export interface TimelineBounds {start:number;end:number}
 export interface TemporalMapRow {
-  story:RelationStory;left:number;width:number;top:number;bounds:TimelineBounds|null;childCount:number;
+  story:RelationStory;left:number;width:number;top:number;depth:number;bounds:TimelineBounds|null;childCount:number;
 }
 export interface TemporalViewport {x:number;scale:number;width:number}
 
@@ -40,26 +40,43 @@ export function buildTemporalTimelineMap(network:RelationsNetwork,contents:Map<s
   const forest=buildTimelineForest(network,contents);
   const rows:TemporalMapRow[]=[];
   const undated:TemporalMapRow[]=[];
-  function visit(branch:TimelineBranch) {
+  function visit(branch:TimelineBranch,depth:number) {
     const interval=bounds.get(branch.story.id)??null;
     const row={story:branch.story,bounds:interval,childCount:branch.children.length,
       left:interval&&duration?(start-interval.start)/duration*TEMPORAL_MAP_WIDTH:0,
       width:interval?(duration?(interval.start-interval.end)/duration*TEMPORAL_MAP_WIDTH:0):400,
-      top:0};
+      top:0,depth};
     (interval?rows:undated).push(row);
-    if (!collapsed.has(branch.story.id)) branch.children.forEach(visit);
+    if (!collapsed.has(branch.story.id)) branch.children.forEach(child=>visit(child,depth+1));
   }
-  forest.roots.forEach(visit);
+  forest.roots.forEach(branch=>visit(branch,0));
   let cursor=0;
-  function placeRows(items:TemporalMapRow[]) {
-    items.forEach(row=>{
-      row.top=cursor;
-      cursor+=(heights.get(row.story.id)??(TEMPORAL_MAP_ROW_HEIGHT-TEMPORAL_MAP_ROW_GAP))+TEMPORAL_MAP_ROW_GAP;
-    });
+  const rowHeight=(row:TemporalMapRow)=>heights.get(row.story.id)??(TEMPORAL_MAP_ROW_HEIGHT-TEMPORAL_MAP_ROW_GAP);
+  const levels=new Map<number,TemporalMapRow[]>();
+  for (const row of rows) {
+    const level=levels.get(row.depth)??[];
+    level.push(row);levels.set(row.depth,level);
   }
-  placeRows(rows);
+  for (const [,level] of [...levels].sort(([a],[b])=>a-b)) {
+    const lanes:Array<{end:number;items:TemporalMapRow[]}>=[];
+    const chronological=[...level].sort((a,b)=>b.bounds!.start-a.bounds!.start || a.bounds!.end-b.bounds!.end || a.story.id.localeCompare(b.story.id));
+    for (const row of chronological) {
+      // An interval may begin at the previous one's end; overlapping frises keep separate lanes.
+      let lane=lanes.find(lane=>lane.end>=row.bounds!.start
+        && !(lane.end===row.bounds!.start&&row.bounds!.start===row.bounds!.end&&lane.items[lane.items.length-1].width===0));
+      if (!lane) {lane={end:row.bounds!.end,items:[]};lanes.push(lane);}
+      lane.items.push(row);lane.end=row.bounds!.end;
+    }
+    for (const lane of lanes) {
+      lane.items.forEach(row=>{row.top=cursor;});
+      cursor+=Math.max(...lane.items.map(rowHeight))+TEMPORAL_MAP_ROW_GAP;
+    }
+  }
   const undatedTop=cursor+32;
-  if (undated.length) {cursor=undatedTop+32;placeRows(undated);}
+  if (undated.length) {
+    cursor=undatedTop+32;
+    undated.forEach(row=>{row.top=cursor;cursor+=rowHeight(row)+TEMPORAL_MAP_ROW_GAP;});
+  }
   return {rows:[...rows,...undated],width:TEMPORAL_MAP_WIDTH+400,
     height:cursor||TEMPORAL_MAP_ROW_HEIGHT,
     undatedTop:undated.length?undatedTop:null,parents:forest.parents,referenceTime:now};

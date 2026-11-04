@@ -93,7 +93,7 @@ it('moves following frises upward when hiding events shrinks a preview, and rest
 it('reveals a searched object inside folded branches, and a hidden event restores its marker',async()=>{
   await start();await button('Tout replier').trigger('click');expect(view.findAllComponents(TimelineMapCard)).toHaveLength(1);
   const input=view.get('[role="combobox"]');await input.setValue('Privée');await input.trigger('keydown',{key:'Enter'});await flushPromises();
-  expect(view.findAllComponents(TimelineMapCard)).toHaveLength(2);
+  expect(view.findAllComponents(TimelineMapCard)).toHaveLength(3);
   expect(card('2').classes()).toContain('timeline-map-card--selected');
   expect(view.get('[role="status"]').text()).toContain('Privée');
   expect(view.find('[aria-label="Objet sélectionné"]').exists()).toBe(false);
