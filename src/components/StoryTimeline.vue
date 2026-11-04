@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasItems" class="story-timeline" :class="{ 'story-timeline--compact': compact, 'story-timeline--collapsible': collapsible }" :style="{ '--story-bar-height': barSizes.barHeight + 'px', '--story-root-height': barSizes.rootHeight + 'px' }" @click.self="emit('deselect')">
+  <div v-if="hasItems" class="story-timeline" :class="{ 'story-timeline--compact': compact, 'story-timeline--collapsible': collapsible, 'story-timeline--proportional':proportional }" :style="{ '--story-bar-height': barSizes.barHeight + 'px', '--story-root-height': barSizes.rootHeight + 'px' }" @click.self="emit('deselect')">
     <div v-if="bounds" class="story-timeline__track" ref="trackRef" :style="{ height: trackHeight + 'px' }" @click.self="emit('deselect')">
       <!-- Axe -->
       <div v-if="!compact || positionedEvents.length" class="story-timeline__axis" />
@@ -13,7 +13,7 @@
         :class="{ 'story-timeline__period--root': p.isRoot }"
         :style="{
           '--story-period-left': p.left + '%',
-          '--story-period-width': Math.max(p.width, 0.5) + '%',
+          '--story-period-width': (proportional?p.width:Math.max(p.width, 0.5)) + '%',
           '--story-period-top': p.top + 'px',
         }"
       >
@@ -46,6 +46,7 @@
         :type="compact && !collapsible ? undefined : 'button'"
         v-for="e in positionedEvents"
         :key="e.id"
+        :data-event-id="e.id"
         class="story-timeline__event-marker"
         :aria-label="`${e.label}${e.detail ? ' · ' + e.detail : ''}`"
         :aria-pressed="compact && !collapsible ? undefined : selectedEventId === e.id"
@@ -111,6 +112,9 @@ import {
 const props = defineProps<{
   compact?: boolean;
   collapsible?: boolean;
+  proportional?: boolean;
+  timeBounds?: {start:number;end:number};
+  referenceTime?: number;
   periods?: InPeriod[];
   events?: InEvent[];
   selectedPeriodId?: string | null;
@@ -187,7 +191,7 @@ function hideTooltip() {
 // The dates are re-read at one instant: stored coordinates were computed at different times and
 // would make a same-day sub-period overflow its parent. A stored number is used only without text.
 const coordinates = computed(() => {
-  const now = Date.now();
+  const now = props.referenceTime ?? Date.now();
   return {
     periods: (props.periods ?? []).map(p => ({ p, start: comparableYearsBeforePresent(p.startDate, p.startYearsBP, now), end: comparableYearsBeforePresent(p.endDate, p.endYearsBP, now) })),
     events: (props.events ?? []).map(e => ({ e, date: comparableYearsBeforePresent(e.date, e.dateYearsBP, now) })),
@@ -198,6 +202,10 @@ const datedEvents = computed(() => coordinates.value.events.flatMap(({e, date}) 
 const undatedPeriods = computed(() => coordinates.value.periods.filter(row => visiblePeriodIds.value.has(row.p.id) && (row.start === null || row.end === null)).map(row => row.p));
 const undatedEvents = computed(() => coordinates.value.events.filter(row => row.date === null).map(row => row.e));
 const bounds = computed(() => {
+  if (props.timeBounds) {
+    const min=Math.min(props.timeBounds.start,props.timeBounds.end),max=Math.max(props.timeBounds.start,props.timeBounds.end);
+    return {min,max,range:max-min};
+  }
   const ybps = [...datedPeriods.value.flatMap(p => [p.startYbp, p.endYbp]), ...datedEvents.value.map(e => e.dateYbp)];
   if (!ybps.length) return null;
   const min = Math.min(...ybps), max = Math.max(...ybps);
@@ -225,7 +233,8 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
   const b = bounds.value;
   if (!b) return [];
 
-  const periods = datedPeriods.value.filter(period => visiblePeriodIds.value.has(period.id));
+  const periods = datedPeriods.value.filter(period => visiblePeriodIds.value.has(period.id)
+    && (!props.proportional || Math.max(period.startYbp,period.endYbp)>=b.min && Math.min(period.startYbp,period.endYbp)<=b.max));
   const periodIds = new Set(periods.map(p => p.id));
 
   type DatedPeriod = typeof periods[number];
@@ -234,12 +243,14 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
     const eYbp = p.endYbp;
     const ancientYbp = Math.max(sYbp, eYbp);
     const recentYbp  = Math.min(sYbp, eYbp);
+    const left=toLeft(ancientYbp),right=toLeft(recentYbp);
+    const bounded=(value:number)=>Math.max(0,Math.min(100,value));
     return {
       id: p.id,
       label: p.label?.fr || p.label?.en || p.id,
       detail: formatStoryTimelinePeriodDetail(p),
-      left: toLeft(ancientYbp),
-      width: toLeft(recentYbp) - toLeft(ancientYbp),
+      left: props.proportional?bounded(left):left,
+      width: props.proportional?bounded(right)-bounded(left):right-left,
       startYbp: sYbp,
       row: 0,
       top: 0,
@@ -319,7 +330,7 @@ interface PosEvent { id: string; label: string; detail: string; left: number; im
 const positionedEvents = computed<PosEvent[]>(() => {
   const b = bounds.value;
   if (!b) return [];
-  return datedEvents.value.map(e => {
+  return datedEvents.value.filter(e=>!props.proportional || e.dateYbp>=b.min&&e.dateYbp<=b.max).map(e => {
     const ybp = e.dateYbp;
     const label = typeof e.label === 'string' ? e.label : (e.label?.fr ?? '');
     const importance = e.importance ?? 'normal';
@@ -497,6 +508,7 @@ const trackRef = ref<HTMLElement | null>(null);
 .story-timeline__period-toggle--undated { position: static; width: var(--field-height-sm); height: var(--field-height-sm); }
 /* Bars of one line keep a 2px gap between them, like the gap between lines. */
 .story-timeline--compact .story-timeline__period { width: max(2px, calc(var(--story-period-width) - 2px)); }
+.story-timeline--compact.story-timeline--proportional .story-timeline__period {width:var(--story-period-width);}
 .story-timeline--compact .story-timeline__period-bar { border-radius: 3px; }
 .story-timeline--compact .story-timeline__axis { bottom: 8px; }
 .story-timeline--compact .story-timeline__event-marker { --marker-size: 6px; bottom: calc(8px - (var(--marker-size) + 2px) / 2); }

@@ -1,6 +1,7 @@
 <template>
-  <SidebarLayout menu-label="Administration" :items="menu" :active="section" class="admin-view" :class="{'admin-view--relations':section==='relations'}">
+  <SidebarLayout menu-label="Administration" :items="menu" :active="section" class="admin-view" :class="{'admin-view--relations':section==='relations'||section==='timelines'}">
     <AdminRelations v-if="section==='relations'" />
+    <AdminTimelines v-else-if="section==='timelines'" />
     <AdminUserDetail v-else-if="section === 'users' && userId" :key="userId" :user-id="userId" />
     <AdminUsers v-else-if="section === 'users'" />
     <AdminDashboard v-else />
@@ -21,15 +22,17 @@ import AdminDashboard from './AdminDashboard.vue';
 import AdminUsers from './AdminUsers.vue';
 import AdminUserDetail from './AdminUserDetail.vue';
 const AdminRelations = defineAsyncComponent(() => import('./AdminRelations.vue'));
+const AdminTimelines = defineAsyncComponent(() => import('./AdminTimelines.vue'));
 
-type Section = 'dashboard' | 'users' | 'relations';
+type Section = 'dashboard' | 'users' | 'relations' | 'timelines';
 const menu: SidebarItem[] = [
   { key: 'dashboard', label: 'Tableau de bord', icon: 'mdi:view-dashboard-outline', to: { name: 'admin' } },
   { key: 'users', label: 'Utilisateurs', icon: 'mdi:account-group-outline', to: { name: 'admin', query: { section: 'users' } } },
   { key:'relations',label:'Relations',icon:'mdi:graph-outline',to:{name:'admin',query:{section:'relations'}} },
+  { key:'timelines',label:'Carte des frises',icon:'mdi:timeline-text-outline',to:{name:'admin',query:{section:'timelines'}} },
 ];
 const route = useRoute();
-const section = computed<Section>(() => route.query.section === 'relations' ? 'relations' : route.query.section === 'users' ? 'users' : 'dashboard');
+const section = computed<Section>(() => route.query.section === 'timelines' ? 'timelines' : route.query.section === 'relations' ? 'relations' : route.query.section === 'users' ? 'users' : 'dashboard');
 const userId = computed(() => typeof route.query.user === 'string' ? route.query.user : null);
 </script>
 

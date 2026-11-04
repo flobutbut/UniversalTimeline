@@ -8,6 +8,17 @@ const periods = [period('root', null, 'M65', 'NOW'), ...Array.from({ length: 15 
 const visible = (view: ReturnType<typeof mount>) => view.findAll('[data-period-id]').map(row => row.attributes('data-period-id'));
 const top = (view: ReturnType<typeof mount>, id: string) => (view.get(`[data-period-id="${id}"]`).element as HTMLElement).style.getPropertyValue('--story-period-top');
 
+it('clips a cosmic preview to a recent date window without stretching offscreen periods or events',()=>{
+  const view=mount(StoryTimeline,{props:{compact:true,proportional:true,referenceTime:Date.UTC(2026,10,4),timeBounds:{start:30,end:0},periods:[
+    period('universe',null,'G13.8','NOW'),period('ancient','universe','G10','G4'),period('recent','universe','2000','NOW'),
+  ],events:[{id:'old',label:'Ancien',date:'M5'},{id:'new',label:'Récent',date:'2020'}]}});
+  expect(visible(view)).toEqual(['universe','recent']);
+  expect((view.get('[data-period-id="universe"]').element as HTMLElement).style.getPropertyValue('--story-period-width')).toBe('100%');
+  expect(view.find('[data-event-id="old"]').exists()).toBe(false);
+  expect(view.find('[data-event-id="new"]').exists()).toBe(true);
+  view.unmount();
+});
+
 it('renders every dated period in the full timeline', () => {
   const view = mount(StoryTimeline, { props: { periods } });
   expect(visible(view)).toHaveLength(16); view.unmount();
