@@ -115,7 +115,7 @@ test('adds multiple sources and locations without replacing legacy entry points,
   ]);
   assert.equal(detail.payload.parentStories.find(parent=>parent.id==='4').anchors[0].label.fr,'Racine');
   const source = await call('get','/stories/:id',{}, {id:'4'});
-  assert.deepEqual(source.payload.childStories,[{id:'2',title:{fr:'Privé',en:'Private'},anchors:[{type:'period',id:'root'}]}]);
+  assert.deepEqual(source.payload.childStories,[{id:'2',title:{fr:'Privé',en:'Private'},anchors:[{type:'period',id:'root'}],atRoot:false}]);
   assert.equal((await entry('1','period','root','remove')).statusCode,204);
   const retained = (await call('get','/stories/:id',{}, {id:'2'})).payload.parentStories;
   assert.deepEqual(retained.find(parent=>parent.id==='1').anchors.map(a=>a.type+':'+a.id),['event:event']);

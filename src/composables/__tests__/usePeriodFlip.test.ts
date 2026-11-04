@@ -25,17 +25,10 @@ function setup() {
   return { id, loading, parent, source, flip, navigate };
 }
 
-it('does not animate the current parent when a leaf only loads story suggestions', async () => {
-  const { flip, source, parent, navigate } = setup();
-  flip.prepare(period('leaf', false), source);
-  await navigate('root');
-  expect(parent.style.transform).toBe(''); expect(vi.getTimerCount()).toBe(0);
-});
-
-it('animates a committed destination and restores the original styles after both phases', async () => {
+it.each([true, false])('animates a committed destination and restores the original styles (has children: %s)', async hasChildren => {
   const { flip, source, parent, navigate } = setup();
   parent.style.transformOrigin = 'center';
-  flip.prepare(period('child'), source); await navigate('child');
+  flip.prepare(period('child', hasChildren), source); await navigate('child');
   expect(parent.style.transform).toContain('scale(0.2, 1)');
   await vi.advanceTimersByTimeAsync(260);
   expect(parent.style.transform).toBe('none');
@@ -88,12 +81,15 @@ it('respects reduced motion without keeping pending timers or styles', async () 
 
 it('moves keyboard focus to the new back control after the activated card is removed', async () => {
   const { flip, source, parent, navigate } = setup();
-  source.tabIndex = 0; parent.tabIndex = 0;
+  const backControl = document.createElement('button');
+  backControl.className = 'period-card__title-action';
+  parent.append(backControl);
+  source.tabIndex = 0;
   document.body.append(source, parent);
   try {
     source.focus(); flip.prepare(period('child'), source); source.remove();
     await navigate('child');
-    expect(document.activeElement).toBe(parent);
+    expect(document.activeElement).toBe(backControl);
   } finally { source.remove(); parent.remove(); }
 });
 

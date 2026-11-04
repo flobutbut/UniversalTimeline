@@ -1,0 +1,28 @@
+{
+  "schemaMigration": {
+    "name": "navigation_without_wrapper_periods",
+    "version": "20261104134742",
+    "applied": true
+  },
+  "dataCleanupApplied": false,
+  "deploymentApplied": false,
+  "deploymentBlock": "Automatic approval review requires explicit production deployment approval.",
+  "counts": {
+    "events": 421,
+    "periods": 366,
+    "stories": 39,
+    "story_events": 555,
+    "story_anchors": 35,
+    "story_periods": 418,
+    "story_entry_points": 24,
+    "story_period_presentations": 4
+  },
+  "checked_at": "2026-11-04T13:55:28.270585+00:00",
+  "constraints": {
+    "story_entry_points_location": "CHECK ((num_nonnulls(period_id, event_id) <= 1))",
+    "story_period_presentations_target": "FOREIGN KEY (target_story_id) REFERENCES stories(id) ON DELETE CASCADE",
+    "story_period_presentations_context": "FOREIGN KEY (context_story_id, period_id) REFERENCES story_periods(story_id, period_id) ON DELETE CASCADE"
+  },
+  "reviewed_memberships_still_present": 4,
+  "securityAdvisories": []
+}

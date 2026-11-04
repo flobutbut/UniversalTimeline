@@ -1,18 +1,14 @@
 import type { Story, StoryAnchor, StorySuggestion } from '@/types/database';
-import { getStoryPeriodParentId } from './storyPeriodParent';
 
 /** Child anchors first, then shared content; all links come from one readable frise snapshot. */
-export function storyNavigationLinks(story: Story): Array<StorySuggestion & { anchors: StoryAnchor[] }> {
+export function storyNavigationLinks(story: Story): Array<StorySuggestion & { anchors: StoryAnchor[]; atRoot?: boolean }> {
   const periods = new Set(story.periods.map(period => period.id));
   const events = new Set(story.events.map(event => event.id));
-  const roots: StoryAnchor[] = story.periods
-    .filter(period => { const parent = getStoryPeriodParentId(period); return !parent || !periods.has(parent); })
-    .map(period => ({ type: 'period', id: period.id }));
-  const links = new Map<string, StorySuggestion & { anchors: StoryAnchor[] }>();
+  const links = new Map<string, StorySuggestion & { anchors: StoryAnchor[]; atRoot?: boolean }>();
   for (const child of story.childStories ?? []) {
     if (String(child.id).trim() === String(story.id).trim()) continue;
     const anchors = child.anchors.filter(anchor => (anchor.type === 'period' ? periods : events).has(anchor.id));
-    links.set(child.id, { id: child.id, title: child.title, parentStoryId: story.id, anchors: anchors.length ? anchors : roots });
+    links.set(child.id, { id: child.id, title: child.title, parentStoryId: story.id, anchors, atRoot: child.atRoot ?? anchors.length === 0 });
   }
   const related = [...(story.relatedStories ?? [])].sort((a, b) => (a.title.fr || a.title.en).localeCompare(b.title.fr || b.title.en, 'fr'));
   for (const other of related) {
@@ -33,7 +29,7 @@ export function storyNavigationLinks(story: Story): Array<StorySuggestion & { an
 
 export function indexStoryNavigationLinks(links: ReturnType<typeof storyNavigationLinks>, kind: StoryAnchor['type']) {
   const indexed = new Map<string, StorySuggestion[]>();
-  for (const { anchors, ...story } of links) {
+  for (const { anchors, atRoot: _atRoot, ...story } of links) {
     for (const anchor of anchors) {
       if (anchor.type !== kind) continue;
       const bucket = indexed.get(anchor.id) ?? [];
@@ -42,4 +38,8 @@ export function indexStoryNavigationLinks(links: ReturnType<typeof storyNavigati
     }
   }
   return indexed;
+}
+
+export function rootStoryNavigationLinks(story: Story): StorySuggestion[] {
+  return storyNavigationLinks(story).filter(link => link.atRoot).map(({ anchors: _anchors, atRoot: _root, ...link }) => link);
 }

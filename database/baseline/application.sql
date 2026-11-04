@@ -357,7 +357,7 @@ CREATE TABLE public.story_entry_points (
   target_story_id integer NOT NULL REFERENCES public.stories(id) ON DELETE CASCADE,
   period_id varchar,
   event_id varchar,
-  CONSTRAINT story_entry_points_location CHECK (num_nonnulls(period_id, event_id) = 1),
+  CONSTRAINT story_entry_points_location CHECK (num_nonnulls(period_id, event_id) <= 1),
   CONSTRAINT story_entry_points_distinct_stories CHECK (source_story_id <> target_story_id),
   CONSTRAINT story_entry_points_unique UNIQUE NULLS NOT DISTINCT (source_story_id, target_story_id, period_id, event_id),
   CONSTRAINT story_entry_points_period FOREIGN KEY (source_story_id, period_id)
@@ -478,8 +478,8 @@ CREATE TABLE public.story_period_presentations (
   CONSTRAINT story_period_presentations_pkey PRIMARY KEY (context_story_id, period_id, target_story_id),
   CONSTRAINT story_period_presentations_context FOREIGN KEY (context_story_id, period_id)
     REFERENCES public.story_periods(story_id, period_id) ON DELETE CASCADE,
-  CONSTRAINT story_period_presentations_target FOREIGN KEY (target_story_id, period_id)
-    REFERENCES public.story_periods(story_id, period_id) ON DELETE CASCADE,
+  CONSTRAINT story_period_presentations_target FOREIGN KEY (target_story_id)
+    REFERENCES public.stories(id) ON DELETE CASCADE,
   CONSTRAINT story_period_presentations_distinct CHECK (context_story_id <> target_story_id)
 );
 CREATE INDEX story_period_presentations_target_idx ON public.story_period_presentations(target_story_id, period_id);

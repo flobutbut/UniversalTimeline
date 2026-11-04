@@ -110,7 +110,19 @@ it('keeps counts unknown until the snapshot completes, then uses plural labels',
   const [a, b] = view.findAllComponents(EventCard); expect(a.props('otherStoryCount')).toBeNull();
   pending.resolve({ ...snapshot(), relatedStories: [related('two'), related('three')] }); await flushPromises();
   expect(a.get('.event-meta').text()).toBe('2 autres frises associées'); expect(b.props('otherStoryCount')).toBe(0);
-  await select(0); expect(view.getComponent(EventCard).text()).not.toContain('2 autres frises associées');
+  await select(0); expect(view.getComponent(EventCard).get('.event-story-count').text()).toBe('2 autres frises associées');
+});
+
+it.each(['.event-info-box','.event-label','.event-date','.event-description'])('pins an event by clicking %s, keeps its count and leaves story actions independent',async surface=>{
+  vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(withChild());
+  view=mount(PeriodGrid,{props:{...props,events:[{...event('a'),description:{fr:'Description de l’événement',en:''}},event('b')]}});await settle();
+  const card=view.getComponent(EventCard);await card.get(surface).trigger('click');await settle();
+  expect(card.props('isSelected')).toBe(true);expect(card.get('.event-dot').attributes('aria-pressed')).toBe('true');
+  expect(card.get('.event-story-count').text()).toBe('1 autre frise associée');
+  await card.trigger('mouseleave');await settle();expect(card.props('isSelected')).toBe(true);
+  await card.get('.event-story-item').trigger('click');expect(view.emitted('story-select')).toEqual([['child',{type:'event',id:'a'}]]);
+  expect(card.props('isSelected')).toBe(true);
+  await card.get('.event-label').trigger('click');await settle();expect(card.props('isSelected')).toBe(false);
 });
 
 it('uses the singular and keeps counts unknown after a failed snapshot', async () => {

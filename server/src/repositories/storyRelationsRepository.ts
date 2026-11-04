@@ -141,7 +141,6 @@ export async function readMovedPeriodLinks(client: TransactionClient, sourceId: 
       WHERE child.parent_story_id = $1 AND a.anchor_type = 'period' AND a.anchor_id = ANY($2::varchar[])
       UNION SELECT target_story_id, false FROM public.story_entry_points WHERE source_story_id = $1 AND period_id = ANY($2::varchar[])
       UNION SELECT target_story_id, false FROM public.story_period_presentations WHERE context_story_id = $1 AND period_id = ANY($2::varchar[])
-      UNION SELECT context_story_id, false FROM public.story_period_presentations WHERE target_story_id = $1 AND period_id = ANY($2::varchar[])
     )
     SELECT s.id, s.owner_user_id, bool_or(linked.child) AS child FROM linked JOIN public.stories s ON s.id = linked.id
     GROUP BY s.id, s.owner_user_id ORDER BY s.id`, [sourceId, periodIds])).rows;
@@ -172,10 +171,6 @@ export async function transferMovedPeriodLinks(client: TransactionClient, source
     WITH moved AS (DELETE FROM public.story_period_presentations WHERE context_story_id = $1 AND period_id = ANY($3::varchar[]) RETURNING period_id, target_story_id)
     INSERT INTO public.story_period_presentations (context_story_id, period_id, target_story_id)
     SELECT $2, period_id, target_story_id FROM moved WHERE target_story_id <> $2 ON CONFLICT DO NOTHING`, [sourceId, targetId, periodIds]);
-  await client.query(`
-    WITH moved AS (DELETE FROM public.story_period_presentations WHERE target_story_id = $1 AND period_id = ANY($3::varchar[]) RETURNING context_story_id, period_id)
-    INSERT INTO public.story_period_presentations (context_story_id, period_id, target_story_id)
-    SELECT context_story_id, period_id, $2 FROM moved WHERE context_story_id <> $2 ON CONFLICT DO NOTHING`, [sourceId, targetId, periodIds]);
 }
 export async function deletePeriodMemberships(client: TransactionClient, storyId: string, periodIds: string[]) {
   await client.query('DELETE FROM public.story_periods WHERE story_id = $1 AND period_id = ANY($2::varchar[])', [storyId, periodIds]);

@@ -7,7 +7,7 @@ interface StorySnapshotRow extends StoryRow {
   periods: Array<JoinedPeriodRow & Pick<PeriodRow, 'has_children'>>;
   events: Array<JoinedEventRow & { importance: EventImportance }>;
   child_stories: ChildStoryRow[];
-  parent_stories?: Array<Pick<StoryRow, 'id' | 'title_fr' | 'title_en' | 'owner_user_id' | 'is_public'> & { anchors: Array<{ type: 'period' | 'event'; id: string; label_fr: string; label_en: string | null }> }>;
+  parent_stories?: Array<Pick<StoryRow, 'id' | 'title_fr' | 'title_en' | 'owner_user_id' | 'is_public'> & { at_root?: boolean; anchors: Array<{ type: 'period' | 'event'; id: string; label_fr: string; label_en: string | null }> }>;
   navigation_contexts?: Array<{
     id: number; title_fr: string; title_en: string;
     periods: Array<Pick<PeriodRow, 'id' | 'label_fr' | 'label_en' | 'start_date' | 'end_date' | 'start_years_bp' | 'end_years_bp'> & { story_parent_id: string | null }>;
@@ -21,13 +21,16 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
   return (await db.query<StorySnapshotRow>(`
     WITH entry_links AS (
       SELECT source_story_id, target_story_id,
-        CASE WHEN period_id IS NOT NULL THEN 'period' ELSE 'event' END AS anchor_type,
+        CASE WHEN period_id IS NOT NULL THEN 'period' WHEN event_id IS NOT NULL THEN 'event' END AS anchor_type,
         COALESCE(period_id, event_id) AS anchor_id
       FROM public.story_entry_points WHERE source_story_id = $1 OR target_story_id = $1
       UNION
       SELECT child.parent_story_id, child.id, a.anchor_type, a.anchor_id
       FROM public.stories child JOIN public.story_anchors a ON a.story_id = child.id
       WHERE child.parent_story_id IS NOT NULL AND (child.parent_story_id = $1 OR child.id = $1)
+      UNION
+      SELECT v.context_story_id, v.target_story_id, 'period', v.period_id
+      FROM public.story_period_presentations v WHERE v.context_story_id=$1 OR v.target_story_id=$1
     )
     SELECT s.*,
       (SELECT COALESCE(jsonb_agg(to_jsonb(ctx) ORDER BY ctx.id), '[]') FROM (
@@ -68,19 +71,23 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
       ) e) AS events,
       (SELECT COALESCE(jsonb_agg(to_jsonb(child) ORDER BY child.id), '[]') FROM (
         SELECT child.id, child.title_fr, child.title_en,
+          (EXISTS(SELECT 1 FROM entry_links root WHERE root.source_story_id=s.id AND root.target_story_id=child.id AND root.anchor_id IS NULL)
+            OR (child.parent_story_id=s.id AND NOT EXISTS(SELECT 1 FROM public.story_anchors a WHERE a.story_id=child.id))) AS at_root,
           (SELECT COALESCE(jsonb_agg(jsonb_build_object('type', a.anchor_type, 'id', a.anchor_id) ORDER BY a.anchor_type, a.anchor_id), '[]')
-           FROM entry_links a WHERE a.target_story_id = child.id AND a.source_story_id = s.id) AS anchors
+           FROM entry_links a WHERE a.target_story_id = child.id AND a.source_story_id = s.id AND a.anchor_id IS NOT NULL) AS anchors
         FROM public.stories child WHERE child.parent_story_id = s.id
           OR EXISTS (SELECT 1 FROM entry_links a WHERE a.source_story_id = s.id AND a.target_story_id = child.id)
       ) child) AS child_stories,
       (SELECT COALESCE(jsonb_agg(to_jsonb(parent) ORDER BY parent.title_fr, parent.id), '[]') FROM (
         SELECT parent.id, parent.title_fr, parent.title_en, parent.owner_user_id, parent.is_public,
+          (EXISTS(SELECT 1 FROM entry_links root WHERE root.source_story_id=parent.id AND root.target_story_id=s.id AND root.anchor_id IS NULL)
+            OR (s.parent_story_id=parent.id AND NOT EXISTS(SELECT 1 FROM public.story_anchors a WHERE a.story_id=s.id))) AS at_root,
           (SELECT COALESCE(jsonb_agg(jsonb_build_object('type', a.anchor_type, 'id', a.anchor_id,
             'label_fr', COALESCE(p.label_fr, e.label_fr, a.anchor_id), 'label_en', COALESCE(p.label_en, e.label_en))
             ORDER BY a.anchor_type, a.anchor_id), '[]')
            FROM entry_links a LEFT JOIN public.periods p ON a.anchor_type = 'period' AND p.id = a.anchor_id
            LEFT JOIN public.events e ON a.anchor_type = 'event' AND e.id = a.anchor_id
-           WHERE a.source_story_id = parent.id AND a.target_story_id = s.id) AS anchors
+           WHERE a.source_story_id = parent.id AND a.target_story_id = s.id AND a.anchor_id IS NOT NULL) AS anchors
         FROM public.stories parent WHERE parent.id = s.parent_story_id
           OR EXISTS (SELECT 1 FROM entry_links a WHERE a.source_story_id = parent.id AND a.target_story_id = s.id)
       ) parent) AS parent_stories,
@@ -246,6 +253,8 @@ export async function findSuggestedStories(db: TransactionClient, storyId: strin
       UNION
       SELECT target_story_id, source_story_id, CASE WHEN period_id IS NOT NULL THEN 'period' ELSE 'event' END, COALESCE(period_id, event_id)
       FROM public.story_entry_points WHERE source_story_id = $1
+      UNION
+      SELECT target_story_id,context_story_id,'period',period_id FROM public.story_period_presentations WHERE context_story_id=$1
     )
     SELECT DISTINCT s.id, s.title_fr, s.title_en, s.description_fr, s.description_en, sa.source_story_id AS parent_story_id
     FROM public.stories s JOIN entry_links sa ON sa.story_id = s.id

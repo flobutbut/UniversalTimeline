@@ -7,7 +7,6 @@
         selected: isSelected,
         loading,
         'has-children': period.hasChildren,
-        'period-card--leaf': variant === 'timeline' && !period.hasChildren,
         'period-card--expanded': expanded,
         'period-card--wrap': wrapContent,
       },
@@ -22,8 +21,8 @@
       <div ref="contentRef" class="card-content">
         <div class="period-header">
           <h3 class="period-title" :aria-label="period.label.fr">
-            <component :is="navigable ? 'button' : 'span'" :type="navigable ? 'button' : undefined" class="period-card__title-action" :disabled="navigable ? loading : undefined" :tabindex="navigable ? undefined : 0" :aria-label="variant === 'parent' ? `Revenir depuis ${period.label.fr}` : period.label.fr"
-              :aria-describedby="typeof $attrs['aria-describedby'] === 'string' ? $attrs['aria-describedby'] : undefined" @click.stop="handleClick">{{ period.label.fr }}</component>
+            <button type="button" class="period-card__title-action" :disabled="loading" :aria-label="variant === 'parent' ? `Revenir depuis ${period.label.fr}` : period.label.fr"
+              :aria-describedby="typeof $attrs['aria-describedby'] === 'string' ? $attrs['aria-describedby'] : undefined" @click.stop="handleClick">{{ period.label.fr }}</button>
           </h3>
         </div>
         <div class="period-footer" v-if="period.startDate || period.endDate">
@@ -59,7 +58,7 @@ const props = withDefaults(
     period: ListPeriod;
     isSelected: boolean;
     loading?: boolean;
-    /** `timeline` : segment sur la frise ; `parent` : barre pleine largeur (retour niveau supérieur) */
+    /** `timeline` : segment sur la frise ; `parent` : barre de retour positionnée par le conteneur */
     variant?: 'timeline' | 'parent';
     expanded?: boolean;
     wrapContent?: boolean;
@@ -73,7 +72,6 @@ const emit = defineEmits<{
 }>();
 
 const periodDateRange = computed(() => formatPeriodDateRange(props.period));
-const navigable = computed(() => props.variant === 'parent' || !!props.period.hasChildren);
 
 // ─── Priorité au titre et à la date sur les actions (badge) ─────────────────
 
@@ -106,7 +104,7 @@ onBeforeUnmount(() => observer?.disconnect());
 watch(() => [props.period.label.fr, periodDateRange.value, props.wrapContent], measureActions, { flush: 'post' });
 
 const handleClick = () => {
-  if (props.loading || !navigable.value) return;
+  if (props.loading) return;
   if (props.variant === 'parent') emit('back');
   else emit('select', props.period);
 };
@@ -140,13 +138,6 @@ const handleClick = () => {
   box-sizing: border-box;
   position: relative;
   border: none;
-}
-
-.period-card--leaf, .period-card--leaf .period-card__title-action { cursor: default; }
-
-.period-card--timeline.period-card--leaf:hover .main-container {
-  background: var(--color-surface-raised);
-  box-shadow: var(--shadow-sm);
 }
 
 .main-container {

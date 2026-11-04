@@ -2,6 +2,7 @@ import type { RouteRecordRaw } from 'vue-router';
 
 /** The router loads each page only when its route is first visited. */
 export const appRoutes: RouteRecordRaw[] = [
+  ...(import.meta.env.DEV ? [{ path: '/prototype/navigation', name: 'navigation-prototype', meta: { public: true }, component: () => import('@/dev/navigation-prototype/NavigationPrototypeView.vue') }] : []),
   { path: '/', name: 'landing', meta: { public: true, landing: true }, component: () => import('@/views/LandingView.vue') },
   { path: '/voyage', name: 'landing-scroll', meta: { public: true, landing: true }, component: () => import('@/views/ScrollLandingView.vue') },
   { path: '/timeline', name: 'timeline', meta: { public: true }, component: () => import('@/views/HomeView.vue') },

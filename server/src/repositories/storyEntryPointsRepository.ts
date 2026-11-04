@@ -1,5 +1,17 @@
 import type { TransactionClient } from '../api/transaction.js';
 
+/** A root is a real location, distinct from deleting every location in a source. */
+export async function changeRootEntryPoint(client: TransactionClient, sourceId: string, targetId: string, remove: boolean) {
+  if (!remove) {
+    await client.query(`INSERT INTO public.story_entry_points(source_story_id,target_story_id,period_id,event_id)
+      VALUES($1,$2,NULL,NULL) ON CONFLICT ON CONSTRAINT story_entry_points_unique DO NOTHING`,[sourceId,targetId]);
+    return;
+  }
+  await client.query('DELETE FROM public.story_entry_points WHERE source_story_id=$1 AND target_story_id=$2 AND period_id IS NULL AND event_id IS NULL',[sourceId,targetId]);
+  await client.query(`UPDATE public.stories s SET parent_story_id=NULL WHERE s.id=$2 AND s.parent_story_id=$1
+    AND NOT EXISTS(SELECT 1 FROM public.story_anchors a WHERE a.story_id=s.id)`,[sourceId,targetId]);
+}
+
 /** New entry points coexist with historical parent/anchor links without reparenting them. */
 export async function addEntryPoint(client: TransactionClient, sourceId: string, targetId: string, type: 'period' | 'event', anchorId: string) {
   await client.query(`INSERT INTO public.story_entry_points (source_story_id, target_story_id, period_id, event_id)

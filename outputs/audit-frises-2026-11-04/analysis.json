@@ -1,0 +1,313 @@
+{
+  "counts": {
+    "stories": 39,
+    "periods": 366,
+    "events": 421,
+    "memberships": 418,
+    "candidateStories": 17,
+    "candidatePeriods": 17,
+    "multiSources": 20,
+    "unreachable": 1,
+    "sharedPairs": 102,
+    "relations": 65,
+    "rootOnly": 2
+  },
+  "candidates": [
+    {
+      "id": 1,
+      "title": "Univers moderne",
+      "periods": "Univers"
+    },
+    {
+      "id": 3,
+      "title": "Big Bang et ères primordiales",
+      "periods": "Big Bang"
+    },
+    {
+      "id": 7,
+      "title": "Empire romain",
+      "periods": "Antiquité romaine"
+    },
+    {
+      "id": 10,
+      "title": "Antiquité et premières civilisations",
+      "periods": "Holocène"
+    },
+    {
+      "id": 12,
+      "title": "Guerre froide",
+      "periods": "Guerre froide"
+    },
+    {
+      "id": 14,
+      "title": "Conquête spatiale",
+      "periods": "Conquête spatiale"
+    },
+    {
+      "id": 15,
+      "title": "Moyen Âge",
+      "periods": "Moyen Âge"
+    },
+    {
+      "id": 16,
+      "title": "Époque moderne",
+      "periods": "Époque moderne"
+    },
+    {
+      "id": 17,
+      "title": "Renaissance",
+      "periods": "Renaissance"
+    },
+    {
+      "id": 20,
+      "title": "Néolithique",
+      "periods": "Néolithique"
+    },
+    {
+      "id": 21,
+      "title": "Âges des métaux",
+      "periods": "Âges des métaux"
+    },
+    {
+      "id": 22,
+      "title": "Les cinq grandes extinctions",
+      "periods": "Phanérozoïque"
+    },
+    {
+      "id": 25,
+      "title": "Révolutions industrielles et énergie",
+      "periods": "Ère industrielle"
+    },
+    {
+      "id": 27,
+      "title": "L’âge des révolutions",
+      "periods": "Âge des révolutions"
+    },
+    {
+      "id": 28,
+      "title": "Empire byzantin",
+      "periods": "Empire byzantin"
+    },
+    {
+      "id": 33,
+      "title": "La guerre de Cent Ans",
+      "periods": "Guerre de Cent Ans"
+    },
+    {
+      "id": 37,
+      "title": "Époque contemporaine",
+      "periods": "Histoire contemporaine"
+    }
+  ],
+  "unreachable": [
+    {
+      "id": 24,
+      "title": "Grandes périodes de l’histoire européenne"
+    }
+  ],
+  "focus": [
+    [
+      1,
+      "Univers moderne",
+      1,
+      "Univers",
+      7,
+      14,
+      1,
+      "Publique",
+      null,
+      "",
+      0,
+      0,
+      0,
+      "",
+      4,
+      0,
+      13,
+      0,
+      13798000000,
+      0,
+      0,
+      "Non",
+      "",
+      "",
+      "",
+      "À examiner",
+      ""
+    ],
+    [
+      2,
+      "Histoire de la vie sur Terre",
+      0,
+      "",
+      7,
+      21,
+      3,
+      "Publique",
+      11,
+      "Histoire géologique de la Terre",
+      2,
+      1,
+      2,
+      "Histoire géologique de la Terre\nUnivers moderne",
+      4,
+      0,
+      7,
+      0,
+      4540000000,
+      0,
+      0,
+      "Non",
+      "",
+      "",
+      "",
+      "À examiner",
+      ""
+    ],
+    [
+      5,
+      "Genre Homo",
+      0,
+      "",
+      11,
+      12,
+      11,
+      "Publique",
+      2,
+      "Histoire de la vie sur Terre",
+      3,
+      2,
+      2,
+      "Histoire de la vie sur Terre\nLes premiers hominines",
+      7,
+      0,
+      12,
+      0,
+      2800000,
+      0,
+      0,
+      "Non",
+      "",
+      "",
+      "",
+      "À examiner",
+      ""
+    ],
+    [
+      11,
+      "Histoire géologique de la Terre",
+      0,
+      "",
+      30,
+      28,
+      4,
+      "Publique",
+      1,
+      "Univers moderne",
+      1,
+      1,
+      1,
+      "Univers moderne",
+      2,
+      2,
+      9,
+      0,
+      4540000000,
+      0,
+      0,
+      "Non",
+      "",
+      "",
+      "",
+      "À examiner",
+      ""
+    ],
+    [
+      23,
+      "Histoire du climat",
+      0,
+      "",
+      18,
+      12,
+      7,
+      "Publique",
+      11,
+      "Histoire géologique de la Terre",
+      2,
+      1,
+      2,
+      "Histoire géologique de la Terre\nUnivers moderne",
+      1,
+      0,
+      8,
+      0,
+      2450000000,
+      0,
+      0,
+      "Non",
+      "",
+      "",
+      "",
+      "À examiner",
+      ""
+    ],
+    [
+      38,
+      "Les premiers hominines",
+      0,
+      "",
+      13,
+      7,
+      6,
+      "Publique",
+      2,
+      "Histoire de la vie sur Terre",
+      3,
+      2,
+      1,
+      "Histoire de la vie sur Terre",
+      2,
+      0,
+      4,
+      0,
+      7000000,
+      1200000,
+      0,
+      "Non",
+      "",
+      "",
+      "",
+      "À examiner",
+      ""
+    ],
+    [
+      39,
+      "Histoire des techniques",
+      0,
+      "",
+      8,
+      21,
+      4,
+      "Publique",
+      null,
+      "",
+      0,
+      3,
+      1,
+      "Les premiers hominines",
+      3,
+      0,
+      11,
+      0,
+      3300000,
+      0,
+      0,
+      "Non",
+      "",
+      "",
+      "",
+      "À examiner",
+      ""
+    ]
+  ]
+}

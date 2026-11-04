@@ -1,0 +1,29 @@
+{
+  "localOnly": true,
+  "productionDataApplied": false,
+  "anonymizedOwner": true,
+  "countsBefore": {
+    "stories": 39,
+    "periods": 366,
+    "events": 421,
+    "story_periods": 418,
+    "story_events": 555,
+    "story_anchors": 35,
+    "story_entry_points": 24,
+    "story_period_presentations": 4
+  },
+  "countsAfter": {
+    "stories": 39,
+    "periods": 366,
+    "events": 421,
+    "story_periods": 414,
+    "story_events": 555,
+    "story_anchors": 27,
+    "story_entry_points": 33,
+    "story_period_presentations": 4
+  },
+  "factsUnchanged": true,
+  "allPreviousDestinationsReachable": true,
+  "allFourPresentationsRetained": true,
+  "rollbackRestoresExactRows": true
+}

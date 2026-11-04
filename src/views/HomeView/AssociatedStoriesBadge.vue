@@ -35,7 +35,7 @@ import { generateDomUid } from '@/utils/generateDomUid';
 
 const props = withDefaults(defineProps<{ storyId: string; periodId: string; periodLabel: string; stories: StorySuggestion[]; loading?: boolean; error?: string | null; disabled?: boolean }>(), { loading: false, error: null });
 const otherStories = computed(() => props.stories.filter(story => String(story.id).trim() !== String(props.storyId).trim()));
-const emit = defineEmits<{ select: [id: string]; retry: [] }>();
+const emit = defineEmits<{ select: [id: string]; retry: []; 'open-change': [open: boolean] }>();
 const retry = () => emit('retry');
 const open = ref(false);
 const trigger = ref<HTMLButtonElement | null>(null);
@@ -89,11 +89,12 @@ watch([otherStories, () => props.loading, () => props.error], async () => {
   await nextTick(); position();
 });
 watch(open, value => {
+  emit('open-change',value);
   if (value) { window.addEventListener('resize', position); window.addEventListener('scroll', position, true); }
   else { window.removeEventListener('resize', position); window.removeEventListener('scroll', position, true); }
 }, { flush: 'sync' });
 onDeactivated(() => close(false));
-onScopeDispose(() => { window.removeEventListener('resize', position); window.removeEventListener('scroll', position, true); });
+onScopeDispose(() => { close(false); window.removeEventListener('resize', position); window.removeEventListener('scroll', position, true); });
 </script>
 
 <style scoped>

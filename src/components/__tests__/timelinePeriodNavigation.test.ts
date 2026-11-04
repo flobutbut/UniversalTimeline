@@ -3,6 +3,7 @@ import { mount, type VueWrapper } from '@vue/test-utils';
 import PeriodGrid from '@/views/HomeView/PeriodGrid.vue';
 import { StoryApiService } from '@/services/StoryApiService';
 import type { ListPeriod } from '@/types/database';
+import {h} from 'vue';
 
 const period = (id: string, hasChildren = false): ListPeriod => ({
   id, label: { fr: id, en: '' }, startDate: 'M65', endDate: 'NOW', hasChildren, categories: [],
@@ -44,6 +45,29 @@ it('keeps the back control available when the current period has no remaining it
   expect(view.emitted('go-back')).toHaveLength(1);
 });
 
+it('keeps the reference and temporal controls available on an empty narrative without a wrapper', async () => {
+  view=mount(PeriodGrid,{props:{periods:[],events:[],loading:false,currentPeriod:null,parentPeriod:null,currentStoryId:'1',overviewNavigation:true,nextPeriod:period('next')},slots:{'overview-context':'<button class="return-marker">Retour à la source</button>'}});
+  expect(view.get('.return-marker').text()).toBe('Retour à la source');
+  expect(view.text()).toContain('Aucune période à afficher');
+  await view.get('[data-period-direction="next"]').trigger('click');
+  expect(view.emitted('navigate-period')).toEqual([['next']]);
+});
+
+it.each([
+  ['M7','M1.2',0,100*1.6/2.8],
+  ['M2','M1',100*0.8/2.8,100/2.8],
+  ['M7','TODAY',0,100],
+])('projects the source period into the unchanged narrative window (%s to %s)',async(start,end,left,width)=>{
+  view=mount(PeriodGrid,{props:{periods:[{...period('homo'),startDate:'M2.8',endDate:'TODAY'}],events:[],loading:false,currentPeriod:null,parentPeriod:null,currentStoryId:'1',storyBounds:{startYearsBP:2800000,endYearsBP:0},overviewPeriod:{...period('origin'),startDate:start,endDate:end}},slots:{'overview-context':({style})=>h('div',{class:'source-reference',style},'Origin')}});
+  const style=(view.get('.source-reference').element as HTMLElement).style;
+  expect(parseFloat(style.marginLeft)).toBeCloseTo(left);expect(parseFloat(style.width)).toBeCloseTo(width);
+  expect((view.get('[data-period-id="homo"]').element as HTMLElement).style.getPropertyValue('--period-width')).toBe('100%');
+});
+it.each([['M7','M3'],['2100','2200'],['','']])('does not render an origin with no visible temporal intersection (%s to %s)',(start,end)=>{
+  view=mount(PeriodGrid,{props:{periods:[{...period('homo'),startDate:'M2.8',endDate:'TODAY'}],events:[],loading:false,currentPeriod:null,parentPeriod:null,currentStoryId:'1',storyBounds:{startYearsBP:2800000,endYearsBP:0},overviewPeriod:{...period('origin'),startDate:start,endDate:end}},slots:{'overview-context':()=>h('div',{class:'source-reference'},'Origin')}});
+  expect(view.find('.source-reference').exists()).toBe(false);
+});
+
 it('keeps the back control visible when the parent dates are unknown', async () => {
   render();
   await view.setProps({ currentPeriod: { ...period('root', true), endDate: 'unknown' } });
@@ -59,13 +83,29 @@ it('uses the initial spinner only when there is no timeline context yet', async 
   expect(view.find('.feedback-state--loading').exists()).toBe(true);
 });
 
-it('does not descend into a leaf on mouse or keyboard activation', async () => {
+it.each(['card', 'title', 'Enter', ' '])('opens a leaf with %s activation', async action => {
   render();
   const leaf = view.get('.period-card--timeline');
-  await leaf.trigger('click');
-  await leaf.get('.period-card__title-action').trigger('click');
-  await leaf.get('.period-card__title-action').trigger('keydown', { key:'Enter' });
-  expect(leaf.find('button.period-card__title-action').exists()).toBe(false);
+  expect(leaf.find('button.period-card__title-action').exists()).toBe(true);
+  if (action === 'card') await leaf.trigger('click');
+  else if (action === 'title') await leaf.get('.period-card__title-action').trigger('click');
+  else await leaf.trigger('keydown', { key: action });
+  expect(view.emitted('period-click')).toEqual([[period('leaf')]]);
+});
+
+it('opens an undated leaf through its title', async () => {
+  const undated = { ...period('undated'), startDate: '', endDate: '' };
+  render([undated]);
+  const title = view.get('.period-grid__undated button');
+  expect(title.attributes('disabled')).toBeUndefined();
+  await title.trigger('click');
+  expect(view.emitted('period-click')).toEqual([[undated]]);
+});
+
+it('keeps a leaf closed while the timeline is loading', async () => {
+  render();
+  await view.setProps({ loading: true });
+  await view.get('.period-card--timeline').trigger('click');
   expect(view.emitted('period-click')).toBeUndefined();
 });
 

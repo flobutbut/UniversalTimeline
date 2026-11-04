@@ -96,15 +96,15 @@ it('starts the public timeline at the Universe with its full duration, before ex
   expect(grid.props('currentPeriod').startYearsBP).toBe(13.8e9);
   expect(grid.props('periods').map((p:Period) => p.label.fr)).toEqual(['Terre']);
 });
-it('keeps a leaf closed and preserves its period only when the selected frise has children', async () => {
+it('opens a leaf directly and restores it through browser history after visiting an associated frise', async () => {
   vi.mocked(stories.getStory).mockImplementation(async id => storyFixture(id,
     [period(`root-${id}`), period(id === '2' ? 'leaf-7' : `leaf-${id}`, `root-${id}`), ...(id === '2' ? [period('detail-child','leaf-7')] : [])],
     [event(`event-${id}`)], id === '7' ? [{ id: '2', title_fr: 'Frise 2', anchors: [{ type: 'period', id: 'leaf-7' }] }] : []));
   await start('/timeline?story=7');
   await view.get('[data-period-id="leaf-7"]').trigger('click'); await flushPromises();
-  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7');
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7&period=leaf-7');
   expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('7');
-  expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('root-7');
+  expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('leaf-7');
   await view.get('[aria-label="1 frise associée à leaf-7"]').trigger('click'); await flushPromises();
   (document.body.querySelector('.associated-stories__item') as HTMLButtonElement).click(); await flushPromises();
   expect(router.currentRoute.value.fullPath).toBe('/timeline?story=2&period=leaf-7');
@@ -113,6 +113,10 @@ it('keeps a leaf closed and preserves its period only when the selected frise ha
   expect(view.get('[aria-label="Fil d’Ariane de la timeline"]').text()).not.toContain('Frise 7');
   const moved = new Promise<void>(resolve => { const stop = router.afterEach(() => { stop(); resolve(); }); });
   router.back(); await moved; await flushPromises();
+  expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7&period=leaf-7');
+  expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('leaf-7');
+  const returned = new Promise<void>(resolve => { const stop = router.afterEach(() => { stop(); resolve(); }); });
+  router.back(); await returned; await flushPromises();
   expect(router.currentRoute.value.fullPath).toBe('/timeline?story=7');
   expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('root-7');
 });

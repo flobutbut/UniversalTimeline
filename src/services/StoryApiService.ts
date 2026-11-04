@@ -124,10 +124,10 @@ export class StoryApiService {
     await apiClient.delete(`/stories/${parentStoryId}/child-stories/${childStoryId}`);
   }
 
-  async changeEntryPoints(sourceId: string, targetIds: string[], anchor: StoryAnchor | undefined, remove = false): Promise<void> {
+  async changeEntryPoints(sourceId: string, targetIds: string[], anchor: StoryAnchor | null | undefined, remove = false): Promise<void> {
     await apiClient.post(`/stories/${sourceId}/entry-points`, {
       childStoryIds: [...new Set(targetIds)], operation: remove ? 'remove' : 'add',
-      ...(anchor ? { anchor: { anchorType: anchor.type, anchorId: anchor.id } } : {}),
+      ...(anchor ? { anchor: { anchorType: anchor.type, anchorId: anchor.id } } : anchor === null ? {anchor:null} : {}),
     });
   }
 

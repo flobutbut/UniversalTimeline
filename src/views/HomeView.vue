@@ -2,9 +2,12 @@
   <div class="home-view">
     <div class="home-view__header">
       <div class="home-view__breadcrumbs">
-        <StoryBreadcrumb class="home-view__story-breadcrumb" :items="storyBreadcrumb" label="Fil d’Ariane des frises" :loading="loading" @navigate="onStoryBreadcrumb" />
+        <StoryBreadcrumb class="home-view__story-breadcrumb" :items="storyBreadcrumb" :max-visible="3" label="Fil d’Ariane des frises" :loading="loading" @navigate="onStoryBreadcrumb" />
         <StoryBreadcrumb class="home-view__period-breadcrumb" :items="breadcrumb" :loading="loading" @navigate="onBreadcrumb" />
       </div>
+      <Button v-if="!contextBar && returnTitle" variant="tertiary" size="sm" :disabled="loading" @click="onGoBack">Retour à {{ returnTitle }}</Button>
+      <AssociatedStoriesBadge v-if="visibleRootStories.length" :story-id="currentStoryId" period-id="story-root"
+        :period-label="storyBreadcrumb[storyBreadcrumb.length - 1]?.title || 'cette frise'" :stories="visibleRootStories" :disabled="loading" @select="id => onStorySelect(id)" />
       <Button v-if="!routeError && !error" class="home-view__story-detail" variant="tertiary" size="sm" :disabled="loading"
         :to="{ name: 'database', query: { story: currentStoryId } }">Voir le détail de la frise</Button>
     </div>
@@ -35,6 +38,8 @@
         :loading="loading"
         :parent-period="parentStack.length > 0 ? parentStack[parentStack.length - 1] : null"
         :current-period="currentPeriod"
+        :overview-navigation="!!returnTitle"
+        :overview-period="contextBar"
         :previous-period="previousPeriod"
         :next-period="nextPeriod"
         :story-bounds="currentStoryBounds"
@@ -46,7 +51,17 @@
         @go-back="onGoBack"
         @navigate-period="slideToAdjacentPeriod"
         @story-select="onStorySelect"
-      />
+      >
+        <template v-if="contextBar" #overview-context="{ style }">
+          <PeriodCard variant="parent" :period="contextBar" :style="style" :is-selected="false" :loading="loading" @back="onGoBack">
+            <template #title-actions>
+              <span class="home-view__context-label">{{ returnPath.length ? 'Retour' : 'Période de référence' }}</span>
+              <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="contextBar.id" :period-label="contextBar.label.fr"
+                :stories="contextStories" :disabled="loading" @select="id => onStorySelect(id, contextAnchor)" />
+            </template>
+          </PeriodCard>
+        </template>
+      </PeriodGrid>
     </div>
   </div>
 </template>
@@ -55,10 +70,12 @@
 import Button from '@/components/base/Button.vue';
 import Select from '@/components/base/Select.vue';
 import ModalShell from '@/components/base/ModalShell.vue';
-import { onActivated, onDeactivated, ref, watch } from 'vue';
+import { computed, onActivated, onDeactivated, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import StoryBreadcrumb from '@/components/StoryBreadcrumb.vue';
-import { readStoryTarget, readTimelinePosition, timelineLocation } from '@/router/storyTarget';
+import { readStoryTarget, readTimelinePosition, readTimelineReturnPath, timelineLocation } from '@/router/storyTarget';
+import PeriodCard from './HomeView/PeriodCard.vue';
+import AssociatedStoriesBadge from './HomeView/AssociatedStoriesBadge.vue';
 
 // KeepAlive includes this page by name; navigation and history stay in its instance.
 defineOptions({ name: 'HomeView' });
@@ -94,6 +111,7 @@ const {
   breadcrumb,
   storyBreadcrumb,
   currentStoryBounds,
+  contextBar, contextStories, rootStories, returnTitle, returnPath, referencePeriodId,
   loadInitialData,
   openStory,
   handlePeriodClick,
@@ -106,6 +124,11 @@ const {
   routeVia = actionVia ?? 'app'; actionVia = null;
   // A refused or duplicate navigation changes no route: its cause must not label the next one.
   void router.push(timelineLocation(target)).then(failure => { if (failure) routeVia = null; });
+});
+const visibleRootStories=computed(()=>rootStories.value.filter(story=>!contextBar.value||!contextStories.value.some(other=>other.id===story.id)));
+const contextAnchor=computed(()=>{
+  const frame=returnPath.value[returnPath.value.length-1];
+  return referencePeriodId.value?{type:'period' as const,id:referencePeriodId.value}:frame?.anchor;
 });
 function as<A extends unknown[]>(via: TimelineVia, run: (...args: A) => unknown) {
   return (...args: A) => { actionVia = via; return run(...args); };
@@ -159,7 +182,7 @@ const periodGrid = ref<InstanceType<typeof PeriodGrid> | null>(null);
 const slide = useTimelineSlide(
   () => timelineViewport.value,
   () => periodGrid.value?.getSlideLayers() ?? [],
-  () => ({ storyId: currentStoryId.value, periodId: currentPeriod.value?.id, contextId: contextId.value }),
+  () => ({ storyId: currentStoryId.value, periodId: currentPeriod.value?.id ?? referencePeriodId.value ?? undefined, contextId: contextId.value }),
   () => loading.value,
   () => routeError.value || error.value,
 );
@@ -175,7 +198,7 @@ function closeNavigationChoices() { slide.cancel(); navigationChoices.value = []
 let initialized = false;
 let consumedPosition = '';
 let previousRouteName: unknown = null;
-watch([() => route.query.story, () => route.query.period, () => route.query.context, () => route.query.view, () => route.query.entry, () => route.name], () => {
+watch([() => route.query.story, () => route.query.period, () => route.query.context, () => route.query.reference, () => route.query.view, () => route.query.entry, () => route.name], () => {
   const from = previousRouteName; previousRouteName = route.name;
   if (route.name !== 'timeline') return;
   // An in-page action, an announced search, the browser history inside the page, or an entry from elsewhere.
@@ -184,7 +207,8 @@ watch([() => route.query.story, () => route.query.period, () => route.query.cont
   routeError.value = '';
   try {
     const storyId = readStoryTarget(route.query.story);
-    const position = readTimelinePosition(route.query);
+    const state=router.options.history.state;
+    const position = { ...readTimelinePosition(route.query), ...(Array.isArray(state?.timelineReturnPath)?{returnPath:readTimelineReturnPath(state)}:{}) };
     const key = JSON.stringify([storyId, position]);
     if (initialized && key === consumedPosition) return;
     consumedPosition = key;
@@ -228,6 +252,7 @@ onActivated(() => {
   overflow: hidden;
 }
 .home-view__timeline { height: 100%; }
+.home-view__context-label { font-size: var(--font-size-xs); color: var(--color-text-secondary); margin-right: var(--spacing-sm); }
 .home-view__viewport--waiting > .home-view__timeline { visibility: hidden; }
 .home-view__viewport--sliding :deep(.timeline-card),
 .home-view__viewport :deep(.timeline-slide-snapshot *) {

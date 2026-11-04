@@ -23,7 +23,7 @@ export function usePeriodFlip(
 
   const prepare = (period: ListPeriod, element: HTMLElement | null) => {
     cancel();
-    if (period.hasChildren && element) pending = {
+    if (element) pending = {
       id: period.id,
       rect: element.getBoundingClientRect(),
       restoreFocus: element.contains(document.activeElement),
@@ -42,7 +42,10 @@ export function usePeriodFlip(
     const element = parentElement();
     const to = element?.getBoundingClientRect();
     if (!element || !to?.width || !from.rect.width) { cancel(); return; }
-    if (from.restoreFocus && document.activeElement === document.body) element.focus({ preventScroll: true });
+    if (from.restoreFocus && document.activeElement === document.body) {
+      const backControl = element.querySelector<HTMLElement>('.period-card__title-action') ?? element;
+      backControl.focus({ preventScroll: true });
+    }
     pending = null;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
 

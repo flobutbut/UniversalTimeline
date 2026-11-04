@@ -84,20 +84,20 @@ it('rejects inaccessible contexts and periods missing from the requested view', 
   expect(nav.error.value).toMatch(/période/);
 });
 
-it('returns from a detail root to its context without reopening the default subject in a loop', async () => {
+it('returns from a local root to the narrative overview before leaving the reference context', async () => {
   const navigate = vi.fn();
   const routed = scope.run(() => useHomeNavigation(navigate))!;
   await routed.openStory('10',{storyId:'10',contextId:'50',periodId:'holocene'});
   await routed.goBack();
-  expect(navigate).toHaveBeenCalledWith({storyId:'50',contextId:'50',view:'overview'});
+  expect(navigate).toHaveBeenCalledWith({storyId:'10',contextId:'50',referencePeriodId:'antiquity',view:'overview'});
 });
 
-it('requires explicit frise selection for a leaf in the reference frise', async () => {
+it('opens a leaf locally while leaving its associated frise available for explicit selection', async () => {
   const navigate = vi.fn();
   const routed = scope.run(() => useHomeNavigation(navigate))!;
   await routed.openStory('50');
   await routed.handlePeriodClick(periods[1]);
-  expect(navigate).not.toHaveBeenCalled();
+  expect(navigate).toHaveBeenCalledExactlyOnceWith({storyId:'50',periodId:'medieval',contextId:'50'});
   await routed.selectStory('15',{type:'period',id:periods[1].id});
   expect(navigate).toHaveBeenCalledWith(expect.objectContaining({storyId:'15',periodId:'medieval',contextId:'50'}));
 });

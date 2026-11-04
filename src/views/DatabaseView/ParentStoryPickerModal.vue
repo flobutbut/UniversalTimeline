@@ -1,8 +1,8 @@
 <template>
   <ModalShell :title="mode === 'parent' ? 'Choisir la frise parente' : 'Ajouter un point d’entrée'" height="auto" :busy="busy" @close="$emit('close')">
     <p class="parent-picker__hint">{{ mode === 'parent'
-      ? 'Choisissez la frise qui contient le sujet et la période sur laquelle cette frise sera proposée (l’ancre).'
-      : 'Choisissez une frise et la période depuis laquelle celle-ci sera accessible.' }}</p>
+      ? 'Choisissez la frise parente et un emplacement : période ou racine de la frise.'
+      : 'Choisissez une frise et la période ou la racine depuis laquelle celle-ci sera accessible.' }}</p>
     <p v-if="error" role="alert" class="parent-picker__error">{{ error }}</p>
     <BaseSelect v-model="parentId" :label="mode === 'parent' ? 'Frise parente' : 'Frise source'" placeholder="Rechercher une frise…"
       :options="options" searchable no-results-text="Aucune autre frise disponible" :disabled="busy" />
@@ -34,16 +34,18 @@ const props = withDefaults(defineProps<{
   /** Rattachement à la frise parente plutôt qu’un point d’entrée. */ mode?: 'entry' | 'parent';
   /** Bornes du contenu de la frise : la période qui les contient est proposée. */ subject?: YearsRange | null;
 }>(), { mode: 'entry', subject: null });
-const emit = defineEmits<{ close: []; confirm: [parentId: string, periodId: string] }>();
+const emit = defineEmits<{ close: []; confirm: [parentId: string, periodId: string | null] }>();
 const parentId = ref<string | null>(null);
 const periodId = ref<string | null>(null);
 const { parent, loading, error: loadError, load: loadParent } = useParentStoryDetail(parentId);
 const options = computed(() => props.candidates.map(story => ({ value: story.id, label: story.title.fr || story.title.en })));
 const suggestedId = computed(() => parent.value ? suggestAnchorPeriod(parent.value.periods, props.subject, Date.now()) : null);
 const periodOptions = computed(() => {
+  if(!parent.value || parent.value.id!==parentId.value || loading.value)return [];
   const linked = new Set(props.mode === 'entry' ? props.existingParents?.find(story => story.id === parentId.value)?.anchors.filter(anchor => anchor.type === 'period').map(anchor => anchor.id) : []);
-  return (parent.value?.periods ?? []).filter(period => !linked.has(period.id))
-    .map(period => ({ value: period.id, label: `${period.label.fr || period.label.en}${period.id === suggestedId.value ? ' (proposée)' : ''}` }));
+  const rootLinked=props.mode==='entry'&&props.existingParents?.find(story=>story.id===parentId.value)?.atRoot;
+  return [...(!rootLinked?[{value:'__story_root__',label:'Racine de la frise'}]:[]),...(parent.value?.periods ?? []).filter(period => !linked.has(period.id))
+    .map(period => ({ value: period.id, label: `${period.label.fr || period.label.en}${period.id === suggestedId.value ? ' (proposée)' : ''}` }))];
 });
 const suggestedLabel = computed(() => periodOptions.value.find(option => option.value === suggestedId.value)?.label.replace(/ \(proposée\)$/, ''));
 watch(suggestedId, id => { if (id && !periodId.value && periodOptions.value.some(option => option.value === id)) periodId.value = id; });
@@ -51,7 +53,7 @@ watch(parentId, () => { periodId.value = null; });
 function submit() {
   if (props.busy || loading.value || loadError.value || !parentId.value || !periodId.value) return;
   if (!props.candidates.some(story => story.id === parentId.value) || !periodOptions.value.some(period => period.value === periodId.value)) return;
-  emit('confirm', parentId.value, periodId.value);
+  emit('confirm', parentId.value, periodId.value==='__story_root__'?null:periodId.value);
 }
 </script>
 

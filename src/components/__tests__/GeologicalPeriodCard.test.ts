@@ -10,9 +10,11 @@ describe('active PeriodCard', () => {
     await wrapper.trigger('click');
     expect(wrapper.emitted('select')?.[0]).toEqual([period]);
   });
-  it('keeps a leaf inert so its associations are selected explicitly', async () => {
-    const wrapper = mount(PeriodCard, { props: { period: { ...period, hasChildren: false }, isSelected: false } });
-    await wrapper.trigger('click'); expect(wrapper.emitted('select')).toBeUndefined();
+  it('opens a leaf without requiring an associated frise', async () => {
+    const leaf = { ...period, hasChildren: false };
+    const wrapper = mount(PeriodCard, { props: { period: leaf, isSelected: false } });
+    await wrapper.get('button.period-card__title-action').trigger('click');
+    expect(wrapper.emitted('select')).toEqual([[leaf]]);
   });
   it('uses a parent card to go back rather than drilling down', async () => {
     const wrapper = mount(PeriodCard, { props: { period, isSelected: false, variant: 'parent' } });

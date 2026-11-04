@@ -63,6 +63,7 @@ before(async () => {
   await pool.query(await readFile(new URL('../../database/migrations/20261031220914_hybrid_catalogue_search.sql',import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261102075026_story_entry_points.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261102131202_story_period_presentations.sql', import.meta.url),'utf8'));
+  await pool.query(await readFile(new URL('../../database/migrations/20261104132539_navigation_without_wrapper_periods.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261102105902_account_profiles.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261102110027_account_functions_private_schema.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261102223946_story_event_importance.sql', import.meta.url),'utf8'));
@@ -230,7 +231,7 @@ test('read services preserve story ownership, private visibility and linked deta
   assert.equal(detail.statusCode,200); assert.equal(detail.payload.isPublic,false); assert.equal(detail.payload.ownerUserId,alice);
   assert.equal(detail.payload.categories[0].id,category); assert.deepEqual(detail.payload.periods.map(row=>row.id),['root']);
   assert.deepEqual(detail.payload.events.map(row=>row.id),['e1']);
-  assert.deepEqual(detail.payload.childStories,[{id:'2',title:{fr:'Alice enfant',en:'Alice enfant'},anchors:[{type:'period',id:'root'}]}]);
+  assert.deepEqual(detail.payload.childStories,[{id:'2',title:{fr:'Alice enfant',en:'Alice enfant'},anchors:[{type:'period',id:'root'}],atRoot:false}]);
   assert.equal((await call('get','/stories/:id',{}, {id:'1'},bob)).statusCode,404);
   assert.equal((await call('get','/stories/:id',{}, {id:'3'},null)).statusCode,200);
   assert.deepEqual((await call('get','/stories',{}, {},null)).payload.map(row=>row.id),[3]);
@@ -393,13 +394,12 @@ test('creates a child frise from a period: its sub-periods move, the period stay
   const before = await sourceRows(1);
   const result = await call('post', '/stories/:storyId/from-period', { periodId: 'apollo', title: '  Programme Apollo ' }, { storyId: '1' });
   assert.equal(result.statusCode, 201);
-  assert.deepEqual(result.payload, { id: '6', parentStoryId: '1', periodId: 'apollo', periodCount: 2, eventCount: 2, movedPeriodCount: 1, linkedStoryCount: 0 });
+  assert.deepEqual(result.payload, { id: '6', parentStoryId: '1', periodId: 'apollo', periodCount: 1, eventCount: 2, movedPeriodCount: 1, linkedStoryCount: 0 });
   assert.deepEqual(await sourceRows(1), { ...before, periods: before.periods.filter(row => row.period_id !== 'gemini') });
   const created = await sourceRows(6);
   assert.deepEqual(created.story, [{ title_fr: 'Programme Apollo', is_public: true, parent_story_id: 1 }]);
   assert.deepEqual(created.periods, [
-    { period_id: 'apollo', parent_period_id: null },
-    { period_id: 'gemini', parent_period_id: 'apollo' },
+    { period_id: 'gemini', parent_period_id: null },
   ]);
   assert.deepEqual(created.events.map(row => row.event_id), ['edge', 'in']);
   assert.deepEqual((await pool.query('SELECT anchor_type,anchor_id FROM story_anchors WHERE story_id=6')).rows, [{ anchor_type: 'period', anchor_id: 'apollo' }]);
@@ -412,12 +412,12 @@ test('an event on the first day of the period is copied even without a stored co
   const result = await call('post', '/stories/:storyId/from-period', { periodId: 'apollo', title: 'Apollo' }, { storyId: '1' });
   assert.deepEqual((await pool.query('SELECT event_id FROM story_events WHERE story_id=$1 ORDER BY event_id', [result.payload.id])).rows.map(row => row.event_id), ['edge', 'first-day', 'in']);
 });
-test('a period without known dates copies its branch but no event', async () => {
+test('an undated leaf creates a frise without a wrapper or events', async () => {
   await seedSplitSource();
   await pool.query("INSERT INTO periods(id,label_fr) VALUES ('vague','Sans dates'); INSERT INTO story_periods(story_id,period_id) VALUES (1,'vague')");
   const result = await call('post', '/stories/:storyId/from-period', { periodId: 'vague', title: 'Vague' }, { storyId: '1' });
   assert.equal(result.statusCode, 201);
-  assert.deepEqual([result.payload.periodCount, result.payload.eventCount], [1, 0]);
+  assert.deepEqual([result.payload.periodCount, result.payload.eventCount], [0, 0]);
 });
 test('refuses another owner, a period outside the frise or a blank title without creating anything', async () => {
   await seedSplitSource();
