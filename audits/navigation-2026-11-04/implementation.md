@@ -42,7 +42,7 @@ La référence reste dans « Grandes périodes de l’histoire européenne ». C
 
 ## Validation
 
-`yarn verify` passe : 1 515 tests, contrôles du design, configuration et symboles inutilisés, builds frontend et API. Après le contrôle dans le navigateur utilisateur, un défaut de retour avec les anciens chapeaux a été corrigé et la suite complète ainsi que le build frontend ont été repassés ; voir [le contrôle réel](browser-review.md). Les six suites PostgreSQL concernées totalisent 86 tests réussis ; les six parcours de navigateur passent sans erreur de page. Résumé : [validation.json](validation.json).
+La dernière vérification isolée `node scripts/check-clean.mjs` passe : installation vierge, 1 524 tests, contrôles du design, configuration et symboles inutilisés, builds frontend et API, zéro vulnérabilité aux deux audits de dépendances. Après le contrôle dans le navigateur utilisateur, un défaut de retour avec les anciens chapeaux a été corrigé et la suite complète ainsi que le build frontend ont été repassés ; voir [le contrôle réel](browser-review.md). Les quatorze suites PostgreSQL 17 isolées et le contrôle de restauration totalisent 182 tests réussis ; les six parcours de navigateur passent sans erreur de page. Résumé : [validation.json](validation.json).
 
 La répétition utilise PostgreSQL 17 local par socket, une copie aux propriétaires anonymisés et aucun identifiant de connexion distant. Tous les faits, événements et destinations restent identiques. Le retour arrière [rollback-data.sql](rollback-data.sql) a restauré exactement toutes les lignes d’origine ; [rehearsal.json](rehearsal.json) en conserve le résultat.
 
@@ -60,3 +60,9 @@ La sauvegarde ciblée [before.json](before.json), le [plan détaillé](data-plan
 Ne pas appliquer le nettoyage avant le nouveau code en production. Le retour arrière de données reste compatible avec le nouveau schéma ; il n’est pas nécessaire de retirer les contraintes de compatibilité.
 
 Le [correctif de cadrage des origines](temporal-origin-review.md) remplace l’ancien repère sans dates : aucune frise n’est présentée comme une période fictive.
+
+## Infobulles et petites périodes
+
+Cliquer sur le contenu d’une infobulle, y compris sa date ou sa description, fige l’événement ; son titre offre la même action au clavier. Les liens vers les frises gardent leur action propre. Le nombre de frises associées reste visible à l’état figé ; zéro ou nombre inconnu ne sont pas affichés. Une petite période reste étendue tant que son menu de frises associées est ouvert, y compris lorsque le focus passe dans le panneau téléporté.
+
+Contrôle sur l’onglet utilisateur, Cénozoïque : clic sur la date d’« Apparition du genre Homo », compteur de trois autres frises, ouverture puis fermeture du menu du Quaternaire sans changement de sa largeur étendue (26,14446 %). [Capture](event-pin-and-period-menu.jpg).
