@@ -4,9 +4,11 @@
       @click="childCount?emit('toggle',story.id):emit('select',graphKey('story',story.id))">
       {{ story.title }}
     </button>
-    <StoryTimeline v-if="content && (periods.length || events.length)" compact proportional :time-bounds="bounds??undefined" :reference-time="referenceTime" :periods="periods" :events="events"
-      :selected-period-id="selected?.kind==='period'?selected.entityId:null" :selected-event-id="selected?.kind==='event'?selected.entityId:null" />
-    <span v-else class="timeline-map-card__empty" :class="{'timeline-map-card__empty--error':!content}" :role="!content?'status':undefined">{{ content?'Frise vide':'Aperçu indisponible' }}</span>
+    <div class="timeline-map-card__preview">
+      <StoryTimeline v-if="content && (periods.length || events.length)" compact proportional :time-bounds="bounds??undefined" :layout-bounds="fullBounds??undefined" :reference-time="referenceTime" :periods="periods" :events="events"
+        :selected-period-id="selected?.kind==='period'?selected.entityId:null" :selected-event-id="selected?.kind==='event'?selected.entityId:null" />
+      <span v-else class="timeline-map-card__empty" :class="{'timeline-map-card__empty--error':!content}" :role="!content?'status':undefined">{{ content?'Frise vide':'Aperçu indisponible' }}</span>
+    </div>
   </div>
 </template>
 
@@ -19,7 +21,7 @@ import type { TimelineBounds } from './temporalTimelineMap';
 
 const props=defineProps<{
   story:RelationStory; content?:RelationsContent; showEvents:boolean; selected?:GraphNode;
-  childCount:number; collapsed:boolean; bounds?:TimelineBounds|null; referenceTime?:number; alignTitleEnd?:boolean;
+  childCount:number; collapsed:boolean; bounds?:TimelineBounds|null; fullBounds?:TimelineBounds|null; referenceTime?:number; alignTitleEnd?:boolean;
 }>();
 const emit=defineEmits<{select:[id:string];toggle:[id:string];resize:[height:number]}>();
 const root=ref<HTMLElement>();
@@ -53,6 +55,7 @@ const selectedHere=computed(()=>props.selected && (props.selected.kind==='story'
 .timeline-map-card--end-title .timeline-map-card__title {margin-left:100%;transform:translateX(-100%);}
 .timeline-map-card__title:hover,.timeline-map-card--selected .timeline-map-card__title {color:var(--color-text-link);}
 .timeline-map-card__title:focus-visible {outline:2px solid var(--color-border-focus);outline-offset:2px;}
+.timeline-map-card__preview {padding-block:var(--spacing-xs);background:var(--color-surface-default);border-radius:var(--radius-sm);outline:1px solid var(--color-border-light);outline-offset:-1px;}
 .timeline-map-card__empty {display:block;color:var(--color-text-secondary);font:var(--type-meta);}
 .timeline-map-card__empty--error {color:var(--color-status-error-foreground);}
 </style>

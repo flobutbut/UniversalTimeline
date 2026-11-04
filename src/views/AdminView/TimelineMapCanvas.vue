@@ -43,7 +43,6 @@ let width=0;
 let height=0;
 let placing=false;
 let renderedY=0;
-let rowScale=1;
 const dimensions=()=>({width:viewport.value?.clientWidth || 800,height:viewport.value?.clientHeight || 560});
 
 function place(transform:ZoomTransform) {
@@ -57,10 +56,9 @@ function fit() {
   automaticFit=true;
   const size=dimensions();
   const w=scene.value.offsetWidth || 560;
-  const h=(scene.value.offsetHeight || 300)/(props.temporal?rowScale:1);
-  if (props.temporal) rowScale=Math.min(1,(size.height-112)/h);
+  const h=scene.value.offsetHeight || 300;
   const k=Math.max(MIN_ZOOM,Math.min(1,(size.width-48)/w,props.temporal?1:(size.height-112)/h));
-  place(zoomIdentity.translate((size.width-w*k)/2,80+Math.max(0,(size.height-112-h*(props.temporal?rowScale:k))/2)).scale(k));
+  place(zoomIdentity.translate((size.width-w*k)/2,80+Math.max(0,(size.height-112-h*(props.temporal?1:k))/2)).scale(k));
 }
 function preserveView() {automaticFit=false;}
 function scale(factor:number) {
@@ -77,13 +75,12 @@ function frame(element:HTMLElement) {
   const current=zoomTransform(viewport.value);
   const position=props.temporal?element.closest<HTMLElement>('[data-temporal-story]'):null;
   const x=position?parseFloat(position.style.getPropertyValue('--row-left')):(rect.left-host.left-current.x)/current.k;
-  const y=position?parseFloat(position.style.getPropertyValue('--row-top')):(rect.top-host.top-current.y)/(props.temporal?rowScale:current.k);
+  const y=position?parseFloat(position.style.getPropertyValue('--row-top')):(rect.top-host.top-current.y)/(props.temporal?1:current.k);
   const w=position?parseFloat(position.style.getPropertyValue('--row-width')):rect.width/current.k;
-  const h=rect.height/(props.temporal?rowScale:current.k) || 300;
+  const h=rect.height/(props.temporal?1:current.k) || 300;
   const size=dimensions();
   const k=props.temporal?Math.max(MIN_ZOOM,Math.min(MAX_ZOOM,w>0?(size.width-48)/w:current.k))
     :Math.max(MIN_ZOOM,Math.min(1,(size.width-48)/(w||560),(size.height-112)/h));
-  if (props.temporal) rowScale=1;
   place(zoomIdentity.translate((size.width-w*k)/2-x*k,80+(size.height-112-h*(props.temporal?1:k))/2-y*(props.temporal?1:k)).scale(k));
 }
 function revealFocus(event:FocusEvent) {
@@ -114,14 +111,9 @@ onMounted(async()=>{
     .on('start',event=>{if(event.sourceEvent)automaticFit=false;})
     .on('zoom',event=>{
       const {x,y,k}=event.transform;
-      // Fit all rows initially, then cap their growth while dates continue to zoom.
+      // Temporal zoom changes dates only; vertical movement belongs to panning.
       if (props.temporal&&!placing&&k!==zoomLevel.value) {
-        const ratio=k/zoomLevel.value;
-        const anchorY=(y-renderedY*ratio)/(1-ratio);
-        const nextRowScale=Math.min(1,rowScale*ratio);
-        const nextY=renderedY*(nextRowScale/rowScale)+anchorY*(1-nextRowScale/rowScale);
-        rowScale=nextRowScale;
-        place(zoomIdentity.translate(x,nextY).scale(k));
+        place(zoomIdentity.translate(x,renderedY).scale(k));
         return;
       }
       renderedY=y;
@@ -129,7 +121,6 @@ onMounted(async()=>{
       if (props.temporal) emit('viewChange',{x,scale:k,width:dimensions().width});
       if(scene.value) {
         scene.value.style.setProperty('--canvas-zoom',String(k));
-        scene.value.style.setProperty('--canvas-row-scale',String(rowScale));
         scene.value.style.setProperty('--canvas-offset-x',`${x}px`);
         scene.value.style.transform=props.temporal?`translate(0px, ${y}px)`:`translate(${x}px, ${y}px) scale(${k})`;
       }
@@ -157,7 +148,7 @@ defineExpose({ frame, fit, preserveView });
 .timeline-map-canvas__viewport {position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab;background-color:var(--color-surface-subtle);background-image:radial-gradient(var(--color-border-default) 1px,transparent 1px);background-size:20px 20px;}
 .timeline-map-canvas__viewport:active {cursor:grabbing;}
 .timeline-map-canvas__viewport:focus-visible {outline:2px solid var(--color-border-focus);outline-offset:-2px;}
-.timeline-map-canvas__scene {--canvas-zoom:1;--canvas-row-scale:1;--canvas-offset-x:0px;position:absolute;top:0;left:0;display:flex;align-items:flex-start;gap:64px;width:max-content;transform-origin:0 0;padding:16px;}
+.timeline-map-canvas__scene {--canvas-zoom:1;--canvas-offset-x:0px;position:absolute;top:0;left:0;display:flex;align-items:flex-start;gap:64px;width:max-content;transform-origin:0 0;padding:16px;}
 .timeline-map-canvas--temporal .timeline-map-canvas__scene {padding:0;}
 .timeline-map-canvas__search {position:absolute;top:var(--spacing-md);left:var(--spacing-md);width:248px;max-width:calc(100% - var(--spacing-md) * 2);z-index:var(--z-index-dropdown);}
 .timeline-map-canvas--expanded {flex:1;min-height:160px;}

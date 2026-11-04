@@ -40,17 +40,26 @@ it('leaves text input keyboard shortcuts alone and bounds zoom controls',async()
   for(let i=0;i<10;i++)await view.get('[aria-label="Zoomer"]').trigger('click');
   expect(zoomTransform(host).k).toBe(3);expect(view.get('[aria-label="Zoomer"]').attributes('disabled')).toBeDefined();
 });
-it('allows zooming from cosmic time down to short frises while keeping row heights bounded',async()=>{
+it('keeps vertical placement fixed through zoom in and zoom out, including below the initial fit',async()=>{
   view=mount(TimelineMapCanvas,{props:{expanded:false,temporal:true},slots:{default:'<article>Humanité</article>'}});
   await view.vm.$nextTick();
   const host=view.get('.timeline-map-canvas__viewport').element as HTMLElement;
+  const initialY=zoomTransform(host).y;
+  const scene=view.get('.timeline-map-canvas__scene').element as HTMLElement;
+  const initialTransform=scene.style.transform;
   for(let i=0;i<20;i++)await view.get('[aria-label="Zoomer"]').trigger('click');
   expect(zoomTransform(host).k).toBeGreaterThan(3);
-  const scene=view.get('.timeline-map-canvas__scene').element as HTMLElement;
-  expect(scene.style.getPropertyValue('--canvas-row-scale')).toBe('1');
-  const beforeY=zoomTransform(host).y;
+  expect(zoomTransform(host).y).toBe(initialY);
+  expect(scene.style.transform).toBe(initialTransform);
+  for(let i=0;i<40;i++)await view.get('[aria-label="Dézoomer"]').trigger('click');
+  expect(zoomTransform(host).k).toBe(.01);
+  expect(zoomTransform(host).y).toBe(initialY);
+  expect(scene.style.transform).toBe(initialTransform);
+  await view.get('.timeline-map-canvas__viewport').trigger('keydown',{key:'ArrowDown'});
+  const pannedY=zoomTransform(host).y;
+  expect(pannedY).toBeCloseTo(initialY-80,6);
   await view.get('[aria-label="Zoomer"]').trigger('click');
-  expect(zoomTransform(host).y).toBeCloseTo(beforeY,6);
+  expect(zoomTransform(host).y).toBe(pannedY);
 });
 it('centers a subpixel frise using its date coordinates rather than rounded DOM measurements',async()=>{
   view=mount(TimelineMapCanvas,{props:{expanded:false,temporal:true},slots:{default:'<div data-temporal-story="recent" style="--row-left:4095px;--row-width:0.00007px;--row-top:88px"><article>Récente</article></div>'}});

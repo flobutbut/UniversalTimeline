@@ -16,12 +16,17 @@ it('juxtaposes siblings chronologically without losing frises',()=>{
   expect(storyAncestors('3',forest.parents)).toEqual(['1']);
   expect(flatten(forest.roots).sort()).toEqual(['1','2','3']);
 });
-it('places entry points and detail views along the navigation path before historical ownership',()=>{
+it('keeps siblings at the same parent level despite entry points and detail-view shortcuts between them',()=>{
   const forest=buildTimelineForest(leafNetwork(),new Map());
   expect(forest.parents.get('2')).toBe('1');
-  expect(forest.parents.get('3')).toBe('2');
-  expect(storyAncestors('3',forest.parents)).toEqual(['2','1']);
+  expect(forest.parents.get('3')).toBe('1');
+  expect(storyAncestors('3',forest.parents)).toEqual(['1']);
   expect(flatten(forest.roots).sort()).toEqual(['1','2','3']);
+});
+it('uses navigation as a fallback when a frise has no explicit parent',()=>{
+  const network=leafNetwork();network.links=network.links.filter(link=>link.type!=='legacy');
+  const forest=buildTimelineForest(network,new Map());
+  expect(forest.parents.get('2')).toBe('1');expect(forest.parents.get('3')).toBe('2');
 });
 it('bounds historical cycles, self-links and missing parents without losing a frise',()=>{
   const network=leafNetwork();

@@ -18,6 +18,27 @@ it('clips a cosmic preview to a recent date window without stretching offscreen 
   expect(view.find('[data-event-id="new"]').exists()).toBe(true);
   view.unmount();
 });
+it('keeps compact lanes and event space stable through temporal zoom, while hiding events still shrinks the preview',async()=>{
+  const referenceTime=Date.UTC(2026,10,4);
+  const full={start:13.8e9,end:0};
+  const view=mount(StoryTimeline,{props:{compact:true,proportional:true,referenceTime,timeBounds:full,layoutBounds:full,periods:[
+    period('universe',null,'G13.8','NOW'),period('ancient','universe','G10','G4'),period('recent','universe','2000','NOW'),
+  ],events:[{id:'old',label:'Ancien',date:'M5'}]}});
+  const height=()=>parseFloat((view.get('.story-timeline__track').element as HTMLElement).style.height);
+  const initialHeight=height();
+  const initialLanes=['universe','ancient','recent'].map(id=>top(view,id));
+  for (const timeBounds of [{start:30,end:0},{start:20e9,end:-100},full]) {
+    await view.setProps({timeBounds});
+    expect(height()).toBe(initialHeight);
+    expect(['universe','ancient','recent'].map(id=>top(view,id))).toEqual(initialLanes);
+  }
+  await view.setProps({timeBounds:{start:30,end:0}});
+  expect(view.find('[data-event-id="old"]').exists()).toBe(false);
+  expect(height()).toBe(initialHeight);
+  await view.setProps({events:[]});
+  expect(height()).toBe(initialHeight-18);
+  view.unmount();
+});
 
 it('renders every dated period in the full timeline', () => {
   const view = mount(StoryTimeline, { props: { periods } });

@@ -114,6 +114,8 @@ const props = defineProps<{
   collapsible?: boolean;
   proportional?: boolean;
   timeBounds?: {start:number;end:number};
+  /** Keep preview lanes fixed while the visible time window changes. */
+  layoutBounds?: {start:number;end:number};
   referenceTime?: number;
   periods?: InPeriod[];
   events?: InEvent[];
@@ -227,23 +229,27 @@ function toLeft(ybp: number): number {
 
 // ─── Périodes positionnées + stagger vertical ─────────────────────────────────
 
-interface PosPeriod { id: string; label: string; detail: string; left: number; width: number; startYbp: number; row: number; top: number; depth: number; isRoot: boolean }
+interface PosPeriod { id: string; label: string; detail: string; left: number; width: number; startYbp: number; endYbp:number; row: number; top: number; depth: number; isRoot: boolean }
 
 const positionedPeriods = computed<PosPeriod[]>(() => {
   const b = bounds.value;
   if (!b) return [];
 
   const periods = datedPeriods.value.filter(period => visiblePeriodIds.value.has(period.id)
-    && (!props.proportional || Math.max(period.startYbp,period.endYbp)>=b.min && Math.min(period.startYbp,period.endYbp)<=b.max));
+    && (props.compact&&props.layoutBounds || !props.proportional || Math.max(period.startYbp,period.endYbp)>=b.min && Math.min(period.startYbp,period.endYbp)<=b.max));
   const periodIds = new Set(periods.map(p => p.id));
 
   type DatedPeriod = typeof periods[number];
+  const layoutBounds=props.compact?props.layoutBounds:undefined;
+  const layoutStart=layoutBounds?Math.max(layoutBounds.start,layoutBounds.end):0;
+  const layoutDuration=layoutBounds?Math.abs(layoutBounds.start-layoutBounds.end):0;
+  const layoutLeft=(value:number)=>layoutBounds?(layoutDuration?(layoutStart-value)/layoutDuration*100:50):toLeft(value);
   function toPos(p: DatedPeriod, depth: number): PosPeriod {
     const sYbp = p.startYbp;
     const eYbp = p.endYbp;
     const ancientYbp = Math.max(sYbp, eYbp);
     const recentYbp  = Math.min(sYbp, eYbp);
-    const left=toLeft(ancientYbp),right=toLeft(recentYbp);
+    const left=layoutLeft(ancientYbp),right=layoutLeft(recentYbp);
     const bounded=(value:number)=>Math.max(0,Math.min(100,value));
     return {
       id: p.id,
@@ -252,6 +258,7 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
       left: props.proportional?bounded(left):left,
       width: props.proportional?bounded(right)-bounded(left):right-left,
       startYbp: sYbp,
+      endYbp:eYbp,
       row: 0,
       top: 0,
       depth,
@@ -317,7 +324,12 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
   // Passive cards stay bounded. Interactive previews expose every expanded level.
   if (props.compact) {
     const bars = props.collapsible ? ordered : ordered.filter(period => period.depth <= 1);
-    return layoutCompactLanes(bars, props.collapsible ? bars.length : undefined, barSizes.value).placed.map(period => ({ ...period, row: period.lane }));
+    return layoutCompactLanes(bars, props.collapsible ? bars.length : undefined, barSizes.value).placed.map(period => {
+      if (!layoutBounds) return {...period,row:period.lane};
+      const left=Math.max(0,Math.min(100,toLeft(Math.max(period.startYbp,period.endYbp))));
+      const right=Math.max(0,Math.min(100,toLeft(Math.min(period.startYbp,period.endYbp))));
+      return {...period,left,width:right-left,row:period.lane};
+    });
   }
   return ordered;
 });
@@ -347,7 +359,7 @@ const trackHeight = computed(() => {
   const pp = positionedPeriods.value;
   const maxRow = pp.length === 0 ? 0 : Math.max(...pp.map(p => p.row));
   // Compact : les événements occupent une ligne de 16 px sous les périodes, avec le même écart.
-  if (props.compact) return compactPeriodsHeight.value + (positionedEvents.value.length ? (compactPeriodsHeight.value ? barSizes.value.gap : 0) + 16 : 0);
+  if (props.compact) return compactPeriodsHeight.value + ((props.layoutBounds?datedEvents.value.length:positionedEvents.value.length) ? (compactPeriodsHeight.value ? barSizes.value.gap : 0) + 16 : 0);
   return Math.max(68, ROW_OFFSET + (maxRow + 1) * rowStep.value + 8);
 });
 

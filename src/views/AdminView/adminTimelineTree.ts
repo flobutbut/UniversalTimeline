@@ -4,13 +4,13 @@ import type { RelationStory, RelationsContent, RelationsNetwork } from '@/types/
 export interface TimelineBranch { story: RelationStory; children: TimelineBranch[] }
 export interface TimelineForest { roots: TimelineBranch[]; parents: Map<string, string> }
 
-/** Lay out the navigation paths first, falling back to historical parents.
+/** Keep explicit parent/child levels first; navigation is a fallback for unattached frises.
  * Every frise appears once, including disconnected, empty and cyclic legacy records.
  */
 export function buildTimelineForest(network: RelationsNetwork, contents: Map<string, RelationsContent>): TimelineForest {
   const branches = new Map(network.stories.map(story => [story.id, { story, children: [] } as TimelineBranch]));
   const parents = new Map<string, string>();
-  const links=[...network.links].sort((a,b)=>Number(a.type==='legacy')-Number(b.type==='legacy'));
+  const links=[...network.links].sort((a,b)=>Number(a.type!=='legacy')-Number(b.type!=='legacy'));
   for (const link of links) {
     if (!branches.has(link.source) || !branches.has(link.target) || parents.has(link.target)) continue;
     const seen = new Set([link.target]);
