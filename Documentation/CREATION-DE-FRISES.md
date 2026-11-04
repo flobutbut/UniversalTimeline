@@ -104,13 +104,25 @@ Cette contrainte ne signifie pas que la navigation exige un parent unique. Ne pa
 
 ### Périodes et événements du récit
 
-Les périodes d’un même rang sont placées dans l’ordre chronologique, chacune sur la première ligne où elle ne chevauche pas une autre période.
+Dans le détail d’un événement, **Frises associées** affiche la même liste que l’exploration : les rattachements explicites et les frises accessibles contenant le même événement, sans doublon ni inclusion de la frise courante. Seuls les rattachements explicites peuvent être détachés ici ; une frise partageant l’événement reste visible tant qu’elle le contient.
+
+Dans l’exploration comme dans l’aperçu du détail, les périodes et sous-frises sont placées dans l’ordre chronologique sur la ligne courante. Un chevauchement fait descendre d’une ligne ; les éléments suivants ne remontent jamais vers une ligne supérieure qui se serait libérée.
 
 - Regrouper des phases successives sous une période utile : Ère industrielle contient par exemple les révolutions industrielles et la Grande accélération.
 - Garder les recouvrements qui racontent des histoires simultanées ; éviter deux périodes qui doublonnent le même découpage.
 - Viser environ 3 à 10 périodes par rang. Regrouper ou créer un récit de détail lorsque la lecture devient difficile.
 - Une sous-période devrait tenir dans les dates de son parent local. Si elle déborde, revoir le placement ou les dates avec une justification historique ; ne pas modifier une fiche partagée pour des raisons de mise en page seulement.
 - Ne pas copier les subdivisions d’un récit de détail dans son portail uniquement pour conserver une navigation.
+
+Dans l’onglet **Périodes**, la vue **Colonnes** permet de glisser une période ou une frise associée vers une autre colonne. La première colonne correspond à la racine ; chaque autre colonne correspond au parent indiqué dans son en-tête. Les périodes gardent leurs sous-périodes et leur fiche partagée. Pour une frise associée, seul le rattachement déplacé change : ses autres accès restent en place, y compris ceux par événement. Une période ne peut pas être déposée dans elle-même ou dans ses descendants. Les positions restent triées chronologiquement.
+
+Les cartes des frises associées disposent du même menu à trois points que les périodes : **Voir la frise**, **Déplacer**, **Afficher comme une période** et **Supprimer**. Cette dernière action retire seulement le lien à cet endroit. Le chevron ouvre les sous-périodes de la frise dans des colonnes atténuées en **lecture seule** ; pour les modifier, ouvrir le détail de cette frise.
+
+**Afficher comme une période** remplace le badge par une carte temporelle utilisant les bornes de la frise liée. Ce choix appartient au rattachement et ne crée aucune période dans le catalogue. La carte reste limitée à la fenêtre active, ouvre la frise cible et conserve le retour à l’origine. Le menu permet de revenir à **Afficher dans le badge**. Les flèches temporelles ne changent pas de rôle.
+
+Ce choix actualise aussi l’aperçu du détail de la frise : chaque rattachement affiché comme une période y possède sa propre barre, avec les dates de la cible et son parent local. La barre suit le pliage de ce parent ; son clic ouvre les colonnes de lecture seule de la frise associée.
+
+Dans cet aperçu, périodes et sous-frises sont classées chronologiquement. Les éléments successifs continuent sur la même ligne. Chaque chevauchement fait descendre d’une ligne ; les éléments suivants ne réutilisent jamais les lignes supérieures, même lorsqu’elles se libèrent.
 
 ### Fenêtre temporelle et origine de navigation
 
@@ -121,6 +133,7 @@ Une vraie période d’origine peut apparaître comme repère de retour, sans de
 - ses dates réelles sont conservées ;
 - seule son intersection avec la fenêtre active est dessinée, à sa position temporelle ;
 - si elle couvre toute cette fenêtre, sa barre peut légitimement occuper toute la largeur ;
+- chaque extrémité qui dépasse se prolonge jusqu’au bord de l’écran, sans arrondi, pour distinguer une coupure d’une vraie borne temporelle ;
 - entièrement hors fenêtre ou sans dates, elle n’est pas dessinée ; le retour reste dans l’en-tête.
 
 Une entrée depuis un événement ou la racine d’une frise ne fabrique aucune période à partir du nom de la source. Le retour est une commande dans l’en-tête, hors du contenu temporel. Des dates inconnues ne justifient pas un positionnement arbitraire sur l’axe.
@@ -193,6 +206,8 @@ Pour les points d’entrée, `POST /stories/:sourceId/entry-points` reçoit `chi
 | Racine de la source | `anchor: null` |
 
 À l’ajout, l’emplacement est obligatoire. Au retrait, le préciser pour conserver les autres liens ; omettre l’ancre signifie historiquement retirer tous les accès depuis cette source. La racine est un emplacement distinct, pas une période fictive. Les deux frises doivent être modifiables par le compte.
+
+Pour déplacer un rattachement, `POST /stories/:sourceId/entry-points/move` reçoit `targetStoryId`, `from` et `to`. Chaque emplacement est explicitement `null` pour la racine, ou `{ anchorType: 'period' | 'event', anchorId: '…' }`. Le retrait et le nouveau rattachement sont enregistrés dans une seule transaction ; une origine devenue périmée est refusée. Le parent historique et les autres accès sont conservés. Si l’occurrence déplacée était une présentation chronologique, cette présentation précise est retirée du parcours et remplacée par le nouvel accès ; les autres présentations restent intactes. Une frise visible à la racine seulement grâce à un événement peut recevoir un rattachement à une période sans perdre son accès par événement.
 
 Pour une présentation chronologique, `POST /stories/:contextId/presentations` reçoit `periodId`, `targetStoryId` et `operation`. La période appartient au contexte ; elle n’a pas à appartenir au récit cible. Aucun lien précédent/suivant n’est enregistré séparément.
 

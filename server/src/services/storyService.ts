@@ -8,7 +8,7 @@ import { description, localized, groupCategories, mapCategory, mapPeriodDetail, 
 import { aggregateStoryTemporalBounds } from '../domain/storyTemporalBounds.js';
 import * as associations from './storyAssociations.js';
 import type { AssociationKind } from '../repositories/storyRelationsRepository.js';
-import { changeEntryPoints } from './storyEntryPoints.js';
+import { changeEntryPoints, moveEntryPoint, changeEntryDisplay, type EntryLocation } from './storyEntryPoints.js';
 import { changePresentation, lockWritableStory, setRelationLockTimeout } from '../repositories/storyRelationsRepository.js';
 import { creatorAuthor, editorAuthor } from './storyAuthor.js';
 import { principalContext } from '../auth/context.js';
@@ -40,6 +40,7 @@ export async function getStory(id: string) {
   const events = groupCategories(row.events, event => ({ ...mapEventDetail(event), wikidata_id: event.wikidata_id, dateYearsBP: event.date_years_bp == null ? null : Number(event.date_years_bp), importance: event.importance }));
   const childStories = row.child_stories.map(child => ({
     id: String(child.id), title: localized(child.title_fr, child.title_en), anchors: child.anchors ?? [], atRoot: child.at_root === true,
+    ...(child.root_display_as_period ? { rootDisplayAsPeriod: true } : {}),
   }));
   return {
     id: row.id, title: localized(row.title_fr, row.title_en), description: description(row.description_fr, row.description_en),
@@ -128,6 +129,8 @@ export const changeEventImportance = (storyId: string, eventId: string, importan
   return { storyId, eventId, importance: updated.importance };
 });
 export const changeEntries = (sourceId: string, ids: string[], anchor: { anchorType: 'period' | 'event'; anchorId: string } | null | undefined, remove: boolean) => withTransaction(client => changeEntryPoints(client, sourceId, ids, anchor, remove));
+export const moveEntry = (sourceId: string, targetId: string, from: EntryLocation, to: EntryLocation) => withTransaction(client => moveEntryPoint(client, sourceId, targetId, from, to));
+export const setEntryDisplay = (sourceId: string, targetId: string, location: EntryLocation, asPeriod: boolean) => withTransaction(client => changeEntryDisplay(client,sourceId,targetId,location,asPeriod));
 
 export const changePeriodPresentation = (contextId: string, periodId: string, targetId: string, remove: boolean) => withTransaction(async client => {
   if (!remove) await associations.changeStoryAssociations(client, contextId, 'period', [periodId], false);

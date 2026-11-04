@@ -357,6 +357,7 @@ CREATE TABLE public.story_entry_points (
   target_story_id integer NOT NULL REFERENCES public.stories(id) ON DELETE CASCADE,
   period_id varchar,
   event_id varchar,
+  display_as_period boolean NOT NULL DEFAULT false,
   CONSTRAINT story_entry_points_location CHECK (num_nonnulls(period_id, event_id) <= 1),
   CONSTRAINT story_entry_points_distinct_stories CHECK (source_story_id <> target_story_id),
   CONSTRAINT story_entry_points_unique UNIQUE NULLS NOT DISTINCT (source_story_id, target_story_id, period_id, event_id),

@@ -71,9 +71,14 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
       ) e) AS events,
       (SELECT COALESCE(jsonb_agg(to_jsonb(child) ORDER BY child.id), '[]') FROM (
         SELECT child.id, child.title_fr, child.title_en,
+          EXISTS(SELECT 1 FROM public.story_entry_points d WHERE d.source_story_id=s.id AND d.target_story_id=child.id
+            AND d.period_id IS NULL AND d.event_id IS NULL AND d.display_as_period) AS root_display_as_period,
           (EXISTS(SELECT 1 FROM entry_links root WHERE root.source_story_id=s.id AND root.target_story_id=child.id AND root.anchor_id IS NULL)
-            OR (child.parent_story_id=s.id AND NOT EXISTS(SELECT 1 FROM public.story_anchors a WHERE a.story_id=child.id))) AS at_root,
-          (SELECT COALESCE(jsonb_agg(jsonb_build_object('type', a.anchor_type, 'id', a.anchor_id) ORDER BY a.anchor_type, a.anchor_id), '[]')
+            OR (child.parent_story_id IS NOT DISTINCT FROM s.id AND NOT EXISTS(SELECT 1 FROM public.story_anchors a WHERE a.story_id=child.id))) AS at_root,
+          (SELECT COALESCE(jsonb_agg(jsonb_build_object('type', a.anchor_type, 'id', a.anchor_id) || CASE WHEN EXISTS(
+            SELECT 1 FROM public.story_entry_points d WHERE d.source_story_id=a.source_story_id AND d.target_story_id=a.target_story_id AND d.display_as_period
+              AND ((a.anchor_type='period' AND d.period_id=a.anchor_id) OR (a.anchor_type='event' AND d.event_id=a.anchor_id)))
+            THEN '{"displayAsPeriod":true}'::jsonb ELSE '{}'::jsonb END ORDER BY a.anchor_type, a.anchor_id), '[]')
            FROM entry_links a WHERE a.target_story_id = child.id AND a.source_story_id = s.id AND a.anchor_id IS NOT NULL) AS anchors
         FROM public.stories child WHERE child.parent_story_id = s.id
           OR EXISTS (SELECT 1 FROM entry_links a WHERE a.source_story_id = s.id AND a.target_story_id = child.id)
@@ -81,7 +86,7 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
       (SELECT COALESCE(jsonb_agg(to_jsonb(parent) ORDER BY parent.title_fr, parent.id), '[]') FROM (
         SELECT parent.id, parent.title_fr, parent.title_en, parent.owner_user_id, parent.is_public,
           (EXISTS(SELECT 1 FROM entry_links root WHERE root.source_story_id=parent.id AND root.target_story_id=s.id AND root.anchor_id IS NULL)
-            OR (s.parent_story_id=parent.id AND NOT EXISTS(SELECT 1 FROM public.story_anchors a WHERE a.story_id=s.id))) AS at_root,
+            OR (s.parent_story_id IS NOT DISTINCT FROM parent.id AND NOT EXISTS(SELECT 1 FROM public.story_anchors a WHERE a.story_id=s.id))) AS at_root,
           (SELECT COALESCE(jsonb_agg(jsonb_build_object('type', a.anchor_type, 'id', a.anchor_id,
             'label_fr', COALESCE(p.label_fr, e.label_fr, a.anchor_id), 'label_en', COALESCE(p.label_en, e.label_en))
             ORDER BY a.anchor_type, a.anchor_id), '[]')

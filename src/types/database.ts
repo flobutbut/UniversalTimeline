@@ -88,8 +88,9 @@ export type Event = ListEvent;
 export interface ChildStorySummary {
   id: string;
   title: MultilingualText;
-  anchors: StoryAnchor[];
+  anchors: Array<StoryAnchor & { displayAsPeriod?: boolean }>;
   atRoot?: boolean;
+  rootDisplayAsPeriod?: boolean;
 }
 export interface ParentStorySummary {
   id: string;

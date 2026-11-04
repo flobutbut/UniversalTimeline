@@ -23,7 +23,7 @@
           <span v-else-if="currentPeriodEnd" class="period-grid__end-label">{{ currentPeriodEnd }}</span>
         </nav>
         <div ref="periodSurfaceRef" class="period-grid__surface">
-          <slot v-if="!props.currentPeriod && (!overviewPeriod || overviewPeriodStyle)" name="overview-context" :style="overviewPeriodStyle" />
+          <slot v-if="!props.currentPeriod && (!overviewPeriod || overviewPeriodStyle)" name="overview-context" :style="overviewPeriodStyle" :continuation="overviewContinuation" />
           <FeedbackState v-if="!loading && !currentPeriod && overviewNavigation && periods.length === 0 && events.length === 0" message="Aucune période à afficher" />
           <PeriodCard
             v-if="props.currentPeriod"
@@ -31,6 +31,8 @@
             variant="parent"
             :period="props.currentPeriod"
             :style="parentBarStyle"
+            :continues-before="parentContinuation.before"
+            :continues-after="parentContinuation.after"
             :is-selected="false"
             :aria-describedby="tooltipPeriod?.id === props.currentPeriod.id ? tooltipId : undefined"
             @back="goBack"
@@ -103,7 +105,7 @@
         </div>
       </Teleport>
       <div ref="eventsSurfaceRef" class="events-container" @click="selectedEvent = null">
-        <p v-if="currentPeriod && !loading && periods.length === 0 && events.length === 0" class="period-grid__empty-detail">Aucune sous-période ni événement dans cette frise pour cette période.</p>
+        <p v-if="currentPeriod && !loading && renderedPeriods.length === 0 && events.length === 0" class="period-grid__empty-detail">Aucune sous-période ni événement dans cette frise pour cette période.</p>
         <span v-if="undatedEvents.length" class="period-grid__undated-label">Événements sans date déterminée</span>
         <EventCard
           v-for="event in events"
@@ -136,7 +138,7 @@ import { Icon } from '@iconify/vue';
 import { ref, computed, watch, onActivated, onDeactivated, onScopeDispose } from 'vue';
 
 import type { ListPeriod, ListEvent, Story, StoryAnchor } from '@/types/database';
-import { compareYearsOldestFirst } from '@temporal';
+import { layoutSequentialLanes } from '@/lib/sequentialTimelineLanes';
 import { periodCoordinates } from '@/services/TimelineScalingService';
 import { listEventYearsBP } from '@/lib/listEventTableHelpers';
 import { useTimelineScaling } from '@/composables/useTimelineScaling';
@@ -155,9 +157,11 @@ import PeriodCard from './PeriodCard.vue';
 import EventCard from './EventCard.vue';
 import AssociatedStoriesBadge from './AssociatedStoriesBadge.vue';
 import { useTimelineAssociatedStories } from '@/composables/useTimelineAssociatedStories';
+import type { LinkedStoryPeriod } from '@/lib/linkedStoryPeriods';
 
 const props = withDefaults(defineProps<{
   periods: ListPeriod[];
+  linkedPeriods?: LinkedStoryPeriod[];
   events: ListEvent[];
   loading: boolean;
   parentPeriod: ListPeriod | null;
@@ -175,7 +179,7 @@ const props = withDefaults(defineProps<{
   periodTooltips?: boolean;
   /** Home shares its cached frise read with the cards. Standalone grids can load their own metadata. */
   loadStoryDetails?: (id: string, signal: AbortSignal) => Promise<Story>;
-}>(), { periodTooltips: false });
+}>(), { periodTooltips: false, linkedPeriods: () => [] });
 
 const emit = defineEmits<{
   (e: 'period-click', period: ListPeriod): void;
@@ -185,14 +189,15 @@ const emit = defineEmits<{
   (e: 'story-select', storyId: string, anchor?: StoryAnchor): void;
 }>();
 
-const { updateFromPeriods, getPeriodLayoutStyle, getEventLayoutStyle } = useTimelineScaling();
+const { updateFromPeriods, getPeriodLayoutStyle, getEventLayoutStyle, getPeriodContinuation } = useTimelineScaling();
 
 const error = ref<string | null>(null);
 const selectedEvent = ref<ListEvent | null>(null);
 /** Suggestions de stories pour l'événement actuellement sélectionné. */
 const active = ref(true);
+const renderedPeriods = computed(() => [...props.periods,...props.linkedPeriods]);
 const { byPeriod: associatedByPeriod, byEvent: associatedByEvent, loading: associationsLoading, error: associationsError, retry: retryAssociations } = useTimelineAssociatedStories(
-  () => props.currentStoryId, () => active.value && (!!props.currentPeriod || props.periods.length > 0 || props.events.length > 0),
+  () => props.currentStoryId, () => active.value && (!!props.currentPeriod || renderedPeriods.value.length > 0 || props.events.length > 0),
   props.loadStoryDetails,
 );
 const eventStorySuggestions = computed(() => selectedEvent.value ? associatedByEvent.value.get(selectedEvent.value.id) ?? [] : []);
@@ -227,7 +232,7 @@ function setPeriodRef(el: unknown, id: string) {
 
 // La barre parente a aussi son infobulle : elle est ancrée sur parentBarRef.
 const periodDetails = useTimelinePeriodTooltip(
-  () => props.currentPeriod ? [...props.periods, props.currentPeriod] : props.periods,
+  () => props.currentPeriod ? [...renderedPeriods.value, props.currentPeriod] : renderedPeriods.value,
   id => id === props.currentPeriod?.id ? unwrapTemplateRefToHTMLElement(parentBarRef.value) : periodElMap.get(id) ?? null,
   () => props.periodTooltips && active.value && !props.loading,
 );
@@ -239,7 +244,7 @@ function setPeriodAssociationsOpen(id: string, open: boolean) {
 }
 const activePeriodId = computed(() => {
   const id=associationPeriodId.value??periodDetails.activeId.value;
-  return active.value && !props.loading && props.periods.some(p => p.id === id) ? id : null;
+  return active.value && !props.loading && renderedPeriods.value.some(p => p.id === id) ? id : null;
 });
 const { minimumPct, laneHeight, wrapContent } = useTimelinePeriodExpansion(
   () => activePeriodId.value,
@@ -277,44 +282,25 @@ const periodFlip = usePeriodFlip(
 
 const periodRows = computed(() => {
   const now = Date.now();
-  return props.periods.map(p => ({ p, ...periodCoordinates(p, now) }));
+  const rows = props.periods.map(p => ({ p, ...periodCoordinates(p, now) }));
+  const frame = props.currentPeriod ?? props.storyBounds;
+  const coordinates = [...rows.flatMap(row => [row.start,row.end]), ...(frame ? Object.values(periodCoordinates(frame,now)) : [])].filter((v): v is number => v !== null);
+  const start = Math.max(...coordinates), end = Math.min(...coordinates);
+  const links = props.linkedPeriods.flatMap(p => {
+    const dates = periodCoordinates(p,now);
+    if (dates.start === null || dates.end === null || !(start > end)) return [{ p,...dates }];
+    const clippedStart = Math.min(start,dates.start), clippedEnd = Math.max(end,dates.end);
+    return clippedStart > clippedEnd ? [{ p,start:clippedStart,end:clippedEnd }] : [];
+  });
+  return [...rows,...links];
 });
 const datedPeriodRows = computed(() => periodRows.value.flatMap(({p,start,end}) => start !== null && end !== null ? [{p,start,end}] : []));
 const undatedPeriods = computed(() => periodRows.value.filter(row => row.start === null || row.end === null).map(row => row.p));
 const undatedEvents = computed(() => props.events.filter(e => listEventYearsBP(e) === null));
-const sortedPeriodRows = computed(() => [...datedPeriodRows.value].sort((a,b) => compareYearsOldestFirst(a.start,b.start)));
+const sortedPeriodRows = computed(() => layoutSequentialLanes(datedPeriodRows.value));
 const sortedPeriods = computed(() => sortedPeriodRows.value.map(row => row.p));
 
-const laneMap = computed((): Map<string, number> => {
-  const result = new Map<string, number>();
-  const laneMinEnds: number[] = [];
-
-  const allBP = datedPeriodRows.value.flatMap(row => [row.start, row.end]);
-  const span = allBP.length ? Math.max(...allBP) - Math.min(...allBP) : 0;
-  const tolerance = span * 0.001;
-
-  for (const { p: period, start: startBP, end: endBP } of sortedPeriodRows.value) {
-
-    let assigned = -1;
-    for (let lane = 0; lane < laneMinEnds.length; lane++) {
-      if (laneMinEnds[lane] >= startBP - tolerance) {
-        assigned = lane;
-        break;
-      }
-    }
-
-    if (assigned === -1) {
-      assigned = laneMinEnds.length;
-      laneMinEnds.push(endBP);
-    } else {
-      laneMinEnds[assigned] = Math.min(laneMinEnds[assigned], endBP);
-    }
-
-    result.set(period.id, assigned);
-  }
-
-  return result;
-});
+const laneMap = computed(() => new Map(sortedPeriodRows.value.map(({ p, lane }) => [p.id,lane])));
 
 const numLanes = computed(() =>
   laneMap.value.size === 0 ? 1 : Math.max(...laneMap.value.values()) + 1
@@ -324,10 +310,10 @@ const periodRowHeight = computed(() => numLanes.value * laneHeight.value);
 
 watch(
   [sortedPeriods, () => props.currentPeriod, () => props.storyBounds],
-  ([p]) => {
+  () => {
     // Le cadre inclut la référence et les périodes affichées, même si un enfant déborde.
     const framingPeriod = props.currentPeriod ?? props.storyBounds ?? undefined;
-    try { updateFromPeriods(p, framingPeriod); }
+    try { updateFromPeriods(sortedPeriodRows.value.map(row => ({ startYearsBP: row.start, endYearsBP: row.end })), framingPeriod); }
     catch (e) { error.value = e instanceof Error ? e.message : 'Erreur de calcul'; }
   },
   { immediate: true }
@@ -337,8 +323,8 @@ watch(
 
 const rawLayouts = computed(() => {
   const map = new Map<string, { left: number; width: number; top: number }>();
-  for (const period of sortedPeriods.value) {
-    const s = getPeriodLayoutStyle(period, {
+  for (const { p: period, start, end } of sortedPeriodRows.value) {
+    const s = getPeriodLayoutStyle({ startYearsBP: start, endYearsBP: end }, {
       row: laneMap.value.get(period.id) ?? 0,
       rowHeight: laneHeight.value,
     });
@@ -375,6 +361,8 @@ const getPeriodCssVars = (period: ListPeriod): Record<string, string> => {
 };
 
 // The parent uses the same dates and hover projection as its children and events.
+const overviewContinuation = computed(() => props.overviewPeriod ? getPeriodContinuation(props.overviewPeriod) : { before: false, after: false });
+const parentContinuation = computed(() => props.currentPeriod ? getPeriodContinuation(props.currentPeriod) : { before: false, after: false });
 const overviewPeriodStyle = computed(() => {
   if(!props.overviewPeriod)return null;
   const base=getPeriodLayoutStyle(props.overviewPeriod);
@@ -459,6 +447,8 @@ const getEventStyles = (event: ListEvent): { width: string; left: string } => {
 const selectPeriod = (period: ListPeriod) => {
   if (props.loading) return;
   periodDetails.dismiss();
+  const linked = props.linkedPeriods.find(link => link.id === period.id);
+  if (linked) { emit('story-select',linked.linkedStoryId,linked.sourceAnchor); return; }
   const el = periodElMap.get(period.id);
   periodFlip.prepare(period, el ?? null);
   emit('period-click', period);
@@ -578,19 +568,22 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
   flex-direction: column;
   gap: var(--spacing-md);
   padding: var(--spacing-md);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  container-type: size;
   background-color: var(--color-background-default);
 }
 
 .timeline-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1 0 auto;
+  min-height: 100%;
   width: 100%;
 }
 
 .periods-container {
-  flex: 1 1 0;
+  flex: 1 0 auto;
   position: relative;
   width: 100%;
   display: flex;
@@ -623,7 +616,9 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
 }
 
 .events-container {
-  flex: 1 1 0;
+  /* Keep half the visible container below the axis, so scrolling can bring it to the centre. */
+  flex: 0 0 auto;
+  min-height: 50cqh;
   position: relative;
   /* Les infobulles figées restent sous les menus téléportés de l’application. */
   z-index: var(--z-index-timeline-item);

@@ -87,6 +87,21 @@ it('finishes loading when a saved association refresh overtakes a return to the 
   expect(view.relationsBusy.value).toBe(false);
 });
 
+it('saves an explicit root placement through the association API and confirms a move after refresh', async () => {
+  const service = StoryApiService.getInstance();
+  const before = storyFixture('a', [{ id: 'root', label_fr: 'Racine', story_parent_id: null }, { id: 'p', label_fr: 'Période', story_parent_id: 'root' }]);
+  const after = storyFixture('a', [{ id: 'root', label_fr: 'Racine', story_parent_id: null }, { id: 'p', label_fr: 'Période', story_parent_id: null }]);
+  vi.spyOn(service, 'getStory').mockResolvedValueOnce(before).mockResolvedValueOnce(after);
+  vi.spyOn(service, 'getListStories').mockResolvedValue([story('a')]);
+  const write = vi.spyOn(service, 'changeAssociations').mockResolvedValue(undefined);
+  const view = scoped(useDatabaseView); await view.selectStory(story('a'));
+  await view.addPeriodsToStory(['p'], null);
+  expect(write).toHaveBeenCalledExactlyOnceWith('a', 'period', ['p'], false, null);
+  expect(view.selectedStory.value?.periods.find(p => p.id === 'p')?.storyParentId).toBeNull();
+  expect(before.periods.find(p => p.id === 'p')?.storyParentId).toBe('root');
+  expect(useUiStore().notify).toHaveBeenLastCalledWith('Période déplacée', 'success', undefined);
+});
+
 it('reports a refused batch without claiming that some associations were saved', async () => {
   const service = StoryApiService.getInstance();
   vi.spyOn(service, 'getStory').mockImplementation(async id => detail(id));
@@ -132,6 +147,19 @@ it('keeps a related-story write attached to its original story after selection c
   await view.selectStory(story('b')); pending.resolve(); await saving;
   expect(write).toHaveBeenCalledExactlyOnceWith('a', ['child'], { type: 'period', id: 'period' });
   expect(view.selectedStory.value?.id).toBe('b'); expect(view.relationsBusy.value).toBe(false);
+});
+
+it('moves a frise with one request captured on the original source, even after switching tabs', async () => {
+  const service = StoryApiService.getInstance(); const pending = deferred<void>();
+  vi.spyOn(service, 'getStory').mockImplementation(async id => detail(id));
+  vi.spyOn(service, 'getListStories').mockResolvedValue([story('a'), story('b')]);
+  const write = vi.spyOn(service, 'moveEntryPoint').mockReturnValue(pending.promise);
+  const view = scoped(useDatabaseView); await view.selectStory(story('a'));
+  const saving = view.moveChildStoryToColumn('child', { type: 'period', id: 'period' }, null);
+  await view.selectStory(story('b')); pending.resolve(); await saving;
+  expect(write).toHaveBeenCalledExactlyOnceWith('a', 'child', { type: 'period', id: 'period' }, null);
+  expect(view.selectedStory.value?.id).toBe('b');
+  expect(useUiStore().notify).toHaveBeenLastCalledWith('Frise déplacée', 'success', undefined);
 });
 
 it('refreshes the cached story detail after an anchor changes', async () => {

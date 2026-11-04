@@ -5,11 +5,20 @@
         <StoryBreadcrumb class="home-view__story-breadcrumb" :items="storyBreadcrumb" :max-visible="3" label="Fil d’Ariane des frises" :loading="loading" @navigate="onStoryBreadcrumb" />
         <StoryBreadcrumb class="home-view__period-breadcrumb" :items="breadcrumb" :loading="loading" @navigate="onBreadcrumb" />
       </div>
-      <Button v-if="!contextBar && returnTitle" variant="tertiary" size="sm" :disabled="loading" @click="onGoBack">Retour à {{ returnTitle }}</Button>
-      <AssociatedStoriesBadge v-if="visibleRootStories.length" :story-id="currentStoryId" period-id="story-root"
-        :period-label="storyBreadcrumb[storyBreadcrumb.length - 1]?.title || 'cette frise'" :stories="visibleRootStories" :disabled="loading" @select="id => onStorySelect(id)" />
-      <Button v-if="!routeError && !error" class="home-view__story-detail" variant="tertiary" size="sm" :disabled="loading"
-        :to="{ name: 'database', query: { story: currentStoryId } }">Voir le détail de la frise</Button>
+      <div v-if="visibleRootStories.length" class="home-view__associated-stories">
+        <Button v-if="visibleRootStories.length === 1" variant="tertiary" size="sm" :disabled="loading"
+          @click="onStorySelect(visibleRootStories[0].id)">{{ visibleRootStories[0].title.fr || visibleRootStories[0].title.en }}</Button>
+        <Select v-else-if="visibleRootStories.length > 1" :model-value="null"
+          placeholder="Explorer une frise associée" compact
+          :options="visibleRootStories.map(story => ({ value: story.id, label: story.title.fr || story.title.en }))"
+          :searchable="visibleRootStories.length > 6" :disabled="loading"
+          @update:model-value="value => typeof value === 'string' && onStorySelect(value)" />
+      </div>
+      <div class="home-view__header-actions">
+        <Button v-if="!contextBar && returnTitle" variant="tertiary" size="sm" :disabled="loading" @click="onGoBack">Retour à {{ returnTitle }}</Button>
+        <Button v-if="!routeError && !error" variant="tertiary" size="sm" :disabled="loading"
+          :to="{ name: 'database', query: { story: currentStoryId } }">Voir le détail de la frise</Button>
+      </div>
     </div>
     <div v-if="routeError || error" role="alert">
       {{ routeError || error }} <Button variant="tertiary" size="sm" v-if="!routeError" type="button" :disabled="loading" @click="retry">Réessayer</Button><RouterLink v-else :to="{ name: 'timeline' }">Revenir à la timeline</RouterLink>
@@ -34,6 +43,7 @@
         :key="currentStoryId"
         class="home-view__timeline"
         :periods="displayedPeriods"
+        :linked-periods="linkedPeriods"
         :events="storyEvents"
         :loading="loading"
         :parent-period="parentStack.length > 0 ? parentStack[parentStack.length - 1] : null"
@@ -52,8 +62,8 @@
         @navigate-period="slideToAdjacentPeriod"
         @story-select="onStorySelect"
       >
-        <template v-if="contextBar" #overview-context="{ style }">
-          <PeriodCard variant="parent" :period="contextBar" :style="style" :is-selected="false" :loading="loading" @back="onGoBack">
+        <template v-if="contextBar" #overview-context="{ style, continuation }">
+          <PeriodCard variant="parent" :period="contextBar" :style="style" :continues-before="continuation.before" :continues-after="continuation.after" :is-selected="false" :loading="loading" @back="onGoBack">
             <template #title-actions>
               <span class="home-view__context-label">{{ returnPath.length ? 'Retour' : 'Période de référence' }}</span>
               <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="contextBar.id" :period-label="contextBar.label.fr"
@@ -111,7 +121,7 @@ const {
   breadcrumb,
   storyBreadcrumb,
   currentStoryBounds,
-  contextBar, contextStories, rootStories, returnTitle, returnPath, referencePeriodId,
+  contextBar, contextStories, rootStories, linkedPeriods, returnTitle, returnPath, referencePeriodId,
   loadInitialData,
   openStory,
   handlePeriodClick,
@@ -239,9 +249,16 @@ onActivated(() => {
 }
 
 .home-view__choices { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md); }
-.home-view__header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); flex-shrink: 0; padding-right: var(--spacing-md); }
+.home-view__header { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 320px) minmax(0, 1fr); align-items: start; gap: var(--spacing-sm); flex-shrink: 0; padding-inline: var(--spacing-md); }
 .home-view__breadcrumbs { flex: 1; min-width: 0; }
-.home-view__story-detail { margin-top: var(--spacing-sm); margin-bottom: var(--spacing-xs); }
+.home-view__associated-stories { min-width: 0; display: flex; justify-content: center; margin-block: var(--spacing-sm) var(--spacing-xs); }
+.home-view__associated-stories > .base-select { width: 100%; }
+.home-view__header-actions { grid-column: 3; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--spacing-sm); margin-block: var(--spacing-sm) var(--spacing-xs); }
+@media (max-width: 768px) {
+  .home-view__header { grid-template-columns: minmax(0, 1fr) auto; }
+  .home-view__associated-stories { grid-column: 1 / -1; grid-row: 2; width: min(100%, 320px); justify-self: center; }
+  .home-view__header-actions { grid-column: 2; grid-row: 1; }
+}
 .home-view__breadcrumbs > .story-breadcrumb + .story-breadcrumb { padding-top: 0; }
 .home-view__story-breadcrumb :deep(.story-breadcrumb__item) { padding-bottom: 0; }
 .home-view__period-breadcrumb :deep(.story-breadcrumb__item) { padding-top: 0; }

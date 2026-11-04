@@ -64,6 +64,7 @@ before(async () => {
   await pool.query(await readFile(new URL('../../database/migrations/20261102075026_story_entry_points.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261102131202_story_period_presentations.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261104132539_navigation_without_wrapper_periods.sql', import.meta.url),'utf8'));
+  await pool.query(await readFile(new URL('../../database/migrations/20261104184833_story_entry_point_display.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261102105902_account_profiles.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261102110027_account_functions_private_schema.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261102223946_story_event_importance.sql', import.meta.url),'utf8'));

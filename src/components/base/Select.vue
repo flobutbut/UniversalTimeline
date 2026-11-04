@@ -12,38 +12,28 @@
   >
     <template #trigger>
       <div
-        :id="id"
         ref="triggerRef"
         class="base-select__trigger"
         :class="{
           'base-select__trigger--disabled': disabled,
           'base-select__trigger--with-tags': multiple && selectedItems.length > 0,
         }"
-        @click="toggleDropdown"
-        @keydown="handleKeydown"
-        :tabindex="disabled ? -1 : 0"
-        role="combobox"
-        :aria-labelledby="label ? `${id}-label` : undefined"
-        :aria-label="label ? undefined : placeholder"
-        :aria-disabled="disabled"
-        :aria-invalid="!!error || undefined"
-        :aria-required="required || undefined"
-        :aria-describedby="descriptionIds"
-        :aria-expanded="isOpen"
-        :aria-controls="isOpen ? `${id}-options` : undefined"
-        :aria-activedescendant="isOpen && highlightedIndex >= 0 ? `${id}-option-${highlightedIndex}` : undefined"
-        aria-haspopup="listbox"
+        v-bind="searchable ? {} : comboboxAttrs"
+        @click="onTriggerClick"
+        @keydown="!searchable && handleKeydown($event)"
       >
-        <div class="base-select__value">
+        <div class="base-select__value" :class="{ 'base-select__value--editable': searchable, 'base-select__value--multiple': multiple }">
           <template v-if="multiple">
-            <div v-if="selectedItems.length === 0" class="base-select__placeholder">{{ placeholder }}</div>
-            <div v-else class="base-select__selected-items">
-              <Tag v-for="item in selectedItems" :key="item.value" class="base-select__selected-item" :label="item.label" variant="accent" removable :disabled="disabled" @remove="removeItem(item)" />
-            </div>
+            <Tag v-for="item in selectedItems" :key="item.value" class="base-select__selected-item" :label="item.label" variant="accent" removable :disabled="disabled" @remove="removeItem(item)" />
           </template>
+          <input v-if="searchable" ref="searchInputRef" v-bind="comboboxAttrs" type="text" class="base-select__input"
+            :value="isOpen ? searchQuery : (selectedItem?.label ?? '')"
+            :placeholder="isOpen ? searchPlaceholder : (selectedItem?.label || placeholder)"
+            :disabled="disabled" autocomplete="off" :spellcheck="false"
+            @focus="onInputFocus" @input="onSearchInput" @keydown="handleSearchKeydown" />
           <template v-else>
             <span v-if="selectedItem" class="base-select__selected-text">{{ selectedItem.label }}</span>
-            <span v-else class="base-select__placeholder">{{ placeholder }}</span>
+            <span v-else-if="!multiple || !selectedItems.length" class="base-select__placeholder">{{ placeholder }}</span>
           </template>
         </div>
         <div class="base-select__indicators">
@@ -54,23 +44,6 @@
     </template>
 
     <template #dropdown>
-      <div v-if="searchable" class="base-select__search-wrapper">
-        <input
-          ref="searchInputRef"
-          v-model="searchQuery"
-          type="text"
-          class="base-select__search"
-          :placeholder="searchPlaceholder"
-          :aria-label="searchPlaceholder"
-          role="combobox"
-          aria-autocomplete="list"
-          :aria-expanded="isOpen"
-          :aria-controls="`${id}-options`"
-          :aria-activedescendant="highlightedIndex >= 0 ? `${id}-option-${highlightedIndex}` : undefined"
-          @input="highlightedIndex = -1"
-          @keydown="handleSearchKeydown"
-        />
-      </div>
       <div v-if="filteredOptions.length === 0" class="base-select__no-results" role="status">{{ noResultsText }}</div>
       <div class="base-select__options" :id="`${id}-options`" role="listbox" :aria-label="label || placeholder" :aria-multiselectable="multiple">
         <div
@@ -83,6 +56,7 @@
             'base-select__option--highlighted': highlightedIndex === index,
             'base-select__option--disabled': option.disabled,
           }"
+          @mousedown.prevent
           @click="selectOption(option)"
           @mouseenter="highlightedIndex = option.disabled ? -1 : index"
           role="option"
@@ -146,6 +120,22 @@ const isOpen = ref(false);
 const searchQuery = ref('');
 const highlightedIndex = ref(-1);
 const descriptionIds = computed(() => [props.error ? `${props.id}-error` : '', props.hint ? `${props.id}-hint` : ''].filter(Boolean).join(' ') || undefined);
+const comboboxAttrs = computed(() => ({
+  id: props.id,
+  role: 'combobox' as const,
+  tabindex: props.disabled ? -1 : 0,
+  'aria-labelledby': props.label ? `${props.id}-label` : undefined,
+  'aria-label': props.label ? undefined : props.placeholder,
+  'aria-disabled': props.disabled,
+  'aria-invalid': !!props.error || undefined,
+  'aria-required': props.required || undefined,
+  'aria-describedby': descriptionIds.value,
+  'aria-expanded': isOpen.value,
+  'aria-controls': isOpen.value ? `${props.id}-options` : undefined,
+  'aria-activedescendant': isOpen.value && highlightedIndex.value >= 0 ? `${props.id}-option-${highlightedIndex.value}` : undefined,
+  'aria-haspopup': 'listbox' as const,
+  'aria-autocomplete': props.searchable ? 'list' as const : undefined,
+}));
 const selectedItem = computed(() => props.multiple ? null : props.options.find(option => option.value === props.modelValue) ?? null);
 const selectedItems = computed(() => props.multiple ? props.options.filter(option => isOptionSelected(option)) : []);
 const filteredOptions = computed(() => {
@@ -159,11 +149,16 @@ function closeDropdown() {
   highlightedIndex.value = -1;
   searchQuery.value = '';
 }
-function restoreTriggerFocus() {
-  void nextTick(() => triggerRef.value?.focus());
+let restoringFocus = false;
+async function restoreTriggerFocus() {
+  await nextTick();
+  restoringFocus = true;
+  (props.searchable ? searchInputRef.value : triggerRef.value)?.focus();
+  restoringFocus = false;
 }
+function onInputFocus() { if (!restoringFocus) void openDropdown(); }
 async function openDropdown() {
-  if (props.disabled) return;
+  if (props.disabled || isOpen.value) return;
   isOpen.value = true;
   highlightedIndex.value = -1;
   searchQuery.value = '';
@@ -175,6 +170,16 @@ function toggleDropdown() {
   if (isOpen.value) closeDropdown();
   else void openDropdown();
 }
+function onTriggerClick() {
+  if (props.searchable) { void openDropdown(); restoreTriggerFocus(); }
+  else toggleDropdown();
+}
+function onSearchInput(event: Event) {
+  if (props.disabled) return;
+  isOpen.value = true;
+  searchQuery.value = (event.target as HTMLInputElement).value;
+  highlightedIndex.value = -1;
+}
 function updateSelection(value: SelectValue) {
   emit('update:modelValue', value);
   emit('change', value);
@@ -184,6 +189,9 @@ function selectOption(option: SelectOption) {
   if (props.multiple) {
     const values = Array.isArray(props.modelValue) ? props.modelValue : [];
     updateSelection(values.includes(option.value) ? values.filter(value => value !== option.value) : [...values, option.value]);
+    searchQuery.value = '';
+    highlightedIndex.value = -1;
+    restoreTriggerFocus();
   } else {
     updateSelection(option.value);
     closeDropdown();
@@ -206,7 +214,7 @@ function handleSearchKeydown(event: KeyboardEvent) {
   if (event.key !== ' ') handleKeydown(event);
 }
 function handleKeydown(event: KeyboardEvent) {
-  if (props.disabled) return;
+  if (props.disabled || event.isComposing) return;
   switch (event.key) {
     case 'Enter':
     case ' ':
@@ -236,7 +244,29 @@ watch(highlightedIndex, () => {
     if (isOpen.value && highlightedIndex.value >= 0) document.getElementById(`${props.id}-option-${highlightedIndex.value}`)?.scrollIntoView?.({ block: 'nearest' });
   });
 });
+watch(isOpen, open => { if (!open) { searchQuery.value = ''; highlightedIndex.value = -1; } });
 watch(() => props.modelValue, () => { if (!props.multiple) closeDropdown(); });
 watch(() => props.disabled, disabled => { if (disabled) closeDropdown(); });
 watch(filteredOptions, () => { highlightedIndex.value = -1; });
 </script>
+
+<style scoped>
+.base-select__value--multiple { flex-wrap: wrap; }
+.base-select__value--editable { cursor: text; }
+.base-select__input {
+  flex: 1 1 80px;
+  width: 0;
+  min-width: 0;
+  min-height: var(--spacing-xl);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  outline: none;
+  box-shadow: none;
+}
+.base-select__input::placeholder { color: var(--color-text-secondary); opacity: .7; }
+.base-select__input:disabled { cursor: not-allowed; }
+</style>

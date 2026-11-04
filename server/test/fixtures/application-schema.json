@@ -731,6 +731,13 @@
           "notNull": false,
           "default": null,
           "identity": ""
+        },
+        {
+          "name": "display_as_period",
+          "type": "boolean",
+          "notNull": true,
+          "default": "false",
+          "identity": ""
         }
       ],
       "constraints": [

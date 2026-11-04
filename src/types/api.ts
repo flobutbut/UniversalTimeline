@@ -45,9 +45,10 @@ export interface EventDto extends EntityDto {
 }
 export interface ChildStoryDto {
   atRoot?: boolean;
+  rootDisplayAsPeriod?: boolean;
   id: ApiId; title?: ApiText | null;
   title_fr?: string | null; title_en?: string | null;
-  anchors?: Array<{ type: 'period' | 'event'; id: ApiId }> | null;
+  anchors?: Array<{ type: 'period' | 'event'; id: ApiId; displayAsPeriod?: boolean }> | null;
 }
 export interface StoryDto extends MetadataDto {
   navigationContexts?: Array<{ id: ApiId; title: ApiText; periods: PeriodDto[]; presentations: Array<{ periodId: string; storyId: ApiId; title: ApiText }> }>;

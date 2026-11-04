@@ -39,7 +39,7 @@ it('gives labelled and icon-only switches an accessible name on the actual contr
 
 it('announces filtering and keyboard highlight from the focused combobox, then restores focus after selection', async () => {
   view = mount(Select, { props: { modelValue: '', label: 'Catégorie', error: 'Obligatoire', hint: 'Choisir une valeur', options: [{ value: 'off', label: 'Désactivé', disabled: true }, { value: 'a', label: 'Astronomie' }, { value: 'b', label: 'Biologie' }] }, attachTo: document.body });
-  const trigger = view.get('.base-select__trigger');
+  const trigger = view.get('[role="combobox"]');
   expect(trigger.attributes('aria-invalid')).toBe('true');
   for (const id of trigger.attributes('aria-describedby')!.split(' ')) expect(view.get(`[id="${id}"]`).text()).not.toBe('');
   await trigger.trigger('click'); await flushPromises();

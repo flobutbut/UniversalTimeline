@@ -216,6 +216,8 @@ export function useDatabaseView() {
   const mutateAssociations = async (kind: 'period' | 'event', ids: string[], remove = false, parentPeriodId?: string | null) => {
     const storyId = selectedStory.value?.id;
     if (!storyId || relationsBusy.value || !ids.length) return;
+    const moving = kind === 'period' && !remove && parentPeriodId !== undefined
+      && ids.every(id => selectedStory.value?.periods.some(period => period.id === id));
     const service = StoryApiService.getInstance();
     relationsBusy.value = true;
     let committed = false;
@@ -228,7 +230,8 @@ export function useDatabaseView() {
         refreshSelectedStory(storyId),
       ]);
       const total = new Set(ids).size;
-      toast.show(`${total} association(s) ${remove ? 'retirée(s)' : 'ajoutée(s)'}`, 'success');
+      toast.show(moving ? (total === 1 ? 'Période déplacée' : `${total} périodes déplacées`)
+        : `${total} association(s) ${remove ? 'retirée(s)' : 'ajoutée(s)'}`, 'success');
     } catch (cause) {
       dataStore.invalidateStory(storyId);
       const message = committed
@@ -346,7 +349,15 @@ export function useDatabaseView() {
     await service.changeEntryPoints(parentId, ids, anchor);
     return `${ids.length} frise(s) rattachée(s)`;
   });
-  const removeChildStoryFromStory = (childId: string, anchor?: StoryAnchor) => mutateRelatedStories(async parentId => {
+  const moveChildStoryToColumn = (childId: string, from: StoryAnchor | null, to: StoryAnchor | null) => mutateRelatedStories(async sourceId => {
+    await StoryApiService.getInstance().moveEntryPoint(sourceId, childId, from, to);
+    return 'Frise déplacée';
+  });
+  const displayChildStory = (childId: string, location: StoryAnchor | null, asPeriod: boolean) => mutateRelatedStories(async sourceId => {
+    await StoryApiService.getInstance().setEntryDisplay(sourceId,childId,location,asPeriod);
+    return asPeriod ? 'Frise affichée comme une période' : 'Frise affichée dans le badge';
+  });
+  const removeChildStoryFromStory = (childId: string, anchor?: StoryAnchor | null) => mutateRelatedStories(async parentId => {
     await StoryApiService.getInstance().changeEntryPoints(parentId, [childId], anchor, true);
     return 'Frise détachée';
   });
@@ -408,6 +419,8 @@ export function useDatabaseView() {
     addPeriodsToStory,
     addEventsToStory,
     addChildStoriesToStory,
+    moveChildStoryToColumn,
+    displayChildStory,
     removeChildStoryFromStory,
     addEventAnchorToStory,
     removeEventAnchorFromStory,

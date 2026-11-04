@@ -9,11 +9,17 @@
     <Teleport to="body">
       <div v-if="open" ref="menu" :id="menuId" class="story-item-actions__menu" :style="positionStyle"
         role="menu" :aria-label="`Actions pour ${label}`" @click.stop @keydown="onMenuKeydown" @focusout="onFocusOut">
-        <button type="button" role="menuitem" tabindex="-1" @click="choose('edit')">
+        <RouterLink v-if="viewTo" :to="viewTo" role="menuitem" tabindex="-1" @click="close()">
+          <Icon icon="mdi:book-open-outline" width="16" height="16" aria-hidden="true" />Voir la frise
+        </RouterLink>
+        <button v-else type="button" role="menuitem" tabindex="-1" @click="choose('edit')">
           <Icon icon="mdi:pencil-outline" width="16" height="16" aria-hidden="true" />Modifier
         </button>
-        <button v-if="movable" type="button" role="menuitem" tabindex="-1" @click="choose('move')">
-          <Icon icon="mdi:folder-move-outline" width="16" height="16" aria-hidden="true" />Déplacer dans la frise
+        <button v-if="movable && !readOnly" type="button" role="menuitem" tabindex="-1" @click="choose('move')">
+          <Icon icon="mdi:folder-move-outline" width="16" height="16" aria-hidden="true" />{{ viewTo ? 'Déplacer' : 'Déplacer dans la frise' }}
+        </button>
+        <button v-if="viewTo && !readOnly" type="button" role="menuitem" tabindex="-1" @click="choose('display')">
+          <Icon icon="mdi:timeline-outline" width="16" height="16" aria-hidden="true" />{{ displayAsPeriod ? 'Afficher dans le badge' : 'Afficher comme une période' }}
         </button>
         <button v-if="createStory" type="button" role="menuitem" tabindex="-1" @click="choose('create-story')">
           <Icon :icon="promote ? 'mdi:arrow-up-bold-box-outline' : 'mdi:book-plus-outline'" width="16" height="16" aria-hidden="true" />{{ promote ? 'Promouvoir en sous-frise' : 'Créer une frise' }}
@@ -21,8 +27,8 @@
         <button v-if="convertTo" type="button" role="menuitem" tabindex="-1" @click="choose('convert')">
           <Icon icon="mdi:swap-horizontal" width="16" height="16" aria-hidden="true" />{{ convertTo === 'event' ? 'Convertir en événement' : 'Convertir en période' }}
         </button>
-        <button type="button" role="menuitem" tabindex="-1" class="story-item-actions__delete"
-          title="Supprimer de cette frise" @click="choose('remove')">
+        <button v-if="!readOnly" type="button" role="menuitem" tabindex="-1" class="story-item-actions__delete"
+          :title="viewTo ? 'Supprimer uniquement ce lien' : 'Supprimer de cette frise'" @click="choose('remove')">
           <Icon icon="mdi:trash-can-outline" width="16" height="16" aria-hidden="true" />Supprimer
         </button>
       </div>
@@ -33,23 +39,25 @@
 <script setup lang="ts">
 import { computed, nextTick, onDeactivated, onScopeDispose, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
+import { RouterLink, type RouteLocationRaw } from 'vue-router';
 import Button from '@/components/base/Button.vue';
 import { generateDomUid } from '@/utils/generateDomUid';
 
 const props = defineProps<{
   label: string; disabled?: boolean; movable?: boolean;
+  viewTo?: RouteLocationRaw; readOnly?: boolean; displayAsPeriod?: boolean;
   /** Périodes : proposer une frise créée depuis cet élément. */ createStory?: boolean;
   /** La période remplit les critères d’une sous-frise (règle 3) : l’action est présentée comme une promotion. */ promote?: boolean;
   /** Type vers lequel la fiche du catalogue peut être convertie. */ convertTo?: 'period' | 'event';
 }>();
-const emit = defineEmits<{ edit: []; remove: []; move: []; 'create-story': []; convert: [] }>();
+const emit = defineEmits<{ edit: []; remove: []; move: []; 'create-story': []; convert: []; display: [] }>();
 const open = ref(false);
 const triggerComponent = ref<InstanceType<typeof Button> | null>(null);
 const trigger = computed(() => triggerComponent.value?.$el as HTMLButtonElement | undefined);
 const menu = ref<HTMLElement | null>(null);
 const menuId = generateDomUid('story-item-actions');
 const positionStyle = ref({ top: '0px', left: '0px' });
-const items = () => [...(menu.value?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? [])];
+const items = () => [...(menu.value?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])];
 
 function close(restoreFocus = false) {
   open.value = false;
@@ -69,11 +77,11 @@ async function show(last = false) {
   const options = items(); options[last ? options.length - 1 : 0]?.focus();
 }
 function toggle() { if (open.value) close(true); else void show(); }
-function choose(action: 'edit' | 'remove' | 'create-story' | 'move' | 'convert') {
+function choose(action: 'edit' | 'remove' | 'create-story' | 'move' | 'convert' | 'display') {
   if (props.disabled) return;
   close(action === 'remove');
   if (action === 'move') emit('move'); else if (action === 'edit') emit('edit'); else if (action === 'create-story') emit('create-story');
-  else if (action === 'convert') emit('convert'); else emit('remove');
+  else if (action === 'convert') emit('convert'); else if (action === 'display') emit('display'); else emit('remove');
 }
 function onTriggerKeydown(event: KeyboardEvent) {
   if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
@@ -121,16 +129,16 @@ onScopeDispose(removeListeners);
 .story-item-actions { display: inline-flex; align-items: center; }
 :global(.finder-item.selected) .story-item-actions__trigger { color: var(--color-text-on-selected); }
 .story-item-actions__menu {
-  position: fixed; z-index: 1100; width: 176px; max-width: calc(100vw - 16px); box-sizing: border-box;
+  position: fixed; z-index: 1100; width: max-content; min-width: 176px; max-width: calc(100vw - 16px); box-sizing: border-box;
   padding: var(--spacing-xs); border: 1px solid var(--color-border-default); border-radius: var(--radius-md);
   background: var(--color-surface-default); box-shadow: var(--shadow-lg);
 }
-.story-item-actions__menu button {
+.story-item-actions__menu :is(button, a) {
   display: flex; align-items: center; gap: var(--spacing-sm); width: 100%; padding: var(--spacing-sm);
   border: 0; border-radius: var(--radius-sm); background: transparent;
-  color: var(--color-text-primary); font: inherit; font-size: var(--font-size-sm); text-align: left; cursor: pointer;
+  color: var(--color-text-primary); font: inherit; font-size: var(--font-size-sm); text-align: left; cursor: pointer; text-decoration: none;
 }
-.story-item-actions__menu button:hover, .story-item-actions__menu button:focus-visible { background: var(--color-interaction-hover); }
-.story-item-actions__menu button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
+.story-item-actions__menu :is(button, a):hover, .story-item-actions__menu :is(button, a):focus-visible { background: var(--color-interaction-hover); }
+.story-item-actions__menu :is(button, a):focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 .story-item-actions__menu .story-item-actions__delete { color: var(--color-status-error-foreground); }
 </style>

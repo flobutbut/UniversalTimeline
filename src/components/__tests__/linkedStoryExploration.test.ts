@@ -1,0 +1,39 @@
+import { afterEach, expect, it, vi } from 'vitest';
+import { flushPromises, mount } from '@vue/test-utils';
+import PeriodGrid from '@/views/HomeView/PeriodGrid.vue';
+import PeriodCard from '@/views/HomeView/PeriodCard.vue';
+import { StoryApiService } from '@/services/StoryApiService';
+import { storyFixture } from '@/testFixtures/story';
+import { linkedStoryPeriods } from '@/lib/linkedStoryPeriods';
+import { indexStoryNavigationLinks, rootStoryNavigationLinks, storyNavigationLinks } from '@/lib/storyNavigationLinks';
+let view:ReturnType<typeof mount>;
+afterEach(()=>{view?.unmount();vi.restoreAllMocks();});
+it('replaces only the selected period badge while retaining event links and other root choices',()=>{
+  const source=storyFixture('1',[{id:'parent',label_fr:'Parent'}],[{id:'event',label_fr:'Event',date:'1700'}],[
+    {id:'2',title_fr:'Liée',atRoot:true,rootDisplayAsPeriod:true,anchors:[{type:'period',id:'parent',displayAsPeriod:true},{type:'event',id:'event'}]},
+  ]);
+  const links=storyNavigationLinks(source);
+  expect(indexStoryNavigationLinks(links,'period').get('parent')).toBeUndefined();
+  expect(indexStoryNavigationLinks(links,'event').get('event')?.map(s=>s.id)).toEqual(['2']);
+  expect(rootStoryNavigationLinks(source)).toEqual([]);
+  const summary={...storyFixture('2'),startDate:'1500',endDate:'1900'};
+  expect(linkedStoryPeriods(source,'parent',[summary])[0]).toMatchObject({linkedStoryId:'2',label:{fr:'Liée'},sourceAnchor:{type:'period',id:'parent'},startDate:'1500',endDate:'1900'});
+  expect(linkedStoryPeriods(source,null,[summary])).toHaveLength(1);
+  expect(linkedStoryPeriods(source,'unrelated',[summary])).toEqual([]);
+});
+it('clips associated story cards to the current window and opens the story without creating a period navigation level',async()=>{
+  vi.spyOn(StoryApiService.getInstance(),'getStory').mockResolvedValue(storyFixture('1'));
+  const source=storyFixture('1',[{id:'parent',label_fr:'Parent',start_date:'1600',end_date:'1800'}],[],[
+    {id:'2',title_fr:'Longue',anchors:[{type:'period',id:'parent',displayAsPeriod:true}]},
+    {id:'3',title_fr:'Hors fenêtre',anchors:[{type:'period',id:'parent',displayAsPeriod:true}]},
+  ]);
+  const links=linkedStoryPeriods(source,'parent',[{...storyFixture('2'),startDate:'1500',endDate:'1700'},{...storyFixture('3'),startDate:'1900',endDate:'1950'}]);
+  view=mount(PeriodGrid,{props:{periods:[],linkedPeriods:links,events:[],loading:false,currentPeriod:source.periods[0],parentPeriod:null,currentStoryId:'1'}});await flushPromises();
+  const card=view.findAllComponents(PeriodCard).find(card=>card.props('period').id==='linked-story:2')!;
+  expect(card.exists()).toBe(true);expect(view.findAllComponents(PeriodCard).some(card=>card.props('period').id==='linked-story:3')).toBe(false);
+  expect(parseFloat(card.element.style.getPropertyValue('--period-left'))).toBeCloseTo(0,2);
+  expect(parseFloat(card.element.style.getPropertyValue('--period-width'))).toBeCloseTo(50,0);
+  expect(card.props('period').startDate).toBe('1500');
+  card.vm.$emit('select',card.props('period'));await flushPromises();
+  expect(view.emitted('story-select')).toEqual([['2',{type:'period',id:'parent'}]]);expect(view.emitted('period-click')).toBeUndefined();
+});
