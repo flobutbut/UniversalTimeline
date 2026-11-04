@@ -25,6 +25,13 @@ export function useStoryTabs() {
     if (!openIds.value.includes(id)) openIds.value = [...openIds.value, id];
   }
 
+  function reorder(id: string, targetId: string, position: 'before' | 'after') {
+    if (id === targetId || !openIds.value.includes(id) || !openIds.value.includes(targetId)) return;
+    const next = openIds.value.filter(openId => openId !== id);
+    next.splice(next.indexOf(targetId) + (position === 'after' ? 1 : 0), 0, id);
+    openIds.value = next;
+  }
+
   /** Ferme un onglet et renvoie la frise à afficher ensuite : inchangée, sa voisine de droite, de gauche, ou la liste (null). */
   function close(id: string, activeId: string | null): string | null {
     const index = openIds.value.indexOf(id);
@@ -40,5 +47,5 @@ export function useStoryTabs() {
     if (openIds.value.some(id => !accessibleIds.has(id))) openIds.value = openIds.value.filter(id => accessibleIds.has(id));
   }
 
-  return { openIds, open, close, retain };
+  return { openIds, open, close, retain, reorder };
 }
