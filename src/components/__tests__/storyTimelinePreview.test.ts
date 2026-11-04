@@ -29,14 +29,15 @@ it('only moves downward after overlaps and never reuses an earlier free line for
   view.unmount();
 });
 
-it('keeps periods and linked frises below an overlapping parent and applies the same floor to later roots',()=>{
+it('keeps children below all root lanes while applying the same overlap rule within each level',()=>{
   const view=mount(StoryTimeline,{props:{collapsible:true,periods:[
     period('root',null,'1800','2000'),period('phase','root','1800','1850'),
     period('linked-story:2:period:root','root','1850','1900'),period('later-root',null,'1910','1950'),
   ]}});
   expect(parseFloat(top(view,'phase'))).toBeGreaterThan(parseFloat(top(view,'root')));
   expect(top(view,'phase')).toBe(top(view,'linked-story:2:period:root'));
-  expect(top(view,'later-root')).toBe(top(view,'phase'));
+  expect(parseFloat(top(view,'later-root'))).toBeGreaterThan(parseFloat(top(view,'root')));
+  expect(parseFloat(top(view,'later-root'))).toBeLessThan(parseFloat(top(view,'phase')));
   view.unmount();
 });
 
@@ -76,15 +77,15 @@ it('renders every dated period in the full timeline', () => {
   const view = mount(StoryTimeline, { props: { periods } });
   expect(visible(view)).toHaveLength(16); view.unmount();
 });
-it('keeps only roots and their direct children on at most four lines in the compact preview', () => {
+it('caps passive previews at the first four shared lanes without backfilling', () => {
   const view = mount(StoryTimeline, { props: { compact: true, periods: [
     period('root', null, 'M65', 'NOW'),
     period('a', 'root', 'M65', 'M40'), period('b', 'root', 'M40', 'M10'), period('c', 'root', 'M50', 'M20'),
     period('d', 'root', 'M45', 'M15'), period('e', 'root', 'M44', 'M14'), period('grandchild', 'a', 'M64', 'M63'),
   ] } });
-  // a and b share a line (b starts where a ends); c and d each need their own; e finds no room.
-  expect(visible(view).sort()).toEqual(['a', 'b', 'c', 'd', 'root']);
-  expect(['root', 'a', 'b', 'c', 'd'].map(id => top(view, id))).toEqual(['0px', '12px', '12px', '22px', '32px']);
+  // Shared placement never backfills: overlaps push e and the later b beyond the four-line cap.
+  expect(visible(view).sort()).toEqual(['a', 'c', 'd', 'root']);
+  expect(['root', 'a', 'c', 'd'].map(id => top(view, id))).toEqual(['0px', '12px', '22px', '32px']);
   view.unmount();
 });
 it('stacks overlapping roots before any child line with a constant gap', () => {

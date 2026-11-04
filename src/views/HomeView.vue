@@ -15,9 +15,9 @@
           @update:model-value="value => typeof value === 'string' && onStorySelect(value)" />
       </div>
       <div class="home-view__header-actions">
-        <Button v-if="!contextBar && returnTitle" variant="tertiary" size="sm" :disabled="loading" @click="onGoBack">Retour à {{ returnTitle }}</Button>
+        <Switch v-model="showPeriodChildren" label="Étendre" label-first variant="sm" :disabled="loading" />
         <Button v-if="!routeError && !error" variant="tertiary" size="sm" :disabled="loading"
-          :to="{ name: 'database', query: { story: currentStoryId } }">Voir le détail de la frise</Button>
+          :to="{ name: 'database', query: { story: currentStoryId } }">Détail de la frise</Button>
       </div>
     </div>
     <div v-if="routeError || error" role="alert">
@@ -43,6 +43,9 @@
         :key="currentStoryId"
         class="home-view__timeline"
         :periods="displayedPeriods"
+        :child-periods="periodChildren"
+        :child-linked-periods="childLinkedPeriods"
+        :show-children="showPeriodChildren"
         :linked-periods="linkedPeriods"
         :events="storyEvents"
         :loading="loading"
@@ -79,6 +82,7 @@
 <script setup lang="ts">
 import Button from '@/components/base/Button.vue';
 import Select from '@/components/base/Select.vue';
+import Switch from '@/components/base/Switch.vue';
 import ModalShell from '@/components/base/ModalShell.vue';
 import { computed, onActivated, onDeactivated, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
@@ -99,6 +103,7 @@ import { entryVia, eventProperties, periodProperties, storyProperties, takeAnnou
 import type { ListEvent } from '@/types/database';
 
 const dataStore = useDataStore();
+const showPeriodChildren = ref(false);
 const auth = useAuthStore();
 const router = useRouter();
 // Cause of the next in-page navigation: set by the action, handed to the route change it pushes.
@@ -117,11 +122,12 @@ const {
   navigationContexts, contextId, navigationChoices, chooseNavigationTarget, selectNavigationContext,
   currentStoryId,
   displayedPeriods,
+  periodChildren,
   storyEvents,
   breadcrumb,
   storyBreadcrumb,
   currentStoryBounds,
-  contextBar, contextStories, rootStories, linkedPeriods, returnTitle, returnPath, referencePeriodId,
+  contextBar, contextStories, rootStories, linkedPeriods, childLinkedPeriods, returnTitle, returnPath, referencePeriodId,
   loadInitialData,
   openStory,
   handlePeriodClick,

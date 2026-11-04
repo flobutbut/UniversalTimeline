@@ -9,11 +9,13 @@
         'has-children': period.hasChildren,
         'period-card--expanded': expanded,
         'period-card--wrap': wrapContent,
+        'period-card--child': !!parentLabel,
         'period-card--continues-before': continuesBefore,
         'period-card--continues-after': continuesAfter,
       },
     ]"
     :data-period-id="period.id"
+    :aria-description="parentLabel ? `Sous-période de ${parentLabel}` : undefined"
     :aria-disabled="loading || undefined"
     @click="handleClick"
     @keydown.enter.self.prevent="handleClick"
@@ -64,6 +66,7 @@ const props = withDefaults(
     variant?: 'timeline' | 'parent';
     expanded?: boolean;
     wrapContent?: boolean;
+    parentLabel?: string;
     continuesBefore?: boolean;
     continuesAfter?: boolean;
   }>(),
@@ -92,7 +95,8 @@ function measureActions() {
   const actionsWidth = actions.offsetWidth;
   if (actionsWidth === 0 || props.wrapContent) { actionsFit.value = true; return; }
   const gap = parseFloat(getComputedStyle(main).columnGap) || 0;
-  const needed = Math.max(0, ...Array.from(content.querySelectorAll<HTMLElement>('.period-card__title-action, .period-info'), measureTextWidth));
+  const widths = Array.from(content.querySelectorAll<HTMLElement>('.period-card__title-action, .period-info'), measureTextWidth);
+  const needed = Math.max(0, ...widths);
   // Espace partagé par le texte et les actions : celui du texte, plus celui des actions quand elles sont dans le flux.
   const shared = content.clientWidth + (actionsFit.value ? actionsWidth + gap : 0);
   actionsFit.value = Math.ceil(needed) + gap + actionsWidth <= shared;
@@ -321,4 +325,8 @@ const handleClick = () => {
 }
 
 
+</style>
+
+<style scoped>
+.period-card--child .main-container { border-left: 2px solid var(--color-border-dark); padding-left: var(--spacing-lg); }
 </style>
