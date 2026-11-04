@@ -34,7 +34,7 @@ it('offers another location in an existing source, keeps a failed draft, then cl
   expect(picker.props('candidates').map((s: { id: string }) => s.id)).toEqual(['1', '2']);
   picker.findAllComponents(BaseSelect)[0].vm.$emit('update:modelValue', '1'); await flushPromises();
   const period = picker.findAllComponents(BaseSelect)[1];
-  expect(period.props('options')).toEqual([{ value: 'p2', label: 'Seconde période' }]);
+  expect(period.props('options')).toEqual([{value:'__story_root__',label:'Racine de la frise'},{ value: 'p2', label: 'Seconde période' }]);
   period.vm.$emit('update:modelValue', 'p2'); await flushPromises();
   await button('Ajouter').trigger('click');
   expect(view.emitted('add-parent')).toEqual([['1', 'p2']]);
@@ -53,7 +53,7 @@ it('ignores an older source load after another source was selected', async () =>
   select.vm.$emit('update:modelValue', '1'); await flushPromises();
   select.vm.$emit('update:modelValue', '2'); await flushPromises();
   resolve(source('1')); await flushPromises();
-  expect(view.findAllComponents(BaseSelect)[1].props('options')).toEqual([]);
+  expect(view.findAllComponents(BaseSelect)[1].props('options')).toEqual([{value:'__story_root__',label:'Racine de la frise'}]);
   expect(button('Ajouter').attributes('disabled')).toBeDefined();
 });
 

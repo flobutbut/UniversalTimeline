@@ -44,6 +44,7 @@ export interface EventDto extends EntityDto {
   importance?: string | null;
 }
 export interface ChildStoryDto {
+  atRoot?: boolean;
   id: ApiId; title?: ApiText | null;
   title_fr?: string | null; title_en?: string | null;
   anchors?: Array<{ type: 'period' | 'event'; id: ApiId }> | null;

@@ -1,4 +1,4 @@
-import { afterEach, expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { nextTick } from 'vue';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import StoryBreadcrumb from '@/components/StoryBreadcrumb.vue';
@@ -9,7 +9,7 @@ const items = [
   { id: 'period:2', title: 'Terre' },
 ];
 let view: VueWrapper;
-afterEach(() => { view?.unmount(); document.body.innerHTML = ''; });
+afterEach(() => { view?.unmount(); document.body.innerHTML = ''; vi.unstubAllGlobals(); });
 function render() { view = mount(StoryBreadcrumb, { props: { items }, attachTo: document.body }); return view; }
 async function settled() { await nextTick(); await nextTick(); }
 
@@ -60,4 +60,63 @@ it('waits for a story to load before restoring focus, and does not steal another
   await view.setProps({ loading: true, items: items.slice(0, 1) });
   const other = document.createElement('button'); document.body.append(other); other.focus();
   await view.setProps({ loading: false }); await settled(); expect(document.activeElement).toBe(other);
+});
+
+it('keeps the last three steps visible and navigates using their original indices', async () => {
+  const path = [...items, {id:'extra:1',title:'Genre Homo'}, {id:'extra:2',title:'Époque moderne'}];
+  view=mount(StoryBreadcrumb,{props:{items:path,maxVisible:3},attachTo:document.body});
+  expect(view.findAll('.story-breadcrumb__step button').map(button=>button.text())).toEqual(['Terre','Genre Homo']);
+  expect(view.get('[aria-current="location"]').text()).toBe('Époque moderne');
+  await view.get('[aria-haspopup="menu"]').trigger('click');await settled();
+  expect(view.get('[role="menu"]').classes()).toContain('popover-surface');
+  expect(view.findAll('[role="menuitem"]').map(item=>item.text())).toEqual(['Univers Moderne','Système solaire']);
+  await view.findAll('.story-breadcrumb__step button')[0].trigger('click');expect(view.emitted('navigate')).toEqual([[2]]);
+});
+
+it('selects an earlier step, closes the menu and restores focus to its destination',async()=>{
+  view=mount(StoryBreadcrumb,{props:{items:[...items,{id:'extra',title:'Genre Homo'}],maxVisible:1},attachTo:document.body});
+  await view.get('[aria-haspopup="menu"]').trigger('click');await settled();
+  await view.findAll('[role="menuitem"]')[1].trigger('click');expect(view.emitted('navigate')).toEqual([[1]]);
+  expect(view.find('[role="menu"]').exists()).toBe(false);
+  await view.setProps({items:items.slice(0,2),loading:true});await settled();
+  await view.setProps({loading:false});await settled();
+  expect(document.activeElement).toBe(view.get('[aria-current="location"]').element);
+});
+
+it('does not add an overflow control for short paths and disables it while loading',async()=>{
+  render();await view.setProps({maxVisible:3});expect(view.find('[aria-haspopup="menu"]').exists()).toBe(false);
+  await view.setProps({maxVisible:1,loading:true});expect(view.get('[aria-haspopup="menu"]').attributes('disabled')).toBeDefined();
+  expect(view.findAll('.story-breadcrumb__step button')).toHaveLength(0);
+});
+
+it('keeps the current step visible on a narrow container and restores recent steps when it grows',async()=>{
+  let resize!:(width:number)=>void;
+  vi.stubGlobal('ResizeObserver',class {
+    constructor(callback:ResizeObserverCallback){resize=width=>callback([{contentRect:{width}}] as ResizeObserverEntry[],this as unknown as ResizeObserver);}
+    observe(){} disconnect(){}
+  });
+  const path=[...items,{id:'extra:1',title:'Genre Homo'},{id:'extra:2',title:'Époque moderne'}];
+  view=mount(StoryBreadcrumb,{props:{items:path,maxVisible:3},attachTo:document.body});await settled();
+  resize(280);await settled();
+  expect(view.findAll('.story-breadcrumb__step button')).toHaveLength(0);
+  await view.get('[aria-haspopup="menu"]').trigger('click');await settled();expect(view.findAll('[role="menuitem"]')).toHaveLength(4);
+  expect(view.get('[aria-current="location"]').text()).toBe('Époque moderne');
+  resize(800);await settled();expect(view.findAll('.story-breadcrumb__step button').map(button=>button.text())).toEqual(['Terre','Genre Homo']);
+  expect(view.find('[role="menu"]').exists()).toBe(false);
+  await view.get('[aria-haspopup="menu"]').trigger('click');await settled();expect(view.findAll('[role="menuitem"]')).toHaveLength(2);
+});
+
+
+it('uses the design-system icon button and supports menu arrows, Escape and outside dismissal',async()=>{
+  view=mount(StoryBreadcrumb,{props:{items,maxVisible:1},attachTo:document.body});
+  const trigger=view.get('[aria-haspopup="menu"]');
+  expect(trigger.classes()).toContain('base-button--icon-only');
+  (trigger.element as HTMLElement).focus();await trigger.trigger('keydown',{key:'ArrowDown'});await settled();
+  const options=view.findAll('[role="menuitem"]');expect(document.activeElement).toBe(options[0].element);
+  await options[0].trigger('keydown',{key:'ArrowDown'});expect(document.activeElement).toBe(options[1].element);
+  await options[1].trigger('keydown',{key:'Home'});expect(document.activeElement).toBe(options[0].element);
+  await options[0].trigger('keydown',{key:'Escape'});await settled();
+  expect(view.find('[role="menu"]').exists()).toBe(false);expect(document.activeElement).toBe(trigger.element);
+  await trigger.trigger('click');await settled();expect(view.find('[role="menu"]').exists()).toBe(true);
+  document.body.click();await settled();expect(view.find('[role="menu"]').exists()).toBe(false);
 });

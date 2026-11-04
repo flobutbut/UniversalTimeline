@@ -105,7 +105,8 @@ export async function createStoryFromPeriod(client: TransactionClient, sourceId:
     comparableYearsBeforePresent(root.start_date, root.start_years_bp, now), comparableYearsBeforePresent(root.end_date, root.end_years_bp, now));
   const story = await relations.insertDerivedStory(client, sourceId, title, await creatorAuthor(client, source.author), source.is_public);
   const storyId = String(story.id);
-  await relations.insertFrozenPlacements(client, story.id, subtree);
+  const narrative = subtree.slice(1).map(p => ({ ...p, parent_id: p.parent_id === periodId ? null : p.parent_id }));
+  if (narrative.length) await relations.insertFrozenPlacements(client, story.id, narrative);
   if (eventIds.length) await relations.insertAssociations(client, storyId, 'event', eventIds);
   await relations.insertChildAnchor(client, storyId, 'period', periodId);
   await relations.changePresentation(client, sourceId, periodId, storyId, false);
@@ -115,5 +116,5 @@ export async function createStoryFromPeriod(client: TransactionClient, sourceId:
   }
   const categories = (await readEntityCategories(client, 'story', sourceId)).map(category => category.id);
   if (categories.length) await replaceEntityCategories(client, 'story', story.id, categories);
-  return { id: storyId, parentStoryId: sourceId, periodId, periodCount: subtree.length, eventCount: eventIds.length, movedPeriodCount: moved.length, linkedStoryCount: linked.length };
+  return { id: storyId, parentStoryId: sourceId, periodId, periodCount: narrative.length, eventCount: eventIds.length, movedPeriodCount: moved.length, linkedStoryCount: linked.length };
 }

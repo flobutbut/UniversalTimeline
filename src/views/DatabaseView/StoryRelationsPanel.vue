@@ -39,9 +39,9 @@
               :aria-label="`Retirer le point d’entrée ${anchor.label.fr || anchor.id} depuis ${parent.title.fr}`" @click="emit('remove-parent', parent.id, { type: anchor.type, id: anchor.id })">Retirer</Button>
           </li>
         </ul>
-        <div v-else class="story-relations__location">
-          <span class="story-relations__description">Depuis les périodes racines de cette frise</span>
-          <Button v-if="editable && auth.canEditStory(parent)" variant="ghost" size="xs" :disabled="busy" @click="emit('remove-parent', parent.id)">Retirer</Button>
+        <div v-if="parent.atRoot || !parent.anchors.length" class="story-relations__location">
+          <span class="story-relations__description">Depuis la racine de cette frise</span>
+          <Button v-if="editable && auth.canEditStory(parent)" variant="ghost" size="xs" :disabled="busy" @click="emit('remove-parent', parent.id, null)">Retirer</Button>
         </div>
       </li>
     </ul>
@@ -62,7 +62,7 @@ import { useLatestRequest } from '@/composables/useLatestRequest';
 import type { Story, StoryAnchor } from '@/types/database';
 import { contentRange, isTreeRoot } from '@/lib/storyArchitecture';
 const props = defineProps<{ story: Story; busy?: boolean; error?: string | null }>();
-const emit = defineEmits<{ 'add-parent': [sourceId: string, periodId: string]; 'remove-parent': [sourceId: string, anchor?: StoryAnchor]; 'set-parent': [parentId: string, periodId: string] }>();
+const emit = defineEmits<{ 'add-parent': [sourceId: string, periodId: string | null]; 'remove-parent': [sourceId: string, anchor?: StoryAnchor | null]; 'set-parent': [parentId: string, periodId: string | null] }>();
 const auth = useAuthStore();
 const store = useDataStore();
 const editable = computed(() => auth.canEditStory(props.story));
@@ -77,7 +77,7 @@ const treeRoot = computed(() => !props.story.parentStoryId && isTreeRoot(props.s
 const parentAnchorsLabel = computed(() => {
   if (!props.story.parentStoryId) return treeRoot.value ? 'Seule la racine n’a pas de frise parente.' : 'Sans frise parente, la frise reste privée.';
   const anchors = parents.value.find(parent => parent.id === props.story.parentStoryId)?.anchors ?? [];
-  return anchors.length ? `Ancre : ${anchors.map(anchor => anchor.label.fr || anchor.label.en || anchor.id).join(', ')}` : 'Sans ancre : proposée depuis les périodes racines de la parente.';
+  return anchors.length ? `Ancre : ${anchors.map(anchor => anchor.label.fr || anchor.label.en || anchor.id).join(', ')}` : 'Accès depuis la racine de la frise parente.';
 });
 const subject = computed(() => contentRange(props.story.periods ?? [], props.story.events ?? [], Date.now()));
 /** Ni la frise ni ses descendantes : le rattachement créerait un cycle. */
@@ -93,11 +93,11 @@ async function openParentPicker() {
   await loadCandidates();
   if (!loadError.value) showParentPicker.value = true;
 }
-function setParent(parentId: string, periodId: string) {
+function setParent(parentId: string, periodId: string | null) {
   pendingParent.value = parentId;
   emit('set-parent', parentId, periodId);
 }
-const pending = ref<{ sourceId: string; periodId: string } | null>(null);
+const pending = ref<{ sourceId: string; periodId: string | null } | null>(null);
 const loading = ref(false);
 const loadError = ref<string | null>(null);
 const requests = useLatestRequest();
@@ -114,14 +114,14 @@ async function openPicker() {
   await loadCandidates();
   if (!loadError.value) showPicker.value = true;
 }
-function add(sourceId: string, periodId: string) {
+function add(sourceId: string, periodId: string | null) {
   pending.value = { sourceId, periodId };
   emit('add-parent', sourceId, periodId);
 }
 watch(() => props.story, () => {
   if (pendingParent.value && props.story.parentStoryId === pendingParent.value) { pendingParent.value = null; showParentPicker.value = false; }
   const saved = pending.value;
-  if (saved && parents.value.some(parent => parent.id === saved.sourceId && parent.anchors.some(anchor => anchor.type === 'period' && anchor.id === saved.periodId))) {
+  if (saved && parents.value.some(parent => parent.id === saved.sourceId && (saved.periodId === null ? parent.atRoot : parent.anchors.some(anchor => anchor.type === 'period' && anchor.id === saved.periodId)))) {
     pending.value = null;
     showPicker.value = false;
   }

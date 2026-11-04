@@ -117,8 +117,8 @@ it('keeps the detail contract for stories, periods, events, child IDs and anchor
     }],
     events: [{ id: 'legacy-event', wikidata_id: null, label: { fr: 'Événement', en: 'Événement' }, description: undefined, date: 'M54', dateYearsBP: 54000000, categories: [], createdAt: timestamp, updatedAt: timestamp }],
     childStories: [
-      { id: '8', title: { fr: 'Enfant', en: 'Enfant' }, anchors: [{ type: 'period', id: 'legacy-period' }] },
-      { id: '9', title: { fr: 'Autre', en: 'Other' }, anchors: [] },
+      { id: '8', title: { fr: 'Enfant', en: 'Enfant' }, anchors: [{ type: 'period', id: 'legacy-period' }],atRoot:false },
+      { id: '9', title: { fr: 'Autre', en: 'Other' }, anchors: [],atRoot:false },
     ], parentStories: [], relatedStories: [], navigationContexts: [], createdAt: timestamp, updatedAt: timestamp,
   });
   expect(db).toHaveBeenCalledOnce();

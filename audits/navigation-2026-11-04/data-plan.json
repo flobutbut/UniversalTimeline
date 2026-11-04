@@ -1,0 +1,160 @@
+{
+  "extracted_at": "2026-11-04T13:23:40.89527+00:00",
+  "removedMemberships": [
+    {
+      "story_id": 37,
+      "period_id": "Q11769",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 15,
+      "period_id": "Q12554",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 10,
+      "period_id": "Q40244",
+      "parent_period_id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story_id": 16,
+      "period_id": "Q7432",
+      "parent_period_id": null
+    }
+  ],
+  "rootedChildren": [
+    {
+      "story_id": 10,
+      "period_id": "Q11537",
+      "parent_period_id": "Q40244"
+    },
+    {
+      "story_id": 10,
+      "period_id": "Q11768",
+      "parent_period_id": "Q40244"
+    },
+    {
+      "story_id": 10,
+      "period_id": "Q1747689",
+      "parent_period_id": "Q40244"
+    },
+    {
+      "story_id": 15,
+      "period_id": "a664a308-316b-4b14-9a5f-68dce9e3e249",
+      "parent_period_id": "Q12554"
+    },
+    {
+      "story_id": 15,
+      "period_id": "d5c571fb-43bb-435d-b9fc-a77c46e2d319",
+      "parent_period_id": "Q12554"
+    }
+  ],
+  "removedAnchors": [
+    {
+      "id": 28,
+      "story_id": 14,
+      "anchor_id": "Q11769",
+      "anchor_type": "period"
+    },
+    {
+      "id": 29,
+      "story_id": 4,
+      "anchor_id": "Q11769",
+      "anchor_type": "period"
+    },
+    {
+      "id": 36,
+      "story_id": 25,
+      "anchor_id": "Q11769",
+      "anchor_type": "period"
+    },
+    {
+      "id": 37,
+      "story_id": 26,
+      "anchor_id": "Q40244",
+      "anchor_type": "period"
+    },
+    {
+      "id": 38,
+      "story_id": 27,
+      "anchor_id": "Q7432",
+      "anchor_type": "period"
+    },
+    {
+      "id": 39,
+      "story_id": 28,
+      "anchor_id": "Q12554",
+      "anchor_type": "period"
+    },
+    {
+      "id": 43,
+      "story_id": 34,
+      "anchor_id": "Q7432",
+      "anchor_type": "period"
+    },
+    {
+      "id": 44,
+      "story_id": 35,
+      "anchor_id": "Q11769",
+      "anchor_type": "period"
+    }
+  ],
+  "removedEntries": [],
+  "rootPairs": [
+    [
+      37,
+      14
+    ],
+    [
+      37,
+      4
+    ],
+    [
+      37,
+      25
+    ],
+    [
+      10,
+      26
+    ],
+    [
+      16,
+      27
+    ],
+    [
+      15,
+      28
+    ],
+    [
+      16,
+      34
+    ],
+    [
+      37,
+      35
+    ],
+    [
+      5,
+      39
+    ]
+  ],
+  "reviewed": [
+    {
+      "story": "Époque contemporaine",
+      "period": "Histoire contemporaine"
+    },
+    {
+      "story": "Moyen Âge",
+      "period": "Moyen Âge"
+    },
+    {
+      "story": "Antiquité et premières civilisations",
+      "period": "Antiquité"
+    },
+    {
+      "story": "Époque moderne",
+      "period": "Époque moderne"
+    }
+  ],
+  "preserveAllOtherCandidates": true
+}

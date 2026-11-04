@@ -57,7 +57,7 @@ it('opens from keyboard focus and dismisses with Escape without selecting a peri
   expect(view.emitted('period-click')).toBeUndefined();
 });
 
-it('directs a leaf toward its associated frises without promising a descent', async () => {
+it('offers to explore a leaf even when associated frises are available', async () => {
   view.unmount();
   vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue({
     id:'1', periods:[hadean,archean], events:[],
@@ -65,9 +65,9 @@ it('directs a leaf toward its associated frises without promising a descent', as
   } as never);
   view = mount(PeriodGrid, {props:gridProps,attachTo:document.body});
   await hover('hadean');
-  expect(tip()?.querySelector('.period-grid__tooltip-hint')?.textContent).toBe('Pas de sous-périodes. Choisissez une frise associée pour continuer.');
+  expect(tip()?.querySelector('.period-grid__tooltip-hint')?.textContent).toBe('Cliquer pour explorer');
   await card('hadean').trigger('click');
-  expect(view.emitted('period-click')).toBeUndefined();
+  expect(view.emitted('period-click')).toEqual([[hadean]]);
 });
 
 it('prioritizes hover over focus and restores the focused period after leaving', async () => {
@@ -103,10 +103,10 @@ it('hides as soon as the pointer leaves the period', async () => {
   expect(tip()).toBeNull();
 });
 
-it('dismisses before descending into a period with children', async () => {
-  await view.setProps({periods:[{...hadean,hasChildren:true},archean]});
+it.each([true, false])('dismisses before opening a period (has children: %s)', async hasChildren => {
+  await view.setProps({periods:[{...hadean,hasChildren},archean]});
   await hover('hadean'); await card('hadean').trigger('click'); await settled();
-  expect(tip()).toBeNull(); expect(view.emitted('period-click')?.[0]).toEqual([{...hadean,hasChildren:true}]);
+  expect(tip()).toBeNull(); expect(view.emitted('period-click')?.[0]).toEqual([{...hadean,hasChildren}]);
 });
 
 it('clamps the tooltip inside a narrow viewport and follows an expanded card', async () => {
@@ -182,7 +182,7 @@ it('also describes the parent bar, and says what a click does', async () => {
   expect(card('earth').attributes('aria-describedby')).toBe(tip()?.id);
   await card('earth').trigger('mouseleave'); await vi.advanceTimersByTimeAsync(200);
   await hover('hadean');
-  expect(tip()?.querySelector('.period-grid__tooltip-hint')?.textContent).toBe('Pas de sous-périodes.');
+  expect(tip()?.querySelector('.period-grid__tooltip-hint')?.textContent).toBe('Cliquer pour explorer');
   await card('hadean').trigger('mouseleave'); await vi.advanceTimersByTimeAsync(200);
   await view.setProps({ periods: [hadean, { ...archean, hasChildren: true }] });
   await hover('archean');

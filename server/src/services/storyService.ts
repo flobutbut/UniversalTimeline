@@ -39,7 +39,7 @@ export async function getStory(id: string) {
   const periods = groupCategories(row.periods, period => ({ ...mapPeriodDetail(period), hasChildren: period.has_children }));
   const events = groupCategories(row.events, event => ({ ...mapEventDetail(event), wikidata_id: event.wikidata_id, dateYearsBP: event.date_years_bp == null ? null : Number(event.date_years_bp), importance: event.importance }));
   const childStories = row.child_stories.map(child => ({
-    id: String(child.id), title: localized(child.title_fr, child.title_en), anchors: child.anchors ?? [],
+    id: String(child.id), title: localized(child.title_fr, child.title_en), anchors: child.anchors ?? [], atRoot: child.at_root === true,
   }));
   return {
     id: row.id, title: localized(row.title_fr, row.title_en), description: description(row.description_fr, row.description_en),
@@ -51,7 +51,7 @@ export async function getStory(id: string) {
       presentations: context.presentations.map(view => ({ periodId: view.period_id, storyId: String(view.story_id), title: localized(view.title_fr, view.title_en) })),
     })),
     parentStories: (row.parent_stories ?? []).map(parent => ({
-      id: String(parent.id), title: localized(parent.title_fr, parent.title_en), ownerUserId: parent.owner_user_id, isPublic: parent.is_public,
+      id: String(parent.id), title: localized(parent.title_fr, parent.title_en), ownerUserId: parent.owner_user_id, isPublic: parent.is_public, atRoot: parent.at_root === true,
       anchors: parent.anchors.map(anchor => ({ type: anchor.type, id: anchor.id, label: localized(anchor.label_fr, anchor.label_en) })),
     })),
     relatedStories: row.related_stories.map(related => ({
@@ -127,7 +127,7 @@ export const changeEventImportance = (storyId: string, eventId: string, importan
   if (!updated) throw new StoryAssociationError(404, 'Cet événement n’appartient pas à la frise.');
   return { storyId, eventId, importance: updated.importance };
 });
-export const changeEntries = (sourceId: string, ids: string[], anchor: { anchorType: 'period' | 'event'; anchorId: string } | undefined, remove: boolean) => withTransaction(client => changeEntryPoints(client, sourceId, ids, anchor, remove));
+export const changeEntries = (sourceId: string, ids: string[], anchor: { anchorType: 'period' | 'event'; anchorId: string } | null | undefined, remove: boolean) => withTransaction(client => changeEntryPoints(client, sourceId, ids, anchor, remove));
 
 export const changePeriodPresentation = (contextId: string, periodId: string, targetId: string, remove: boolean) => withTransaction(async client => {
   if (!remove) await associations.changeStoryAssociations(client, contextId, 'period', [periodId], false);

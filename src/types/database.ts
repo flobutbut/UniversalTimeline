@@ -89,12 +89,14 @@ export interface ChildStorySummary {
   id: string;
   title: MultilingualText;
   anchors: StoryAnchor[];
+  atRoot?: boolean;
 }
 export interface ParentStorySummary {
   id: string;
   title: MultilingualText;
   ownerUserId?: string | null;
   isPublic?: boolean;
+  atRoot?: boolean;
   anchors: Array<StoryAnchor & { label: MultilingualText }>;
 }
 

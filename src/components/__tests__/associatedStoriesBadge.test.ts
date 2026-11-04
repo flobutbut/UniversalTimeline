@@ -1,3 +1,4 @@
+import { rootStoryNavigationLinks } from '@/lib/storyNavigationLinks';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { createPinia } from 'pinia';
@@ -48,7 +49,7 @@ it('places a text badge only on linked child periods and reads associations once
   await body().get('.associated-stories__item').trigger('click');
   expect(view.emitted('story-select')).toEqual([['child', {type:'period', id:'leaf'}]]); expect(body().find('[role="dialog"]').exists()).toBe(false);
   await view.get('[data-period-id="leaf"] .period-card__title-action').trigger('click');
-  expect(view.emitted('period-click')).toBeUndefined();
+  expect(view.emitted('period-click')).toEqual([[leaf]]);
   await view.setProps({ periods: [{ ...leaf, id: 'deeper' }] }); await settle();
   expect(api).toHaveBeenCalledOnce();
 });
@@ -178,17 +179,17 @@ it('offers unanchored frise-level links at the frise root without attaching them
   source.events = [{ id: root.id, label: { fr: 'Événement', en: '' }, date: 'M65', categories: [] }];
   vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(source);
   view = mount(PeriodGrid, { props: gridProps, attachTo: document.body }); await settle();
-  expect(view.get('.period-card--parent').get('.associated-stories__badge').text()).toBe('1 frise associée');
+  expect(view.get('.period-card--parent').find('.associated-stories__badge').exists()).toBe(false);
   expect(view.get('[data-period-id="leaf"]').find('.associated-stories__badge').exists()).toBe(false);
-  await badge().trigger('click'); await flushPromises();
-  expect(body().get('[role="dialog"]').text()).toContain('Frise global');
-  expect(body().get('[role="dialog"]').text()).not.toContain('Frise event-link');
+  expect(rootStoryNavigationLinks(source).map(story => story.id)).toEqual(['global']);
 });
 
 it('shows a child anchored on a period that left the frise at frise level instead of hiding it', async () => {
-  vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue({ ...detail('one'), periods: [root] as unknown as Story['periods'], childStories: [linked('stale', 'removed-period')] });
+  const source={ ...detail('one'), periods: [root] as unknown as Story['periods'], childStories: [linked('stale', 'removed-period')] };
+  vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(source);
   view = mount(PeriodGrid, { props: { ...gridProps, periods: [] }, attachTo: document.body }); await settle();
-  expect(view.get('.period-card--parent .associated-stories__badge').text()).toBe('1 frise associée');
+  expect(view.find('.period-card--parent .associated-stories__badge').exists()).toBe(false);
+  expect(rootStoryNavigationLinks(source).map(story => story.id)).toContain('stale');
 });
 
 it('offers other frises sharing a period, deduplicated with anchored children', async () => {

@@ -21,11 +21,10 @@
     <div class="event-vertical-line"></div>
 
     <!-- Bulle d'info décalée selon l'alignement -->
-    <div class="event-info-box">
-      <div class="event-label">{{ displayLabel }}</div>
+    <div class="event-info-box" @click.stop="$emit('click', $event)">
+      <button type="button" class="event-label" :aria-label="`${isSelected ? 'Libérer' : 'Figer'} l’infobulle de ${displayLabel}`" :aria-pressed="isSelected">{{ displayLabel }}</button>
       <div class="event-date">{{ displayDate }}</div>
-      <!-- Au survol seulement : la sélection liste directement ces frises -->
-      <div v-if="!isSelected && otherStoryCount" class="event-meta">{{ otherStoryCount }} {{ otherStoryCount > 1 ? 'autres frises associées' : 'autre frise associée' }}</div>
+      <div v-if="otherStoryCount" class="event-meta event-story-count">{{ otherStoryCount }} {{ otherStoryCount > 1 ? 'autres frises associées' : 'autre frise associée' }}</div>
       <!-- Au survol, une courte description ; le texte complet à la sélection. -->
       <p v-if="displayDescription" class="event-description" :class="{ 'event-description--clamped': !isSelected }">{{ displayDescription }}</p>
       <div v-if="suggestionsLoading" class="event-meta" role="status">Chargement des frises…</div>
@@ -225,6 +224,7 @@ const displayDate = computed(() => {
   width: max-content;
   max-width: calc(var(--spacing-xs) * 60);
   text-align: left;
+  cursor: pointer;
 }
 
 .align-start .event-info-box {
@@ -305,7 +305,7 @@ const displayDate = computed(() => {
 .event-card.is-default-open:not(:hover, :focus-within, .is-selected) .event-info-box::before {
   opacity: 1;
 }
-.event-card.is-default-open:not(:hover, :focus-within, .is-selected) :is(.event-description, .event-meta) {
+.event-card.is-default-open:not(:hover, :focus-within, .is-selected) :is(.event-description, .event-meta:not(.event-story-count)) {
   display: none;
 }
 /* Mêmes tailles qu'à l'état complet : seul le nombre de lignes change. */
@@ -323,6 +323,14 @@ const displayDate = computed(() => {
 }
 
 .event-label {
+  display: block;
+  padding: 0;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: inherit;
+  font-family: inherit;
+  cursor: pointer;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);

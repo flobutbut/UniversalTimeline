@@ -27,6 +27,7 @@ it('exposes only the reviewed Supabase migrations and explicit ownership operati
     '20261103143455_public_story_editors.sql',
     '20261103172801_admin_relations_graph.sql',
     '20261103183154_admin_relations_network.sql',
+    '20261104132539_navigation_without_wrapper_periods.sql',
   ]);
   expect(readdirSync(root + 'database/operations').sort()).toEqual(['assign_admin_role.sql', 'assign_legacy_stories.sql']);
   expect(readdirSync(root + 'database').filter(name => /\.(sh|sql)$/.test(name))).toEqual([]);

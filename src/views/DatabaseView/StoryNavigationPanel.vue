@@ -1,11 +1,11 @@
 <template>
   <section class="story-navigation" aria-labelledby="story-navigation-title">
     <h3 id="story-navigation-title">Parcours chronologique</h3>
-    <p>Reliez une période de cette frise à un parcours pour continuer vers les périodes précédentes et suivantes. L’ordre suit les dates de début.</p>
+    <p>Choisissez la période du parcours présentée par cette frise pour continuer dans le temps. Cette période n’a pas besoin d’être ajoutée au récit.</p>
     <ul v-if="memberships.length" class="story-navigation__list">
       <li v-for="item in memberships" :key="`${item.context.id}:${item.periodId}`">
         <span>{{ item.context.title.fr || item.context.title.en }} · {{ periodLabel(item.periodId) }}</span>
-        <Button variant="ghost" size="xs" :to="{ name: 'timeline', query: { story: story.id, period: item.periodId, context: item.context.id, entry: 'universe' } }">Voir le parcours</Button>
+        <Button variant="ghost" size="xs" :to="{ name: 'timeline', query: { story: story.id, reference: item.periodId, view:'overview', context: item.context.id, entry: 'universe' } }">Voir le parcours</Button>
         <Button v-if="editable && canEditContext(item.context.id)" variant="ghost" size="xs" :disabled="busy || saving" @click="save(item.context.id, item.periodId, true)">Dissocier cette frise</Button>
       </li>
     </ul>
@@ -14,9 +14,10 @@
       <Button v-if="!adding" variant="tertiary" size="sm" :disabled="busy || saving" @click="open">Ajouter à un parcours</Button>
       <form v-else class="story-navigation__form" @submit.prevent="save(contextId, periodId, false)">
         <Select v-model="contextId" label="Frise de référence" placeholder="Choisir le parcours" :options="candidates" searchable :disabled="saving" />
-        <Select v-model="periodId" label="Période présentée par cette frise" placeholder="Choisir la période" :options="story.periods.map(period => ({ value: period.id, label: period.label.fr || period.label.en }))" searchable :disabled="saving" />
+        <Select v-model="periodId" label="Période présentée par cette frise" placeholder="Choisir la période" :options="periodOptions" searchable :disabled="saving || contextLoading" />
+        <p v-if="contextError" role="alert">{{ contextError }}</p>
         <div class="story-navigation__actions">
-          <Button type="submit" size="sm" :disabled="!contextId || !periodId || saving">Ajouter au parcours</Button>
+          <Button type="submit" size="sm" :disabled="!contextId || !periodId || saving || contextLoading || !!contextError">Ajouter au parcours</Button>
           <Button variant="ghost" size="sm" :disabled="saving" @click="adding = false">Annuler</Button>
         </div>
       </form>
@@ -26,24 +27,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import Button from '@/components/base/Button.vue';
 import Select from '@/components/base/Select.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useDataStore } from '@/stores/useDataStore';
 import { StoryApiService } from '@/services/StoryApiService';
 import type { Story } from '@/types/database';
+import { useParentStoryDetail } from '@/composables/useParentStoryDetail';
 const props = defineProps<{ story: Story; busy?: boolean }>();
 const emit = defineEmits<{ saved: [] }>();
 const auth = useAuthStore(), store = useDataStore();
 const editable = computed(() => auth.canEditStory(props.story));
 const adding = ref(false), saving = ref(false), error = ref('');
 const contextId = ref<string | null>(null), periodId = ref<string | null>(null);
+const {parent:contextStory,loading:contextLoading,error:contextError}=useParentStoryDetail(contextId);
+const periodOptions=computed(()=>[...new Map([...(contextStory.value?.periods??[]),...props.story.periods].map(p=>[p.id,{value:p.id,label:p.label.fr||p.label.en}])).values()]);
+watch(contextId,()=>{periodId.value=null;});
 const memberships = computed(() => (props.story.navigationContexts ?? []).flatMap(context => context.presentations
   .filter(view => view.storyId === props.story.id).map(view => ({ context, periodId: view.periodId }))));
 const candidates = computed(() => store.stories.filter(s => s.id !== props.story.id && auth.canEditStory(s))
   .map(s => ({ value: s.id, label: s.title.fr || s.title.en })));
-const periodLabel = (id: string) => props.story.periods.find(p => p.id === id)?.label.fr || id;
+const periodLabel = (id: string) => props.story.periods.find(p => p.id === id)?.label.fr || props.story.navigationContexts?.flatMap(c=>c.periods).find(p=>p.id===id)?.label.fr || id;
 const canEditContext = (id: string) => !!store.stories.find(s => s.id === id && auth.canEditStory(s));
 async function open() {
   saving.value = true; error.value = '';

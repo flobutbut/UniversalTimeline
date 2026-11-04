@@ -73,6 +73,9 @@ it('reserves the badge and drill control width, then reveals the badge at the ex
   expect(card().get('.associated-stories__badge').text()).toBe('1 frise associée');
   await card().get('.associated-stories__badge').trigger('click'); await settled();
   expect(document.querySelector('[role="dialog"]')?.textContent).toContain('Autre frise');
+  await card().trigger('focusout');await card().trigger('mouseleave');await settled();
+  expect(card().classes()).toContain('period-card--expanded');
+  expect(pct('first','--period-width')).toBeCloseTo(47);
   expect(view.emitted('period-click')).toBeUndefined();
 });
 

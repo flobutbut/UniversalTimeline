@@ -16,7 +16,7 @@
     <h2>StoryTabsBar · StoryGallery</h2>
     <Tabs v-model="galleryState" :tabs="[{ value: 'catalogue', label: 'Catalogue' }, { value: 'empty', label: 'Sans frise' }]" />
     <div class="gallery-example">
-      <StoryTabsBar :tabs="tabs" :active-id="active" @select="active = $event" @close="closeTab" />
+      <StoryTabsBar :tabs="tabs" :active-id="active" @select="active = $event" @close="closeTab" @reorder="reorderTab" />
       <StoryGallery v-model:search="gallerySearch" v-model:visibility="visibility" v-model:time-range="galleryRange" v-model:period="period" v-model:categories="galleryCategories" :stories="visibleStories" :total-stories="sampleStories.length" :category-options="categoryOptions" @open="openStory" @create="notice('Créer une frise')" />
     </div>
   </section>
@@ -74,6 +74,13 @@ const tabs = ref<{ id: string; label: string }[]>([]);
 const active = ref<string | null>(null);
 function openStory(story: StorySummary) { if (!tabs.value.some(tab => tab.id === story.id)) tabs.value.push({ id: story.id, label: story.title.fr }); active.value = story.id; }
 function closeTab(id: string) { tabs.value = tabs.value.filter(tab => tab.id !== id); if (active.value === id) active.value = null; }
+function reorderTab(id: string, targetId: string, position: 'before' | 'after') {
+  const tab = tabs.value.find(tab => tab.id === id);
+  if (!tab || id === targetId || !tabs.value.some(tab => tab.id === targetId)) return;
+  const next = tabs.value.filter(tab => tab.id !== id);
+  next.splice(next.findIndex(tab => tab.id === targetId) + (position === 'after' ? 1 : 0), 0, tab);
+  tabs.value = next;
+}
 </script>
 <style scoped>
 .catalogue-demo { max-width: 1100px; display: flex; flex-direction: column; gap: var(--spacing-md); }

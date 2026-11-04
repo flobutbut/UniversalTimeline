@@ -47,11 +47,11 @@ after(() => pool.end());
 test('creating a frise from a period moves its sub-periods and the links that target them', async () => {
   const result = await call('post', '/stories/:storyId/from-period', { params: { storyId: '1' }, body: { periodId: 'p', title: 'Détail' } });
   assert.equal(result.statusCode, 201);
-  assert.deepEqual(result.payload, { id: '6', parentStoryId: '1', periodId: 'p', periodCount: 4, eventCount: 1, movedPeriodCount: 3, linkedStoryCount: 3 });
+  assert.deepEqual(result.payload, { id: '6', parentStoryId: '1', periodId: 'p', periodCount: 3, eventCount: 1, movedPeriodCount: 3, linkedStoryCount: 2 });
   // The source keeps the period as anchor, without its structure.
   assert.deepEqual(await memberships(1), [{ period_id: 'p', parent_period_id: null }, { period_id: 'q', parent_period_id: null }]);
   assert.deepEqual(await memberships(6), [
-    { period_id: 'b1', parent_period_id: 'p' }, { period_id: 'b11', parent_period_id: 'b1' }, { period_id: 'b2', parent_period_id: 'p' }, { period_id: 'p', parent_period_id: null }]);
+    { period_id: 'b1', parent_period_id: null }, { period_id: 'b11', parent_period_id: 'b1' }, { period_id: 'b2', parent_period_id: null }]);
   assert.deepEqual(await rows('SELECT event_id FROM story_events WHERE story_id IN (1,6) ORDER BY story_id, event_id'), [{ event_id: 'inside' }, { event_id: 'outside' }, { event_id: 'inside' }]);
   // The anchored child follows its period; its anchor outside the new parent stays reachable as an entry point.
   assert.deepEqual(await rows('SELECT parent_story_id FROM stories WHERE id=2'), [{ parent_story_id: 6 }]);
@@ -59,7 +59,7 @@ test('creating a frise from a period moves its sub-periods and the links that ta
   assert.deepEqual(await rows('SELECT source_story_id, target_story_id, period_id FROM story_entry_points ORDER BY source_story_id, target_story_id'), [
     { source_story_id: 1, target_story_id: 2, period_id: 'q' }, { source_story_id: 6, target_story_id: 3, period_id: 'b2' }]);
   assert.deepEqual(await rows('SELECT * FROM story_period_presentations ORDER BY context_story_id'), [
-    { context_story_id: 1, period_id: 'p', target_story_id: 6 }, { context_story_id: 4, period_id: 'b1', target_story_id: 6 }]);
+    { context_story_id: 1, period_id: 'p', target_story_id: 6 }, { context_story_id: 4, period_id: 'b1', target_story_id: 1 }]);
   assert.deepEqual(await rows('SELECT anchor_type, anchor_id FROM story_anchors WHERE story_id=6'), [{ anchor_type: 'period', anchor_id: 'p' }]);
 });
 test('a link to another account’s frise refuses the creation and changes nothing', async () => {
@@ -70,10 +70,12 @@ test('a link to another account’s frise refuses the creation and changes nothi
   assert.deepEqual(await rows('SELECT count(*)::int n FROM stories'), before);
   assert.equal((await memberships(1)).length, 5);
 });
-test('a leaf period is copied without moving anything', async () => {
+test('a leaf period remains in its source without adding a wrapper to the new narrative', async () => {
   const result = await call('post', '/stories/:storyId/from-period', { params: { storyId: '1' }, body: { periodId: 'q', title: 'Feuille' } });
   assert.equal(result.statusCode, 201);
   assert.equal(result.payload.movedPeriodCount, 0);
+  assert.equal(result.payload.periodCount, 0);
+  assert.deepEqual(await memberships(Number(result.payload.id)), []);
   assert.equal((await memberships(1)).length, 5);
 });
 

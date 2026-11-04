@@ -1,0 +1,102 @@
+{
+  "yarnVerify": "passed",
+  "unitTests": 1515,
+  "postgresTests": {
+    "baseline": 17,
+    "atomicWrites": 47,
+    "publicEditors": 6,
+    "storyStructure": 6,
+    "storyPresentations": 6,
+    "navigationWrappers": 4,
+    "total": 86,
+    "allPassed": true,
+    "localUnixSocketOnly": true
+  },
+  "frontendBuild": "passed",
+  "apiBuild": "passed",
+  "unusedSymbols": "passed",
+  "designChecks": "passed",
+  "databaseConfigurationChecks": 4,
+  "browser": {
+    "realHomeView": true,
+    "postchangeApiFromLocalPostgres": true,
+    "cases": 6,
+    "rootEntry": true,
+    "crossStoryTemporalNavigation": true,
+    "differentDurations": true,
+    "multipleOrigins": true,
+    "browserReloadPreservesReturn": true,
+    "legacyDeepLink": true,
+    "pageErrors": 0,
+    "liveDataWritten": false
+  },
+  "dataTransactionRehearsed": true,
+  "rollbackRestoresExactOriginalRows": true,
+  "schemaAppliedOnSupabase": true,
+  "productionDeploymentApplied": false,
+  "productionDataCleanupApplied": false,
+  "liveBrowserReview": {
+    "realUserTab": true,
+    "realApiAndData": true,
+    "temporalReturnRegressionFixed": true,
+    "browserReturnVerified": true,
+    "frontendBuildAfterFix": "passed",
+    "dataWritten": false,
+    "report": "browser-review.md"
+  },
+  "temporalOriginReview": {
+    "trueDatesPreserved": true,
+    "referenceNeverExtendsWindow": true,
+    "partialIntersectionProjected": true,
+    "outsideOrUndatedReferenceHidden": true,
+    "noFakePeriodForEventOrRootEntry": true,
+    "headerReturnPreserved": true,
+    "realHomoCaseVerified": true,
+    "realQuaternaryOffsetPct": 7.85714,
+    "realQuaternaryWidthPct": 92.1429,
+    "report": "temporal-origin-review.md",
+    "frontendBuildAfterFix": "passed"
+  },
+  "finalVerification": {
+    "date": "2026-11-04",
+    "cleanInstallation": "passed",
+    "networkIsolatedVerification": "passed",
+    "unitTests": 1524,
+    "postgresTests": {
+      "bySuite": {
+        "baseline": 20,
+        "presentations": 6,
+        "auth": 24,
+        "hierarchy": 10,
+        "deletion": 7,
+        "privileges": 4,
+        "atomic": 47,
+        "profiles": 10,
+        "admin": 15,
+        "public_editors": 6,
+        "wikidata_generation": 16,
+        "conversion": 7,
+        "story_structure": 6,
+        "navigation_wrappers": 4
+      },
+      "total": 182,
+      "allPassed": true,
+      "isolatedPostgres17": true,
+      "dumpRestoreVerified": true
+    },
+    "dependencyAudits": {
+      "frontendVulnerabilities": 0,
+      "apiVulnerabilities": 0
+    },
+    "frontendBuild": "passed",
+    "apiBuild": "passed",
+    "designChecks": "passed",
+    "browser": {
+      "clickedEventDatePinsTooltip": true,
+      "pinnedHomoAssociatedStoryCount": 3,
+      "smallPeriodMenuPreservesExpandedWidth": true,
+      "quaternaryExpandedWidthPct": 26.144455747711092,
+      "screenshot": "event-pin-and-period-menu.jpg"
+    }
+  }
+}

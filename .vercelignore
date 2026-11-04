@@ -1,0 +1,7 @@
+audits/**
+outputs/**
+database/**
+.agents/**
+.codex/**
+.env*
+**/.env*

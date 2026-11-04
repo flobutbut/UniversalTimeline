@@ -205,10 +205,12 @@ router.post('/stories/:parentId/child-stories', endpoint('Erreur lors du rattach
 }));
 router.post('/stories/:sourceId/entry-points', endpoint('Impossible de modifier les points d’entrée.', async (req, res) => {
   const sourceId = parseStoryId(req.params.sourceId, 'sourceId');
-  const { ids, anchor } = parseChildStories(req.body);
+  const body=inputObject(req.body);
+  const { ids, anchor } = parseChildStories(body.anchor===null?{...body,anchor:undefined}:body);
   const operation = parseAssociationOperation(inputObject(req.body).operation);
-  if (operation === 'add' && !anchor) throw new InputValidationError('anchor', 'Choisissez une période ou un événement de rattachement.');
-  await stories.changeEntries(sourceId, ids, anchor, operation === 'remove');
+  const location = inputObject(req.body).anchor === null ? null : anchor;
+  if (operation === 'add' && location === undefined) throw new InputValidationError('anchor', 'Choisissez une période, un événement ou la racine de la frise.');
+  await stories.changeEntries(sourceId, ids, location, operation === 'remove');
   res.status(204).send();
 }));
 router.delete('/stories/:parentId/child-stories/:childId', endpoint('Erreur lors du détachement', async (req, res) => {

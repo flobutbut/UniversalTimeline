@@ -3,10 +3,10 @@
     <!-- Garder le niveau courant affiché pendant une navigation ou une recherche de stories. -->
     <FeedbackState v-if="loading && !currentPeriod && periods.length === 0 && events.length === 0" kind="loading" message="Chargement de la timeline…" />
     <FeedbackState v-else-if="error" kind="error" :message="error" />
-    <FeedbackState v-else-if="!loading && !currentPeriod && periods.length === 0 && events.length === 0" message="Aucune période à afficher" />
+    <FeedbackState v-else-if="!loading && !currentPeriod && !overviewNavigation && periods.length === 0 && events.length === 0" message="Aucune période à afficher" />
     <div v-else class="timeline-container">
       <div class="periods-container">
-        <nav v-if="props.currentPeriod && !loading && (previousPeriod || nextPeriod || currentPeriodEnd)" class="period-grid__navigation" aria-label="Périodes de même niveau">
+        <nav v-if="(props.currentPeriod || props.overviewNavigation) && !loading && (previousPeriod || nextPeriod || currentPeriodEnd)" class="period-grid__navigation" aria-label="Périodes de même niveau">
           <Button v-if="previousPeriod" variant="ghost" size="sm" data-period-direction="previous"
             :title="`Période précédente : ${previousPeriod.label.fr || previousPeriod.label.en}`"
             @click="navigatePeriod('previous')">
@@ -23,6 +23,8 @@
           <span v-else-if="currentPeriodEnd" class="period-grid__end-label">{{ currentPeriodEnd }}</span>
         </nav>
         <div ref="periodSurfaceRef" class="period-grid__surface">
+          <slot v-if="!props.currentPeriod && (!overviewPeriod || overviewPeriodStyle)" name="overview-context" :style="overviewPeriodStyle" />
+          <FeedbackState v-if="!loading && !currentPeriod && overviewNavigation && periods.length === 0 && events.length === 0" message="Aucune période à afficher" />
           <PeriodCard
             v-if="props.currentPeriod"
             ref="parentBarRef"
@@ -68,6 +70,7 @@
               <template #title-actions>
                 <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
                   :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
+                  @open-change="value => setPeriodAssociationsOpen(period.id, value)"
                   @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: period.id })" />
               </template>
             </PeriodCard>
@@ -78,7 +81,7 @@
       <div v-if="undatedPeriods.length" ref="undatedPeriodsRef" class="period-grid__undated">
         <span>Dates non déterminées</span>
         <span v-for="period in undatedPeriods" :key="`p:${period.id}`" class="period-grid__undated-item">
-          <Button variant="tertiary" size="xs" type="button" :disabled="loading || !period.hasChildren" @click="selectPeriod(period)">{{ period.label.fr }}</Button>
+          <Button variant="tertiary" size="xs" type="button" :disabled="loading" @click="selectPeriod(period)">{{ period.label.fr }}</Button>
           <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
             :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
             @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: period.id })" />
@@ -161,6 +164,10 @@ const props = withDefaults(defineProps<{
   currentPeriod: ListPeriod | null;
   previousPeriod?: ListPeriod | null;
   nextPeriod?: ListPeriod | null;
+  /** A reference period can carry temporal neighbors without being part of the narrative. */
+  overviewNavigation?: boolean;
+  /** Real reference dates, projected into the narrative window without framing it. */
+  overviewPeriod?: ListPeriod | null;
   /** Bornes de la story courante : cadre fixe quand aucun currentPeriod n'est actif. */
   storyBounds?: { startYearsBP?: number; endYearsBP?: number } | null;
   currentStoryId: string;
@@ -225,8 +232,15 @@ const periodDetails = useTimelinePeriodTooltip(
   () => props.periodTooltips && active.value && !props.loading,
 );
 const { period: tooltipPeriod, tooltipId, tooltipElement, tooltipStyle } = periodDetails;
-const activePeriodId = computed(() => active.value && !props.loading && props.periods.some(p => p.id === periodDetails.activeId.value)
-  ? periodDetails.activeId.value : null);
+const associationPeriodId = ref<string | null>(null);
+function setPeriodAssociationsOpen(id: string, open: boolean) {
+  if(open) { associationPeriodId.value=id; periodDetails.dismiss(); }
+  else if(associationPeriodId.value===id)associationPeriodId.value=null;
+}
+const activePeriodId = computed(() => {
+  const id=associationPeriodId.value??periodDetails.activeId.value;
+  return active.value && !props.loading && props.periods.some(p => p.id === id) ? id : null;
+});
 const { minimumPct, laneHeight, wrapContent } = useTimelinePeriodExpansion(
   () => activePeriodId.value,
   id => periodElMap.get(id) ?? null,
@@ -247,14 +261,10 @@ const currentPeriodEnd = computed(() => {
 });
 const tooltipDateRange = computed(() => tooltipPeriod.value ? formatPeriodDateRange(tooltipPeriod.value) : '');
 const tooltipDescription = computed(() => (tooltipPeriod.value?.description?.fr || tooltipPeriod.value?.description?.en || '').trim());
-/** Seules les périodes avec enfants se parcourent au clic. */
 const tooltipHint = computed(() => {
   if (!tooltipPeriod.value) return '';
   if (tooltipPeriod.value.id === props.currentPeriod?.id) return 'Cliquer pour remonter';
-  if (tooltipPeriod.value.hasChildren) return 'Cliquer pour explorer';
-  return (associatedByPeriod.value.get(tooltipPeriod.value.id) ?? []).length
-    ? 'Pas de sous-périodes. Choisissez une frise associée pour continuer.'
-    : 'Pas de sous-périodes.';
+  return 'Cliquer pour explorer';
 });
 
 const periodFlip = usePeriodFlip(
@@ -365,6 +375,14 @@ const getPeriodCssVars = (period: ListPeriod): Record<string, string> => {
 };
 
 // The parent uses the same dates and hover projection as its children and events.
+const overviewPeriodStyle = computed(() => {
+  if(!props.overviewPeriod)return null;
+  const base=getPeriodLayoutStyle(props.overviewPeriod);
+  if(parseFloat(base.width)<=0)return null;
+  const left=projectPosition(parseFloat(base.left));
+  const right=projectPosition(parseFloat(base.left)+parseFloat(base.width));
+  return {width:`${Math.max(0,right-left)}%`,marginLeft:`${left}%`};
+});
 const parentBarStyle = computed(() => {
   if (!props.currentPeriod) return {};
   const { start, end } = periodCoordinates(props.currentPeriod);
@@ -439,7 +457,7 @@ const getEventStyles = (event: ListEvent): { width: string; left: string } => {
 // ─── Actions ──────────────────────────────────────────────────────────────────
 
 const selectPeriod = (period: ListPeriod) => {
-  if (props.loading || !period.hasChildren) return;
+  if (props.loading) return;
   periodDetails.dismiss();
   const el = periodElMap.get(period.id);
   periodFlip.prepare(period, el ?? null);

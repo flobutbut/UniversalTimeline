@@ -1,9 +1,12 @@
 import { comparableYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
-import type { ListPeriod, NavigationContext } from '@/types/database';
+import type { ListPeriod, NavigationContext, StoryAnchor } from '@/types/database';
 import { storyChildrenOf } from './homeStoryPeriodNav';
 import { getStoryPeriodParentId } from './storyPeriodParent';
 
-export interface TimelineTarget { storyId: string; periodId?: string; contextId?: string; view?: 'overview'; entry?: 'universe' }
+export interface TimelinePosition { storyId: string; periodId?: string; contextId?: string; referencePeriodId?: string; view?: 'overview' }
+/** Exact source position and clicked location. Stored in browser history, never as catalogue content. */
+export interface TimelineReturnFrame extends TimelinePosition { anchor?: StoryAnchor; anchorStoryId?: string }
+export interface TimelineTarget extends TimelinePosition { entry?: 'universe'; returnPath?: TimelineReturnFrame[] }
 
 /** Full path in this frise, including leaves; invalid paths cannot become navigation targets. */
 export function timelinePeriodPath(periods: ListPeriod[], id: string): ListPeriod[] | null {
@@ -57,6 +60,6 @@ export function contextPeriodNeighbors(context: NavigationContext, periodId: str
 
 export function periodPresentationTargets(context: NavigationContext, periodId: string): Array<TimelineTarget & { title: string }> {
   const views = context.presentations.filter(p => p.periodId === periodId);
-  return views.length ? views.map(view => ({ storyId: view.storyId, periodId, contextId: context.id, title: view.title.fr || view.title.en }))
+  return views.length ? views.map(view => ({ storyId: view.storyId, periodId, referencePeriodId: periodId, contextId: context.id, title: view.title.fr || view.title.en }))
     : [{ storyId: context.id, periodId, contextId: context.id, title: context.title.fr || context.title.en }];
 }

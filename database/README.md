@@ -24,7 +24,7 @@ Ces migrations sont un historique des changements sur le schéma existant. Pour 
 
 ## Parcours chronologiques
 
-La migration `20261102131202_story_period_presentations.sql` ajoute les présentations de périodes par contexte, avec clés étrangères composées, index et RLS. Elle est appliquée au projet actif. La baseline des projets vides contient déjà cette table.
+La migration `20261102131202_story_period_presentations.sql` ajoute les présentations de périodes par contexte, avec index et RLS. La migration `20261104132539_navigation_without_wrapper_periods.sql`, appliquée le 4 novembre 2026 (version distante `20261104134742`), conserve la clé composée côté contexte et référence seulement la frise côté cible. Elle autorise aussi les entrées à la racine sans modifier les droits ni les données. Elle est appliquée au projet actif. La baseline des projets vides contient déjà cette table.
 
 Le lot `data/20261102_historical_navigation_context.sql`, appliqué le 2 novembre 2026, crée la frise de référence « Grandes périodes de l’histoire européenne » et quatre présentations sur les fiches existantes Antiquité, Moyen Âge, Époque moderne et Histoire contemporaine. Les points d’entrée historiques sont conservés. Ce lot est propre aux données auditées ; ne pas l’exécuter sur une installation vide. Les identifiants des frises créées sont obtenus par `RETURNING`, jamais imposés.
 
@@ -43,3 +43,10 @@ Le test `server/test/maintenance.test.ts`, inclus dans `yarn test`, vérifie les
 ## Sauvegardes
 
 Voir [la procédure actuelle](README_backup.md). Aucun dump, restauration ou changement de la base distante n’a été exécuté au lot 27.
+
+
+## Navigation sans chapeau — 4 novembre 2026
+
+Le schéma de compatibilité est appliqué ; les huit tables de données contrôlées gardent leurs effectifs initiaux (39 frises, 366 périodes, 421 événements). Le lot `data/20261104_navigation_without_wrappers.sql` est **préparé mais non appliqué** : l’API et le frontend doivent être déployés ensemble avant son exécution. La revue automatique demande un accord explicite pour le déploiement Vercel.
+
+La répétition locale anonymisée valide les quatre retraits, les cinq nouveaux placements racine, la conservation des huit destinations ancrées et l’ajout de Genre Homo → Techniques. Le [suivi](../audits/navigation-2026-11-04/implementation.md) distingue les actions effectuées de celles en attente et référence le retour arrière testé. Ne pas rejouer ce lot propre aux données auditées sur une installation vide.

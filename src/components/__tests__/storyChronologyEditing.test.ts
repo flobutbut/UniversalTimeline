@@ -1,0 +1,31 @@
+import {beforeEach,afterEach,it,expect,vi} from 'vitest';
+import {mount,flushPromises} from '@vue/test-utils';
+import {createPinia,setActivePinia} from 'pinia';
+import StoryNavigationPanel from '@/views/DatabaseView/StoryNavigationPanel.vue';
+import Select from '@/components/base/Select.vue';
+import {StoryApiService} from '@/services/StoryApiService';
+import {useDataStore} from '@/stores/useDataStore';
+import {storyFixture} from '@/testFixtures/story';
+let view:ReturnType<typeof mount>;
+const target=storyFixture('1');
+const source=storyFixture('2',[{id:'middle',label_fr:'Moyen Âge',start_date:'0476',end_date:'1492'}]);
+beforeEach(()=>{setActivePinia(createPinia());vi.spyOn(StoryApiService.getInstance(),'getListStories').mockResolvedValue([target,source]);});
+afterEach(()=>{view?.unmount();vi.restoreAllMocks();});
+it('offers the reference context periods even when the target has no wrapper or periods',async()=>{
+  vi.spyOn(StoryApiService.getInstance(),'getStory').mockResolvedValue(source);
+  const save=vi.spyOn(StoryApiService.getInstance(),'changePresentation').mockResolvedValue(undefined);
+  useDataStore().updateStories([target,source]);view=mount(StoryNavigationPanel,{props:{story:target}});
+  await view.get('button').trigger('click');await flushPromises();
+  view.findAllComponents(Select)[0].vm.$emit('update:modelValue','2');await flushPromises();
+  const periods=view.findAllComponents(Select)[1];expect(periods.props('options')).toContainEqual({value:'middle',label:'Moyen Âge'});
+  periods.vm.$emit('update:modelValue','middle');await flushPromises();await view.get('form').trigger('submit');await flushPromises();
+  expect(save).toHaveBeenCalledWith('2','middle','1',false);expect(view.emitted('saved')).toHaveLength(1);expect(target.periods).toEqual([]);
+});
+it('does not offer a stale reference while another source is still loading',async()=>{
+  let finish!:(s:typeof source)=>void;const pending=new Promise<typeof source>(resolve=>{finish=resolve;});
+  vi.spyOn(StoryApiService.getInstance(),'getStory').mockImplementation(id=>id==='2'?pending:Promise.resolve(storyFixture('3')));
+  view=mount(StoryNavigationPanel,{props:{story:target}});await view.get('button').trigger('click');await flushPromises();
+  const select=view.findAllComponents(Select)[0];select.vm.$emit('update:modelValue','2');await flushPromises();select.vm.$emit('update:modelValue','3');await flushPromises();
+  finish(source);await flushPromises();expect(view.findAllComponents(Select)[1].props('options')).toEqual([]);
+  expect(view.get('button[type="submit"]').attributes('disabled')).toBeDefined();
+});

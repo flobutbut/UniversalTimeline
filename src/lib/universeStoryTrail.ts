@@ -5,8 +5,9 @@ import { timelinePeriodPath, type TimelineTarget } from './timelineNavigation';
 
 /** Position depuis laquelle le lien vers la frise suivante est effectivement accessible. */
 function entryToward(story: Story, nextStoryId: string): TimelineTarget | null {
-  const link = storyNavigationLinks(story).find(link => link.id === nextStoryId && link.anchors.length);
+  const link = storyNavigationLinks(story).find(link => link.id === nextStoryId && (link.anchors.length || link.atRoot));
   if (!link) return null;
+  if(link.atRoot)return {storyId:story.id,view:'overview'};
   const paths = link.anchors.flatMap(anchor => {
     const path = anchor.type === 'period' ? timelinePeriodPath(story.periods, anchor.id) : null;
     return path ? [path] : [];

@@ -34,15 +34,20 @@ beforeEach(() => {
 });
 afterEach(() => { scope.stop(); vi.restoreAllMocks(); });
 
-it('does not descend into a leaf or follow another frise at a period click', async () => {
+it('opens a leaf in the same frise and restores its parent on return', async () => {
   await descend();
   expect(ids()).toEqual(['story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild']);
   expect(nav.storyBreadcrumb.value[0].title).toBe('Univers Moderne');
   vi.spyOn(StoryApiService.getInstance(), 'getSuggestions').mockResolvedValue([]);
   await nav.handlePeriodClick(nav.displayedPeriods.value[0]);
-  // A leaf does not change the current period or follow an associated frise.
   expect(StoryApiService.getInstance().getSuggestions).not.toHaveBeenCalled();
   expect(StoryApiService.getInstance().getStory).toHaveBeenCalledOnce();
+  expect(ids()).toEqual(['story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild', 'story:1/period:leaf']);
+  expect(nav.currentStoryId.value).toBe('1');
+  expect(nav.currentPeriod.value?.id).toBe('leaf');
+  expect(nav.displayedPeriods.value).toEqual([]);
+  expect(nav.storyEvents.value.map(e => e.id)).toEqual(['e50']);
+  await nav.goBack();
   expect(ids()).toEqual(['story:1/period:root', 'story:1/period:child', 'story:1/period:grandchild']);
   expect(nav.currentPeriod.value?.id).toBe('grandchild');
 });

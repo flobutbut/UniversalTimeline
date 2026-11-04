@@ -23,9 +23,11 @@ before(async () => {
 });
 after(() => pool.end());
 
-test('composite FKs reject a presentation whose period is absent from either view', async () => {
+test('the reference must belong to its context, while the target may omit the wrapper', async () => {
   await assert.rejects(pool.query("INSERT INTO story_period_presentations VALUES(1,'renaissance',2)"),{code:'23503'});
-  await assert.rejects(pool.query("INSERT INTO story_period_presentations VALUES(1,'ancient',2)"),{code:'23503'});
+  await pool.query("INSERT INTO story_period_presentations VALUES(1,'ancient',2)");
+  await assert.rejects(pool.query("INSERT INTO story_period_presentations VALUES(1,'ancient',9999)"),{code:'23503'});
+  await pool.query("DELETE FROM story_period_presentations WHERE period_id='ancient'");
 });
 test('owners declare a view, duplicates are idempotent, and foreign owners cannot redirect it', async () => {
   await scoped(alice,c=>c.query("INSERT INTO story_period_presentations VALUES(1,'medieval',2) ON CONFLICT DO NOTHING"));
@@ -52,8 +54,8 @@ test('a newly added period appears in the context snapshot without rewriting old
   const snapshot = await scoped(null,c=>findStorySnapshot(c,'2'));
   assert.ok(snapshot.navigation_contexts[0].periods.some(p=>p.id==='renaissance'));
 });
-test('removing a target membership removes only its presentation and keeps its context period', async () => {
+test('removing a target wrapper preserves the presentation and its source period', async () => {
   await pool.query("DELETE FROM story_periods WHERE story_id=2 AND period_id='medieval'");
-  assert.equal((await pool.query('SELECT * FROM story_period_presentations WHERE target_story_id=2')).rowCount,0);
+  assert.equal((await pool.query('SELECT * FROM story_period_presentations WHERE target_story_id=2')).rowCount,1);
   assert.equal((await pool.query("SELECT * FROM story_periods WHERE story_id=1 AND period_id='medieval'")).rowCount,1);
 });

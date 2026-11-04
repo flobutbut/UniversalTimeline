@@ -746,7 +746,7 @@
         },
         {
           "name": "story_entry_points_location",
-          "definition": "CHECK (num_nonnulls(period_id, event_id) = 1)",
+          "definition": "CHECK (num_nonnulls(period_id, event_id) <= 1)",
           "kind": "c"
         },
         {
@@ -879,7 +879,7 @@
         },
         {
           "name": "story_period_presentations_target",
-          "definition": "FOREIGN KEY (target_story_id, period_id) REFERENCES story_periods(story_id, period_id) ON DELETE CASCADE",
+          "definition": "FOREIGN KEY (target_story_id) REFERENCES stories(id) ON DELETE CASCADE",
           "kind": "f"
         }
       ],

@@ -378,16 +378,16 @@ export function useDatabaseView() {
     });
     return importanceWrites;
   };
-  const addParentEntryToStory = (sourceId: string, periodId: string) => mutateRelatedStories(async targetId => {
-    await StoryApiService.getInstance().changeEntryPoints(sourceId, [targetId], { type: 'period', id: periodId });
+  const addParentEntryToStory = (sourceId: string, periodId: string | null) => mutateRelatedStories(async targetId => {
+    await StoryApiService.getInstance().changeEntryPoints(sourceId, [targetId], periodId?{ type: 'period', id: periodId }:null);
     return 'Point d’entrée ajouté';
   });
   /** Rattache la frise à sa parente, sur une ancre ; les ancres d’une ancienne parente sont retirées. */
-  const setParentOfStory = (parentId: string, periodId: string) => mutateRelatedStories(async storyId => {
-    await StoryApiService.getInstance().linkChildStories(parentId, [storyId], { type: 'period', id: periodId });
+  const setParentOfStory = (parentId: string, periodId: string | null) => mutateRelatedStories(async storyId => {
+    await StoryApiService.getInstance().linkChildStories(parentId, [storyId], periodId?{ type: 'period', id: periodId }:undefined);
     return 'Frise parente enregistrée';
   });
-  const removeParentEntryFromStory = (sourceId: string, anchor?: StoryAnchor) => mutateRelatedStories(async targetId => {
+  const removeParentEntryFromStory = (sourceId: string, anchor?: StoryAnchor | null) => mutateRelatedStories(async targetId => {
     await StoryApiService.getInstance().changeEntryPoints(sourceId, [targetId], anchor, true);
     return 'Point d’entrée retiré';
   });
