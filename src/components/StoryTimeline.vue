@@ -104,6 +104,7 @@ import type { StoryTimelinePeriod as InPeriod, StoryTimelineEvent as InEvent } f
 import type { EventImportance } from '@/types/database';
 import { COMPACT_BAR_HEIGHT, COMPACT_LANE_GAP, COMPACT_ROOT_HEIGHT, INTERACTIVE_BAR_SIZES, layoutCompactLanes } from '@/lib/compactStoryTimeline';
 import { comparableYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
+import { timelineHierarchy } from '@/lib/timelineHierarchy';
 import { layoutSequentialLanes } from '@/lib/sequentialTimelineLanes';
 import {
   formatStoryTimelineBoundLabel,
@@ -238,7 +239,6 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
 
   const periods = datedPeriods.value.filter(period => visiblePeriodIds.value.has(period.id)
     && (props.compact&&props.layoutBounds || !props.proportional || Math.max(period.startYbp,period.endYbp)>=b.min && Math.min(period.startYbp,period.endYbp)<=b.max));
-  const periodIds = new Set(periods.map(p => p.id));
 
   type DatedPeriod = typeof periods[number];
   const layoutBounds=props.compact?props.layoutBounds:undefined;
@@ -267,54 +267,13 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
     };
   }
 
-  // Construction de l'arbre dans le contexte de la story
-  const childrenMap = new Map<string, DatedPeriod[]>();
-  const roots: DatedPeriod[] = [];
-  for (const p of periods) {
-    const parentId = getStoryPeriodParentId(p);
-    if (!parentId || !periodIds.has(parentId)) {
-      roots.push(p);
-    } else {
-      const arr = childrenMap.get(parentId) ?? [];
-      arr.push(p);
-      childrenMap.set(parentId, arr);
-    }
-  }
-
-  // La hiérarchie fournit la profondeur et le pliage, pas une ligne par élément.
-  const ordered: PosPeriod[] = [];
-  const visited = new Set<string>();
-
-  function traverse(p: DatedPeriod, depth: number) {
-    if (visited.has(p.id)) return;
-    visited.add(p.id);
-    ordered.push(toPos(p, depth));
-    const children = (childrenMap.get(p.id) ?? [])
-      .slice()
-      .sort((a, b_) => {
-        const aYbp = a.startYbp;
-        const bYbp = b_.startYbp;
-        return bYbp - aYbp;
-      });
-    for (const child of children) traverse(child, depth + 1);
-  }
-
-  roots
-    .slice()
-    .sort((a, b_) => {
-      const aYbp = a.startYbp;
-      const bYbp = b_.startYbp;
-      return bYbp - aYbp;
-    })
-    .forEach(r => traverse(r, 0));
-
-  // Legacy cycles remain bounded and visible instead of recursing indefinitely.
-  periods.filter(period => !visited.has(period.id)).forEach(period => traverse(period, 0));
+  const hierarchy = timelineHierarchy(props.periods ?? [], getStoryPeriodParentId);
+  const depths = new Map(hierarchy.map(({ item, depth }) => [item.id, depth]));
+  const ordered = periods.map(period => toPos(period, depths.get(period.id) ?? 0));
 
   // Passive cards stay bounded. Interactive previews expose every expanded level.
   if (props.compact) {
-    const bars = props.collapsible ? ordered : ordered.filter(period => period.depth <= 1);
-    return layoutCompactLanes(bars, props.collapsible ? bars.length : undefined, barSizes.value).placed.map(period => {
+    return layoutCompactLanes(ordered, props.collapsible ? ordered.length : undefined, barSizes.value).placed.map(period => {
       if (!layoutBounds) return {...period,row:period.lane};
       const left=Math.max(0,Math.min(100,toLeft(Math.max(period.startYbp,period.endYbp))));
       const right=Math.max(0,Math.min(100,toLeft(Math.min(period.startYbp,period.endYbp))));

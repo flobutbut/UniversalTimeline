@@ -50,7 +50,8 @@ export function useTimelinePeriodExpansion(
     }, 0);
     // Mesurer le texte lui-même : le h3 peut être étroit sans déborder, car son
     // bouton/span enfant masque déjà le texte. Cela vaut aussi sans badge ni flèche.
-    textPixels = Math.max(0, ...Array.from(card.querySelectorAll<HTMLElement>('.period-card__title-action, .period-info'), measureTextWidth));
+    const widths = Array.from(card.querySelectorAll<HTMLElement>('.period-card__title-action, .period-info'), measureTextWidth);
+    textPixels = Math.max(0, ...widths);
     measureFrame();
   }, { flush: 'sync' });
 

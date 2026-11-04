@@ -9,7 +9,9 @@ import { storyChildrenOf, resolvePeriodNavFromSnapshot, type StoryPeriodNavSnaps
 import { timelineLevel, levelNeighbors, timelinePeriodPath, contextPeriodNeighbors, periodPresentationTargets, type TimelineTarget, type TimelineReturnFrame } from '@/lib/timelineNavigation';
 import { universeStoryTrail } from '@/lib/universeStoryTrail';
 import { storyNavigationLinks, indexStoryNavigationLinks, rootStoryNavigationLinks } from '@/lib/storyNavigationLinks';
-import { linkedStoryPeriods } from '@/lib/linkedStoryPeriods';
+import { timelineHierarchy } from '@/lib/timelineHierarchy';
+import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
+import { linkedStoryPeriods, linkedStoryPreviewPeriods } from '@/lib/linkedStoryPeriods';
 
 const ENTRY_STORY_ID = '1';
 
@@ -22,6 +24,11 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   const parentStack = ref<ListPeriod[]>([]);
   const currentPeriod = ref<ListPeriod | null>(null);
   const displayedPeriods = ref<ListPeriod[]>([]);
+  const periodChildren = computed(() => {
+    const parents = new Set(currentStoryPeriods.value.map(getStoryPeriodParentId));
+    return timelineHierarchy(currentStoryPeriods.value, getStoryPeriodParentId, displayedPeriods.value.map(parent => parent.id))
+      .filter(node => node.depth > 0).map(({ item }) => ({ ...item, hasChildren: parents.has(item.id) }));
+  });
   const storyEvents = ref<ListEvent[]>([]);
   const currentStoryId = ref(ENTRY_STORY_ID);
   const currentStoryPeriods = ref<ListPeriod[]>([]);
@@ -32,6 +39,10 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   const referencePeriodId = ref<string | null>(null);
   const returnPath = ref<TimelineReturnFrame[]>([]);
   const currentStory = ref<Story | null>(null);
+  const childLinkedPeriods = computed(() => {
+    const visible = new Set([...displayedPeriods.value, ...periodChildren.value].map(p => p.id));
+    return linkedStoryPreviewPeriods(currentStory.value, stories.value).filter(p => p.storyParentId !== null && visible.has(p.storyParentId));
+  });
   const entryStory = ref<Story | null>(null);
   const selectedContext = computed(() => navigationContexts.value.find(c => c.id === contextId.value) ?? null);
   const navigationChoices = ref<Array<TimelineTarget & { title: string }>>([]);
@@ -393,9 +404,9 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   const handleEventClick = async (_event: ListEvent) => {};
 
   return {
-    loading, error, retryLoad, parentStack, currentPeriod, displayedPeriods, storyEvents,
+    loading, error, retryLoad, parentStack, currentPeriod, displayedPeriods, periodChildren, storyEvents,
     currentStoryId, breadcrumb, storyBreadcrumb, currentStoryBounds, previousPeriod, nextPeriod, navigationContexts, contextId, referencePeriodId, returnPath,
-    contextBar, contextStories, rootStories, linkedPeriods, returnTitle, navigationChoices, chooseNavigationTarget, selectNavigationContext,
+    contextBar, contextStories, rootStories, linkedPeriods, childLinkedPeriods, returnTitle, navigationChoices, chooseNavigationTarget, selectNavigationContext,
     loadInitialData, openStory, handlePeriodClick, handleEventClick, goBack, selectStory, navigateToBreadcrumb, navigateToStoryBreadcrumb, navigateAdjacentPeriod,
   };
 }

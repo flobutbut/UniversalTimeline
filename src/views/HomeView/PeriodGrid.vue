@@ -55,6 +55,7 @@
               :key="period.id"
               :ref="(el: any) => setPeriodRef(el, period.id)"
               :period="period"
+              :parent-label="childParentLabels.get(period.id)"
               :is-selected="false"
               class="timeline-card period-grid__period-position"
               :expanded="activePeriodId === period.id"
@@ -138,7 +139,9 @@ import { Icon } from '@iconify/vue';
 import { ref, computed, watch, onActivated, onDeactivated, onScopeDispose } from 'vue';
 
 import type { ListPeriod, ListEvent, Story, StoryAnchor } from '@/types/database';
+import { timelineHierarchy } from '@/lib/timelineHierarchy';
 import { layoutSequentialLanes } from '@/lib/sequentialTimelineLanes';
+import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import { periodCoordinates } from '@/services/TimelineScalingService';
 import { listEventYearsBP } from '@/lib/listEventTableHelpers';
 import { useTimelineScaling } from '@/composables/useTimelineScaling';
@@ -161,6 +164,9 @@ import type { LinkedStoryPeriod } from '@/lib/linkedStoryPeriods';
 
 const props = withDefaults(defineProps<{
   periods: ListPeriod[];
+  childPeriods?: ListPeriod[];
+  childLinkedPeriods?: LinkedStoryPeriod[];
+  showChildren?: boolean;
   linkedPeriods?: LinkedStoryPeriod[];
   events: ListEvent[];
   loading: boolean;
@@ -179,7 +185,7 @@ const props = withDefaults(defineProps<{
   periodTooltips?: boolean;
   /** Home shares its cached frise read with the cards. Standalone grids can load their own metadata. */
   loadStoryDetails?: (id: string, signal: AbortSignal) => Promise<Story>;
-}>(), { periodTooltips: false, linkedPeriods: () => [] });
+}>(), { periodTooltips: false, linkedPeriods: () => [], childPeriods: () => [], childLinkedPeriods: () => [], showChildren: false });
 
 const emit = defineEmits<{
   (e: 'period-click', period: ListPeriod): void;
@@ -195,7 +201,8 @@ const error = ref<string | null>(null);
 const selectedEvent = ref<ListEvent | null>(null);
 /** Suggestions de stories pour l'événement actuellement sélectionné. */
 const active = ref(true);
-const renderedPeriods = computed(() => [...props.periods,...props.linkedPeriods]);
+const inlineChildren = computed(() => [...props.childPeriods, ...props.childLinkedPeriods]);
+const renderedPeriods = computed(() => [...props.periods,...props.linkedPeriods,...(props.showChildren ? inlineChildren.value : [])]);
 const { byPeriod: associatedByPeriod, byEvent: associatedByEvent, loading: associationsLoading, error: associationsError, retry: retryAssociations } = useTimelineAssociatedStories(
   () => props.currentStoryId, () => active.value && (!!props.currentPeriod || renderedPeriods.value.length > 0 || props.events.length > 0),
   props.loadStoryDetails,
@@ -294,10 +301,39 @@ const periodRows = computed(() => {
   });
   return [...rows,...links];
 });
+const childParentLabels = computed(() => {
+  const parents = new Map([...props.periods, ...props.childPeriods].map(p => [p.id, p.label.fr || p.label.en || 'Période sans nom']));
+  return new Map(inlineChildren.value.map(p => [p.id, parents.get(getStoryPeriodParentId(p) ?? '')]));
+});
+const childRows = computed(() => {
+  if (!props.showChildren) return [];
+  const now = Date.now();
+  const frame = props.currentPeriod ?? props.storyBounds;
+  const coordinates = [...periodRows.value.flatMap(row => [row.start,row.end]), ...(frame ? Object.values(periodCoordinates(frame, now)) : [])]
+    .filter((value): value is number => value !== null);
+  const start = Math.max(...coordinates), end = Math.min(...coordinates);
+  const visible = new Set(periodRows.value.map(row => row.p.id));
+  return inlineChildren.value.flatMap(p => {
+    if (visible.has(p.id) || !childParentLabels.value.get(p.id)) return [];
+    const dates = periodCoordinates(p, now);
+    if (dates.start === null || dates.end === null) return [{ p, ...dates }];
+    if (!(start > end)) return [];
+    const clippedStart = Math.min(start, dates.start), clippedEnd = Math.max(end, dates.end);
+    return clippedStart > clippedEnd ? [{ p, start: clippedStart, end: clippedEnd }] : [];
+  });
+});
 const datedPeriodRows = computed(() => periodRows.value.flatMap(({p,start,end}) => start !== null && end !== null ? [{p,start,end}] : []));
-const undatedPeriods = computed(() => periodRows.value.filter(row => row.start === null || row.end === null).map(row => row.p));
+const undatedPeriods = computed(() => [...periodRows.value, ...childRows.value].filter(row => row.start === null || row.end === null).map(row => row.p));
 const undatedEvents = computed(() => props.events.filter(e => listEventYearsBP(e) === null));
-const sortedPeriodRows = computed(() => layoutSequentialLanes(datedPeriodRows.value));
+const sortedPeriodRows = computed(() => {
+  if (!props.showChildren) return layoutSequentialLanes(datedPeriodRows.value);
+  const hierarchy = timelineHierarchy([...props.periods, ...inlineChildren.value], getStoryPeriodParentId, props.periods.map(p => p.id));
+  const depths = new Map(hierarchy.map(({ item, depth }) => [item.id, depth]));
+  const children = childRows.value.flatMap(child => child.start !== null && child.end !== null && depths.has(child.p.id)
+    ? [{ p: child.p, start: child.start, end: child.end, depth: depths.get(child.p.id)! }] : []);
+  return layoutSequentialLanes([...datedPeriodRows.value.map(row => ({ ...row, depth: 0 })), ...children]);
+});
+
 const sortedPeriods = computed(() => sortedPeriodRows.value.map(row => row.p));
 
 const laneMap = computed(() => new Map(sortedPeriodRows.value.map(({ p, lane }) => [p.id,lane])));
@@ -309,11 +345,11 @@ const numLanes = computed(() =>
 const periodRowHeight = computed(() => numLanes.value * laneHeight.value);
 
 watch(
-  [sortedPeriods, () => props.currentPeriod, () => props.storyBounds],
+  [datedPeriodRows, () => props.currentPeriod, () => props.storyBounds],
   () => {
     // Le cadre inclut la référence et les périodes affichées, même si un enfant déborde.
     const framingPeriod = props.currentPeriod ?? props.storyBounds ?? undefined;
-    try { updateFromPeriods(sortedPeriodRows.value.map(row => ({ startYearsBP: row.start, endYearsBP: row.end })), framingPeriod); }
+    try { updateFromPeriods(datedPeriodRows.value.map(row => ({ startYearsBP: row.start, endYearsBP: row.end })), framingPeriod); }
     catch (e) { error.value = e instanceof Error ? e.message : 'Erreur de calcul'; }
   },
   { immediate: true }
@@ -447,7 +483,7 @@ const getEventStyles = (event: ListEvent): { width: string; left: string } => {
 const selectPeriod = (period: ListPeriod) => {
   if (props.loading) return;
   periodDetails.dismiss();
-  const linked = props.linkedPeriods.find(link => link.id === period.id);
+  const linked = [...props.linkedPeriods, ...(props.showChildren ? props.childLinkedPeriods : [])].find(link => link.id === period.id);
   if (linked) { emit('story-select',linked.linkedStoryId,linked.sourceAnchor); return; }
   const el = periodElMap.get(period.id);
   periodFlip.prepare(period, el ?? null);
@@ -629,8 +665,10 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
 
 .period-grid__period-position {
   position: absolute;
-  left: var(--period-left);
+  /* Keep the minimum clickable width inside the frame, including tiny periods ending today. */
+  left: min(var(--period-left), calc(100% - var(--spacing-xs)));
   width: var(--period-width);
+  min-width: var(--spacing-xs);
   top: var(--period-top);
   z-index: var(--period-z, auto);
 }
