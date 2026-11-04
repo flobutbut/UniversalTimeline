@@ -1,0 +1,157 @@
+{
+  "story": {
+    "id": 22,
+    "title_fr": "Les cinq grandes extinctions",
+    "description_fr": "Cinq fois en 540 millions d’années, plus des trois quarts des espèces ont disparu en peu de temps. Pour chaque crise, la frise montre ce qui précède, les causes (glaciation, volcanisme géant, impact), les vagues d’extinction et la reprise, jusqu’à la sixième extinction en cours et la façon dont on les a découvertes.",
+    "description_en": "Five times in 540 million years, more than three quarters of species vanished in a short time. For each crisis, the timeline shows what came before, the causes (glaciation, giant volcanism, impact), the extinction pulses and the recovery, up to the ongoing sixth extinction and how scientists uncovered them."
+  },
+  "newPeriods": [
+    {
+      "key": "gobe", "parent": "PER_ORDOVICIAN", "wikidata_id": "Q5599717",
+      "label_fr": "Grande biodiversification ordovicienne", "label_en": "Great Ordovician Biodiversification Event",
+      "start": "M486.85", "end": "M445.2",
+      "description_fr": "Les espèces marines se multiplient (brachiopodes, trilobites, coraux, bryozoaires) : c’est cette diversité que la crise de la fin de l’Ordovicien va décimer.",
+      "description_en": "Marine species multiply (brachiopods, trilobites, corals, bryozoans): this is the diversity that the end-Ordovician crisis will decimate.",
+      "categories": ["CAT_BIO_EVO", "CAT_PALEO", "CAT_OCEAN"]
+    },
+    {
+      "key": "viluy", "parent": "PER_DEVONIAN", "wikidata_id": "Q138658650",
+      "label_fr": "Trapps de Viluy", "label_en": "Viluy Traps",
+      "start": "M376.7", "end": "M364.4",
+      "description_fr": "Province volcanique de Sibérie orientale, dont les émissions sont l’une des causes avancées de la crise du Dévonien tardif.",
+      "description_en": "Large igneous province in eastern Siberia whose emissions are one of the proposed causes of the Late Devonian crisis.",
+      "categories": ["CAT_GEO", "CAT_PALEO"]
+    },
+    {
+      "key": "emeishan", "parent": "PER_PERMIAN", "wikidata_id": "Q844933",
+      "label_fr": "Trapps d’Emeishan", "label_en": "Emeishan Traps",
+      "start": "M260", "end": "M259",
+      "description_fr": "Province volcanique du sud-ouest de la Chine, associée à l’extinction du Capitanien.",
+      "description_en": "Large igneous province in south-western China, linked to the Capitanian extinction.",
+      "categories": ["CAT_GEO", "CAT_PALEO"]
+    },
+    {
+      "key": "carnian", "parent": "PER_TRIASSIC", "wikidata_id": "Q5044049",
+      "label_fr": "Épisode pluvial du Carnien", "label_en": "Carnian Pluvial Event",
+      "start": "M234", "end": "M232",
+      "description_fr": "Crise climatique humide liée au volcanisme de Wrangellia, après laquelle les dinosaures se diversifient.",
+      "description_en": "Humid climate crisis linked to Wrangellia volcanism, after which dinosaurs diversify.",
+      "categories": ["CAT_PALEO", "CAT_GEO", "CAT_BIO_EVO"]
+    },
+    {
+      "key": "megafauna", "parent": "PER_QUATERNARY", "wikidata_id": "Q1759232",
+      "label_fr": "Extinction de la mégafaune du Quaternaire", "label_en": "Quaternary megafauna extinction",
+      "start": "K50", "end": "K10",
+      "description_fr": "Disparition de la plupart des grands mammifères (mammouths, paresseux géants, diprotodons), attribuée à la chasse humaine et aux changements climatiques.",
+      "description_en": "Loss of most large mammals (mammoths, giant sloths, diprotodons), attributed to human hunting and climate change.",
+      "categories": ["CAT_PALEO", "CAT_ECO_SYS", "CAT_ANTHRO"]
+    }
+  ],
+  "newEvents": [
+    {
+      "key": "second_pulse", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Seconde vague de l’extinction ordovicienne", "label_en": "Second pulse of the Ordovician extinction",
+      "date": "M443.8",
+      "description_fr": "La fonte de la calotte du Gondwana réchauffe les mers et prive leurs fonds d’oxygène, frappant les espèces qui avaient survécu au froid.",
+      "description_en": "The melting of the Gondwana ice sheet warms the seas and strips their floors of oxygen, striking the species that had survived the cold.",
+      "categories": ["CAT_PALEO", "CAT_OCEAN"]
+    },
+    {
+      "key": "first_forests", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Premières forêts", "label_en": "First forests",
+      "date": "M385",
+      "description_fr": "Les premiers arbres forment des forêts ; leurs racines accélèrent l’altération des sols, une cause avancée de l’anoxie des mers du Dévonien.",
+      "description_en": "The first trees form forests; their roots speed up soil weathering, a proposed cause of Devonian ocean anoxia.",
+      "categories": ["CAT_BOT", "CAT_PALEO", "CAT_ECO_SYS"]
+    },
+    {
+      "key": "rainforest_collapse", "wikidata_id": "Q5038049", "importance": "normal",
+      "label_fr": "Effondrement de la forêt tropicale du Carbonifère", "label_en": "Carboniferous rainforest collapse",
+      "date": "M307",
+      "description_fr": "L’assèchement du climat fragmente les forêts houillères d’Euramérique et fait disparaître de nombreuses plantes et amphibiens.",
+      "description_en": "A drying climate breaks up the coal forests of Euramerica and wipes out many plants and amphibians.",
+      "categories": ["CAT_BOT", "CAT_PALEO", "CAT_ECO_SYS"]
+    },
+    {
+      "key": "cuvier", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Cuvier établit la réalité des extinctions", "label_en": "Cuvier establishes that extinction is real",
+      "date": "1796",
+      "description_fr": "En comparant les mammouths aux éléphants actuels, Georges Cuvier montre que des espèces ont disparu pour de bon.",
+      "description_en": "By comparing mammoths with living elephants, Georges Cuvier shows that species can vanish for good.",
+      "categories": ["CAT_PALEO", "CAT_BIO_EVO"]
+    },
+    {
+      "key": "dodo", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Dernière observation du dodo", "label_en": "Last sighting of the dodo",
+      "date": "1662",
+      "description_fr": "Chassé et concurrencé par les animaux introduits à Maurice, l’oiseau est vu pour la dernière fois de façon certaine.",
+      "description_en": "Hunted and outcompeted by animals introduced to Mauritius, the bird is reliably seen for the last time.",
+      "categories": ["CAT_ECO_SYS", "CAT_BIO_EVO"]
+    },
+    {
+      "key": "martha", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Mort de Martha, dernière tourte voyageuse", "label_en": "Death of Martha, the last passenger pigeon",
+      "date": "1914-09-01",
+      "description_fr": "L’oiseau le plus abondant d’Amérique du Nord, décimé par la chasse et la déforestation, s’éteint au zoo de Cincinnati.",
+      "description_en": "Once North America’s most abundant bird, decimated by hunting and deforestation, the species dies out at the Cincinnati Zoo.",
+      "categories": ["CAT_ECO_SYS", "CAT_BIO_EVO"]
+    },
+    {
+      "key": "alvarez", "wikidata_id": "Q683975", "importance": "normal",
+      "label_fr": "Hypothèse d’Alvarez", "label_en": "Alvarez hypothesis",
+      "date": "1980-06-06",
+      "description_fr": "Une couche riche en iridium à la limite Crétacé-Paléogène conduit Luis et Walter Alvarez à proposer l’impact d’un astéroïde.",
+      "description_en": "An iridium-rich layer at the Cretaceous–Paleogene boundary leads Luis and Walter Alvarez to propose an asteroid impact.",
+      "categories": ["CAT_PALEO", "CAT_GEO"]
+    },
+    {
+      "key": "raup_sepkoski", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Raup et Sepkoski distinguent cinq grandes extinctions", "label_en": "Raup and Sepkoski identify the Big Five",
+      "date": "1982-03",
+      "description_fr": "En comptant les familles marines fossiles, David Raup et Jack Sepkoski isolent cinq extinctions de masse au-dessus du rythme ordinaire des disparitions.",
+      "description_en": "By counting fossil marine families, David Raup and Jack Sepkoski single out five mass extinctions above the background rate.",
+      "categories": ["CAT_PALEO", "CAT_BIO_EVO"]
+    },
+    {
+      "key": "chicxulub_found", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Identification du cratère de Chicxulub", "label_en": "Chicxulub crater identified",
+      "date": "1991-09",
+      "description_fr": "Le cratère enfoui sous le Yucatán est reconnu comme la trace de l’impact, ce qui confirme l’hypothèse d’Alvarez.",
+      "description_en": "The crater buried beneath Yucatán is recognised as the impact site, confirming the Alvarez hypothesis.",
+      "categories": ["CAT_PALEO", "CAT_GEO"]
+    },
+    {
+      "key": "ipbes", "wikidata_id": "Q63535006", "importance": "normal",
+      "label_fr": "Rapport mondial de l’IPBES sur la biodiversité", "label_en": "IPBES Global Assessment on biodiversity",
+      "date": "2019-05-06",
+      "description_fr": "Les experts mandatés par l’ONU estiment qu’environ un million d’espèces animales et végétales sont menacées d’extinction.",
+      "description_en": "UN-mandated experts estimate that around one million animal and plant species are threatened with extinction.",
+      "categories": ["CAT_ECO_SYS", "CAT_BIO_EVO"]
+    }
+  ],
+  "reusedPeriods": [
+    { "id": "PER_PALEOZOIC", "parent": null, "start": "M538.8", "end": "M251.902" },
+    { "id": "00cc0d70-f486-4516-9d8f-739ea30442b6", "parent": "PER_TRIASSIC", "start": "M251.902", "end": "M247.2" },
+    { "id": "1bed4622-1d47-46da-9249-a7e10b676ab8", "parent": "PER_PALEOGENE", "start": "M56", "end": "M55.8" },
+    { "id": "ec055b57-d7d5-40da-91dd-2f82b4154371", "parent": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3", "start": "1950", "end": "TODAY" }
+  ],
+  "reusedEvents": [
+    { "id": "b3a00018-db06-45e9-ae56-d21916ccf2b1", "date": "M231.4", "importance": "normal" },
+    { "id": "bc607aed-30d0-4d26-91e6-6410addd2011", "date": "K70", "importance": "normal" }
+  ],
+  "reparent": [
+    { "id": "PER_CAMBRIAN", "from": null, "to": "PER_PALEOZOIC" },
+    { "id": "PER_ORDOVICIAN", "from": null, "to": "PER_PALEOZOIC" },
+    { "id": "PER_SILURIAN", "from": null, "to": "PER_PALEOZOIC" },
+    { "id": "PER_DEVONIAN", "from": null, "to": "PER_PALEOZOIC" },
+    { "id": "PER_CARBONIFEROUS", "from": null, "to": "PER_PALEOZOIC" },
+    { "id": "PER_PERMIAN", "from": null, "to": "PER_PALEOZOIC" },
+    { "id": "PER_MESOZOIC", "from": "Q101313", "to": null },
+    { "id": "PER_CENOZOIC", "from": "Q101313", "to": null },
+    { "id": "48ba8ead-0f0f-4d67-bbcd-ff4d95ae2ee7", "from": "Q101313", "to": "PER_PERMIAN" },
+    { "id": "213d4f29-b839-4493-87e2-ab566d74734f", "from": "Q101313", "to": "PER_TRIASSIC" },
+    { "id": "418dcf15-402a-42fa-b335-7e5984106dba", "from": "Q101313", "to": "PER_CRETACEOUS" }
+  ],
+  "removeMembership": [{ "id": "Q101313", "parent": null }],
+  "majorEvents": ["7144612b-d26b-464d-8cae-3b027103f113", "f1d0dbe8-88cf-421e-9c4a-89f971d7c3b4", "Q141118", "2360ae6d-a41b-4c49-b2e0-e023a8e91daa", "Q55811", "Q796140"]
+}

@@ -95,6 +95,7 @@ Les frises existantes couvrent ces périodes à grands traits ; aucun thème n'y
 ### Frises à compléter
 
 - **Big Bang et ères primordiales (3)** : 10 périodes mais seulement 2 événements. Ajouter le rayonnement fossile, les premières étoiles et galaxies, la formation de la Voie lactée, la domination de l'énergie sombre.
+- **Les cinq grandes extinctions (22)** : refonte **appliquée en production le 4 novembre 2026** après accord (`database/data/20261104_cinq_extinctions.sql`, retour arrière `_rollback.sql`, répété auparavant sur base locale jetable ; l'API publique renvoie 29 périodes et 21 événements). Racines Paléozoïque / Mésozoïque / Cénozoïque sans chapeau Phanérozoïque ; causes rangées dans leur période (biodiversification ordovicienne, trapps de Viluy et d'Emeishan, épisode pluvial du Carnien, Trias inférieur, PETM, mégafaune du Quaternaire, Grande accélération) ; seconde vague ordovicienne, premières forêts, effondrement de la forêt carbonifère, dodo, Martha, IPBES et quatre jalons de la découverte (Cuvier, Alvarez, Raup et Sepkoski, cratère de Chicxulub).
 - **Histoire de la vie (2)** : regrouper ses nombreuses périodes pour une lecture plus claire, comme pour « Ère industrielle ».
 
 ### À vérifier avant d'aller plus loin
