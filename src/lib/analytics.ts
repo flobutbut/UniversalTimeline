@@ -127,9 +127,12 @@ const persistenceFor = (mode: 'exempt' | 'consented') => mode === 'consented' ? 
  * writes nothing on the device: one visit, never linked to another. With consent, it persists across visits.
  * Switching mode starts a new identifier, so the two are never linked; `off` opts out and deletes PostHog's
  * cookies and storage. Session replay stays off; every event carries `measurement` to tell the modes apart.
+ * Deleting the storage also deletes the SDK's opt-out flag, which it reads before each capture: `before_send`
+ * therefore drops every event (autocapture, pageview, page leave) while the mode is `off`.
  */
 export function createPostHogTracker({ token, host }: PostHogSettings, load: LoadPostHog = loadPostHog): ConsentTracker {
   let client: PostHog | null = null; let wanted: MeasurementMode = 'off'; let loading: Promise<void> | null = null;
+  const beforeSend = (event: CaptureResult | null) => wanted === 'off' ? null : scrubAuthSecrets(event);
   function enter(posthog: PostHog, mode: 'exempt' | 'consented') {
     if (currentMode === 'off') posthog.opt_in_capturing();
     posthog.reset(true);
@@ -154,7 +157,7 @@ export function createPostHogTracker({ token, host }: PostHogSettings, load: Loa
         // Measurement turned off while the script was downloading: never initialise.
         if (wanted === 'off') return;
         posthog.init(token, {
-          api_host: host, defaults: '2026-08-30', disable_session_recording: true, before_send: scrubAuthSecrets,
+          api_host: host, defaults: '2026-08-30', disable_session_recording: true, before_send: beforeSend,
           persistence: persistenceFor(wanted), disable_surveys: true, advanced_disable_flags: true,
           mask_all_text: true,
           autocapture: { element_attribute_ignorelist: ELEMENT_ATTRIBUTE_IGNORELIST },

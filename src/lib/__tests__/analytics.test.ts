@@ -69,6 +69,21 @@ it('opts out, forgets the identifier and deletes PostHog storage on objection', 
   await tracker.apply('off');
 });
 
+it('drops every SDK event once measurement is off, although purging removed the opt-out flag', async () => {
+  const posthog = fakePostHog(); const tracker = createPostHogTracker(settings, async () => posthog as unknown as PostHog);
+  await tracker.apply('exempt');
+  const beforeSend = posthog.init.mock.calls[0][1].before_send as (event: unknown) => unknown;
+  const pageview = () => ({ uuid: 'u', event: '$pageview', properties: { $pathname: '/admin' } });
+  expect(beforeSend(pageview())).toEqual(pageview());
+  // An administrator signs in during the visit: autocapture and pageviews must stop with the product events.
+  await tracker.apply('off');
+  expect(localStorage.getItem(`__ph_opt_in_out_${token}`)).toBeNull();
+  expect(beforeSend(pageview())).toBeNull();
+  await tracker.apply('exempt');
+  expect(beforeSend(pageview())).toEqual(pageview());
+  await tracker.apply('off');
+});
+
 it('never initialises when measurement is turned off while the script is downloading', async () => {
   const posthog = fakePostHog(); let resolve!: (value: PostHog) => void;
   const tracker = createPostHogTracker(settings, () => new Promise<PostHog>(done => { resolve = done; }));
