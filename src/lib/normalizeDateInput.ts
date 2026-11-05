@@ -11,6 +11,7 @@ function decimal(raw: string) {
 export function normalizeDateInput(input: string): string {
   const parsed = parseTemporal(input);
   if (parsed.kind === 'unknown') return input;
+  if (parsed.approximate) return parsed.raw;
   if (parsed.kind === 'current') return 'NOW';
   if (parsed.kind === 'age') {
     const canonical = /^([GMKA])(\d+(?:\.\d+)?)$/i.exec(parsed.raw);

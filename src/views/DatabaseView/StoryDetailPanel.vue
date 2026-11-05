@@ -24,7 +24,7 @@
         </div>
         <div class="story-detail-panel__meta-actions">
           <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openEventCreator">Ajouter un événement</Button>
-          <Button variant="tertiary" size="sm" :to="{ path: '/timeline', query: { story: story.id, entry: 'universe' } }">Voir dans la timeline</Button>
+          <Button variant="primary" size="sm" :to="{ path: '/timeline', query: { story: story.id, entry: 'universe' } }">Voir dans la timeline</Button>
         </div>
       </div>
 
@@ -85,17 +85,6 @@
               @pick-period="handleStoryPeriodSearchPick"
             >
               <template #actions>
-                <div class="story-period-layout-toggle" role="group" aria-label="Affichage des périodes">
-                  <Button variant="ghost" size="sm" :pressed="periodLayout === 'columns'" @click="switchPeriodLayout('columns')">Colonnes</Button>
-                  <Button variant="ghost" size="sm" :pressed="periodLayout === 'tree'" title="Nouvelle présentation à valider" @click="switchPeriodLayout('tree')">Arbre et détail</Button>
-                </div>
-                <span class="story-finder-activity">
-                  <span class="sr-only" role="status">{{ finderLoading ? 'Recherche des sous-périodes…' : '' }}</span>
-                  <button v-if="finderLoading" type="button" class="story-finder-activity__cancel" aria-label="Annuler la recherche des sous-périodes" @click="cancelFinder">
-                    <LoadingSpinner />
-                    <span class="sr-only">Annuler</span>
-                  </button>
-                </span>
                 <Switch
                   variant="sm"
                   label-first
@@ -103,6 +92,17 @@
                   label="Périodes additionnelles"
                   @update:model-value="onShowExternalChange"
                 />
+                <span class="story-finder-activity">
+                  <span class="sr-only" role="status">{{ finderLoading ? 'Recherche des sous-périodes…' : '' }}</span>
+                  <button v-if="finderLoading" type="button" class="story-finder-activity__cancel" aria-label="Annuler la recherche des sous-périodes" @click="cancelFinder">
+                    <LoadingSpinner />
+                    <span class="sr-only">Annuler</span>
+                  </button>
+                </span>
+                <div class="story-period-layout-toggle" role="group" aria-label="Affichage des périodes">
+                  <Button variant="ghost" size="sm" :pressed="periodLayout === 'columns'" @click="switchPeriodLayout('columns')">Colonnes</Button>
+                  <Button variant="ghost" size="sm" :pressed="periodLayout === 'tree'" title="Nouvelle présentation à valider" @click="switchPeriodLayout('tree')">Arbre et détail</Button>
+                </div>
               </template>
             </FilterBar>
           <div v-if="finderError" class="story-finder-feedback" role="alert">
@@ -119,7 +119,7 @@
                 :search="periodHeaderSearch" :category-id="periodFilterCategoryId" :show-additional="showExternalInFinder" :loaded-branch-ids="loadedBranchIds"
                 @select="onTreePeriodSelect" @expanded-change="onTreeExpandedChange">
                 <template #header-actions>
-                  <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">Ajouter une période racine</Button>
+                  <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">Ajouter une période</Button>
                 </template>
                 <template #actions="{ period, inStory }">
                   <StoryItemActionsMenu v-if="inStory" :label="period.label.fr || period.label.en" :disabled="panelBusy" movable :create-story="auth.ownsStory(story)" :promote="promotableIds.has(period.id)" :convert-to="periodConvertTo(period.id)"
@@ -262,10 +262,6 @@
                   hide-chevron
                   @click="onStoryEventFinderRowClick(event.id)"
                 >
-                  <template #actions>
-                    <StoryItemActionsMenu :label="event.label.fr" :disabled="panelBusy" convert-to="period"
-                      @edit="emit('edit-event', event.id)" @remove="emit('remove-event', event.id)" @convert="convertEvent(event)" />
-                  </template>
                 </FinderItem>
               </div>
 
@@ -322,6 +318,11 @@
                               class="event-detail-empty"
                             > Aucune frise associée à cet événement. </div>
 
+                          </section>
+                          <section class="event-detail-section" aria-label="Zone de danger">
+                            <h4 class="event-detail-section-title">Zone de danger</h4>
+                            <p class="event-detail-section-description">Cet événement sera retiré de cette frise. Il restera disponible dans le catalogue.</p>
+                            <Button variant="danger" size="sm" :disabled="panelBusy" @click="emit('remove-event', event.id)">Supprimer de cette frise</Button>
                           </section>
                         </div>
                       </div>
@@ -837,14 +838,14 @@ const { results: eventSearchSuggestions, loading: eventSearchLoading, error: eve
 watch([periodHeaderSearch, periodFilterCategoryId, activeTab, () => props.loading, () => props.error], cancelFinder, { flush: 'sync' });
 
 watch(
-  () => [eventFilterCategoryId.value, props.story?.events?.length ?? 0] as const,
+  [activeTab, eventsFilteredForList],
   () => {
     const sid = selectedEventId.value;
-    if (!sid) return;
     if (!eventsFilteredForList.value.some((e) => e.id === sid)) {
-      selectedEventId.value = null;
+      selectedEventId.value = activeTab.value === 'events' ? eventsFilteredForList.value[0]?.id ?? null : null;
     }
   },
+  { immediate: true },
 );
 
 async function handleStoryPeriodSearchPick(period: ListPeriod) {
@@ -871,7 +872,7 @@ function handleStoryEventSearchPick(ev: ListEvent) {
 }
 
 function finderColumnHeader(colIdx: number): string {
-  if (colIdx === 0) return 'Périodes racines';
+  if (colIdx === 0) return 'Périodes';
   const parentId = finderSelectedPath.value[colIdx - 1];
   const fromStory = (props.story?.periods ?? []).find((x) => x.id === parentId);
   if (fromStory) return storyPeriodLabelForFinder(fromStory).fr || 'Sous-périodes';
@@ -931,7 +932,7 @@ function onTimelineSelectEvent(id: string) {
 }
 
 function onStoryEventFinderRowClick(eventId: string) {
-  selectedEventId.value = selectedEventId.value === eventId ? null : eventId;
+  selectedEventId.value = eventId;
   clearPeriodSelection();
 }
 

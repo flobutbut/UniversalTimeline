@@ -138,7 +138,8 @@ function changeView(event: MouseEvent, view: NavigationView) {
   width: 100%;
   position: sticky;
   top: 0;
-  z-index: var(--z-index-sticky);
+  /* Keep global navigation and its dropdowns above sticky page headings. */
+  z-index: var(--z-index-fixed);
 }
 
 .header-content {

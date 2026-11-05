@@ -29,23 +29,25 @@ export async function findGeneratedStoryMatches(client: TransactionClient, qid: 
 export async function insertOrReuseGeneratedItem(client: TransactionClient, item: GeneratedItem): Promise<string> {
   const { data } = item;
   const common = [data.id, data.wikidata_id, data.label.fr, data.label.en, data.description.fr, data.description.en];
+  const conflict = data.wikidata_id ? '(wikidata_id)' : '(source_key) WHERE source_key IS NOT NULL';
+  const storedKey = data.wikidata_id ? null : item.sourceKey;
   let inserted: string | undefined;
   const now = Date.now();
   if (item.type === 'period') {
     inserted = (await client.query<{ id: string }>(`
-      INSERT INTO public.periods (id, wikidata_id, label_fr, label_en, description_fr, description_en, start_date, end_date, start_years_bp, end_years_bp)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (wikidata_id) DO NOTHING RETURNING id
-    `, [...common, item.data.start_date, item.data.end_date, storedYearsBeforePresent(item.data.start_date, now), storedYearsBeforePresent(item.data.end_date, now)])).rows[0]?.id;
+      INSERT INTO public.periods (id, wikidata_id, label_fr, label_en, description_fr, description_en, start_date, end_date, start_years_bp, end_years_bp, source_key, wikidata_source)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT ${conflict} DO NOTHING RETURNING id
+    `, [...common, item.data.start_date, item.data.end_date, storedYearsBeforePresent(item.data.start_date, now), storedYearsBeforePresent(item.data.end_date, now), storedKey, item.source ?? null])).rows[0]?.id;
   } else {
     inserted = (await client.query<{ id: string }>(`
-      INSERT INTO public.events (id, wikidata_id, label_fr, label_en, description_fr, description_en, date, date_years_bp)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (wikidata_id) DO NOTHING RETURNING id
-    `, [...common, item.data.date, storedYearsBeforePresent(item.data.date, now)])).rows[0]?.id;
+      INSERT INTO public.events (id, wikidata_id, label_fr, label_en, description_fr, description_en, date, date_years_bp, source_key, wikidata_source)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT ${conflict} DO NOTHING RETURNING id
+    `, [...common, item.data.date, storedYearsBeforePresent(item.data.date, now), storedKey, item.source ?? null])).rows[0]?.id;
   }
   if (inserted) return inserted;
   // A fresh statement sees the committed row after ON CONFLICT waited for another import.
   const table = item.type === 'period' ? 'periods' : 'events';
-  const existing = (await client.query<{ id: string }>(`SELECT id FROM public.${table} WHERE wikidata_id = $1 FOR KEY SHARE`, [data.wikidata_id])).rows[0];
+  const existing = (await client.query<{ id: string }>(`SELECT id FROM public.${table} WHERE ${data.wikidata_id ? 'wikidata_id' : 'source_key'} = $1 FOR KEY SHARE`, [data.wikidata_id ?? item.sourceKey])).rows[0];
   if (!existing) throw new Error('Impossible de retrouver l’élément Wikidata après son import.');
   return existing.id;
 }

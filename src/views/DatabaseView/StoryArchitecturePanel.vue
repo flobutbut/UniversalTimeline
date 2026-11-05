@@ -2,7 +2,10 @@
   <div class="story-architecture">
     <p class="story-architecture__role">
       <span class="story-architecture__badge">{{ role.label }}</span>
-      <span v-if="role.draft" class="story-architecture__badge story-architecture__badge--draft">Brouillon</span>
+      <span v-if="!story.isPublic && role.draft" class="story-architecture__visibility">
+        <InfoTooltip label="Pourquoi cette frise est privée"><template #trigger>Privé</template>Ajoutez une frise parente pour pouvoir rendre cette frise publique.</InfoTooltip>
+      </span>
+      <span v-else class="story-architecture__badge story-architecture__badge--visibility">{{ story.isPublic ? 'Public' : 'Privé' }}</span>
       <span class="story-architecture__description">{{ role.description }}</span>
     </p>
     <details v-if="editable && issueCount" class="story-architecture__review">
@@ -26,6 +29,7 @@
 import { computed } from 'vue';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
+import InfoTooltip from '@/components/base/InfoTooltip.vue';
 import { deduceStoryRole, promotionCandidates, storyStructureWarnings } from '@/lib/storyArchitecture';
 import type { Story, StorySummary } from '@/types/database';
 
@@ -45,7 +49,8 @@ const periodLabel = (id: string) => {
 .story-architecture { display: flex; flex-direction: column; gap: var(--spacing-sm); margin-top: var(--spacing-sm); font-size: var(--font-size-sm); }
 .story-architecture__role { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--spacing-xs) var(--spacing-sm); margin: 0; }
 .story-architecture__badge { padding: 0 var(--spacing-sm); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); font-weight: var(--font-weight-semibold); }
-.story-architecture__badge--draft { color: var(--color-text-secondary); font-weight: normal; }
+.story-architecture__badge--visibility { color: var(--color-text-secondary); font-weight: normal; }
+.story-architecture__visibility :deep(.base-button) { min-height:0; height:auto; padding:0; border-color:var(--color-border-default); border-radius:var(--radius-md); }
 .story-architecture__description, .story-architecture__hint { color: var(--color-text-secondary); }
 .story-architecture__review { border: 1px solid var(--color-border-default); border-radius: var(--radius-md); padding: var(--spacing-sm) var(--spacing-md); max-width: 960px; }
 .story-architecture__review summary { display: flex; align-items: center; gap: var(--spacing-xs); cursor: pointer; font-weight: var(--font-weight-semibold); }

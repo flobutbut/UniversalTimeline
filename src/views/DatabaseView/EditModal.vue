@@ -110,12 +110,14 @@
         <div class="form-row" v-if="type !== 'story'">
           <div class="form-group">
             <Input
+              v-if="!form.sourceKey?.startsWith('fact:')"
               v-model="form.qid"
               label="Q-id Wikidata"
               placeholder="Q12345"
               :error="editState.qidError || fieldError('qid')"
               @blur="touch('qid'); validateQid()"
             />
+            <p v-else class="generation-source-note">Fait daté issu d’une déclaration Wikidata. Son identité est conservée lors des modifications.</p>
             <Button
               v-if="canOfferExisting && editState.qidExistsInBase && editState.existingItem"
               class="edit-modal__use-existing"
@@ -525,6 +527,7 @@ const qidRequests = useLatestRequest();
 watch(() => form.qid, () => { setQidError(''); setQidExists(false); });
 watch([() => form.qid, () => props.type, () => props.data, () => props.mode, () => props.isOpen], qidRequests.cancel, { flush: 'sync' });
 const validateQid = async () => {
+  if (form.sourceKey?.startsWith('fact:') && !form.qid) { setQidError(''); return; }
   if (props.type === 'story') return;
   const isCurrent = qidRequests.begin();
   const validation = await validateEntityQid(form.qid.trim().toUpperCase(), props.type, props.mode === 'edit' ? props.data?.id : undefined);

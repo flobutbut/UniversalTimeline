@@ -69,7 +69,7 @@ Depuis une période feuille, le nouveau récit peut ne contenir encore aucune p�
 
 ### Avertissements encore présents dans l’interface
 
-`src/lib/storyArchitecture.ts` déduit les rôles et signale notamment les rangs chargés, les débordements et les structures recopiées. Les avertissements de « saut de niveaux » et certains libellés « Brouillon » utilisent encore l’arbre historique des parents. Ils ne définissent ni les voisins temporels ni la validité d’un accès dans le nouveau moteur. Ne pas supprimer un lien utile pour satisfaire artificiellement cet ancien calcul.
+`src/lib/storyArchitecture.ts` déduit les rôles et signale notamment les rangs chargés, les débordements et les structures recopiées. Les avertissements de « saut de niveaux » et l’explication sur le parent requis pour publier utilisent encore l’arbre historique des parents. Le badge « Privé / Public » reflète toujours la visibilité réelle de la frise. Ces avertissements ne définissent ni les voisins temporels ni la validité d’un accès dans le nouveau moteur. Ne pas supprimer un lien utile pour satisfaire artificiellement cet ancien calcul.
 
 ## 3. Avant de créer : partir de l’existant
 

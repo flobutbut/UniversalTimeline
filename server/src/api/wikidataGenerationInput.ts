@@ -3,9 +3,12 @@ import { inputObject, InputValidationError, parseEventWrite, parsePeriodWrite, p
 import type { EventWrite, PeriodWrite, StoryWrite } from '../domain/writeInputs.js';
 import { parseTemporal } from '../shared/temporal.js';
 import { parseWriteCategories } from './entityCategories.js';
+import { parseGeneratedIdentity } from './wikidataSourceInput.js';
+import type { WikidataSource } from '../shared/wikidataGeneration.js';
 
-export type GeneratedItem = { type: 'event'; data: EventWrite & { id: string; wikidata_id: string } }
-  | { type: 'period'; parentQid: string | null; data: PeriodWrite & { id: string; wikidata_id: string } };
+interface GeneratedIdentity { key: string; sourceKey: string; source?: WikidataSource }
+export type GeneratedItem = GeneratedIdentity & ({ type: 'event'; data: EventWrite & { id: string } }
+  | { type: 'period'; parentQid: string | null; data: Omit<PeriodWrite, 'wikidata_id'> & { id: string; wikidata_id: string | null } });
 export interface GeneratedStoryInput { qid: string; acknowledgedStoryIds: string[]; story: StoryWrite; items: GeneratedItem[] }
 
 export function parseGeneratedStoryLookup(value: unknown) {
@@ -24,24 +27,26 @@ export function parseGeneratedStory(value: unknown): GeneratedStoryInput {
   const seen = new Set<string>();
   const items = body.items.map((raw): GeneratedItem => {
     const item = inputObject(raw, 'items');
-    const wikidata_id = parseQid(item.qid, true)!;
-    if (seen.has(wikidata_id)) throw new InputValidationError('items', 'Un élément Wikidata ne peut apparaître qu’une fois.');
-    seen.add(wikidata_id);
-    const parentQid = item.parentQid == null || item.parentQid === '' ? null : parseQid(item.parentQid, true)!;
+    const qid = parseQid(item.qid, true)!;
+    const identity = parseGeneratedIdentity(item, qid);
+    if (seen.has(identity.sourceKey)) throw new InputValidationError('items', 'Un même fait ne peut apparaître qu’une fois.');
+    seen.add(identity.sourceKey);
+    const parentQid = item.parentQid == null || item.parentQid === '' ? null : typeof item.parentQid === 'string' && item.parentQid.length <= 200 ? item.parentQid : (() => { throw new InputValidationError('parentQid', 'Le parent est invalide.'); })();
     if (typeof item.startDate !== 'string' || parseTemporal(item.startDate).kind === 'unknown') throw new InputValidationError('startDate', 'Chaque élément doit avoir une date valide.');
-    const core = { id: randomUUID(), wikidata_id, label: { fr: item.title }, description: { fr: item.description } };
+    const core = { id: randomUUID(), wikidata_id: qid, label: { fr: item.title }, description: { fr: item.description } };
+    const metadata = { key: identity.key, sourceKey: identity.sourceKey, source: identity.source };
     if (item.type === 'event') {
       if (parentQid) throw new InputValidationError('parentQid', 'Seule une période peut avoir un parent.');
-      return { type: 'event', data: { ...parseWriteCategories(parseEventWrite({ ...core, date: item.startDate }, true)), wikidata_id } };
+      return { ...metadata, type: 'event', data: { ...parseWriteCategories(parseEventWrite({ ...core, date: item.startDate }, true)), wikidata_id: identity.wikidataId } };
     }
     if (item.type !== 'period') throw new InputValidationError('type', 'Le type doit être period ou event.');
     if (typeof item.endDate !== 'string' || parseTemporal(item.endDate).kind === 'unknown') throw new InputValidationError('endDate', 'Chaque période doit avoir une date de fin explicite.');
-    return { type: 'period', parentQid, data: { ...parseWriteCategories(parsePeriodWrite({ ...core, start_date: item.startDate, end_date: item.endDate }, true)), wikidata_id } };
+    return { ...metadata, type: 'period', parentQid, data: { ...parseWriteCategories(parsePeriodWrite({ ...core, start_date: item.startDate, end_date: item.endDate }, true)), wikidata_id: identity.wikidataId } };
   });
-  const periods = new Map(items.filter(item => item.type === 'period').map(item => [item.data.wikidata_id, item]));
+  const periods = new Map(items.filter(item => item.type === 'period').map(item => [item.key, item]));
   for (const item of periods.values()) {
     if (item.parentQid && !periods.has(item.parentQid)) throw new InputValidationError('parentQid', 'Le parent doit être une période sélectionnée dans cette frise.');
-    const ancestors = new Set([item.data.wikidata_id]);
+    const ancestors = new Set([item.key]);
     let parent = item.parentQid;
     while (parent) {
       if (ancestors.has(parent)) throw new InputValidationError('parentQid', 'Les rattachements ne doivent pas former de boucle.');

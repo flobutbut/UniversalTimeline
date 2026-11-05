@@ -130,7 +130,7 @@ it('does not open an outdated period editor after switching frises during its re
   expect(view.findComponent({ name: 'EditModal' }).exists()).toBe(false);
 });
 
-it('edits a frise event with the shared menu and refreshes its displayed metadata after saving', async () => {
+it('edits a frise event from its fiche and refreshes its displayed metadata after saving', async () => {
   const events = EventApiService.getInstance();
   const full = { id: 'ev', wikidata_id: 'Q43653', label: { fr: 'Apollo 11', en: '' }, description: { fr: 'Mission lunaire', en: '' }, date: '1969-07-21', categories: [] };
   const edited = { ...full, label: { fr: 'Premiers pas sur la Lune', en: '' } };
@@ -140,9 +140,9 @@ it('edits a frise event with the shared menu and refreshes its displayed metadat
   vi.mocked(api.getStory).mockResolvedValueOnce({ ...detail(), events: [full] }).mockResolvedValueOnce({ ...detail(), events: [edited] });
   await start(); await panel().findAll('button').find(button => button.text() === 'Événements')!.trigger('click'); await flushPromises();
   await row('ev').get('.finder-item-content').trigger('click'); await flushPromises();
-  await row('ev').get('button[aria-haspopup="menu"]').trigger('click');
+  expect(row('ev').find('button[aria-haspopup="menu"]').exists()).toBe(false);
   expect(selected()).toEqual(['ev']);
-  (document.querySelector('[role="menuitem"]') as HTMLButtonElement).click(); await flushPromises();
+  await panel().findAll('.event-detail-actions button').find(button => button.text() === 'Modifier l’événement')!.trigger('click'); await flushPromises();
   const editor = view.getComponent({ name: 'EditModal' });
   expect(editor.props()).toMatchObject({ type: 'event', mode: 'edit', data: { id: 'ev', wikidata_id: 'Q43653', description: full.description } });
   editor.vm.$emit('submit', { qid: 'Q43653', title: edited.label, description: full.description, date: full.date, startDate: '', endDate: '', location: '', parentId: null, categories: [], author: '', isPublic: false });
@@ -152,13 +152,12 @@ it('edits a frise event with the shared menu and refreshes its displayed metadat
   expect(row('ev').text()).toContain('Premiers pas sur la Lune'); expect(selected()).toEqual(['ev']);
 });
 
-it('removes an event through its menu from this frise without deleting its catalogue entity', async () => {
+it('removes an event from its fiche without deleting its catalogue entity', async () => {
   const full = { id: 'ev', label: { fr: 'Apollo 11', en: '' }, date: '1969-07-21', categories: [] };
   const destroy = vi.spyOn(EventApiService.getInstance(), 'deleteEvent');
   vi.mocked(api.getStory).mockResolvedValueOnce({ ...detail(), events: [full] }).mockResolvedValueOnce(detail());
   await start(); await panel().findAll('button').find(button => button.text() === 'Événements')!.trigger('click'); await flushPromises();
-  await row('ev').get('button[aria-haspopup="menu"]').trigger('click');
-  [...document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')].find(item => item.textContent?.trim() === 'Supprimer')!.click(); await flushPromises();
+  await panel().findAll('.events-finder-detail button').find(button => button.text() === 'Supprimer de cette frise')!.trigger('click'); await flushPromises();
   expect(api.changeAssociations).toHaveBeenCalledExactlyOnceWith('1', 'event', ['ev'], true);
   expect(destroy).not.toHaveBeenCalled();
   expect(panel().findAllComponents(FinderItem).some(item => item.props('itemId') === 'ev')).toBe(false);

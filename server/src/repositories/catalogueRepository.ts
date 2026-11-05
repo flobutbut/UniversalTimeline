@@ -87,7 +87,7 @@ export async function deleteEvent(client: TransactionClient, id: string) {
 }
 export async function listPeriods(db: TransactionClient) {
   return (await db.query<JoinedPeriodListRow>(`
-    SELECT p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
+    SELECT p.source_key, p.wikidata_source, p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
            p.start_date, p.end_date, NULL::varchar AS parent_id, p.start_years_bp, p.end_years_bp,
            false AS has_children,
            c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
@@ -106,9 +106,12 @@ export async function listEvents(db: TransactionClient) {
     ORDER BY e.date_years_bp DESC NULLS LAST
   `)).rows;
 }
+export async function findEvent(db: TransactionClient, id: string) {
+  return (await db.query<EventRow>('SELECT * FROM public.events WHERE id = $1', [id])).rows[0];
+}
 export async function findPeriod(db: TransactionClient, value: string, by: 'id' | 'wikidata_id') {
   return (await db.query<PeriodRow>(`
-    SELECT p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
+    SELECT p.source_key, p.wikidata_source, p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
            p.start_date, p.end_date, NULL::varchar AS parent_id, p.start_years_bp, p.end_years_bp,
            p.created_at, p.updated_at,
            false AS has_children

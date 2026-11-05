@@ -1,13 +1,13 @@
 import { MS_PER_YEAR, parseTemporal } from '@temporal';
-import type { WikidataTimelineItem } from '@/types/wikidataGeneration';
+import { wikidataItemKey, type WikidataTimelineItem } from '@/types/wikidataGeneration';
 
 export function effectiveWikidataParent(item: WikidataTimelineItem, selected: readonly WikidataTimelineItem[]): string | null {
-  return item.type === 'period' && selected.some(parent => parent.type === 'period' && parent.qid === item.parentQid)
+  return item.type === 'period' && selected.some(parent => parent.type === 'period' && wikidataItemKey(parent) === item.parentQid)
     ? item.parentQid! : null;
 }
 
 export function wouldCreateWikidataCycle(childQid: string, parentQid: string, periods: readonly WikidataTimelineItem[]): boolean {
-  const byId = new Map(periods.filter(item => item.type === 'period').map(item => [item.qid, item]));
+  const byId = new Map(periods.filter(item => item.type === 'period').map(item => [wikidataItemKey(item), item]));
   const seen = new Set([childQid]);
   let cursor: string | null | undefined = parentQid;
   while (cursor && byId.has(cursor)) {
@@ -19,7 +19,7 @@ export function wouldCreateWikidataCycle(childQid: string, parentQid: string, pe
 }
 
 export function wikidataHierarchyError(items: readonly WikidataTimelineItem[]): string | null {
-  return items.some(item => item.type === 'period' && item.parentQid && wouldCreateWikidataCycle(item.qid, item.parentQid, items))
+  return items.some(item => item.type === 'period' && item.parentQid && wouldCreateWikidataCycle(wikidataItemKey(item), item.parentQid, items))
     ? 'Les rattachements forment une boucle. Changez un parent ou choisissez « À la racine ».' : null;
 }
 
@@ -28,7 +28,7 @@ export function wikidataHierarchyError(items: readonly WikidataTimelineItem[]): 
 function dateWindow(raw: string) {
   const now = 0;
   const value = parseTemporal(raw, now);
-  if (value.kind === 'unknown') return null;
+  if (value.kind === 'unknown' || value.approximate) return null;
   const oldest = value.yearsBeforePresent;
   const coarse = value.kind === 'calendar' && ['year', 'month'].includes(value.precision);
   if (!coarse) return { oldest, newest: oldest };
@@ -41,6 +41,7 @@ function dateWindow(raw: string) {
 }
 
 export function wikidataDateWarnings(item: WikidataTimelineItem, parent: WikidataTimelineItem): string[] {
+  const approximate = [item.startDate, item.endDate, parent.startDate, parent.endDate].some(raw => parseTemporal(raw, 0).approximate);
   const start = dateWindow(item.startDate), end = dateWindow(item.endDate);
   const parentStart = dateWindow(parent.startDate), parentEnd = dateWindow(parent.endDate);
   const warnings: string[] = [];
@@ -53,6 +54,7 @@ export function wikidataDateWarnings(item: WikidataTimelineItem, parent: Wikidat
     if (end.oldest < parentEnd.newest) warnings.push(`Se termine après « ${parent.title} » (${parent.endDate}).`);
     else if (end.newest < parentEnd.oldest) uncertain = true;
   }
-  if (uncertain) warnings.push(`Les dates au mois ou à l’année ne permettent pas de confirmer l’inclusion dans « ${parent.title} ».`);
+  if (approximate) warnings.push(`Les dates approximatives ne permettent pas de confirmer l’inclusion dans « ${parent.title} ».`);
+  else if (uncertain) warnings.push(`Les dates au mois ou à l’année ne permettent pas de confirmer l’inclusion dans « ${parent.title} ».`);
   return warnings;
 }

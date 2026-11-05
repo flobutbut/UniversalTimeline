@@ -172,7 +172,7 @@ export async function listStoryEvents(db: TransactionClient, id: string) {
 }
 export async function listAssociatedPeriods(db: TransactionClient, storyId: string) {
   return (await db.query<Pick<PeriodRow, 'id' | 'wikidata_id' | 'label_fr' | 'label_en' | 'description_fr' | 'description_en' | 'start_date' | 'end_date' | 'parent_id' | 'story_parent_id' | 'start_years_bp' | 'end_years_bp' | 'has_children'>>(`
-      SELECT p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
+      SELECT p.source_key, p.wikidata_source, p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
              p.start_date, p.end_date, NULL::varchar AS parent_id, sp.parent_period_id AS story_parent_id,
              p.start_years_bp, p.end_years_bp,
              EXISTS(SELECT 1 FROM public.story_periods c WHERE c.story_id = sp.story_id AND c.parent_period_id = p.id) AS has_children

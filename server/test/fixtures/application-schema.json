@@ -189,9 +189,28 @@
           "notNull": false,
           "default": "now()",
           "identity": ""
+        },
+        {
+          "name": "source_key",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "wikidata_source",
+          "type": "jsonb",
+          "notNull": false,
+          "default": null,
+          "identity": ""
         }
       ],
       "constraints": [
+        {
+          "name": "events_fact_identity",
+          "definition": "CHECK (source_key IS NULL OR COALESCE(wikidata_id IS NULL AND source_key = ((((('fact:'::text || (wikidata_source ->> 'qid'::text)) || ':'::text) || (wikidata_source ->> 'property'::text)) || ':'::text) || lower(wikidata_source ->> 'statementId'::text)) AND (wikidata_source ->> 'qid'::text) ~ '^Q[1-9][0-9]*$'::text AND (wikidata_source ->> 'property'::text) ~ '^P[1-9][0-9]*$'::text AND length(source_key) <= 200, false))",
+          "kind": "c"
+        },
         {
           "name": "events_pkey",
           "definition": "PRIMARY KEY (id)",
@@ -201,9 +220,15 @@
           "name": "events_wikidata_id_key",
           "definition": "UNIQUE (wikidata_id)",
           "kind": "u"
+        },
+        {
+          "name": "events_wikidata_source_object",
+          "definition": "CHECK (wikidata_source IS NULL OR jsonb_typeof(wikidata_source) = 'object'::text)",
+          "kind": "c"
         }
       ],
       "indexes": [
+        "CREATE UNIQUE INDEX events_source_key_unique ON public.events USING btree (source_key) WHERE (source_key IS NOT NULL)",
         "CREATE INDEX idx_events_date_years_bp ON public.events USING btree (date_years_bp DESC NULLS LAST)"
       ],
       "triggers": [
@@ -350,9 +375,28 @@
           "notNull": false,
           "default": "now()",
           "identity": ""
+        },
+        {
+          "name": "source_key",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "wikidata_source",
+          "type": "jsonb",
+          "notNull": false,
+          "default": null,
+          "identity": ""
         }
       ],
       "constraints": [
+        {
+          "name": "periods_fact_identity",
+          "definition": "CHECK (source_key IS NULL OR COALESCE(wikidata_id IS NULL AND source_key = ((((('fact:'::text || (wikidata_source ->> 'qid'::text)) || ':'::text) || (wikidata_source ->> 'property'::text)) || ':'::text) || lower(wikidata_source ->> 'statementId'::text)) AND (wikidata_source ->> 'qid'::text) ~ '^Q[1-9][0-9]*$'::text AND (wikidata_source ->> 'property'::text) ~ '^P[1-9][0-9]*$'::text AND length(source_key) <= 200, false))",
+          "kind": "c"
+        },
         {
           "name": "periods_pkey",
           "definition": "PRIMARY KEY (id)",
@@ -362,11 +406,17 @@
           "name": "periods_wikidata_id_key",
           "definition": "UNIQUE (wikidata_id)",
           "kind": "u"
+        },
+        {
+          "name": "periods_wikidata_source_object",
+          "definition": "CHECK (wikidata_source IS NULL OR jsonb_typeof(wikidata_source) = 'object'::text)",
+          "kind": "c"
         }
       ],
       "indexes": [
         "CREATE INDEX idx_periods_end_years_bp ON public.periods USING btree (end_years_bp)",
-        "CREATE INDEX idx_periods_start_years_bp ON public.periods USING btree (start_years_bp DESC NULLS LAST)"
+        "CREATE INDEX idx_periods_start_years_bp ON public.periods USING btree (start_years_bp DESC NULLS LAST)",
+        "CREATE UNIQUE INDEX periods_source_key_unique ON public.periods USING btree (source_key) WHERE (source_key IS NOT NULL)"
       ],
       "triggers": [
         "CREATE TRIGGER trg_periods_updated_at BEFORE UPDATE ON periods FOR EACH ROW EXECUTE FUNCTION set_updated_at()"

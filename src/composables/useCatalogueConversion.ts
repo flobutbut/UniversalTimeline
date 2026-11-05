@@ -31,6 +31,7 @@ export function useCatalogueConversion(storyId: () => string | null | undefined,
   watch(storyId, reset, { flush: 'sync' });
 
   const common = (item: ListPeriod | ListEvent): EditInitialData => ({
+    ...(item.sourceKey ? { sourceKey: item.sourceKey } : {}),
     qid: item.wikidata_id ?? '', label: { ...item.label }, description: item.description ? { ...item.description } : null,
     categories: item.categories.map(category => ({ id: category.id })),
   });

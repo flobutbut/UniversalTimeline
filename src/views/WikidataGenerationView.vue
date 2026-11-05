@@ -3,6 +3,7 @@ import { computed, nextTick, onScopeDispose, ref, watch, type ComponentPublicIns
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router';
 import Button from '@/components/base/Button.vue';
 import Tag from '@/components/base/Tag.vue';
+import InfoTooltip from '@/components/base/InfoTooltip.vue';
 import { Icon } from '@iconify/vue';
 import Input from '@/components/base/Input.vue';
 import DateInput from '@/components/base/DateInput.vue';
@@ -22,13 +23,23 @@ import { useDataStore } from '@/stores/useDataStore';
 import { canUseWorkspace } from '@/router/access';
 import { mutationErrorMessage } from '@/lib/mutationErrorMessage';
 import { formatSearchResultDateBound } from '@/lib/formatTemporalBoundLabel';
-import type { WikidataTimelineDraft, WikidataTimelineItem, ExistingWikidataStory } from '@/types/wikidataGeneration';
+import { wikidataItemKey, type WikidataTimelineDraft, type WikidataTimelineItem, type ExistingWikidataStory } from '@/types/wikidataGeneration';
+import { profiles, defaultSettings, propertyLabels, type Profile, type Status } from '@/lib/wikidataGenerationModel';
 import { effectiveWikidataParent, wikidataDateWarnings, wikidataHierarchyError, wouldCreateWikidataCycle } from '@/lib/wikidataHierarchy';
 
 const route = useRoute(); const router = useRouter(); const auth = useAuthStore(); const store = useDataStore();
 const query = ref('');
 const subjects = useDebouncedSearch(() => query.value, (q, signal) => SearchApiService.getInstance().searchWikidataEntityLabels(q, { signal }));
 const draft = ref<WikidataTimelineDraft | null>(null);
+const profile = ref<Profile | ''>('');
+const generationSettings = ref({ ...defaultSettings });
+const statusFilter = ref<Status | 'all'>('retained');
+const visibleItems = computed(() => draft.value?.items.filter(item => statusFilter.value === 'all' || (item.status ?? 'retained') === statusFilter.value) ?? []);
+const statusCounts = computed(() => (['retained','review','excluded'] as const).map(value => ({ value, label: ({retained:'Proposés',review:'À vérifier',excluded:'Écartés'})[value], count: draft.value?.items.filter(item => (item.status ?? 'retained') === value).length ?? 0 })));
+function setProfile(value: unknown) { if (profiles.some(p => p.value === value)) { profile.value = value as Profile; void load(false); } }
+function changeRules() { void load(false); }
+function setLimit(value: unknown) { if (typeof value === 'number' && [20,40,80].includes(value)) { generationSettings.value.limit = value; void load(false); } }
+const itemSourceUrl = (item: WikidataTimelineItem) => `${sourceUrl(item.source?.qid ?? item.qid)}${item.source?.statementId ? `#${encodeURIComponent(item.source.statementId)}` : ''}`;
 const loading = ref(false); const error = ref<string | null>(null); const saving = ref(false); const saveError = ref<string | null>(null);
 const savedId = ref<string | null>(null);
 const activeItemQid = ref<string | null>(null);
@@ -47,16 +58,16 @@ const duplicateRequests = useLatestRequest(); let duplicateController: AbortCont
 const storyCheckKey = computed(() => draft.value ? `${draft.value.qid}:${draft.value.title.trim()}` : null);
 const requests = useLatestRequest(); let controller: AbortController | undefined;
 const selected = computed(() => draft.value?.items.filter(item => item.selected) ?? []);
-const validSelected = computed(() => selected.value.filter(item => !wikidataTimelineItemError(item)));
+const validSelected = computed(() => selected.value.filter(item => item.status !== 'excluded' && !wikidataTimelineItemError(item)));
 const hierarchyError = computed(() => wikidataHierarchyError(validSelected.value));
-const periods = computed(() => validSelected.value.filter(item => item.type === 'period').map(item => ({ id: item.qid, label: { fr: item.title, en: '' }, startDate: item.startDate, endDate: item.endDate, categories: [], storyParentId: hierarchyError.value ? null : effectiveWikidataParent(item, validSelected.value) })));
-const events = computed(() => validSelected.value.filter(item => item.type === 'event').map(item => ({ id: item.qid, label: { fr: item.title, en: '' }, date: item.startDate })));
-const itemsByQid = computed(() => new Map(draft.value?.items.map(item => [item.qid, item]) ?? []));
-const canSave = computed(() => canUseWorkspace(auth) && auth.canCreateStories && !!draft.value?.title.trim() && draft.value.title.length <= 255 && draft.value.description.length <= 1000 && selected.value.length > 0 && validSelected.value.length === selected.value.length && !hierarchyError.value && checkedStoryKey.value === storyCheckKey.value && !checkingStories.value && !storyCheckError.value && (!existingStories.value.length || acknowledgeExistingStories.value) && !saving.value && !savedId.value && !saveUncertain.value);
+const periods = computed(() => validSelected.value.filter(item => item.type === 'period').map(item => ({ id: wikidataItemKey(item), label: { fr: item.title, en: '' }, startDate: item.startDate, endDate: item.endDate, categories: [], storyParentId: hierarchyError.value ? null : effectiveWikidataParent(item, validSelected.value) })));
+const events = computed(() => validSelected.value.filter(item => item.type === 'event').map(item => ({ id: wikidataItemKey(item), label: { fr: item.title, en: '' }, date: item.startDate })));
+const itemsByQid = computed(() => new Map(draft.value?.items.map(item => [wikidataItemKey(item), item]) ?? []));
+const canSave = computed(() => canUseWorkspace(auth) && auth.canCreateStories && !!draft.value?.title.trim() && draft.value.title.length <= 255 && draft.value.description.length <= 1000 && selected.value.length > 0 && selected.value.length <= 81 && validSelected.value.length === selected.value.length && !hierarchyError.value && checkedStoryKey.value === storyCheckKey.value && !checkingStories.value && !storyCheckError.value && (!existingStories.value.length || acknowledgeExistingStories.value) && !saving.value && !savedId.value && !saveUncertain.value);
 const typeOptions = [{ value: 'period', label: 'Période' }, { value: 'event', label: 'Événement' }] as const;
 const sourceUrl = (qid: string) => `https://www.wikidata.org/wiki/${qid}`;
 const draftStorageKey = 'wikidata-generation-draft';
-const isExistingItem = (item: WikidataTimelineItem) => existing.value.has(`${item.type}:${item.qid}`);
+const isExistingItem = (item: WikidataTimelineItem) => existing.value.has(`${item.type}:${wikidataItemKey(item)}`);
 
 async function checkExistingStories() {
   duplicateController?.abort(); const active = new AbortController(); duplicateController = active;
@@ -83,6 +94,7 @@ function setItemElement(qid: string, element: Element | ComponentPublicInstance 
 }
 
 async function showItem(qid: string) {
+  if (!visibleItems.value.some(item => wikidataItemKey(item) === qid)) statusFilter.value = 'all';
   activeItemQid.value = qid;
   await nextTick();
   const pane = detailPane.value, item = itemElements.get(qid);
@@ -106,10 +118,10 @@ function cancelDraft() {
 
 function parentOptions(item: WikidataTimelineItem) {
   const options = [{ value: '', label: 'À la racine', disabled: false }, ...validSelected.value
-    .filter(parent => parent.type === 'period' && parent.qid !== item.qid && !wouldCreateWikidataCycle(item.qid, parent.qid, validSelected.value))
-    .map(parent => ({ value: parent.qid, label: `${parent.title}${item.parentCandidates?.includes(parent.qid) ? ' · Wikidata' : ''}`, disabled: false }))];
+    .filter(parent => parent.type === 'period' && wikidataItemKey(parent) !== wikidataItemKey(item) && !wouldCreateWikidataCycle(wikidataItemKey(item), wikidataItemKey(parent), validSelected.value))
+    .map(parent => ({ value: wikidataItemKey(parent), label: `${parent.title}${item.parentCandidates?.includes(wikidataItemKey(parent)) ? ' · Wikidata' : ''}`, disabled: false }))];
   if (item.parentQid && !options.some(option => option.value === item.parentQid)) {
-    const parent = draft.value?.items.find(row => row.qid === item.parentQid);
+    const parent = draft.value?.items.find(row => wikidataItemKey(row) === item.parentQid);
     options.push({ value: item.parentQid, label: `${parent?.title || item.parentQid} (indisponible)`, disabled: true });
   }
   return options;
@@ -117,7 +129,7 @@ function parentOptions(item: WikidataTimelineItem) {
 
 function changeParent(item: WikidataTimelineItem, value: unknown) {
   if (saving.value || savedId.value) return;
-  item.parentQid = typeof value === 'string' && /^Q[1-9]\d*$/.test(value) ? value : null;
+  item.parentQid = typeof value === 'string' && parentOptions(item).some(option => option.value === value) ? value || null : null;
 }
 
 function parentHint(item: WikidataTimelineItem) {
@@ -128,9 +140,9 @@ function parentHint(item: WikidataTimelineItem) {
 
 function hierarchyWarnings(item: WikidataTimelineItem) {
   if (item.type !== 'period') return [];
-  const parent = validSelected.value.find(row => row.type === 'period' && row.qid === item.parentQid);
+  const parent = validSelected.value.find(row => row.type === 'period' && wikidataItemKey(row) === item.parentQid);
   const warnings = item.parentQid && !parent ? ['Parent non sélectionné ou incomplet : cette période sera placée à la racine.'] : [];
-  const reference = parent ?? validSelected.value.find(row => row.qid === draft.value?.qid && row.type === 'period' && row.qid !== item.qid);
+  const reference = parent ?? validSelected.value.find(row => row.qid === draft.value?.qid && row.origin !== 'fact' && row.type === 'period' && wikidataItemKey(row) !== wikidataItemKey(item));
   if (reference) warnings.push(...wikidataDateWarnings(item, reference));
   return warnings;
 }
@@ -142,7 +154,7 @@ function periodWarnings(qid: string) {
 
 // Only a validity transition reselects a card; valid edits preserve a manual opt-out.
 watch(
-  () => draft.value?.items.map(item => ({ item, valid: !wikidataTimelineItemError(item) })) ?? [],
+  () => draft.value?.items.map(item => ({ item, valid: item.status !== 'excluded' && !wikidataTimelineItemError(item) })) ?? [],
   (next, previous) => {
     const previousValidity = new Map(previous.map(({ item, valid }) => [item, valid]));
     for (const { item, valid } of next) {
@@ -153,7 +165,7 @@ watch(
 );
 
 function applyExistingItem(item: WikidataTimelineItem) {
-  const local = existing.value.get(`${item.type}:${item.qid}`);
+  const local = existing.value.get(`${item.type}:${wikidataItemKey(item)}`);
   if (!local) return;
   item.title = local.label.fr || local.label.en;
   item.description = local.description ?? '';
@@ -165,7 +177,7 @@ function applyExistingItem(item: WikidataTimelineItem) {
 
 function changeType(item: WikidataTimelineItem, value: unknown) {
   if (saving.value || savedId.value || isExistingItem(item)) return;
-  openEditors.value.add(item.qid);
+  openEditors.value.add(wikidataItemKey(item));
   item.type = value === 'period' ? 'period' : 'event';
   if (item.type === 'event') item.parentQid = null;
   applyExistingItem(item);
@@ -181,15 +193,16 @@ function restoreDraft(result: WikidataTimelineDraft) {
   try {
     const cached = JSON.parse(sessionStorage.getItem(draftStorageKey) || 'null');
     if (cached?.qid !== result.qid || !Array.isArray(cached.items)) return;
+    const sameRules = cached.profile === result.profile && JSON.stringify(cached.settings) === JSON.stringify(result.settings);
     if (typeof cached.title === 'string' && cached.title.length <= 255) result.title = cached.title;
     if (typeof cached.description === 'string' && cached.description.length <= 1000) result.description = cached.description;
     for (const item of result.items) {
-      const previous = cached.items.find((row: { qid?: unknown }) => row?.qid === item.qid);
-      if (previous && typeof previous.selected === 'boolean') item.selected = previous.selected;
-      if (previous && (previous.parentQid === null || (typeof previous.parentQid === 'string' && /^Q[1-9]\d*$/.test(previous.parentQid)))) item.parentQid = previous.parentQid;
-      if (existing.value.has(`${item.type}:${item.qid}`)) continue;
+      const previous = cached.items.find((row: { qid?: unknown }) => (row as WikidataTimelineItem | undefined) && wikidataItemKey(row as WikidataTimelineItem) === wikidataItemKey(item));
+      if (sameRules && previous && typeof previous.selected === 'boolean') item.selected = item.status !== 'excluded' && previous.selected;
+      if (previous && (previous.parentQid === null || (typeof previous.parentQid === 'string' && result.items.some(parent => wikidataItemKey(parent) === previous.parentQid)))) item.parentQid = previous.parentQid;
+      if (existing.value.has(`${item.type}:${wikidataItemKey(item)}`)) continue;
       if (!previous || !['event', 'period'].includes(previous.type) || !['title', 'description', 'startDate', 'endDate'].every(key => typeof previous[key] === 'string' && previous[key].length <= 1000)) continue;
-      Object.assign(item, { type: previous.type, title: previous.title, description: previous.description, startDate: previous.startDate, endDate: previous.endDate, selected: previous.selected === true });
+      Object.assign(item, { type: previous.type, title: previous.title, description: previous.description, startDate: previous.startDate, endDate: previous.endDate, selected: item.status !== 'excluded' && (sameRules ? previous.selected === true : item.selected) });
     }
   } catch { /* An unavailable or stale browser draft never prevents generation. */ }
 }
@@ -201,6 +214,7 @@ async function choose(qid: string) {
 }
 
 async function load(force = false) {
+  if (draft.value?.qid === route.query.wikidata) preserveDraft();
   controller?.abort(); const active = new AbortController(); controller = active;
   const isCurrent = requests.begin();
   draft.value = null; error.value = null; saveError.value = null; savedId.value = null; saveUncertain.value = false; existing.value = new Map();
@@ -212,14 +226,26 @@ async function load(force = false) {
   try {
     if (typeof raw !== 'string') throw new Error('Choisissez un seul sujet Wikidata.');
     const qid = normalizeWikidataId(raw);
-    const result = await generateWikidataTimeline(qid, { signal: active.signal, force });
-    // Present the catalogue values that saving will actually reuse.
-    const matches = (await Promise.all((['period', 'event'] as const).map(type => SearchApiService.getInstance().searchLocalByWikidataIds(result.items.map(item => item.qid), type, active.signal)))).flat();
+    if (!profile.value) {
+      try {
+        const cached = JSON.parse(sessionStorage.getItem(draftStorageKey) || 'null');
+        if (cached?.qid === qid && profiles.some(entry => entry.value === cached.profile)) {
+          profile.value = cached.profile;
+          for (const key of ['approximate', 'withinBounds', 'biography', 'works'] as const) if (typeof cached.settings?.[key] === 'boolean') generationSettings.value[key] = cached.settings[key];
+          if ([20, 40, 80].includes(cached.settings?.limit)) generationSettings.value.limit = cached.settings.limit;
+        }
+      } catch { /* Invalid optional tab storage never prevents generation. */ }
+    }
+    const result = await generateWikidataTimeline(qid, { signal: active.signal, force, ...(profile.value ? { profile: profile.value } : {}), settings: generationSettings.value });
     if (!isCurrent()) return;
-    existing.value = new Map(matches.flatMap(hit => hit.wikidataId ? [[`${hit.type}:${hit.wikidataId}`, hit] as const] : []));
+    profile.value = result.profile ?? profile.value;
+    // Present the catalogue values that saving will actually reuse.
+    const matches = (await Promise.all((['period', 'event'] as const).map(type => result.items.some(item => item.id) ? SearchApiService.getInstance().searchLocalByGenerationKeys(result.items.map(wikidataItemKey), type, active.signal) : SearchApiService.getInstance().searchLocalByWikidataIds(result.items.map(item => item.qid), type, active.signal)))).flat();
+    if (!isCurrent()) return;
+    existing.value = new Map(matches.flatMap(hit => hit.sourceKey || hit.wikidataId ? [[`${hit.type}:${hit.sourceKey ?? hit.wikidataId}`, hit] as const] : []));
     for (const item of result.items) {
       applyExistingItem(item);
-      item.selected = !wikidataTimelineItemError(item);
+      item.selected = (item.status === undefined || item.status === 'retained') && !wikidataTimelineItemError(item);
     }
     restoreDraft(result);
     result.items.forEach(applyExistingItem);
@@ -229,7 +255,7 @@ async function load(force = false) {
   } finally { if (isCurrent()) loading.value = false; }
 }
 
-watch(() => route.query.wikidata, () => { void load(); }, { immediate: true });
+watch(() => route.query.wikidata, () => { profile.value = ''; void load(); }, { immediate: true });
 watch(() => auth.account?.id, () => { if (auth.account) void auth.ensureProfile(); }, { immediate: true });
 onScopeDispose(() => { controller?.abort(); duplicateController?.abort(); });
 onBeforeRouteLeave(() => !saving.value);
@@ -289,6 +315,13 @@ async function save() {
     <div class="generation-workspace">
       <aside ref="navigationPane" class="generation-navigation" aria-label="Structure de la frise">
         <template v-if="draft">
+          <section class="generation-rules" aria-label="Règles de génération">
+            <Select :model-value="profile" :options="profiles" label="Famille du sujet" :searchable="false" :disabled="loading || saving || !!savedId" @update:model-value="setProfile" />
+            <Select :model-value="generationSettings.limit" :options="[{value:20,label:'20 propositions'},{value:40,label:'40 propositions'},{value:80,label:'80 propositions'}]" label="Propositions maximum" :searchable="false" :disabled="loading || saving || !!savedId" @update:model-value="setLimit" />
+            <label><input v-model="generationSettings.approximate" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />Conserver les dates approximatives</label>
+            <label><input v-model="generationSettings.withinBounds" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />Vérifier les bornes du sujet</label>
+            <template v-if="profile === 'person'"><label><input v-model="generationSettings.biography" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />Événements de vie</label><label><input v-model="generationSettings.works" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />Œuvres majeures</label></template>
+          </section>
           <StoryPeriodTree class="generation-tree" :story-id="draft.qid" :periods="periods" :selected-id="activeItemQid" :scroll-selected-into-view="false" @select="showItem">
             <template #actions="{ period }">
               <Tag v-if="periodWarnings(period.id).length" variant="warning" label="À vérifier" :title="periodWarnings(period.id).join(' ')" />
@@ -321,6 +354,7 @@ async function save() {
         <template v-else-if="draft">
           <section class="generation-context" aria-label="Source et validation de la frise">
             <a class="generation-source-link" :href="sourceUrl(draft.qid)" target="_blank" rel="noopener noreferrer"><Icon icon="mdi:open-in-new" aria-hidden="true" />Voir le sujet sur Wikidata<span class="sr-only"> (nouvel onglet)</span></a>
+            <div v-if="draft.warnings.length" class="generation-warnings" role="status"><p v-for="warning in draft.warnings" :key="warning"><Icon icon="mdi:information-outline" aria-hidden="true" />{{ warning }}</p></div>
             <span v-if="checkingStories" class="sr-only" role="status">Vérification des frises existantes…</span>
             <div v-if="storyCheckError || existingStories.length" class="generation-existing-stories" aria-label="Vérification des frises existantes">
               <p v-if="storyCheckError" role="alert">{{ storyCheckError }} <Button variant="tertiary" size="sm" @click="checkExistingStories">Réessayer</Button></p>
@@ -336,32 +370,50 @@ async function save() {
           <StoryDraftPreview v-model:title="draft.title" v-model:description="draft.description" class="generation-overview" :disabled="saving || !!savedId" :periods="periods" :events="events" @select-period="showItem" @select-event="showItem" />
           <section class="generation-items" aria-label="Éléments proposés">
             <h2>{{ draft.items.length }} éléments proposés · {{ selected.length }} sélectionnés</h2>
+            <div class="generation-status-filters" aria-label="Filtrer les propositions"><Button v-for="entry in statusCounts" :key="entry.value" size="sm" variant="tertiary" :pressed="statusFilter === entry.value" @click="statusFilter=entry.value">{{ entry.label }} {{ entry.count }}</Button><Button size="sm" variant="tertiary" :pressed="statusFilter==='all'" @click="statusFilter='all'">Tous {{ draft.items.length }}</Button></div>
+            <p v-if="selected.length > 81" class="generation-item-error" role="alert">Sélectionnez au maximum 81 faits pour enregistrer la frise.</p>
             <div class="generation-selection-actions">
-              <Button size="sm" variant="secondary" :disabled="saving || !!savedId" @click="draft.items.forEach(item => item.selected = !wikidataTimelineItemError(item))">Tout sélectionner avec une date valide</Button>
+              <Button size="sm" variant="secondary" :disabled="saving || !!savedId" @click="draft.items.forEach(item => item.selected = (item.status === undefined || item.status === 'retained') && !wikidataTimelineItemError(item))">Tout sélectionner avec une date valide</Button>
               <Button size="sm" variant="tertiary" :disabled="saving || !!savedId" @click="draft.items.forEach(item => item.selected = false)">Tout désélectionner</Button>
             </div>
             <p v-if="!draft.items.length">Aucun élément daté n’a été trouvé dans les relations directes de ce sujet. Essayez un sujet plus précis.</p>
-        <article v-for="item in draft.items" :id="`generation-item-${item.qid}`" :ref="el => setItemElement(item.qid, el)" :key="item.qid" class="generation-item" :class="{ 'generation-item--selected': item.selected, 'generation-item--active': activeItemQid === item.qid }">
+            <p v-else-if="!visibleItems.length" class="generation-note">Aucun élément dans ce filtre. Consultez les autres propositions ou ajustez les règles.</p>
+        <article v-for="item in visibleItems" :id="`generation-item-${wikidataItemKey(item)}`" :ref="el => setItemElement(wikidataItemKey(item), el)" :key="wikidataItemKey(item)" class="generation-item" :class="{ 'generation-item--selected': item.selected, 'generation-item--active': activeItemQid === wikidataItemKey(item) }">
           <div class="generation-item-heading">
-            <label><input v-model="item.selected" type="checkbox" :disabled="saving || !!savedId || (!item.selected && !!wikidataTimelineItemError(item))" :aria-label="`Inclure ${item.title}`" /> {{ item.title }}</label>
-            <a :href="sourceUrl(item.qid)" target="_blank" rel="noopener noreferrer">{{ item.qid }}<span class="sr-only"> sur Wikidata (nouvel onglet)</span></a>
+            <input class="generation-item-checkbox" :id="`generation-include-${wikidataItemKey(item)}`" v-model="item.selected" type="checkbox" :disabled="saving || !!savedId || item.status === 'excluded' || (!item.selected && !!wikidataTimelineItemError(item))" :aria-label="`Inclure ${item.title}`" />
+              <div class="generation-item-title-block">
+                <div class="generation-item-title"><label :for="`generation-include-${wikidataItemKey(item)}`">{{ item.title }}</label> <a :href="itemSourceUrl(item)" target="_blank" rel="noopener noreferrer">{{ item.qid }}<span class="sr-only"> sur Wikidata (nouvel onglet)</span></a></div>
+                <p class="generation-item-dates">{{ formatSearchResultDateBound(item.startDate) || 'Date à renseigner' }}<template v-if="item.type === 'period'"> → {{ formatSearchResultDateBound(item.endDate) || 'fin inconnue' }}</template></p>
+              </div>
+              <div class="generation-item-status">
+                <Tag v-if="item.status" :variant="item.status==='retained' ? 'success' : item.status==='review' ? 'warning' : 'neutral'" :label="item.status==='retained' ? 'Proposé' : item.status==='review' ? 'À vérifier' : 'Écarté'" />
+                <InfoTooltip v-if="item.source || item.reasons?.length" :label="`Pourquoi ce fait : ${item.title}`">
+                  <div class="generation-provenance">
+                    <strong>Pourquoi ce fait ?<template v-if="item.category"> · {{ item.category }}</template></strong>
+                    <ul v-if="item.reasons?.length"><li v-for="reason in item.reasons" :key="reason">{{ reason }}</li></ul>
+                    <p v-if="item.source">{{ item.source.qid }} · {{ item.source.property }} · {{ propertyLabels[item.source.property] }}</p>
+                    <p v-if="item.source">{{ item.source.references }} référence{{ item.source.references===1 ? '' : 's' }} dans la déclaration source.</p>
+                    <p v-if="item.origin==='fact'">Fait daté extrait d’une déclaration du sujet.</p>
+                  </div>
+                </InfoTooltip>
+              </div>
           </div>
-          <details :open="openEditors.has(item.qid) || !!wikidataTimelineItemError(item)" class="generation-item-editor" @toggle="($event.target as HTMLDetailsElement).open ? openEditors.add(item.qid) : openEditors.delete(item.qid)">
-            <summary><Icon class="generation-editor-chevron" icon="mdi:chevron-right" aria-hidden="true" /><span>{{ formatSearchResultDateBound(item.startDate) || 'Date à renseigner' }}<template v-if="item.type === 'period'"> → {{ formatSearchResultDateBound(item.endDate) || 'fin inconnue' }}</template> · {{ isExistingItem(item) ? 'Consulter les informations' : 'Modifier les informations' }}</span></summary>
+          <details :open="openEditors.has(wikidataItemKey(item)) || !!wikidataTimelineItemError(item)" class="generation-item-editor" @toggle="($event.target as HTMLDetailsElement).open ? openEditors.add(wikidataItemKey(item)) : openEditors.delete(wikidataItemKey(item))">
+            <summary><Icon class="generation-editor-chevron" icon="mdi:chevron-down" aria-hidden="true" /><span>Informations<span class="sr-only"> de {{ item.title }}</span></span></summary>
             <div class="generation-type-toggle" role="radiogroup" :aria-label="`Type de ${item.title}`">
               <label v-for="option in typeOptions" :key="option.value">
-                <input type="radio" :name="`generation-type-${item.qid}`" :value="option.value" :checked="item.type === option.value" :disabled="saving || !!savedId || isExistingItem(item)" @change="changeType(item, option.value)" />
+                <input type="radio" :name="`generation-type-${wikidataItemKey(item)}`" :value="option.value" :checked="item.type === option.value" :disabled="saving || !!savedId || isExistingItem(item)" @change="changeType(item, option.value)" />
                 <span>{{ option.label }}</span>
               </label>
             </div>
             <div class="generation-item-fields">
               <Input v-model="item.title" label="Titre" :maxlength="255" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
               <DateInput v-model="item.startDate" :label="item.type === 'period' ? 'Début' : 'Date'" placeholder="Ex. 1789 ou 1789-07-14" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
-              <DateInput v-if="item.type === 'period'" :id="`generation-end-${item.qid}`" v-model="item.endDate" label="Fin" placeholder="Date de fin connue" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
+              <DateInput v-if="item.type === 'period'" :id="`generation-end-${wikidataItemKey(item)}`" v-model="item.endDate" label="Fin" placeholder="Date de fin connue" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
             </div>
             <Input v-model="item.description" label="Description" type="textarea" :maxlength="1000" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
+            <Select v-if="item.type === 'period'" :id="`generation-parent-${wikidataItemKey(item)}`" :model-value="item.parentQid || ''" :options="parentOptions(item)" label="Période parente" :hint="parentHint(item)" :disabled="saving || !!savedId" @update:model-value="changeParent(item, $event)" />
           </details>
-          <Select v-if="item.type === 'period'" :id="`generation-parent-${item.qid}`" :model-value="item.parentQid || ''" :options="parentOptions(item)" label="Période parente" :hint="parentHint(item)" :disabled="saving || !!savedId" @update:model-value="changeParent(item, $event)" />
           <div v-if="isExistingItem(item) || hierarchyWarnings(item).length || item.warning || wikidataTimelineItemError(item)" class="generation-item-feedback">
             <p v-if="isExistingItem(item)" class="generation-note"><Icon icon="mdi:information-outline" aria-hidden="true" /><span>Déjà dans le catalogue · Informations en lecture seule.</span></p>
             <div v-if="hierarchyWarnings(item).length" class="generation-hierarchy-warnings"><p v-for="warning in hierarchyWarnings(item)" :key="warning"><Tag label="À vérifier" variant="warning" /><span>{{ warning }}</span></p></div>
@@ -377,6 +429,16 @@ async function save() {
 </template>
 
 <style scoped>
+.generation-rules { display:flex; flex-direction:column; gap:var(--spacing-md); padding:var(--spacing-lg); border-bottom:1px solid var(--color-border-default); }
+.generation-rules label { display:flex; align-items:flex-start; gap:var(--spacing-sm); font:var(--type-meta); }
+.generation-rules input { accent-color:var(--color-primary); margin-top:3px; }
+.generation-status-filters { display:flex; flex-wrap:wrap; gap:var(--spacing-sm); margin-block:var(--spacing-md); }
+.generation-warnings { display:flex; flex-direction:column; gap:var(--spacing-sm); }
+.generation-warnings p { display:flex; align-items:flex-start; gap:var(--spacing-sm); margin:0; font:var(--type-meta); color:var(--color-text-secondary); }
+.generation-warnings svg { width:16px; height:16px; flex-shrink:0; }
+.generation-provenance { display:flex; flex-direction:column; gap:var(--spacing-sm); }
+.generation-provenance ul { display:flex; flex-direction:column; gap:var(--spacing-xs); margin:0; padding:0; list-style:none; }
+.generation-provenance p { margin:0; }
 .wikidata-generation { width: 100%; height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 .generation-heading { position: sticky; top: 0; z-index: var(--z-index-sticky); flex-shrink: 0; display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-md) var(--spacing-xl); width: 100%; box-sizing: border-box; padding: var(--spacing-lg) var(--spacing-xl); border-bottom: 1px solid var(--color-border-default); background: var(--color-surface-default); }
 .generation-heading-main { display: flex; align-items: center; flex: 1; min-width: 240px; gap: var(--spacing-lg); }
@@ -418,9 +480,13 @@ async function save() {
 .generation-item { padding: var(--spacing-lg); border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-surface-default); scroll-margin-top: var(--spacing-lg); }
 .generation-item--selected { border-color: var(--color-border-focus); }
 .generation-item--active { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
-.generation-item-heading { display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-md); flex-wrap: wrap; }
-.generation-item-heading label { display: flex; gap: var(--spacing-sm); align-items: center; font-weight: var(--font-weight-semibold); min-width: 0; overflow-wrap: anywhere; }
-.generation-item-heading input { accent-color: var(--color-primary); }
+.generation-item-heading { display:grid; grid-template-columns:16px minmax(0, 1fr) auto; column-gap:var(--spacing-sm); align-items:start; }
+.generation-item-status { display:flex; align-items:center; gap:var(--spacing-xs); }
+.generation-item-title-block { display:flex; flex-direction:column; gap:0; min-width:0; }
+.generation-item-title { font-weight:var(--font-weight-semibold); overflow-wrap:anywhere; }
+.generation-item-title a { margin-left:var(--spacing-xs); font:var(--type-meta); color:var(--color-text-link); white-space:nowrap; }
+.generation-item-checkbox { accent-color:var(--color-primary); width:16px; height:16px; margin:3px 0 0; }
+.generation-item-dates { font:var(--type-meta); color:var(--color-text-secondary); }
 .generation-item-fields { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); gap: var(--spacing-md); }
 .generation-selection-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
 .generation-visibility { margin: 0; max-width: 16rem; font: var(--type-compact); color: var(--color-text-secondary); }
@@ -433,11 +499,12 @@ async function save() {
 :is(.generation-type-toggle, .generation-segmented) input:disabled + span { opacity: .5; cursor: not-allowed; }
 .generation-visibility { height: var(--field-height-md); box-sizing: border-box; padding: 2px; gap: 2px; border-radius: var(--radius-md); }
 .generation-visibility span { display: flex; align-items: center; height: 100%; padding: 0 var(--spacing-md); box-sizing: border-box; }
+.generation-item-editor { padding-top:var(--spacing-md); border-top:1px solid var(--color-border-default); }
 .generation-item-editor summary { display: flex; align-items: center; gap: var(--spacing-xs); min-height: var(--field-height-sm); list-style: none; cursor: pointer; color: var(--color-text-secondary); }
 .generation-item-editor summary::-webkit-details-marker { display: none; }
 .generation-item-editor summary:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 .generation-editor-chevron { flex-shrink: 0; width: 20px; height: 20px; }
-.generation-item-editor[open] > summary .generation-editor-chevron { transform: rotate(90deg); }
+.generation-item-editor[open] > summary .generation-editor-chevron { transform: rotate(180deg); }
 .generation-item-editor[open] > :not(summary) { margin-top: var(--spacing-md); }
 .generation-item-heading a { flex-shrink: 0; }
 .generation-search :deep(.base-button__text) { white-space: normal; text-align: left; }
@@ -446,7 +513,9 @@ async function save() {
 .generation-items h2 { font-size: var(--font-size-lg); margin: 0; }
 .generation-item-feedback { display: flex; flex-direction: column; gap: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--color-border-default); font: var(--type-compact); }
 .generation-item-feedback p { display: flex; align-items: flex-start; gap: var(--spacing-sm); }
-.generation-item-feedback .generation-note > svg { flex-shrink: 0; width: 18px; height: 18px; margin-top: 2px; }
+.generation-item-feedback .generation-item-error, .generation-hierarchy-warnings p { align-items:baseline; }
+.generation-item-feedback .generation-note { display:grid; grid-template-columns:18px minmax(0, 1fr); align-items:start; }
+.generation-item-feedback .generation-note > svg { display:block; width:18px; height:18px; margin-top:calc((1lh - 18px) / 2); }
 .generation-hierarchy-warnings { display: flex; flex-direction: column; gap: var(--spacing-sm); color: var(--color-text-secondary); }
 @media (max-width: 700px) {
   .generation-heading { padding: var(--spacing-md); gap: var(--spacing-md); }

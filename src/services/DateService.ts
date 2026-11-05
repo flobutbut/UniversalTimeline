@@ -12,6 +12,7 @@ export class DateService {
    */
   static format(date: NormalizedDate, locale = 'fr-FR'): string {
     if (date.kind === 'unknown') return date.raw || 'Date inconnue'
+    if (date.approximate) return date.raw
     if (date.isCurrent) return "Aujourd'hui"
 
     // Si calendarDate est défini, c'est une date calendaire (CE) — toujours formater comme telle
@@ -47,6 +48,7 @@ export class DateService {
    */
   static formatBound(date: NormalizedDate, locale = 'fr-FR'): string {
     if (date.kind === 'unknown') return date.raw || 'Date inconnue'
+    if (date.approximate) return date.raw
     if (date.isCurrent) return "aujourd'hui"
     if (date.calendarDate) return this.formatCalendar(date.calendarDate, date.precision, locale)
     return this.formatGeologicalBound(date.yearsBeforePresent)

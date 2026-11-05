@@ -40,7 +40,7 @@ export function useDatabaseSave() {
       const submission = { ...formData, qid: formData.qid.trim().toUpperCase() };
 
       // 2. Refuser les conflits sans modifier ni supprimer un autre élément
-      if (currentType !== 'story' && currentMode === 'edit') {
+      if (currentType !== 'story' && currentMode === 'edit' && submission.qid) {
         const conflictInfo = await conflictService.detectConflict(submission.qid, currentType, currentItem?.id);
         if (conflictInfo.hasConflict) {
           return fail('Ce Q-id est déjà utilisé. Aucun élément n’a été modifié ou supprimé.');

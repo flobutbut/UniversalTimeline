@@ -68,6 +68,7 @@ before(async () => {
   await pool.query(await readFile(new URL('../../database/migrations/20261102105902_account_profiles.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261102110027_account_functions_private_schema.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261102223946_story_event_importance.sql', import.meta.url),'utf8'));
+  await pool.query(await readFile(new URL('../../database/migrations/20261104234615_wikidata_fact_sources.sql', import.meta.url),'utf8'));
   // Frises are signed by a username: both accounts sign up with one.
   await pool.query(`INSERT INTO auth.users (id, raw_user_meta_data) VALUES ($1, '{"username":"Alice"}'),($2, '{"username":"Bob"}')`, [alice,bob]);
 });

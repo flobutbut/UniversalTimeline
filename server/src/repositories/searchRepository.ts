@@ -1,6 +1,14 @@
 import type { TransactionClient } from '../api/transaction.js';
 import type { PeriodRow, EventRow, StoryRow } from './rows.js';
 
+export async function findGeneratedCatalogueRows(db: TransactionClient, kind: 'periods', keys: string[], qids: string[]): Promise<PeriodRow[]>;
+export async function findGeneratedCatalogueRows(db: TransactionClient, kind: 'events', keys: string[], qids: string[]): Promise<EventRow[]>;
+export async function findGeneratedCatalogueRows(db: TransactionClient, kind: 'periods' | 'events', keys: string[], qids: string[]) {
+  return (await db.query<PeriodRow & EventRow>(
+    `SELECT *, NULL::varchar AS parent_id, false AS has_children FROM public.${kind} WHERE source_key = ANY($1::text[]) OR wikidata_id = ANY($2::text[])`, [keys, qids],
+  )).rows;
+}
+
 export type SearchStoryRow = Pick<StoryRow, 'id' | 'title_fr' | 'title_en' | 'description_fr' | 'description_en'> & {
   matched_on: 'title' | 'description' | 'content';
   matched_type: 'period' | 'event' | null;

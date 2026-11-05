@@ -12,8 +12,6 @@
               <Button variant="tertiary" size="sm" :disabled="busy" @click="emit('edit', period.id)">Modifier la période</Button>
               <Button v-if="canCreateStory" variant="tertiary" size="sm" :disabled="busy" @click="emit('create-story', period.id)">{{ promote ? 'Promouvoir en sous-frise' : 'Créer une frise' }}</Button>
               <Button variant="tertiary" size="sm" :disabled="busy || children.length > 0" :title="children.length > 0 ? 'Déplacez d’abord ses sous-périodes.' : undefined" @click="emit('convert', period.id)">Convertir en événement</Button>
-              <StoryItemActionsMenu :label="label(period)" :disabled="busy" movable :convert-to="children.length ? undefined : 'event'" @edit="emit('edit', period.id)"
-                @move="emit('move', period.id)" @remove="emit('remove', period.id)" @create-story="emit('create-story', period.id)" @convert="emit('convert', period.id)" />
             </template>
             <Button v-else variant="secondary" size="sm" :disabled="busy || !canAdd" :title="!canAdd ? 'Ajoutez d’abord la période parente à la frise.' : undefined" @click="emit('add', period.id)">{{ period.id.startsWith('wikidata:') ? 'Importer cette période' : 'Ajouter à la frise' }}</Button>
           </div>
@@ -68,7 +66,6 @@ import { Icon } from '@iconify/vue';
 import type { ListPeriod, ChildStorySummary, StorySummary } from '@/types/database';
 import Button from '@/components/base/Button.vue';
 import Tag from '@/components/base/Tag.vue';
-import StoryItemActionsMenu from './StoryItemActionsMenu.vue';
 import AnchoredStoryRow from './AnchoredStoryRow.vue';
 import { DateService } from '@/services/DateService';
 import { formatRecordDate } from '@/lib/storyListDates';

@@ -11,7 +11,7 @@ import type { Response } from 'express';
 import * as catalogue from '../services/catalogueService.js';
 import { convertEventToPeriod, convertPeriodToEvent } from '../services/catalogueConversion.js';
 import * as stories from '../services/storyService.js';
-import { search, searchStoryTimelines } from '../services/searchService.js';
+import { search, searchStoryTimelines, searchGeneratedCatalogue } from '../services/searchService.js';
 import { semanticSearch } from '../services/semanticSearch.js';
 import { loadStoryTemporalBounds } from '../services/storyTemporalBounds.js';
 import * as profiles from '../services/profileService.js';
@@ -20,6 +20,11 @@ import { parseGeneratedStory, parseGeneratedStoryLookup } from './wikidataGenera
 import { createGeneratedStory, findExistingGeneratedStories } from '../services/wikidataGeneration.js';
 
 const router = express.Router();
+router.get('/search/by-generation-keys', endpoint('Erreur lors du rapprochement des faits.', async (req, res) => {
+  const keys = parseCsvIds(req.query.keys, 'keys');
+  if (keys.some(key => !/^(entity:Q[1-9]\d*|fact:Q[1-9]\d*:P[1-9]\d*:q[1-9]\d*\$[0-9a-f-]{36})$/.test(key))) throw new InputValidationError('keys', 'Une identité de fait est invalide.');
+  res.json(keys.length ? await searchGeneratedCatalogue(keys, parseSearchScope(req.query.only)) : { periods: [], events: [] });
+}));
 
 router.get('/search/stories', endpoint('Erreur lors de la recherche de frises', async (req, res) => {
   const q = parseSearchText(req.query.q, 'q');
@@ -149,7 +154,9 @@ router.put('/events/:id', endpoint("Erreur lors de la mise à jour de l'événem
 }, { conflict: 'Ce Q-id ou cet identifiant d’événement est déjà utilisé.' }));
 router.put('/periods/:id', endpoint('Erreur lors de la mise à jour de la période', async (req, res) => {
   const id = parseEntityId(req.params.id);
-  const data = parseWriteCategories(parsePeriodWrite(req.body, false));
+  // Only an already persisted derived fact may omit a native entity Q-id.
+  const allowMissingQid = !req.body?.wikidata_id && (await catalogue.getPeriod(id)).sourceKey?.startsWith('fact:') === true;
+  const data = parseWriteCategories(parsePeriodWrite(req.body, false, allowMissingQid));
   res.json(await catalogue.updatePeriod(id, data));
 }, { conflict: 'Ce Q-id ou cet identifiant de période est déjà utilisé.' }));
 router.delete('/periods/:id', endpoint('Erreur lors de la suppression de la période', async (req, res) => {
@@ -166,7 +173,8 @@ router.post('/periods/:id/convert-to-event', endpoint('Impossible de convertir l
 }, { conflict: 'Ce Q-id ou cet identifiant d’événement est déjà utilisé.', busy: 'La période est occupée. Réessayez la conversion.' }));
 router.post('/events/:id/convert-to-period', endpoint('Impossible de convertir l’événement en période.', async (req, res) => {
   const id = parseEntityId(req.params.id);
-  const data = parseWriteCategories(parsePeriodWrite(req.body, true));
+  const allowMissingQid = !req.body?.wikidata_id && (await catalogue.getEvent(id)).sourceKey?.startsWith('fact:') === true;
+  const data = parseWriteCategories(parsePeriodWrite(req.body, true, allowMissingQid));
   res.status(201).json(await convertEventToPeriod(id, data));
 }, { conflict: 'Ce Q-id ou cet identifiant de période est déjà utilisé.', busy: 'L’événement est occupé. Réessayez la conversion.' }));
 router.delete('/events/:id', endpoint("Erreur lors de la suppression de l'événement", async (req, res) => {

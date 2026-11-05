@@ -32,3 +32,9 @@ it('treats a month or year as an uncertain range rather than a fabricated first 
   expect(wikidataDateWarnings(period('Q2', 'Q1', '1790', '1798'), parent)).toEqual([]);
   expect(wikidataDateWarnings(period('Q2', null, '-0044', '-0040'), period('Q1', null, '-0050', '-0030'))).toEqual([]);
 });
+
+it('does not claim a definite overflow from an approximate century or decade', () => {
+  const parent = period('Q1', null, '1450', '1700');
+  expect(wikidataDateWarnings(period('Q2', 'Q1', 'vers 1400 (siècle)', '1600'), parent)).toEqual([expect.stringContaining('dates approximatives')]);
+  expect(wikidataDateWarnings(period('Q2', 'Q1', 'vers 1420 (décennie)', '1800'), parent)).toEqual([expect.stringContaining('Se termine après'), expect.stringContaining('dates approximatives')]);
+});

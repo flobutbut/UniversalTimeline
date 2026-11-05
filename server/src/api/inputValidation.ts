@@ -84,14 +84,14 @@ export function parseEventWrite(value: unknown, create: boolean): EntityWriteInp
   };
 }
 
-export function parsePeriodWrite(value: unknown, create: true): PeriodWriteInput & { id: string };
-export function parsePeriodWrite(value: unknown, create: false): PeriodWriteInput;
-export function parsePeriodWrite(value: unknown, create: boolean): PeriodWriteInput {
+export function parsePeriodWrite(value: unknown, create: true, allowMissingQid?: boolean): PeriodWriteInput & { id: string };
+export function parsePeriodWrite(value: unknown, create: false, allowMissingQid?: boolean): PeriodWriteInput;
+export function parsePeriodWrite(value: unknown, create: boolean, allowMissingQid = false): PeriodWriteInput {
   const body = inputObject(value);
   if (body.parent_id != null) throw new InputValidationError('parent_id', 'Organisez les périodes dans une frise, pas dans le catalogue.');
   const parsed = {
     id: create ? parseEntityId(body.id) : undefined,
-    wikidata_id: parseQid(body.wikidata_id, true)!,
+    wikidata_id: parseQid(body.wikidata_id, !allowMissingQid),
     label: label(body.label, 'label'), description: bilingual(body.description, 'description'),
     start_date: dateText(body.start_date, 'start_date', true)!,
     end_date: dateText(body.end_date, 'end_date') || (create ? 'NOW' : 'TODAY'),

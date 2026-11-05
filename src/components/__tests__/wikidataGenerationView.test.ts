@@ -8,6 +8,7 @@ import { SearchApiService } from '@/services/SearchApiService';
 import { StoryApiService } from '@/services/StoryApiService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { WikidataTimelineDraft } from '@/types/wikidataGeneration';
+import { defaultSettings } from '@/lib/wikidataGenerationModel';
 
 const fixture = (): WikidataTimelineDraft => ({ qid: 'Q1', title: 'Révolution', description: 'Un sujet', warnings: ['Sélection à vérifier'], items: [
   { qid: 'Q2', type: 'event', title: 'Prise de la Bastille', description: 'Événement', startDate: '1789-07-14', endDate: '', selected: true },
@@ -204,6 +205,32 @@ it('restores an edited public draft after sign-in', async () => {
   sessionStorage.setItem('wikidata-generation-draft', JSON.stringify(previous));
   await start(); expect(view.get('input[maxlength="255"]').element.value).toBe('Titre corrigé');
   expect(button('Enregistrer la frise').attributes('disabled')).toBeDefined();
+});
+
+it('recalculates selection after changing rules while preserving manual corrections', async () => {
+  vi.mocked(generation.generateWikidataTimeline).mockImplementation(async (_qid, options) => {
+    const result = fixture(); result.profile = 'history'; result.settings = { ...defaultSettings, ...options?.settings };
+    result.items[0].status = result.settings.approximate ? 'retained' : 'review';
+    return result;
+  });
+  await start();
+  await view.get('.generation-overview input').setValue('Mon titre');
+  await view.findAll('.generation-item')[0].get('input[maxlength="255"]').setValue('Fait corrigé');
+  await view.get('.generation-rules input[type="checkbox"]').setValue(false); await flushPromises();
+  expect(view.get('.generation-overview input').element.value).toBe('Mon titre');
+  expect(view.text()).toContain('0 sélectionnés');
+  await button('À vérifier').trigger('click');
+  const row = view.findAll('.generation-item').find(item => item.text().includes('Fait corrigé'))!;
+  expect(row.get('input[type="checkbox"]').element.checked).toBe(false);
+  await row.get('input[type="checkbox"]').setValue(true);
+  expect(button('Enregistrer la frise').attributes('disabled')).toBeUndefined();
+});
+
+it('restores generation rules before fetching the saved sign-in draft', async () => {
+  const previous = { ...fixture(), profile: 'history', settings: { ...defaultSettings, approximate: false, limit: 20 } };
+  sessionStorage.setItem('wikidata-generation-draft', JSON.stringify(previous));
+  await start();
+  expect(generation.generateWikidataTimeline).toHaveBeenCalledWith('Q1', expect.objectContaining({ profile: 'history', settings: expect.objectContaining({ approximate: false, limit: 20 }) }));
 });
 
 it('offers an explicit retry after a failed load without showing it as a successful empty result', async () => {

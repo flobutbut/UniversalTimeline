@@ -20,6 +20,8 @@ interface MetadataDto {
   createdAt?: ApiTimestamp; updatedAt?: ApiTimestamp;
 }
 interface EntityDto extends MetadataDto {
+  sourceKey?: string | null;
+  wikidataSource?: import('../../server/src/shared/wikidataGeneration').WikidataSource | null;
   wikidata_id?: string | null;
   label?: ApiText | null;
   label_fr?: string | null; label_en?: string | null;
