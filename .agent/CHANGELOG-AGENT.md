@@ -337,3 +337,7 @@ Réglages du projet PostHog 331677 : clics sans effet, capture des exceptions, f
 
 `timeline_position_viewed` (une fois par position affichée, avec `via` : entrée ou action dans la page, profondeur, vue), `timeline_event_opened` (clic de sélection), `timeline_load_failed` dans `HomeView.vue` ; aides dans `src/lib/explorationAnalytics.ts` (frise privée ou inconnue jamais identifiée, entrée annoncée par la recherche). `search_completed` dans `GlobalSearch.vue` via `useSearchAnalytics` (issue, résultats de la dernière saisie, reformulations, position, terme seulement sans frise trouvée et filtré par `searchTermForAnalytics`). Autocapture : `mask_all_text` et attributs descriptifs ignorés. Plan § 4.3, registre RGPD et politique de confidentialité mis à jour ; finalité inchangée, `CONSENT_VERSION` inchangé.
 Réglages PostHog : règle de suppression de l'erreur « ResizeObserver loop completed… » ; « Éléments qui frustrent » repère les éléments sans texte ; dashboard « Exploration » (1081248) créé.
+
+## 2026-11-05 — Exemples cliquables sur la landing
+
+Les trois lignes d'exemples de la section « Vos frises » (`LandingView.vue`) attiraient des clics sans effet (PostHog, 3 novembre) : ce sont désormais des liens vers la création de frise (`accountTarget`), avec survol, focus, flèche et précision pour les lecteurs d'écran, marqués `data-attr="landing-cta-example_<course|research|project>"`. L'entonnoir d'acquisition PostHog compte ces clics comme CTA de création.
