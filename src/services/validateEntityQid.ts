@@ -11,6 +11,7 @@ export interface QidValidation {
 
 /** Format and authoritative existence lookup, without hierarchy or mutation state. */
 export async function validateEntityQid(qid: string, type: 'period' | 'event', currentItemId?: string): Promise<QidValidation> {
+  if (!qid.trim()) return { isValid: true, error: '', exists: false };
   const format = EditFormValidator.validateQid(qid);
   if (!format.isValid) return { isValid: false, error: format.errors.join(', '), exists: false };
   try {

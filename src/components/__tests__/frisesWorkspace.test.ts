@@ -278,3 +278,38 @@ it('filters frises by a selected period independently from the date range', asyn
   filters.vm.$emit('update:period', null); await flushPromises();
   expect(cards()).toEqual(['Histoire de France']);
 });
+
+it('opens the newly created frise directly in its own tab and URL', async () => {
+  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  const created = { ...summaries[1], id: '3', title: { fr: 'Ma frise', en: '' }, isPublic: true };
+  vi.spyOn(api, 'createStory').mockResolvedValue(created);
+  vi.mocked(api.getStory).mockResolvedValue({ ...created, periods: [], events: [], parentStories: [] });
+  await start();
+  await button('Créer une frise').trigger('click'); await flushPromises();
+  view.getComponent({ name: 'EditModal' }).vm.$emit('submit', {
+    qid: '', title: created.title, description: { fr: '', en: '' }, startDate: '', endDate: '', date: '', location: '', parentId: null, categories: [], author: '', isPublic: true,
+  });
+  await flushPromises();
+  expect(router.currentRoute.value.query.story).toBe('3');
+  expect(tabs()).toEqual(['Ma frise']);
+  expect(view.getComponent(StoryDetailPanel).props('story').id).toBe('3');
+  expect(view.text()).toContain('Ajoutez votre première période');
+  expect(view.text()).toContain('aucun point d’entrée');
+});
+
+it('guides an empty frise through period and event creation and its entry points', async () => {
+  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  await start('/database?story=2');
+  await button('Ajouter une période').trigger('click'); await flushPromises();
+  expect(view.getComponent({ name: 'EditModal' }).props()).toMatchObject({ type: 'period', mode: 'create', data: { parent_id: null } });
+  view.getComponent({ name: 'EditModal' }).vm.$emit('close'); await flushPromises();
+  await button('Événements').trigger('click'); await flushPromises();
+  expect(view.text()).toContain('Ajoutez votre premier événement');
+  const emptyState = view.findAll('.feedback-state').find(state => state.text().includes('Ajoutez votre premier événement'))!;
+  await emptyState.get('button').trigger('click'); await flushPromises();
+  expect(view.getComponent({ name: 'EditModal' }).props()).toMatchObject({ type: 'event', mode: 'create' });
+  view.getComponent({ name: 'EditModal' }).vm.$emit('close'); await flushPromises();
+  await button('Gérer les points d’entrée').trigger('click'); await flushPromises();
+  expect(view.find('.story-relations').exists()).toBe(true);
+  expect(button('Rendre publique').attributes('disabled')).toBeUndefined();
+});

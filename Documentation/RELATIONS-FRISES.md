@@ -70,7 +70,7 @@ L’onglet **Relations → Parcours chronologique** permet de choisir une frise 
 
 `POST /stories/:contextId/presentations` prend `periodId`, `targetStoryId` et `operation` (`add` ou `remove`). La création d’une frise depuis une période enregistre automatiquement une présentation dans sa source, en plus de son ancre historique. Depuis le 4 novembre 2026, ses sous-périodes sont déplacées vers la nouvelle frise avec les sous-frises et points d’entrée qui les visent. La période reste dans la source comme ancre et n’est plus copiée dans la cible. Une présentation située sur une sous-période déplacée suit cette sous-période ; une présentation dont la frise source est la cible garde sa cible (voir [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md), section 2).
 
-`POST /stories` accepte `parentStoryId` et `anchor` (`{ anchorType, anchorId }`, dans la parente) : la frise, sa parente et son ancre sont écrites dans la même transaction. Une frise sans parente ne peut pas devenir publique (400) ; une frise déjà publique garde sa visibilité.
+`POST /stories` accepte `parentStoryId` et `anchor` (`{ anchorType, anchorId }`, dans la parente) : la frise, sa parente et son ancre sont écrites dans la même transaction. Une frise peut être créée publique sans parente. La modale et la fiche signalent alors l’absence de point d’entrée et orientent vers l’onglet Propriétés pour en ajouter un.
 
 Le contexte initial « Grandes périodes de l’histoire européenne » comporte Antiquité, Moyen Âge, Époque moderne et Histoire contemporaine. Pour ajouter la Renaissance : ouvrir sa frise, aller dans Relations, choisir ce parcours et la période Renaissance. Son début en 1400 la place automatiquement après Moyen Âge et avant Époque moderne. Aucun voisin existant n’est à modifier.
 

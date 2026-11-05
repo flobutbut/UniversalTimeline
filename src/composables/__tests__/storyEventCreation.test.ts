@@ -76,3 +76,16 @@ it('reuses the saved event on retry when its creation response was lost', async 
   expect(events.createEvent).toHaveBeenCalledOnce();
   expect(stories.changeAssociations).toHaveBeenCalledExactlyOnceWith('original', 'event', ['saved-event']);
 });
+
+it('creates a manual event without a Wikidata lookup and retries its association without duplicates', async () => {
+  vi.mocked(stories.changeAssociations).mockRejectedValueOnce(new Error('Ajout refusé'));
+  const { flow, onAdded } = start(); flow.open();
+  const manual = { ...form, qid: '' };
+  await flow.submit(manual);
+  expect(events.getEventById).not.toHaveBeenCalled();
+  expect(flow.error.value).toContain('L’événement est enregistré');
+  await flow.submit(manual);
+  expect(events.createEvent).toHaveBeenCalledExactlyOnceWith(manual);
+  expect(stories.changeAssociations).toHaveBeenCalledTimes(2);
+  expect(onAdded).toHaveBeenCalledOnce();
+});

@@ -14,7 +14,7 @@ afterEach(() => { view?.unmount(); vi.restoreAllMocks(); });
 
 it('rejects invalid Q-ids before any existence lookup', async () => {
   const lookup = vi.spyOn(ConflictResolutionService.getInstance(), 'detectConflict');
-  for (const value of ['', '123', 'Q-1']) expect(await validateEntityQid(value, 'period')).toMatchObject({ isValid: false, exists: false });
+  for (const value of ['123', 'Q-1']) expect(await validateEntityQid(value, 'period')).toMatchObject({ isValid: false, exists: false });
   expect(lookup).not.toHaveBeenCalled();
 });
 

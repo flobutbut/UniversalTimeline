@@ -2,7 +2,7 @@
   <div class="story-placement">
     <BaseSelect :model-value="modelValue.parentStoryId ?? ''" label="Frise parente" placeholder="Rechercher une frise…"
       :options="parentOptions" searchable no-results-text="Aucune frise modifiable" :disabled="disabled"
-      :hint="modelValue.parentStoryId ? undefined : 'Sans frise parente, la frise reste un brouillon privé. Seule la racine de l’arbre n’a pas de parente.'"
+      :hint="modelValue.parentStoryId ? undefined : 'Facultatif : rattachez cette frise à une frise existante pour créer un point d’entrée.'"
       @update:model-value="selectParent" />
     <template v-if="modelValue.parentStoryId">
       <div class="story-placement__dates">
@@ -41,7 +41,7 @@ const subjectStart = ref('');
 const subjectEnd = ref('');
 /** Un choix manuel n’est jamais remplacé par la proposition. */
 const anchorChosen = ref(false);
-const parentOptions = computed(() => [{ value: '', label: 'Aucune (brouillon privé)' },
+const parentOptions = computed(() => [{ value: '', label: 'Aucune' },
   ...props.candidates.map(story => ({ value: story.id, label: story.title.fr || story.title.en }))]);
 const suggestedId = computed(() => parent.value ? suggestAnchorPeriod(parent.value.periods, subjectRange(subjectStart.value, subjectEnd.value, Date.now()), Date.now()) : null);
 const anchorOptions = computed(() => (parent.value?.periods ?? [])

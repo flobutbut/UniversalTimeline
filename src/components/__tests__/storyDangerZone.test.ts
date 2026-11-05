@@ -23,10 +23,11 @@ it('changes the visibility and deletes the frise from the saved state', async ()
   expect(button('Rendre publique')?.attributes('disabled')).toBeUndefined();
 });
 
-it('keeps a private frise without a parent as a draft', () => {
+it('allows publishing a private frise without a parent', async () => {
   view = mount(StoryDangerZone, { props: { story: { ...story, isPublic: false, parentStoryId: null } } });
-  expect(button('Rendre publique')?.attributes('disabled')).toBeDefined();
-  expect(view.text()).toContain('Sans frise parente, la frise reste un brouillon privé');
+  expect(button('Rendre publique')?.attributes('disabled')).toBeUndefined();
+  await button('Rendre publique')!.trigger('click');
+  expect(view.emitted('toggle-visibility')).toHaveLength(1);
 });
 
 it('blocks both actions while a write is in progress', () => {

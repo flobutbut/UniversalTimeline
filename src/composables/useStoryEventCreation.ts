@@ -17,9 +17,11 @@ export function useStoryEventCreation(story: () => Story | null | undefined, onA
   const draft = ref<EditInitialData | null>(null);
   const busy = ref(false);
   const error = ref<string | null>(null);
+  let savedDraft: Event | null = null;
   let targetStoryId: string | null = null;
 
   function reset() {
+    savedDraft = null;
     requests.cancel(); draft.value = null; targetStoryId = null;
     busy.value = false; error.value = null;
   }
@@ -56,9 +58,10 @@ export function useStoryEventCreation(story: () => Story | null | undefined, onA
       const service = EventApiService.getInstance();
       const qid = formData.qid.trim().toUpperCase();
       // Resolve again on retry if the creation response was lost after COMMIT.
-      const existing = await service.getEventById(qid);
+      const existing = savedDraft ?? (qid ? await service.getEventById(qid) : null);
       if (!isCurrent()) return;
       saved = existing ?? await service.createEvent({ ...formData, qid });
+      if (isCurrent()) savedDraft = saved;
       store.upsertSavedEvent(saved);
       await associate(saved.id, storyId, isCurrent);
     } catch (cause) {

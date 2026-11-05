@@ -70,7 +70,7 @@ it('attaches the frise to a parent, preselecting the period that contains its da
   vi.spyOn(StoryApiService.getInstance(), 'getStory').mockResolvedValue(dated);
   const story = { ...storyFixture('3', [{ id: 'own', label_fr: 'Sujet', start_date: '1300', end_date: '1350' }]), ownerUserId: 'me', parentStoryId: null, isPublic: false };
   view = mount(StoryRelationsPanel, { props: { story }, attachTo: document.body });
-  expect(view.text()).toContain('Aucune : brouillon privé');
+  expect(view.text()).toContain('Aucune frise parente');
   await button('Choisir la frise parente').trigger('click'); await flushPromises();
   const picker = view.getComponent(ParentStoryPickerModal);
   expect(picker.props('candidates').map((s: { id: string }) => s.id)).toEqual(['1', '2']);

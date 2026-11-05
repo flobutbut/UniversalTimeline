@@ -112,7 +112,8 @@
             <Input
               v-if="!form.sourceKey?.startsWith('fact:')"
               v-model="form.qid"
-              label="Q-id Wikidata"
+              label="Q-id Wikidata (facultatif)"
+              hint="Laissez vide pour créer manuellement."
               placeholder="Q12345"
               :error="editState.qidError || fieldError('qid')"
               @blur="touch('qid'); validateQid()"
@@ -263,9 +264,9 @@
         <div class="form-row" v-if="type === 'story'">
           <div class="form-group">
             <div class="switch-group">
-              <Switch v-model="form.isPublic" label="Mode public" label-first :disabled="publicLocked" />
+              <Switch v-model="form.isPublic" label="Mode public" label-first />
             </div>
-            <p v-if="publicLocked" class="edit-modal__parent-hint">Une frise sans frise parente reste privée.</p>
+            <p v-if="isStoryCreation && !storyPlacement.parentStoryId" class="edit-modal__parent-hint" role="status">Cette frise n’aura aucun point d’entrée depuis une autre frise. Vous pourrez en ajouter dans l’onglet Propriétés après sa création.</p>
           </div>
         </div>
 
@@ -539,9 +540,6 @@ const validateQid = async () => {
 // Gestion de la soumission du formulaire
 const isStoryCreation = computed(() => props.type === 'story' && props.mode === 'create');
 const storyPlacement = ref<StoryPlacementDraft>({ parentStoryId: null, anchorPeriodId: null, complete: true });
-/** Règle 1 : une frise sans parente est un brouillon privé. */
-const publicLocked = computed(() => isStoryCreation.value && !storyPlacement.value.parentStoryId);
-watch(publicLocked, locked => { if (locked) form.isPublic = false; }, { immediate: true });
 const handleSubmit = () => {
   if (props.loading || wikidataApplyLoading.value) return;
   if (isStoryCreation.value && !storyPlacement.value.complete) return;

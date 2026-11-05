@@ -16,6 +16,7 @@ export function useDatabaseSave() {
   const toast = useToast();
   const { isLoading: loading } = useLoadingState();
   const error = ref<string | null>(null);
+  const savedStoryId = ref<string | null>(null);
   const fail = (message: string) => {
     error.value = message;
     toast.hide();
@@ -26,6 +27,7 @@ export function useDatabaseSave() {
   const handleSave = async (formData: EditFormSubmission, currentType: EditFormType, currentMode: EditFormMode, currentItem?: Pick<EditableItem, 'id'> | null) => {
     if (loading.value) return false;
     error.value = null;
+    savedStoryId.value = null;
     toast.show('Sauvegarde en cours...', 'info', 0);
 
     try {
@@ -63,6 +65,7 @@ export function useDatabaseSave() {
         const updatedItem = await (currentMode === 'edit' && currentItem
           ? service.updateStory(currentItem.id, submission) : service.createStory(submission));
         dataStore.upsertSavedStory(updatedItem);
+        savedStoryId.value = updatedItem.id;
         // The parent now proposes the new frise on its anchor.
         if (submission.storyPlacement) dataStore.invalidateStory(submission.storyPlacement.parentStoryId);
       }
@@ -78,5 +81,5 @@ export function useDatabaseSave() {
     }
   };
 
-  return { loading, error, handleSave };
+  return { loading, error, handleSave, savedStoryId };
 }

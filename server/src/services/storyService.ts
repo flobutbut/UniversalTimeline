@@ -12,7 +12,6 @@ import { changeEntryPoints, moveEntryPoint, changeEntryDisplay, type EntryLocati
 import { changePresentation, lockWritableStory, setRelationLockTimeout } from '../repositories/storyRelationsRepository.js';
 import { creatorAuthor, editorAuthor } from './storyAuthor.js';
 import { principalContext } from '../auth/context.js';
-import { PRIVATE_DRAFT_MESSAGE, refusesPublication } from '../domain/storyVisibility.js';
 
 const db = { query };
 export async function listStories() {
@@ -64,7 +63,6 @@ export async function getStory(id: string) {
 }
 /** One transaction: the frise, its categories and, when given, its parent and anchor. */
 export function createStory(data: StoryWrite, placement: { parentStoryId: string; anchor?: { anchorType: 'period' | 'event'; anchorId: string } } | null = null) {
-  if (refusesPublication(data.isPublic, { isPublic: false, parentStoryId: placement?.parentStoryId ?? null })) throw new StoryAssociationError(400, PRIVATE_DRAFT_MESSAGE);
   return withTransaction(async client => {
     const row = await stories.insertStory(client, { ...data, author: await creatorAuthor(client, data.author) });
     await replaceEntityCategories(client, 'story', row.id, data.categories);
@@ -74,11 +72,6 @@ export function createStory(data: StoryWrite, placement: { parentStoryId: string
 }
 export async function updateStory(id: string, data: StoryWrite) {
   const row = await withTransaction(async client => {
-    // Only a request to publish needs the current state: a draft without a parent stays private.
-    const current = data.isPublic === true ? await stories.lockStoryVisibility(client, id) : null;
-    if (current && refusesPublication(data.isPublic, { isPublic: current.is_public, parentStoryId: current.parent_story_id === null ? null : String(current.parent_story_id) })) {
-      throw new StoryAssociationError(400, PRIVATE_DRAFT_MESSAGE);
-    }
     const row = await stories.updateStory(client, id, { ...data, author: editorAuthor(data.author) });
     if (!row) return undefined;
     await replaceEntityCategories(client, 'story', id, data.categories);

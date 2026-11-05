@@ -18,11 +18,13 @@ export function useStoryWikidataPeriodImport(story: () => Story | null | undefin
   const draft = ref<EditInitialData | null>(null);
   const busy = ref(false);
   const error = ref<string | null>(null);
+  let savedDraft: Period | null = null;
   let targetStoryId: string | null = null;
   let targetParentId: string | null | undefined;
   let retryTask: (() => Promise<void>) | null = null;
 
   function reset() {
+    savedDraft = null;
     requests.cancel(); draft.value = null; targetStoryId = null; targetParentId = undefined;
     error.value = null; busy.value = false; retryTask = null;
   }
@@ -101,9 +103,10 @@ export function useStoryWikidataPeriodImport(story: () => Story | null | undefin
       const service = PeriodApiService.getInstance();
       const qid = formData.qid.trim().toUpperCase();
       // Resolve again on an explicit retry: a previous response may have been lost after COMMIT.
-      const existing = await service.getPeriodByWikidataId(qid);
+      const existing = savedDraft ?? (qid ? await service.getPeriodByWikidataId(qid) : null);
       if (!isCurrent()) return;
       saved = existing ?? await service.createPeriod({ ...formData, qid });
+      if (isCurrent()) savedDraft = saved;
       await associate(saved, storyId, isCurrent, parentId);
     } catch (cause) {
       if (isCurrent()) error.value = saved
