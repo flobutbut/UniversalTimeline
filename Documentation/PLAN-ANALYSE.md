@@ -110,6 +110,8 @@ Implémenté le 3 novembre 2026 (`src/lib/explorationAnalytics.ts`, `HomeView.vu
 
 Statut : **appliqué** le 3 novembre 2026 (Web Vitals et attribut `data-attr` étaient déjà actifs).
 
+Le 5 novembre 2026, les filtres « données de test » du projet (utilisés par tous les tableaux de bord) excluent aussi les robots déclarés (`$virt_is_bot = false`). Ce filtre ne voit pas les robots qui imitent un navigateur ordinaire. La cohorte « Internal / Test users » ne retire rien, car le site n'identifie pas les comptes : ce sont les appareils marqués `ut-internal-device` qui écartent les visites de l'éditeur. Ce même jour, l'arrêt de la mesure pendant une visite (connexion admin, opposition) a été corrigé : en effaçant le stockage, `purgePostHogStorage` supprimait aussi le refus enregistré par PostHog, et la capture automatique continuait. Désormais `before_send` écarte chaque événement tant que le mode est `off`.
+
 ## 5. Tableaux de bord
 
 ### Dashboard 1 — « Landing & inscription » (phase 1)
