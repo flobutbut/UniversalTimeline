@@ -50,26 +50,31 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Contenus : les frises que vous créez, leur visibilité et leurs liens avec le catalogue. Une frise publique affiche votre nom d’utilisateur.',
         'Données techniques : journaux de connexion et d’erreur des hébergeurs (adresse IP, date, requête), utilisés pour la sécurité.',
         'Modération : si l’administrateur suspend ou supprime un compte, ou modifie son rôle, l’action est enregistrée avec la date et le nom d’utilisateur concerné.',
+        'Fréquentation, sans cookie : page consultée (sans ses paramètres), site d’origine, pays, type de navigateur, de système et d’appareil. Un visiteur est reconnu pendant 24 heures au plus par une empreinte que Vercel calcule à partir de la requête, sans rien enregistrer sur votre appareil.',
         'Mesure d’audience, seulement avec votre accord : pages consultées, clics (sans le texte affiché), étapes franchies (par exemple l’envoi du formulaire d’inscription ou le motif technique d’un échec, sans son contenu), frises publiques, périodes et événements consultés (une frise privée est seulement comptée, jamais nommée), utilisation de la recherche et, lorsqu’aucune frise n’est trouvée, les termes recherchés (sans adresse, lien ni numéro), erreurs techniques de la page, provenance, type de navigateur et d’appareil, associés à un identifiant pseudonyme. L’adresse IP n’est pas conservée et les sessions ne sont pas enregistrées.',
       ] },
       { title: 'Finalités et bases légales', paragraphs: [], items: [
         'Créer et gérer votre compte, publier vos frises : exécution du contrat (article 6.1.b du RGPD).',
         'Sécuriser le service et prévenir les abus : intérêt légitime (article 6.1.f).',
         'Mesurer l’audience avec des cookies (PostHog) pour améliorer le site : votre consentement (article 6.1.a), retirable à tout moment.',
+        'Compter les visites sans cookie (Vercel Web Analytics) pour connaître la fréquentation réelle du site : intérêt légitime (article 6.1.f). Vous pouvez vous y opposer en nous écrivant ou en bloquant le script « /_vercel/insights » dans votre navigateur.',
       ] },
-      { title: 'Durées de conservation', paragraphs: [], items: [
+      { title: 'Durées de conservation', paragraphs: [
+        '[À compléter : durée de conservation des statistiques de fréquentation chez Vercel, selon l’offre souscrite.]',
+      ], items: [
         'Compte, profil et frises : jusqu’à la suppression de votre compte. Un compte sans aucune connexion pendant deux ans est supprimé avec ses frises ; un e-mail vous prévient un mois avant.',
         'Journaux techniques : sept jours au plus, durée fixée par les hébergeurs (Vercel et Supabase).',
         'Journal d’administration : un an après l’action.',
         'Messages adressés au contact : un an après le dernier échange.',
         'Choix relatif aux cookies : six mois, puis la question vous est reposée.',
         'Mesure d’audience : cookie conservé douze mois au plus et supprimé dès le retrait de votre accord ; statistiques conservées un an.',
+        'Fréquentation : l’empreinte qui reconnaît un visiteur disparaît après 24 heures ; seules des statistiques agrégées sont conservées.',
       ] },
       { title: 'Destinataires et sous-traitants', paragraphs: [
         'Vos données ne sont ni vendues ni cédées. Elles sont traitées pour notre compte par :',
       ], items: [
         'Supabase Inc. : base de données et authentification, hébergées dans l’Union européenne.',
-        'Vercel Inc. : hébergement de l’application et de l’API (États-Unis). Vercel est certifiée au cadre de protection des données UE–États-Unis (Data Privacy Framework), et son accord de traitement des données prévoit aussi les clauses contractuelles types de la Commission européenne.',
+        'Vercel Inc. : hébergement de l’application et de l’API, et comptage des visites sans cookie (États-Unis). Vercel est certifiée au cadre de protection des données UE–États-Unis (Data Privacy Framework), et son accord de traitement des données prévoit aussi les clauses contractuelles types de la Commission européenne.',
         'Hostinger International Ltd. : messagerie (envoi des e-mails du compte, réception des messages adressés au contact), société établie dans l’Union européenne (Chypre).',
         'PostHog Inc. : mesure d’audience, avec votre accord, hébergée dans l’Union européenne (PostHog Cloud EU), dans le cadre d’un accord de traitement des données (DPA) signé avec PostHog le 3 novembre 2026.',
       ] },
@@ -107,6 +112,9 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Cookie « ph_<clé du projet>_posthog » et stockage local du même nom : identifiant pseudonyme de l’appareil et de la visite, douze mois au plus.',
         'Stockage de session « ph_<clé du projet>_… » : identifiant de l’onglet, effacé à sa fermeture.',
         'Si vous retirez votre accord, ces éléments sont supprimés et l’outil cesse toute mesure.',
+      ] },
+      { title: 'Comptage des visites sans cookie', paragraphs: [
+        'Nous comptons aussi les visites avec Vercel Web Analytics, qui ne dépose aucun cookie et n’écrit rien sur votre appareil : il ne demande donc pas votre accord et fonctionne même si vous refusez la mesure d’audience. Seuls la page consultée (sans ses paramètres), le site d’origine, le pays et le type de navigateur, de système et d’appareil sont transmis. Voir la politique de confidentialité pour vous y opposer.',
       ] },
       { title: 'Gérer votre choix', paragraphs: [
         'Vous pouvez modifier ou retirer votre consentement à tout moment avec le bouton « Gérer mes préférences » ci-dessous ou depuis votre profil.',
