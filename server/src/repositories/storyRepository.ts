@@ -218,9 +218,6 @@ export async function updateStory(client: TransactionClient, id: string, data: S
     description?.en || description?.fr || null, author, isPublic ?? null, id,
   ])).rows[0];
 }
-export async function lockStoryVisibility(client: TransactionClient, id: string) {
-  return (await client.query<{ is_public: boolean; parent_story_id: number | null }>('SELECT is_public, parent_story_id FROM public.stories WHERE id=$1 FOR UPDATE', [id])).rows[0];
-}
 export async function lockOwnedStory(client: TransactionClient, id: string, userId: string) {
   return (await client.query('SELECT id FROM public.stories WHERE id=$1 AND owner_user_id=$2 FOR UPDATE', [id, userId])).rows[0];
 }

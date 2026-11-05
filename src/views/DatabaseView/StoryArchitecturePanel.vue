@@ -3,7 +3,7 @@
     <p class="story-architecture__role">
       <span class="story-architecture__badge">{{ role.label }}</span>
       <span v-if="!story.isPublic && role.draft" class="story-architecture__visibility">
-        <InfoTooltip label="Pourquoi cette frise est privée"><template #trigger>Privé</template>Ajoutez une frise parente pour pouvoir rendre cette frise publique.</InfoTooltip>
+        <InfoTooltip label="Visibilité de cette frise"><template #trigger>Privé</template>Vous pouvez rendre cette frise publique dans les Propriétés, même sans frise parente.</InfoTooltip>
       </span>
       <span v-else class="story-architecture__badge story-architecture__badge--visibility">{{ story.isPublic ? 'Public' : 'Privé' }}</span>
       <span class="story-architecture__description">{{ role.description }}</span>

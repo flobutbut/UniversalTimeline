@@ -17,9 +17,9 @@ function start() {
   view = mount(StoryPlacementFields, { props: { modelValue: value, candidates: [parent], 'onUpdate:modelValue': (next: StoryPlacementDraft) => { value = next; void view.setProps({ modelValue: next }); } }, attachTo: document.body });
   return () => value;
 }
-it('keeps a frise without a parent as a complete private draft', () => {
+it('keeps creation without a parent optional and complete', () => {
   const value = start();
-  expect(view.text()).toContain('Sans frise parente, la frise reste un brouillon privé');
+  expect(view.text()).toContain('Facultatif : rattachez cette frise');
   expect(value()).toEqual({ parentStoryId: null, anchorPeriodId: null, complete: true });
 });
 it('proposes the deepest anchor containing the subject dates, and keeps a manual choice', async () => {

@@ -33,7 +33,7 @@ it('hides the review from readers and the promotion from non-owners, and marks a
 it('explains the missing parent on a private draft and displays actual public visibility', async () => {
   view = mount(StoryArchitecturePanel, { props: { story: { ...story(), parentStoryId: null, isPublic: false }, stories: [] }, attachTo: document.body });
   await view.get('.story-architecture__visibility button').trigger('click'); await flushPromises();
-  expect(document.querySelector('[role="tooltip"]')?.textContent).toContain('Ajoutez une frise parente pour pouvoir rendre cette frise publique.');
+  expect(document.querySelector('[role="tooltip"]')?.textContent).toContain('Vous pouvez rendre cette frise publique dans les Propriétés, même sans frise parente.');
   await view.setProps({ story: { ...story(), isPublic: true } });
   expect(view.text()).toContain('Public'); expect(view.text()).not.toContain('Privé');
   expect(document.querySelector('[role="tooltip"]')).toBeNull();

@@ -94,15 +94,39 @@ test('a new frise refuses an anchor outside its parent, or without a parent, and
   assert.equal((await call('post', '/stories', { body: storyBody({ parentStoryId: '5' }), userId: alice })).statusCode, 404);
   assert.deepEqual(await rows('SELECT count(*)::int n FROM stories'), before);
 });
-test('a frise without a parent stays private, while an already public one keeps its visibility', async () => {
-  const before = await rows('SELECT count(*)::int n FROM stories');
-  assert.equal((await call('post', '/stories', { body: storyBody({ isPublic: true }) })).statusCode, 400);
-  assert.deepEqual(await rows('SELECT count(*)::int n FROM stories'), before);
+test('a frise can be created public or published later without a parent', async () => {
+  const created = await call('post', '/stories', { body: storyBody({ isPublic: true }) });
+  assert.equal(created.statusCode, 201);
+  assert.deepEqual(await rows('SELECT parent_story_id, is_public FROM stories WHERE id=$1', [created.payload.id]), [{ parent_story_id: null, is_public: true }]);
   const draft = await call('post', '/stories', { body: storyBody({ isPublic: false }) });
   assert.equal(draft.statusCode, 201);
-  assert.equal((await call('put', '/stories/:id', { params: { id: String(draft.payload.id) }, body: storyBody({ isPublic: true }) })).statusCode, 400);
-  assert.deepEqual(await rows('SELECT is_public FROM stories WHERE id=$1', [draft.payload.id]), [{ is_public: false }]);
-  assert.equal((await call('put', '/stories/:id', { params: { id: '3' }, body: storyBody({ isPublic: true }) })).statusCode, 200);
-  await pool.query('UPDATE stories SET parent_story_id = 1 WHERE id = $1', [draft.payload.id]);
   assert.equal((await call('put', '/stories/:id', { params: { id: String(draft.payload.id) }, body: storyBody({ isPublic: true }) })).statusCode, 200);
+  assert.deepEqual(await rows('SELECT is_public FROM stories WHERE id=$1', [draft.payload.id]), [{ is_public: true }]);
+});
+
+test('a manual period and event can be created without Q-ids, then attached to an empty frise', async () => {
+  const created = await call('post', '/stories', { body: storyBody({ isPublic: true }) });
+  assert.equal(created.statusCode, 201);
+  const storyId = String(created.payload.id);
+  const period = await call('post', '/periods', { body: { id: 'manual-period', label: { fr: 'Mon projet' }, start_date: '2000', end_date: '2001' } });
+  assert.equal(period.statusCode, 201);
+  assert.equal(period.payload.wikidata_id, null);
+  const edited = await call('put', '/periods/:id', { params: { id: 'manual-period' }, body: { label: { fr: 'Mon projet renommé' }, start_date: '2000', end_date: '2002' } });
+  assert.equal(edited.statusCode, 200);
+  const event = await call('post', '/events', { body: { id: 'manual-event', label: { fr: 'Premier souvenir' }, date: '2000-06-01' } });
+  assert.equal(event.statusCode, 201);
+  assert.equal(event.payload.wikidata_id, null);
+  assert.equal((await call('post', '/stories/:storyId/periods', { params: { storyId }, body: { ids: ['manual-period'], operation: 'add', parentPeriodId: null } })).statusCode, 200);
+  assert.equal((await call('post', '/stories/:storyId/events', { params: { storyId }, body: { ids: ['manual-event'], operation: 'add' } })).statusCode, 200);
+  assert.deepEqual(await memberships(Number(storyId)), [{ period_id: 'manual-period', parent_period_id: null }]);
+  assert.deepEqual(await rows('SELECT event_id FROM story_events WHERE story_id=$1', [storyId]), [{ event_id: 'manual-event' }]);
+});
+
+test('the personal category seed is replayable and selectable on a frise', async () => {
+  const seed = await readFile(new URL('../../database/data/20261105_personal_category.sql', import.meta.url), 'utf8');
+  await pool.query(seed); await pool.query(seed);
+  assert.deepEqual(await rows("SELECT id, label_fr FROM categories WHERE id='CAT_PERSONAL'"), [{ id: 'CAT_PERSONAL', label_fr: 'Personnelle' }]);
+  const created = await call('post', '/stories', { body: storyBody({ categories: [{ id: 'CAT_PERSONAL' }] }) });
+  assert.equal(created.statusCode, 201);
+  assert.deepEqual(await rows('SELECT category_id FROM story_categories WHERE story_id=$1', [created.payload.id]), [{ category_id: 'CAT_PERSONAL' }]);
 });

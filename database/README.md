@@ -31,6 +31,10 @@ Le lot `data/20261102_historical_navigation_context.sql`, appliqué le 2 novembr
 
 Voir [Relations au sein des frises](../Documentation/RELATIONS-FRISES.md) pour le comportement et l’édition des parcours.
 
+## Catégorie personnelle — 5 novembre 2026
+
+Le lot idempotent `data/20261105_personal_category.sql` ajoute « Personnelle » (`CAT_PERSONAL`) pour les frises, périodes et événements. Appliqué au projet actif le 5 novembre 2026 et vérifié par lecture. Il peut aussi être exécuté après la baseline sur une installation vide.
+
 ## Corrections du catalogue
 
 Les fichiers `data/20261102_catalogue_*` contiennent les textes sourcés et le lot transactionnel de correction de l’audit du 2 novembre 2026, déjà appliqué au projet actif. Le [compte rendu](../Documentation/PERFORMANCE-ET-CATALOGUE.md) décrit les décisions et la validation. Ces corrections ciblent les anciennes fiches recensées et ne doivent pas être exécutées sur une nouvelle base vide. Le retour arrière refuse les contenus ou relations modifiés depuis l’application.

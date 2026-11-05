@@ -4,7 +4,7 @@
       <div class="story-relations__source-header">
         <div>
           <span class="story-relations__caption">Frise parente</span>
-          <h4>{{ parentStory ? parentStory.title.fr || parentStory.title.en : treeRoot ? 'Racine de l’arbre des frises' : 'Aucune : brouillon privé' }}</h4>
+          <h4>{{ parentStory ? parentStory.title.fr || parentStory.title.en : treeRoot ? 'Racine de l’arbre des frises' : 'Aucune frise parente' }}</h4>
           <p class="story-relations__description">{{ parentAnchorsLabel }}</p>
         </div>
         <Button v-if="auth.ownsStory(story)" variant="tertiary" size="sm" :disabled="busy || loading" @click="openParentPicker">{{ story.parentStoryId ? 'Changer de frise parente' : 'Choisir la frise parente' }}</Button>
@@ -75,7 +75,7 @@ const parentStory = computed(() => parents.value.find(parent => parent.id === pr
   ?? store.stories.find(story => story.id === props.story.parentStoryId) ?? null);
 const treeRoot = computed(() => !props.story.parentStoryId && isTreeRoot(props.story.id, store.stories));
 const parentAnchorsLabel = computed(() => {
-  if (!props.story.parentStoryId) return treeRoot.value ? 'Seule la racine n’a pas de frise parente.' : 'Sans frise parente, la frise reste privée.';
+  if (!props.story.parentStoryId) return treeRoot.value ? 'Seule la racine n’a pas de frise parente.' : 'Le rattachement est facultatif, quelle que soit la visibilité de la frise.';
   const anchors = parents.value.find(parent => parent.id === props.story.parentStoryId)?.anchors ?? [];
   return anchors.length ? `Ancre : ${anchors.map(anchor => anchor.label.fr || anchor.label.en || anchor.id).join(', ')}` : 'Accès depuis la racine de la frise parente.';
 });

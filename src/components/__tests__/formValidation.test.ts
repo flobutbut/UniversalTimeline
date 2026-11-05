@@ -58,3 +58,26 @@ it('clears a derived date preview as soon as its input is erased without alterin
   await start.setValue('');expect(view.findAll('.date-preview')[0].text()).toBe('');
   expect(button().attributes('disabled')).toBeDefined();
 });
+
+it('allows public creation without a parent and explains the missing entry point', async () => {
+  view = mount(EditModal, { props: { isOpen: true, type: 'story', mode: 'create', data: { title: { fr: 'Ma frise' }, isPublic: true } } });
+  await flushPromises();
+  expect(view.get('[role="switch"]').attributes('disabled')).toBeUndefined();
+  expect(view.text()).toContain('aucun point d’entrée');
+  await button().trigger('click');
+  expect(view.emitted('submit')?.[0]?.[0]).toMatchObject({ isPublic: true, title: { fr: 'Ma frise' } });
+});
+
+it.each(['period', 'event'] as const)('creates a manual %s without Q-id, while rejecting a malformed supplied Q-id', async type => {
+  view = mount(EditModal, { props: { isOpen: true, type, mode: 'create', data: { title: { fr: 'Mon souvenir' }, startDate: '2000', endDate: '2001', date: '2000' } } });
+  await flushPromises();
+  const qid = view.get('input[placeholder="Q12345"]');
+  await qid.trigger('blur'); await flushPromises();
+  expect(button().attributes('disabled')).toBeUndefined();
+  await button().trigger('click');
+  expect(view.emitted('submit')?.[0]?.[0]).toMatchObject({ qid: '', title: { fr: 'Mon souvenir' } });
+  await qid.setValue('Q-1'); await qid.trigger('blur'); await flushPromises();
+  expect(button().attributes('disabled')).toBeDefined();
+  await qid.setValue(''); await qid.trigger('blur'); await flushPromises();
+  expect(button().attributes('disabled')).toBeUndefined();
+});

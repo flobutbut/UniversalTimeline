@@ -123,3 +123,16 @@ it('ignores an existing-period lookup after the user switches frises', async () 
   pending.resolve(saved); await choosing;
   expect(stories.changeAssociations).not.toHaveBeenCalled(); expect(flow.draft.value).toBeNull();
 });
+
+it('creates the first manual period at the root and retries its association without duplicates', async () => {
+  vi.mocked(stories.changeAssociations).mockRejectedValueOnce(new Error('Ajout refusé'));
+  const { flow, onImported } = start(); flow.openCreate(null);
+  const manual = { ...form, qid: '', parentId: null };
+  await flow.submit(manual);
+  expect(periods.getPeriodByWikidataId).not.toHaveBeenCalled();
+  expect(flow.error.value).toContain('La période est enregistrée');
+  await flow.submit(manual);
+  expect(periods.createPeriod).toHaveBeenCalledExactlyOnceWith(manual);
+  expect(stories.changeAssociations).toHaveBeenLastCalledWith('original', 'period', ['saved-period'], false, null);
+  expect(onImported).toHaveBeenCalledOnce();
+});

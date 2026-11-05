@@ -218,13 +218,14 @@ function onEditStoryEvent(id: string) {
   void handleEditEvent(event);
 }
 
-const { handleSave: saveHandler, loading: saveLoading, error: saveError } = useDatabaseSave();
+const { handleSave: saveHandler, loading: saveLoading, error: saveError, savedStoryId } = useDatabaseSave();
 const { handleDelete: deleteHandler, loading: deleteLoading } = useDatabaseDelete();
 
 const handleSave = async (formData: EditFormSubmission) => {
   if (saveLoading.value || deleteLoading.value) return;
   const savedId = modalState.value.currentItem?.id;
   const savedType = modalState.value.currentType;
+  const creatingStory = savedType === 'story' && modalState.value.currentMode === 'create';
   const success = await saveHandler(
     formData, 
     modalState.value.currentType, 
@@ -235,6 +236,11 @@ const handleSave = async (formData: EditFormSubmission) => {
   if (success) {
     closeAddModal();
     closeEditModal();
+    if (creatingStory && savedStoryId.value) {
+      const created = useDataStore().stories.find(story => story.id === savedStoryId.value);
+      if (created) openStory(created);
+      return;
+    }
     if (savedId === selectedStoryId.value || (savedType === 'period' && selectedStory.value?.periods.some(period => period.id === savedId)) || (savedType === 'event' && selectedStory.value?.events.some(event => event.id === savedId))) await retryStory();
   }
 };
@@ -257,7 +263,6 @@ const visibilityBusy = ref(false);
 async function toggleStoryVisibility() {
   const story = selectedStory.value;
   if (!story || relationsBusy.value || visibilityBusy.value || saveLoading.value || deleteLoading.value) return;
-  if (!story.isPublic && !story.parentStoryId) { toast.show('Une frise sans frise parente reste privée : choisissez d’abord sa frise parente.', 'error'); return; }
   const next = story.isPublic ? 'privée' : 'publique';
   const accepted = await confirm(`Rendre la frise ${next}`, story.isPublic
     ? `« ${story.title.fr} » ne sera plus visible que par vous.`

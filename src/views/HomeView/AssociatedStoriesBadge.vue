@@ -3,7 +3,8 @@
     <button ref="trigger" type="button" class="associated-stories__badge" :disabled="disabled"
       :aria-label="badgeLabel" :title="badgeLabel" aria-haspopup="dialog" :aria-expanded="open"
       :aria-controls="open ? panelId : undefined" @click="toggle">
-      <span>{{ loading ? 'Frises…' : error ? 'Frises indisponibles' : `${otherStories.length} ${otherStories.length === 1 ? 'frise associée' : 'frises associées'}` }}</span>
+      <span class="associated-stories__label">{{ loading ? 'Frises…' : error ? 'Frises indisponibles' : `${otherStories.length} ${otherStories.length === 1 ? 'frise associée' : 'frises associées'}` }}</span>
+      <DesignIcon name="down" class="associated-stories__arrow" :class="{ 'associated-stories__arrow--open': open }" />
     </button>
     <Teleport to="body">
       <template v-if="open">
@@ -27,6 +28,7 @@
 
 <script setup lang="ts">
 import Button from '@/components/base/Button.vue';
+import DesignIcon from '@/components/base/DesignIcon.vue';
 import { elementRef } from '@/utils/elementRef';
 import PopoverSurface from '@/components/base/PopoverSurface.vue';
 import { computed, nextTick, onDeactivated, onScopeDispose, ref, watch } from 'vue';
@@ -99,10 +101,12 @@ onScopeDispose(() => { close(false); window.removeEventListener('resize', positi
 
 <style scoped>
 .associated-stories { display: inline-flex; flex-shrink: 0; align-self: center; max-width: 100%; min-width: 0; overflow: hidden; }
-.associated-stories__badge { display: inline-flex; align-items: center; gap: var(--spacing-xs); min-width: 0; max-width: 100%; height: 24px; padding: 2px 6px; border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-surface-default); color: var(--color-text-primary); font-size: var(--font-size-xs); line-height: var(--line-height-small); white-space: nowrap; font-variant-numeric: tabular-nums; cursor: pointer; }
-.associated-stories__badge > span { overflow: hidden; text-overflow: ellipsis; }
-.associated-stories__badge:focus-visible { outline-offset: -2px; }
-.associated-stories__badge:hover, .associated-stories__badge[aria-expanded="true"] { background: var(--color-interaction-hover); border-color: var(--color-primary); }
+.associated-stories__badge { display: inline-flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); min-width: 0; max-width: 100%; min-height: var(--field-height-sm); padding: 0 var(--spacing-sm); border: 1px solid transparent; border-radius: var(--radius-md); background: var(--color-action-primary-default); color: var(--color-text-on-accent); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); line-height: var(--line-height-small); white-space: nowrap; font-variant-numeric: tabular-nums; cursor: pointer; transition: background-color var(--transition-fast); }
+.associated-stories__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.associated-stories__arrow { transition: transform var(--transition-fast); }
+.associated-stories__arrow--open { transform: rotate(180deg); }
+.associated-stories__badge:focus-visible { outline-offset: -3px; }
+.associated-stories__badge:hover, .associated-stories__badge[aria-expanded="true"] { background: var(--color-action-primary-hover); }
 .associated-stories__badge:disabled { opacity: .5; cursor: default; }
 .associated-stories__badge:focus-visible, .associated-stories__panel button:focus-visible { outline: 2px solid var(--color-border-focus); }
 .associated-stories__panel button:focus-visible { outline-offset: 2px; }

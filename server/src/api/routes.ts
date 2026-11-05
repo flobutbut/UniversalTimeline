@@ -154,9 +154,7 @@ router.put('/events/:id', endpoint("Erreur lors de la mise à jour de l'événem
 }, { conflict: 'Ce Q-id ou cet identifiant d’événement est déjà utilisé.' }));
 router.put('/periods/:id', endpoint('Erreur lors de la mise à jour de la période', async (req, res) => {
   const id = parseEntityId(req.params.id);
-  // Only an already persisted derived fact may omit a native entity Q-id.
-  const allowMissingQid = !req.body?.wikidata_id && (await catalogue.getPeriod(id)).sourceKey?.startsWith('fact:') === true;
-  const data = parseWriteCategories(parsePeriodWrite(req.body, false, allowMissingQid));
+  const data = parseWriteCategories(parsePeriodWrite(req.body, false));
   res.json(await catalogue.updatePeriod(id, data));
 }, { conflict: 'Ce Q-id ou cet identifiant de période est déjà utilisé.' }));
 router.delete('/periods/:id', endpoint('Erreur lors de la suppression de la période', async (req, res) => {
@@ -173,8 +171,7 @@ router.post('/periods/:id/convert-to-event', endpoint('Impossible de convertir l
 }, { conflict: 'Ce Q-id ou cet identifiant d’événement est déjà utilisé.', busy: 'La période est occupée. Réessayez la conversion.' }));
 router.post('/events/:id/convert-to-period', endpoint('Impossible de convertir l’événement en période.', async (req, res) => {
   const id = parseEntityId(req.params.id);
-  const allowMissingQid = !req.body?.wikidata_id && (await catalogue.getEvent(id)).sourceKey?.startsWith('fact:') === true;
-  const data = parseWriteCategories(parsePeriodWrite(req.body, true, allowMissingQid));
+  const data = parseWriteCategories(parsePeriodWrite(req.body, true));
   res.status(201).json(await convertEventToPeriod(id, data));
 }, { conflict: 'Ce Q-id ou cet identifiant de période est déjà utilisé.', busy: 'L’événement est occupé. Réessayez la conversion.' }));
 router.delete('/events/:id', endpoint("Erreur lors de la suppression de l'événement", async (req, res) => {

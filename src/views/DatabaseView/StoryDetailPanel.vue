@@ -28,6 +28,11 @@
         </div>
       </div>
 
+      <FeedbackState v-if="auth.canEditStory(story) && !story.parentStories?.length" layout="inline">
+        Cette frise n’a aucun point d’entrée depuis une autre frise.
+        <template #actions><Button variant="tertiary" size="sm" @click="selectContentTab('overview')">Gérer les points d’entrée</Button></template>
+      </FeedbackState>
+
       <!-- Onglets -->
       <div class="story-detail-panel__tabs-bar">
         <Tabs
@@ -113,7 +118,10 @@
           <div v-if="periodImportError && !periodImportDraft" class="story-finder-feedback" role="alert">
             {{ periodImportError }} <Button variant="tertiary" size="sm" type="button" :disabled="periodImportBusy" @click="retryPeriodImport">Réessayer</Button>
           </div>
-          <div v-if="treeViewVisited" v-show="periodLayout === 'tree'" class="story-period-tree-workspace">
+          <FeedbackState v-if="!story.periods?.length && !story.childStories?.length && !showExternalInFinder && !finderLoading && !finderError" title="Ajoutez votre première période" message="Définissez un début et une fin pour structurer votre frise. Vous pouvez créer une période manuellement ou en choisir une existante.">
+            <template v-if="auth.canEditStory(story)" #actions><Button size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">Ajouter une période</Button></template>
+          </FeedbackState>
+          <div v-if="treeViewVisited && (story.periods?.length || story.childStories?.length || showExternalInFinder)" v-show="periodLayout === 'tree'" class="story-period-tree-workspace">
             <div class="story-period-tree-workspace__navigation">
               <StoryPeriodTree :story-id="story.id" :periods="story.periods" :additional-periods="finderPeriods" :selected-id="selectedPeriodId"
                 :search="periodHeaderSearch" :category-id="periodFilterCategoryId" :show-additional="showExternalInFinder" :loaded-branch-ids="loadedBranchIds"
@@ -222,7 +230,6 @@
               </div>
             </div>
           </template>
-          <div v-else-if="!finderLoading && !finderError" class="finder-empty-column">Aucune période associée <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="showRootPicker = true">Choisir la racine</Button></div>
           </div>
           </div>
         </template>
@@ -348,7 +355,9 @@
               </div>
             </div>
           </template>
-          <div v-else class="finder-empty-column">Aucun événement associé</div>
+          <FeedbackState v-else title="Ajoutez votre premier événement" message="Placez les moments clés de votre frise à une date précise. Vous pouvez créer un événement manuellement ou en choisir un existant.">
+            <template v-if="auth.canEditStory(story)" #actions><Button size="sm" :disabled="panelBusy" @click="openEventCreator">Ajouter un événement</Button></template>
+          </FeedbackState>
           </div>
         </template>
 

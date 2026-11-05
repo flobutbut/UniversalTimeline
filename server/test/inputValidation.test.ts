@@ -58,7 +58,7 @@ it.each([1,'','  ','a'.repeat(256)])('refuses an invalid author before SQL (%j)'
 it.each([undefined,null])('accepts a story without author: the account signs it (%j)', author => {
   expect(parseStoryWrite({...story,author}).author).toBeNull();
 });
-it.each([{},[],1,'','Q-1','Q0'])('refuses invalid Q-ids before SQL (%j)', async wikidata_id => {
+it.each([{},[],1,'Q-1','Q0'])('refuses invalid Q-ids before SQL (%j)', async wikidata_id => {
   const res=await call('post','/periods',{...entity,wikidata_id}); expect(res.status).toHaveBeenCalledWith(400); noSql();
 });
 it.each([{},1,'','\0','id'.repeat(101)])('refuses malformed catalogue IDs while keeping historical text IDs (%j)', async id => {
@@ -123,4 +123,9 @@ it.each([
 ])('rejects an invalid temporal interval before SQL: %s → %s', async (start_date,end_date) => {
   const res=await call('post','/periods',{id:'period',wikidata_id:'Q123',label:{fr:'Période'},start_date,end_date});
   expect(res.status).toHaveBeenCalledWith(400);expect(query).not.toHaveBeenCalled();expect(withTransaction).not.toHaveBeenCalled();
+});
+
+it.each([undefined, null, '', '  '])('accepts manual period creation and editing without a Q-id (%j)', wikidata_id => {
+  expect(parsePeriodWrite({ ...entity, wikidata_id }, true).wikidata_id).toBeNull();
+  expect(parsePeriodWrite({ ...entity, wikidata_id }, false).wikidata_id).toBeNull();
 });

@@ -34,17 +34,18 @@ beforeEach(() => {
 });
 afterEach(() => { view?.unmount(); document.body.innerHTML = ''; vi.restoreAllMocks(); vi.useRealTimers(); });
 
-it('places a text badge only on linked child periods and reads associations once for the whole frise', async () => {
+it('places a dropdown selector only on linked child periods and reads associations once for the whole frise', async () => {
   const api = vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(detail('one', [linked('child'), linked('child')]));
   view = mount(PeriodGrid, { props: gridProps, attachTo: document.body }); await settle();
   expect(api).toHaveBeenCalledExactlyOnceWith('one', expect.objectContaining({ signal: expect.any(AbortSignal) }));
   expect(view.get('.period-card--parent').find('.associated-stories__badge').exists()).toBe(false);
   expect(view.get('[data-period-id="other"]').find('.associated-stories__badge').exists()).toBe(false);
   expect(view.get('[data-period-id="leaf"]').get('.associated-stories__badge').text()).toBe('1 frise associée');
-  expect(badge().find('svg').exists()).toBe(false);
+  expect(badge().get('.associated-stories__arrow').attributes('aria-hidden')).toBe('true');
   expect(badge().element.closest('[role="button"]')).toBeNull();
   await badge().trigger('click'); await flushPromises();
   expect(body().get('[role="dialog"]').text()).toContain('Frise child');
+  expect(badge().get('.associated-stories__arrow').classes()).toContain('associated-stories__arrow--open');
   expect(view.emitted('period-click')).toBeUndefined(); expect(view.emitted('go-back')).toBeUndefined();
   await body().get('.associated-stories__item').trigger('click');
   expect(view.emitted('story-select')).toEqual([['child', {type:'period', id:'leaf'}]]); expect(body().find('[role="dialog"]').exists()).toBe(false);
