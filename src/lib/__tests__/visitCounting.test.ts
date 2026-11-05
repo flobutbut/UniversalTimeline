@@ -13,6 +13,14 @@ it('sends only the path, never identifiers or auth secrets of the query', () => 
   expect(filter({ type: 'event', url: '/timeline?story=8#x' })).toEqual({ type: 'event', url: 'https://universaltimeline.net/timeline' });
 });
 
+it('sends nothing for a visitor who objected or a device of the publisher', () => {
+  let allowed = true;
+  const filter = createPathOnlyFilter('https://universaltimeline.net', () => allowed);
+  expect(filter({ type: 'pageview', url: '/' })).not.toBeNull();
+  allowed = false;
+  expect(filter({ type: 'pageview', url: '/timeline' })).toBeNull();
+});
+
 it('counts one visit per page, not one per position of the Exploration', () => {
   const filter = createPathOnlyFilter('https://universaltimeline.net');
   const view = (url: string) => filter({ type: 'pageview', url });
@@ -23,8 +31,8 @@ it('counts one visit per page, not one per position of the Exploration', () => {
 });
 
 it('loads the Vercel script only in a production build', () => {
-  installVisitCounting(env({ PROD: false }));
+  installVisitCounting(() => true, env({ PROD: false }));
   expect(vercel.inject).not.toHaveBeenCalled();
-  installVisitCounting(env({ PROD: true }));
+  installVisitCounting(() => true, env({ PROD: true }));
   expect(vercel.inject).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ mode: 'production', debug: false, beforeSend: expect.any(Function) }));
 });

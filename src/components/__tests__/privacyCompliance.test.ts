@@ -28,32 +28,48 @@ it('shows no banner while no tracker is configured, but keeps the preferences re
   expect(view!.find('.cookie-consent').exists()).toBe(false);
   consent.openPreferences(); await flushPromises();
   expect(view!.text()).toContain('Aucun traceur de mesure d’audience n’est actif');
-  expect(view!.findAll('[role="switch"]').map(item => item.attributes('aria-checked'))).toEqual(['true', 'false']);
+  expect(view!.findAll('[role="switch"]').map(item => item.attributes('aria-checked'))).toEqual(['true', 'false', 'true']);
 });
 
-it('asks once a tracker exists, with refusal as easy as acceptance, and starts the tracker only after consent', async () => {
+it('asks once a tracker exists, measures anonymously until consent, and lets the visitor object', async () => {
   vi.stubEnv('VITE_ANALYTICS_PROVIDER', 'future-provider');
   const consent = useConsentStore();
-  const tracker = { start: vi.fn(), stop: vi.fn() };
+  const tracker = { apply: vi.fn() };
   consent.registerTracker(tracker);
   await mountWithRouter(CookieConsent);
   const buttons = () => view!.findAll('button').map(button => button.text());
   expect(buttons()).toEqual(['Tout refuser', 'Personnaliser', 'Tout accepter']);
-  expect(tracker.start).not.toHaveBeenCalled();
+  expect(tracker.apply).toHaveBeenLastCalledWith('exempt');
   await view!.findAll('button')[0].trigger('click');
-  expect(JSON.parse(localStorage.getItem('ut-consent')!)).toMatchObject({ version: CONSENT_VERSION, analytics: false });
-  expect(view!.find('.cookie-consent').exists()).toBe(false); expect(tracker.start).not.toHaveBeenCalled();
-  consent.acceptAll(); await flushPromises(); expect(tracker.start).toHaveBeenCalledOnce();
-  consent.rejectAll(); await flushPromises(); expect(tracker.stop).toHaveBeenCalledOnce();
+  expect(JSON.parse(localStorage.getItem('ut-consent')!)).toMatchObject({ version: CONSENT_VERSION, analytics: false, anonymous: true });
+  expect(view!.find('.cookie-consent').exists()).toBe(false); expect(tracker.apply).toHaveBeenCalledTimes(1);
+  consent.acceptAll(); await flushPromises(); expect(tracker.apply).toHaveBeenLastCalledWith('consented');
+  consent.rejectAll(); await flushPromises(); expect(tracker.apply).toHaveBeenLastCalledWith('exempt');
+  // Objecting to the anonymous measurement from the preferences stops everything.
+  consent.openPreferences(); await flushPromises();
+  await view!.findAll('[role="switch"]')[2]!.trigger('click');
+  await view!.findAll('button').find(button => button.text() === 'Enregistrer mes choix')!.trigger('click'); await flushPromises();
+  expect(consent.choice).toMatchObject({ analytics: false, anonymous: false }); expect(tracker.apply).toHaveBeenLastCalledWith('off');
+  consent.rejectAll(); await flushPromises(); expect(consent.measurementMode).toBe('off');
+});
+
+it('never measures a device where an administrator signed in, even signed out later', () => {
+  vi.stubEnv('VITE_ANALYTICS_PROVIDER', 'future-provider');
+  const consent = useConsentStore(); const tracker = { apply: vi.fn() };
+  consent.registerTracker(tracker); consent.acceptAll();
+  consent.markInternalDevice();
+  expect(consent.measurementMode).toBe('off');
+  disposePinia(pinia); pinia = createPinia(); setActivePinia(pinia);
+  expect(useConsentStore().measurementMode).toBe('off'); expect(localStorage.getItem('ut-internal-device')).toBe('1');
 });
 
 it('asks again after six months or a new consent version', () => {
   vi.stubEnv('VITE_ANALYTICS_PROVIDER', 'future-provider');
   const old = new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString();
-  localStorage.setItem('ut-consent', JSON.stringify({ version: CONSENT_VERSION, decidedAt: old, analytics: true }));
+  localStorage.setItem('ut-consent', JSON.stringify({ version: CONSENT_VERSION, decidedAt: old, analytics: true, anonymous: true }));
   expect(useConsentStore().needsDecision).toBe(true);
   disposePinia(pinia); pinia = createPinia(); setActivePinia(pinia);
-  localStorage.setItem('ut-consent', JSON.stringify({ version: CONSENT_VERSION + 1, decidedAt: new Date().toISOString(), analytics: true }));
+  localStorage.setItem('ut-consent', JSON.stringify({ version: CONSENT_VERSION + 1, decidedAt: new Date().toISOString(), analytics: true, anonymous: true }));
   expect(useConsentStore().analyticsAllowed).toBe(false);
 });
 

@@ -345,3 +345,7 @@ Réglages PostHog : règle de suppression de l'erreur « ResizeObserver loop com
 ## 2026-11-05 — Exemples cliquables sur la landing
 
 Les trois lignes d'exemples de la section « Vos frises » (`LandingView.vue`) attiraient des clics sans effet (PostHog, 3 novembre) : ce sont désormais des liens vers la création de frise (`accountTarget`), avec survol, focus, flèche et précision pour les lecteurs d'écran, marqués `data-attr="landing-cta-example_<course|research|project>"`. L'entonnoir d'acquisition PostHog compte ces clics comme CTA de création.
+
+## 2026-11-05 — Mesure anonyme sans cookie et exclusion de l'éditeur
+
+`useConsentStore` : trois modes (`MeasurementMode` : `off`, `exempt`, `consented`), choix `anonymous` (opposition à la mesure anonyme), `CONSENT_VERSION` 3, `markInternalDevice` (`ut-internal-device`). Le traceur PostHog suit le mode via `apply` : persistance mémoire sans accord, cookies avec accord, nouvel identifiant à chaque changement de mode, propriété `measurement` sur chaque événement, termes de recherche seulement en mode consenti. `main.ts` exclut les appareils où un administrateur se connecte et coupe aussi Vercel en cas d'opposition. Bandeau (interrupteur « Mesure anonyme sans cookie »), profil, politiques de confidentialité et cookies, registre RGPD, règle 30 et plan d'analyse mis à jour.

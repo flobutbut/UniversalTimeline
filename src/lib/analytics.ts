@@ -1,5 +1,5 @@
 import type { CaptureOptions, CaptureResult, PostHog } from 'posthog-js';
-import type { ConsentTracker } from '@/stores/useConsentStore';
+import type { ConsentTracker, MeasurementMode } from '@/stores/useConsentStore';
 
 export interface PostHogSettings { token: string; host: string }
 
@@ -69,7 +69,7 @@ export interface SearchCompletedProperties {
   matched_on?: 'title' | 'description' | 'content';
   wikidata_id?: string;
   wikidata_label?: string;
-  /** Only for a search that found no frise, after the guard of searchTermForAnalytics. */
+  /** Only for a consented search that found no frise, after the guard of searchTermForAnalytics. */
   query?: string;
   query_redacted?: boolean;
 }
@@ -115,42 +115,65 @@ export function track<E extends keyof AnalyticsEvents>(event: E, properties: Ana
 type LoadPostHog = () => Promise<PostHog>;
 const loadPostHog: LoadPostHog = () => import('posthog-js').then(module => module.default);
 
+/** Mode the events are currently sent in; searches only keep their term when the visitor consented. */
+let currentMode: MeasurementMode = 'off';
+export const measurementMode = () => currentMode;
+
+/** Cookies and storage with consent; nothing but memory otherwise, so an anonymous visit ends with the page. */
+const persistenceFor = (mode: 'exempt' | 'consented') => mode === 'consented' ? 'localStorage+cookie' as const : 'memory' as const;
+
 /**
- * Audience measurement: the SDK is downloaded and initialised only on start (after consent). Stop opts out,
- * forgets the pseudonymous identifier and deletes PostHog's cookies and storage. Session replay stays off.
+ * Audience measurement in two modes. Without consent (`exempt`), the SDK keeps its identifier in memory only and
+ * writes nothing on the device: one visit, never linked to another. With consent, it persists across visits.
+ * Switching mode starts a new identifier, so the two are never linked; `off` opts out and deletes PostHog's
+ * cookies and storage. Session replay stays off; every event carries `measurement` to tell the modes apart.
  */
 export function createPostHogTracker({ token, host }: PostHogSettings, load: LoadPostHog = loadPostHog): ConsentTracker {
-  let client: PostHog | null = null; let wanted = false; let loading: Promise<void> | null = null;
+  let client: PostHog | null = null; let wanted: MeasurementMode = 'off'; let loading: Promise<void> | null = null;
+  function enter(posthog: PostHog, mode: 'exempt' | 'consented') {
+    if (currentMode === 'off') posthog.opt_in_capturing();
+    posthog.reset(true);
+    posthog.set_config({ persistence: persistenceFor(mode) });
+    posthog.register({ measurement: mode });
+    // Opting in records a flag in local storage: an anonymous visit must leave nothing behind.
+    if (mode === 'exempt') purgePostHogStorage(token);
+    capturing = posthog; currentMode = mode;
+  }
   return {
-    async start() {
-      wanted = true;
-      if (client) { client.set_config({ persistence: 'localStorage+cookie' }); client.opt_in_capturing(); capturing = client; return; }
+    async apply(mode) {
+      wanted = mode;
+      if (mode === 'off') {
+        capturing = null; currentMode = 'off';
+        if (client) { client.opt_out_capturing(); client.reset(true); client.set_config({ persistence: 'memory' }); }
+        purgePostHogStorage(token);
+        return;
+      }
+      if (client) { if (mode !== currentMode) enter(client, mode); return; }
       loading ??= load().then(posthog => {
         loading = null;
-        // Consent withdrawn while the script was downloading: never initialise.
-        if (!wanted) return;
+        // Measurement turned off while the script was downloading: never initialise.
+        if (wanted === 'off') return;
         posthog.init(token, {
           api_host: host, defaults: '2026-08-30', disable_session_recording: true, before_send: scrubAuthSecrets,
+          persistence: persistenceFor(wanted), disable_surveys: true, advanced_disable_flags: true,
           mask_all_text: true,
           autocapture: { element_attribute_ignorelist: ELEMENT_ATTRIBUTE_IGNORELIST },
           capture_dead_clicks: { element_attribute_ignorelist: ELEMENT_ATTRIBUTE_IGNORELIST },
         });
-        client = posthog; capturing = posthog;
+        posthog.register({ measurement: wanted });
+        client = posthog; capturing = posthog; currentMode = wanted;
       }).catch(() => { loading = null; });
       await loading;
-    },
-    stop() {
-      wanted = false; capturing = null;
-      if (client) { client.opt_out_capturing(); client.reset(true); client.set_config({ persistence: 'memory' }); }
-      purgePostHogStorage(token);
+      // The mode changed while the script was downloading (a choice made on the banner meanwhile).
+      if (client && wanted !== 'off' && wanted !== currentMode) enter(client, wanted);
     },
   };
 }
 
-/** Registers the configured tracker; without consent, leftovers of an expired or withdrawn choice are deleted. */
-export function installAnalytics(consent: { analyticsAllowed: boolean; registerTracker(tracker: ConsentTracker): void }, env: ImportMetaEnv = import.meta.env) {
+/** Registers the configured tracker; outside consent, leftovers of an expired or withdrawn choice are deleted. */
+export function installAnalytics(consent: { measurementMode: MeasurementMode; registerTracker(tracker: ConsentTracker): void }, env: ImportMetaEnv = import.meta.env) {
   const settings = readPostHogSettings(env);
   if (!settings) return;
-  if (!consent.analyticsAllowed) purgePostHogStorage(settings.token);
+  if (consent.measurementMode !== 'consented') purgePostHogStorage(settings.token);
   consent.registerTracker(createPostHogTracker(settings));
 }

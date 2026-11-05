@@ -51,13 +51,15 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Données techniques : journaux de connexion et d’erreur des hébergeurs (adresse IP, date, requête), utilisés pour la sécurité.',
         'Modération : si l’administrateur suspend ou supprime un compte, ou modifie son rôle, l’action est enregistrée avec la date et le nom d’utilisateur concerné.',
         'Fréquentation, sans cookie : page consultée (sans ses paramètres), site d’origine, pays, type de navigateur, de système et d’appareil. Un visiteur est reconnu pendant 24 heures au plus par une empreinte que Vercel calcule à partir de la requête, sans rien enregistrer sur votre appareil.',
-        'Mesure d’audience, seulement avec votre accord : pages consultées, clics (sans le texte affiché), étapes franchies (par exemple l’envoi du formulaire d’inscription ou le motif technique d’un échec, sans son contenu), frises publiques, périodes et événements consultés (une frise privée est seulement comptée, jamais nommée), utilisation de la recherche et, lorsqu’aucune frise n’est trouvée, les termes recherchés (sans adresse, lien ni numéro), erreurs techniques de la page, provenance, type de navigateur et d’appareil, associés à un identifiant pseudonyme. L’adresse IP n’est pas conservée et les sessions ne sont pas enregistrées.',
+        'Mesure anonyme de la visite, sans cookie ni accord (sauf si vous vous y opposez) : pages consultées, clics (sans le texte affiché), étapes franchies, frises publiques, périodes et événements consultés (une frise privée est seulement comptée, jamais nommée), utilisation de la recherche (sans les termes saisis), erreurs techniques et performances de la page, provenance, type de navigateur et d’appareil. L’identifiant de la visite reste dans la mémoire de la page : rien n’est écrit sur votre appareil, et une visite n’est jamais reliée à une autre ni à votre compte.',
+        'Mesure d’audience avec cookies, seulement avec votre accord : les mêmes informations, reliées d’une visite à l’autre, ainsi que les termes recherchés lorsqu’aucune frise n’est trouvée (sans adresse, lien ni numéro). En détail : pages consultées, clics (sans le texte affiché), étapes franchies (par exemple l’envoi du formulaire d’inscription ou le motif technique d’un échec, sans son contenu), frises publiques, périodes et événements consultés (une frise privée est seulement comptée, jamais nommée), utilisation de la recherche et, lorsqu’aucune frise n’est trouvée, les termes recherchés (sans adresse, lien ni numéro), erreurs techniques de la page, provenance, type de navigateur et d’appareil, associés à un identifiant pseudonyme. L’adresse IP n’est pas conservée et les sessions ne sont pas enregistrées.',
       ] },
       { title: 'Finalités et bases légales', paragraphs: [], items: [
         'Créer et gérer votre compte, publier vos frises : exécution du contrat (article 6.1.b du RGPD).',
         'Sécuriser le service et prévenir les abus : intérêt légitime (article 6.1.f).',
         'Mesurer l’audience avec des cookies (PostHog) pour améliorer le site : votre consentement (article 6.1.a), retirable à tout moment.',
-        'Compter les visites sans cookie (Vercel Web Analytics) pour connaître la fréquentation réelle du site : intérêt légitime (article 6.1.f). Vous pouvez vous y opposer en nous écrivant ou en bloquant le script « /_vercel/insights » dans votre navigateur.',
+        'Mesurer anonymement chaque visite sans cookie (PostHog), pour connaître l’usage du site et ses problèmes de navigation : intérêt légitime (article 6.1.f), dans le cadre de l’exemption de consentement de la CNIL pour la mesure d’audience. Vous pouvez vous y opposer à tout moment depuis « Gérer mes préférences ».',
+        'Compter les visites sans cookie (Vercel Web Analytics) pour connaître la fréquentation réelle du site : intérêt légitime (article 6.1.f). Vous pouvez vous y opposer avec l’interrupteur « Mesure anonyme sans cookie » de « Gérer mes préférences », en nous écrivant ou en bloquant le script « /_vercel/insights » dans votre navigateur.',
       ] },
       { title: 'Durées de conservation', paragraphs: [
         '[À compléter : durée de conservation des statistiques de fréquentation chez Vercel, selon l’offre souscrite.]',
@@ -68,6 +70,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Messages adressés au contact : un an après le dernier échange.',
         'Choix relatif aux cookies : six mois, puis la question vous est reposée.',
         'Mesure d’audience : cookie conservé douze mois au plus et supprimé dès le retrait de votre accord ; statistiques conservées un an.',
+        'Mesure anonyme : rien n’est conservé sur votre appareil ; l’identifiant de la visite disparaît à la fermeture ou au rechargement de la page ; statistiques conservées un an.',
         'Fréquentation : l’empreinte qui reconnaît un visiteur disparaît après 24 heures ; seules des statistiques agrégées sont conservées.',
       ] },
       { title: 'Destinataires et sous-traitants', paragraphs: [
@@ -76,7 +79,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Supabase Inc. : base de données et authentification, hébergées dans l’Union européenne.',
         'Vercel Inc. : hébergement de l’application et de l’API, et comptage des visites sans cookie (États-Unis). Vercel est certifiée au cadre de protection des données UE–États-Unis (Data Privacy Framework), et son accord de traitement des données prévoit aussi les clauses contractuelles types de la Commission européenne.',
         'Hostinger International Ltd. : messagerie (envoi des e-mails du compte, réception des messages adressés au contact), société établie dans l’Union européenne (Chypre).',
-        'PostHog Inc. : mesure d’audience, avec votre accord, hébergée dans l’Union européenne (PostHog Cloud EU), dans le cadre d’un accord de traitement des données (DPA) signé avec PostHog le 3 novembre 2026.',
+        'PostHog Inc. : mesure d’audience (anonyme sans cookie, ou avec cookies selon votre accord), hébergée dans l’Union européenne (PostHog Cloud EU), dans le cadre d’un accord de traitement des données (DPA) signé avec PostHog le 3 novembre 2026.',
       ] },
       { title: 'Vos droits', paragraphs: [
         'Vous disposez des droits d’accès, de rectification, d’effacement, de limitation, d’opposition et de portabilité, ainsi que du droit de définir des directives sur le sort de vos données après votre décès.',
@@ -104,20 +107,23 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Session de connexion (stockage local « sb-…-auth-token ») : vous garder connecté, jusqu’à la déconnexion.',
         'Thème clair ou sombre (stockage local « theme »), affichage de la galerie (« frises:view »).',
         'Onglets de frises ouverts (stockage de session « frises:open-tabs ») : effacés à la fermeture de l’onglet.',
-        'Votre choix sur les cookies (stockage local « ut-consent ») : six mois.',
+        'Votre choix sur les cookies et votre éventuelle opposition à la mesure anonyme (stockage local « ut-consent ») : six mois.',
+        'Appareil de l’éditeur (stockage local « ut-internal-device ») : posé seulement quand un compte administrateur se connecte, pour que les visites de l’éditeur ne soient jamais mesurées.',
       ] },
       { title: 'Mesure d’audience', paragraphs: [
-        'Avec votre accord, nous utilisons PostHog (PostHog Inc., données hébergées dans l’Union européenne) pour savoir quelles pages et quelles fonctions sont utilisées, afin d’améliorer le site. Les sessions ne sont pas enregistrées et l’adresse IP n’est pas conservée. Sans votre accord, l’outil n’est même pas chargé.',
+        'Nous utilisons PostHog (PostHog Inc., données hébergées dans l’Union européenne) pour savoir quelles pages et quelles fonctions sont utilisées, afin d’améliorer le site. Les sessions ne sont pas enregistrées et l’adresse IP n’est pas conservée.',
+        'Sans votre accord, PostHog mesure chaque visite de façon anonyme : il ne dépose aucun cookie et n’écrit rien sur votre appareil, l’identifiant de la visite reste dans la mémoire de la page et disparaît avec elle, et les termes que vous recherchez ne sont pas transmis. Cette mesure, limitée aux statistiques du site, ne demande pas votre accord ; vous pouvez vous y opposer avec l’interrupteur « Mesure anonyme sans cookie » de « Gérer mes préférences ».',
+        'Avec votre accord, la mesure relie aussi vos visites entre elles grâce aux éléments ci-dessous :',
       ], items: [
         'Cookie « ph_<clé du projet>_posthog » et stockage local du même nom : identifiant pseudonyme de l’appareil et de la visite, douze mois au plus.',
         'Stockage de session « ph_<clé du projet>_… » : identifiant de l’onglet, effacé à sa fermeture.',
-        'Si vous retirez votre accord, ces éléments sont supprimés et l’outil cesse toute mesure.',
+        'Si vous retirez votre accord, ces éléments sont supprimés et seule la mesure anonyme continue, sauf si vous vous y opposez.',
       ] },
       { title: 'Comptage des visites sans cookie', paragraphs: [
-        'Nous comptons aussi les visites avec Vercel Web Analytics, qui ne dépose aucun cookie et n’écrit rien sur votre appareil : il ne demande donc pas votre accord et fonctionne même si vous refusez la mesure d’audience. Seuls la page consultée (sans ses paramètres), le site d’origine, le pays et le type de navigateur, de système et d’appareil sont transmis. Voir la politique de confidentialité pour vous y opposer.',
+        'Nous comptons aussi les visites avec Vercel Web Analytics, qui ne dépose aucun cookie et n’écrit rien sur votre appareil : il ne demande donc pas votre accord et fonctionne même si vous refusez la mesure d’audience. Seuls la page consultée (sans ses paramètres), le site d’origine, le pays et le type de navigateur, de système et d’appareil sont transmis. L’opposition à la mesure anonyme l’arrête aussi.',
       ] },
       { title: 'Gérer votre choix', paragraphs: [
-        'Vous pouvez modifier ou retirer votre consentement à tout moment avec le bouton « Gérer mes préférences » ci-dessous ou depuis votre profil.',
+        'Vous pouvez modifier ou retirer votre consentement, et vous opposer à la mesure anonyme, à tout moment avec le bouton « Gérer mes préférences » ci-dessous ou depuis votre profil.',
       ] },
     ],
   },
