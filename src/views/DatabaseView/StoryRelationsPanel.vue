@@ -39,7 +39,7 @@
               :aria-label="`Retirer le point d’entrée ${anchor.label.fr || anchor.id} depuis ${parent.title.fr}`" @click="emit('remove-parent', parent.id, { type: anchor.type, id: anchor.id })">Retirer</Button>
           </li>
         </ul>
-        <div v-if="parent.atRoot || !parent.anchors.length" class="story-relations__location">
+        <div v-if="hasStoryRootLocation(parent)" class="story-relations__location">
           <span class="story-relations__description">Depuis la racine de cette frise</span>
           <Button v-if="editable && auth.canEditStory(parent)" variant="ghost" size="xs" :disabled="busy" @click="emit('remove-parent', parent.id, null)">Retirer</Button>
         </div>
@@ -53,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+import { hasStoryRootLocation } from '@/lib/storyRelationLocations';
 import { computed, ref, watch } from 'vue';
 import Button from '@/components/base/Button.vue';
 import ParentStoryPickerModal from './ParentStoryPickerModal.vue';

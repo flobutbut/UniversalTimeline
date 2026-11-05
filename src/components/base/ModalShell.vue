@@ -90,7 +90,7 @@ const handleOverlayClick = (e: MouseEvent) => {
   justify-content: space-between;
   align-items: center;
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 0;
   flex-shrink: 0;
 }
 

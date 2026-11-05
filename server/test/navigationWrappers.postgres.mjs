@@ -103,12 +103,18 @@ test('an implicit historical root can move into a period and back without repare
   await f.move(location('earth'),null);assert.equal((await f.child()).at_root,true);
   assert.equal(String((await pool.query('SELECT parent_story_id FROM stories WHERE id=$1',[f.target])).rows[0].parent_story_id),f.source);
 });
-test('the event-only root projection acquires a period location without losing its event access',async()=>{
+test('event-only links cannot move or change display from a nonexistent root',async()=>{
   const f=await moveFixture();await f.add(f.source,{anchorType:'event',anchorId:'move-event'});
+  await assert.rejects(f.move(null,location('earth')),error=>error.status===409);
+  await assert.rejects(scoped(alice,c=>changeEntryDisplay(c,f.source,f.target,null,true)),error=>error.status===409);
+  assert.equal((await f.child()).at_root,false);
+  assert.deepEqual((await f.child()).anchors,[{type:'event',id:'move-event'}]);
+  await f.add(f.source,null);
   await f.move(null,location('earth'));
   assert.equal((await f.child()).at_root,false);
   assert.deepEqual((await f.child()).anchors,[{type:'event',id:'move-event'},{type:'period',id:'earth'}]);
 });
+
 test('a chronological occurrence moves without leaving a duplicate or changing other presentations and facts',async()=>{
   const f=await moveFixture();
   await pool.query("INSERT INTO story_period_presentations(context_story_id,period_id,target_story_id) VALUES($1,'earth',$2),($3,'earth',$2)",[f.source,f.target,f.other]);

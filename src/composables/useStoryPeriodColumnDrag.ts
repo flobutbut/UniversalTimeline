@@ -1,3 +1,4 @@
+import { hasStoryLocation } from '@/lib/storyRelationLocations';
 import { computed, ref, watch } from 'vue';
 import { collectStoryPeriodSubtreeIds } from '@/lib/storyPeriodFinderColumns';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
@@ -25,8 +26,7 @@ export function useStoryPeriodColumnDrag(options: {
     const child = options.story()?.childStories?.find(story => story.id === id);
     const parent = parentForColumn(index);
     if (!options.enabled() || options.busy() || !child || parent === undefined) return false;
-    return parent === null ? !!child.atRoot || !child.anchors.some(anchor => anchor.type === 'period' && periodIds.value.has(anchor.id))
-      : child.anchors.some(anchor => anchor.type === 'period' && anchor.id === parent);
+    return hasStoryLocation(child, parent === null ? null : { type: 'period', id: parent });
   }
   function canDrag(id: string) {
     return options.enabled() && !options.busy() && periodIds.value.has(id) && !id.startsWith('wikidata:');

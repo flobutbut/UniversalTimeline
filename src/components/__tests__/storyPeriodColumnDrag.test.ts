@@ -143,19 +143,23 @@ it('moves just the dragged occurrence of an associated frise, preserving its oth
   expect(childRow('linked', 0).exists()).toBe(true); expect(childRow('linked', 2).exists()).toBe(true);
 });
 
-it('moves a frise from the root projection into a selected period without removing its event anchor', async () => {
+it('does not project event-only or missing-period links into the root column', async () => {
   const data = fixture();
-  data.childStories = [{ id: 'linked', title: { fr: 'Frise liée', en: '' }, atRoot: false, anchors: [{ type: 'event', id: 'event' }] }];
+  data.childStories = [
+    { id: 'event-link', title: { fr: 'Événement', en: '' }, atRoot: false, anchors: [{ type: 'event', id: 'event' }] },
+    { id: 'missing-link', title: { fr: 'Période absente', en: '' }, anchors: [{ type: 'period', id: 'missing' }] },
+  ];
   await start(data); await select('root');
-  await childRow('linked', 0).trigger('dragstart'); await column(0).trigger('drop');
+  expect(column(0).find('[data-child-story-id]').exists()).toBe(false);
   expect(view.emitted('move-child-story')).toBeUndefined();
+});
+
+it('moves an explicit root while retaining its independent event access', async () => {
+  const data = fixture();
+  data.childStories = [{ id: 'linked', title: { fr: 'Frise liée', en: '' }, atRoot: true, anchors: [{ type: 'event', id: 'event' }] }];
+  await start(data); await select('root');
   await childRow('linked', 0).trigger('dragstart'); await column(1).trigger('drop');
   expect(view.emitted('move-child-story')).toEqual([['linked', null, { type: 'period', id: 'root' }]]);
-  const updated = fixture(); updated.childStories = [{ ...data.childStories[0], anchors: [...data.childStories[0].anchors, { type: 'period', id: 'root' }] }];
-  await view.setProps({ story: updated });
-  expect(column(0).find('[data-child-story-id="linked"]').exists()).toBe(false);
-  expect(childRow('linked', 1).exists()).toBe(true);
-  expect(updated.childStories[0].anchors).toContainEqual({ type: 'event', id: 'event' });
 });
 
 it('disables associated-frise dragging while busy or read-only, and cancels stale drags', async () => {

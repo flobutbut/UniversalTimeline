@@ -21,9 +21,7 @@ export async function moveEntryPoint(client: TransactionClient, sourceId: string
   }
   const locations = await entries.listEntryLocations(client, sourceId, targetId);
   const origin = locations.filter(location => location.anchor_type === (from?.anchorType ?? null) && location.anchor_id === (from?.anchorId ?? null));
-  // Event-only links also appear in the root of the periods view. Retain their event anchors.
-  const rootFallback = from === null && locations.length > 0 && !locations.some(location => location.in_story);
-  if (!origin.length && !rootFallback) throw new StoryAssociationError(409, 'Le rattachement d’origine a changé. Rechargez la frise.');
+  if (!origin.length) throw new StoryAssociationError(409, 'Le rattachement d’origine a changé. Rechargez la frise.');
   if (from?.anchorType === to?.anchorType && from?.anchorId === to?.anchorId) return;
   if (to) await entries.addEntryPoint(client, sourceId, targetId, to.anchorType, to.anchorId);
   else await entries.changeRootEntryPoint(client, sourceId, targetId, false);
@@ -35,8 +33,7 @@ export async function changeEntryDisplay(client: TransactionClient, sourceId: st
   await lockEntryStories(client,sourceId,[targetId]);
   const locations = await entries.listEntryLocations(client,sourceId,targetId);
   const matching = locations.some(row => row.anchor_type === (location?.anchorType ?? null) && row.anchor_id === (location?.anchorId ?? null));
-  const rootFallback = location === null && locations.length > 0 && !locations.some(row => row.in_story);
-  if (!matching && !rootFallback) throw new StoryAssociationError(409,'Le rattachement a changé. Rechargez la frise.');
+  if (!matching) throw new StoryAssociationError(409,'Le rattachement a changé. Rechargez la frise.');
   if (location && !await hasAssociation(client,sourceId,location.anchorType,location.anchorId)) throw new StoryAssociationError(409,'Cette ancre n’appartient pas à la frise.');
   await entries.setEntryDisplay(client,sourceId,targetId,location,asPeriod);
 }

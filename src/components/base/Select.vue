@@ -16,6 +16,7 @@
         class="base-select__trigger"
         :class="{
           'base-select__trigger--disabled': disabled,
+          'base-select__trigger--multiple': multiple,
           'base-select__trigger--with-tags': multiple && selectedItems.length > 0,
         }"
         v-bind="searchable ? {} : comboboxAttrs"
@@ -63,8 +64,8 @@
           :aria-selected="isOptionSelected(option)"
           :aria-disabled="!!option.disabled"
         >
-          <i class="base-select__option-check" :class="{ 'base-select__option-check--hidden': !isOptionSelected(option) }" aria-hidden="true">✓</i>
           <span class="base-select__option-text">{{ option.label }}</span>
+          <i class="base-select__option-check" :class="{ 'base-select__option-check--hidden': !isOptionSelected(option) }" aria-hidden="true">✓</i>
         </div>
       </div>
     </template>
@@ -251,7 +252,18 @@ watch(filteredOptions, () => { highlightedIndex.value = -1; });
 </script>
 
 <style scoped>
-.base-select__value--multiple { flex-wrap: wrap; }
+.base-select__option {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: inherit;
+  line-height: inherit;
+}
+.base-select--sm .base-select__option {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+.base-select__trigger--multiple { padding-inline: var(--spacing-sm); }
+.base-select__value--multiple { flex-wrap: wrap; gap: var(--spacing-sm); }
+.base-select__selected-item { padding-right: 0; }
 .base-select__value--editable { cursor: text; }
 .base-select__input {
   flex: 1 1 80px;

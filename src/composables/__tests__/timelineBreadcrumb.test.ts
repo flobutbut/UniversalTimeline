@@ -231,3 +231,19 @@ it('ignores invalid visited-path indices and the current frise', async () => {
   expect(nav.currentStoryId.value).toBe('2');
   expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:2']);
 });
+
+it('keeps root redirects first, then visible period anchors, excluding event-only links', async () => {
+  const story = storyFixture('1', source, [event(750)]);
+  story.childStories = [
+    { id: '2', title: { fr: 'Période visible', en: '' }, anchors: [{ type: 'period', id: 'root' }] },
+    { id: '3', title: { fr: 'Événement', en: '' }, anchors: [{ type: 'event', id: 'e750' }] },
+    { id: '4', title: { fr: 'Racine', en: '' }, anchors: [], atRoot: true },
+    { id: '5', title: { fr: 'Période masquée', en: '' }, anchors: [{ type: 'period', id: 'leaf' }] },
+  ];
+  vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(story);
+  await nav.loadInitialData(undefined, true);
+  expect(nav.headerStories.value.map(link => ({ id: link.id, anchor: link.anchor }))).toEqual([
+    { id: '4', anchor: undefined },
+    { id: '2', anchor: { type: 'period', id: 'root' } },
+  ]);
+});
