@@ -18,6 +18,12 @@ const { default: router } = await import('../dist/api/routes.js');
 const event = { qid: 'Q2', type: 'event', title: 'Événement importé', description: 'Depuis Wikidata', startDate: '1789-07-14', endDate: '' };
 const period = { qid: 'Q3', type: 'period', title: 'Période importée', description: '', startDate: '1789', endDate: '1799' };
 const body = () => ({ qid: 'Q1', title: 'Frise de test', items: [event, period] });
+const fact = (property, uuid, date, title) => ({
+  qid: 'Q5593', origin: 'fact', id: `fact:Q5593:${property}:q5593$${uuid}`,
+  type: 'event', title, description: '', startDate: date, endDate: '',
+  source: { qid: 'Q5593', property, statementId: `Q5593$${uuid}`, references: 2,
+    start: [{ time: `+${date}T00:00:00Z`, precision: 11, calendarmodel: 'http://www.wikidata.org/entity/Q1985727' }] },
+});
 async function call(payload = body(), userId = alice) {
   const route = router.stack.find(layer => layer.route?.path === '/stories/from-wikidata' && layer.route.methods.post);
   const res = { statusCode: 200, payload: undefined,
@@ -47,6 +53,54 @@ beforeEach(async () => {
     ($2, 'bob@example.test', '{"username":"Bob_1","terms_version":"2026-11-03"}')`, [alice, bob]);
 });
 after(() => pool.end());
+
+test('persists distinct facts from the same person with public provenance and reuses them on another import', async () => {
+  const birth = fact('P569', '00000000-0000-0000-0000-000000000101', '1881-10-25', 'Naissance de Picasso');
+  const death = fact('P570', '00000000-0000-0000-0000-000000000102', '1973-04-08', 'Décès de Picasso');
+  const payload = { qid: 'Q5593', title: 'Picasso', items: [birth, death] };
+  const first = await call(payload); assert.equal(first.statusCode, 201);
+  const second = await call(payload, bob); assert.equal(second.statusCode, 201);
+  const rows = (await pool.query('SELECT wikidata_id,source_key,wikidata_source,date FROM events ORDER BY date')).rows;
+  assert.equal(rows.length, 2); assert.ok(rows.every(row => row.wikidata_id === null));
+  assert.notEqual(rows[0].source_key, rows[1].source_key);
+  assert.equal(rows[0].wikidata_source.property, 'P569');
+  assert.equal(rows[0].wikidata_source.start[0].precision, 11);
+  assert.equal((await pool.query('SELECT count(*)::int n FROM story_events')).rows[0].n, 4);
+});
+
+test('finds native entities and distinct derived facts by generation identity with their provenance', async () => {
+  const birth = fact('P569', '00000000-0000-0000-0000-000000000101', '1881-10-25', 'Naissance');
+  const death = fact('P570', '00000000-0000-0000-0000-000000000102', '1973-04-08', 'Décès');
+  assert.equal((await call({ qid: 'Q5593', title: 'Sources', items: [birth, death, event] })).statusCode, 201);
+  const route = router.stack.find(layer => layer.route?.path === '/search/by-generation-keys' && layer.route.methods.get);
+  const res = { payload: undefined, statusCode: 200, status(code) { this.statusCode = code; return this; }, json(data) { this.payload = data; return this; } };
+  await principalContext.run({ userId: null, isAdmin: false }, () => route.route.stack[0].handle({ query: { keys: [birth.id, death.id, 'entity:Q2'].join(','), only: 'events' } }, res));
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.payload.periods, []);
+  assert.deepEqual(new Set(res.payload.events.map(row => row.sourceKey)), new Set([birth.id, death.id, 'entity:Q2']));
+  const savedBirth = res.payload.events.find(row => row.sourceKey === birth.id);
+  assert.equal(savedBirth.wikidataId, null);
+  assert.deepEqual(savedBirth.wikidataSource, birth.source);
+});
+
+test('saves a derived interval and an approximate period with their actual parent identities', async () => {
+  const relation = fact('P26', '00000000-0000-0000-0000-000000000103', '1918-07-12', 'Mariage de Picasso');
+  relation.type = 'period'; relation.endDate = '1955-02-11'; relation.parentQid = 'entity:Q4692';
+  const root = { ...period, id: 'entity:Q4692', qid: 'Q4692', origin: 'entity', title: 'Période approximative', startDate: 'vers 1400 (siècle)', endDate: 'vers 2000 (siècle)' };
+  const result = await call({ qid: 'Q5593', title: 'Dates et sources', items: [root, relation] }); assert.equal(result.statusCode, 201);
+  const rows = (await pool.query('SELECT p.id,p.wikidata_id,p.source_key,p.start_date,p.start_years_bp,sp.parent_period_id FROM periods p JOIN story_periods sp ON sp.period_id=p.id WHERE sp.story_id=$1', [result.payload.id])).rows;
+  const parent = rows.find(row => row.wikidata_id === 'Q4692');
+  const child = rows.find(row => row.source_key === relation.id);
+  assert.ok(Number.isFinite(Number(parent.start_years_bp))); assert.equal(parent.start_date, 'vers 1400 (siècle)');
+  assert.equal(child.wikidata_id, null); assert.equal(child.parent_period_id, parent.id);
+});
+
+test('rejects a forged fact identity before inserting catalogue rows', async () => {
+  const item = fact('P569', '00000000-0000-0000-0000-000000000101', '1881-10-25', 'Naissance');
+  item.id += 'forged';
+  assert.equal((await call({ qid: 'Q5593', title: 'Picasso', items: [item] })).statusCode, 400);
+  assert.equal((await pool.query('SELECT count(*)::int n FROM events')).rows[0].n, 0);
+});
 
 test('creates a private owned frise with dated UUID entities, inaccessible to another account or a visitor', async () => {
   const response = await call(); assert.equal(response.statusCode, 201);

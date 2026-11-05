@@ -5,6 +5,7 @@ export type EditFormMode = 'create' | 'edit';
 
 /** Saved UI entities and Wikidata drafts share a small, explicit initialization contract. */
 export interface EditInitialData {
+  sourceKey?: string;
   id?: string;
   wikidata_id?: string; qid?: string;
   label?: Partial<MultilingualText>; title?: Partial<MultilingualText>;
@@ -19,6 +20,7 @@ export interface EditInitialData {
 }
 
 export interface EditFormData {
+  sourceKey?: string;
   qid: string; title: MultilingualText; description: MultilingualText;
   startDate: string; endDate: string; date: string; location: string;
   author: string; isPublic: boolean; parentId: string | null; categories: string[];
@@ -26,6 +28,7 @@ export interface EditFormData {
 
 /** A submitted draft is distinct from its category ID selection and from a saved entity. */
 export interface EditFormSubmission {
+  sourceKey?: string;
   qid: string; title: MultilingualText;
   description: { fr: string | null; en: string | null };
   startDate: string; endDate: string; date: string; location: string | null;

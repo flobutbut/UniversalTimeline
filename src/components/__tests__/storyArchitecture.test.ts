@@ -23,12 +23,23 @@ it('shows the deduced role, the non-blocking warnings and a promotion for the ow
   expect(view.emitted('promote')).toEqual([['big']]);
 });
 it('hides the review from readers and the promotion from non-owners, and marks a draft', async () => {
-  view = mount(StoryArchitecturePanel, { props: { story: { ...story(), parentStoryId: null }, stories: [], editable: false } });
-  expect(view.text()).toContain('Brouillon');
+  view = mount(StoryArchitecturePanel, { props: { story: { ...story(), parentStoryId: null, isPublic: false }, stories: [], editable: false } });
+  expect(view.text()).toContain('Privé');
   expect(view.find('details').exists()).toBe(false);
   await view.setProps({ editable: true, canPromote: false });
   expect(view.find('details').exists()).toBe(true);
-  expect(view.find('button').exists()).toBe(false);
+  expect(view.find('.story-architecture__promotion button').exists()).toBe(false);
+});
+it('explains the missing parent on a private draft and displays actual public visibility', async () => {
+  view = mount(StoryArchitecturePanel, { props: { story: { ...story(), parentStoryId: null, isPublic: false }, stories: [] }, attachTo: document.body });
+  await view.get('.story-architecture__visibility button').trigger('click'); await flushPromises();
+  expect(document.querySelector('[role="tooltip"]')?.textContent).toContain('Ajoutez une frise parente pour pouvoir rendre cette frise publique.');
+  await view.setProps({ story: { ...story(), isPublic: true } });
+  expect(view.text()).toContain('Public'); expect(view.text()).not.toContain('Privé');
+  expect(document.querySelector('[role="tooltip"]')).toBeNull();
+  await view.setProps({ story: { ...story(), isPublic: false } });
+  expect(view.text()).toContain('Privé');
+  expect(view.find('.story-architecture__visibility').exists()).toBe(false);
 });
 it('labels the menu action as a promotion when the period meets the criteria', async () => {
   view = mount(StoryItemActionsMenu, { props: { label: 'Grande période', createStory: true, promote: true }, attachTo: document.body });

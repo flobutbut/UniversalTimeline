@@ -11,7 +11,8 @@ export interface CategoryJoinRow {
   category_label_fr: string | null;
   category_label_en: string | null;
 }
-export interface PeriodRecord extends LocalizedRow {
+export interface SourceMetadata { source_key?: string | null; wikidata_source?: import('../shared/wikidataGeneration.js').WikidataSource | null }
+export interface PeriodRecord extends LocalizedRow, SourceMetadata {
   id: string; wikidata_id: string | null;
   start_date: string | null; end_date: string | null; parent_id: string | null;
   story_parent_id?: string | null;
@@ -20,7 +21,7 @@ export interface PeriodRecord extends LocalizedRow {
 }
 export interface PeriodRow extends PeriodRecord { has_children: boolean }
 export type PeriodListRow = Omit<PeriodRow, 'created_at' | 'updated_at'>;
-export interface EventRow extends LocalizedRow {
+export interface EventRow extends LocalizedRow, SourceMetadata {
   id: string; wikidata_id: string | null; date: string | null; date_years_bp: Numeric;
   created_at: Timestamp; updated_at: Timestamp;
 }

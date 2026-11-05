@@ -116,6 +116,7 @@ it.each([
   { ...payload(), acknowledgedStoryIds: true }, { ...payload(), acknowledgedStoryIds: ['invalid'] },
   { ...payload(), acknowledgedStoryIds: Array(21).fill('30') },
   { ...payload(), items: Array(82).fill(event) }, { ...payload(), items: [event, event] },
+  { ...payload(), items: [event, { ...event, id: 'entity:Q2', origin: 'entity' }] },
   { ...payload(), items: [{ ...event, type: 'person' }] }, { ...payload(), items: [{ ...event, startDate: 'unknown' }] },
   { ...payload(), items: [{ ...period, endDate: '' }] }, { ...payload(), items: [{ ...period, endDate: '1780' }] },
   { ...payload(), items: [{ ...period, parentQid: 'Q999' }] },

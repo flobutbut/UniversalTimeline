@@ -40,7 +40,7 @@ export class EditFormValidator {
       text(data.author, 'author', 'L’auteur', 255);
       if (data.isPublic !== undefined && typeof data.isPublic !== 'boolean') fields.isPublic = 'La visibilité doit être un booléen.';
     } else {
-      Object.assign(fields, this.validateQid(data.qid).fields);
+      if (!(typeof data.sourceKey === 'string' && data.sourceKey.startsWith('fact:') && !data.qid)) Object.assign(fields, this.validateQid(data.qid).fields);
       const keys = type === 'period' ? ['startDate','endDate'] as const : ['date'] as const;
       for (const key of keys) {
         text(data[key], key, key === 'startDate' ? 'La date de début' : key === 'endDate' ? 'La date de fin' : 'La date', 255, key !== 'endDate');

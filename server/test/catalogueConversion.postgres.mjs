@@ -17,9 +17,9 @@ mock.module(new URL('../dist/api/database.js', import.meta.url), { namedExports:
 } });
 const { default: router } = await import('../dist/api/routes.js');
 
-async function call(path, params, body, userId = alice) {
-  const route = router.stack.find(layer => layer.route?.path === path && layer.route.methods.post);
-  assert.ok(route, `Missing route POST ${path}`);
+async function call(path, params, body, userId = alice, method = 'post') {
+  const route = router.stack.find(layer => layer.route?.path === path && layer.route.methods[method]);
+  assert.ok(route, `Missing route ${method.toUpperCase()} ${path}`);
   const res = { statusCode: 200, payload: undefined, status(code) { this.statusCode = code; return this; }, json(value) { this.payload = value; return this; }, send() { return this; } };
   await principalContext.run({ userId, isAdmin: false }, () => route.route.stack[0].handle({ body, params, query: {} }, res));
   return res;
@@ -83,6 +83,27 @@ test('turns an event into a root period of each frise and keeps its entry points
   assert.deepEqual(await rows("SELECT story_id, parent_period_id FROM story_periods WHERE period_id='p-new'"), [{ story_id: 1, parent_period_id: null }]);
   assert.deepEqual(await rows("SELECT source_story_id, target_story_id FROM story_entry_points WHERE period_id='p-new'"), [{ source_story_id: 1, target_story_id: 2 }]);
   assert.deepEqual(await rows("SELECT story_id FROM story_anchors WHERE anchor_type='period' AND anchor_id='p-new'"), [{ story_id: 2 }]);
+});
+
+test('preserves a derived fact identity and original date precision in both conversion directions', async () => {
+  const source = { qid: 'Q5593', property: 'P69', statementId: 'Q5593$11111111-1111-4111-8111-111111111111', references: 2, start: [{ time: '+00000001793-01-01T00:00:00Z', precision: 9 }] };
+  const key = `fact:Q5593:P69:${source.statementId.toLowerCase()}`;
+  await pool.query("UPDATE events SET wikidata_id=NULL, source_key=$1, wikidata_source=$2 WHERE id='terror'", [key, source]);
+  const period = await toPeriod('terror', { ...periodBody, wikidata_id: null });
+  assert.equal(period.statusCode, 201);
+  assert.equal(period.payload.source_key, key);
+  assert.deepEqual(period.payload.wikidata_source, source);
+  assert.equal(period.payload.wikidata_id, null);
+  const edited = await call('/periods/:id', { id: 'p-new' }, { ...periodBody, wikidata_id: null, label: { fr: 'Fait corrigé' } }, alice, 'put');
+  assert.equal(edited.statusCode, 200);
+  assert.equal(edited.payload.label_fr, 'Fait corrigé');
+  assert.deepEqual(edited.payload.wikidata_source, source);
+  const event = await toEvent('p-new', { ...eventBody, wikidata_id: null });
+  assert.equal(event.statusCode, 201);
+  assert.equal(event.payload.source_key, key);
+  assert.deepEqual(event.payload.wikidata_source, source);
+  assert.deepEqual((await rows("SELECT source_key, wikidata_source, wikidata_id FROM events WHERE id='ev-new'"))[0], { source_key: key, wikidata_source: source, wikidata_id: null });
+  assert.equal((await rows("SELECT count(*)::int n FROM story_events WHERE event_id='ev-new'"))[0].n, 1);
 });
 
 test('refuses a record used by a private frise of another account that RLS hides from the caller', async () => {

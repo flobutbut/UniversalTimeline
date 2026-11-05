@@ -1,5 +1,7 @@
 // Types pour les données de liste
 export interface ListPeriod {
+  sourceKey?: string;
+  wikidataSource?: import('../../server/src/shared/wikidataGeneration').WikidataSource;
   id: string; // Identifiant texte historique ou UUID.
   label: MultilingualText;
   startDate: string;
@@ -25,6 +27,8 @@ export interface ListPeriod {
 export type EventImportance = 'major' | 'normal' | 'minor';
 
 export interface ListEvent {
+  sourceKey?: string;
+  wikidataSource?: import('../../server/src/shared/wikidataGeneration').WikidataSource;
   id: string; // Identifiant texte historique ou UUID.
   label: MultilingualText;
   date: string;

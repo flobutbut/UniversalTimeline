@@ -25,6 +25,11 @@ export async function getPeriod(value: string, by: 'id' | 'wikidata_id' = 'id') 
     categories: (await listDetailedCategories(db, 'period', row.id)).map(mapCategory),
   };
 }
+export async function getEvent(id: string) {
+  const row = await catalogue.findEvent(db, id);
+  if (!row) throw new NotFoundError('Événement non trouvé');
+  return mapEventDetail(row);
+}
 export function createEvent(data: EventWrite & { id: string }) {
   return withTransaction(async client => {
     const row = await catalogue.insertEvent(client, data, computeYearsBP(data.date));

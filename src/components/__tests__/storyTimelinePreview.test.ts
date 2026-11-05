@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
-import { expect, it } from 'vitest';
+import { flushPromises, mount } from '@vue/test-utils';
+import { expect, it, vi } from 'vitest';
 import StoryTimeline from '@/components/StoryTimeline.vue';
 import { layoutCompactLanes } from '@/lib/compactStoryTimeline';
 
@@ -7,6 +7,27 @@ const period = (id: string, parentId: string | null, startDate = 'M60', endDate 
 const periods = [period('root', null, 'M65', 'NOW'), ...Array.from({ length: 15 }, (_, i) => period(`child-${i}`, 'root')), period('unknown', 'root', 'unknown', 'NOW')];
 const visible = (view: ReturnType<typeof mount>) => view.findAll('[data-period-id]').map(row => row.attributes('data-period-id'));
 const top = (view: ReturnType<typeof mount>, id: string) => (view.get(`[data-period-id="${id}"]`).element as HTMLElement).style.getPropertyValue('--story-period-top');
+
+it('keeps preview tooltips inside the viewport at every edge and dismisses them on scroll', async () => {
+  const original = HTMLElement.prototype.getBoundingClientRect;
+  const measure = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function(this: HTMLElement) {
+    return this.classList.contains('story-timeline-tooltip') ? { x:0, y:0, left:0, top:0, right:300, bottom:60, width:300, height:60, toJSON() {} } : original.call(this);
+  });
+  const view = mount(StoryTimeline, { props: { periods:[period('root', null)] } });
+  try {
+    const bar = view.get('.story-timeline__period-bar');
+    for (const [clientX,clientY] of [[1,100],[window.innerWidth-1,100],[100,1],[100,window.innerHeight-1]]) {
+      await bar.trigger('mouseenter', { clientX,clientY }); await flushPromises();
+      const tip = document.querySelector<HTMLElement>('.story-timeline-tooltip')!;
+      const left = parseFloat(tip.style.left), y = parseFloat(tip.style.top);
+      expect(left).toBeGreaterThanOrEqual(8); expect(left+300).toBeLessThanOrEqual(window.innerWidth-8);
+      expect(y).toBeGreaterThanOrEqual(8); expect(y+60).toBeLessThanOrEqual(window.innerHeight-8);
+      expect(tip.textContent).toContain('root');
+    }
+    window.dispatchEvent(new Event('scroll')); await flushPromises();
+    expect(document.querySelector('.story-timeline-tooltip')).toBeNull();
+  } finally { view.unmount(); measure.mockRestore(); }
+});
 
 it('keeps successive periods on the same line, including touching boundaries and gaps, regardless of input order',()=>{
   const view=mount(StoryTimeline,{props:{collapsible:true,periods:[

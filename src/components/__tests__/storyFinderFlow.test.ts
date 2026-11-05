@@ -329,6 +329,22 @@ it('edits the event importance for this frise from the event detail', async () =
   expect(view.emitted('change-event-importance')).toEqual([['event', 'major']]);
 });
 
+it('preselects the first visible event and preserves an explicit choice when changing tabs', async () => {
+  const data = story('one');
+  data.events.push({ ...data.events[0], id: 'second', label: { fr: 'Deuxième', en: '' }, categories: [{ id:'geo', label:{fr:'Géologie',en:''} }] });
+  await start(data);
+  view.getComponent(Tabs).vm.$emit('update:modelValue', 'events'); await flushPromises();
+  expect(selected()).toEqual(['event']);
+  expect(view.get('.events-finder-list').find('[aria-haspopup="menu"]').exists()).toBe(false);
+  view.findAllComponents(FinderItem).find(row => row.props('itemId') === 'second')!.vm.$emit('click'); await flushPromises();
+  view.getComponent(Tabs).vm.$emit('update:modelValue', 'overview'); await flushPromises();
+  view.getComponent(Tabs).vm.$emit('update:modelValue', 'events'); await flushPromises();
+  expect(selected()).toEqual(['second']);
+  view.findAllComponents(FinderItem).find(row => row.props('itemId') === 'event')!.vm.$emit('click'); await flushPromises();
+  view.getComponent(FilterBar).vm.$emit('update:categoryId', 'geo'); await flushPromises();
+  expect(selected()).toEqual(['second']);
+});
+
 it('shows the selected frise event description, categories, reference and record dates', async () => {
   const data = story('one');
   Object.assign(data.events[0], {

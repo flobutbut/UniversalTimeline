@@ -27,8 +27,8 @@ const submission = (patch: Partial<EditFormSubmission>): EditFormSubmission => (
 });
 let view: ReturnType<typeof mount>;
 const button = (name: string) => view.findAll('button').find(item => item.text() === name);
-async function start(tab: 'periods' | 'events') {
-  view = mount(StoryDetailPanel, { props: { story }, attachTo: document.body, global: { stubs: {
+async function start(tab: 'periods' | 'events', initialStory = story) {
+  view = mount(StoryDetailPanel, { props: { story: initialStory }, attachTo: document.body, global: { stubs: {
     StoryTimeline: true, StoryRelatedPickerModal: true, EditModal: { name: 'EditModal', props: ['type', 'mode', 'data', 'convertFrom', 'loading', 'error'], template: '<div class="edit-modal-stub" />' },
   } } });
   await flushPromises();
@@ -84,6 +84,20 @@ it('keeps the form open with the server refusal and never resends it on its own'
   expect(convert).toHaveBeenCalledOnce();
   expect(view.getComponent({ name: 'EditModal' }).props('error')).toContain('d’autres comptes');
   expect(view.emitted('entity-converted')).toBeUndefined();
+});
+
+it('carries a derived fact identity into the conversion form without requiring a fictitious Q-id', async () => {
+  const sourceKey = 'fact:Q5593:P69:q5593$11111111-1111-4111-8111-111111111111';
+  const derived = { ...story.events[0], wikidata_id: null, sourceKey };
+  const convert = vi.spyOn(EventApiService.getInstance(), 'convertToPeriod').mockResolvedValue({ ...period('p-new'), wikidata_id: null, sourceKey });
+  await start('events', { ...story, events: [derived] });
+  view.findAllComponents(FinderItem).find(row => row.props('itemId') === 'terror')!.vm.$emit('click'); await flushPromises();
+  await button('Convertir en période')!.trigger('click'); await flushPromises();
+  const modal = view.getComponent({ name: 'EditModal' });
+  expect(modal.props('data')).toMatchObject({ qid: '', sourceKey });
+  modal.vm.$emit('submit', submission({ qid: '', sourceKey, startDate: '1793', endDate: '1794' })); await flushPromises();
+  expect(convert).toHaveBeenCalledWith('terror', expect.objectContaining({ qid: '', sourceKey }));
+  expect(view.emitted('entity-converted')).toHaveLength(1);
 });
 
 it('titles the shared form as a conversion and hides the catalogue search', async () => {

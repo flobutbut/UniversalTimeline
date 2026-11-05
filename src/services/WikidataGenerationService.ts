@@ -1,6 +1,9 @@
+import { collectWikidataGeneration } from './wikidataGenerationDiscovery';
+import { evaluate, defaultSettings, label, description, type Profile, type WikidataGenerationSettings, type WikidataGenerationCollection, type WikidataGenerationDate } from '@/lib/wikidataGenerationModel';
+import { generatedSourceKey } from '../../server/src/shared/wikidataGeneration';
 import { mediaWiki, normalizeWikidataId, sparql, type WikidataEntity, type WikidataStatement, type WikidataReadOptions } from './wikidataTransport';
 import { WIKIDATA_MEDIAWIKI_API_URL } from '@/lib/wikidataMediaWikiConstants';
-import type { WikidataTimelineDraft, WikidataTimelineItem } from '@/types/wikidataGeneration';
+import { wikidataItemKey, type WikidataTimelineDraft, type WikidataTimelineItem } from '@/types/wikidataGeneration';
 import { compareYearsOldestFirst, parseTemporal, periodDateErrors } from '@temporal';
 import { wikibaseTimeToTemporal, type WikibaseTime } from '@/lib/wikidataTime';
 import { wouldCreateWikidataCycle } from '@/lib/wikidataHierarchy';
@@ -31,6 +34,10 @@ function isHuman(entity: WikidataEntity) {
 }
 
 export function wikidataTimelineItemError(item: WikidataTimelineItem): string | null {
+  if (item.origin === 'fact') {
+    try { generatedSourceKey(item.qid, 'fact', item.source); }
+    catch (cause) { return cause instanceof Error ? cause.message : 'La provenance de ce fait est incomplète.'; }
+  }
   if (!item.title.trim() || item.title.length > 255) return 'Renseignez un titre de 255 caractères maximum.';
   if (item.description.length > 1000) return 'La description doit tenir en 1 000 caractères.';
   if (!item.startDate.trim() || parseTemporal(item.startDate).kind === 'unknown') return 'Renseignez une date valide.';
@@ -87,22 +94,22 @@ function relationIds(entity: WikidataEntity, property: string): string[] {
 
 /** Preserve declared relationships only; dates never invent a historical parent. */
 function proposeParents(items: WikidataTimelineItem[], entities: Map<string, WikidataEntity>) {
-  const periods = items.filter(item => item.type === 'period');
+  const periods = items.filter(item => item.type === 'period' && item.origin !== 'fact');
   for (const item of periods) {
     item.parentCandidates = periods.filter(parent => parent.qid !== item.qid && (
       relationIds(entities.get(item.qid)!, 'P361').includes(parent.qid)
       || relationIds(entities.get(parent.qid)!, 'P527').includes(item.qid)
-    )).map(parent => parent.qid);
+    )).map(parent => wikidataItemKey(parent));
     item.parentQid = null;
   }
   for (const item of periods) {
     const candidate = item.parentCandidates?.length === 1 ? item.parentCandidates[0] : null;
-    if (candidate && !wouldCreateWikidataCycle(item.qid, candidate, periods)) item.parentQid = candidate;
+    if (candidate && !wouldCreateWikidataCycle(wikidataItemKey(item), candidate, periods)) item.parentQid = candidate;
   }
 }
 
 /** Direct relations only: bounded discovery, followed by full claims (precision + rank). */
-export async function generateWikidataTimeline(rawQid: string, options: WikidataReadOptions = {}): Promise<WikidataTimelineDraft> {
+export async function generateLegacyWikidataTimeline(rawQid: string, options: WikidataReadOptions = {}): Promise<WikidataTimelineDraft> {
   const qid = normalizeWikidataId(rawQid);
   const subject = (await loadEntities([qid], options)).get(qid);
   if (!subject || subject.missing !== undefined) throw new Error('Ce sujet Wikidata est introuvable.');
@@ -127,4 +134,43 @@ export async function generateWikidataTimeline(rawQid: string, options: Wikidata
   if (rows.length > MAX_RELATED_ITEMS) warnings.push(`La recherche est limitée aux ${MAX_RELATED_ITEMS} premiers éléments liés. La frise ne sera pas exhaustive.`);
   if (isHuman(subject)) warnings.push('Les biographies ne sont pas encore transformées en événements de vie. Seuls les événements liés sont proposés.');
   return { qid, title: subject.labels?.fr?.value || subject.labels?.en?.value || qid, description: subject.descriptions?.fr?.value || subject.descriptions?.en?.value || '', items, warnings };
+}
+
+
+export async function generateWikidataTimeline(rawQid: string, options: WikidataReadOptions & { profile?: Profile; settings?: Partial<WikidataGenerationSettings> } = {}): Promise<WikidataTimelineDraft> {
+  const collection = await collectWikidataGeneration(rawQid, options);
+  return generationDraftFromCollection(collection, options.settings);
+}
+
+/** Shared adapter: the laboratory rules now produce saveable application records. */
+export function generationDraftFromCollection(collection: WikidataGenerationCollection, settings?: Partial<WikidataGenerationSettings>): WikidataTimelineDraft {
+  const rules = { ...defaultSettings, ...settings };
+  const candidates = evaluate(collection, collection.profile, rules);
+  const items: WikidataTimelineItem[] = candidates.map(candidate => {
+    const source = { ...candidate.source, start: candidate.start?.values, end: candidate.end?.values };
+    const startDate = generationDate(candidate.start), endDate = generationDate(candidate.end);
+    const type = candidate.type === 'period' && startDate && startDate === endDate ? 'event' : candidate.type;
+    let id: string;
+    try { id = generatedSourceKey(candidate.qid, candidate.origin, source); }
+    catch { id = candidate.id; }
+    const item: WikidataTimelineItem = { id, qid: candidate.qid, origin: candidate.origin, source, type, title: candidate.title, description: candidate.description, startDate, endDate: type === 'period' ? endDate : '', selected: false, category: candidate.category, status: candidate.status, reasons: candidate.reasons, warning: [candidate.start?.issue, candidate.end?.issue].filter(Boolean).join(' ') || undefined };
+    item.selected = candidate.status === 'retained' && !wikidataTimelineItemError(item);
+    return item;
+  });
+  proposeParents(items, new Map(Object.entries(collection.entities)));
+  const subject = collection.entities[collection.qid];
+  const warnings = [...(collection.notices ?? [])];
+  if (collection.truncated) warnings.push('La collecte est limitée à 120 candidats classés ; cette frise ne sera pas exhaustive.');
+  warnings.push('Les propositions sont extraites de déclarations Wikidata. Vérifiez leur pertinence et les dates avant d’enregistrer.');
+  return { qid: collection.qid, title: label(subject, collection.qid), description: description(subject), profile: collection.profile, settings: rules, items, warnings };
+}
+
+function generationDate(date: WikidataGenerationDate | null): string {
+  if (!date || date.order == null) return '';
+  if (parseTemporal(date.raw).kind !== 'unknown') return date.raw;
+  const match = /^([+-])(\d+)-/.exec(date.values[0]?.time ?? '');
+  if (!match || !date.approximate) return '';
+  const year = Number(match[2]);
+  const unit = date.precision === 7 ? ' (siècle)' : date.precision === 8 ? ' (décennie)' : date.precision === 6 ? ' (millénaire)' : '';
+  return `vers ${year}${match[1] === '-' ? ' av. J.-C.' : ''}${unit}`;
 }

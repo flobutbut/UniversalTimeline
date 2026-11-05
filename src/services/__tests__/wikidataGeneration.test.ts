@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { generateWikidataTimeline, wikidataTimelineItemError } from '../WikidataGenerationService';
+import { generateLegacyWikidataTimeline as generateWikidataTimeline, wikidataTimelineItemError } from '../WikidataGenerationService';
 import { mediaWiki, sparql, type WikidataEntity } from '../wikidataTransport';
 import { wikidataHierarchyError } from '@/lib/wikidataHierarchy';
 

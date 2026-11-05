@@ -1,4 +1,5 @@
 import type { TransactionClient } from '../api/transaction.js';
+import type { SourceMetadata } from './rows.js';
 
 export type CatalogueKind = 'period' | 'event';
 const table = (kind: CatalogueKind) => kind === 'period' ? 'periods' : 'events';
@@ -44,4 +45,14 @@ export async function countMemberships(client: TransactionClient, kind: Catalogu
     ? 'SELECT count(*)::int AS n FROM public.story_periods WHERE period_id = $1'
     : 'SELECT count(*)::int AS n FROM public.story_events WHERE event_id = $1';
   return (await client.query<{ n: number }>(sql, [id])).rows[0].n;
+}
+
+/** Provenance comes from the locked catalogue record, never from conversion input. */
+export async function transferSource(client: TransactionClient, from: CatalogueKind, oldId: string, newId: string) {
+  const target = from === 'period' ? 'events' : 'periods';
+  return (await client.query<SourceMetadata>(`UPDATE public.${target} AS target
+    SET source_key = source.source_key, wikidata_source = source.wikidata_source,
+      wikidata_id = CASE WHEN source.source_key IS NOT NULL THEN NULL ELSE target.wikidata_id END
+    FROM public.${table(from)} AS source WHERE source.id = $1 AND target.id = $2
+    RETURNING target.source_key, target.wikidata_source`, [oldId, newId])).rows[0];
 }

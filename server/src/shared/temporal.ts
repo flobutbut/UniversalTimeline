@@ -4,8 +4,8 @@
  * Calendar years use ISO astronomical numbering, including year zero.
  */
 export const MS_PER_YEAR = 365.25 * 86400000;
-export type DatePrecision = 'Ga' | 'Ma' | 'ka' | 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second';
-interface TemporalBase { raw: string; precision: DatePrecision; calendarDate?: Date }
+export type DatePrecision = 'Ga' | 'Ma' | 'ka' | 'millennium' | 'century' | 'decade' | 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second';
+interface TemporalBase { raw: string; precision: DatePrecision; calendarDate?: Date; approximate?: boolean }
 export type NormalizedDate = TemporalBase & (
   | { kind: 'unknown'; yearsBeforePresent: null; isCurrent: false; reason: 'missing' | 'unrecognized' | 'invalid' }
   | { kind: 'age' | 'calendar' | 'current'; yearsBeforePresent: number; isCurrent: boolean }
@@ -49,6 +49,13 @@ function calendar(raw: string, year: number, month: number, day: number, hour: n
 export function parseTemporal(input: string | null | undefined, now = Date.now()): NormalizedDate {
   const raw = input?.trim() ?? '';
   if (!raw) return unknown(raw, 'missing');
+  const approximate = /^vers (\d{1,9})( BCE| av\. J\.-C\.)?(?: \((siècle|décennie|millénaire)\))?$/i.exec(raw);
+  if (approximate) {
+    const year = approximate[2] ? 1 - Number(approximate[1]) : Number(approximate[1]);
+    if (approximate[2] && Number(approximate[1]) === 0) return unknown(raw, 'invalid');
+    const precision = ({ 'siècle': 'century', 'décennie': 'decade', 'millénaire': 'millennium' } as const)[approximate[3]?.toLowerCase() as 'siècle'] ?? 'year';
+    return { ...calendar(raw, year, 1, 1, 0, 0, 0, 0, 0, precision, now), approximate: true };
+  }
   if (/^(NOW|TODAY)$/i.test(raw)) return { raw, kind: 'current', yearsBeforePresent: 0, precision: 'year', isCurrent: true };
   const canonical = raw.match(/^([GMKA])(\d+(?:\.\d+)?)$/i);
   if (canonical) {

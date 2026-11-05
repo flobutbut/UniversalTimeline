@@ -14,6 +14,7 @@ export interface EditModalState {
 
 function draft(data: EditInitialData = {}): EditFormData {
   return {
+    sourceKey: data.sourceKey,
     qid: data.wikidata_id ?? data.qid ?? '',
     title: { fr: data.label?.fr ?? data.title?.fr ?? '', en: data.label?.en ?? data.title?.en ?? '' },
     description: { fr: data.description?.fr ?? '', en: data.description?.en ?? '' },
@@ -58,6 +59,7 @@ export function useEditModal(type: EditFormType | (() => EditFormType), mode: Ed
     state.qidError=''; state.qidExistsInBase=false; state.existingItem=currentMode()==='edit' ? data : null;
   };
   const prepareSubmitData = (): EditFormSubmission => ({
+    ...(form.sourceKey ? { sourceKey: form.sourceKey } : {}),
     qid:form.qid.trim().toUpperCase(), title:{fr:form.title.fr.trim(),en:form.title.en.trim() || form.title.fr.trim()},
     description:{fr:form.description.fr || null,en:form.description.en || form.description.fr || null},
     startDate:form.startDate.trim(), endDate:form.endDate.trim() || 'NOW', date:form.date.trim(),

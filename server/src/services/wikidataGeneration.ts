@@ -24,13 +24,13 @@ export function createGeneratedStory(input: GeneratedStoryInput) {
     const story = await insertStory(client, { ...input.story, isPublic: input.story.isPublic ?? false, author: await creatorAuthor(client) });
     const periods = new Map<string, string>(); const events: string[] = [];
     // Stable lock ordering makes overlapping imports less likely to deadlock.
-    for (const item of [...input.items].sort((a, b) => a.data.wikidata_id.localeCompare(b.data.wikidata_id))) {
+    for (const item of [...input.items].sort((a, b) => a.sourceKey.localeCompare(b.sourceKey))) {
       const id = await insertOrReuseGeneratedItem(client, item);
-      if (item.type === 'period') periods.set(item.data.wikidata_id, id);
+      if (item.type === 'period') periods.set(item.key, id);
       else events.push(id);
     }
     if (periods.size) await insertFrozenPlacements(client, story.id, input.items.filter(item => item.type === 'period').map(item => ({
-      id: periods.get(item.data.wikidata_id)!, parent_id: item.parentQid ? periods.get(item.parentQid)! : null,
+      id: periods.get(item.key)!, parent_id: item.parentQid ? periods.get(item.parentQid)! : null,
     })));
     if (events.length) await insertAssociations(client, String(story.id), 'event', events);
     return { id: String(story.id), periodCount: periods.size, eventCount: events.length };

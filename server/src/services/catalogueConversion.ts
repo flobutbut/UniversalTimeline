@@ -37,10 +37,11 @@ export function convertPeriodToEvent(periodId: string, data: EventWrite & { id: 
       throw new CatalogueConversionError(409, `Conversion impossible : cette période a des sous-périodes dans ${withChildren} frise(s). Déplacez-les avant de la convertir.`);
     }
     const row = await catalogue.insertEvent(client, data, computeYearsBP(data.date));
+    const provenance = await conversion.transferSource(client, 'period', periodId, row.id);
     await replaceEntityCategories(client, 'event', row.id, data.categories);
     await conversion.transferMemberships(client, 'period', periodId, row.id);
     await deletePeriod(client, periodId);
-    return { ...row, categories: await readEntityCategories(client, 'event', row.id), stories };
+    return { ...row, ...provenance, ...(provenance.source_key ? { wikidata_id: null } : {}), categories: await readEntityCategories(client, 'event', row.id), stories };
   });
 }
 
@@ -49,9 +50,10 @@ export function convertEventToPeriod(eventId: string, data: PeriodWrite & { id: 
   return withTransaction(async client => {
     const stories = await prepare(client, 'event', eventId);
     const row = await catalogue.insertPeriod(client, data, computeYearsBP(data.start_date, now), computeYearsBP(data.end_date, now));
+    const provenance = await conversion.transferSource(client, 'event', eventId, row.id);
     await replaceEntityCategories(client, 'period', row.id, data.categories);
     await conversion.transferMemberships(client, 'event', eventId, row.id);
     await catalogue.deleteEvent(client, eventId);
-    return { ...row, categories: await readEntityCategories(client, 'period', row.id), stories };
+    return { ...row, ...provenance, ...(provenance.source_key ? { wikidata_id: null } : {}), categories: await readEntityCategories(client, 'period', row.id), stories };
   });
 }

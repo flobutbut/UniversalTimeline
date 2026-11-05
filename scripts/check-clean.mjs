@@ -97,6 +97,7 @@ try {
     ['profiles', 'profiles.postgres.mjs'], ['admin', 'admin.postgres.mjs'],
     ['public_editors', 'publicEditors.postgres.mjs'],
     ['wikidata_generation', 'wikidataGeneration.postgres.mjs'], ['conversion', 'catalogueConversion.postgres.mjs'],
+    ['wikidata_sources', 'wikidataSourcesMigration.postgres.mjs'],
     ['story_structure', 'storyStructure.postgres.mjs'],
     ['navigation_wrappers', 'navigationWrappers.postgres.mjs'],
   ]) await postgresSuite(name, file, restore);

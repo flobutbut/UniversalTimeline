@@ -84,8 +84,10 @@
     <Teleport to="body">
       <div
         v-if="tooltip"
+        ref="tooltipElement"
         class="story-timeline-tooltip"
-        :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
+        role="tooltip"
+        :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px', visibility: tooltip.ready ? 'visible' : 'hidden' }"
       >
         <span class="story-timeline-tooltip__name">{{ tooltip.label }}</span>
         <span v-if="tooltip.detail" class="story-timeline-tooltip__detail">{{ tooltip.detail }}</span>
@@ -97,7 +99,7 @@
 <script setup lang="ts">
 import Button from '@/components/base/Button.vue';
 import { Icon } from '@iconify/vue';
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onScopeDispose, ref, watch } from 'vue';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import { EVENT_IMPORTANCE_LABELS } from '@/lib/eventImportance';
 import type { StoryTimelinePeriod as InPeriod, StoryTimelineEvent as InEvent } from '@/types/storyTimeline';
@@ -175,20 +177,40 @@ const toggleLabel = (id: string, label: string) => `${collapsedIds.value.has(id)
 // ─── Tooltip ─────────────────────────────────────────────────────────────────
 
 const TOOLTIP_OFFSET = 12; // px au-dessus du curseur
-const tooltip = ref<{ label: string; detail: string; x: number; y: number } | null>(null);
+const tooltip = ref<{ label: string; detail: string; x: number; y: number; ready: boolean } | null>(null);
+const tooltipElement = ref<HTMLElement | null>(null);
+let tooltipVersion = 0;
 
-function showTooltip(e: MouseEvent, label: string, detail: string) {
+async function showTooltip(e: MouseEvent, label: string, detail: string) {
+  const version = ++tooltipVersion;
+  const x = e.clientX, y = e.clientY;
+  const current = { label, detail, x, y, ready: false };
+  tooltip.value = current;
+  await nextTick();
+  if (version !== tooltipVersion) return;
+  const bounds = tooltipElement.value?.getBoundingClientRect();
+  if (!bounds || !tooltip.value) return;
+  const margin = 8;
+  const above = y - TOOLTIP_OFFSET - bounds.height;
   tooltip.value = {
-    label,
-    detail,
-    x: e.clientX,
-    y: e.clientY - TOOLTIP_OFFSET,
+    label, detail, ready: true,
+    x: Math.max(margin, Math.min(x - bounds.width / 2, window.innerWidth - bounds.width - margin)),
+    y: Math.max(margin, Math.min(above >= margin ? above : y + TOOLTIP_OFFSET, window.innerHeight - bounds.height - margin)),
   };
 }
 
 function hideTooltip() {
+  tooltipVersion++;
   tooltip.value = null;
 }
+onMounted(() => {
+  window.addEventListener('resize', hideTooltip);
+  window.addEventListener('scroll', hideTooltip, true);
+});
+onScopeDispose(() => {
+  window.removeEventListener('resize', hideTooltip);
+  window.removeEventListener('scroll', hideTooltip, true);
+});
 
 // ─── Bornes globales ──────────────────────────────────────────────────────────
 
@@ -484,7 +506,11 @@ const trackRef = ref<HTMLElement | null>(null);
 .story-timeline-tooltip {
   position: fixed;
   z-index: var(--z-index-tooltip, 9999);
-  transform: translate(-50%, -100%);
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(360px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  overflow: hidden;
   background: var(--color-surface-raised);
   color: var(--color-text-primary);
   border-radius: var(--radius-md);
@@ -493,7 +519,8 @@ const trackRef = ref<HTMLElement | null>(null);
   display: flex;
   flex-direction: column;
   gap: calc(var(--spacing-xs) / 4);
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
   box-shadow: var(--shadow-md);
 }
 

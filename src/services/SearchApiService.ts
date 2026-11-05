@@ -214,6 +214,7 @@ function wikidataSearchHitIsLikelyEvent(
 }
 
 export interface LocalSearchResult {
+  sourceKey?: string;
   id: string;
   wikidataId?: string;
   type: 'period' | 'event';
@@ -263,6 +264,7 @@ export type GlobalSearchResult = StorySearchResult | (WikidataEntityLabelHit & {
 
 interface ApiSearchResponse {
   periods: Array<{
+    sourceKey?: string;
     id: string;
     wikidataId?: string;
     label: { fr: string; en: string };
@@ -274,6 +276,7 @@ interface ApiSearchResponse {
     hasChildren?: boolean;
   }>;
   events: Array<{
+    sourceKey?: string;
     id: string; wikidataId?: string; label: { fr: string; en: string };
     date?: string; description?: string;
   }>;
@@ -295,6 +298,15 @@ export class SearchApiService {
     if (!ids.length) return [];
     const data = await apiClient.get<ApiSearchResponse>(`/search/by-wikidata?${new URLSearchParams({ ids: ids.join(','), only: `${type}s` })}`, { signal });
     return this.mapLocalResults(data);
+  }
+  async searchLocalByGenerationKeys(keys: string[], type: 'period' | 'event', signal?: AbortSignal): Promise<LocalSearchResult[]> {
+    if (!keys.length) return [];
+    const unique = [...new Set(keys)], results: LocalSearchResult[] = [];
+    for (let i = 0; i < unique.length; i += 50) {
+      const data = await apiClient.get<ApiSearchResponse>(`/search/by-generation-keys?${new URLSearchParams({ keys: unique.slice(i, i + 50).join(','), only: `${type}s` })}`, { signal });
+      results.push(...this.mapLocalResults(data));
+    }
+    return results;
   }
 
   private mapLocalResults(data: ApiSearchResponse): LocalSearchResult[] {
