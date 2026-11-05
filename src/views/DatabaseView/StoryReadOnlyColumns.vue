@@ -42,7 +42,7 @@ watch([() => props.storyId, () => auth.identityVersion], load, { immediate: true
 onScopeDispose(() => { revision++; });
 </script>
 <style scoped>
-.story-readonly-columns { display: flex; flex: 0 0 auto; height: 100%; min-height: 0; }
+.story-readonly-columns { display: flex; flex: 0 0 auto; height: auto; min-height: 0; align-items: stretch; }
 .story-readonly-column__label { color: var(--color-text-secondary); font-size: var(--font-size-xs); white-space: nowrap; }
 .story-readonly-column :deep(.finder-item-content) { color: var(--color-text-secondary); }
 .story-readonly-column :deep(.finder-item.selected .finder-item-content) { color: var(--color-text-on-selected); }

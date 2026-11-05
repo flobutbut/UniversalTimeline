@@ -243,9 +243,9 @@ it('offers period and frise additions at the root without retaining a nested anc
   await headers[2].findAll('button').find(action => action.text() === 'Ajouter une frise')!.trigger('click');
   view.getComponent({ name: 'StoryRelatedPickerModal' }).vm.$emit('close'); await flushPromises();
   await rootButton('Ajouter une frise').trigger('click');
-  expect(view.getComponent({ name: 'StoryRelatedPickerModal' }).props('periods')).toHaveLength(2);
-  view.getComponent({ name: 'StoryRelatedPickerModal' }).vm.$emit('confirm', ['linked-frise'], 'inside'); await flushPromises();
-  expect(view.emitted('add-child-stories')).toEqual([[['linked-frise'], { type: 'period', id: 'inside' }]]);
+  expect(view.getComponent({ name: 'StoryRelatedPickerModal' }).props('periods')).toBeUndefined();
+  view.getComponent({ name: 'StoryRelatedPickerModal' }).vm.$emit('confirm', ['linked-frise']); await flushPromises();
+  expect(view.emitted('add-child-stories')).toEqual([[['linked-frise'], null]]);
   await rootButton('Ajouter une période').trigger('click');
   expect(view.getComponent(EditModal).props()).toMatchObject({ mode: 'create', type: 'period', data: { parent_id: null }, allowExistingPeriods: true });
   expect(view.emitted('add-periods')).toBeUndefined();

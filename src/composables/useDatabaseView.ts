@@ -343,7 +343,7 @@ export function useDatabaseView() {
     }
   };
 
-  const addChildStoriesToStory = (childIds: string[], anchor?: StoryAnchor) => mutateRelatedStories(async parentId => {
+  const addChildStoriesToStory = (childIds: string[], anchor?: StoryAnchor | null) => mutateRelatedStories(async parentId => {
     const ids = [...new Set(childIds)];
     const service = StoryApiService.getInstance();
     await service.changeEntryPoints(parentId, ids, anchor);

@@ -185,12 +185,12 @@ it('offers unanchored frise-level links at the frise root without attaching them
   expect(rootStoryNavigationLinks(source).map(story => story.id)).toEqual(['global']);
 });
 
-it('shows a child anchored on a period that left the frise at frise level instead of hiding it', async () => {
+it('does not invent a root access for a period anchor that left the frise', async () => {
   const source={ ...detail('one'), periods: [root] as unknown as Story['periods'], childStories: [linked('stale', 'removed-period')] };
   vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(source);
   view = mount(PeriodGrid, { props: { ...gridProps, periods: [] }, attachTo: document.body }); await settle();
   expect(view.find('.period-card--parent .associated-stories__badge').exists()).toBe(false);
-  expect(rootStoryNavigationLinks(source).map(story => story.id)).toContain('stale');
+  expect(rootStoryNavigationLinks(source).map(story => story.id)).not.toContain('stale');
 });
 
 it('offers other frises sharing a period, deduplicated with anchored children', async () => {

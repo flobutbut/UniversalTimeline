@@ -111,35 +111,31 @@ it('resets the first frise to its overview from the story breadcrumb and restore
   expect(view.getComponent(PeriodGrid).props('currentPeriod')?.id).toBe('leaf-1');
 });
 
-it.each([1, 2])('opens event-linked frises from the header with their real return anchor (%s choices)', async count => {
+it.each([1, 2])('opens period-linked frises from the header with their real return anchor (%s choices)', async count => {
   vi.mocked(stories.getListStories).mockResolvedValue(['38', '5', '39'].map(summary));
   const homo = { ...event('homo'), date: 'M2.8' };
   vi.mocked(stories.getStory).mockImplementation(async id => storyFixture(id,
     [{ ...period(id === '38' ? 'hominins' : 'homo-period'), startDate: id === '38' ? 'M7' : 'M2.8', endDate: id === '38' ? 'M1.2' : 'TODAY' }],
     [homo], id === '38' ? [
-      { id: '5', title_fr: 'Genre Homo', atRoot: false, anchors: [{ type: 'event', id: 'homo' }] },
-      { id: '39', title_fr: 'Histoire des techniques', atRoot: false, anchors: [{ type: 'event', id: 'homo' }] },
+      { id: '5', title_fr: 'Genre Homo', atRoot: false, anchors: [{ type: 'period', id: 'hominins' }] },
+      { id: '39', title_fr: 'Histoire des techniques', atRoot: false, anchors: [{ type: 'period', id: 'hominins' }] },
     ].slice(0, count) : []));
   await start('/timeline?story=38');
-  const header = view.get('.home-view__associated-stories');
-  if (count === 1) {
-    await header.get('button').trigger('click');
-  } else {
-    await header.get('[role="combobox"]').trigger('click'); await flushPromises();
-    const options = document.body.querySelectorAll<HTMLElement>('[role="option"]');
-    expect([...options].map(option => option.querySelector('.base-select__option-text')?.textContent?.trim())).toEqual(['Genre Homo', 'Histoire des techniques']);
-    options[0].click();
-  }
+  const header = view.get('.home-view__story-selector');
+  await header.get('[role="combobox"]').trigger('click'); await flushPromises();
+  const options = document.body.querySelectorAll<HTMLElement>('[role="option"]');
+  expect([...options].map(option => option.querySelector('.base-select__option-text')?.textContent?.trim())).toEqual(['Vue d’ensemble de la frise', ...['Genre Homo', 'Histoire des techniques'].slice(0, count)]);
+  options[1].click();
   await flushPromises();
   expect(router.currentRoute.value.query.story).toBe('5');
   expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('5');
   expect(router.options.history.state).toMatchObject({ timelineReturnPath: [
-    { storyId: '38', view: 'overview', anchor: { type: 'event', id: 'homo' }, anchorStoryId: '38' },
+    { storyId: '38', view: 'overview', anchor: { type: 'period', id: 'hominins' }, anchorStoryId: '38' },
   ] });
   const moved = new Promise<void>(resolve => { const stop = router.afterEach(() => { stop(); resolve(); }); });
   router.back(); await moved; await flushPromises();
   expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('38');
-  expect(view.get('.home-view__associated-stories').exists()).toBe(true);
+  expect(view.get('.home-view__story-selector').exists()).toBe(true);
 });
 
 it('opens a leaf directly and restores it through browser history after visiting an associated frise', async () => {

@@ -78,13 +78,12 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   const headerStories = computed(() => {
     if (!currentStory.value) return [];
     const periodIds = new Set([...displayedPeriods.value.map(period => period.id), ...(currentPeriod.value ? [currentPeriod.value.id] : [])]);
-    const eventIds = new Set(storyEvents.value.map(event => event.id));
     return storyNavigationLinks(currentStory.value).flatMap(link => {
-      const anchor = link.anchors.find(anchor => anchor.type === 'period' && !anchor.displayAsPeriod && anchor.id === currentPeriod.value?.id)
-        ?? link.anchors.find(anchor => anchor.type === 'period' ? !anchor.displayAsPeriod && periodIds.has(anchor.id) : eventIds.has(anchor.id));
       if (link.atRoot && !link.rootDisplayAsPeriod) return [{ id: link.id, title: link.title, anchor: undefined as StoryAnchor | undefined }];
+      const anchor = link.anchors.find(anchor => anchor.type === 'period' && !anchor.displayAsPeriod && anchor.id === currentPeriod.value?.id)
+        ?? link.anchors.find(anchor => anchor.type === 'period' && !anchor.displayAsPeriod && periodIds.has(anchor.id));
       return anchor ? [{ id: link.id, title: link.title, anchor: { type: anchor.type, id: anchor.id } as StoryAnchor }] : [];
-    });
+    }).sort((a, b) => Number(a.anchor !== undefined) - Number(b.anchor !== undefined));
   });
   const linkedPeriods = computed(() => linkedStoryPeriods(currentStory.value,currentPeriod.value?.id ?? null,stories.value));
   const navigationReference = computed(() => {

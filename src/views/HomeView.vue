@@ -2,17 +2,14 @@
   <div class="home-view">
     <div class="home-view__header">
       <div class="home-view__breadcrumbs">
-        <StoryBreadcrumb class="home-view__story-breadcrumb" :items="storyBreadcrumb" :max-visible="3" label="Fil d’Ariane des frises" current-navigable :loading="loading" @navigate="onStoryBreadcrumb" />
+        <StoryBreadcrumb class="home-view__story-breadcrumb" :items="storyBreadcrumb" :max-visible="3" label="Fil d’Ariane des frises" current-navigable :loading="loading" @navigate="onStoryBreadcrumb">
+          <template v-if="headerStories.length" #current="{ item }">
+            <Select class="home-view__story-selector" :model-value="null" :placeholder="item.title" compact :searchable="false" :disabled="loading"
+              :options="[{ value: currentStoryId, label: 'Vue d’ensemble de la frise' }, ...headerStories.map(story => ({ value: story.id, label: story.title.fr || story.title.en }))]"
+              @update:model-value="value => typeof value === 'string' && (value === currentStoryId ? onStoryBreadcrumb(storyBreadcrumb.length - 1) : onHeaderStorySelect(value))" />
+          </template>
+        </StoryBreadcrumb>
         <StoryBreadcrumb class="home-view__period-breadcrumb" :items="breadcrumb" :loading="loading" @navigate="onBreadcrumb" />
-      </div>
-      <div v-if="headerStories.length" class="home-view__associated-stories">
-        <Button v-if="headerStories.length === 1" variant="tertiary" size="sm" :disabled="loading"
-          @click="onHeaderStorySelect(headerStories[0].id)">{{ headerStories[0].title.fr || headerStories[0].title.en }}</Button>
-        <Select v-else-if="headerStories.length > 1" :model-value="null"
-          placeholder="Explorer une frise associée" compact
-          :options="headerStories.map(story => ({ value: story.id, label: story.title.fr || story.title.en }))"
-          :searchable="headerStories.length > 6" :disabled="loading"
-          @update:model-value="value => typeof value === 'string' && onHeaderStorySelect(value)" />
       </div>
       <div class="home-view__header-actions">
         <Switch v-model="showPeriodChildren" label="Étendre" label-first variant="sm" :disabled="loading" />
@@ -258,14 +255,16 @@ onActivated(() => {
 }
 
 .home-view__choices { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md); }
-.home-view__header { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 320px) minmax(0, 1fr); align-items: start; gap: var(--spacing-sm); flex-shrink: 0; padding-inline: var(--spacing-md); }
+.home-view__header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: var(--spacing-sm); flex-shrink: 0; padding-inline: var(--spacing-md); }
 .home-view__breadcrumbs { flex: 1; min-width: 0; }
-.home-view__associated-stories { min-width: 0; display: flex; justify-content: center; margin-block: var(--spacing-sm) var(--spacing-xs); }
-.home-view__associated-stories > .base-select { width: 100%; }
-.home-view__header-actions { grid-column: 3; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--spacing-sm); margin-block: var(--spacing-sm) var(--spacing-xs); }
+.home-view__story-selector { width: auto; min-width: 0; }
+.home-view__story-selector :deep(.base-select__trigger) { min-height: 0; padding: var(--spacing-xs) 0; background: transparent; border-color: transparent; color: var(--color-text-primary); }
+.home-view__story-selector :deep(.base-select__placeholder) { color: var(--color-text-primary); opacity: 1; font-weight: var(--font-weight-semibold); }
+.home-view__story-selector :deep(.base-select__indicators) { margin-left: var(--spacing-xs); }
+.home-view__story-selector :deep(.base-select__dropdown) { right: auto; width: max-content; min-width: 100%; max-width: min(320px, 85vw); }
+.home-view__header-actions { grid-column: 2; grid-row: 1; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--spacing-sm); margin-block: var(--spacing-sm) var(--spacing-xs); }
 @media (max-width: 768px) {
   .home-view__header { grid-template-columns: minmax(0, 1fr) auto; }
-  .home-view__associated-stories { grid-column: 1 / -1; grid-row: 2; width: min(100%, 320px); justify-self: center; }
   .home-view__header-actions { grid-column: 2; grid-row: 1; }
 }
 .home-view__breadcrumbs > .story-breadcrumb + .story-breadcrumb { padding-top: 0; }

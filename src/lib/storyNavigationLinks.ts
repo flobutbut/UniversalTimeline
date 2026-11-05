@@ -1,3 +1,4 @@
+import { hasStoryRootLocation } from './storyRelationLocations';
 import type { Story, StoryAnchor, StorySuggestion, ChildStorySummary } from '@/types/database';
 type NavigationLink = StorySuggestion & { anchors: ChildStorySummary['anchors']; atRoot?: boolean; rootDisplayAsPeriod?: boolean };
 
@@ -9,7 +10,7 @@ export function storyNavigationLinks(story: Story): NavigationLink[] {
   for (const child of story.childStories ?? []) {
     if (String(child.id).trim() === String(story.id).trim()) continue;
     const anchors = child.anchors.filter(anchor => (anchor.type === 'period' ? periods : events).has(anchor.id));
-    links.set(child.id, { id: child.id, title: child.title, parentStoryId: story.id, anchors, atRoot: child.atRoot ?? anchors.length === 0,
+    links.set(child.id, { id: child.id, title: child.title, parentStoryId: story.id, anchors, atRoot: hasStoryRootLocation(child),
       ...(child.rootDisplayAsPeriod ? { rootDisplayAsPeriod: true } : {}) });
   }
   const related = [...(story.relatedStories ?? [])].sort((a, b) => (a.title.fr || a.title.en).localeCompare(b.title.fr || b.title.en, 'fr'));

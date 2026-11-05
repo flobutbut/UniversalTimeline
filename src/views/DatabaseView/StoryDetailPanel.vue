@@ -174,6 +174,15 @@
                   </div>
                   <div class="finder-column-content">
                     <template v-if="col.length > 0 || childStoriesForColumn(colIdx).length > 0">
+                      <AnchoredStoryRow v-for="cs in childStoriesForColumn(colIdx)" :key="cs.id" :story="cs" :summary="childStorySummary(cs.id)" :disabled="panelBusy"
+                        column-actions explorable :read-only="!auth.canEditStory(story)" :display-as-period="storyLinkAsPeriod(cs, colIdx)"
+                        :explored="readonlyStory?.id === cs.id && readonlyStory.column === colIdx"
+                        :data-child-story-id="cs.id" :draggable="canDragChildStory(cs.id, colIdx)"
+                        :class="{ 'story-period-row--dragging': draggedChildStory?.id === cs.id && draggedChildStory.column === colIdx }"
+                        @explore="readonlyStory = { id: cs.id, column: colIdx }"
+                        @move="movingStoryLink = { id: cs.id, fromParentId: finderSelectedPath[colIdx - 1] ?? null, label: cs.title.fr || cs.title.en }"
+                        @display="emit('display-child-story', cs.id, columnAnchor(colIdx), !storyLinkAsPeriod(cs, colIdx))"
+                        @remove="emit('remove-child-story', cs.id, colIdx ? columnAnchor(colIdx) : null)" />
                       <FinderItem
                         v-for="row in col"
                         :key="row.item.id"
@@ -209,15 +218,7 @@
                           </button>
                         </template>
                       </FinderItem>
-                      <AnchoredStoryRow v-for="cs in childStoriesForColumn(colIdx)" :key="cs.id" :story="cs" :summary="childStorySummary(cs.id)" :disabled="panelBusy"
-                        column-actions explorable :read-only="!auth.canEditStory(story)" :display-as-period="storyLinkAsPeriod(cs, colIdx)"
-                        :explored="readonlyStory?.id === cs.id && readonlyStory.column === colIdx"
-                        :data-child-story-id="cs.id" :draggable="canDragChildStory(cs.id, colIdx)"
-                        :class="{ 'story-period-row--dragging': draggedChildStory?.id === cs.id && draggedChildStory.column === colIdx }"
-                        @explore="readonlyStory = { id: cs.id, column: colIdx }"
-                        @move="movingStoryLink = { id: cs.id, fromParentId: finderSelectedPath[colIdx - 1] ?? null, label: cs.title.fr || cs.title.en }"
-                        @display="emit('display-child-story', cs.id, columnAnchor(colIdx), !storyLinkAsPeriod(cs, colIdx))"
-                        @remove="emit('remove-child-story', cs.id, colIdx ? columnAnchor(colIdx) : cs.atRoot || !cs.anchors.length ? null : undefined)" />
+
 
                     </template>
                     <div v-else class="finder-empty-column">
@@ -401,7 +402,6 @@
     <StoryRelatedPickerModal
       v-if="showChildStoryPicker && story"
       :exclude-story-ids="childStoryPickerExcludeIds"
-      :periods="childStoryAnchor ? undefined : story.periods"
       @close="showChildStoryPicker = false"
       @confirm="onAddChildStories"
     />
@@ -435,6 +435,7 @@ import { promotionCandidates } from '@/lib/storyArchitecture';
 import EditModal from './EditModal.vue';
 import { useStoryWikidataPeriodImport } from '@/composables/useStoryWikidataPeriodImport';
 import AnchoredStoryRow from './AnchoredStoryRow.vue';
+import { hasStoryLocation } from '@/lib/storyRelationLocations';
 import { storyNavigationLinks } from '@/lib/storyNavigationLinks';
 import Tabs from '@/components/base/Tabs.vue';
 import type { Tab } from '@/types/global';
@@ -585,7 +586,7 @@ watch(() => props.story?.periods.map(p => `${p.id}:${getStoryPeriodParentId(p)}`
 const panelBusy = computed(() => props.updating || periodImportBusy.value || eventCreationBusy.value || conversionBusy.value);
 const showRootPicker = ref(false);
 const periodCreationParentId = ref<string | null>(null);
-const childStoryAnchor = ref<StoryAnchor>();
+const childStoryAnchor = ref<StoryAnchor | null>(null);
 function openPeriodCreator(colIdx: number) { periodCreationParentId.value = finderSelectedPath.value[colIdx - 1] ?? null; createStoryPeriod(periodCreationParentId.value); }
 function onChangeRoot(id: string) { requestedRootId.value = id; emit('change-root', id); }
 const requestedRootId = ref<string | null>(null);
@@ -952,24 +953,24 @@ const childStoryPickerExcludeIds = computed(() => {
   const s = props.story;
   if (!s) return [];
   const anchor = childStoryAnchor.value;
-  return [s.id, ...(anchor ? (s.childStories ?? []).filter(cs => cs.anchors.some(a => a.type === anchor.type && a.id === anchor.id)).map(cs => cs.id) : [])];
+  return [s.id, ...(s.childStories ?? []).filter(cs => hasStoryLocation(cs, anchor)).map(cs => cs.id)];
 });
 
 function openChildStoryPicker(colIdx?: number, eventId?: string) {
   const periodId = colIdx === undefined ? undefined : finderSelectedPath.value[colIdx - 1];
-  childStoryAnchor.value = eventId ? { type: 'event', id: eventId } : periodId ? { type: 'period', id: periodId } : undefined;
+  childStoryAnchor.value = eventId ? { type: 'event', id: eventId } : periodId ? { type: 'period', id: periodId } : null;
   showChildStoryPicker.value = true;
 }
 
 function onAddChildStories(ids: string[], periodId?: string) {
   showChildStoryPicker.value = false;
-  const anchor = childStoryAnchor.value ?? (periodId ? { type: 'period' as const, id: periodId } : undefined);
-  if (ids.length && anchor) emit('add-child-stories', ids, anchor);
+  const anchor = childStoryAnchor.value ?? (periodId ? { type: 'period' as const, id: periodId } : null);
+  if (ids.length) emit('add-child-stories', ids, anchor);
 }
 
 /**
  * Retourne les stories enfants à afficher dans la colonne `colIdx`.
- * Colonne 0 (racine) : stories sans ancre de type period.
+ * Colonne 0 (racine) : frises avec un emplacement racine.
  * Colonne N : stories qui ont une ancre period = finderSelectedPath[N-1].
  */
 /** Match exploration: explicit anchors and readable frises sharing the event, deduplicated. */
@@ -983,14 +984,9 @@ function hasExplicitEventAnchor(storyId: string, eventId: string): boolean {
 
 function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   const children = props.story?.childStories ?? [];
-  if (colIdx === 0) {
-    // An anchor on a period that is no longer in this frise places the child at the root, not nowhere.
-    const periodIds = new Set((props.story?.periods ?? []).map(period => period.id));
-    return children.filter(cs => cs.atRoot || !cs.anchors.some(a => a.type === 'period' && periodIds.has(a.id)));
-  }
-  const periodId = finderSelectedPath.value[colIdx - 1] ?? null;
-  if (!periodId) return [];
-  return children.filter(cs => cs.anchors.some(a => a.type === 'period' && a.id === periodId));
+  const periodId = colIdx === 0 ? null : finderSelectedPath.value[colIdx - 1];
+  if (periodId === undefined) return [];
+  return children.filter(child => hasStoryLocation(child, periodId === null ? null : { type: 'period', id: periodId }));
 }
 
 </script>
@@ -999,7 +995,7 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .story-finder-feedback { padding: var(--spacing-sm) var(--spacing-md); color: var(--color-text-primary); }
 .story-period-layout-toggle { display: flex; gap: 2px; padding: 2px; border: 1px solid var(--color-border-default); border-radius: var(--radius-md); }
 .story-detail-panel :deep(.filter-bar__slot-actions) { flex-wrap: wrap; max-width: 100%; }
-.story-period-columns { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.story-period-columns { display: flex; flex: none; flex-direction: column; min-height: 0; }
 .story-period-column--drop-target { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 .story-period-column--drop-target .finder-column-header, .story-period-column--drop-target .finder-column-content { background: var(--color-interaction-hover); }
 .story-period-columns :deep(.finder-item[draggable="true"] .finder-item-content) { cursor: grab; }
@@ -1107,20 +1103,20 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 }
 
 .story-detail-panel__tab-panel .story-detail-panel__finder-columns-wrap {
-  flex: 1;
+  flex: none;
   min-height: 0;
 }
 
 .story-detail-panel__finder-columns-wrap {
-  flex: 1;
+  flex: none;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .story-detail-panel__finder-columns-wrap .finder-columns {
-  flex: 1;
+  flex: none;
   min-height: 0;
   /* Same fill as the columns: the space past the last column reads as part of them. */
   background: var(--color-surface-default);
@@ -1134,9 +1130,9 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 }
 
 .story-detail-panel__tab-content--finder-periods {
-  flex: 1 0 clamp(320px, 60dvh, 560px);
-  min-height: clamp(320px, 60dvh, 560px);
-  overflow: hidden;
+  flex: none;
+  min-height: 0;
+  overflow: visible;
   display: flex;
   flex-direction: column;
 }
@@ -1150,6 +1146,7 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
   display: flex;
   flex-direction: column;
 }
+.story-detail-panel__tab-content--finder-periods > .story-detail-panel__tab-panel,
 .story-detail-panel__tab-content--tree-periods > .story-detail-panel__tab-panel,
 .story-detail-panel__tab-content--finder-events > .story-detail-panel__tab-panel {
   flex: none;

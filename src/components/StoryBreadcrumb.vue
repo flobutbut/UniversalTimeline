@@ -30,8 +30,9 @@
           :disabled="loading"
           @click="navigate(hiddenItems.length + offset, $event)"
         ><StoryMarker v-if="item.kind === 'story'" />{{ item.title }}</button>
+        <slot v-else name="current" :item="item">
         <button
-          v-else-if="currentNavigable"
+          v-if="currentNavigable"
           ref="currentItem"
           type="button"
           class="story-breadcrumb__item story-breadcrumb__item--link story-breadcrumb__item--current"
@@ -48,6 +49,7 @@
           tabindex="-1"
           :title="item.title"
         ><StoryMarker v-if="item.kind === 'story'" />{{ item.title }}</span>
+        </slot>
       </li>
     </ol>
   </nav>

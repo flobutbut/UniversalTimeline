@@ -136,16 +136,16 @@ it('retries the story list as well as the details after a mutation refresh faile
   expect(useDataStore().stories[0].startDate).toBe('M65'); expect(view.state.value.storyError).toBeNull();
 });
 
-it('keeps a related-story write attached to its original story after selection changes', async () => {
+it.each([null, { type: 'period' as const, id: 'period' }])('keeps a related-story write attached to its original story after selection changes (%j)', async anchor => {
   const service = StoryApiService.getInstance();
   const pending = deferred<void>();
   vi.spyOn(service, 'getStory').mockImplementation(async id => detail(id));
   vi.spyOn(service, 'getListStories').mockResolvedValue([story('a'), story('b')]);
   const write = vi.spyOn(service, 'changeEntryPoints').mockReturnValue(pending.promise);
   const view = scoped(useDatabaseView); await view.selectStory(story('a'));
-  const saving = view.addChildStoriesToStory(['child'], { type: 'period', id: 'period' });
+  const saving = view.addChildStoriesToStory(['child'], anchor);
   await view.selectStory(story('b')); pending.resolve(); await saving;
-  expect(write).toHaveBeenCalledExactlyOnceWith('a', ['child'], { type: 'period', id: 'period' });
+  expect(write).toHaveBeenCalledExactlyOnceWith('a', ['child'], anchor);
   expect(view.selectedStory.value?.id).toBe('b'); expect(view.relationsBusy.value).toBe(false);
 });
 

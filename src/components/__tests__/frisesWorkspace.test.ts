@@ -210,13 +210,13 @@ it('reports an inaccessible linked frise while keeping the list available', asyn
   expect(tabs()).toEqual([]);
   expect(api.getStory).not.toHaveBeenCalled();
 });
-it('lists at the root column a child frise whose anchor period is no longer in the frise', async () => {
+it('does not promote a missing period anchor to the root column', async () => {
   vi.mocked(api.getStory).mockImplementation(async id => ({ ...story(id), childStories: id === '1'
     ? [{ id: '2', title: { fr: 'Histoire de France', en: '' }, anchors: [{ type: 'period', id: 'period-not-in-frise' }] }] : [] }));
   await start('/database?story=1');
   await view.findAll('.story-detail-panel__tabs-bar button').find(item => item.text() === 'Périodes')!.trigger('click'); await flushPromises();
   const rootColumn = view.findAll('.finder-column')[0];
-  expect(rootColumn.text()).toContain('Histoire de France');
+  expect(rootColumn.text()).not.toContain('Histoire de France');
 });
 it('filters the frise list by time overlap and clears it from the chip', async () => {
   vi.mocked(api.getListStories).mockResolvedValue([
