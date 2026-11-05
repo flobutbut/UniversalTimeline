@@ -36,14 +36,14 @@ it('exposes a structured event table and sorting buttons with an announced direc
   view = mount(EventsView); await flushPromises();
   expect(view.get('[role="table"]').attributes('aria-label')).toBe('Événements');
   expect(view.findAll('[role="columnheader"]').map(header => header.text())).toContain('Frises');
-  expect(view.findAll('[role="columnheader"]')).toHaveLength(6);
+  expect(view.findAll('[role="columnheader"]')).toHaveLength(7);
   const sort = view.get('button[aria-label="Trier par nom"]');
   await sort.trigger('click');
   expect(sort.element.closest('[role="columnheader"]')?.getAttribute('aria-sort')).toBe('ascending');
-  expect(view.findAll('.table-row')[0].get('[role="cell"]').text()).toBe('Alpha');
+  expect(view.findAll('.table-row')[0].get('.col-label').text()).toBe('Alpha');
   await sort.trigger('click');
   expect(sort.element.closest('[role="columnheader"]')?.getAttribute('aria-sort')).toBe('descending');
-  expect(view.findAll('.table-row')[0].get('[role="cell"]').text()).toBe('Zulu');
+  expect(view.findAll('.table-row')[0].get('.col-label').text()).toBe('Zulu');
   expect(view.findAll('.col-actions button')[0].attributes('aria-label')).toBe('Modifier Zulu');
 });
 

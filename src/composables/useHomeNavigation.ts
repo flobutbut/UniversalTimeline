@@ -75,6 +75,17 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   const usesContextNeighbors = computed(() => !!chronologicalPeriodId.value && !!selectedContext.value &&
     (selectedContext.value.id === currentStoryId.value || selectedContext.value.presentations.some(view => view.storyId === currentStoryId.value && view.periodId === chronologicalPeriodId.value)));
   const rootStories = computed(() => currentStory.value ? rootStoryNavigationLinks(currentStory.value) : []);
+  const headerStories = computed(() => {
+    if (!currentStory.value) return [];
+    const periodIds = new Set([...displayedPeriods.value.map(period => period.id), ...(currentPeriod.value ? [currentPeriod.value.id] : [])]);
+    const eventIds = new Set(storyEvents.value.map(event => event.id));
+    return storyNavigationLinks(currentStory.value).flatMap(link => {
+      const anchor = link.anchors.find(anchor => anchor.type === 'period' && !anchor.displayAsPeriod && anchor.id === currentPeriod.value?.id)
+        ?? link.anchors.find(anchor => anchor.type === 'period' ? !anchor.displayAsPeriod && periodIds.has(anchor.id) : eventIds.has(anchor.id));
+      if (link.atRoot && !link.rootDisplayAsPeriod) return [{ id: link.id, title: link.title, anchor: undefined as StoryAnchor | undefined }];
+      return anchor ? [{ id: link.id, title: link.title, anchor: { type: anchor.type, id: anchor.id } as StoryAnchor }] : [];
+    });
+  });
   const linkedPeriods = computed(() => linkedStoryPeriods(currentStory.value,currentPeriod.value?.id ?? null,stories.value));
   const navigationReference = computed(() => {
     if (currentPeriod.value) return null;
@@ -406,8 +417,11 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
     await chooseNavigationTarget(positionTarget(periodPath.value[index].id));
   };
   const navigateToStoryBreadcrumb = async (index: number) => {
-    if (loading.value || !Number.isInteger(index) || index < 0 || index >= visitedStories.value.length - 1) return;
-    await chooseNavigationTarget(visitedStories.value[index]);
+    if (loading.value || !Number.isInteger(index) || index < 0 || index >= visitedStories.value.length) return;
+    const target = visitedStories.value[index];
+    await chooseNavigationTarget(index === visitedStories.value.length - 1
+      ? { ...target, periodId: undefined, view: 'overview' }
+      : target);
   };
   // EventCard/PeriodGrid handles event suggestions and emits story-select.
   const handleEventClick = async (_event: ListEvent) => {};
@@ -415,7 +429,7 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   return {
     loading, error, retryLoad, parentStack, currentPeriod, displayedPeriods, periodChildren, storyEvents,
     currentStoryId, breadcrumb, storyBreadcrumb, currentStoryBounds, previousPeriod, nextPeriod, navigationContexts, contextId, referencePeriodId, returnPath,
-    contextBar, contextStories, rootStories, linkedPeriods, childLinkedPeriods, returnTitle, navigationChoices, chooseNavigationTarget, selectNavigationContext,
+    contextBar, contextStories, rootStories, headerStories, linkedPeriods, childLinkedPeriods, returnTitle, navigationChoices, chooseNavigationTarget, selectNavigationContext,
     loadInitialData, openStory, handlePeriodClick, handleEventClick, goBack, selectStory, navigateToBreadcrumb, navigateToStoryBreadcrumb, navigateAdjacentPeriod,
   };
 }

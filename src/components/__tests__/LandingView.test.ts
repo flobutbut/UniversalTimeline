@@ -41,3 +41,13 @@ it('sends a signed-in visitor straight to their workspace', async () => {
   expect(link.attributes('href')).toBe('/database');
   expect(link.get('.sr-only').text()).toContain('mon espace');
 });
+
+it('opens exploration from Mon espace while keeping creation links in Frises', async () => {
+  await start(true);
+  const workspace = view.get('[data-attr="landing-cta-login"]');
+  expect(workspace.text()).toBe('Mon espace');
+  expect(workspace.attributes('href')).toBe('/timeline');
+  await workspace.trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.name).toBe('timeline');
+  expect(view.get('[data-attr="landing-cta-create"]').attributes('href')).toBe('/database');
+});

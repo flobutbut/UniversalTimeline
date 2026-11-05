@@ -22,7 +22,8 @@
       Frises des périodes indisponibles : {{ storyLinks.error.value }}
       <Button variant="tertiary" size="sm" type="button" @click="storyLinks.load">Réessayer</Button>
     </p>
-    <CatalogueTable label="Périodes" :columns="periodColumns" :items="visiblePeriods" empty-text="Aucune période trouvée"
+    <CatalogueBulkBar :count="bulk.selected.value.length" :actions="bulk.actions" :stories="bulk.editableStories.value" :busy="bulk.busy.value" :message="bulk.message.value" :failures="bulk.failures.value" :uncertain="bulk.uncertain.value" @apply="bulk.run" @clear="bulk.selectedIds.value = []" @reload="bulk.reload" />
+    <CatalogueTable v-model:selected-ids="bulk.selectedIds.value" selectable :selection-disabled="bulk.busy.value || bulk.uncertain.value" :item-label="item => item.label.fr || item.label.en || item.id" label="Périodes" :columns="periodColumns" :items="visiblePeriods" empty-text="Aucune période trouvée"
       :sort-column="sortColumn" :sort-dir="sortDir" :loading="loading || (!!filterStoryIds.length && storyLinks.loading.value)"
       :error="error || (filterStoryIds.length ? storyLinks.error.value : null)" @retry="retryTable" @sort="toggleSort($event as SortColumn)">
       <template #row="{ item }">
@@ -88,6 +89,8 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import CatalogueTable from '@/components/catalogue/CatalogueTable.vue';
+import CatalogueBulkBar from '@/components/catalogue/CatalogueBulkBar.vue';
+import { useEntityBulkActions } from '@/composables/useEntityBulkActions';
 import type { CatalogueColumn } from '@/components/catalogue/columns';
 import Button from '@/components/base/Button.vue';
 import Tag from '@/components/base/Tag.vue';
@@ -112,7 +115,7 @@ const auth = useAuthStore();
 const { stories } = storeToRefs(store);
 const storyLinks = useStoryLinks('period');
 const storiesOf = (id: string) => storyLinks.storyIdsOf(id).map(storyId => ({ id: storyId, title: store.storyById(storyId)?.title.fr || `Frise ${storyId}` }));
-type SortColumn = 'label' | 'start' | 'end' | 'categories' | 'updated';
+type SortColumn = 'label' | 'start' | 'end' | 'categories' | 'stories' | 'updated';
 const sortColumn = ref<SortColumn>('label');
 const sortDir = ref<'asc' | 'desc'>('asc');
 const periodColumns: CatalogueColumn[] = [
@@ -120,7 +123,7 @@ const periodColumns: CatalogueColumn[] = [
   { key: 'start', label: 'Début', sortLabel: 'Trier par début', width: 160, minWidth: 100, maxWidth: 280, resizable: true },
   { key: 'end', label: 'Fin', sortLabel: 'Trier par fin', width: 160, minWidth: 100, maxWidth: 280, resizable: true },
   { key: 'categories', label: 'Catégories', sortLabel: 'Trier par catégories', minWidth: 120 },
-  { key: 'stories', label: 'Frises', minWidth: 160 },
+  { key: 'stories', label: 'Frises', sortLabel: 'Trier par frises', minWidth: 160 },
   { key: 'updated', label: 'Modifié', sortLabel: 'Trier par modification', width: 150 },
   { key: 'actions', label: 'Actions', width: 88 },
 ];
@@ -152,6 +155,7 @@ const visiblePeriods = computed(() => {
         if (ya === null || yb === null) return compareYearsOldestFirst(ya, yb);
         comparison = yb - ya;
       } else if (sortColumn.value === 'categories') comparison = listEventCategoriesSortKey(a).localeCompare(listEventCategoriesSortKey(b), 'fr', { sensitivity: 'base' });
+      else if (sortColumn.value === 'stories') comparison = storyLinks.sortKeyOf(a.id).localeCompare(storyLinks.sortKeyOf(b.id), 'fr', { sensitivity: 'base' });
       else if (sortColumn.value === 'updated') comparison = listEventUpdatedTimestampMs(a) - listEventUpdatedTimestampMs(b);
       else comparison = (a.label.fr || a.label.en).localeCompare(b.label.fr || b.label.en, 'fr', { sensitivity: 'base' });
       return sortDir.value === 'asc' ? comparison : -comparison;
@@ -162,6 +166,7 @@ const periodCategoryFilterOptions = computed(() => {
   return [...categories.values()]
     .sort((a,b) => a.label.fr.localeCompare(b.label.fr, 'fr')).map(c => ({ value: c.id, label: c.label.fr }));
 });
+const bulk = useEntityBulkActions('period', () => visiblePeriods.value, storyLinks);
 const {
   showEditModal, showAddModal, selectedPeriod, loading: openingLoading, openingError, retryOpening, cancelOpening,
   addModalInitialData, handleEdit, handleDelete, busy, saveError, addError, closeEditModal, handleEditSubmit,

@@ -5,15 +5,13 @@ export type NavigationView = 'timeline' | 'database' | 'graph' | 'events' | 'adm
 export const navigationTabs: Tab<NavigationView>[] = [
   { label: 'Exploration', value: 'timeline', icon: 'mdi:timeline' },
   { label: 'Frises', value: 'database', icon: 'mdi:book-open-page-variant' },
-  { label: 'Périodes', value: 'graph', icon: 'mdi:chart-tree' },
-  { label: 'Événements', value: 'events', icon: 'mdi:calendar-clock' },
   { label: 'Administration', value: 'admin', icon: 'mdi:shield-account-outline' },
 ];
 
 /** Catalogue tools and administration: admins only (routes carry meta.admin, the guard enforces it). */
 const ADMIN_VIEWS: ReadonlySet<NavigationView> = new Set(['graph', 'events', 'admin']);
 /** Pages without a tab of their own, shown under the tab they belong to. */
-const PARENT_VIEWS: Partial<Record<string, NavigationView>> = { 'design-system': 'admin', 'wikidata-generation': 'database', 'navigation-prototype': 'timeline' };
+const PARENT_VIEWS: Partial<Record<string, NavigationView>> = { graph: 'admin', events: 'admin', 'design-system': 'admin', 'wikidata-generation': 'database', 'navigation-prototype': 'timeline' };
 
 export function navigationTabsFor(isAdmin: boolean): Tab<NavigationView>[] {
   return navigationTabs.filter(tab => isAdmin || !ADMIN_VIEWS.has(tab.value));

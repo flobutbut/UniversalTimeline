@@ -65,7 +65,7 @@ it('opens signup from the header and preserves the original destination when swi
 });
 it.each([false, true])('restores the appropriate workspace navigation for a verified account (admin: %s)', async isAdmin => {
   const auth = await start({ account: { id: 'alice', isAdmin } });
-  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Exploration', 'Frises', ...(isAdmin ? ['Périodes', 'Événements', 'Administration'] : [])]);
+  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Exploration', 'Frises', ...(isAdmin ? ['Administration'] : [])]);
   expect(view.find('.header-account-actions').exists()).toBe(false);
   const trigger = view.get('button[aria-haspopup="menu"]');
   expect(trigger.attributes('aria-label')).toBe('Compte : Mon compte'); expect(view.text()).not.toContain('Se déconnecter');
@@ -102,12 +102,12 @@ it('collapses navigation when space runs out, keeps navigation usable and expand
   const header = view.getComponent(Header);
   expect(view.find('.header-nav-select').exists()).toBe(false);
 
-  availableWidth = 1600; resize(); await flushPromises();
+  availableWidth = 1120; resize(); await flushPromises();
   expect(view.find('.header-nav-select').exists()).toBe(false);
   expect(view.get('.header-content').attributes('style')).toContain('--header-search-width: 248px');
 
   // Les trois groupes tiendraient côte à côte, mais décentreraient la recherche.
-  availableWidth = 1400; resize(); await flushPromises();
+  availableWidth = 1000; resize(); await flushPromises();
   expect(view.find('.header-nav-select').exists()).toBe(true);
 
   availableWidth = 604; resize(); await flushPromises();
@@ -118,7 +118,7 @@ it('collapses navigation when space runs out, keeps navigation usable and expand
   expect(view.find('.header-search-wrap').exists()).toBe(false);
   expect(view.get('.header-search-open').attributes('href')).toBe('/search?from=/timeline');
 
-  availableWidth = 1060; resize(); await flushPromises();
+  availableWidth = 1000; resize(); await flushPromises();
   expect(view.find('.header-search-open').exists()).toBe(false);
   expect(view.get('.header-nav-wrap').attributes('inert')).toBeDefined();
   expect(view.get('.header-nav-wrap').attributes('aria-hidden')).toBe('true');
@@ -135,7 +135,7 @@ it('collapses navigation when space runs out, keeps navigation usable and expand
   expect(view.find('.header-nav-select').exists()).toBe(true);
   expect(view.find('.header-search-wrap').exists()).toBe(true);
   // Sans recherche, les onglets peuvent tenir dans la même largeur.
-  await view.setProps({ currentView: 'graph' });
+  await view.setProps({ currentView: 'admin' });
   expect(view.find('.header-nav-select').exists()).toBe(false);
   expect(view.find('.header-search-wrap').exists()).toBe(false);
   await view.setProps({ currentView: 'timeline' });

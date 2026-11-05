@@ -34,6 +34,9 @@ export function useStoryLinks(kind: 'period' | 'event') {
   }
 
   const storyIdsOf = (id: string) => links.value.get(id) ?? [];
+  const sortKeyOf = (id: string) => storyIdsOf(id)
+    .map(storyId => { const title = dataStore.storyById(storyId)?.title; return title?.fr || title?.en || `Frise ${storyId}`; })
+    .sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' })).join('\u0000');
 
   /** One transaction per change; a lost response is reported, never resent. */
   async function change(id: string, storyId: string, remove: boolean) {
@@ -56,5 +59,5 @@ export function useStoryLinks(kind: 'period' | 'event') {
     }
   }
 
-  return { links, loading, error, pending, changeError, load, storyIdsOf, change };
+  return { links, loading, error, pending, changeError, load, storyIdsOf, sortKeyOf, change };
 }

@@ -1,6 +1,8 @@
 <template>
-  <SidebarLayout menu-label="Administration" :items="menu" :active="section" class="admin-view" :class="{'admin-view--relations':section==='relations'||section==='timelines'}">
-    <AdminRelations v-if="section==='relations'" />
+  <SidebarLayout menu-label="Administration" :items="menu" :active="section" class="admin-view" :class="{'admin-view--relations':section==='relations'||section==='timelines', 'admin-view--catalogue':section==='periods'||section==='events'}">
+    <PeriodsView v-if="section==='periods'" />
+    <EventsView v-else-if="section==='events'" />
+    <AdminRelations v-else-if="section==='relations'" />
     <AdminTimelines v-else-if="section==='timelines'" />
     <AdminUserDetail v-else-if="section === 'users' && userId" :key="userId" :user-id="userId" />
     <AdminUsers v-else-if="section === 'users'" />
@@ -23,16 +25,20 @@ import AdminUsers from './AdminUsers.vue';
 import AdminUserDetail from './AdminUserDetail.vue';
 const AdminRelations = defineAsyncComponent(() => import('./AdminRelations.vue'));
 const AdminTimelines = defineAsyncComponent(() => import('./AdminTimelines.vue'));
+const PeriodsView = defineAsyncComponent(() => import('@/views/GraphView/Periods.vue').then(module => module.default));
+const EventsView = defineAsyncComponent(() => import('@/views/EventsView/EventsView.vue').then(module => module.default));
 
-type Section = 'dashboard' | 'users' | 'relations' | 'timelines';
+type Section = 'dashboard' | 'users' | 'relations' | 'timelines' | 'periods' | 'events';
 const menu: SidebarItem[] = [
   { key: 'dashboard', label: 'Tableau de bord', icon: 'mdi:view-dashboard-outline', to: { name: 'admin' } },
   { key: 'users', label: 'Utilisateurs', icon: 'mdi:account-group-outline', to: { name: 'admin', query: { section: 'users' } } },
+  { key: 'periods', label: 'Périodes', icon: 'mdi:chart-tree', to: { name: 'graph' } },
+  { key: 'events', label: 'Événements', icon: 'mdi:calendar-clock', to: { name: 'events' } },
   { key:'relations',label:'Relations',icon:'mdi:graph-outline',to:{name:'admin',query:{section:'relations'}} },
   { key:'timelines',label:'Carte des frises',icon:'mdi:timeline-text-outline',to:{name:'admin',query:{section:'timelines'}} },
 ];
 const route = useRoute();
-const section = computed<Section>(() => route.query.section === 'timelines' ? 'timelines' : route.query.section === 'relations' ? 'relations' : route.query.section === 'users' ? 'users' : 'dashboard');
+const section = computed<Section>(() => route.name === 'graph' ? 'periods' : route.name === 'events' ? 'events' : route.query.section === 'timelines' ? 'timelines' : route.query.section === 'relations' ? 'relations' : route.query.section === 'users' ? 'users' : 'dashboard');
 const userId = computed(() => typeof route.query.user === 'string' ? route.query.user : null);
 </script>
 
@@ -41,6 +47,8 @@ const userId = computed(() => typeof route.query.user === 'string' ? route.query
 .admin-view { max-width: 1320px; }
 .admin-view--relations { max-width:1680px; }
 .admin-view--relations :deep(.sidebar-layout__main) { max-width:none; }
+.admin-view--catalogue { max-width: none; height: 100%; min-height: 0; overflow: hidden; }
+.admin-view--catalogue :deep(.sidebar-layout__main) { max-width: none; min-height: 0; overflow: hidden; }
 .admin-view__extra {
   display: flex; align-items: center; gap: var(--spacing-sm); margin-top: var(--spacing-md); padding: var(--spacing-sm) var(--spacing-md);
   border-top: 1px solid var(--color-border-default); color: var(--color-text-secondary); font-size: var(--font-size-sm); text-decoration: none;

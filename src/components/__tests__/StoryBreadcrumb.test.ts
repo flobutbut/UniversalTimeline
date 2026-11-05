@@ -32,6 +32,17 @@ it('shows a single current item without a useless button or leading separator', 
   await view.setProps({ items: [] }); expect(view.find('nav').exists()).toBe(false);
 });
 
+it('keeps the current frise selectable to reset its exploration and blocks it while loading', async () => {
+  view = mount(StoryBreadcrumb, { props: { items: [{ id: 'story:1', title: 'Univers moderne', kind: 'story' }], currentNavigable: true } });
+  const current = view.get('button[aria-current="location"]');
+  await current.trigger('click');
+  expect(view.emitted('navigate')).toEqual([[0]]);
+  await view.setProps({ loading: true });
+  expect(current.attributes('disabled')).toBeDefined();
+  await current.trigger('click');
+  expect(view.emitted('navigate')).toEqual([[0]]);
+});
+
 it('keeps full labels in the document and handles a story and period with identical raw IDs', async () => {
   render();
   const title = 'Une période avec un intitulé très long qui doit rester lisible';

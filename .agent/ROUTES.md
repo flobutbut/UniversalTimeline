@@ -10,8 +10,8 @@
 | `/voyage` | `landing-scroll` | `ScrollLandingView.vue` | Second concept public : zoom temporel lié au scroll, du cosmos à une seconde |
 | `/timeline` | `timeline` | `HomeView.vue` | Grille timeline et navigation hiérarchique |
 | `/database` | `database` | `DatabaseView/DatabaseView.vue` | Onglet Stories |
-| `/periods` (alias `/graph`) | `graph` | `GraphView/Periods.vue` | Onglet Periods, réservé aux admins (`meta.admin`) ; les deux URL existantes sont conservées |
-| `/events` | `events` | `EventsView/EventsView.vue` | Liste et filtres d’événements, réservé aux admins (`meta.admin`) |
+| `/periods` (alias `/graph`) | `graph` | `AdminView/AdminView.vue` → `GraphView/Periods.vue` | Catalogue Périodes dans le menu Administration, réservé aux admins (`meta.admin`) ; les deux URL existantes sont conservées |
+| `/events` | `events` | `AdminView/AdminView.vue` → `EventsView/EventsView.vue` | Catalogue Événements dans le menu Administration, réservé aux admins (`meta.admin`) |
 | `/admin` | `admin` | `AdminView/AdminView.vue` | Admin seulement : menu à gauche (Tableau de bord, Utilisateurs, lien Design system), `?section=users` pour la liste, `&user=<uuid>` pour la fiche et ses actions |
 | `/profile` | `profile` | `ProfileView.vue` | Profil du compte : nom d’utilisateur et avatar, données et confidentialité (conditions, export, cookies, suppression), session ; `SidebarLayout`, `?section=privacy|session` |
 | `/legal/:page` | `legal` | `LegalView.vue` | Public : mentions légales, confidentialité, cookies, conditions (`src/lib/legalDocuments.ts`) |
@@ -22,7 +22,9 @@
 
 ## État et cycle de vie
 
-- `navigation.ts` expose `NavigationView`, les onglets et la correspondance avec les noms de routes. Design system n’a plus d’onglet : on y entre depuis le menu de l’administration, l’onglet Administration reste actif (`PARENT_VIEWS`) et la page offre un lien de retour vers `/admin`.
+Les tableaux du catalogue et des utilisateurs partagent `CatalogueTable` : colonnes ajustées à la largeur disponible, poignées souris/clavier, double-clic pour ajuster au contenu. Périodes, Événements et Utilisateurs proposent des cases de sélection ; « Tout sélectionner » vise uniquement les lignes affichées et autorisées, et les filtres retirent les lignes masquées de la sélection. Les actions groupées passent par les API existantes : suppression confirmée avec bilan des refus, ajout/retrait d’une frise en une transaction pour les fiches, suspension/réactivation des comptes ordinaires et export CSV. Les administrateurs et le compte courant sont exclus des actions groupées sur les utilisateurs. Une réponse d’écriture incertaine arrête le lot et impose un rechargement, sans renvoi automatique.
+
+- `navigation.ts` expose `NavigationView`, les onglets et la correspondance avec les noms de routes. La navigation principale propose Exploration, Frises et Administration (admins). Périodes et Événements sont chargés à la demande dans le menu Administration ; leurs URL, paramètres de recherche et gardes restent conservés. Design system est aussi accessible depuis ce menu. L’onglet Administration reste actif pour ces trois destinations (`PARENT_VIEWS`).
 - `useAppNavigation` dérive l’onglet actif de la route résolue. Il conserve la page précédente pendant le chargement, expose un message avec Réessayer en cas d’erreur, ignore les erreurs tardives de navigations abandonnées et désinscrit ses gardes à la destruction du shell.
 - RouterView utilise son slot pour placer le composant de page dans KeepAlive. `include="HomeView"` et `max=1` conservent uniquement la timeline. Son nom est explicite dans `defineOptions` ; la clé est le nom de route pour éviter une réinitialisation lors des changements de query/hash.
 - Le breadcrumb des stories, les snapshots de périodes par story, la période courante et la pile de navigation de la timeline survivent aux changements d’onglet et aux retours navigateur. Les autres pages sont démontées en quittant leur route. Le cache reste en mémoire : un rechargement complet redémarre la timeline ; aucun lien profond vers une période n’est ajouté ici.

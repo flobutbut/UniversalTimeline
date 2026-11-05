@@ -18,7 +18,8 @@
       Frises des événements indisponibles : {{ storyLinks.error.value }}
       <Button variant="tertiary" size="sm" type="button" @click="storyLinks.load">Réessayer</Button>
     </p>
-    <CatalogueTable label="Événements" :columns="eventColumns" :items="displayEvents"
+    <CatalogueBulkBar :count="bulk.selected.value.length" :actions="bulk.actions" :stories="bulk.editableStories.value" :busy="bulk.busy.value" :message="bulk.message.value" :failures="bulk.failures.value" :uncertain="bulk.uncertain.value" @apply="bulk.run" @clear="bulk.selectedIds.value = []" @reload="bulk.reload" />
+    <CatalogueTable v-model:selected-ids="bulk.selectedIds.value" selectable :selection-disabled="bulk.busy.value || bulk.uncertain.value" :item-label="item => item.label.fr || item.label.en || item.id" label="Événements" :columns="eventColumns" :items="displayEvents"
       empty-text="Aucun événement trouvé" :loading="loading || (!!selectedStoryIds.length && storyLinks.loading.value)" :error="loadError || (selectedStoryIds.length ? storyLinks.error.value : null)"
       :sort-column="sortColumn" :sort-dir="sortDir" @sort="toggleSort($event as SortColumn)" @retry="loadData(); storyLinks.load()">
       <template #row="{ item: event }">
@@ -102,6 +103,8 @@ import CatalogueFilters from '@/components/filters/CatalogueFilters.vue';
 import type { PeriodFilter } from '@/components/filters/filterTypes';
 import type { StoryTimeRange } from '@/lib/storyTimeFilter';
 import CatalogueTable from '@/components/catalogue/CatalogueTable.vue';
+import CatalogueBulkBar from '@/components/catalogue/CatalogueBulkBar.vue';
+import { useEntityBulkActions } from '@/composables/useEntityBulkActions';
 import type { CatalogueColumn } from '@/components/catalogue/columns';
 import type { ListEvent } from '@/types/database';
 
@@ -118,14 +121,14 @@ const loading = ref(false);
 const loadError = ref<string | null>(null);
 const requests = useLatestRequest();
 
-type SortColumn = 'label' | 'date' | 'categories' | 'updated';
+type SortColumn = 'label' | 'date' | 'categories' | 'stories' | 'updated';
 const sortColumn = ref<SortColumn | null>(null);
 const sortDir = ref<'asc' | 'desc'>('asc');
 const eventColumns: CatalogueColumn[] = [
   { key: 'label', label: 'Nom', sortLabel: 'Trier par nom', width: 360, minWidth: 140, maxWidth: 720, resizable: true },
   { key: 'date', label: 'Date', sortLabel: 'Trier par date', width: 160, minWidth: 100, maxWidth: 280, resizable: true },
   { key: 'categories', label: 'Catégories', sortLabel: 'Trier par catégories', minWidth: 120 },
-  { key: 'stories', label: 'Frises', minWidth: 160 },
+  { key: 'stories', label: 'Frises', sortLabel: 'Trier par frises', minWidth: 160 },
   { key: 'updated', label: 'Modifié', sortLabel: 'Trier par modification', width: 150 },
   { key: 'actions', label: 'Actions', width: 88 },
 ];
@@ -158,6 +161,8 @@ const displayEvents = computed(() => {
       cmp = listEventCategoriesSortKey(a).localeCompare(listEventCategoriesSortKey(b), 'fr', {
         sensitivity: 'base',
       });
+    } else if (col === 'stories') {
+      cmp = storyLinks.sortKeyOf(a.id).localeCompare(storyLinks.sortKeyOf(b.id), 'fr', { sensitivity: 'base' });
     } else if (col === 'updated') {
       cmp = listEventUpdatedTimestampMs(a) - listEventUpdatedTimestampMs(b);
     }
@@ -210,6 +215,7 @@ const filteredEvents = computed(() => {
     return true;
   });
 });
+const bulk = useEntityBulkActions('event', () => displayEvents.value, storyLinks);
 
 // ── Modal ──────────────────────────────────────────────────────────────────────
 

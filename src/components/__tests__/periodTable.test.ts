@@ -29,7 +29,7 @@ it('uses the shared table and sorts each period boundary chronologically with un
   view = mount(PeriodsView); await flushPromises();
   expect(view.findComponent(CatalogueTable).exists()).toBe(true);
   expect(view.findAll('[role="columnheader"]').map(header => header.text().replace('▲', '').trim()))
-    .toEqual(['Nom', 'Début', 'Fin', 'Catégories', 'Frises', 'Modifié', 'Actions']);
+    .toEqual(['', 'Nom', 'Début', 'Fin', 'Catégories', 'Frises', 'Modifié', 'Actions']);
   for (const boundary of ['début', 'fin']) {
     const sort = view.get(`button[aria-label="Trier par ${boundary}"]`);
     await sort.trigger('click'); expect(ids()).toEqual(['Ancienne', 'Récente', 'Inconnue']);
@@ -51,6 +51,21 @@ it('filters table rows by category and keeps the date columns keyboard resizable
   await handle.trigger('keydown', { key: 'End' }); expect(handle.attributes('aria-valuenow')).toBe('280');
   view.getComponent(CatalogueFilters).vm.$emit('update:categories', ['missing']); await flushPromises();
   expect(view.get('[role="table"]').text()).toContain('Aucune période trouvée');
+});
+
+it('sorts by associated frise titles instead of their IDs, in both directions', async () => {
+  vi.mocked(StoryApiService.getInstance().getListStories).mockResolvedValue([
+    { id: 'z', title: { fr: 'Alpha', en: '' }, categories: [], author: '', isPublic: true },
+    { id: 'a', title: { fr: 'Zeta', en: '' }, categories: [], author: '', isPublic: true },
+  ]);
+  vi.mocked(StoryApiService.getInstance().getMemberships).mockResolvedValue(new Map([
+    ['Ancienne', ['a']], ['Récente', ['z']],
+  ]));
+  view = mount(PeriodsView, { global: { stubs: { RouterLink: { template: '<a><slot /></a>' } } } }); await flushPromises();
+  const sort = view.get('button[aria-label="Trier par frises"]');
+  await sort.trigger('click'); expect(ids()).toEqual(['Inconnue', 'Récente', 'Ancienne']);
+  expect(sort.element.closest('[role="columnheader"]')?.getAttribute('aria-sort')).toBe('ascending');
+  await sort.trigger('click'); expect(ids()).toEqual(['Ancienne', 'Récente', 'Inconnue']);
 });
 
 it('loads period memberships on arrival and distinguishes their failure from no associated frise', async () => {
