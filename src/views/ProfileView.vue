@@ -65,7 +65,7 @@
       </div>
       <div class="profile-view__card">
         <h3>Cookies</h3>
-        <p>{{ consent.trackingConfigured ? (consent.analyticsAllowed ? 'Mesure d’audience acceptée.' : 'Mesure d’audience refusée ou non choisie.') : 'Aucun cookie de mesure d’audience n’est utilisé pour le moment.' }}</p>
+        <p>{{ measurementSummary }}</p>
         <div class="profile-view__actions"><Button variant="secondary" size="sm" @click="consent.openPreferences">Gérer mes préférences</Button></div>
       </div>
       <nav class="profile-view__card" aria-label="Informations légales">
@@ -128,6 +128,11 @@ const colorLabels: Record<AvatarColor, string> = { blue: 'Bleu', green: 'Vert', 
 const iconLabels: Record<AvatarIcon, string> = { initial: 'Initiale', telescope: 'Télescope', earth: 'Terre', temple: 'Colonne antique', dna: 'ADN', rocket: 'Fusée', book: 'Livre', compass: 'Boussole' };
 
 const auth = useAuthStore(); const consent = useConsentStore(); const data = useDataStore();
+const measurementSummary = computed(() => {
+  if (!consent.trackingConfigured) return 'Aucune mesure d’audience n’est utilisée pour le moment.';
+  if (consent.internalDevice) return 'Cet appareil est exclu de toute mesure : un compte administrateur s’y est connecté.';
+  return { consented: 'Mesure d’audience acceptée.', exempt: 'Cookies de mesure refusés ou non choisis : seules des visites anonymes sont comptées, sans cookie.', off: 'Aucune mesure : vous vous êtes opposé à la mesure anonyme.' }[consent.measurementMode];
+});
 const route = useRoute(); const router = useRouter(); const toast = useToast();
 const section = computed<Section>(() => route.query.section === 'privacy' || route.query.section === 'session' ? route.query.section : 'profile');
 

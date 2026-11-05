@@ -14,8 +14,8 @@ import { installAccessGuard } from '@/router/access';
 import type { ListEvent, Period } from '@/types/database';
 import { storyFixture } from '@/testFixtures/story';
 
-const analytics = vi.hoisted(() => ({ track: vi.fn() }));
-vi.mock('@/lib/analytics', async original => ({ ...(await original<typeof import('@/lib/analytics')>()), track: analytics.track }));
+const analytics = vi.hoisted(() => ({ track: vi.fn(), mode: 'consented' as 'exempt' | 'consented' }));
+vi.mock('@/lib/analytics', async original => ({ ...(await original<typeof import('@/lib/analytics')>()), track: analytics.track, measurementMode: () => analytics.mode }));
 vi.mock('@/components/ThemeToggle.vue', () => ({ default: { template: '<button>Thème</button>' } }));
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
 
@@ -29,7 +29,7 @@ let pinia: Pinia;
 let router: Router;
 let view: ReturnType<typeof mount>;
 beforeEach(() => {
-  analytics.track.mockReset();
+  analytics.track.mockReset(); analytics.mode = 'consented';
   vi.spyOn(stories, 'getStory').mockImplementation(async id => storyFixture(id, tree(id), [event(`event-${id}`)]));
   vi.spyOn(PeriodApiService.getInstance(), 'getListPeriods').mockResolvedValue([]);
   vi.spyOn(EventApiService.getInstance(), 'getListEvents').mockResolvedValue([]);
@@ -101,7 +101,7 @@ it('reports a search that opens a frise, then the position it led to', async () 
   expect(calls('timeline_position_viewed').at(-1)).toEqual(expect.objectContaining({ via: 'search', story_id: '7' }));
 });
 
-it('keeps the guarded term of a search without frise, and redacts what may be personal', async () => {
+it('keeps the guarded term of a consented search without frise, and redacts what may be personal', async () => {
   vi.useFakeTimers(); await start('/timeline?story=1');
   vi.mocked(searches.searchStories).mockResolvedValue([]);
   const input = view.get('header input');
@@ -116,4 +116,17 @@ it('keeps the guarded term of a search without frise, and redacts what may be pe
     expect.objectContaining({ outcome: 'abandon', story_results: 0, query_redacted: true }),
   ]);
   expect(JSON.stringify(analytics.track.mock.calls)).not.toMatch(/dupont|56 78/);
+});
+
+it('never sends the typed term of an anonymous visit', async () => {
+  vi.useFakeTimers(); await start('/timeline?story=1');
+  analytics.mode = 'exempt';
+  vi.mocked(searches.searchStories).mockResolvedValue([]);
+  const input = view.get('header input');
+  await input.trigger('focus'); await input.setValue('Traité de Versailles');
+  await vi.advanceTimersByTimeAsync(600); await flushPromises();
+  await input.trigger('keydown', { key: 'Escape' }); await flushPromises();
+  const [search] = calls('search_completed');
+  expect(search).toEqual(expect.objectContaining({ outcome: 'abandon', story_results: 0, query_length: 20 }));
+  expect(search).not.toHaveProperty('query'); expect(search).not.toHaveProperty('query_redacted');
 });

@@ -1,5 +1,5 @@
 import { onScopeDispose, watch, type Ref } from 'vue';
-import { track, type SearchCompletedProperties } from '@/lib/analytics';
+import { measurementMode, track, type SearchCompletedProperties } from '@/lib/analytics';
 import { announceTimelineEntry } from '@/lib/explorationAnalytics';
 import type { GlobalSearchResult, StorySearchResult } from '@/services/SearchApiService';
 
@@ -60,7 +60,8 @@ export function useSearchAnalytics(options: {
       surface: options.surface(), outcome, query_length: query.length, reformulations: Math.max(0, queries.size - 1),
       story_results: last?.stories ?? null, wikidata_results: last?.wikidata ?? null, ...extra,
     };
-    if (properties.story_results === 0) {
+    // The typed term needs consent: an anonymous visit only counts the search.
+    if (properties.story_results === 0 && measurementMode() === 'consented') {
       const term = searchTermForAnalytics(query);
       if (term) properties.query = term; else properties.query_redacted = true;
     }

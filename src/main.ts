@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, watch } from 'vue'
 import { createPinia } from 'pinia'
 import './style.css'
 import App from './App.vue'
@@ -11,8 +11,12 @@ import { installVisitCounting } from './lib/visitCounting'
 
 const app = createApp(App)
 app.use(createPinia())
-installAnalytics(useConsentStore())
-installVisitCounting()
-installAccessGuard(router, useAuthStore())
+const consent = useConsentStore()
+const auth = useAuthStore()
+// The publisher's own visits: a device where an administrator signs in is excluded from every measurement.
+watch(() => auth.isAdmin, admin => { if (admin) consent.markInternalDevice() }, { immediate: true })
+installAnalytics(consent)
+installVisitCounting(() => consent.anonymousAllowed)
+installAccessGuard(router, auth)
 app.use(router)
 app.mount('#app')

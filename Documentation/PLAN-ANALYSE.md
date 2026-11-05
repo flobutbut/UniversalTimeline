@@ -13,7 +13,7 @@
 
 ## 2. Contraintes à garder en tête
 
-- **Échantillon consenti.** Seuls les visiteurs qui acceptent la mesure sont comptés. Les chiffres PostHog sont des tendances et des taux, pas des totaux. Les totaux viennent de la base (section 7) et, pour la fréquentation, de Vercel Web Analytics (sans cookie, toutes les visites) : visiteurs PostHog ÷ visiteurs Vercel sur une même page et une même période donne une estimation du taux d’acceptation.
+- **Deux modes de mesure (depuis le 5 novembre 2026).** Sans accord, chaque visite est mesurée de façon anonyme (`measurement: exempt`, identifiant en mémoire, une visite = un « visiteur », pas de termes de recherche) ; avec accord, les visites sont reliées (`measurement: consented`). Ventiler par `measurement` ; les mesures dans la durée (rétention, visiteurs qui reviennent) ne valent que pour `consented`. Avant ce changement, seuls les visiteurs qui acceptaient étaient comptés. Les chiffres PostHog sont des tendances et des taux, pas des totaux. Les totaux viennent de la base (section 7) et, pour la fréquentation, de Vercel Web Analytics (sans cookie, toutes les visites) : visiteurs PostHog ÷ visiteurs Vercel sur une même page et une même période donne une estimation du taux d’acceptation.
 - **Pas d’identification des comptes aujourd’hui.** Sans `identify`, un même utilisateur sur deux appareils compte pour deux, et on ne peut pas classer une *personne* comme « contributeur » sur la durée. Décision D1 (section 9).
 - **Pas d’enregistrement de sessions.** Le « pourquoi » s’appuie d’abord sur les erreurs, les clics sans effet et les sondages. L’enregistrement ciblé est une option (D3).
 - **Aucune donnée personnelle dans les événements** : ni e-mail, ni nom d’utilisateur, ni texte saisi, ni titre de frise privée. Les recherches sont mesurées par leur nombre de résultats, pas par leur texte.
@@ -134,7 +134,7 @@ Créé le 3 novembre 2026 : dashboard PostHog 1079515. Les points 1 à 7 sont co
 
 ### Dashboard 3 — « Exploration » (phase 2)
 
-Remplace « Usage de la timeline ». Créé le 3 novembre 2026 : dashboard PostHog 1081248 (12 graphiques, données de test exclues). Contenu : frises visitées, profondeur maximale par session, entonnoir de profondeur, parcours « Frise › Période », dernières positions, modes de navigation (`via`), événements ouverts, entrées, et section recherche (volume et part sans frise, issues, position choisie, `matched_on`, sujets Wikidata demandés, recherches sans frise à reporter dans `FRISES-A-CREER.md`).
+Remplace « Usage de la timeline ». Créé le 3 novembre 2026 : dashboard PostHog 1081248 (12 graphiques, données de test exclues). Ajouts du 5 novembre : « Ouvertures de l’Exploration » (sessions entrant dans l’onglet par jour, ventilées par `measurement`) et « Visites selon le mode de mesure » (part des visites avec accord, aussi sur « Landing & inscription »). Contenu : frises visitées, profondeur maximale par session, entonnoir de profondeur, parcours « Frise › Période », dernières positions, modes de navigation (`via`), événements ouverts, entrées, et section recherche (volume et part sans frise, issues, position choisie, `matched_on`, sujets Wikidata demandés, recherches sans frise à reporter dans `FRISES-A-CREER.md`).
 
 1. Frises les plus ouvertes et source d’ouverture.
 2. Profondeur atteinte (`depth` maximal par session).
