@@ -16,6 +16,7 @@ Univers moderne (1)
       ├─ Le temps des dinosaures (29)
       ├─ Les premiers hominines (38)                 ancrée sur le Cénozoïque
       └─ Genre Homo (5)                              portail des époques humaines, sur Homo sapiens
+         ├─ Les grandes migrations humaines (46)     thématique, accès depuis Homo sapiens
          ├─ Histoire des techniques (39)             thématique, ancrée sur Homo
          ├─ Histoire de l'art (40)                   thématique
          ├─ L'esclavage (41)                         thématique
@@ -96,6 +97,7 @@ Les frises existantes couvrent ces périodes à grands traits ; aucun thème n'y
 
 - **Big Bang et ères primordiales (3)** : 10 périodes mais seulement 2 événements. Ajouter le rayonnement fossile, les premières étoiles et galaxies, la formation de la Voie lactée, la domination de l'énergie sombre.
 - **Les cinq grandes extinctions (22)** : refonte **appliquée en production le 4 novembre 2026** après accord (`database/data/20261104_cinq_extinctions.sql`, retour arrière `_rollback.sql`, répété auparavant sur base locale jetable ; l'API publique renvoie 29 périodes et 21 événements). Racines Paléozoïque / Mésozoïque / Cénozoïque sans chapeau Phanérozoïque ; causes rangées dans leur période (biodiversification ordovicienne, trapps de Viluy et d'Emeishan, épisode pluvial du Carnien, Trias inférieur, PETM, mégafaune du Quaternaire, Grande accélération) ; seconde vague ordovicienne, premières forêts, effondrement de la forêt carbonifère, dodo, Martha, IPBES et quatre jalons de la découverte (Cuvier, Alvarez, Raup et Sepkoski, cratère de Chicxulub).
+- **Les grandes migrations humaines (46)** (parent Genre Homo) : **créée en production le 5 novembre 2026** après accord (`database/data/20261105_migrations_humaines.sql`, retour arrière `_rollback.sql`, répété auparavant sur base locale jetable ; l’API publique renvoie 22 périodes et 19 événements). Quatre racines : peuplement de la planète, agriculteurs et navigateurs, des invasions barbares aux Vikings, migrations modernes et contemporaines. Accès depuis la période Homo sapiens de Genre Homo et vers L’esclavage depuis la Traite atlantique.
 - **Histoire de la vie (2)** : regrouper ses nombreuses périodes pour une lecture plus claire, comme pour « Ère industrielle ».
 
 ### À vérifier avant d'aller plus loin

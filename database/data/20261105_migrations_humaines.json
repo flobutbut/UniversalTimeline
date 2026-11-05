@@ -1,0 +1,254 @@
+{
+  "story": {
+    "title_fr": "Les grandes migrations humaines",
+    "title_en": "The great human migrations",
+    "description_fr": "Depuis plus de deux millions d’années, les humains se déplacent. La frise suit les sorties d’Afrique, le peuplement des continents et des îles, l’expansion des agriculteurs et des navigateurs, les migrations des peuples, puis les migrations de masse et les exils contemporains.",
+    "description_en": "Humans have been on the move for more than two million years. The timeline follows the exits from Africa, the settlement of continents and islands, the spread of farmers and seafarers, the migrations of peoples, then mass migration and modern exile.",
+    "author": "flobutbut",
+    "parent_story_id": 5,
+    "is_public": true,
+    "categories": ["CAT_ANTHRO", "CAT_HIST"]
+  },
+  "newPeriods": [
+    {
+      "key": "peuplement", "parent": null, "wikidata_id": null,
+      "label_fr": "Peuplement de la planète", "label_en": "Peopling of the planet",
+      "start": "M2.12", "end": "K12",
+      "description_fr": "Des premiers humains archaïques à Homo sapiens, les chasseurs-cueilleurs gagnent tous les continents sauf l’Antarctique.",
+      "description_en": "From the first archaic humans to Homo sapiens, hunter-gatherers reach every continent except Antarctica.",
+      "categories": ["CAT_ANTHRO", "CAT_PALEO"]
+    },
+    {
+      "key": "archaiques", "parent": "peuplement", "wikidata_id": null,
+      "label_fr": "Humains archaïques hors d’Afrique", "label_en": "Archaic humans beyond Africa",
+      "start": "M2.12", "end": "K30",
+      "description_fr": "Homo erectus puis ses descendants s’installent en Eurasie, où naissent Néandertaliens et Dénisoviens.",
+      "description_en": "Homo erectus and its descendants settle in Eurasia, where Neanderthals and Denisovans emerge.",
+      "categories": ["CAT_ANTHRO", "CAT_PALEO"]
+    },
+    {
+      "key": "sapiens", "parent": "peuplement", "wikidata_id": null,
+      "label_fr": "Expansion d’Homo sapiens", "label_en": "Spread of Homo sapiens",
+      "start": "K200", "end": "K12",
+      "description_fr": "Après des sorties sans descendance, Homo sapiens quitte l’Afrique, rencontre les autres humains et atteint l’Australie puis les Amériques.",
+      "description_en": "After early exits that left no descendants, Homo sapiens leaves Africa, meets other humans and reaches Australia, then the Americas.",
+      "categories": ["CAT_ANTHRO", "CAT_PALEO"]
+    },
+    {
+      "key": "agriculteurs_navigateurs", "parent": null, "wikidata_id": null,
+      "label_fr": "Expansion des agriculteurs et des navigateurs", "label_en": "Spread of farmers and seafarers",
+      "start": "6500 BCE", "end": "1280",
+      "description_fr": "Les populations d’agriculteurs, d’éleveurs et de marins diffusent leurs langues et leurs modes de vie sur des continents entiers et dans le Pacifique.",
+      "description_en": "Farming, herding and seafaring populations spread their languages and ways of life across whole continents and the Pacific.",
+      "categories": ["CAT_ANTHRO", "CAT_HIST"]
+    },
+    {
+      "key": "agriculteurs_europe", "parent": "agriculteurs_navigateurs", "wikidata_id": null,
+      "label_fr": "Arrivée des agriculteurs anatoliens en Europe", "label_en": "Anatolian farmers settle Europe",
+      "start": "6500 BCE", "end": "4000 BCE",
+      "description_fr": "Venus d’Anatolie, les premiers agriculteurs gagnent l’Europe par la Méditerranée et le Danube et y remplacent en grande partie les chasseurs-cueilleurs.",
+      "description_en": "Coming from Anatolia, the first farmers reach Europe along the Mediterranean and the Danube and largely replace its hunter-gatherers.",
+      "categories": ["CAT_ANTHRO", "CAT_HIST"]
+    },
+    {
+      "key": "indo_europeens", "parent": "agriculteurs_navigateurs", "wikidata_id": "Q28445743",
+      "label_fr": "Migrations indo-européennes", "label_en": "Indo-European migrations",
+      "start": "3300 BCE", "end": "1500 BCE",
+      "description_fr": "Des pasteurs des steppes pontiques se répandent vers l’Europe et l’Asie du Sud, diffusant probablement les langues indo-européennes.",
+      "description_en": "Herders from the Pontic steppe spread into Europe and South Asia, probably carrying the Indo-European languages.",
+      "categories": ["CAT_ANTHRO", "CAT_HIST"]
+    },
+    {
+      "key": "austronesiens", "parent": "agriculteurs_navigateurs", "wikidata_id": null,
+      "label_fr": "Expansion austronésienne", "label_en": "Austronesian expansion",
+      "start": "3000 BCE", "end": "1280",
+      "description_fr": "Partis de Taïwan, des navigateurs peuplent l’Asie du Sud-Est insulaire, Madagascar et les îles du Pacifique jusqu’à la Nouvelle-Zélande.",
+      "description_en": "Setting out from Taiwan, seafarers settle Island Southeast Asia, Madagascar and the Pacific islands as far as New Zealand.",
+      "categories": ["CAT_ANTHRO", "CAT_OCEAN"]
+    },
+    {
+      "key": "bantous", "parent": "agriculteurs_navigateurs", "wikidata_id": "Q130251",
+      "label_fr": "Expansion bantoue", "label_en": "Bantu expansion",
+      "start": "2000 BCE", "end": "0500",
+      "description_fr": "Depuis la région du Cameroun, des agriculteurs de langues bantoues gagnent progressivement l’Afrique centrale, orientale et australe.",
+      "description_en": "From the Cameroon region, Bantu-speaking farmers gradually spread across central, eastern and southern Africa.",
+      "categories": ["CAT_ANTHRO", "CAT_HIST"]
+    },
+    {
+      "key": "peuples", "parent": null, "wikidata_id": null,
+      "label_fr": "Des invasions barbares aux Vikings", "label_en": "From the barbarian invasions to the Vikings",
+      "start": "0375", "end": "1066",
+      "description_fr": "Peuples germaniques, Huns, Slaves, Magyars puis Scandinaves se déplacent et s’installent dans l’ancien monde romain et au-delà.",
+      "description_en": "Germanic peoples, Huns, Slavs, Magyars and then Scandinavians move and settle across the former Roman world and beyond.",
+      "categories": ["CAT_HIST", "CAT_ANTHRO"]
+    },
+    {
+      "key": "invasions", "parent": "peuples", "wikidata_id": "Q131192",
+      "label_fr": "Grandes invasions", "label_en": "Migration Period",
+      "start": "0375", "end": "0568",
+      "description_fr": "Poussés notamment par l’arrivée des Huns, des peuples germaniques franchissent les frontières romaines et fondent leurs royaumes.",
+      "description_en": "Pushed in part by the arrival of the Huns, Germanic peoples cross the Roman frontiers and found their own kingdoms.",
+      "categories": ["CAT_HIST", "CAT_ANTHRO"]
+    },
+    {
+      "key": "vikings", "parent": "peuples", "wikidata_id": "Q213649",
+      "label_fr": "Âge des Vikings", "label_en": "Viking Age",
+      "start": "0793", "end": "1066",
+      "description_fr": "Raids, commerce et colonies scandinaves des îles Britanniques à la Russie, jusqu’à l’Islande, au Groenland et à Terre-Neuve.",
+      "description_en": "Scandinavian raids, trade and settlement from the British Isles to Russia, as far as Iceland, Greenland and Newfoundland.",
+      "categories": ["CAT_HIST", "CAT_ANTHRO"]
+    },
+    {
+      "key": "moderne", "parent": null, "wikidata_id": null,
+      "label_fr": "Migrations des temps modernes et contemporains", "label_en": "Modern and contemporary migrations",
+      "start": "1492-10-12", "end": "TODAY",
+      "description_fr": "Colonisation, déportations forcées, exodes économiques et exils politiques redessinent la population de tous les continents.",
+      "description_en": "Colonisation, forced deportation, economic exodus and political exile reshape the population of every continent.",
+      "categories": ["CAT_HIST", "CAT_ANTHRO"]
+    },
+    {
+      "key": "emigration_europeenne", "parent": "moderne", "wikidata_id": null,
+      "label_fr": "Grande émigration européenne", "label_en": "Great European emigration",
+      "start": "1820", "end": "1914",
+      "description_fr": "Environ 55 millions d’Européens partent vers les Amériques et l’Océanie, chassés par la pauvreté et attirés par la terre et le travail.",
+      "description_en": "Some 55 million Europeans leave for the Americas and Oceania, driven by poverty and drawn by land and work.",
+      "categories": ["CAT_HIST", "CAT_ECO"]
+    },
+    {
+      "key": "famine_irlandaise", "parent": "emigration_europeenne", "wikidata_id": "Q188371",
+      "label_fr": "Grande Famine en Irlande", "label_en": "Great Irish Famine",
+      "start": "1845", "end": "1852",
+      "description_fr": "La maladie de la pomme de terre tue environ un million d’Irlandais et en pousse plus d’un million à émigrer.",
+      "description_en": "Potato blight kills about a million Irish people and drives more than a million to emigrate.",
+      "categories": ["CAT_HIST", "CAT_ECO"]
+    },
+    {
+      "key": "grande_migration", "parent": "moderne", "wikidata_id": "Q1506365",
+      "label_fr": "Grande migration afro-américaine", "label_en": "Great Migration",
+      "start": "1916", "end": "1970",
+      "description_fr": "Six millions d’Afro-Américains quittent le Sud rural et ségrégationniste pour les villes du Nord et de l’Ouest des États-Unis.",
+      "description_en": "Six million African Americans leave the rural, segregated South for the cities of the North and West of the United States.",
+      "categories": ["CAT_HIST", "CAT_ANTHRO"]
+    },
+    {
+      "key": "crise_migratoire", "parent": "moderne", "wikidata_id": "Q20857240",
+      "label_fr": "Crise migratoire en Europe", "label_en": "European migrant crisis",
+      "start": "2014", "end": "2016",
+      "description_fr": "Plus d’un million de personnes fuyant surtout les guerres de Syrie, d’Afghanistan et d’Irak arrivent dans l’Union européenne, souvent par la mer.",
+      "description_en": "More than a million people, fleeing mainly the wars in Syria, Afghanistan and Iraq, reach the European Union, often by sea.",
+      "categories": ["CAT_HIST", "CAT_ANTHRO"]
+    }
+  ],
+  "newEvents": [
+    {
+      "key": "shangchen", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Outils de Shangchen", "label_en": "Shangchen stone tools",
+      "date": "M2.12",
+      "description_fr": "Des outils de pierre découverts en Chine sont les plus anciennes traces connues d’humains hors d’Afrique.",
+      "description_en": "Stone tools found in China are the oldest known traces of humans outside Africa.",
+      "categories": ["CAT_ANTHRO", "CAT_PALEO"]
+    },
+    {
+      "key": "dmanissi", "wikidata_id": "Q65077610", "importance": "normal",
+      "label_fr": "Crânes de Dmanissi", "label_en": "Dmanisi skulls",
+      "date": "M1.77",
+      "description_fr": "En Géorgie, cinq crânes livrent les plus anciens fossiles humains connus hors d’Afrique.",
+      "description_en": "In Georgia, five skulls are the oldest known human fossils outside Africa.",
+      "categories": ["CAT_ANTHRO", "CAT_PALEO"]
+    },
+    {
+      "key": "misliya", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Mâchoire de Misliya", "label_en": "Misliya jawbone",
+      "date": "K185",
+      "description_fr": "Découverte en Israël, elle témoigne d’une sortie très ancienne d’Homo sapiens, sans descendance connue.",
+      "description_en": "Found in Israel, it attests a very early exit of Homo sapiens that left no known descendants.",
+      "categories": ["CAT_ANTHRO", "CAT_PALEO"]
+    },
+    {
+      "key": "metissage", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Métissage avec Néandertal", "label_en": "Interbreeding with Neanderthals",
+      "date": "K47",
+      "description_fr": "Les Homo sapiens sortis d’Afrique se mêlent aux Néandertaliens : tous les humains non africains en portent environ 2 % de gènes.",
+      "description_en": "Homo sapiens leaving Africa interbreed with Neanderthals: all non-African humans carry about 2% of their genes.",
+      "categories": ["CAT_ANTHRO", "CAT_BIO_EVO"]
+    },
+    {
+      "key": "white_sands", "wikidata_id": "Q114289250", "importance": "normal",
+      "label_fr": "Empreintes de White Sands", "label_en": "White Sands footprints",
+      "date": "K23",
+      "description_fr": "Au Nouveau-Mexique, des traces de pas montrent une présence humaine en Amérique pendant le dernier maximum glaciaire.",
+      "description_en": "In New Mexico, footprints show humans were present in the Americas during the Last Glacial Maximum.",
+      "categories": ["CAT_ANTHRO", "CAT_PALEO"]
+    },
+    {
+      "key": "islande", "wikidata_id": "Q2725768", "importance": "normal",
+      "label_fr": "Colonisation de l’Islande", "label_en": "Settlement of Iceland",
+      "date": "0874",
+      "description_fr": "Selon la tradition, Ingólfr Arnarson fonde le premier établissement norrois permanent de l’île.",
+      "description_en": "According to tradition, Ingólfr Arnarson founds the island’s first permanent Norse settlement.",
+      "categories": ["CAT_HIST", "CAT_ANTHRO"]
+    },
+    {
+      "key": "magyars", "wikidata_id": "Q4218", "importance": "normal",
+      "label_fr": "Installation des Magyars dans le bassin des Carpates", "label_en": "Hungarian conquest of the Carpathian Basin",
+      "date": "0895",
+      "description_fr": "Venus des steppes, les Hongrois franchissent les Carpates et s’établissent dans la plaine du Danube.",
+      "description_en": "Coming from the steppes, the Hungarians cross the Carpathians and settle on the Danube plain.",
+      "categories": ["CAT_HIST", "CAT_ANTHRO"]
+    },
+    {
+      "key": "ellis_island", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Ouverture d’Ellis Island", "label_en": "Ellis Island opens",
+      "date": "1892-01-01",
+      "description_fr": "Le centre d’immigration de New York accueillera environ 12 millions d’arrivants jusqu’en 1954.",
+      "description_en": "New York’s immigration station will process some 12 million arrivals until 1954.",
+      "categories": ["CAT_HIST"]
+    },
+    {
+      "key": "partition", "wikidata_id": "Q129053", "importance": "major",
+      "label_fr": "Partition des Indes", "label_en": "Partition of India",
+      "date": "1947-08-15",
+      "description_fr": "La division entre l’Inde et le Pakistan provoque l’un des plus grands déplacements de population de l’histoire, environ 15 millions de personnes.",
+      "description_en": "The division into India and Pakistan triggers one of history’s largest population movements, some 15 million people.",
+      "categories": ["CAT_HIST"]
+    },
+    {
+      "key": "windrush", "wikidata_id": null, "importance": "normal",
+      "label_fr": "Arrivée de l’Empire Windrush", "label_en": "Arrival of the Empire Windrush",
+      "date": "1948-06-22",
+      "description_fr": "Le navire débarque près de Londres des centaines d’immigrés caribéens, symbole des migrations de travail de l’après-guerre.",
+      "description_en": "The ship lands hundreds of Caribbean migrants near London, a symbol of post-war labour migration.",
+      "categories": ["CAT_HIST"]
+    },
+    {
+      "key": "convention_refugies", "wikidata_id": "Q60433", "importance": "normal",
+      "label_fr": "Convention relative au statut des réfugiés", "label_en": "Refugee Convention",
+      "date": "1951-07-28",
+      "description_fr": "Adoptée à Genève, elle définit le réfugié et interdit de le renvoyer là où sa vie est menacée.",
+      "description_en": "Adopted in Geneva, it defines who is a refugee and forbids returning them where their life is threatened.",
+      "categories": ["CAT_HIST"]
+    }
+  ],
+  "reusedPeriods": [
+    { "id": "Q38486", "parent": "archaiques", "start": "M1.89", "end": "K143" },
+    { "id": "Q838707", "parent": "archaiques", "start": "K500", "end": "K30" },
+    { "id": "Q42767", "parent": "archaiques", "start": "K400", "end": "K40" },
+    { "id": "bdfa109a-864c-4ae8-adb9-b7e9aec9443f", "parent": "sapiens", "start": "K26.5", "end": "K19" },
+    { "id": "56b0f980-fc39-44a1-b647-2ecfd4689793", "parent": "agriculteurs_europe", "start": "5500 BCE", "end": "4900 BCE" },
+    { "id": "9515f188-b7b8-4992-985d-b733ce70da1b", "parent": "moderne", "start": "1501", "end": "1867" }
+  ],
+  "reusedEvents": [
+    { "id": "bc607aed-30d0-4d26-91e6-6410addd2011", "date": "K70", "importance": "major" },
+    { "id": "8badd516-c091-4e37-849e-efe94e2f0af0", "date": "K54", "importance": "normal" },
+    { "id": "dc13695d-22ef-4c18-bce1-714f4f286122", "date": "K50", "importance": "major" },
+    { "id": "24eb4d95-8788-4bc1-b300-a21eeec57f01", "date": "K16", "importance": "major" },
+    { "id": "Q1069958", "date": "0410-08-24", "importance": "normal" },
+    { "id": "EVT_HEGIRA", "date": "0622-07-16", "importance": "normal" },
+    { "id": "fdbc9fb3-9a9c-4f17-9d9d-55a5a92fbe2e", "date": "1280", "importance": "major" },
+    { "id": "EVT_AMERICA", "date": "1492-10-12", "importance": "normal" }
+  ],
+  "entryPoints": [
+    { "source": 5, "target": "new", "period_id": "Q15978631", "why": "Genre Homo → migrations, depuis la période Homo sapiens" },
+    { "source": "new", "target": 41, "period_id": "9515f188-b7b8-4992-985d-b733ce70da1b", "why": "Traite atlantique → L’esclavage" }
+  ]
+}
