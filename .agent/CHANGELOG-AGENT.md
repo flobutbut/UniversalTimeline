@@ -341,6 +341,7 @@ Réglages PostHog : règle de suppression de l'erreur « ResizeObserver loop com
 ## 2026-11-05 — Comptage des visites Vercel Web Analytics
 
 `@vercel/analytics` 2.0.1 injecté par `installVisitCounting` (`src/lib/visitCounting.ts`, appelé dans `main.ts`) en build de production seulement. Sans cookie ni stockage, donc hors consentement : il donne la fréquentation réelle face à l'échantillon consenti de PostHog. `createPathOnlyFilter` n'envoie que le chemin (ni identifiants de frise ni secrets d'authentification) et ne compte qu'une visite de suite par chemin. Politique de confidentialité (données, intérêt légitime, opposition, durée « [À compléter] »), politique cookies, registre RGPD, règle 30, plan d'analyse et OPERATIONS mis à jour.
+
 ## 2026-11-05 — Exemples cliquables sur la landing
 
 Les trois lignes d'exemples de la section « Vos frises » (`LandingView.vue`) attiraient des clics sans effet (PostHog, 3 novembre) : ce sont désormais des liens vers la création de frise (`accountTarget`), avec survol, focus, flèche et précision pour les lecteurs d'écran, marqués `data-attr="landing-cta-example_<course|research|project>"`. L'entonnoir d'acquisition PostHog compte ces clics comme CTA de création.
