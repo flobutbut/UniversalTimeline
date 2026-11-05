@@ -10,34 +10,35 @@
     </div>
     <FeedbackState v-if="loading && !users" kind="loading" layout="inline" />
     <FeedbackState v-else-if="error && !users" kind="error" layout="inline" :message="error" retryable @retry="load" />
-    <FeedbackState v-else-if="users && !visible.length" kind="empty" layout="inline" message="Aucun compte ne correspond." />
-    <div v-else-if="users" class="admin-users__scroll" role="region" aria-label="Liste des utilisateurs" tabindex="0">
-      <table class="admin-users__table">
-        <thead>
-          <tr><th scope="col">Utilisateur</th><th scope="col">Inscription</th><th scope="col">Dernière connexion</th><th scope="col">Frises</th><th scope="col">Statut</th></tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in visible" :key="user.id">
-            <th scope="row">
-              <RouterLink class="admin-users__identity" :to="{ name: 'admin', query: { section: 'users', user: user.id } }">
-                <UserAvatar :username="user.username" :color="user.avatarColor ?? undefined" :icon="user.avatarIcon ?? undefined" size="sm" />
-                <span><span class="admin-users__name">{{ user.username ?? 'Sans nom d’utilisateur' }}</span><span class="admin-users__email">{{ user.email ?? '—' }}</span></span>
-              </RouterLink>
-            </th>
-            <td>{{ formatAdminDate(user.createdAt) }}</td>
-            <td>{{ formatAdminDate(user.lastSignInAt) }}</td>
-            <td>{{ user.stories }}<span v-if="user.stories" class="admin-users__muted"> ({{ user.publicStories }} publiques)</span></td>
-            <td><span class="admin-users__tags"><Tag v-for="status in statuses(user)" :key="status" :label="status" :variant="status === 'Admin' ? 'accent' : 'neutral'" /></span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <template v-else-if="users">
+      <CatalogueBulkBar :count="bulk.selected.value.length" :actions="bulkActions" :busy="bulk.busy.value" :message="bulk.message.value" :failures="bulk.failures.value" :uncertain="bulk.uncertain.value" @apply="bulk.run" @clear="bulk.selectedIds.value = []" @reload="bulk.reload" />
+      <p class="admin-users__meta">Les administrateurs et votre propre compte sont exclus des actions groupées.</p>
+      <CatalogueTable v-model:selected-ids="bulk.selectedIds.value" label="Utilisateurs" :columns="columns" :items="visible" empty-text="Aucun compte ne correspond." selectable :can-select="canSelectUser" :item-label="user => user.username || user.email || user.id" :selection-disabled="bulk.busy.value || bulk.uncertain.value" :sort-column="sortColumn" :sort-dir="sortDir" @sort="toggleSort($event as SortColumn)">
+        <template #row="{ item: user }">
+          <span role="cell">
+            <RouterLink class="admin-users__identity" :to="{ name: 'admin', query: { section: 'users', user: user.id } }">
+              <UserAvatar :username="user.username" :color="user.avatarColor ?? undefined" :icon="user.avatarIcon ?? undefined" size="sm" />
+              <span><span class="admin-users__name">{{ user.username ?? 'Sans nom d’utilisateur' }}</span><span class="admin-users__email">{{ user.email ?? '—' }}</span></span>
+            </RouterLink>
+          </span>
+          <span role="cell">{{ formatAdminDate(user.createdAt) }}</span>
+          <span role="cell">{{ formatAdminDate(user.lastSignInAt) }}</span>
+          <span role="cell">{{ user.stories }}<span v-if="user.stories" class="admin-users__muted"> ({{ user.publicStories }} publiques)</span></span>
+          <span role="cell" class="admin-users__tags"><Tag v-for="status in statuses(user)" :key="status" :label="status" :variant="status === 'Admin' ? 'accent' : 'neutral'" /></span>
+        </template>
+      </CatalogueTable>
+    </template>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import CatalogueTable from '@/components/catalogue/CatalogueTable.vue';
+import CatalogueBulkBar from '@/components/catalogue/CatalogueBulkBar.vue';
+import type { CatalogueColumn } from '@/components/catalogue/columns';
+import { useCatalogueBulkActions, type CatalogueBulkAction } from '@/composables/useCatalogueBulkActions';
+import { useAuthStore } from '@/stores/useAuthStore';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import SearchInput from '@/components/base/SearchInput.vue';
 import Select from '@/components/base/Select.vue';
@@ -56,6 +57,29 @@ const filterOptions: { value: Filter; label: string }[] = [
 ];
 const users = ref<AdminUser[] | null>(null); const loading = ref(false); const error = ref('');
 const query = ref(''); const filter = ref<SelectValue>('all');
+type SortColumn = 'username' | 'createdAt' | 'lastSignInAt' | 'stories' | 'status';
+const columns: (CatalogueColumn & { key: SortColumn })[] = [
+  { key: 'username', label: 'Utilisateur', sortLabel: 'Trier par utilisateur', width: 260, minWidth: 160 },
+  { key: 'createdAt', label: 'Inscription', sortLabel: 'Trier par inscription', width: 140 },
+  { key: 'lastSignInAt', label: 'Dernière connexion', sortLabel: 'Trier par dernière connexion', width: 170 },
+  { key: 'stories', label: 'Frises', sortLabel: 'Trier par nombre de frises', width: 150 },
+  { key: 'status', label: 'Statut', sortLabel: 'Trier par statut', width: 180 },
+];
+const sortColumn = ref<SortColumn | null>(null);
+const sortDir = ref<'asc' | 'desc'>('asc');
+function toggleSort(column: SortColumn) {
+  sortDir.value = sortColumn.value === column && sortDir.value === 'asc' ? 'desc' : 'asc';
+  sortColumn.value = column;
+}
+function sortValue(user: AdminUser, column: SortColumn): string | number | null {
+  if (column === 'status') return statuses(user).join(', ');
+  if (column === 'createdAt' || column === 'lastSignInAt') {
+    const raw = user[column];
+    const value = raw ? Date.parse(raw) : NaN;
+    return Number.isFinite(value) ? value : null;
+  }
+  return user[column];
+}
 let request = 0;
 onBeforeUnmount(() => { request++; });
 async function load() {
@@ -73,9 +97,32 @@ const matchesFilter: Record<Filter, (user: AdminUser) => boolean> = {
 const visible = computed(() => {
   const needle = query.value.trim().toLocaleLowerCase('fr');
   const keep = matchesFilter[(filter.value as Filter) ?? 'all'] ?? matchesFilter.all;
-  return (users.value ?? []).filter(user => keep(user)
+  const rows = (users.value ?? []).filter(user => keep(user)
     && (!needle || [user.username, user.email].some(value => value?.toLocaleLowerCase('fr').includes(needle))));
+  const column = sortColumn.value;
+  if (!column) return rows;
+  return rows.sort((a, b) => {
+    const left = sortValue(a, column), right = sortValue(b, column);
+    if (left === null || right === null) return left === right ? 0 : left === null ? 1 : -1;
+    const comparison = typeof left === 'number' && typeof right === 'number'
+      ? left - right : String(left).localeCompare(String(right), 'fr', { sensitivity: 'base', numeric: true });
+    return sortDir.value === 'asc' ? comparison : -comparison;
+  });
 });
+const auth = useAuthStore();
+const canSelectUser = (user: AdminUser) => !user.isAdmin && user.id !== auth.account?.id;
+const bulkActions: { value: CatalogueBulkAction; label: string }[] = [
+  { value: 'suspend', label: 'Suspendre les comptes' }, { value: 'reactivate', label: 'Réactiver les comptes' },
+  { value: 'export', label: 'Exporter en CSV' }, { value: 'delete', label: 'Supprimer les comptes' },
+];
+const bulk = useCatalogueBulkActions({
+  items: () => visible.value, label: 'Utilisateurs', itemLabel: user => user.username || user.email || user.id, canSelect: canSelectUser,
+  deleteItem: async user => { await adminApi.deleteUser(user.id); users.value = users.value?.filter(row => row.id !== user.id) ?? []; },
+  suspend: async (user, suspended) => { await adminApi.setSuspended(user.id, suspended); users.value = users.value?.map(row => row.id === user.id ? { ...row, suspended } : row) ?? []; },
+  reload: async () => { const next = await adminApi.users(); users.value = next; },
+  csvRow: user => ({ ID: user.id, Utilisateur: user.username, Email: user.email, Inscription: user.createdAt, 'Dernière connexion': user.lastSignInAt, Frises: user.stories, Statut: statuses(user).join(', ') }),
+});
+
 function statuses(user: AdminUser): string[] {
   return [user.isAdmin && 'Admin', user.isEditor && 'Éditeur', user.suspended && 'Suspendu', !user.confirmed && 'Non confirmé', !user.username && 'Sans profil']
     .filter((value): value is string => !!value);
@@ -84,6 +131,7 @@ function statuses(user: AdminUser): string[] {
 
 <style scoped>
 .admin-users { display: flex; flex-direction: column; gap: var(--spacing-lg); min-width: 0; }
+.admin-users :deep(.table-wrap) { flex: 0 0 auto; min-height: 200px; max-height: 65vh; }
 .admin-users h2 { margin: 0; font-size: var(--font-size-2xl); }
 .admin-users__header { display: flex; flex-direction: column; gap: var(--spacing-xs); }
 .admin-users__meta, .admin-users__muted, .admin-users__email { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
@@ -91,15 +139,9 @@ function statuses(user: AdminUser): string[] {
 .admin-users__filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--spacing-md); }
 .admin-users__search { flex: 1 1 240px; }
 .admin-users__filter { flex: 0 1 240px; }
-.admin-users__scroll { overflow-x: auto; border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-surface-default); }
-.admin-users__scroll:focus-visible { outline: 2px solid var(--color-text-link); outline-offset: 2px; }
-.admin-users__table { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
-.admin-users__table th, .admin-users__table td { padding: var(--spacing-sm) var(--spacing-md); border-bottom: 1px solid var(--color-border-default); text-align: left; vertical-align: middle; white-space: nowrap; }
-.admin-users__table thead th { color: var(--color-text-secondary); font-weight: var(--font-weight-semibold); }
-.admin-users__table tbody tr:last-child > * { border-bottom: 0; }
-.admin-users__table tbody th { font-weight: normal; }
 .admin-users__identity { display: flex; align-items: center; gap: var(--spacing-sm); text-decoration: none; color: inherit; }
-.admin-users__identity > span { display: flex; flex-direction: column; }
+.admin-users__identity > span { display: flex; flex-direction: column; min-width: 0; }
+.admin-users__name, .admin-users__email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .admin-users__name { color: var(--color-text-link); font-weight: var(--font-weight-semibold); }
 .admin-users__identity:hover .admin-users__name, .admin-users__identity:focus-visible .admin-users__name { text-decoration: underline; }
 .admin-users__tags { display: inline-flex; flex-wrap: wrap; gap: var(--spacing-xs); }

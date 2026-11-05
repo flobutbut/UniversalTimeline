@@ -64,6 +64,20 @@ it('jumps several levels without duplicating history, restoring scoped children 
   await nav.goBack(); expect(nav.currentPeriod.value?.id).toBe('root');
 });
 
+it('resets the current frise from its breadcrumb even when it is the only frise visited', async () => {
+  await descend();
+  await nav.navigateToStoryBreadcrumb(0);
+  expect(nav.currentStoryId.value).toBe('1');
+  expect(nav.currentPeriod.value).toBeNull();
+  expect(nav.parentStack.value).toEqual([]);
+  expect(nav.displayedPeriods.value.map(period => period.id)).toEqual(['root']);
+  expect(nav.storyEvents.value.map(event => event.id)).toEqual(['e750', 'e250', 'e50']);
+  expect(nav.breadcrumb.value).toEqual([]);
+  expect(nav.storyBreadcrumb.value.map(story => story.id)).toEqual(['story:1']);
+  await nav.navigateToStoryBreadcrumb(0);
+  expect(nav.currentPeriod.value).toBeNull();
+});
+
 it('keeps the period breadcrumb local and returns to the overview through the parent action', async () => {
   await descend();
   const store = useDataStore();

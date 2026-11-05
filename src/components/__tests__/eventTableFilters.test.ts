@@ -52,3 +52,17 @@ it('applies period and date filters independently and combines their ranges', as
   filters.vm.$emit('update:timeRange', null); await flushPromises();
   expect(ids()).toEqual(['inside', 'outside', 'untagged', 'unknown']);
 });
+
+it('sorts the frise column alphabetically and keeps sorting when filters change', async () => {
+  vi.mocked(StoryApiService.getInstance().getListStories).mockResolvedValue([
+    { id: 'life', title: { fr: 'Zeta', en: '' }, categories: [], author: '', isPublic: true },
+    { id: 'other', title: { fr: 'Alpha', en: '' }, categories: [], author: '', isPublic: true },
+  ]);
+  view = mount(EventsView, { global: { stubs: { RouterLink: { template: '<a><slot /></a>' } } } }); await flushPromises();
+  const sort = view.get('button[aria-label="Trier par frises"]');
+  await sort.trigger('click'); expect(ids()).toEqual(['outside', 'inside', 'untagged', 'unknown']);
+  await sort.trigger('click'); expect(ids()).toEqual(['inside', 'untagged', 'unknown', 'outside']);
+  expect(sort.element.closest('[role="columnheader"]')?.getAttribute('aria-sort')).toBe('descending');
+  view.getComponent(CatalogueFilters).vm.$emit('update:categories', ['geo']); await flushPromises();
+  expect(ids()).toEqual(['inside', 'unknown', 'outside']);
+});

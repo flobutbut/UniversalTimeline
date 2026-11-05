@@ -2,17 +2,17 @@
   <div class="home-view">
     <div class="home-view__header">
       <div class="home-view__breadcrumbs">
-        <StoryBreadcrumb class="home-view__story-breadcrumb" :items="storyBreadcrumb" :max-visible="3" label="Fil d’Ariane des frises" :loading="loading" @navigate="onStoryBreadcrumb" />
+        <StoryBreadcrumb class="home-view__story-breadcrumb" :items="storyBreadcrumb" :max-visible="3" label="Fil d’Ariane des frises" current-navigable :loading="loading" @navigate="onStoryBreadcrumb" />
         <StoryBreadcrumb class="home-view__period-breadcrumb" :items="breadcrumb" :loading="loading" @navigate="onBreadcrumb" />
       </div>
-      <div v-if="visibleRootStories.length" class="home-view__associated-stories">
-        <Button v-if="visibleRootStories.length === 1" variant="tertiary" size="sm" :disabled="loading"
-          @click="onStorySelect(visibleRootStories[0].id)">{{ visibleRootStories[0].title.fr || visibleRootStories[0].title.en }}</Button>
-        <Select v-else-if="visibleRootStories.length > 1" :model-value="null"
+      <div v-if="headerStories.length" class="home-view__associated-stories">
+        <Button v-if="headerStories.length === 1" variant="tertiary" size="sm" :disabled="loading"
+          @click="onHeaderStorySelect(headerStories[0].id)">{{ headerStories[0].title.fr || headerStories[0].title.en }}</Button>
+        <Select v-else-if="headerStories.length > 1" :model-value="null"
           placeholder="Explorer une frise associée" compact
-          :options="visibleRootStories.map(story => ({ value: story.id, label: story.title.fr || story.title.en }))"
-          :searchable="visibleRootStories.length > 6" :disabled="loading"
-          @update:model-value="value => typeof value === 'string' && onStorySelect(value)" />
+          :options="headerStories.map(story => ({ value: story.id, label: story.title.fr || story.title.en }))"
+          :searchable="headerStories.length > 6" :disabled="loading"
+          @update:model-value="value => typeof value === 'string' && onHeaderStorySelect(value)" />
       </div>
       <div class="home-view__header-actions">
         <Switch v-model="showPeriodChildren" label="Étendre" label-first variant="sm" :disabled="loading" />
@@ -127,7 +127,7 @@ const {
   breadcrumb,
   storyBreadcrumb,
   currentStoryBounds,
-  contextBar, contextStories, rootStories, linkedPeriods, childLinkedPeriods, returnTitle, returnPath, referencePeriodId,
+  contextBar, contextStories, headerStories, linkedPeriods, childLinkedPeriods, returnTitle, returnPath, referencePeriodId,
   loadInitialData,
   openStory,
   handlePeriodClick,
@@ -141,7 +141,10 @@ const {
   // A refused or duplicate navigation changes no route: its cause must not label the next one.
   void router.push(timelineLocation(target)).then(failure => { if (failure) routeVia = null; });
 });
-const visibleRootStories=computed(()=>rootStories.value.filter(story=>!contextBar.value||!contextStories.value.some(other=>other.id===story.id)));
+function onHeaderStorySelect(id: string) {
+  const story = headerStories.value.find(story => story.id === id);
+  if (story) return onStorySelect(id, story.anchor);
+}
 const contextAnchor=computed(()=>{
   const frame=returnPath.value[returnPath.value.length-1];
   return referencePeriodId.value?{type:'period' as const,id:referencePeriodId.value}:frame?.anchor;

@@ -48,6 +48,17 @@ it('shares forced story refreshes while they are pending', async () => {
   expect(read).toHaveBeenCalledTimes(2);
 });
 
+it('reconciles deleted catalogue rows after a forced refresh instead of merging stale rows back', async () => {
+  const read = vi.spyOn(PeriodApiService.getInstance(), 'getListPeriods')
+    .mockResolvedValueOnce([period('removed'), period('kept')] as any)
+    .mockResolvedValueOnce([period('kept')] as any);
+  const store = useDataStore(); await store.ensureRootsLoaded();
+  expect(store.periodById('removed')).not.toBeNull();
+  store.invalidateCatalogue('period'); await store.ensureRootsLoaded(true);
+  expect(store.periodById('removed')).toBeNull(); expect(store.periodById('kept')).not.toBeNull();
+  expect(read).toHaveBeenCalledTimes(2);
+});
+
 it('propagates a failure, releases loading and allows a retry instead of caching an empty success', async () => {
   const read = vi.spyOn(PeriodApiService.getInstance(), 'getListPeriods').mockRejectedValueOnce(new Error('Hors ligne')).mockResolvedValueOnce([]);
   const store = useDataStore();

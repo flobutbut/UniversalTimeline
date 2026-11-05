@@ -62,7 +62,7 @@ const questions = [
           <a href="#questions">Questions</a>
         </nav>
         <div class="landing-account">
-          <RouterLink :to="canUseWorkspace(auth) ? '/database' : '/login'" data-attr="landing-cta-login">{{ canUseWorkspace(auth) ? 'Mon espace' : 'Se connecter' }}</RouterLink>
+          <RouterLink :to="canUseWorkspace(auth) ? '/timeline' : '/login'" data-attr="landing-cta-login">{{ canUseWorkspace(auth) ? 'Mon espace' : 'Se connecter' }}</RouterLink>
           <ThemeToggle />
         </div>
       </div>

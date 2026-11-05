@@ -27,6 +27,17 @@
           type="button"
           class="story-breadcrumb__item story-breadcrumb__item--link"
           :title="item.title"
+          :disabled="loading"
+          @click="navigate(hiddenItems.length + offset, $event)"
+        ><StoryMarker v-if="item.kind === 'story'" />{{ item.title }}</button>
+        <button
+          v-else-if="currentNavigable"
+          ref="currentItem"
+          type="button"
+          class="story-breadcrumb__item story-breadcrumb__item--link story-breadcrumb__item--current"
+          aria-current="location"
+          :title="item.title"
+          :disabled="loading"
           @click="navigate(hiddenItems.length + offset, $event)"
         ><StoryMarker v-if="item.kind === 'story'" />{{ item.title }}</button>
         <span
@@ -58,6 +69,8 @@ const StoryMarker = () => h('span', { class: 'sr-only' }, 'Frise : ');
 const props = withDefaults(defineProps<{
   items: StoryBreadcrumbItem[];
   loading?: boolean;
+  /** The current frise can return to its overview while its periods are explored. */
+  currentNavigable?: boolean;
   label?: string;
   /** Keep the most recent steps visible; preceding steps remain selectable. */
   maxVisible?: number;
@@ -118,6 +131,7 @@ const currentItem = ref<HTMLElement[]>([]);
 let keyboardTrigger: HTMLElement | null = null;
 
 function navigate(index: number, event: MouseEvent) {
+  if (props.loading) return;
   keyboardTrigger = event.detail === 0 ? event.currentTarget as HTMLElement : null;
   emit('navigate', index);
 }

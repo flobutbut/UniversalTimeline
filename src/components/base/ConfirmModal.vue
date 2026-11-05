@@ -43,6 +43,8 @@ const { dialogId: id } = useDialog(dialog, { close: () => emit('cancel') });
   padding: var(--spacing-xl);
   width: 90%;
   max-width: 400px;
+  max-height: calc(100dvh - var(--spacing-xl) * 2);
+  overflow-y: auto;
   box-shadow: var(--shadow-xl);
   text-align: center;
 }
@@ -54,6 +56,7 @@ const { dialogId: id } = useDialog(dialog, { close: () => emit('cancel') });
 }
 
 .modal-message {
+  white-space: pre-line;
   margin: 0 0 var(--spacing-lg) 0;
   color: var(--color-text-secondary);
   line-height: 1.6;

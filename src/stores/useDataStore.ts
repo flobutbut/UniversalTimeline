@@ -51,8 +51,11 @@ export const useDataStore = defineStore('data', () => {
     periods.value = periods.value.filter(p => !p.id.startsWith('wikidata:') || !savedQids.has(p.wikidata_id));
   }
 
-  async function ensureRootsLoaded(): Promise<void> {
-    await reads.load('roots', () => PeriodApiService.getInstance().getListPeriods(), mergePeriods);
+  async function ensureRootsLoaded(force = false): Promise<void> {
+    await reads.load('roots', () => PeriodApiService.getInstance().getListPeriods(), rows => {
+      if (force) periods.value = periods.value.filter(period => period.id.startsWith('wikidata:'));
+      mergePeriods(rows);
+    }, force);
   }
 
   async function ensureChildrenLoaded(parentId: string): Promise<ListPeriod[]> {
@@ -124,6 +127,10 @@ export const useDataStore = defineStore('data', () => {
     storyPeriodsCache.clear();
     storyDetailsCache.clear();
     storyEventsCache.clear();
+  }
+  function invalidateCatalogue(kind: 'period' | 'event') {
+    reads.invalidate(kind === 'period' ? 'roots' : 'events');
+    invalidateStories();
   }
 
   function invalidatePeriodLists(parentIds?: (string | null | undefined)[]) {
@@ -210,7 +217,7 @@ export const useDataStore = defineStore('data', () => {
     periods, events, stories, loading, error, requests,
     rootPeriods, periodById, eventById, storyById, childrenOf,
     ensureRootsLoaded, ensureChildrenLoaded, ensureStoryPeriodsLoaded, ensureStoryEventsLoaded, ensureStoryLoaded,
-    ensureEventsLoaded, ensureStoriesLoaded,
+    ensureEventsLoaded, ensureStoriesLoaded, invalidateCatalogue,
     cachePeriod: (period: ListPeriod) => mergePeriods([period]),
     updatePeriods, updateEvents, updateStories, resetData, addPeriodSuggestions,
     upsertSavedPeriod, removeDeletedPeriod, upsertSavedEvent, upsertSavedStory, invalidateStory, invalidateStories,

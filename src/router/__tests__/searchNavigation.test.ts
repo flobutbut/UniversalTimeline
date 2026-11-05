@@ -42,10 +42,10 @@ async function start(path = '/timeline', anonymous = false) {
   installAccessGuard(router, auth);
   await router.push(path); await router.isReady();
   view = mount(App, { attachTo: document.body, global: { plugins: [router] } });
-  await flushPromises();
+  await vi.dynamicImportSettled(); await flushPromises();
 }
 async function choose(hit: SearchHit) {
-  await router.push(searchHitLocation(hit)); await flushPromises();
+  await router.push(searchHitLocation(hit)); await vi.dynamicImportSettled(); await flushPromises();
 }
 beforeEach(() => {
   vi.useFakeTimers(); setActivePinia(createPinia());
