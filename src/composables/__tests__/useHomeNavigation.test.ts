@@ -26,7 +26,7 @@ describe('useHomeNavigation', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.restoreAllMocks();
-    vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([]);
+    vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([storyFixture('1')]);
   });
 
   it('loadInitialData avec expandSingleRoot ouvre la racine unique + enfants', async () => {
@@ -88,7 +88,53 @@ describe('useHomeNavigation', () => {
       { id: 'end', date: '2001-01-01', date_years_bp: 600 },
       { id: 'outside', date: '2002-01-01', date_years_bp: 900 },
     ]));
-    const nav = useHomeNavigation(); await nav.loadInitialData(undefined, true);
+    const nav = useHomeNavigation(); await nav.openStory('1', { storyId: '1', periodId: 'root' });
     expect(nav.storyEvents.value.map(event => event.id)).toEqual(['start', 'end']);
+  });
+
+  it('opens the Universe at the Big Bang instead of auto-focusing the Milky Way', async () => {
+    vi.spyOn(StoryApiService.getInstance(), 'getStory').mockResolvedValue(storyFixture('1', [
+      { id: 'milky-way', start_date: 'G13.5', end_date: 'TODAY' },
+      { id: 'solar-system', parent_id: 'milky-way', start_date: 'G4.6', end_date: 'TODAY' },
+    ], [
+      { id: 'big-bang', date: 'G13.798' },
+      { id: 'first-stars', date: 'G13.6' },
+      { id: 'earth', date: 'G4.54' },
+    ]));
+
+    const nav = useHomeNavigation();
+    await nav.openStory('1');
+
+    expect(nav.error.value).toBeNull();
+    expect(nav.currentPeriod.value).toBeNull();
+    expect(nav.currentStoryBounds.value).toEqual({ startYearsBP: 13.798e9, endYearsBP: 0 });
+    expect(nav.displayedPeriods.value.map(period => period.id)).toEqual(['milky-way']);
+    expect(nav.storyEvents.value.map(event => event.id)).toEqual(['big-bang', 'first-stars', 'earth']);
+
+    // Explicit exploration still narrows the view, and returning restores all events.
+    await nav.handlePeriodClick(nav.displayedPeriods.value[0]);
+    expect(nav.currentPeriod.value?.id).toBe('milky-way');
+    expect(nav.storyEvents.value.map(event => event.id)).toEqual(['earth']);
+    await nav.goBack();
+    expect(nav.currentPeriod.value).toBeNull();
+    expect(nav.storyEvents.value.map(event => event.id)).toEqual(['big-bang', 'first-stars', 'earth']);
+  });
+
+  it.each([
+    ['0900', null],
+    ['2100', null],
+    ['1000', 'root'],
+    ['2000', 'root'],
+    ['unknown', 'root'],
+  ])('auto-focuses a root only when it covers the dated event %s', async (date, expectedRoot) => {
+    vi.spyOn(StoryApiService.getInstance(), 'getStory').mockResolvedValue(storyFixture('1', [
+      { id: 'root', start_date: '1000', end_date: '2000' },
+      { id: 'child', parent_id: 'root', start_date: '1200', end_date: '1800' },
+    ], [{ id: 'event', date }]));
+
+    const nav = useHomeNavigation();
+    await nav.openStory('1');
+    expect(nav.error.value).toBeNull();
+    expect(nav.currentPeriod.value?.id ?? null).toBe(expectedRoot);
   });
 });
