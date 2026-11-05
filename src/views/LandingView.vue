@@ -77,7 +77,6 @@ const questions = [
         </div>
         <div class="hero-actions">
           <Button to="/timeline" class="action-link" data-attr="landing-cta-explore">Explorer les frises</Button>
-          <span>Sans compte. À votre rythme.</span>
         </div>
       </div>
       <LandingTimeDemo />
@@ -172,12 +171,12 @@ const questions = [
 .hero { padding-top: calc(var(--spacing-2xl) * 2); }
 .section-index { display: flex; align-items: center; gap: var(--spacing-md); color: var(--color-text-secondary); font-size: var(--font-size-xs); letter-spacing: .1em; }
 .section-index>span { font-family: var(--font-family-mono); color: var(--color-text-link); letter-spacing: 0; }
-.hero-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--spacing-2xl); padding: var(--spacing-xl) 0 var(--spacing-2xl); }
-.hero h1 { font-family: var(--font-family-heading); font-weight: var(--font-weight-normal); font-size: clamp(32px, 4.3vw, 56px); line-height: 1.18; letter-spacing: -.045em; margin: 0 0 var(--spacing-xl); color: var(--color-text-heading); }
+.hero-heading { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-lg); padding: var(--spacing-xl) 0 calc(var(--spacing-2xl) + var(--spacing-lg)); }
+.hero h1 { font-family: var(--font-family-heading); font-weight: var(--font-weight-normal); font-size: clamp(32px, 4.3vw, 56px); line-height: 1.18; letter-spacing: -.045em; margin: 0 0 var(--spacing-md); color: var(--color-text-heading); }
 .hero h1>span { color: var(--color-text-secondary); }
 .hero-description { font-size: var(--font-size-base); line-height: var(--line-height-relaxed); color: var(--color-text-secondary); margin: 0; }
-.hero-actions { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-sm); padding-bottom: var(--spacing-xs); flex-shrink: 0; }
-.hero-actions>span,.create-bottom>span { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.hero-actions { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-sm); }
+.create-bottom>span { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
 
 
 .experience-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-sm); padding-top: var(--spacing-md); font-size: var(--font-size-xs); color: var(--color-text-secondary); }
@@ -205,10 +204,10 @@ const questions = [
 .faq-list { border-top: 1px solid var(--color-border-default); }.faq-list details { border-bottom: 1px solid var(--color-border-default); }.faq-list summary { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-lg); cursor: pointer; padding: var(--spacing-lg) 0; font-size: var(--font-size-base); list-style: none; }.faq-list summary::-webkit-details-marker { display: none; }.faq-list summary>span { color: var(--color-text-secondary); font-size: var(--font-size-lg); }.faq-list details[open] summary>span { transform: rotate(45deg); }.faq-list p { margin: 0; padding-bottom: var(--spacing-lg); color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: var(--line-height-body); }
 .landing-footer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xl); padding-block: var(--spacing-xl); }.landing-footer .landing-brand { font-size: var(--font-size-base); }.landing-footer>span { font-size: var(--font-size-sm); color: var(--color-text-secondary); }.landing-footer nav { display: flex; flex-wrap: wrap; gap: var(--spacing-xl); margin-left: auto; font-size: var(--font-size-sm); }.landing-footer .landing-legal { flex-basis: 100%; margin-left: 0; gap: var(--spacing-lg); font-size: var(--font-size-sm); }
 @media (max-width: 850px) {
-  .landing-container { width: calc(100% - var(--spacing-xl) * 2); }.header-inner { gap: var(--spacing-lg); }.landing-nav { gap: var(--spacing-lg); }.landing-account { gap: var(--spacing-md); }.context-section,.create-section,.faq-section { gap: var(--spacing-2xl); }.hero-heading { align-items: flex-start; }.hero-actions { padding-top: var(--spacing-sm); }.example-type { display: none; }
+  .landing-container { width: calc(100% - var(--spacing-xl) * 2); }.header-inner { gap: var(--spacing-lg); }.landing-nav { gap: var(--spacing-lg); }.landing-account { gap: var(--spacing-md); }.context-section,.create-section,.faq-section { gap: var(--spacing-2xl); }.example-type { display: none; }
 }
 @media (max-width: 640px) {
-  .landing-container { width: calc(100% - var(--spacing-lg) * 2); }.header-inner { padding-block: var(--spacing-lg); flex-wrap: wrap; min-height: auto; }.landing-brand { font-size: var(--font-size-lg); }.landing-account { margin-left: auto; }.landing-nav { order: 3; width: 100%; justify-content: space-between; border-top: 1px solid var(--color-border-light); padding-top: var(--spacing-md); }.hero { padding-top: var(--spacing-2xl); }.hero-heading { flex-direction: column; gap: var(--spacing-xl); }.hero h1 { font-size: clamp(29px, 7.3vw, 42px); }.hero-actions { align-items: flex-start; padding: 0; }.hero-description { font-size: var(--font-size-sm); }.experience-footer>span:last-child { display: none; }.context-section,.create-section,.faq-section { grid-template-columns: minmax(0, 1fr); gap: var(--spacing-xl); padding-block: calc(var(--spacing-xl) * 2); }.context-section { margin-top: 0; }.landing-page h2 { margin: var(--spacing-lg) 0; }.visibility-example { flex-wrap: wrap; }.visibility-example :deep(.tabs) { width: auto; }.landing-footer { gap: var(--spacing-md); }.landing-footer nav { width: 100%; margin: var(--spacing-sm) 0 0; }
+  .landing-container { width: calc(100% - var(--spacing-lg) * 2); }.header-inner { padding-block: var(--spacing-lg); flex-wrap: wrap; min-height: auto; }.landing-brand { font-size: var(--font-size-lg); }.landing-account { margin-left: auto; }.landing-nav { order: 3; width: 100%; justify-content: space-between; border-top: 1px solid var(--color-border-light); padding-top: var(--spacing-md); }.hero { padding-top: var(--spacing-2xl); }.hero h1 { font-size: clamp(29px, 7.3vw, 42px); }.hero-description { font-size: var(--font-size-sm); }.experience-footer>span:last-child { display: none; }.context-section,.create-section,.faq-section { grid-template-columns: minmax(0, 1fr); gap: var(--spacing-xl); padding-block: calc(var(--spacing-xl) * 2); }.context-section { margin-top: 0; }.landing-page h2 { margin: var(--spacing-lg) 0; }.visibility-example { flex-wrap: wrap; }.visibility-example :deep(.tabs) { width: auto; }.landing-footer { gap: var(--spacing-md); }.landing-footer nav { width: 100%; margin: var(--spacing-sm) 0 0; }
 }
 @media (prefers-reduced-motion: reduce) { .landing-page { scroll-behavior: auto; } }
 </style>
