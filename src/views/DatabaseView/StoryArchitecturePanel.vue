@@ -11,9 +11,11 @@
     <details v-if="editable && issueCount" class="story-architecture__review">
       <summary>
         <Icon icon="mdi:alert-outline" width="16" height="16" aria-hidden="true" />
-        {{ issueCount }} point{{ issueCount > 1 ? 's' : '' }} d’architecture à revoir
+        <span class="story-architecture__heading">
+          <span>{{ issueCount }} point{{ issueCount > 1 ? 's' : '' }} d’architecture à revoir</span>
+          <span class="story-architecture__hint">Ces signalements ne bloquent rien : ils suivent les règles du guide de création des frises.</span>
+        </span>
       </summary>
-      <p class="story-architecture__hint">Ces signalements ne bloquent rien : ils suivent les règles du guide de création des frises.</p>
       <ul>
         <li v-for="warning in warnings" :key="`${warning.kind}:${warning.periodId ?? ''}:${warning.storyId ?? ''}`">{{ warning.message }}</li>
         <li v-for="candidate in promotions" :key="`promote:${candidate.periodId}`" class="story-architecture__promotion">
@@ -46,17 +48,21 @@ const periodLabel = (id: string) => {
 </script>
 
 <style scoped>
-.story-architecture { display: flex; flex-direction: column; gap: var(--spacing-sm); margin-top: var(--spacing-sm); font-size: var(--font-size-sm); }
+.story-architecture { display: flex; flex-direction: column; gap: var(--spacing-sm); margin-top: var(--spacing-sm); font: var(--type-compact); }
 .story-architecture__role { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--spacing-xs) var(--spacing-sm); margin: 0; }
 .story-architecture__badge { padding: 0 var(--spacing-sm); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); font-weight: var(--font-weight-semibold); }
 .story-architecture__badge--visibility { color: var(--color-text-secondary); font-weight: normal; }
 .story-architecture__visibility :deep(.base-button) { min-height:0; height:auto; padding:0; border-color:var(--color-border-default); border-radius:var(--radius-md); }
 .story-architecture__description, .story-architecture__hint { color: var(--color-text-secondary); }
 .story-architecture__review { border: 1px solid var(--color-border-default); border-radius: var(--radius-md); padding: var(--spacing-sm) var(--spacing-md); max-width: 960px; }
-.story-architecture__review summary { display: flex; align-items: center; gap: var(--spacing-xs); cursor: pointer; font-weight: var(--font-weight-semibold); }
+.story-architecture__review summary { display: grid; grid-template-columns: 16px minmax(0, 1fr); align-items: start; column-gap: var(--spacing-sm); cursor: pointer; font-weight: var(--font-weight-semibold); }
+.story-architecture__review summary > svg { margin-top: 2px; }
+.story-architecture__heading { display: flex; flex-direction: column; gap: 0; }
+.story-architecture__heading > span { margin: 0; padding: 0; font: var(--type-meta); }
+.story-architecture__heading > span:first-child { font-weight: var(--font-weight-semibold); }
 .story-architecture__review summary:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
-.story-architecture__hint { margin: var(--spacing-sm) 0 0; }
-.story-architecture__review ul { margin: var(--spacing-sm) 0 0; padding-left: var(--spacing-lg); display: flex; flex-direction: column; gap: var(--spacing-xs); line-height: var(--line-height-body); }
+.story-architecture__hint { margin: 0; font-weight: var(--font-weight-normal); }
+.story-architecture__review ul { margin: var(--spacing-sm) 0 0; padding-left: calc(16px + var(--spacing-sm)); list-style: none; display: flex; flex-direction: column; gap: var(--spacing-sm); line-height: var(--line-height-body); }
 .story-architecture__promotion { overflow-wrap: anywhere; }
-.story-architecture__promotion .base-button { margin-left: var(--spacing-sm); }
+.story-architecture__promotion { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs) var(--spacing-sm); }
 </style>

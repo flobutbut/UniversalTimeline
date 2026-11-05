@@ -94,6 +94,20 @@ it('toggles the representation of this location without editing a catalogue peri
   expect(view.emitted('display-child-story')?.at(-1)).toEqual(['2',{type:'period',id:'source-root'},false]);
 });
 
+it('previews a column frise on title click and opens its destination only from the actions menu',async()=>{
+  const router=await setup();
+  expect(row().get('.anchored-story-row__link').element.tagName).toBe('BUTTON');
+  await row().get('.anchored-story-row__link').trigger('click');await flushPromises();
+  expect(view.findComponent(StoryReadOnlyColumns).exists()).toBe(true);
+  expect(row().classes()).toContain('anchored-story-row--selected');
+  expect(router.currentRoute.value.query.story).toBe('1');
+  await row().get('[aria-haspopup="menu"]').trigger('click');await flushPromises();
+  const destination=document.body.querySelector<HTMLAnchorElement>('[role="menuitem"][href="/database?story=2"]');
+  expect(destination?.textContent).toContain('Voir la frise');
+  destination!.click();await flushPromises();
+  expect(router.currentRoute.value.query.story).toBe('2');
+});
+
 it('explores dimmed sub-periods in adjacent columns without navigation, drag or editing controls',async()=>{
   const router=await setup();const before=JSON.stringify(view.props('story'));
   await row().get('[aria-label="Explorer Frise associée en lecture seule"]').trigger('click');await flushPromises();

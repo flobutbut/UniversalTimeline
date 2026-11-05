@@ -133,7 +133,7 @@ it('moves just the dragged occurrence of an associated frise, preserving its oth
   await start(data); await select('root'); await select('child');
   expect(childRow('linked', 0).exists()).toBe(true);
   expect(childRow('linked', 1).attributes('draggable')).toBe('true');
-  await childRow('linked', 1).get('router-link-stub').trigger('dragstart');
+  await childRow('linked', 1).get('.anchored-story-row__link').trigger('dragstart');
   await column(0).trigger('drop');
   expect(view.emitted('move-child-story')).toEqual([['linked', { type: 'period', id: 'root' }, null]]);
   expect(moves()).toBeUndefined();
