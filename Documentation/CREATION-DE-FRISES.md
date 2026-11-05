@@ -96,7 +96,7 @@ Dans **Relations → Parcours chronologique**, choisir la frise de référence e
 
 ### Contrainte actuelle de publication
 
-Le formulaire et l’API conservent un garde-fou historique : une frise privée sans `parent_story_id` ne peut pas devenir publique. Les points d’entrée ne renseignent pas ce champ à eux seuls. Pour publier, utiliser le rattachement proposé par **Choisir la frise parente**, éventuellement à sa racine ; aucune période chapeau dans la cible n’est nécessaire. Une frise déjà publique sans parent garde sa visibilité.
+Depuis le 5 novembre 2026, le formulaire et l’API autorisent la création manuelle et la publication d’une frise sans `parent_story_id`. La modale et la fiche signalent l’absence de point d’entrée et orientent vers **Propriétés** pour en ajouter un. Le rattachement proposé par **Choisir la frise parente** reste facultatif ; aucune période chapeau dans la cible n’est nécessaire. La génération Wikidata crée encore un brouillon privé.
 
 Cette contrainte ne signifie pas que la navigation exige un parent unique. Ne pas confondre le parent historique, les sources d’accès et le chemin visité.
 

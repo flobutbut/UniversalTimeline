@@ -2,6 +2,10 @@
 
 # Changelog — documentation agent
 
+## 2026-11-05 — Création manuelle et frises associées
+
+Création publique et publication possibles sans frise parente ; avertissement en l’absence de point d’entrée et ouverture directe de la fiche après création. Q-ID facultatif pour les périodes et événements manuels, états vides guidés et reprise de l’association sans recréer une fiche déjà enregistrée. Catégorie « Personnelle » (`CAT_PERSONAL`) ajoutée au projet actif par le lot idempotent `database/data/20261105_personal_category.sql`, puis vérifiée en lecture. Dans l’exploration, le sélecteur des frises associées affiche un chevron et un fond bleu renforcé, selon les tokens clair/sombre. Validation : vérification complète du projet, 8 tests PostgreSQL sur base locale jetable et aperçu navigateur sur les frises liées à la Terre.
+
 ## [2026-11-03] — Automatismes d’architecture des frises
 
 Application de la section 2 de `Documentation/CREATION-DE-FRISES.md`. « Créer une frise depuis une période » déplace les sous-périodes et les liens qui les visent (sous-frises ancrées, points d’entrée, présentations), en une transaction, refus si un lien touche une frise d’un autre compte ; les événements restent copiés. Création avec frise parente et ancre (`POST /stories` : `parentStoryId`, `anchor`), ancre proposée d’après les dates ; choix de la parente dans l’aperçu. Une frise sans parente ne peut pas devenir publique (création, PUT, génération Wikidata). Avertissements non bloquants, « Promouvoir en sous-frise » et rôle déduit dans l’en-tête du détail (`StoryArchitecturePanel`, `src/lib/storyArchitecture.ts`). `storedYearsBeforePresent` arrondit les années stockées à 15 chiffres significatifs (le guide disait 3 décimales, ce qui effacerait les secondes) ; la miniature lit les dates. Nouvelle suite `storyStructure.postgres.mjs`. Aucune migration, aucune donnée de production modifiée.
