@@ -29,7 +29,7 @@ beforeEach(() => {
   ]);
   vi.spyOn(StoryApiService.getInstance(), 'getStory').mockImplementation(async id => storyFixture(id,
     id === '1' ? source : [apiPeriod('other-root', null, 300), apiPeriod('other-leaf', 'other-root', 0, false)]
-  , [event(750), event(250), event(50)]));
+  , id === '1' ? [event(750), event(250), event(50)] : [event(250), event(50)]));
   nav = scope.run(useHomeNavigation)!;
 });
 afterEach(() => { scope.stop(); vi.restoreAllMocks(); });

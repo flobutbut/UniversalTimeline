@@ -249,7 +249,16 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
       currentPeriod.value = restored?.current ?? null;
       if (!restored && !overview && expandSingleRoot && !referencePeriodId.value) {
         const roots = childrenOf(null);
-        if (roots.length === 1 && roots[0].hasChildren) currentPeriod.value = roots[0];
+        if (roots.length === 1 && roots[0].hasChildren) {
+          const root = roots[0];
+          const start = comparableYearsBeforePresent(root.startDate, root.startYearsBP, now);
+          const end = comparableYearsBeforePresent(root.endDate, root.endYearsBP, now);
+          // Auto-focus only when the root covers the whole story, including events.
+          // Otherwise a later root (e.g. the Milky Way) hides its earlier events (the Big Bang).
+          if (start !== null && end !== null && bounds.every(value => value <= start && value >= end)) {
+            currentPeriod.value = root;
+          }
+        }
       }
       displayedPeriods.value = childrenOf(currentPeriod.value?.id ?? null);
       storyEvents.value = eventsForPeriod(currentPeriod.value);
