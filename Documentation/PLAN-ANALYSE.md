@@ -13,7 +13,7 @@
 
 ## 2. Contraintes à garder en tête
 
-- **Échantillon consenti.** Seuls les visiteurs qui acceptent la mesure sont comptés. Les chiffres PostHog sont des tendances et des taux, pas des totaux. Les totaux viennent de la base (section 7).
+- **Échantillon consenti.** Seuls les visiteurs qui acceptent la mesure sont comptés. Les chiffres PostHog sont des tendances et des taux, pas des totaux. Les totaux viennent de la base (section 7) et, pour la fréquentation, de Vercel Web Analytics (sans cookie, toutes les visites) : visiteurs PostHog ÷ visiteurs Vercel sur une même page et une même période donne une estimation du taux d’acceptation.
 - **Pas d’identification des comptes aujourd’hui.** Sans `identify`, un même utilisateur sur deux appareils compte pour deux, et on ne peut pas classer une *personne* comme « contributeur » sur la durée. Décision D1 (section 9).
 - **Pas d’enregistrement de sessions.** Le « pourquoi » s’appuie d’abord sur les erreurs, les clics sans effet et les sondages. L’enregistrement ciblé est une option (D3).
 - **Aucune donnée personnelle dans les événements** : ni e-mail, ni nom d’utilisateur, ni texte saisi, ni titre de frise privée. Les recherches sont mesurées par leur nombre de résultats, pas par leur texte.

@@ -16,6 +16,7 @@ Ce document décrit ce qui est en place dans l’application et ce qui reste à 
 | Sécurité (art. 32) | RLS : chaque compte ne lit et ne modifie que sa ligne de profil ; routines du compte hors du schéma exposé par la Data API ; HTTPS. |
 | Cookies (art. 82 loi Informatique et Libertés) | `useConsentStore` + bandeau `CookieConsent`. Le bandeau n’apparaît que si `VITE_ANALYTICS_PROVIDER` est défini : refus aussi simple que l’acceptation, choix conservé six mois puis redemandé, retrait possible à tout moment (politique cookies, profil). |
 | Mesure d’audience | PostHog Cloud EU (`src/lib/analytics.ts`), voir ci-dessous. |
+| Comptage des visites | Vercel Web Analytics sans cookie (`src/lib/visitCounting.ts`), hors consentement, voir ci-dessous. |
 
 ## Mesure d’audience : PostHog
 
@@ -27,6 +28,14 @@ Ce document décrit ce qui est en place dans l’application et ce qui reste à 
 - **Changer d’outil ou de finalité :** mettre à jour la politique cookies et la politique de confidentialité (`src/lib/legalDocuments.ts`), puis incrémenter `CONSENT_VERSION` pour redemander le choix (passé à 2 à l’installation de PostHog).
 - Un outil exempté de consentement selon la CNIL (mesure strictement anonyme) devrait être documenté ici avant de se passer du bandeau.
 
+## Comptage des visites : Vercel Web Analytics
+
+- **Pourquoi :** PostHog ne voit que les visiteurs qui acceptent la mesure. Vercel compte toutes les visites, ce qui donne la fréquentation réelle et, par comparaison, le taux d’acceptation.
+- **Activation :** Web Analytics activé dans le projet Vercel (5 novembre 2026). `installVisitCounting` (appelé dans `main.ts`) injecte `@vercel/analytics` en build de production seulement ; le script et la collecte passent par `/_vercel/insights` sur le domaine du site. Rien en développement ni dans les tests.
+- **Données :** chemin de la page sans paramètres ni ancre (`createPathOnlyFilter` retire identifiants de frise et secrets d’authentification ; une même page n’est comptée qu’une fois de suite, la navigation de l’Exploration ne changeant que les paramètres), site d’origine, pays, navigateur, système, type d’appareil. Pas de cookie ni de stockage local ; visiteur reconnu par une empreinte de requête calculée par Vercel et valable 24 heures.
+- **Base légale :** intérêt légitime (statistiques de fréquentation), sans consentement car rien n’est lu ni écrit sur l’appareil (article 82 de la loi Informatique et Libertés non applicable). Information dans la politique de confidentialité et la politique cookies ; opposition par écrit ou en bloquant le script. Aucun événement personnalisé n’est envoyé à Vercel : les parcours restent dans PostHog, sous consentement.
+- **Conservation :** empreinte 24 heures ; durée des statistiques agrégées selon l’offre Vercel, à confirmer (marqueur « [À compléter] » dans la politique de confidentialité).
+
 ## Registre des traitements
 
 | Traitement | Finalité | Base légale | Données | Durée | Sous-traitants |
@@ -36,6 +45,7 @@ Ce document décrit ce qui est en place dans l’application et ce qui reste à 
 | Contact | Répondre aux messages | Intérêt légitime | Adresse e-mail et contenu du message | 1 an après le dernier échange | Hostinger (messagerie, société chypriote) |
 | Frises | Créer, publier, partager | Contrat | Contenus, visibilité, auteur | Jusqu’à suppression de la frise ou du compte | Supabase (UE), Vercel |
 | Journaux techniques | Sécurité | Intérêt légitime | IP, horodatage, requête | 7 jours au plus, fixés par les hébergeurs (Supabase Pro : 7 jours ; Vercel : 1 heure en Hobby, 1 jour en Pro), sans export | Vercel, Supabase |
+| Comptage des visites | Fréquentation réelle du site | Intérêt légitime | Page sans paramètres, site d’origine, pays, navigateur, système, appareil, empreinte de visite 24 h (aucun stockage sur l’appareil) | Empreinte 24 h ; statistiques agrégées [À compléter] | Vercel Inc. |
 | Mesure d’audience | Statistiques d’usage pour améliorer le site | Consentement | Pages vues, clics sans texte, frises publiques et éléments consultés, recherches (terme seulement sans frise trouvée, filtré), provenance, navigateur et appareil, identifiant pseudonyme (IP anonymisée) | Cookie 12 mois au plus ; données 1 an | PostHog Inc. (Cloud EU) |
 
 ## Décisions de l’éditeur (3 novembre 2026)
