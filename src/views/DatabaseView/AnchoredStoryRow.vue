@@ -1,11 +1,12 @@
 <template>
-  <div class="anchored-story-row" :draggable="!!draggable && !disabled">
-    <RouterLink :to="{ name: 'database', query: { story: story.id } }" :draggable="false" class="anchored-story-row__link">
+  <div class="anchored-story-row" :class="{ 'anchored-story-row--selected': explored }" :draggable="!!draggable && !disabled">
+    <component :is="columnActions ? (explorable ? 'button' : 'div') : RouterLink" :to="columnActions ? undefined : { name: 'database', query: { story: story.id } }" :draggable="false" :type="explorable ? 'button' : undefined" :disabled="explorable ? disabled : undefined" :aria-expanded="explorable ? explored : undefined" class="anchored-story-row__link" @click="explorable && $emit('explore')">
       <span class="anchored-story-row__title">{{ story.title.fr }}</span>
       <span v-if="summary" class="anchored-story-row__meta">{{ formatStoryListDateRangeSublabel(summary) }}<span v-if="summary.previewPeriods"> · {{ summary.previewPeriods.length }} périodes</span><span v-if="summary.previewEvents"> · {{ summary.previewEvents.length }} événements</span></span>
-    </RouterLink>
+    </component>
     <StoryItemActionsMenu v-if="columnActions" :label="story.title.fr || story.title.en" :view-to="{ name: 'database', query: { story: story.id } }"
-      movable :disabled="disabled" :read-only="readOnly" :display-as-period="displayAsPeriod" @move="$emit('move')" @display="$emit('display')" @remove="$emit('remove')" />
+      :movable="columnActions" :disabled="disabled" :read-only="readOnly" :display-as-period="displayAsPeriod" @move="$emit('move')" @display="$emit('display')" @remove="$emit('remove')" />
+
     <button v-else-if="!readOnly" type="button" class="anchored-story-row__remove" :disabled="disabled" :aria-label="`Détacher ${story.title.fr}`" @click="$emit('remove')"><DesignIcon name="close" /></button>
     <button v-if="explorable" type="button" class="anchored-story-row__explore" :aria-label="`Explorer ${story.title.fr || story.title.en} en lecture seule`"
       :aria-expanded="explored" :disabled="disabled" @click.stop="$emit('explore')"><ChevronIcon :width="16" :height="16" /></button>
@@ -23,8 +24,10 @@ defineProps<{ story: ChildStorySummary; summary?: StorySummary; disabled?: boole
 defineEmits<{ remove: []; move: []; display: []; explore: [] }>();
 </script>
 <style scoped>
-.anchored-story-row { display: flex; align-items: center; min-height: 56px; padding: var(--spacing-md); background: var(--color-interaction-selected); color: var(--color-status-success-foreground); }
-.anchored-story-row__link { display: flex; flex: 1; min-width: 0; flex-direction: column; color: inherit; line-height: var(--line-height-small); }
+.anchored-story-row { display: flex; align-items: center; padding: var(--spacing-sm) var(--spacing-md); background: var(--color-surface-default); color: var(--color-status-success-foreground); border-bottom: 1px solid var(--color-border-light); }
+.anchored-story-row:hover { background: var(--color-interaction-hover); }
+.anchored-story-row--selected, .anchored-story-row--selected:hover { background: var(--color-interaction-selected); }
+.anchored-story-row__link { padding: 0; border: 0; background: none; text-align: left; font: inherit; cursor: pointer; display: flex; flex: 1; min-width: 0; flex-direction: column; color: inherit; line-height: var(--line-height-small); }
 .anchored-story-row__title { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .anchored-story-row__meta { font-size: var(--font-size-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .anchored-story-row__remove { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; opacity: 0; color: inherit; }
