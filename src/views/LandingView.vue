@@ -2,6 +2,7 @@
 import Button from '@/components/base/Button.vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import { Icon } from '@iconify/vue';
 import LandingTimeDemo from '@/components/LandingTimeDemo.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import Tabs from '@/components/base/Tabs.vue';
@@ -35,6 +36,11 @@ onMounted(() => {
 });
 onBeforeUnmount(() => sectionObserver?.disconnect());
 const accountTarget = computed(() => canUseWorkspace(auth) ? { name: 'database' } : { name: 'login', query: { mode: 'signup', redirect: '/database' } });
+const usageExamples = [
+  { id: 'course', title: 'Donner des repères à un cours', audience: 'Enseignement et transmission', type: 'PÉRIODES' },
+  { id: 'research', title: 'Situer un travail de recherche', audience: 'Études et monde académique', type: 'CONTEXTE' },
+  { id: 'project', title: 'Retracer l’histoire d’un projet', audience: 'Usages personnels et professionnels', type: 'ÉVÉNEMENTS' },
+];
 const visibility = ref<'public' | 'private'>('public');
 const visibilityTabs = [{ value: 'public' as const, label: 'Publique' }, { value: 'private' as const, label: 'Privée' }];
 const questions = [
@@ -109,9 +115,14 @@ const questions = [
       </div>
       <div class="workspace-example">
         <div class="example-header"><span>À CHAQUE SUJET, SA FRISE</span><span>Exemples d’usages</span></div>
-        <div class="example-row"><span class="example-indicator indicator-course" /><div><strong>Donner des repères à un cours</strong><p>Enseignement et transmission</p></div><span class="example-type">PÉRIODES</span></div>
-        <div class="example-row"><span class="example-indicator indicator-research" /><div><strong>Situer un travail de recherche</strong><p>Études et monde académique</p></div><span class="example-type">CONTEXTE</span></div>
-        <div class="example-row"><span class="example-indicator indicator-project" /><div><strong>Retracer l’histoire d’un projet</strong><p>Usages personnels et professionnels</p></div><span class="example-type">ÉVÉNEMENTS</span></div>
+        <!-- Visitors clicked these rows expecting them to open something: each one leads to creating a frise. -->
+        <RouterLink v-for="example in usageExamples" :key="example.id" :to="accountTarget" class="example-row" :data-attr="`landing-cta-example_${example.id}`">
+          <span class="example-indicator" :class="`indicator-${example.id}`" />
+          <div><strong>{{ example.title }}</strong><p>{{ example.audience }}</p></div>
+          <span class="example-type">{{ example.type }}</span>
+          <Icon icon="mdi:arrow-right" class="example-arrow" aria-hidden="true" />
+          <span class="sr-only">{{ canUseWorkspace(auth) ? ' : créer cette frise dans mon espace' : ' : créer un compte pour composer cette frise' }}</span>
+        </RouterLink>
         <div class="visibility-example">
           <span>Votre frise, votre choix <small>Exemple de visibilité</small></span>
           <Tabs v-model="visibility" :tabs="visibilityTabs" aria-label="Exemple du choix de visibilité d’une frise" />
@@ -181,8 +192,15 @@ const questions = [
 .workspace-example { align-self: center; border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); overflow: hidden; background: var(--color-surface-default); }
 .example-header { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); padding: var(--spacing-md) var(--spacing-lg); border-bottom: 1px solid var(--color-border-default); font-size: var(--font-size-xs); color: var(--color-text-secondary); }
 .example-header>span:first-child { letter-spacing: .06em; }
-.example-row { display: flex; gap: var(--spacing-md); align-items: center; padding: var(--spacing-lg); border-bottom: 1px solid var(--color-border-light); }
-.example-row strong { font-size: var(--font-size-base); font-weight: var(--font-weight-medium); }.example-row p { margin: var(--spacing-xs) 0 0; font-size: var(--font-size-sm); color: var(--color-text-secondary); }.example-indicator { width: 3px; height: 34px; flex-shrink: 0; border-radius: var(--radius-sm); }.indicator-course { background: var(--color-data-period); }.indicator-research { background: var(--color-data-frise); }.indicator-project { background: var(--color-data-event); }.example-type { margin-left: auto; font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.example-row { display: flex; gap: var(--spacing-md); align-items: center; padding: var(--spacing-lg); border-bottom: 1px solid var(--color-border-light); color: inherit; text-decoration: none; transition: background-color var(--transition-fast); }
+.example-row:hover, .example-row:focus-visible { background: var(--color-surface-subtle); }
+.example-row:focus-visible { outline-offset: -2px; }
+.example-row:hover strong, .example-row:focus-visible strong { text-decoration: underline; text-underline-offset: 3px; }
+.example-row > div { flex: 1; min-width: 0; }
+.example-arrow { flex-shrink: 0; color: var(--color-text-secondary); }
+.example-row:hover .example-arrow, .example-row:focus-visible .example-arrow { color: var(--color-text-link); }
+@media (prefers-reduced-motion: reduce) { .example-row { transition: none; } }
+.example-row strong { font-size: var(--font-size-base); font-weight: var(--font-weight-medium); }.example-row p { margin: var(--spacing-xs) 0 0; font-size: var(--font-size-sm); color: var(--color-text-secondary); }.example-indicator { width: 3px; height: 34px; flex-shrink: 0; border-radius: var(--radius-sm); }.indicator-course { background: var(--color-data-period); }.indicator-research { background: var(--color-data-frise); }.indicator-project { background: var(--color-data-event); }.example-type { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
 .visibility-example { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-sm); font-size: var(--font-size-sm); }.visibility-example small { display: block; margin-top: var(--spacing-xs); color: var(--color-text-secondary); font-size: var(--font-size-xs); }.visibility-description { font-size: var(--font-size-sm); color: var(--color-text-secondary); padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-lg); margin: 0; }
 .faq-list { border-top: 1px solid var(--color-border-default); }.faq-list details { border-bottom: 1px solid var(--color-border-default); }.faq-list summary { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-lg); cursor: pointer; padding: var(--spacing-lg) 0; font-size: var(--font-size-base); list-style: none; }.faq-list summary::-webkit-details-marker { display: none; }.faq-list summary>span { color: var(--color-text-secondary); font-size: var(--font-size-lg); }.faq-list details[open] summary>span { transform: rotate(45deg); }.faq-list p { margin: 0; padding-bottom: var(--spacing-lg); color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: var(--line-height-body); }
 .landing-footer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xl); padding-block: var(--spacing-xl); }.landing-footer .landing-brand { font-size: var(--font-size-base); }.landing-footer>span { font-size: var(--font-size-sm); color: var(--color-text-secondary); }.landing-footer nav { display: flex; flex-wrap: wrap; gap: var(--spacing-xl); margin-left: auto; font-size: var(--font-size-sm); }.landing-footer .landing-legal { flex-basis: 100%; margin-left: 0; gap: var(--spacing-lg); font-size: var(--font-size-sm); }
