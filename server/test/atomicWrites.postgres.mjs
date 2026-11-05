@@ -261,7 +261,10 @@ test('stores timestamp text unchanged and retains its seconds and timezone in th
   assert.equal(res.statusCode,201); assert.equal(res.payload.date,date);
   const bp=Number(res.payload.date_years_bp), year=365.25*86400000;
   const instant=Date.parse('1944-06-06T14:32:45Z');
-  assert.ok(bp>=(before-instant)/year && bp<=(after-instant)/year);
+  // Stored coordinates use 15 significant digits; allow their rounding at either bound.
+  // 1e-12 years is about 32 microseconds, well below the timestamp's second precision.
+  const tolerance=1e-12;
+  assert.ok(bp>=(before-instant)/year-tolerance && bp<=(after-instant)/year+tolerance);
 });
 test('retains an unrecognized historical expression without manufacturing a present-day coordinate', async () => {
   const date='8. millennium BCE';const res=await call('post','/events',{id:'historical',label:{fr:'Historique'},date});
