@@ -232,7 +232,7 @@ const handleClick = () => {
 
 .period-card__actions { gap: var(--spacing-sm); }
 /* Juste après le nom : le titre se tronque avant le lien. */
-.period-card__wikipedia.wikipedia-link { flex-shrink: 0; align-self: baseline; }
+.period-card__wikipedia.wikipedia-link { flex-shrink: 0; align-self: center; }
 /* Révélé au survol ou au focus de la période ; toujours visible sur écran tactile, sans survol. */
 .period-card__wikipedia.wikipedia-link { visibility: hidden; }
 .period-card:hover .period-card__wikipedia.wikipedia-link,

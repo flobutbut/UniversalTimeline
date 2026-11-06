@@ -27,7 +27,7 @@
       <div v-if="otherStoryCount" class="event-meta event-story-count">{{ otherStoryCount }} {{ otherStoryCount > 1 ? 'autres frises associées' : 'autre frise associée' }}</div>
       <!-- Au survol, une courte description ; le texte complet à la sélection. -->
       <p v-if="displayDescription" class="event-description" :class="{ 'event-description--clamped': !isSelected }">{{ displayDescription }}</p>
-      <WikipediaLink :titles="event.wikipedia" :subject="displayLabel" class="event-wikipedia" />
+      <WikipediaLink :titles="event.wikipedia" :subject="displayLabel" display="text" class="event-wikipedia" />
       <div v-if="suggestionsLoading" class="event-meta" role="status">Chargement des frises…</div>
       <div v-else-if="suggestionsError" class="event-meta event-meta--error" role="alert">
         {{ suggestionsError }} <Button variant="tertiary" size="sm" type="button" @click.stop="$emit('retry-suggestions')">Réessayer</Button>
