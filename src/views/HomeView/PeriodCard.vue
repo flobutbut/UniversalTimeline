@@ -28,6 +28,7 @@
             <button type="button" class="period-card__title-action" :disabled="loading" :aria-label="variant === 'parent' ? `Revenir depuis ${period.label.fr}` : period.label.fr"
               :aria-describedby="typeof $attrs['aria-describedby'] === 'string' ? $attrs['aria-describedby'] : undefined" @click.stop="handleClick">{{ period.label.fr }}</button>
           </h3>
+          <WikipediaLink :titles="period.wikipedia" :subject="period.label.fr || period.label.en" compact class="period-card__wikipedia" :class="{ 'period-card__wikipedia--hidden': !linkFits }" />
         </div>
         <div class="period-footer" v-if="period.startDate || period.endDate">
           <div class="period-info">{{ periodDateRange }}</div>
@@ -35,7 +36,6 @@
       </div>
       <!-- Actions mesurables même masquées : l'agrandissement réserve leur largeur complète. -->
       <div ref="actionsRef" class="period-card__actions" :class="{ 'period-card__actions--hidden': !actionsFit }">
-        <WikipediaLink :titles="period.wikipedia" :subject="period.label.fr || period.label.en" compact class="period-card__wikipedia" />
         <span v-if="variant === 'parent'" class="period-card__return" aria-hidden="true">Retour</span>
         <slot name="title-actions" />
       </div>
@@ -57,7 +57,7 @@ import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
 import WikipediaLink from '@/components/WikipediaLink.vue';
 import { formatPeriodDateRange } from '@/lib/formatTemporalBoundLabel';
-import { measureTextWidth } from '@/lib/measureTextWidth';
+import { measureTextWidth, periodTextWidths } from '@/lib/measureTextWidth';
 import type { ListPeriod } from '@/types/database';
 
 const props = withDefaults(
@@ -89,20 +89,32 @@ const mainRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
 const actionsRef = ref<HTMLElement | null>(null);
 const actionsFit = ref(true);
+/** Le nom passe avant le lien : sans place pour les deux, le lien attend l'agrandissement de la barre. */
+const linkFits = ref(true);
 let observer: ResizeObserver | undefined;
 
 /** La mesure du texte ne dépend pas du badge : pas d'oscillation entre affiché et masqué. */
 function measureActions() {
   const main = mainRef.value, content = contentRef.value, actions = actionsRef.value;
   if (!main || !content || !actions) return;
+  measureLink(content);
   const actionsWidth = actions.offsetWidth;
   if (actionsWidth === 0 || props.wrapContent) { actionsFit.value = true; return; }
   const gap = parseFloat(getComputedStyle(main).columnGap) || 0;
-  const widths = Array.from(content.querySelectorAll<HTMLElement>('.period-card__title-action, .period-info'), measureTextWidth);
+  const widths = periodTextWidths(content, false);
   const needed = Math.max(0, ...widths);
   // Espace partagé par le texte et les actions : celui du texte, plus celui des actions quand elles sont dans le flux.
   const shared = content.clientWidth + (actionsFit.value ? actionsWidth + gap : 0);
   actionsFit.value = Math.ceil(needed) + gap + actionsWidth <= shared;
+}
+
+function measureLink(content: HTMLElement) {
+  const title = content.querySelector<HTMLElement>('.period-card__title-action');
+  const link = content.querySelector<HTMLElement>('.period-card__wikipedia');
+  const header = content.querySelector<HTMLElement>('.period-header');
+  if (!title || !link || !header || props.wrapContent) { linkFits.value = true; return; }
+  const gap = parseFloat(getComputedStyle(header).columnGap) || 0;
+  linkFits.value = Math.ceil(measureTextWidth(title) + gap + link.offsetWidth) <= content.clientWidth;
 }
 
 onMounted(() => {
@@ -219,7 +231,16 @@ const handleClick = () => {
 }
 
 .period-card__actions { gap: var(--spacing-sm); }
-.period-card__wikipedia.wikipedia-link { align-self: center; }
+/* Juste après le nom : le titre se tronque avant le lien. */
+.period-card__wikipedia.wikipedia-link { flex-shrink: 0; align-self: baseline; }
+/* Révélé au survol ou au focus de la période ; toujours visible sur écran tactile, sans survol. */
+.period-card__wikipedia.wikipedia-link { visibility: hidden; }
+.period-card:hover .period-card__wikipedia.wikipedia-link,
+.period-card:focus-within .period-card__wikipedia.wikipedia-link { visibility: visible; }
+@media (hover: none) { .period-card__wikipedia.wikipedia-link { visibility: visible; } }
+/* Hors du flux mais mesurable ; invisible aussi au clavier jusqu'à l'agrandissement. */
+.period-card .period-card__wikipedia.period-card__wikipedia--hidden.wikipedia-link { position: absolute; visibility: hidden; pointer-events: none; }
+.period-card--wrap .period-card__wikipedia.wikipedia-link { white-space: normal; }
 .period-card.selected .period-card__wikipedia.wikipedia-link { color: var(--color-text-on-selected); }
 
 /* Hors du flux mais mesurable ; invisible aussi au clavier et aux lecteurs d’écran. */
@@ -265,7 +286,7 @@ const handleClick = () => {
   display: flex;
   flex-direction: row;
   align-items: baseline;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-md);
   min-width: 0;
   flex-shrink: 0;
 }

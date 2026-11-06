@@ -1,5 +1,5 @@
 import { computed, onScopeDispose, ref, watch, type Ref } from 'vue';
-import { measureTextWidth } from '@/lib/measureTextWidth';
+import { periodTextWidths } from '@/lib/measureTextWidth';
 
 /** Mesure le texte avant l'agrandissement et réserve aussi la place des actions. */
 export function useTimelinePeriodExpansion(
@@ -50,7 +50,7 @@ export function useTimelinePeriodExpansion(
     }, 0);
     // Mesurer le texte lui-même : le h3 peut être étroit sans déborder, car son
     // bouton/span enfant masque déjà le texte. Cela vaut aussi sans badge ni flèche.
-    const widths = Array.from(card.querySelectorAll<HTMLElement>('.period-card__title-action, .period-info'), measureTextWidth);
+    const widths = periodTextWidths(card);
     textPixels = Math.max(0, ...widths);
     measureFrame();
   }, { flush: 'sync' });

@@ -442,9 +442,10 @@ watch(eventsSurfaceRef, element => {
 onScopeDispose(() => eventsObserver?.disconnect());
 
 /** Bords de la vue et des périodes affichées, en % : un événement qui y tombe structure la frise. */
-const boundariesPct = computed(() => [0, 100, ...[...rawLayouts.value.values()].flatMap(({ left, width }) => [left, left + width])]);
+const boundariesPct = computed(() => [0, 100, ...[...rawLayouts.value.values()].flatMap(({ left, width }) => [projectPosition(left), projectPosition(left + width)])]);
 const eventSlots = computed(() => props.events.filter(event => listEventYearsBP(event) !== null).map(event => {
-  const leftPct = getEventRawLeft(event);
+  // Même projection que les points et les périodes : une période agrandie au survol comprime aussi les étiquettes voisines.
+  const leftPct = projectPosition(getEventRawLeft(event));
   // Liens inconnus pendant le chargement ou après une erreur : seuls les signaux de dates comptent.
   const links = associationsLoading.value || associationsError.value ? [] : associatedByEvent.value.get(event.id) ?? [];
   const hasDescription = !!(event.description?.fr || event.description?.en || '').trim();
@@ -473,7 +474,7 @@ const defaultOpenEventIds = computed(() => withoutCoveredTooltips(
 ));
 
 const getEventAlign = (event: ListEvent): 'start' | 'center' | 'end' =>
-  timelineEventCardAlign(getEventRawLeft(event));
+  timelineEventCardAlign(projectPosition(getEventRawLeft(event)));
 
 const getEventStyles = (event: ListEvent): { width: string; left: string } => {
   const base = getEventLayoutStyle(event.date);

@@ -7,14 +7,13 @@
     :hreflang="article.language"
     target="_blank"
     rel="noopener noreferrer"
-    :title="compact ? accessibleName : undefined"
+    title="Voir sur Wikipédia"
     @click.stop
     @keydown.enter.stop
     @keydown.space.stop
   >
     <Icon icon="mdi:wikipedia" class="wikipedia-link__icon" aria-hidden="true" />
-    <span>{{ label }}</span><span class="sr-only"> : {{ subject }}{{ article.language === 'en' ? ', article en anglais' : '' }} (nouvel onglet)</span>
-    <Icon icon="mdi:open-in-new" class="wikipedia-link__external" aria-hidden="true" />
+    <span class="sr-only">{{ label }} : {{ subject }}{{ article.language === 'en' ? ', article en anglais' : '' }} (nouvel onglet)</span>
   </a>
 </template>
 
@@ -35,7 +34,6 @@ const props = withDefaults(defineProps<{
 
 const article = computed(() => preferredWikipediaArticle(props.titles));
 const label = computed(() => article.value?.language === 'en' ? 'Voir sur Wikipédia (en)' : 'Voir sur Wikipédia');
-const accessibleName = computed(() => `${label.value} : ${props.subject} (nouvel onglet)`);
 </script>
 
 <style scoped>
@@ -52,7 +50,6 @@ const accessibleName = computed(() => `${label.value} : ${props.subject} (nouvel
 }
 .wikipedia-link:hover { text-decoration: underline; }
 .wikipedia-link:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
-.wikipedia-link__icon { flex-shrink: 0; font-size: 1.1em; }
-.wikipedia-link__external { flex-shrink: 0; font-size: 0.9em; }
+.wikipedia-link__icon { display: block; font-size: 1.25em; }
 .wikipedia-link--compact { font-size: var(--font-size-sm); }
 </style>
