@@ -239,11 +239,15 @@ it('keeps root redirects first, then visible period anchors, excluding event-onl
     { id: '3', title: { fr: 'Événement', en: '' }, anchors: [{ type: 'event', id: 'e750' }] },
     { id: '4', title: { fr: 'Racine', en: '' }, anchors: [], atRoot: true },
     { id: '5', title: { fr: 'Période masquée', en: '' }, anchors: [{ type: 'period', id: 'leaf' }] },
+    { id: '6', title: { fr: 'Racine affichée comme période', en: '' }, anchors: [], atRoot: true, rootDisplayAsPeriod: true },
+    { id: '7', title: { fr: 'Frise affichée comme période', en: '' }, anchors: [{ type: 'period', id: 'root', displayAsPeriod: true }] },
   ];
   vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(story);
   await nav.loadInitialData(undefined, true);
   expect(nav.headerStories.value.map(link => ({ id: link.id, anchor: link.anchor }))).toEqual([
     { id: '4', anchor: undefined },
+    { id: '6', anchor: undefined },
     { id: '2', anchor: { type: 'period', id: 'root' } },
+    { id: '7', anchor: { type: 'period', id: 'root' } },
   ]);
 });

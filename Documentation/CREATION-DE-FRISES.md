@@ -144,7 +144,7 @@ Dans cet aperçu, périodes et sous-frises sont classées chronologiquement. Les
 
 Le récit cible garde ses dates, même s’il commence avant ou après sa source. Périodes et événements sont placés sur la même échelle. **Il n’y a pas de zoom dans la frise principale.**
 
-Une vraie période d’origine peut apparaître comme repère de retour, sans devenir une appartenance du récit :
+Une période d’origine, ou la carte d’une frise déjà affichée comme période dans la source, peut apparaître comme repère de retour, sans devenir une appartenance du récit :
 
 - ses dates réelles sont conservées ;
 - seule son intersection avec la fenêtre active est dessinée, à sa position temporelle ;
@@ -152,13 +152,17 @@ Une vraie période d’origine peut apparaître comme repère de retour, sans de
 - chaque extrémité qui dépasse se prolonge jusqu’au bord de l’écran, sans arrondi, pour distinguer une coupure d’une vraie borne temporelle ;
 - entièrement hors fenêtre ou sans dates, elle n’est pas dessinée ; le retour reste dans l’en-tête.
 
-Une entrée depuis un événement ou la racine d’une frise ne fabrique aucune période à partir du nom de la source. Le retour est une commande dans l’en-tête, hors du contenu temporel. Des dates inconnues ne justifient pas un positionnement arbitraire sur l’axe.
+Pour une frise affichée comme période à la racine, en l’absence d’une référence chronologique déclarée, le repère reprend la carte existante et les bornes de la frise liée. La cible s’ouvre en vue d’ensemble ; le clic sur ce repère rétablit la position quittée. Le repère se reconstruit depuis le rattachement et l’historique de navigation, y compris après rechargement, sans période ajoutée au catalogue.
+
+Une entrée depuis un événement ou un simple lien à la racine d’une frise ne fabrique aucune période à partir du nom de la source. Le retour reste disponible dans l’en-tête. Des dates inconnues ne justifient pas un positionnement arbitraire sur l’axe.
 
 Exemple : Genre Homo commence à 2,8 Ma et le Quaternaire à 2,58 Ma. Le repère Quaternaire dans Genre Homo commence donc après le bord gauche. L’accès depuis l’événement « Apparition du genre Homo » dans Les premiers hominines conserve un retour à cette source sans afficher de faux chapeau.
 
 ### Flèches, retour et fil d’Ariane
 
 Les flèches précédente/suivante servent **uniquement à naviguer dans le temps** : au rang local dans les subdivisions, ou dans les périodes d’un contexte chronologique explicite. Les voisins sont triés par date de début, avec départage stable par identifiant. Un accès thématique ou une fiche partagée ne devient pas automatiquement un voisin.
+
+Les frises **affichées comme périodes** participent à ce même rang avec les dates de leur carte, à la racine comme sous une période. Une flèche vers cette carte ouvre la frise liée en vue d’ensemble ; les flèches de cette vue poursuivent le rang de la source, dans les deux sens. Le rattachement exact est conservé si la même frise apparaît à plusieurs endroits. Dans les subdivisions de la cible, les flèches suivent sa propre hiérarchie. Les simples liens du badge et les cartes sans date de début restent hors de ce parcours ; aucune période de catalogue n’est créée.
 
 Une période sans vue dédiée s’ouvre dans sa frise de référence. Plusieurs vues dédiées d’une période donnent lieu à un choix ; plusieurs contextes permettent de choisir un parcours. Si une même frise présente plusieurs périodes, l’entrée doit identifier la référence voulue plutôt que supposer un niveau unique.
 

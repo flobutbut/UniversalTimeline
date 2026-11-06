@@ -8,14 +8,14 @@ import { linkedStoryPeriods } from '@/lib/linkedStoryPeriods';
 import { indexStoryNavigationLinks, rootStoryNavigationLinks, storyNavigationLinks } from '@/lib/storyNavigationLinks';
 let view:ReturnType<typeof mount>;
 afterEach(()=>{view?.unmount();vi.restoreAllMocks();});
-it('replaces only the selected period badge while retaining event links and other root choices',()=>{
+it('keeps frises displayed as periods in associated choices at their period and root, alongside their cards',()=>{
   const source=storyFixture('1',[{id:'parent',label_fr:'Parent'}],[{id:'event',label_fr:'Event',date:'1700'}],[
     {id:'2',title_fr:'Liée',atRoot:true,rootDisplayAsPeriod:true,anchors:[{type:'period',id:'parent',displayAsPeriod:true},{type:'event',id:'event'}]},
   ]);
   const links=storyNavigationLinks(source);
-  expect(indexStoryNavigationLinks(links,'period').get('parent')).toBeUndefined();
+  expect(indexStoryNavigationLinks(links,'period').get('parent')?.map(s=>s.id)).toEqual(['2']);
   expect(indexStoryNavigationLinks(links,'event').get('event')?.map(s=>s.id)).toEqual(['2']);
-  expect(rootStoryNavigationLinks(source)).toEqual([]);
+  expect(rootStoryNavigationLinks(source).map(s=>s.id)).toEqual(['2']);
   const summary={...storyFixture('2'),startDate:'1500',endDate:'1900'};
   expect(linkedStoryPeriods(source,'parent',[summary])[0]).toMatchObject({linkedStoryId:'2',label:{fr:'Liée'},sourceAnchor:{type:'period',id:'parent'},startDate:'1500',endDate:'1900'});
   expect(linkedStoryPeriods(source,null,[summary])).toHaveLength(1);

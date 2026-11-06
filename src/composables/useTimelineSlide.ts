@@ -4,6 +4,7 @@ type Direction = 'previous' | 'next';
 type Slide = {
   origin: string;
   periodId: string;
+  storyId?: string;
   direction: Direction;
   snapshot: HTMLElement;
   restoreFocus: boolean;
@@ -30,7 +31,7 @@ export function useTimelineSlide(
     phase.value = 'idle';
   }
 
-  function prepare(direction: Direction, periodId: string) {
+  function prepare(direction: Direction, periodId: string, storyId?: string) {
     cancel();
     const host = viewport();
     const elements = layers();
@@ -54,7 +55,7 @@ export function useTimelineSlide(
       snapshot.append(copy);
     }
     host.append(snapshot);
-    pending = { origin: positionKey(), periodId, direction, snapshot,
+    pending = { origin: positionKey(), periodId, storyId, direction, snapshot,
       restoreFocus: host.contains(document.activeElement), animations: [] };
     phase.value = 'waiting';
   }
@@ -64,7 +65,7 @@ export function useTimelineSlide(
     if (!slide) return;
     if (error()) { cancel(); return; }
     if (loading()) { if (phase.value === 'sliding') cancel(); return; }
-    if (position().periodId !== slide.periodId) {
+    if (slide.storyId ? position().storyId !== slide.storyId : position().periodId !== slide.periodId) {
       if (positionKey() !== slide.origin) cancel();
       return;
     }

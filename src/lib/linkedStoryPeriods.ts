@@ -1,7 +1,7 @@
 import type { ListPeriod, Story, StoryAnchor, StorySummary } from '@/types/database';
 export interface LinkedStoryPeriod extends ListPeriod { linkedStoryId: string; sourceAnchor?: StoryAnchor }
 
-/** Display-only cards. These never become catalogue periods or navigation levels. */
+/** Display-only cards. These never become catalogue periods or local period positions. */
 export function linkedStoryPeriods(story: Story | null, parentId: string | null, summaries: StorySummary[]): LinkedStoryPeriod[] {
   return (story?.childStories ?? []).flatMap(child => {
     const shown = parentId ? child.anchors.some(anchor => anchor.type === 'period' && anchor.id === parentId && anchor.displayAsPeriod) : child.rootDisplayAsPeriod;
@@ -13,7 +13,7 @@ export function linkedStoryPeriods(story: Story | null, parentId: string | null,
   });
 }
 
-/** The editor preview shows every occurrence in its local hierarchy, independently of the open column. */
+/** Every displayed occurrence in its local hierarchy, with distinct identifiers for each entry. */
 export function linkedStoryPreviewPeriods(story: Story | null | undefined, summaries: StorySummary[]): Array<LinkedStoryPeriod & { storyParentId: string | null }> {
   if (!story) return [];
   const members = new Set(story.periods.map(period => period.id));

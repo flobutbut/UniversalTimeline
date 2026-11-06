@@ -30,9 +30,15 @@
           :disabled="loading"
           @click="navigate(hiddenItems.length + offset, $event)"
         ><StoryMarker v-if="item.kind === 'story'" />{{ item.title }}</button>
-        <slot v-else name="current" :item="item">
+        <span
+          v-else-if="$slots.current"
+          ref="currentItem"
+          class="story-breadcrumb__item story-breadcrumb__item--current story-breadcrumb__current-control"
+          aria-current="location"
+          tabindex="-1"
+        ><slot name="current" :item="item" /></span>
         <button
-          v-if="currentNavigable"
+          v-else-if="currentNavigable"
           ref="currentItem"
           type="button"
           class="story-breadcrumb__item story-breadcrumb__item--link story-breadcrumb__item--current"
@@ -49,7 +55,6 @@
           tabindex="-1"
           :title="item.title"
         ><StoryMarker v-if="item.kind === 'story'" />{{ item.title }}</span>
-        </slot>
       </li>
     </ol>
   </nav>
@@ -223,6 +228,8 @@ watch([() => props.items, () => props.loading], async () => {
   color: var(--color-text-primary);
   font-weight: var(--font-weight-semibold);
 }
+
+.story-breadcrumb__current-control { display: inline-flex; align-items: center; }
 
 .story-breadcrumb__item--current:focus-visible {
   outline: 2px solid var(--color-primary);

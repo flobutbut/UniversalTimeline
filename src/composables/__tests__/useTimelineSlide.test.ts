@@ -132,3 +132,15 @@ it('does not steal focus from another control at the end of the animation', asyn
   animations.forEach(animation => animation.finish()); await settled();
   expect(document.activeElement).toBe(elsewhere);
 });
+
+it('animates entry into a displayed frise overview without treating its card id as a catalogue period', async () => {
+  const { slide, position, loading, host } = setup();
+  slide.prepare('next', 'linked-story:2:root', '2');
+  loading.value = true; await settled();
+  position.value = { storyId: '2' }; loading.value = false; await settled();
+  expect(slide.phase.value).toBe('sliding');
+  expect(animate).toHaveBeenCalledTimes(4);
+  animations.forEach(animation => animation.finish()); await settled();
+  expect(slide.phase.value).toBe('idle');
+  expect(host.querySelector('.timeline-slide-snapshot')).toBeNull();
+});

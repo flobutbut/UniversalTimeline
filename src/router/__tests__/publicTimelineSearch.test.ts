@@ -111,14 +111,17 @@ it('resets the first frise to its overview from the story breadcrumb and restore
   expect(view.getComponent(PeriodGrid).props('currentPeriod')?.id).toBe('leaf-1');
 });
 
-it.each([1, 2])('opens period-linked frises from the header with their real return anchor (%s choices)', async count => {
+it.each([
+  { count: 1, displayAsPeriod: false }, { count: 2, displayAsPeriod: false },
+  { count: 1, displayAsPeriod: true }, { count: 2, displayAsPeriod: true },
+])('opens period-linked frises from the header with their real return anchor ($count choices, displayed as period: $displayAsPeriod)', async ({ count, displayAsPeriod }) => {
   vi.mocked(stories.getListStories).mockResolvedValue(['38', '5', '39'].map(summary));
   const homo = { ...event('homo'), date: 'M2.8' };
   vi.mocked(stories.getStory).mockImplementation(async id => storyFixture(id,
     [{ ...period(id === '38' ? 'hominins' : 'homo-period'), startDate: id === '38' ? 'M7' : 'M2.8', endDate: id === '38' ? 'M1.2' : 'TODAY' }],
     [homo], id === '38' ? [
-      { id: '5', title_fr: 'Genre Homo', atRoot: false, anchors: [{ type: 'period', id: 'hominins' }] },
-      { id: '39', title_fr: 'Histoire des techniques', atRoot: false, anchors: [{ type: 'period', id: 'hominins' }] },
+      { id: '5', title_fr: 'Genre Homo', atRoot: false, anchors: [{ type: 'period', id: 'hominins', displayAsPeriod }] },
+      { id: '39', title_fr: 'Histoire des techniques', atRoot: false, anchors: [{ type: 'period', id: 'hominins', displayAsPeriod }] },
     ].slice(0, count) : []));
   await start('/timeline?story=38');
   const header = view.get('.home-view__story-selector');
@@ -362,4 +365,63 @@ it('clears a private search result when the account changes', async () => {
   useAuthStore(pinia).account = null; useAuthStore(pinia).identityVersion++; await flushPromises();
   expect(view.find('[role="option"]').exists()).toBe(false);
   expect(view.get('header input').element.value).toBe('');
+});
+
+it.each(['card', 'selector'])('uses the normal period return when entering a frise displayed as a period through its %s', async entry => {
+  const source = { ...summary('1'), title: { fr: 'Histoire de France', en: '' } };
+  const destination = { ...summary('2'), title: { fr: 'Régimes politiques en France', en: '' }, startDate: '1804', endDate: 'TODAY' };
+  vi.mocked(stories.getListStories).mockResolvedValue([source, destination]);
+  vi.mocked(stories.getStory).mockImplementation(async id => ({
+    ...storyFixture(id,
+      id === '1' ? [{ ...period('gaule'), startDate: '600 BCE', endDate: '51 BCE' }, { ...period('contemporary'), startDate: '1789', endDate: 'TODAY' }]
+        : [{ ...period('empire'), startDate: '1804', endDate: '1815' }, { ...period('restauration'), startDate: '1815', endDate: '1830' }],
+      [], id === '1' ? [{ id: '2', title_fr: destination.title.fr, anchors: [], atRoot: true, rootDisplayAsPeriod: true }] : []),
+    title: id === '1' ? source.title : destination.title,
+  }));
+  await start('/timeline?story=1&view=overview');
+  expect(view.find('.period-card--parent').exists()).toBe(false);
+  if (entry === 'card') {
+    await view.get('[data-period-id="linked-story:2"] .period-card__title-action').trigger('click');
+  } else {
+    await view.get('.home-view__story-selector [role="combobox"]').trigger('click'); await flushPromises();
+    await view.findAll('[role="option"]')[1].trigger('click');
+  }
+  await flushPromises();
+  const grid = view.getComponent(PeriodGrid);
+  expect(grid.props('currentStoryId')).toBe('2');
+  expect(grid.props('currentPeriod')).toBeNull();
+  expect(grid.props('storyBounds')?.startYearsBP).toBeLessThan(300);
+  expect(grid.props('periods').map((item: Period) => item.id)).toEqual(['empire', 'restauration']);
+  const reference = view.get('.period-card--parent[data-period-id="linked-story:2"]');
+  expect(reference.text()).toContain(destination.title.fr);
+  expect(grid.props('overviewPeriod')).toMatchObject({ label: { fr: destination.title.fr }, startDate: '1804', endDate: 'TODAY' });
+  const back = reference.get('button[aria-label="Revenir depuis Régimes politiques en France"]');
+  await back.trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.query).toMatchObject({ story: '1', view: 'overview' });
+  expect(view.getComponent(PeriodGrid).props('periods').map((item: Period) => item.id)).toEqual(['gaule', 'contemporary']);
+  expect(view.find('.period-card--parent').exists()).toBe(false);
+  const moved = new Promise<void>(resolve => { const stop = router.afterEach(() => { stop(); resolve(); }); });
+  router.back(); await moved; await flushPromises();
+  expect(view.find('button[aria-label="Revenir depuis Régimes politiques en France"]').exists()).toBe(true);
+});
+
+it('crosses a displayed frise using the real horizontal controls and restores the source period', async () => {
+  vi.mocked(stories.getListStories).mockResolvedValue([summary('1'), { ...summary('2'), startDate: '1804', endDate: 'TODAY' }]);
+  vi.mocked(stories.getStory).mockImplementation(async id => storyFixture(id,
+    id === '1' ? [{ ...period('revolution'), startDate: '1789', endDate: '1799', hasChildren: false }]
+      : [{ ...period('empire'), startDate: '1804', endDate: '1815', hasChildren: false }],
+    [], id === '1' ? [{ id: '2', title_fr: 'Régimes politiques', atRoot: true, rootDisplayAsPeriod: true, anchors: [] }] : []));
+  await start('/timeline?story=1&period=revolution');
+  await view.get('button[data-period-direction="next"]').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.query).toEqual({ story: '2', view: 'overview' });
+  expect(view.getComponent(PeriodGrid).props('currentPeriod')).toBeNull();
+  expect(view.get('button[data-period-direction="previous"]').text()).toContain('revolution');
+  await view.get('button[data-period-direction="previous"]').trigger('click'); await flushPromises();
+  expect(router.currentRoute.value.query).toEqual({ story: '1', period: 'revolution' });
+  expect(view.getComponent(PeriodGrid).props('currentPeriod')).toMatchObject({ id: 'revolution' });
+  expect(view.get('button[data-period-direction="next"]').text()).toContain('Régimes politiques');
+  const moved = new Promise<void>(resolve => { const stop = router.afterEach(() => { stop(); resolve(); }); });
+  router.back(); await moved; await flushPromises();
+  expect(router.currentRoute.value.query).toEqual({ story: '2', view: 'overview' });
+  expect(view.get('button[data-period-direction="previous"]').text()).toContain('revolution');
 });
