@@ -107,7 +107,7 @@ describe('useHomeNavigation', () => {
 
     expect(nav.error.value).toBeNull();
     expect(nav.currentPeriod.value).toBeNull();
-    expect(nav.currentStoryBounds.value).toEqual({ startYearsBP: 13.798e9, endYearsBP: 0 });
+    expect(nav.currentStoryBounds.value).toEqual({ startDate: 'G13.798', endDate: 'TODAY', startYearsBP: 13.798e9, endYearsBP: 0 });
     expect(nav.displayedPeriods.value.map(period => period.id)).toEqual(['milky-way']);
     expect(nav.storyEvents.value.map(event => event.id)).toEqual(['big-bang', 'first-stars', 'earth']);
 

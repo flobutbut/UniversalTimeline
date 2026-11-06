@@ -2,6 +2,14 @@
 
 # Changelog — documentation agent
 
+## 2026-11-06 — Menu des frises associées dans le fil d’Ariane
+
+Le conteneur introduit pour aligner le sélecteur courant héritait de la troncature des libellés du breadcrumb compact : les options existaient mais leur panneau était entièrement masqué par `overflow: hidden`. La troncature est désormais limitée aux étapes textuelles ; le sélecteur garde celle de son propre libellé et peut afficher son menu. Vérification visuelle du panneau et de la sélection d’une destination dans le navigateur interne.
+
+## 2026-11-06 — Bornes calendaires et fausse coupure du retour
+
+La fenêtre de la frise conservait uniquement des coordonnées BP calculées au chargement, tandis que le repère de retour relisait ses dates à l’instant du rendu : quelques millisecondes suffisaient à déclencher une fausse coupure à gauche. Le modèle des bornes conserve désormais les dates d’origine et partage leur calcul avec le moteur d’échelle ; le cadre, les cartes et le repère peuvent être relus à la même référence temporelle. Test du défaut avec une horloge avançant entre les calculs, des bornes issues d’un événement et des dépassements réels d’une seconde. Audit en lecture de la frise 35 : Code civil au 21 mars 1804, Premier Empire au 18 mai 1804 ; aucun rattachement ni aucune date en base modifiés.
+
 ## 2026-11-06 — Navigation horizontale des frises affichées comme périodes
 
 Les voisins chronologiques comprennent les cartes des frises associées affichées comme périodes, avec leurs dates et leur rang local. Une flèche ouvre leur vue d’ensemble et permet de poursuivre le rang de la source dans les deux sens ; les occurrences ancrées restent distinctes et les subdivisions de la cible gardent leurs propres voisins. Les parcours chronologiques déclarés conservent leurs choix de présentation. L’animation attend la frise cible quand la destination est une carte, sans utiliser son identifiant comme période de catalogue. Historique et position de retour conservés ; aucune modification des données. Tests du parcours mixte, des occurrences, du rechargement et de l’animation ; aller-retour Révolution française ↔ Régimes politiques vérifié dans le navigateur.

@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
-import { TimelineScalingService, type ScalablePeriod } from '@/services/TimelineScalingService';
+import { TimelineScalingService, timelineBounds, type ScalablePeriod } from '@/services/TimelineScalingService';
+import { comparableYearsBeforePresent } from '@temporal';
 
 const scaling = new TimelineScalingService();
 
@@ -55,4 +56,25 @@ it.each([0, -100, NaN, Infinity])('keeps a degenerate window finite (duration %s
 
 it('keeps an unknown boundary off the axis instead of inventing a duration', () => {
   expect(interval({ startDate: 'unknown', endYearsBP: 20 })).toEqual({ left: 0, right: 0, width: 0 });
+});
+
+it('retains the calendar boundaries contributed by events and re-reads them after loading', () => {
+  const loadedAt = Date.UTC(2026, 10, 6, 12);
+  const bounds = timelineBounds([
+    { startDate: '1804-05-18', endDate: '1815-06-22', startYearsBP: 999, endYearsBP: 800 },
+    { startDate: '1804-03-21', endDate: '1804-03-21', startYearsBP: 222.616, endYearsBP: 222.616 },
+    { startDate: '1958-10-04', endDate: 'TODAY' },
+  ], loadedAt)!;
+  expect(bounds).toMatchObject({ startDate: '1804-03-21', endDate: 'TODAY', endYearsBP: 0 });
+  const renderedAt = loadedAt + 60000;
+  expect(scaling.getWindowStart([], bounds, renderedAt)).toBe(comparableYearsBeforePresent('1804-03-21', undefined, renderedAt));
+  expect(scaling.calculatePeriodStyles({ startDate: '1804-03-21', endDate: 'TODAY' },
+    scaling.calculateTotalDuration([], bounds, renderedAt), scaling.getWindowStart([], bounds, renderedAt), renderedAt))
+    .toEqual({ left: '0%', width: '100%' });
+});
+
+it('keeps numeric-only boundaries usable and does not invent calendar dates for them', () => {
+  expect(timelineBounds([{ startYearsBP: 100, endYearsBP: 20 }, { startDate: 'unknown', startYearsBP: 999 }]))
+    .toEqual({ startYearsBP: 100, endYearsBP: 20 });
+  expect(timelineBounds([{ startDate: 'unknown', endDate: 'unknown' }])).toBeNull();
 });
