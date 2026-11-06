@@ -65,7 +65,7 @@
         <template v-if="contextBar" #overview-context="{ style, continuation }">
           <PeriodCard variant="parent" :period="contextBar" :style="style" :continues-before="continuation.before" :continues-after="continuation.after" :is-selected="false" :loading="loading" @back="onGoBack">
             <template #title-actions>
-              <span class="home-view__context-label">{{ returnPath.length ? 'Retour' : 'Période de référence' }}</span>
+              <span v-if="!returnPath.length" class="home-view__context-label">Période de référence</span>
               <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="contextBar.id" :period-label="contextBar.label.fr"
                 :stories="contextStories" :disabled="loading" @select="id => onStorySelect(id, contextAnchor)" />
             </template>
