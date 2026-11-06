@@ -4,7 +4,7 @@
 
 ## Arbre actuel
 
-État du 6 novembre 2026, relevé en base. Les périodes chapeau qui répétaient leur frise ont été retirées (règles de [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md), section 2) : Antiquité (10) et Époque moderne (16) n'ont plus de période et ouvrent leurs récits par des accès racine.
+État du 6 novembre 2026, relevé en base. Les périodes chapeau qui répétaient leur frise ont été retirées (règles de [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md), section 2) : Antiquité (10) et Époque moderne (16) n'ont plus de période et ouvrent leurs récits par des accès racine ; Guerre froide (12) et Renaissance (17) ne gardent que leurs événements.
 
 ```
 Univers moderne (1)
@@ -49,13 +49,13 @@ Univers moderne (1)
                ├─ Seconde Guerre mondiale (9)
                ├─ Guerre froide (12)
                └─ Invasion de l'Ukraine par la Russie (18)
-Sans parente : Empire romain (7), publique ; Florian Butour (48), privée.
+Sans parente : Florian Butour (48), privée. Empire romain (7) a été supprimée le 6 novembre, remplacée par Antiquité romaine (45).
 Parcours : Grandes périodes de l'histoire européenne (24), accès racine vers Antiquité, Moyen Âge, Époque moderne et Époque contemporaine.
 ```
 
-Chaque sous-frise s'ouvre depuis sa parente, par une ancre sur une période distincte ou par un point d'entrée à la racine (ajoutés le 6 novembre pour 2 et 23 depuis 11, et pour 4, 14, 25 et 35 depuis 37). Les accès thématiques entre frises éloignées sont dans l'onglet **Relations** de chaque frise.
+Chaque sous-frise s'ouvre depuis sa parente, par une ancre sur une période distincte ou par un point d'entrée à la racine (ajoutés le 6 novembre pour 2 et 23 depuis 11, pour 4, 14, 25 et 35 depuis 37, et pour l'Empire byzantin depuis le Moyen Âge). Les accès thématiques entre frises éloignées sont dans l'onglet **Relations** de chaque frise.
 
-Périodes chapeau encore présentes, à examiner : Moyen Âge dans la frise 15 (ancre de l'Empire byzantin), Renaissance (17), Guerre froide (12) et Invasion de l'Ukraine (18), seules périodes de leur frise, Première Guerre mondiale (8), Guerre d'indépendance des États-Unis (42) et Antiquité romaine dans Empire romain (7).
+Nettoyage du 6 novembre 2026 (état antérieur dans `audits/2026-11-06-nettoyage-chapeaux.before.json`) : chapeaux retirés de Première Guerre mondiale (8), Guerre froide (12), Moyen Âge (15), Renaissance (17), Révolution française (30) et Guerre d'indépendance des États-Unis (42) ; ancre « Apparition des premiers mammifères » retirée de Genre Homo. Gardés volontairement : « Seconde Guerre mondiale » dans la frise 9, qui la distingue de la montée vers la guerre et de la guerre sino-japonaise, « Premier Empire » dans la frise 36, qui suit le Consulat, et « Invasion de l'Ukraine » dans la frise 18, dont elle est le seul contenu. À reprendre : la Guerre d'indépendance (42) a maintenant 18 racines ; les regrouper par théâtre d'opérations.
 
 ## Prochaines frises demandées (3 novembre 2026)
 
