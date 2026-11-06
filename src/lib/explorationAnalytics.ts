@@ -1,5 +1,6 @@
-import type { MultilingualText, StorySummary } from '@/types/database';
-import type { TimelineStoryProperties, TimelineVia } from './analytics';
+import type { ListPeriod, MultilingualText, StorySummary } from '@/types/database';
+import type { TimelinePositionShape, TimelineStoryProperties, TimelineVia } from './analytics';
+import { timelinePeriodPath } from './timelineNavigation';
 
 const title = (text: MultilingualText | undefined) => text?.fr || text?.en || undefined;
 
@@ -28,6 +29,25 @@ export function storyProperties({ story, username, signedIn }: StoryScope): Time
     ...(story && visibility === 'public' ? { story_id: String(story.id), story_title: title(story.title) } : {}),
     own_story: !!story && !!username && story.author === username,
     signed_in: signedIn,
+  };
+}
+
+/** Deepest level of the frise, counted like the position depth (1 = a root period); invalid paths are ignored. */
+export function storyMaxDepth(periods: ListPeriod[]): number {
+  return periods.reduce((deepest, period) => Math.max(deepest, timelinePeriodPath(periods, period.id)?.length ?? 0), 0);
+}
+
+export interface PositionShapeInput {
+  storyPeriods: ListPeriod[]; displayedPeriods: readonly unknown[]; events: readonly unknown[]; hasPrevious: boolean; hasNext: boolean;
+}
+/**
+ * What the visitor finds at a position: sub-periods to enter, events, same-level neighbours, and how deep the frise
+ * goes. Only counts, so a private frise reveals nothing of its content.
+ */
+export function positionShape({ storyPeriods, displayedPeriods, events, hasPrevious, hasNext }: PositionShapeInput): TimelinePositionShape {
+  return {
+    child_count: displayedPeriods.length, event_count: events.length,
+    has_previous: hasPrevious, has_next: hasNext, story_max_depth: storyMaxDepth(storyPeriods),
   };
 }
 

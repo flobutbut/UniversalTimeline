@@ -96,7 +96,7 @@ import { useTimelineSlide } from '@/composables/useTimelineSlide';
 import { useDataStore } from '@/stores/useDataStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { track, type TimelineVia } from '@/lib/analytics';
-import { entryVia, eventProperties, periodProperties, storyProperties, takeAnnouncedEntry, type StoryScope } from '@/lib/explorationAnalytics';
+import { entryVia, eventProperties, periodProperties, positionShape, storyProperties, takeAnnouncedEntry, type StoryScope } from '@/lib/explorationAnalytics';
 import type { ListEvent } from '@/types/database';
 
 const dataStore = useDataStore();
@@ -121,6 +121,7 @@ const {
   displayedPeriods,
   periodChildren,
   storyEvents,
+  currentStoryPeriods,
   breadcrumb,
   storyBreadcrumb,
   currentStoryBounds,
@@ -186,6 +187,10 @@ async function reportPosition(loaded: Promise<unknown>, via: TimelineVia) {
   track('timeline_position_viewed', {
     ...storyProperties(scope), ...periodProperties(scope, currentPeriod.value),
     view: currentPeriod.value ? 'period' : 'overview', depth: depth(), via, has_context: !!contextId.value,
+    ...positionShape({
+      storyPeriods: currentStoryPeriods.value, displayedPeriods: displayedPeriods.value, events: storyEvents.value,
+      hasPrevious: !!previousPeriod.value, hasNext: !!nextPeriod.value,
+    }),
   });
 }
 function retry() { actionVia = 'retry'; void reportPosition(retryLoad(), 'retry'); }
