@@ -3,6 +3,7 @@ import { sparql, mediaWiki, normalizeWikidataId, type WikidataReadOptions } from
 import { WIKIDATA_MEDIAWIKI_API_URL } from '@/lib/wikidataMediaWikiConstants';
 import { wikibaseTimeToTemporal } from '@/lib/wikidataTime';
 import { compareYearsOldestFirst, yearsBeforePresent } from '@temporal';
+import { normalizeWikipediaTitle, type WikipediaTitles } from '@/lib/wikipedia';
 
 const wdLog = (...args: unknown[]) => {
   if (import.meta.env.DEV) console.log(...args);
@@ -332,6 +333,34 @@ export class WikidataQueryService {
     return result;
   }
 
+
+  /**
+   * Titres des articles Wikipédia (fr, en) reliés aux entités, en une requête SPARQL publique.
+   * Une entité absente de la réponse n'a d'article dans aucune des deux langues.
+   */
+  async getWikipediaTitles(qids: string[], options: WikidataReadOptions = {}): Promise<Map<string, WikipediaTitles>> {
+    const ids = [...new Set(qids.map(normalizeWikidataId))];
+    const titles = new Map<string, WikipediaTitles>(ids.map(id => [id, { fr: null, en: null }]));
+    if (!ids.length) return titles;
+    const query = `
+      SELECT ?item ?language ?article WHERE {
+        VALUES ?item { ${ids.map(id => `wd:${id}`).join(' ')} }
+        VALUES (?site ?language) { (<https://fr.wikipedia.org/> "fr") (<https://en.wikipedia.org/> "en") }
+        ?article schema:about ?item; schema:isPartOf ?site.
+      }
+    `;
+    for (const binding of await sparql(query, options)) {
+      const id = binding.item?.value?.split('/').pop() ?? '';
+      const language = binding.language?.value;
+      const path = binding.article?.value?.split('/wiki/')[1];
+      const entry = titles.get(id);
+      if (!entry || (language !== 'fr' && language !== 'en') || !path) continue;
+      let title: string | null | undefined;
+      try { title = normalizeWikipediaTitle(decodeURIComponent(path)); } catch { title = undefined; }
+      if (title) entry[language] = title;
+    }
+    return titles;
+  }
 
   /**
    * Récupère les Q-ids des classes P31 (instance of) et P279 (subclass of)

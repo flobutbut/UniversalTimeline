@@ -59,8 +59,9 @@ export class StoryApiService {
   async createFromWikidata(qid: string, title: string, items: WikidataTimelineItem[], isPublic = false, description?: string, acknowledgedStoryIds?: string[]): Promise<{ id: string; periodCount: number; eventCount: number }> {
     const result = await apiClient.post<{ id: string; periodCount: number; eventCount: number }>('/stories/from-wikidata', {
       qid, title, isPublic, ...(description === undefined ? {} : { description }), ...(acknowledgedStoryIds?.length ? { acknowledgedStoryIds } : {}), items: items.map(item => {
-        const { qid, type, title, description, startDate, endDate, id, origin, source } = item;
-        return { qid, type, title, description, startDate, endDate, ...(id ? { id, origin, source } : {}), ...(type === 'period' ? { parentQid: effectiveWikidataParent(item, items) } : {}) };
+        const { qid, type, title, description, startDate, endDate, id, origin, source, wikipedia } = item;
+        // Un fait dérivé n'a pas d'article propre.
+        return { qid, type, title, description, startDate, endDate, ...(id ? { id, origin, source } : {}), ...(wikipedia && origin !== 'fact' ? { wikipedia } : {}), ...(type === 'period' ? { parentQid: effectiveWikidataParent(item, items) } : {}) };
       }),
     });
     if (!result || !/^[1-9]\d*$/.test(result.id) || !Number.isInteger(result.periodCount) || !Number.isInteger(result.eventCount)) throw new Error('Réponse invalide après la création de la frise.');

@@ -52,6 +52,7 @@ export class EventApiService {
       description: { fr: formData.description?.fr ?? '', en: formData.description?.en ?? formData.description?.fr ?? '' },
       date: formData.date,
       categories: formData.categories,
+      ...(formData.wikipedia ? { wikipedia: formData.wikipedia } : {}),
     };
     return mapToEvent(await apiClient.put<EventDto>(`/events/${eventId}`, payload));
   }

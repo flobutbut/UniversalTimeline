@@ -27,6 +27,7 @@ beforeEach(() => {
   vi.spyOn(WikidataQueryService.getInstance(), 'loadEvent').mockResolvedValue(event);
   vi.spyOn(WikidataQueryService.getInstance(), 'loadPeriod').mockResolvedValue(period as any);
   vi.spyOn(WikidataQueryService.getInstance(), 'getEntityClasses').mockResolvedValue([]);
+  vi.spyOn(WikidataQueryService.getInstance(), 'getWikipediaTitles').mockResolvedValue(new Map());
   vi.spyOn(WikidataQueryService.getInstance(), 'getPartOfParentQid').mockResolvedValue(null);
   vi.spyOn(PeriodApiService.getInstance(), 'getPeriodByWikidataId').mockResolvedValue(null);
 });

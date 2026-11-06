@@ -2,7 +2,7 @@
 import { beforeEach, it, expect, vi } from 'vitest';
 import router from '../src/api/routes';
 import { withTransaction, query } from '../src/api/database';
-import { parsePeriodWrite, parseStoryWrite, parseStoryId, parseChildStories, parseEntityId } from '../src/api/inputValidation';
+import { parsePeriodWrite, parseEventWrite, parseStoryWrite, parseStoryId, parseChildStories, parseEntityId, parseWikipediaTitles } from '../src/api/inputValidation';
 vi.mock('../src/api/database', () => ({ withTransaction: vi.fn(), query: vi.fn() }));
 
 const entity = { id:'new',label:{fr:'Libellé'},wikidata_id:'Q123',date:'M65',start_date:'M65',end_date:'NOW' };
@@ -128,4 +128,16 @@ it.each([
 it.each([undefined, null, '', '  '])('accepts manual period creation and editing without a Q-id (%j)', wikidata_id => {
   expect(parsePeriodWrite({ ...entity, wikidata_id }, true).wikidata_id).toBeNull();
   expect(parsePeriodWrite({ ...entity, wikidata_id }, false).wikidata_id).toBeNull();
+});
+
+it('normalizes Wikipedia titles and keeps the omission distinct from an explicit removal', () => {
+  expect(parsePeriodWrite(entity, false)).not.toHaveProperty('wikipedia');
+  expect(parseEventWrite({ ...entity, wikipedia: { fr: ' Révolution_française ', en: '' } }, false).wikipedia).toEqual({ fr: 'Révolution française', en: null });
+  expect(parseWikipediaTitles(null)).toEqual({ fr: null, en: null });
+  for (const wikipedia of [{ fr: 'Titre#ancre' }, { en: 'A|B' }, { fr: 12 }, 'Titre', ['Titre']]) {
+    expect(() => parseWikipediaTitles(wikipedia)).toThrow();
+  }
+});
+it('refuses an invalid Wikipedia title before SQL', async () => {
+  const res = await call('post', '/events', { ...entity, wikipedia: { fr: 'Titre[1]' } }); expect(res.status).toHaveBeenCalledWith(400); noSql();
 });

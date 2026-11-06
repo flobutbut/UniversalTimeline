@@ -81,3 +81,19 @@ it.each(['period', 'event'] as const)('creates a manual %s without Q-id, while r
   await qid.setValue(''); await qid.trigger('blur'); await flushPromises();
   expect(button().attributes('disabled')).toBeUndefined();
 });
+it('submits a pasted Wikipedia address as a title and refuses another wiki',async()=>{
+  view=mount(EditModal,{props:{isOpen:true,type:'period',mode:'edit',data:{...period,wikipedia:{fr:'Ancien titre',en:null}}}});await flushPromises();
+  const fr=view.get('input[placeholder="Titre ou adresse fr.wikipedia.org"]');
+  expect((fr.element as HTMLInputElement).value).toBe('Ancien titre');
+  await fr.setValue('https://fr.wikipedia.org/wiki/Paléogène');
+  await view.get('input[placeholder="Titre ou adresse en.wikipedia.org"]').setValue('https://fr.wikipedia.org/wiki/Paléogène');
+  await view.get('form').trigger('submit');expect(view.emitted('submit')).toBeUndefined();
+  await view.get('input[placeholder="Titre ou adresse en.wikipedia.org"]').setValue('Paleogene');
+  await button().trigger('click');
+  expect(view.emitted('submit')?.[0]?.[0]).toMatchObject({wikipedia:{fr:'Paléogène',en:'Paleogene'}});
+});
+it('does not erase titles that the edited record was read without',async()=>{
+  view=mount(EditModal,{props:{isOpen:true,type:'event',mode:'edit',data:{wikidata_id:'Q2',label:{fr:'Événement',en:''},date:'1944',categories:[]}}});await flushPromises();
+  await button().trigger('click');
+  expect(view.emitted('submit')?.[0]?.[0]).not.toHaveProperty('wikipedia');
+});

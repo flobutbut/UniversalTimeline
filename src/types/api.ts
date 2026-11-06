@@ -21,6 +21,9 @@ interface MetadataDto {
 }
 interface EntityDto extends MetadataDto {
   sourceKey?: string | null;
+  /** Détail et listes mappés : objet ; lignes brutes (création, conversion) : colonnes. */
+  wikipedia?: { fr?: string | null; en?: string | null } | null;
+  wikipedia_title_fr?: string | null; wikipedia_title_en?: string | null;
   wikidataSource?: import('../../server/src/shared/wikidataGeneration').WikidataSource | null;
   wikidata_id?: string | null;
   label?: ApiText | null;
@@ -69,6 +72,8 @@ export interface StoryDto extends MetadataDto {
   owner_user_id?: string | null; ownerUserId?: string | null;
 }
 export interface EntityFormPayload extends NewEntityFormCore {
+  /** Omis : la mise à jour conserve les titres enregistrés. */
+  wikipedia?: import('./database').WikipediaTitles;
   parentId?: string | null;
   startDate?: string; endDate?: string; date?: string;
   categories?: Array<{ id: string }>;

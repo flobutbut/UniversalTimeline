@@ -290,6 +290,7 @@
                           </div>
                           <p v-if="eventDescription(event)" class="event-detail-description" aria-label="Description de l’événement">{{ eventDescription(event) }}</p>
                           <p v-else class="event-detail-empty event-detail-description">Aucune description renseignée.</p>
+                          <WikipediaLink :titles="event.wikipedia" :subject="event.label.fr || event.label.en" class="event-detail-wikipedia" />
                         </header>
                         <section class="event-detail-section" aria-label="Catégories de l’événement">
                           <h4 class="event-detail-section-title">Catégories</h4>
@@ -413,6 +414,7 @@ import { ref, computed, watch, nextTick } from 'vue';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
+import WikipediaLink from '@/components/WikipediaLink.vue';
 import Tag from '@/components/base/Tag.vue';
 import { DateService } from '@/services/DateService';
 import { listEventYearsBP } from '@/lib/listEventTableHelpers';
@@ -1213,6 +1215,7 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .event-detail-overview, .event-detail-frise { display: flex; flex-direction: column; gap: var(--spacing-xl); min-width: 0; }
 .event-detail-frise { padding-top: var(--spacing-xl); border-top: 1px solid var(--color-border-default); }
 .event-detail-description { flex: 0 0 100%; margin: 0; color: var(--color-text-primary); font: var(--type-body); white-space: pre-wrap; overflow-wrap: anywhere; }
+.event-detail-wikipedia.wikipedia-link { font: var(--type-body); }
 .event-detail-categories { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); list-style: none; padding: 0; margin: 0; }
 .event-detail-categories li { min-width: 0; max-width: 100%; }
 .event-detail-categories :deep(.ui-tag__label) { white-space: normal; overflow-wrap: anywhere; }

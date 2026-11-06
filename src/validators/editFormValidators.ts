@@ -1,5 +1,6 @@
 import { parseTemporal, periodDateErrors } from '@temporal';
 import type { EditFormType } from '@/types/editForm';
+import { wikipediaTitleFromInput } from '@/lib/wikipedia';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -54,6 +55,15 @@ export class EditFormValidator {
         const errors = periodDateErrors(data.startDate, data.endDate.trim() || 'NOW');
         if (errors.start) fields.startDate = errors.start;
         if (errors.end) fields.endDate = errors.end;
+      }
+      const wikipedia = data.wikipedia == null ? {} : record(data.wikipedia);
+      if (!wikipedia) fields.wikipedia = 'Les articles Wikipédia doivent être indiqués par langue.';
+      else for (const language of ['fr', 'en'] as const) {
+        const value = wikipedia[language];
+        if (value == null || value === '') continue;
+        if (typeof value !== 'string' || wikipediaTitleFromInput(value, language) === undefined) {
+          fields[`wikipedia.${language}`] = `Indiquez le titre de l’article ou son adresse sur ${language}.wikipedia.org, sans les caractères # < > [ ] | { }.`;
+        }
       }
       if (type === 'period' && data.parentId !== undefined && data.parentId !== null && (typeof data.parentId !== 'string' || !data.parentId.trim() || data.parentId.length > 200 || /[\u0000-\u001f\u007f]/.test(data.parentId))) fields.parentId = 'Le parent doit être un identifiant valide ou vide.';
     }

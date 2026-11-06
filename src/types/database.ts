@@ -1,6 +1,11 @@
 // Types pour les données de liste
+/** Titres d'articles Wikipédia ; null quand la langue n'a pas d'article. */
+export type WikipediaTitles = import('../../server/src/shared/wikipedia').WikipediaTitles;
+
 export interface ListPeriod {
   sourceKey?: string;
+  /** Absent tant que la lecture ne transporte pas les titres. */
+  wikipedia?: WikipediaTitles;
   wikidataSource?: import('../../server/src/shared/wikidataGeneration').WikidataSource;
   id: string; // Identifiant texte historique ou UUID.
   label: MultilingualText;
@@ -28,6 +33,7 @@ export type EventImportance = 'major' | 'normal' | 'minor';
 
 export interface ListEvent {
   sourceKey?: string;
+  wikipedia?: WikipediaTitles;
   wikidataSource?: import('../../server/src/shared/wikidataGeneration').WikidataSource;
   id: string; // Identifiant texte historique ou UUID.
   label: MultilingualText;

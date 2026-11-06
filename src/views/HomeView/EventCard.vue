@@ -27,6 +27,7 @@
       <div v-if="otherStoryCount" class="event-meta event-story-count">{{ otherStoryCount }} {{ otherStoryCount > 1 ? 'autres frises associées' : 'autre frise associée' }}</div>
       <!-- Au survol, une courte description ; le texte complet à la sélection. -->
       <p v-if="displayDescription" class="event-description" :class="{ 'event-description--clamped': !isSelected }">{{ displayDescription }}</p>
+      <WikipediaLink :titles="event.wikipedia" :subject="displayLabel" class="event-wikipedia" />
       <div v-if="suggestionsLoading" class="event-meta" role="status">Chargement des frises…</div>
       <div v-else-if="suggestionsError" class="event-meta event-meta--error" role="alert">
         {{ suggestionsError }} <Button variant="tertiary" size="sm" type="button" @click.stop="$emit('retry-suggestions')">Réessayer</Button>
@@ -47,6 +48,7 @@
 
 <script setup lang="ts">
 import Button from '@/components/base/Button.vue';
+import WikipediaLink from '@/components/WikipediaLink.vue';
 import { computed, ref } from 'vue';
 import type { ListEvent, StorySuggestion } from '@/types/database';
 import { DateService } from '@/services/DateService';
@@ -115,6 +117,8 @@ const displayDate = computed(() => {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+/* Sous la description, dans la même taille que le reste de la bulle. */
+.event-wikipedia.wikipedia-link { margin-top: var(--spacing-sm); font-size: var(--font-size-sm); }
 .event-description--clamped {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -305,7 +309,7 @@ const displayDate = computed(() => {
 .event-card.is-default-open:not(:hover, :focus-within, .is-selected) .event-info-box::before {
   opacity: 1;
 }
-.event-card.is-default-open:not(:hover, :focus-within, .is-selected) :is(.event-description, .event-meta:not(.event-story-count)) {
+.event-card.is-default-open:not(:hover, :focus-within, .is-selected) :is(.event-description, .event-wikipedia, .event-meta:not(.event-story-count)) {
   display: none;
 }
 /* Mêmes tailles qu'à l'état complet : seul le nombre de lignes change. */

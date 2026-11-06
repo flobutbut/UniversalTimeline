@@ -35,6 +35,7 @@
       </div>
       <!-- Actions mesurables même masquées : l'agrandissement réserve leur largeur complète. -->
       <div ref="actionsRef" class="period-card__actions" :class="{ 'period-card__actions--hidden': !actionsFit }">
+        <WikipediaLink :titles="period.wikipedia" :subject="period.label.fr || period.label.en" compact class="period-card__wikipedia" />
         <span v-if="variant === 'parent'" class="period-card__return" aria-hidden="true">Retour</span>
         <slot name="title-actions" />
       </div>
@@ -54,6 +55,7 @@ import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
+import WikipediaLink from '@/components/WikipediaLink.vue';
 import { formatPeriodDateRange } from '@/lib/formatTemporalBoundLabel';
 import { measureTextWidth } from '@/lib/measureTextWidth';
 import type { ListPeriod } from '@/types/database';
@@ -215,6 +217,10 @@ const handleClick = () => {
 .period-card__actions:empty {
   display: none;
 }
+
+.period-card__actions { gap: var(--spacing-sm); }
+.period-card__wikipedia.wikipedia-link { align-self: center; }
+.period-card.selected .period-card__wikipedia.wikipedia-link { color: var(--color-text-on-selected); }
 
 /* Hors du flux mais mesurable ; invisible aussi au clavier et aux lecteurs d’écran. */
 .period-card__actions--hidden {

@@ -23,6 +23,7 @@ beforeEach(() => {
   vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
   vi.spyOn(WikidataQueryService.getInstance(), 'loadEvent').mockResolvedValue(imported);
   vi.spyOn(WikidataQueryService.getInstance(), 'getEntityClasses').mockResolvedValue([]);
+  vi.spyOn(WikidataQueryService.getInstance(), 'getWikipediaTitles').mockResolvedValue(new Map());
 });
 afterEach(() => { view?.unmount(); vi.useRealTimers(); vi.restoreAllMocks(); });
 
