@@ -102,3 +102,71 @@ it('restores return state after reload using browser history without storing it 
   await nav.openStory('11',{storyId:'11',view:'overview',returnPath});await nav.goBack();expect(nav.currentPeriod.value?.id).toBe('earth');
   expect(readTimelineReturnPath({timelineReturnPath:[{storyId:'invalid'}]})).toEqual([]);
 });
+
+it('restores a displayed frise card as the ordinary return reference without adding a catalogue period', async () => {
+  const destination = storyFixture('5', [p('native-root', '1804'), { ...p('native-child', '1815'), storyParentId: 'native-root', hasChildren: false }]);
+  destination.periods[0].hasChildren = true;
+  data.set('5', destination);
+  data.set('1', storyFixture('1', [p('source-period', '1500')], [], [
+    { id: '5', title_fr: 'Frise affichée comme période', atRoot: true, rootDisplayAsPeriod: true, anchors: [] },
+  ]));
+  vi.mocked(StoryApiService.getInstance().getListStories).mockResolvedValue([...data.values()].map(story => story.id === '5'
+    ? { ...story, startDate: '1804', endDate: 'TODAY' } : story));
+  await nav.openStory('1', { storyId: '1', view: 'overview' });
+  await nav.selectStory('5');
+  expect(nav.currentPeriod.value).toBeNull();
+  expect(nav.contextBar.value).toMatchObject({ id: 'linked-story:5', label: { fr: 'Frise affichée comme période' }, startDate: '1804', endDate: 'TODAY' });
+  expect(nav.currentStoryPeriods.value.map(period => period.id)).toEqual(['native-root', 'native-child']);
+  const savedState = { timelineReturnPath: JSON.parse(JSON.stringify(nav.returnPath.value)) };
+  const reloadScope = effectScope();
+  const reloaded = reloadScope.run(() => useHomeNavigation())!;
+  try {
+    await reloaded.openStory('5', { storyId: '5', view: 'overview', returnPath: readTimelineReturnPath(savedState) });
+    await vi.waitFor(() => expect(reloaded.contextBar.value?.id).toBe('linked-story:5'));
+    expect(reloaded.currentStoryPeriods.value.map(period => period.id)).toEqual(['native-root', 'native-child']);
+    await reloaded.goBack();
+    expect(reloaded.currentStoryId.value).toBe('1');
+    expect(reloaded.currentPeriod.value).toBeNull();
+  } finally { reloadScope.stop(); }
+});
+
+it('keeps the original root association while visiting another frise from the reference selector', async () => {
+  data.set('1', storyFixture('1', [p('source-period', '1500')], [], ['5', '39'].map(id => ({
+    id, title_fr: `Frise associée ${id}`, atRoot: true, rootDisplayAsPeriod: true, anchors: [],
+  }))));
+  vi.mocked(StoryApiService.getInstance().getListStories).mockResolvedValue([...data.values()].map(story => ({
+    ...story, startDate: story.periods[0]?.startDate, endDate: story.periods[0]?.endDate,
+  })));
+  await nav.openStory('1', { storyId: '1', view: 'overview' });
+  await nav.selectStory('5');
+  expect(nav.contextStories.value.map(story => story.id)).toContain('39');
+  vi.mocked(StoryApiService.getInstance().getStory).mockRejectedValueOnce(new Error('Unavailable'));
+  await nav.selectStory('39', undefined, nav.contextStoryId.value);
+  expect(nav.error.value).toBe('Unavailable');
+  await nav.retryLoad();
+  expect(nav.contextBar.value?.id).toBe('linked-story:39');
+  expect(nav.contextStoryId.value).toBe('1');
+  await nav.goBack();
+  expect(nav.currentStoryId.value).toBe('5');
+  expect(nav.contextBar.value?.id).toBe('linked-story:5');
+  await nav.goBack();
+  expect(nav.currentStoryId.value).toBe('1');
+});
+
+it('opens a displayed root entry in overview even when a chronological context shares its native root', async () => {
+  const root = p('native-root', '1804');
+  const shared: NavigationContext = { id: '1', title: { fr: 'Parcours', en: '' }, periods: [root],
+    presentations: [{ periodId: root.id, storyId: '5', title: root.label }] };
+  data.set('1', { ...storyFixture('1', [root], [], [
+    { id: '5', title_fr: 'Frise associée', atRoot: true, rootDisplayAsPeriod: true, anchors: [] },
+  ]), navigationContexts: [shared] });
+  data.set('5', { ...storyFixture('5', [{ ...root, hasChildren: true }, { ...p('child', '1815'), storyParentId: root.id }]), navigationContexts: [shared] });
+  await nav.openStory('1', { storyId: '1', view: 'overview' });
+  await nav.selectStory('5');
+  expect(nav.currentPeriod.value).toBeNull();
+  expect(nav.contextBar.value?.id).toBe(root.id);
+  expect(nav.displayedPeriods.value.map(period => period.id)).toEqual([root.id]);
+  await nav.goBack();
+  expect(nav.currentStoryId.value).toBe('1');
+  expect(nav.currentPeriod.value).toBeNull();
+});

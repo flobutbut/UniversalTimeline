@@ -131,3 +131,18 @@ it('uses the design-system icon button and supports menu arrows, Escape and outs
   await trigger.trigger('click');await settled();expect(view.find('[role="menu"]').exists()).toBe(true);
   document.body.click();await settled();expect(view.find('[role="menu"]').exists()).toBe(false);
 });
+
+it('marks a custom current selector as the current location and restores focus after ancestor navigation', async () => {
+  view = mount(StoryBreadcrumb, {
+    props: { items, currentNavigable: true },
+    slots: { current: '<button>Choisir une frise associée</button>' },
+    attachTo: document.body,
+  });
+  const current = view.get('[aria-current="location"]');
+  expect(current.text()).toBe('Choisir une frise associée');
+  expect(current.classes()).toContain('story-breadcrumb__item');
+  const ancestor = view.get('.story-breadcrumb__item--link');
+  (ancestor.element as HTMLElement).focus(); await ancestor.trigger('click');
+  await view.setProps({ items: items.slice(0, 1) }); await settled();
+  expect(document.activeElement).toBe(view.get('[aria-current="location"]').element);
+});

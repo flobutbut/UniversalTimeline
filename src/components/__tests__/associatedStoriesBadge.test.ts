@@ -204,3 +204,18 @@ it('offers other frises sharing a period, deduplicated with anchored children', 
   await badge().trigger('click'); await flushPromises();
   expect(body().findAll('.associated-stories__item strong').map(item => item.text())).toEqual(['Frise child', 'Autre parcours']);
 });
+
+it('lists frises displayed as periods in the associated selector and keeps their real navigation anchor', async () => {
+  const child = linked('child');
+  child.anchors[0].displayAsPeriod = true;
+  const source = { ...detail('one', [child]), relatedStories: [
+    { id: 'child', title: child.title, periodIds: ['leaf'], eventIds: [] },
+  ] };
+  vi.mocked(StoryApiService.getInstance().getStory).mockResolvedValue(source);
+  view = mount(PeriodGrid, { props: gridProps, attachTo: document.body }); await settle();
+  expect(badge().text()).toBe('1 frise associée');
+  await badge().trigger('click'); await flushPromises();
+  expect(body().findAll('.associated-stories__item')).toHaveLength(1);
+  await body().get('.associated-stories__item').trigger('click');
+  expect(view.emitted('story-select')).toEqual([['child', { type: 'period', id: 'leaf' }]]);
+});

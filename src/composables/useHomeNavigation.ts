@@ -6,7 +6,7 @@ import { useDataStore } from '@/stores/useDataStore';
 import type { ListPeriod, ListEvent, StoryAnchor, NavigationContext, Story } from '@/types/database';
 import { storyChildrenOf, resolvePeriodNavFromSnapshot, type StoryPeriodNavSnapshot } from '@/lib/homeStoryPeriodNav';
 
-import { timelineLevel, levelNeighbors, timelinePeriodPath, contextPeriodNeighbors, periodPresentationTargets, type TimelineTarget, type TimelineReturnFrame } from '@/lib/timelineNavigation';
+import { timelineLevel, levelNeighbors, timelinePeriodPath, periodPresentationTargets, type TimelineTarget, type TimelineReturnFrame } from '@/lib/timelineNavigation';
 import { universeStoryTrail } from '@/lib/universeStoryTrail';
 import { storyNavigationLinks, indexStoryNavigationLinks, rootStoryNavigationLinks } from '@/lib/storyNavigationLinks';
 import { timelineHierarchy } from '@/lib/timelineHierarchy';
@@ -79,9 +79,9 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
     if (!currentStory.value) return [];
     const periodIds = new Set([...displayedPeriods.value.map(period => period.id), ...(currentPeriod.value ? [currentPeriod.value.id] : [])]);
     return storyNavigationLinks(currentStory.value).flatMap(link => {
-      if (link.atRoot && !link.rootDisplayAsPeriod) return [{ id: link.id, title: link.title, anchor: undefined as StoryAnchor | undefined }];
-      const anchor = link.anchors.find(anchor => anchor.type === 'period' && !anchor.displayAsPeriod && anchor.id === currentPeriod.value?.id)
-        ?? link.anchors.find(anchor => anchor.type === 'period' && !anchor.displayAsPeriod && periodIds.has(anchor.id));
+      if (link.atRoot) return [{ id: link.id, title: link.title, anchor: undefined as StoryAnchor | undefined }];
+      const anchor = link.anchors.find(anchor => anchor.type === 'period' && anchor.id === currentPeriod.value?.id)
+        ?? link.anchors.find(anchor => anchor.type === 'period' && periodIds.has(anchor.id));
       return anchor ? [{ id: link.id, title: link.title, anchor: { type: anchor.type, id: anchor.id } as StoryAnchor }] : [];
     }).sort((a, b) => Number(a.anchor !== undefined) - Number(b.anchor !== undefined));
   });
@@ -96,8 +96,11 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
     const from=returnPath.value[returnPath.value.length-1];
     if(!from)return null;
     const source=entryStory.value;
-    const period=from.anchor?.type==='period'?source?.periods.find(p=>p.id===from.anchor!.id):undefined;
-    return {period:period??null,storyId:from.anchorStoryId??from.storyId,anchor:from.anchor};
+    const anchor=from.anchor;
+    // Reuse the displayed entry card without adding it to the destination's periods.
+    const period=anchor?.type==='period'?source?.periods.find(p=>p.id===anchor.id)
+      : !anchor ? linkedStoryPeriods(source, null, stories.value).find(period=>period.linkedStoryId===currentStoryId.value) : undefined;
+    return {period:period??null,storyId:from.anchorStoryId??from.storyId,anchor};
   });
   // A reference keeps its real dates and never extends the destination's temporal window.
   const contextBar = computed<ListPeriod|null>(()=>{
@@ -122,6 +125,7 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
     const anchor=reference.anchor;
     return anchor?indexStoryNavigationLinks(storyNavigationLinks(source),anchor.type).get(anchor.id)??[]:rootStoryNavigationLinks(source);
   });
+  const contextStoryId = computed(() => navigationReference.value?.storyId);
   let retry: () => Promise<void>;
   const retryLoad = () => retry();
 
@@ -141,12 +145,34 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
     return storyChildrenOf(parentId, currentStoryPeriods.value);
   }
 
-  // Parcourir un même rang de la hiérarchie, y compris au-delà de son parent direct.
-  const adjacentPeriods = computed(() => {
+  // A displayed frise belongs to the same temporal rank as the source's native periods.
+  // Its occurrence (root or anchor) is reconstructed from the visited entry, not stored as content.
+  const horizontalPosition = computed(() => {
     const context = selectedContext.value;
-    if (usesContextNeighbors.value && context && chronologicalPeriodId.value) return contextPeriodNeighbors(context, chronologicalPeriodId.value);
-    if (!currentPeriod.value) return { previous: null, next: null };
-    return levelNeighbors(timelineLevel(currentStoryPeriods.value, parentStack.value.length), currentPeriod.value.id);
+    if (usesContextNeighbors.value && context && chronologicalPeriodId.value) return {
+      source: context.id === currentStoryId.value ? currentStory.value : entryStory.value,
+      storyId: context.id, periods: context.periods, periodId: chronologicalPeriodId.value, context, from: null,
+    };
+    if (currentPeriod.value) return { source: currentStory.value, storyId: currentStoryId.value,
+      periods: currentStoryPeriods.value, periodId: currentPeriod.value.id, context: null, from: null };
+    const from = returnPath.value[returnPath.value.length - 1], source = entryStory.value;
+    if (!from || !source || from.anchor?.type === 'event') return null;
+    const parentId = from.anchor?.id ?? null;
+    const period = linkedStoryPreviewPeriods(source, stories.value).find(period =>
+      period.linkedStoryId === currentStoryId.value && period.storyParentId === parentId);
+    if (!period) return null;
+    const sourceContext = source.navigationContexts?.find(context => context.id === from.contextId) ?? null;
+    return { source, storyId: source.id, periods: sourceContext?.periods ?? source.periods,
+      periodId: period.id, context: sourceContext, from };
+  });
+  const adjacentPeriods = computed(() => {
+    const position = horizontalPosition.value;
+    if (!position) return { previous: null, next: null };
+    const cards = linkedStoryPreviewPeriods(position.source, stories.value).filter(period =>
+      !position.context || position.from || period.linkedStoryId !== currentStoryId.value);
+    const periods = [...position.periods, ...cards];
+    const path = timelinePeriodPath(periods, position.periodId);
+    return levelNeighbors(path ? timelineLevel(periods, path.length - 1) : [], position.periodId);
   });
   const previousPeriod = computed(() => adjacentPeriods.value.previous?.period ?? null);
   const nextPeriod = computed(() => adjacentPeriods.value.next?.period ?? null);
@@ -154,15 +180,33 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   const navigateAdjacentPeriod = (direction: 'previous' | 'next') => {
     if (loading.value) return;
     const target = adjacentPeriods.value[direction];
-    if (!target) return;
-    const context = selectedContext.value;
-    if (usesContextNeighbors.value && context) {
+    const position = horizontalPosition.value;
+    if (!target || !position) return;
+    if ('linkedStoryId' in target.period && typeof target.period.linkedStoryId === 'string') {
+      const frames = cloneReturnPath();
+      const last = frames[frames.length - 1];
+      const from = position.from ?? (position.context && position.storyId !== currentStoryId.value &&
+        last && (last.anchorStoryId ?? last.storyId) === position.storyId ? last : null);
+      if (from) frames.pop();
+      const { entry: _entry, returnPath: _returns, ...visitedPosition } = positionTarget(currentPeriod.value?.id);
+      const origin: TimelineReturnFrame = from ?? visitedPosition;
+      const { anchor: _anchor, anchorStoryId: _source, ...sourcePosition } = origin;
+      const parentId = getStoryPeriodParentId(target.period);
+      frames.push({ ...sourcePosition, anchorStoryId: position.storyId,
+        ...(parentId ? { anchor: { type: 'period' as const, id: parentId } } : {}) });
+      void chooseNavigationTarget({ storyId: target.period.linkedStoryId, view: 'overview', returnPath: frames.slice(-32) });
+      return;
+    }
+    const context = position.context;
+    if (context) {
       const choices = periodPresentationTargets(context, target.period.id).map(choice=>({...choice,returnPath:cloneReturnPath()}));
       if (choices.length > 1) { navigationChoices.value = choices; return; }
       void chooseNavigationTarget(choices[0]);
       return;
     }
-    void chooseNavigationTarget(positionTarget(target.period.id));
+    void chooseNavigationTarget(position.from
+      ? { storyId: position.storyId, periodId: target.period.id, returnPath: cloneReturnPath().slice(0, -1) }
+      : positionTarget(target.period.id));
   };
 
   function positionTarget(periodId?: string): TimelineTarget {
@@ -277,11 +321,16 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
         returnPath.value=entryTrail.map(({entry:_entry,returnPath:_returns,...position})=>position);
       }
       const from=returnPath.value[returnPath.value.length-1];
-      const sourceId=!currentPeriod.value?(referencePeriodId.value?context?.id:from?.anchorStoryId??from?.storyId):undefined;
+      const sourceId=referencePeriodId.value?context?.id:!currentPeriod.value?from?.anchorStoryId??from?.storyId:undefined;
       entryStory.value=null;
       if(sourceId) {
         if(sourceId===storyId)entryStory.value=story;
-        else void dataStore.ensureStoryLoaded(sourceId).then(source=>{if(isCurrent())entryStory.value=source;}).catch(()=>undefined);
+        else {
+          const reading=dataStore.ensureStoryLoaded(sourceId).then(source=>{if(isCurrent())entryStory.value=source;}).catch(()=>undefined);
+          // A declared context already exposes native peers: resolve its cards before enabling them.
+          // An ordinary entry must not delay a new destination on an older, still loading source.
+          if(referencePeriodId.value)await reading;
+        }
       }
       if(!isCurrent())return;
       recordStoryVisit();
@@ -349,24 +398,26 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
     else await loadStory(id, undefined, true);
   };
 
-  const selectStory = async (storyId: string | number, anchor?: StoryAnchor) => {
+  const selectStory = async (storyId: string | number, anchor?: StoryAnchor, sourceStoryId?: string) => {
     const id = String(storyId);
     if (id === currentStoryId.value) return;
     const visited = visitedStories.value.find(entry => entry.storyId === id);
     if (visited) { await chooseNavigationTarget(visited); return; }
     const isCurrent = navigation.begin();
-    retry = () => selectStory(id, anchor);
+    retry = () => selectStory(id, anchor, sourceStoryId);
     loading.value = true;
     error.value = null;
     try {
       const story = await dataStore.ensureStoryLoaded(id);
       if (!isCurrent()) return;
       const reference=navigationReference.value;
-      const sourceId=anchor&&reference?.anchor?.type===anchor.type&&reference.anchor.id===anchor.id?reference.storyId:currentStoryId.value;
+      const sourceId=sourceStoryId??(anchor&&reference?.anchor?.type===anchor.type&&reference.anchor.id===anchor.id?reference.storyId:currentStoryId.value);
+      const source = sourceId === currentStoryId.value ? currentStory.value : entryStory.value;
+      const rootPeriodEntry = !anchor && linkedStoryPeriods(source, null, stories.value).some(period=>period.linkedStoryId===id);
       const context = selectedContext.value;
       const directContext=story.navigationContexts?.find(c=>c.id===sourceId&&c.presentations.some(view=>view.storyId===id&&view.periodId===anchor?.id));
       const sharedContext = directContext??(context && story.navigationContexts?.some(c => c.id === context.id) ? context : null);
-      const anchorId = anchor?.type === 'period' ? anchor.id : !anchor ? currentPeriod.value?.id : undefined;
+      const anchorId = anchor?.type === 'period' ? anchor.id : !anchor && !rootPeriodEntry ? currentPeriod.value?.id : undefined;
       const views = sharedContext?.presentations.filter(view => view.storyId === id) ?? [];
       const candidateId = anchorId && timelinePeriodPath(story.periods, anchorId) ? anchorId : views.length === 1 ? views[0].periodId : undefined;
       const periodId = candidateId && storyChildrenOf(candidateId, story.periods).length > 0 ? candidateId : undefined;
@@ -374,7 +425,7 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
       const {entry:_entry,returnPath:_returns,...sourcePosition}=positionTarget(currentPeriod.value?.id);
       const frames=[...cloneReturnPath(),{...sourcePosition,...(anchor?{anchor}:{}),anchorStoryId:sourceId}].slice(-32);
       await chooseNavigationTarget({ storyId: id,
-        ...(periodId ? { periodId } : candidateId ? { view: 'overview' as const } : {}),
+        ...(rootPeriodEntry ? { view: 'overview' as const } : periodId ? { periodId } : candidateId ? { view: 'overview' as const } : {}),
         ...(sharedContext ? { contextId: sharedContext.id } : {}),
         ...(referenceId?{referencePeriodId:referenceId}:{}),returnPath:frames,
       });
@@ -428,7 +479,7 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   return {
     loading, error, retryLoad, parentStack, currentPeriod, displayedPeriods, periodChildren, storyEvents, currentStoryPeriods,
     currentStoryId, breadcrumb, storyBreadcrumb, currentStoryBounds, previousPeriod, nextPeriod, navigationContexts, contextId, referencePeriodId, returnPath,
-    contextBar, contextStories, rootStories, headerStories, linkedPeriods, childLinkedPeriods, returnTitle, navigationChoices, chooseNavigationTarget, selectNavigationContext,
+    contextBar, contextStories, contextStoryId, rootStories, headerStories, linkedPeriods, childLinkedPeriods, returnTitle, navigationChoices, chooseNavigationTarget, selectNavigationContext,
     loadInitialData, openStory, handlePeriodClick, handleEventClick, goBack, selectStory, navigateToBreadcrumb, navigateToStoryBreadcrumb, navigateAdjacentPeriod,
   };
 }

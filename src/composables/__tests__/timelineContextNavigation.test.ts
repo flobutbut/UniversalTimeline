@@ -74,7 +74,8 @@ it('asks for a presentation when several explicit views exist instead of choosin
   await nav.openStory('15'); nav.navigateAdjacentPeriod('next');
   expect(nav.navigationChoices.value).toHaveLength(2);
   expect(nav.currentStoryId.value).toBe('15');
-  expect(getStory).toHaveBeenCalledTimes(1);
+  expect(getStory).not.toHaveBeenCalledWith('10');
+  expect(getStory).not.toHaveBeenCalledWith('16');
 });
 
 it('rejects inaccessible contexts and periods missing from the requested view', async () => {

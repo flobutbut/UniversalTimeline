@@ -67,7 +67,7 @@
             <template #title-actions>
               <span v-if="!returnPath.length" class="home-view__context-label">Période de référence</span>
               <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="contextBar.id" :period-label="contextBar.label.fr"
-                :stories="contextStories" :disabled="loading" @select="id => onStorySelect(id, contextAnchor)" />
+                :stories="contextStories" :disabled="loading" @select="id => onStorySelect(id, contextAnchor, contextStoryId)" />
             </template>
           </PeriodCard>
         </template>
@@ -125,7 +125,7 @@ const {
   breadcrumb,
   storyBreadcrumb,
   currentStoryBounds,
-  contextBar, contextStories, headerStories, linkedPeriods, childLinkedPeriods, returnTitle, returnPath, referencePeriodId,
+  contextBar, contextStories, contextStoryId, headerStories, linkedPeriods, childLinkedPeriods, returnTitle, returnPath, referencePeriodId,
   loadInitialData,
   openStory,
   handlePeriodClick,
@@ -211,7 +211,8 @@ const { phase: slidePhase } = slide;
 function slideToAdjacentPeriod(direction: 'previous' | 'next') {
   const destination = direction === 'previous' ? previousPeriod.value : nextPeriod.value;
   if (loading.value || !destination) return;
-  slide.prepare(direction, destination.id);
+  slide.prepare(direction, destination.id,
+    'linkedStoryId' in destination && typeof destination.linkedStoryId === 'string' ? destination.linkedStoryId : undefined);
   actionVia = 'slide';
   navigateAdjacentPeriod(direction);
 }
@@ -263,7 +264,8 @@ onActivated(() => {
 .home-view__header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: var(--spacing-sm); flex-shrink: 0; padding-inline: var(--spacing-md); }
 .home-view__breadcrumbs { flex: 1; min-width: 0; }
 .home-view__story-selector { width: auto; min-width: 0; }
-.home-view__story-selector :deep(.base-select__trigger) { min-height: 0; padding: var(--spacing-xs) 0; background: transparent; border-color: transparent; color: var(--color-text-primary); }
+.home-view__story-selector :deep(.base-select__trigger) { min-height: 0; padding: 0; border: 0; background: transparent; color: var(--color-text-primary); font: inherit; }
+.home-view__story-selector :deep(.base-select__value) { font: inherit; }
 .home-view__story-selector :deep(.base-select__placeholder) { color: var(--color-text-primary); opacity: 1; font-weight: var(--font-weight-semibold); }
 .home-view__story-selector :deep(.base-select__indicators) { margin-left: var(--spacing-xs); }
 .home-view__story-selector :deep(.base-select__dropdown) { right: auto; width: max-content; min-width: 100%; max-width: min(320px, 85vw); }

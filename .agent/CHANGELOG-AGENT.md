@@ -2,6 +2,18 @@
 
 # Changelog — documentation agent
 
+## 2026-11-06 — Navigation horizontale des frises affichées comme périodes
+
+Les voisins chronologiques comprennent les cartes des frises associées affichées comme périodes, avec leurs dates et leur rang local. Une flèche ouvre leur vue d’ensemble et permet de poursuivre le rang de la source dans les deux sens ; les occurrences ancrées restent distinctes et les subdivisions de la cible gardent leurs propres voisins. Les parcours chronologiques déclarés conservent leurs choix de présentation. L’animation attend la frise cible quand la destination est une carte, sans utiliser son identifiant comme période de catalogue. Historique et position de retour conservés ; aucune modification des données. Tests du parcours mixte, des occurrences, du rechargement et de l’animation ; aller-retour Révolution française ↔ Régimes politiques vérifié dans le navigateur.
+
+## 2026-11-06 — Repère de retour des frises affichées comme périodes
+
+La navigation réutilise désormais la carte déjà affichée à la racine de la source comme repère de retour dans la cible, via le composant et la projection temporelle habituels. La cible s’ouvre en vue d’ensemble, sans ajout de période ni changement de ses bornes. Le repère est reconstruit depuis le rattachement et l’historique, après rechargement également ; son sélecteur conserve la source quand on rejoint une autre frise associée. Tests des entrées par carte et sélecteur, de la restauration et du retour à la position quittée. Aucun bouton de secours spécifique ni changement des données.
+
+## 2026-11-06 — Fil d’Ariane et choix des frises associées
+
+Le sélecteur de la frise active partage désormais le conteneur et les espacements des étapes du fil d’Ariane ; sa bordure et son padding propres sont retirés pour aligner les textes. Les choix des frises associées (en-tête, période et référence de retour) incluent aussi les liens affichés comme périodes, à la racine comme sur une ancre. Leurs cartes restent affichées et leurs destinations sont dédupliquées avec conservation de l’ancre de retour. Tests de navigation et de focus étendus ; alignement vérifié dans le navigateur interne.
+
 ## 2026-11-05 — Création manuelle et frises associées
 
 Création publique et publication possibles sans frise parente ; avertissement en l’absence de point d’entrée et ouverture directe de la fiche après création. Q-ID facultatif pour les périodes et événements manuels, états vides guidés et reprise de l’association sans recréer une fiche déjà enregistrée. Catégorie « Personnelle » (`CAT_PERSONAL`) ajoutée au projet actif par le lot idempotent `database/data/20261105_personal_category.sql`, puis vérifiée en lecture. Dans l’exploration, le sélecteur des frises associées affiche un chevron et un fond bleu renforcé, selon les tokens clair/sombre. Validation : vérification complète du projet, 8 tests PostgreSQL sur base locale jetable et aperçu navigateur sur les frises liées à la Terre.

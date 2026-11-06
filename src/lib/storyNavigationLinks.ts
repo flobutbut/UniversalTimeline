@@ -34,7 +34,7 @@ export function indexStoryNavigationLinks(links: ReturnType<typeof storyNavigati
   const indexed = new Map<string, StorySuggestion[]>();
   for (const { anchors, atRoot: _atRoot, ...story } of links) {
     for (const anchor of anchors) {
-      if (anchor.type !== kind || (kind === 'period' && anchor.displayAsPeriod)) continue;
+      if (anchor.type !== kind) continue;
       const bucket = indexed.get(anchor.id) ?? [];
       if (!bucket.some(other => other.id === story.id)) bucket.push(story);
       indexed.set(anchor.id, bucket);
@@ -44,5 +44,5 @@ export function indexStoryNavigationLinks(links: ReturnType<typeof storyNavigati
 }
 
 export function rootStoryNavigationLinks(story: Story): StorySuggestion[] {
-  return storyNavigationLinks(story).filter(link => link.atRoot && !link.rootDisplayAsPeriod).map(({ anchors: _anchors, atRoot: _root, ...link }) => link);
+  return storyNavigationLinks(story).filter(link => link.atRoot).map(({ anchors: _anchors, atRoot: _root, ...link }) => link);
 }
