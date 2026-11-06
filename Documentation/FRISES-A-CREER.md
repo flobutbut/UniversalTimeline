@@ -38,7 +38,7 @@ Univers moderne (1)
          │  ├─ Grandes découvertes et empires coloniaux (34)
          │  └─ L'âge des révolutions (27)
          │     ├─ Révolution française (30)
-         │     └─ Guerre d'indépendance des États-Unis (42)
+         │     └─ Guerre d'indépendance des États-Unis (42)  quatre théâtres
          └─ Époque contemporaine (37)
             ├─ Révolutions industrielles et énergie (25)
             ├─ Régimes politiques en France depuis l'Empire (35)
@@ -55,7 +55,7 @@ Parcours : Grandes périodes de l'histoire européenne (24), accès racine vers 
 
 Chaque sous-frise s'ouvre depuis sa parente, par une ancre sur une période distincte ou par un point d'entrée à la racine (ajoutés le 6 novembre pour 2 et 23 depuis 11, pour 4, 14, 25 et 35 depuis 37, et pour l'Empire byzantin depuis le Moyen Âge). Les accès thématiques entre frises éloignées sont dans l'onglet **Relations** de chaque frise.
 
-Nettoyage du 6 novembre 2026 (état antérieur dans `audits/2026-11-06-nettoyage-chapeaux.before.json`) : chapeaux retirés de Première Guerre mondiale (8), Guerre froide (12), Moyen Âge (15), Renaissance (17), Révolution française (30) et Guerre d'indépendance des États-Unis (42) ; ancre « Apparition des premiers mammifères » retirée de Genre Homo. Gardés volontairement : « Seconde Guerre mondiale » dans la frise 9, qui la distingue de la montée vers la guerre et de la guerre sino-japonaise, « Premier Empire » dans la frise 36, qui suit le Consulat, et « Invasion de l'Ukraine » dans la frise 18, dont elle est le seul contenu. À reprendre : la Guerre d'indépendance (42) a maintenant 18 racines ; les regrouper par théâtre d'opérations.
+Nettoyage du 6 novembre 2026 (état antérieur dans `audits/2026-11-06-nettoyage-chapeaux.before.json`) : chapeaux retirés de Première Guerre mondiale (8), Guerre froide (12), Moyen Âge (15), Renaissance (17), Révolution française (30) et Guerre d'indépendance des États-Unis (42) ; ancre « Apparition des premiers mammifères » retirée de Genre Homo. Gardés volontairement : « Seconde Guerre mondiale » dans la frise 9, qui la distingue de la montée vers la guerre et de la guerre sino-japonaise, « Premier Empire » dans la frise 36, qui suit le Consulat, et « Invasion de l'Ukraine » dans la frise 18, dont elle est le seul contenu.
 
 ## Prochaines frises demandées (3 novembre 2026)
 
@@ -165,4 +165,5 @@ Lecture : sur les techniques et l'art, la préhistoire occupe presque tout l'axe
 
 ## Frises révisées
 
+- **Guerre d'indépendance des États-Unis (42)**, 6 novembre 2026 : l'import Wikidata brut (18 combats en périodes, 62 escarmouches souvent libellées en anglais, aucun jalon majeur) est repris en récit. Quatre théâtres à la racine (Nord, Sud, Ouest, Guerre navale et Antilles) et leurs campagnes (Boston, Québec, New York et New Jersey, Saratoga, Philadelphie, Savannah, Charleston, Floride occidentale, Yorktown, expéditions Sullivan et Crawford, Sainte-Lucie, Brimstone Hill, les Saintes) ; jalons ajoutés (Lexington et Concord, Bunker Hill, Long Island, Trenton, Saratoga, traité d'alliance, Guilford Court House) et repris de la frise 27 (Déclaration d'indépendance, traité de Paris) ; 25 périodes, 31 événements. Ancrée sur « Guerre d'indépendance des États-Unis » dans L'âge des révolutions. Les 40 escarmouches retirées restent au catalogue ; état antérieur dans `audits/2026-11-06-guerre-independance-42.before.json`.
 - **Seconde Guerre mondiale (9)**, 3 novembre 2026 : la guerre sino-japonaise (1937) n'est plus rangée dans la guerre mondiale (1939) ; trois racines (« Montée vers la guerre », la guerre mondiale, la guerre sino-japonaise) ; six fronts (Ouest, Europe du Nord, Méditerranée, Asie-Pacifique, Est, Shoah) avec leurs batailles ; 36 périodes et 36 événements. Apostrophes doublées corrigées dans 18 événements de toutes les frises.
