@@ -47,12 +47,17 @@ export async function countMemberships(client: TransactionClient, kind: Catalogu
   return (await client.query<{ n: number }>(sql, [id])).rows[0].n;
 }
 
-/** Provenance comes from the locked catalogue record, never from conversion input. */
-export async function transferSource(client: TransactionClient, from: CatalogueKind, oldId: string, newId: string) {
+/**
+ * Provenance comes from the locked catalogue record, never from conversion input. Wikipedia titles
+ * follow the record too, unless the conversion form submitted its own.
+ */
+export async function transferSource(client: TransactionClient, from: CatalogueKind, oldId: string, newId: string, keepWikipedia: boolean) {
   const target = from === 'period' ? 'events' : 'periods';
-  return (await client.query<SourceMetadata>(`UPDATE public.${target} AS target
+  return (await client.query<SourceMetadata & { wikipedia_title_fr: string | null; wikipedia_title_en: string | null }>(`UPDATE public.${target} AS target
     SET source_key = source.source_key, wikidata_source = source.wikidata_source,
-      wikidata_id = CASE WHEN source.source_key IS NOT NULL THEN NULL ELSE target.wikidata_id END
+      wikidata_id = CASE WHEN source.source_key IS NOT NULL THEN NULL ELSE target.wikidata_id END,
+      wikipedia_title_fr = CASE WHEN $3::boolean THEN source.wikipedia_title_fr ELSE target.wikipedia_title_fr END,
+      wikipedia_title_en = CASE WHEN $3::boolean THEN source.wikipedia_title_en ELSE target.wikipedia_title_en END
     FROM public.${table(from)} AS source WHERE source.id = $1 AND target.id = $2
-    RETURNING target.source_key, target.wikidata_source`, [oldId, newId])).rows[0];
+    RETURNING target.source_key, target.wikidata_source, target.wikipedia_title_fr, target.wikipedia_title_en`, [oldId, newId, keepWikipedia])).rows[0];
 }

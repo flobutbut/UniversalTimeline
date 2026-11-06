@@ -1,8 +1,11 @@
+import type { WikipediaTitles } from '../shared/wikipedia.js';
 export interface LocalizedText { fr: string; en: string }
 export interface Description { fr: string | null; en: string | null }
 interface EntityWrite {
   id?: string; wikidata_id: string | null; label: LocalizedText;
   description: Description; categories?: string[];
+  /** Omitted: an update keeps the stored titles; a creation stores none. */
+  wikipedia?: WikipediaTitles;
 }
 export interface EventWrite extends EntityWrite { date: string }
 export interface PeriodWrite extends EntityWrite {

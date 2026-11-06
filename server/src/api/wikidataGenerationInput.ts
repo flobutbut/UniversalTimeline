@@ -33,7 +33,7 @@ export function parseGeneratedStory(value: unknown): GeneratedStoryInput {
     seen.add(identity.sourceKey);
     const parentQid = item.parentQid == null || item.parentQid === '' ? null : typeof item.parentQid === 'string' && item.parentQid.length <= 200 ? item.parentQid : (() => { throw new InputValidationError('parentQid', 'Le parent est invalide.'); })();
     if (typeof item.startDate !== 'string' || parseTemporal(item.startDate).kind === 'unknown') throw new InputValidationError('startDate', 'Chaque élément doit avoir une date valide.');
-    const core = { id: randomUUID(), wikidata_id: qid, label: { fr: item.title }, description: { fr: item.description } };
+    const core = { id: randomUUID(), wikidata_id: qid, label: { fr: item.title }, description: { fr: item.description }, wikipedia: item.wikipedia };
     const metadata = { key: identity.key, sourceKey: identity.sourceKey, source: identity.source };
     if (item.type === 'event') {
       if (parentQid) throw new InputValidationError('parentQid', 'Seule une période peut avoir un parent.');

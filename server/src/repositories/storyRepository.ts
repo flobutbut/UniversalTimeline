@@ -38,6 +38,7 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
           (SELECT COALESCE(jsonb_agg(jsonb_build_object(
             'id',p.id,'label_fr',p.label_fr,'label_en',p.label_en,
             'start_date',p.start_date,'end_date',p.end_date,'start_years_bp',p.start_years_bp,'end_years_bp',p.end_years_bp,
+            'wikipedia_title_fr',p.wikipedia_title_fr,'wikipedia_title_en',p.wikipedia_title_en,
             'story_parent_id',sp.parent_period_id) ORDER BY p.id), '[]')
            FROM public.story_periods sp JOIN public.periods p ON p.id=sp.period_id WHERE sp.story_id=context.id) AS periods,
           (SELECT COALESCE(jsonb_agg(jsonb_build_object('period_id',v.period_id,'story_id',target.id,

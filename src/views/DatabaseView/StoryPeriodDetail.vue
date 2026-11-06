@@ -17,6 +17,7 @@
           </div>
           <p v-if="description" class="story-period-detail__description" aria-label="Description de la période">{{ description }}</p>
           <p v-else class="story-period-detail__empty story-period-detail__description">Aucune description renseignée.</p>
+          <WikipediaLink :titles="period.wikipedia" :subject="period.label.fr || period.label.en" class="story-period-detail__wikipedia" />
         </header>
         <section aria-label="Catégories de la période">
           <h4>Catégories</h4>
@@ -58,6 +59,7 @@
 
 <script setup lang="ts">
 import EntityDangerZone from './EntityDangerZone.vue';
+import WikipediaLink from '@/components/WikipediaLink.vue';
 import { computed } from 'vue';
 import { Icon } from '@iconify/vue';
 import type { ListPeriod, ChildStorySummary, StorySummary } from '@/types/database';
@@ -104,6 +106,7 @@ const hasMetadata = computed(() => !!(wikidataId.value || recordDate(props.perio
 .story-period-detail h4 { display: flex; align-items: center; gap: var(--spacing-sm); margin: 0; font: var(--type-label); color: var(--color-text-primary); }
 .story-period-detail h4 span { color: var(--color-text-secondary); font: var(--type-meta); }
 .story-period-detail__description { flex: 0 0 100%; margin: 0; font: var(--type-body); color: var(--color-text-primary); white-space: pre-wrap; overflow-wrap: anywhere; }
+.story-period-detail__wikipedia.wikipedia-link { font: var(--type-body); }
 .story-period-detail__empty { margin: 0; font: var(--type-body); color: var(--color-text-secondary); }
 .story-period-detail__hint { margin: 0; font: var(--type-meta); color: var(--color-text-secondary); }
 .story-period-detail__categories { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); list-style: none; padding: 0; margin: 0; }

@@ -5,6 +5,7 @@ export type NewEntityFormCore = {
   qid?: string | null;
   title: { fr: string; en?: string };
   description?: { fr?: string | null; en?: string | null } | null;
+  wikipedia?: { fr: string | null; en: string | null };
 };
 
 /** Champs communs aux POST `/events` et `/periods` : id, wikidata_id, label et description bilingues. */
@@ -17,5 +18,6 @@ export function buildNewEntityCoreFields(formData: NewEntityFormCore) {
       fr: formData.description?.fr || null,
       en: formData.description?.en || formData.description?.fr || null,
     },
+    ...(formData.wikipedia ? { wikipedia: formData.wikipedia } : {}),
   };
 }

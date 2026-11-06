@@ -2,6 +2,8 @@ import type { WikidataSource } from '../../server/src/shared/wikidataGeneration'
 import type { Profile, Status, WikidataGenerationSettings } from '@/lib/wikidataGenerationModel';
 export interface WikidataTimelineItem {
   id?: string;
+  /** Titres lus juste avant l'enregistrement ; absents si la lecture a échoué. */
+  wikipedia?: import('../../server/src/shared/wikipedia').WikipediaTitles;
   qid: string;
   type: 'period' | 'event';
   title: string;

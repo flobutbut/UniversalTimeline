@@ -15,6 +15,8 @@ import StoryPeriodTree from '@/views/DatabaseView/StoryPeriodTree.vue';
 import { generateWikidataTimeline, wikidataTimelineItemError } from '@/services/WikidataGenerationService';
 import { SearchApiService, type LocalSearchResult } from '@/services/SearchApiService';
 import { StoryApiService } from '@/services/StoryApiService';
+import { WikidataQueryService } from '@/services/WikidataQueryService';
+import { useToast } from '@/composables/useToast';
 import { normalizeWikidataId } from '@/services/wikidataTransport';
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { useLatestRequest } from '@/composables/useLatestRequest';
@@ -42,6 +44,7 @@ function setLimit(value: unknown) { if (typeof value === 'number' && [20,40,80].
 const itemSourceUrl = (item: WikidataTimelineItem) => `${sourceUrl(item.source?.qid ?? item.qid)}${item.source?.statementId ? `#${encodeURIComponent(item.source.statementId)}` : ''}`;
 const loading = ref(false); const error = ref<string | null>(null); const saving = ref(false); const saveError = ref<string | null>(null);
 const savedId = ref<string | null>(null);
+const toast = useToast();
 const activeItemQid = ref<string | null>(null);
 const detailPane = ref<HTMLElement | null>(null);
 const navigationPane = ref<HTMLElement | null>(null);
@@ -267,10 +270,16 @@ async function save() {
   const identity = auth.identityVersion; const subject = draft.value;
   try {
     const acknowledged = acknowledgeExistingStories.value ? existingStories.value.map(story => story.id) : [];
-    const result = acknowledged.length
-      ? await StoryApiService.getInstance().createFromWikidata(subject.qid, subject.title.trim(), selected.value, false, subject.description, acknowledged)
-      : await StoryApiService.getInstance().createFromWikidata(subject.qid, subject.title.trim(), selected.value, false, subject.description);
+    // Lecture publique facultative : son échec n'empêche pas la création, il est signalé.
+    const entityQids = selected.value.filter(item => item.origin !== 'fact').map(item => item.qid);
+    const wikipedia = await WikidataQueryService.getInstance().getWikipediaTitles(entityQids).catch(() => null);
     if (identity !== auth.identityVersion) return;
+    const items = wikipedia ? selected.value.map(item => ({ ...item, wikipedia: wikipedia.get(item.qid) })) : selected.value;
+    const result = acknowledged.length
+      ? await StoryApiService.getInstance().createFromWikidata(subject.qid, subject.title.trim(), items, false, subject.description, acknowledged)
+      : await StoryApiService.getInstance().createFromWikidata(subject.qid, subject.title.trim(), items, false, subject.description);
+    if (identity !== auth.identityVersion) return;
+    if (!wikipedia) toast.show('Frise créée sans liens Wikipédia : les articles n’ont pas pu être lus. Ils pourront être ajoutés depuis chaque fiche.', 'info');
     savedId.value = result.id;
     try { sessionStorage.removeItem(draftStorageKey); } catch { /* Optional tab storage. */ }
     store.invalidateStories(); store.invalidateStory(result.id);

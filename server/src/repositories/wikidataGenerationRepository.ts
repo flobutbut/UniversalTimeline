@@ -28,20 +28,22 @@ export async function findGeneratedStoryMatches(client: TransactionClient, qid: 
 /** Reuse a concurrent or existing import without modifying the shared catalogue. */
 export async function insertOrReuseGeneratedItem(client: TransactionClient, item: GeneratedItem): Promise<string> {
   const { data } = item;
-  const common = [data.id, data.wikidata_id, data.label.fr, data.label.en, data.description.fr, data.description.en];
+  // A derived fact has no article of its own: only an entity keeps its Wikipedia titles.
+  const titles = data.wikidata_id ? data.wikipedia : undefined;
+  const common = [data.id, data.wikidata_id, data.label.fr, data.label.en, data.description.fr, data.description.en, titles?.fr ?? null, titles?.en ?? null];
   const conflict = data.wikidata_id ? '(wikidata_id)' : '(source_key) WHERE source_key IS NOT NULL';
   const storedKey = data.wikidata_id ? null : item.sourceKey;
   let inserted: string | undefined;
   const now = Date.now();
   if (item.type === 'period') {
     inserted = (await client.query<{ id: string }>(`
-      INSERT INTO public.periods (id, wikidata_id, label_fr, label_en, description_fr, description_en, start_date, end_date, start_years_bp, end_years_bp, source_key, wikidata_source)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT ${conflict} DO NOTHING RETURNING id
+      INSERT INTO public.periods (id, wikidata_id, label_fr, label_en, description_fr, description_en, wikipedia_title_fr, wikipedia_title_en, start_date, end_date, start_years_bp, end_years_bp, source_key, wikidata_source)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) ON CONFLICT ${conflict} DO NOTHING RETURNING id
     `, [...common, item.data.start_date, item.data.end_date, storedYearsBeforePresent(item.data.start_date, now), storedYearsBeforePresent(item.data.end_date, now), storedKey, item.source ?? null])).rows[0]?.id;
   } else {
     inserted = (await client.query<{ id: string }>(`
-      INSERT INTO public.events (id, wikidata_id, label_fr, label_en, description_fr, description_en, date, date_years_bp, source_key, wikidata_source)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT ${conflict} DO NOTHING RETURNING id
+      INSERT INTO public.events (id, wikidata_id, label_fr, label_en, description_fr, description_en, wikipedia_title_fr, wikipedia_title_en, date, date_years_bp, source_key, wikidata_source)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT ${conflict} DO NOTHING RETURNING id
     `, [...common, item.data.date, storedYearsBeforePresent(item.data.date, now), storedKey, item.source ?? null])).rows[0]?.id;
   }
   if (inserted) return inserted;

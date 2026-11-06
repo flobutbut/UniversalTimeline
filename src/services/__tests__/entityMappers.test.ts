@@ -19,6 +19,12 @@ describe('API entity boundaries', () => {
     expect(mapToEvent({ id: 'e', date: '2000', dateYearsBP: -50 }).dateYearsBP).toBe(-50);
     expect(mapToEvent({ id: 'e', date: 'M65', date_years_bp: ' ' }).dateYearsBP).toBe(65000000);
   });
+  it('reads Wikipedia titles from mapped objects and raw rows, never inventing them', () => {
+    expect(mapToPeriod({ id: 'p', wikipedia: { fr: 'Terre', en: null } }).wikipedia).toEqual({ fr: 'Terre', en: null });
+    expect(mapToEvent({ id: 'e', wikipedia_title_fr: null, wikipedia_title_en: 'Earth' }).wikipedia).toEqual({ fr: null, en: 'Earth' });
+    expect(mapToPeriod({ id: 'p' })).not.toHaveProperty('wikipedia');
+    expect(mapToEvent({ id: 'e', wikipedia: { fr: '  ', en: '' } }).wikipedia).toEqual({ fr: null, en: null });
+  });
   it('keeps a known frise importance and never invents one', () => {
     expect(mapToEvent({ id: 'e', importance: 'major' }).importance).toBe('major');
     expect(mapToEvent({ id: 'e' })).not.toHaveProperty('importance');

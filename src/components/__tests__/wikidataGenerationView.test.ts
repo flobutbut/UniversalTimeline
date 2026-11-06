@@ -6,6 +6,7 @@ import WikidataGenerationView from '@/views/WikidataGenerationView.vue';
 import * as generation from '@/services/WikidataGenerationService';
 import { SearchApiService } from '@/services/SearchApiService';
 import { StoryApiService } from '@/services/StoryApiService';
+import { WikidataQueryService } from '@/services/WikidataQueryService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { WikidataTimelineDraft } from '@/types/wikidataGeneration';
 import { defaultSettings } from '@/lib/wikidataGenerationModel';
@@ -22,6 +23,7 @@ beforeEach(() => {
   vi.spyOn(searches, 'searchWikidataEntityLabels').mockResolvedValue([]);
   vi.spyOn(searches, 'searchLocalByWikidataIds').mockResolvedValue([]);
   vi.spyOn(stories, 'createFromWikidata').mockResolvedValue({ id: '42', periodCount: 0, eventCount: 1 });
+  vi.spyOn(WikidataQueryService.getInstance(), 'getWikipediaTitles').mockResolvedValue(new Map());
   vi.spyOn(stories, 'findWikidataStories').mockResolvedValue([]);
 });
 afterEach(() => { view?.unmount(); router?.options.history.destroy(); disposePinia(pinia); vi.restoreAllMocks(); vi.useRealTimers(); sessionStorage.clear(); document.body.innerHTML = ''; });
@@ -361,6 +363,19 @@ it('saves a generated frise as a private draft, since it has no parent yet', asy
   await button('Enregistrer la frise').trigger('click'); await flushPromises();
   expect(stories.createFromWikidata).toHaveBeenCalledWith('Q1', 'Révolution', expect.any(Array), false, 'Un sujet');
   expect(view.find('.generation-visibility input').exists()).toBe(false);
+});
+
+it('attaches the Wikipedia titles read just before saving, and saves without them when that read fails', async () => {
+  vi.mocked(WikidataQueryService.getInstance().getWikipediaTitles).mockResolvedValueOnce(new Map([['Q2', { fr: 'Prise de la Bastille', en: 'Storming of the Bastille' }]]));
+  await start();
+  await button('Enregistrer la frise').trigger('click'); await flushPromises();
+  expect(WikidataQueryService.getInstance().getWikipediaTitles).toHaveBeenCalledWith(['Q2']);
+  expect(stories.createFromWikidata).toHaveBeenCalledWith('Q1', 'Révolution', [expect.objectContaining({ qid: 'Q2', wikipedia: { fr: 'Prise de la Bastille', en: 'Storming of the Bastille' } })], false, 'Un sujet');
+  view.unmount(); vi.mocked(stories.createFromWikidata).mockClear();
+  vi.mocked(WikidataQueryService.getInstance().getWikipediaTitles).mockRejectedValueOnce(new Error('SPARQL indisponible'));
+  await start();
+  await button('Enregistrer la frise').trigger('click'); await flushPromises();
+  expect(stories.createFromWikidata).toHaveBeenCalledWith('Q1', 'Révolution', [expect.not.objectContaining({ wikipedia: expect.anything() })], false, 'Un sujet');
 });
 
 it('ignores a cached public visibility and clears a cached draft when cancelling', async () => {

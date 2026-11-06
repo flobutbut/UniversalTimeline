@@ -3,7 +3,7 @@ import type { EventWrite, PeriodWrite } from '../domain/writeInputs.js';
 import type { PeriodRow, PeriodRecord, EventRow, JoinedPeriodListRow, JoinedEventRow } from './rows.js';
 
 export async function insertEvent(client: TransactionClient, data: EventWrite & { id: string }, yearsBP: number | null) {
-  const { id, wikidata_id, label, description, date } = data;
+  const { id, wikidata_id, label, description, date, wikipedia } = data;
   return (await client.query<EventRow>(`
       INSERT INTO public.events (
         id,
@@ -14,18 +14,21 @@ export async function insertEvent(client: TransactionClient, data: EventWrite & 
         description_en,
         date,
         date_years_bp,
+        wikipedia_title_fr,
+        wikipedia_title_en,
         created_at,
         updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
     `, [
     id, wikidata_id || null, label.fr, label.en || label.fr,
     description?.fr || null, description?.en || description?.fr || null, date, yearsBP,
+    wikipedia?.fr ?? null, wikipedia?.en ?? null,
   ])).rows[0];
 }
 export async function updateEvent(client: TransactionClient, id: string, data: EventWrite, yearsBP: number | null) {
-  const { wikidata_id, label, description, date } = data;
+  const { wikidata_id, label, description, date, wikipedia } = data;
   return (await client.query<EventRow>(`
       UPDATE public.events
       SET
@@ -36,31 +39,35 @@ export async function updateEvent(client: TransactionClient, id: string, data: E
         wikidata_id = $5,
         date = $6,
         date_years_bp = $8,
+        wikipedia_title_fr = CASE WHEN $9::boolean THEN $10 ELSE wikipedia_title_fr END,
+        wikipedia_title_en = CASE WHEN $9::boolean THEN $11 ELSE wikipedia_title_en END,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $7
       RETURNING *
     `, [
     label.fr, label.en || label.fr, description?.fr, description?.en || description?.fr,
-    wikidata_id, date, id, yearsBP,
+    wikidata_id, date, id, yearsBP, wikipedia !== undefined, wikipedia?.fr ?? null, wikipedia?.en ?? null,
   ])).rows[0];
 }
 export async function insertPeriod(client: TransactionClient, data: PeriodWrite & { id: string }, startBP: number | null, endBP: number | null) {
-  const { id, wikidata_id, label, description, start_date, end_date } = data;
+  const { id, wikidata_id, label, description, start_date, end_date, wikipedia } = data;
   return (await client.query<PeriodRecord>(`
       INSERT INTO public.periods (
         id, wikidata_id, label_fr, label_en,
         description_fr, description_en,
         start_date, end_date,
-        start_years_bp, end_years_bp
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        start_years_bp, end_years_bp,
+        wikipedia_title_fr, wikipedia_title_en
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *, NULL::varchar AS parent_id, false AS has_children
     `, [
     id, wikidata_id, label.fr, label.en || label.fr, description?.fr,
     description?.en || description?.fr, start_date, end_date, startBP, endBP,
+    wikipedia?.fr ?? null, wikipedia?.en ?? null,
   ])).rows[0];
 }
 export async function updatePeriod(client: TransactionClient, id: string, data: PeriodWrite, startBP: number | null, endBP: number | null) {
-  const { wikidata_id, label, description, start_date, end_date } = data;
+  const { wikidata_id, label, description, start_date, end_date, wikipedia } = data;
   return (await client.query<PeriodRow>(`
       UPDATE public.periods AS target
       SET
@@ -73,12 +80,15 @@ export async function updatePeriod(client: TransactionClient, id: string, data: 
         wikidata_id = $7,
         start_years_bp = $8,
         end_years_bp = $9,
+        wikipedia_title_fr = CASE WHEN $11::boolean THEN $12 ELSE target.wikipedia_title_fr END,
+        wikipedia_title_en = CASE WHEN $11::boolean THEN $13 ELSE target.wikipedia_title_en END,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $10
       RETURNING target.*, NULL::varchar AS parent_id, false AS has_children
     `, [
     label.fr, label.en || label.fr, description?.fr || null, description?.en || description?.fr || null,
     start_date || null, end_date, wikidata_id, startBP, endBP, id,
+    wikipedia !== undefined, wikipedia?.fr ?? null, wikipedia?.en ?? null,
   ])).rows[0];
 }
 export async function deleteEvent(client: TransactionClient, id: string) {
@@ -87,7 +97,7 @@ export async function deleteEvent(client: TransactionClient, id: string) {
 }
 export async function listPeriods(db: TransactionClient) {
   return (await db.query<JoinedPeriodListRow>(`
-    SELECT p.source_key, p.wikidata_source, p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
+    SELECT p.source_key, p.wikidata_source, p.wikipedia_title_fr, p.wikipedia_title_en, p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
            p.start_date, p.end_date, NULL::varchar AS parent_id, p.start_years_bp, p.end_years_bp,
            false AS has_children,
            c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
@@ -111,7 +121,7 @@ export async function findEvent(db: TransactionClient, id: string) {
 }
 export async function findPeriod(db: TransactionClient, value: string, by: 'id' | 'wikidata_id') {
   return (await db.query<PeriodRow>(`
-    SELECT p.source_key, p.wikidata_source, p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
+    SELECT p.source_key, p.wikidata_source, p.wikipedia_title_fr, p.wikipedia_title_en, p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
            p.start_date, p.end_date, NULL::varchar AS parent_id, p.start_years_bp, p.end_years_bp,
            p.created_at, p.updated_at,
            false AS has_children

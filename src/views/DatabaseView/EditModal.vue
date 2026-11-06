@@ -190,6 +190,28 @@
           </div>
         </div>
 
+        <div class="form-row" v-if="type !== 'story'">
+          <div class="form-group">
+            <Input
+              v-model="form.wikipedia.fr"
+              label="Article Wikipédia (Français)"
+              placeholder="Titre ou adresse fr.wikipedia.org"
+              hint="Rempli par l’import Wikidata ; vide si l’article n’existe pas."
+              :error="fieldError('wikipedia.fr')"
+              @blur="touch('wikipedia.fr')"
+            />
+          </div>
+          <div class="form-group">
+            <Input
+              v-model="form.wikipedia.en"
+              label="Article Wikipédia (Anglais)"
+              placeholder="Titre ou adresse en.wikipedia.org"
+              :error="fieldError('wikipedia.en')"
+              @blur="touch('wikipedia.en')"
+            />
+          </div>
+        </div>
+
         <div class="form-row" v-if="type === 'period'">
           <div class="form-group">
             <DateInput

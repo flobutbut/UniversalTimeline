@@ -7,6 +7,7 @@ export interface WikidataImportFormDraft {
   date: string;
   location: string;
   categories: string[];
+  wikipedia?: { fr: string; en: string };
 }
 
 export interface WikidataImportPayload {
@@ -20,6 +21,8 @@ export interface WikidataImportPayload {
   suggestedCategoryIds?: string[];
   /** Q-id parent (P361 « partie de ») — résolu côté UI vers un id base si possible. */
   parentWikidataId?: string;
+  /** Absent quand la lecture facultative a échoué : la saisie en cours est conservée. */
+  wikipedia?: { fr: string | null; en: string | null };
   warnings?: string[];
 }
 
@@ -55,6 +58,10 @@ export function applyWikidataImportPayloadToFormDraft(
   if (data.endDate) form.endDate = data.endDate;
   if (data.date) form.date = data.date;
   if (data.location) form.location = data.location;
+  if (data.wikipedia && form.wikipedia) {
+    form.wikipedia.fr = data.wikipedia.fr ?? '';
+    form.wikipedia.en = data.wikipedia.en ?? '';
+  }
   if (data.childrenCount !== undefined && ctx.onChildrenCount) {
     ctx.onChildrenCount(data.childrenCount);
   }

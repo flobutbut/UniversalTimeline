@@ -203,6 +203,20 @@
           "notNull": false,
           "default": null,
           "identity": ""
+        },
+        {
+          "name": "wikipedia_title_fr",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "wikipedia_title_en",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
         }
       ],
       "constraints": [
@@ -224,6 +238,11 @@
         {
           "name": "events_wikidata_source_object",
           "definition": "CHECK (wikidata_source IS NULL OR jsonb_typeof(wikidata_source) = 'object'::text)",
+          "kind": "c"
+        },
+        {
+          "name": "events_wikipedia_titles",
+          "definition": "CHECK ((wikipedia_title_fr IS NULL OR char_length(wikipedia_title_fr) >= 1 AND char_length(wikipedia_title_fr) <= 255 AND wikipedia_title_fr = btrim(wikipedia_title_fr) AND wikipedia_title_fr !~ '[][#<>|{}_[:cntrl:]]'::text) AND (wikipedia_title_en IS NULL OR char_length(wikipedia_title_en) >= 1 AND char_length(wikipedia_title_en) <= 255 AND wikipedia_title_en = btrim(wikipedia_title_en) AND wikipedia_title_en !~ '[][#<>|{}_[:cntrl:]]'::text))",
           "kind": "c"
         }
       ],
@@ -389,6 +408,20 @@
           "notNull": false,
           "default": null,
           "identity": ""
+        },
+        {
+          "name": "wikipedia_title_fr",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "wikipedia_title_en",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
         }
       ],
       "constraints": [
@@ -410,6 +443,11 @@
         {
           "name": "periods_wikidata_source_object",
           "definition": "CHECK (wikidata_source IS NULL OR jsonb_typeof(wikidata_source) = 'object'::text)",
+          "kind": "c"
+        },
+        {
+          "name": "periods_wikipedia_titles",
+          "definition": "CHECK ((wikipedia_title_fr IS NULL OR char_length(wikipedia_title_fr) >= 1 AND char_length(wikipedia_title_fr) <= 255 AND wikipedia_title_fr = btrim(wikipedia_title_fr) AND wikipedia_title_fr !~ '[][#<>|{}_[:cntrl:]]'::text) AND (wikipedia_title_en IS NULL OR char_length(wikipedia_title_en) >= 1 AND char_length(wikipedia_title_en) <= 255 AND wikipedia_title_en = btrim(wikipedia_title_en) AND wikipedia_title_en !~ '[][#<>|{}_[:cntrl:]]'::text))",
           "kind": "c"
         }
       ],

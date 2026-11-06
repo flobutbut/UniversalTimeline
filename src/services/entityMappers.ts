@@ -1,5 +1,5 @@
 import type { ApiId, ApiText, ApiTimestamp, CategoryDto, PeriodDto, EventDto, StoryDto } from '@/types/api';
-import type { Category, MultilingualText, Period, Event, Story, StorySummary, StorySuggestion } from '@/types/database';
+import type { Category, MultilingualText, Period, Event, Story, StorySummary, StorySuggestion, WikipediaTitles } from '@/types/database';
 import { resolveYearsBeforePresent } from '@temporal';
 import { EVENT_IMPORTANCES } from '@/lib/eventImportance';
 
@@ -40,6 +40,13 @@ export function mapToCategory(row: CategoryDto): Category {
     ...(details ? { description: details } : {}),
   };
 }
+/** Les titres ne sont lus que lorsque la réponse les transporte ; aucun objet vide n'est fabriqué. */
+function wikipedia(row: PeriodDto | EventDto): { wikipedia?: WikipediaTitles } {
+  const hasColumns = row.wikipedia_title_fr !== undefined || row.wikipedia_title_en !== undefined;
+  if (!row.wikipedia && !hasColumns) return {};
+  const title = (value: unknown) => typeof value === 'string' && value.trim() ? value.trim() : null;
+  return { wikipedia: { fr: title(row.wikipedia?.fr ?? row.wikipedia_title_fr), en: title(row.wikipedia?.en ?? row.wikipedia_title_en) } };
+}
 function metadata(row: PeriodDto | EventDto | StoryDto) {
   return {
     id: apiId(row.id), categories: categories(row.categories), description: description(row),
@@ -52,7 +59,7 @@ export function mapToPeriod(row: PeriodDto): Period {
   const rawParent = Object.prototype.hasOwnProperty.call(row, 'parent_id') ? row.parent_id : row.parentId;
   const parentId = rawParent != null && rawParent !== '' ? apiId(rawParent) : null;
   return {
-    ...metadata(row), ...(row.sourceKey ? { sourceKey: row.sourceKey } : {}), ...(row.wikidataSource ? { wikidataSource: row.wikidataSource } : {}), wikidata_id: row.wikidata_id ?? '', label: text(row.label, row.label_fr, row.label_en),
+    ...metadata(row), ...(row.sourceKey ? { sourceKey: row.sourceKey } : {}), ...(row.wikidataSource ? { wikidataSource: row.wikidataSource } : {}), ...wikipedia(row), wikidata_id: row.wikidata_id ?? '', label: text(row.label, row.label_fr, row.label_en),
     startDate, endDate,
     startYearsBP: years(row.start_years_bp ?? row.startYearsBP, startDate), endYearsBP: years(row.end_years_bp ?? row.endYearsBP, endDate),
     ...(row.story_parent_id !== undefined || row.storyParentId !== undefined ? { storyParentId: (row.story_parent_id !== undefined ? row.story_parent_id : row.storyParentId) == null ? null : apiId((row.story_parent_id !== undefined ? row.story_parent_id : row.storyParentId)!) } : {}),
@@ -65,7 +72,7 @@ export function mapToEvent(row: EventDto): Event {
   const date = temporal(row.date);
   // Absente hors détail de frise ; une valeur inconnue n'est pas transformée en niveau.
   const importance = EVENT_IMPORTANCES.find(level => level === row.importance);
-  return { ...metadata(row), ...(row.sourceKey ? { sourceKey: row.sourceKey } : {}), ...(row.wikidataSource ? { wikidataSource: row.wikidataSource } : {}), wikidata_id: row.wikidata_id ?? '', label: text(row.label, row.label_fr, row.label_en), date, dateYearsBP: years(row.date_years_bp ?? row.dateYearsBP, date),
+  return { ...metadata(row), ...(row.sourceKey ? { sourceKey: row.sourceKey } : {}), ...(row.wikidataSource ? { wikidataSource: row.wikidataSource } : {}), ...wikipedia(row), wikidata_id: row.wikidata_id ?? '', label: text(row.label, row.label_fr, row.label_en), date, dateYearsBP: years(row.date_years_bp ?? row.dateYearsBP, date),
     ...(importance ? { importance } : {}) };
 }
 function parentStoryId(row: StoryDto): string | null {

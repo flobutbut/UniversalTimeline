@@ -2,6 +2,7 @@ import { USERNAME_MAX, usernameError, isAvatarColor, isAvatarIcon } from '../sha
 import { parseTemporal, periodDateErrors } from '../shared/temporal.js';
 import { EVENT_IMPORTANCES, type EventImportance, type EventWrite, type PeriodWrite } from '../domain/writeInputs.js';
 import { PeriodHierarchyError, StoryAssociationError } from '../domain/errors.js';
+import { normalizeWikipediaTitle, WIKIPEDIA_TITLE_MAX, type WikipediaTitles } from '../shared/wikipedia.js';
 /** Untrusted HTTP input becomes a small, explicitly typed object before any database call. */
 export class InputValidationError extends Error {
   readonly fields: Record<string, string>;
@@ -69,6 +70,25 @@ function dateText(value: unknown, field: string, required = false) {
   return result;
 }
 
+/** Omitted: undefined (an update keeps the stored titles). Null or empty: no article. */
+export function parseWikipediaTitles(value: unknown): WikipediaTitles | undefined {
+  if (value === undefined) return undefined;
+  const body = value === null ? {} : inputObject(value, 'wikipedia');
+  const title = (language: 'fr' | 'en') => {
+    const raw = text(body[language], `wikipedia.${language}`, WIKIPEDIA_TITLE_MAX * 2);
+    if (raw === null) return null;
+    const normalized = normalizeWikipediaTitle(raw);
+    if (normalized === undefined) throw new InputValidationError(`wikipedia.${language}`, 'Le titre Wikipédia contient un caractère interdit ou dépasse 255 caractères.');
+    return normalized;
+  };
+  return { fr: title('fr'), en: title('en') };
+}
+
+const wikipediaField = (body: Record<string, unknown>) => {
+  const wikipedia = parseWikipediaTitles(body.wikipedia);
+  return wikipedia === undefined ? {} : { wikipedia };
+};
+
 type EntityWriteInput = Omit<EventWrite, 'date' | 'categories'> & { categories: unknown };
 type PeriodWriteInput = Omit<PeriodWrite, 'categories'> & { categories: unknown };
 
@@ -81,6 +101,7 @@ export function parseEventWrite(value: unknown, create: boolean): EntityWriteInp
     wikidata_id: parseQid(body.wikidata_id),
     label: label(body.label, 'label'), description: bilingual(body.description, 'description'),
     date: dateText(body.date, 'date', true)!, categories: body.categories,
+    ...wikipediaField(body),
   };
 }
 
@@ -96,6 +117,7 @@ export function parsePeriodWrite(value: unknown, create: boolean): PeriodWriteIn
     start_date: dateText(body.start_date, 'start_date', true)!,
     end_date: dateText(body.end_date, 'end_date') || (create ? 'NOW' : 'TODAY'),
     categories: body.categories,
+    ...wikipediaField(body),
   };
   const errors = periodDateErrors(parsed.start_date, parsed.end_date);
   if (errors.start) throw new InputValidationError('start_date', errors.start);

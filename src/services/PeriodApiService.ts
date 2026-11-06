@@ -83,6 +83,7 @@ export class PeriodApiService {
       start_date: formData.startDate,
       end_date: formData.endDate || null,
       categories: formData.categories || [],
+      ...(formData.wikipedia ? { wikipedia: formData.wikipedia } : {}),
     };
     const data = await apiClient.put<PeriodDto>(`/periods/${periodId}`, payload);
     return mapToPeriod(data);

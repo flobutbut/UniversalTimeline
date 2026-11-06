@@ -3,6 +3,7 @@ import { useLatestRequest } from './useLatestRequest';
 import { CategoryService, type Category } from '@/services/CategoryService';
 import { EditFormValidator } from '@/validators/editFormValidators';
 import type { EditFormData, EditInitialData, EditFormSubmission, EditFormType, EditFormMode } from '@/types/editForm';
+import { wikipediaTitleFromInput } from '@/lib/wikipedia';
 export type { EditFormData } from '@/types/editForm';
 
 export interface EditModalState {
@@ -22,6 +23,8 @@ function draft(data: EditInitialData = {}): EditFormData {
     location: data.location ?? data.temporalLocation ?? '', author: data.author ?? '', isPublic: data.isPublic ?? false,
     parentId: Object.prototype.hasOwnProperty.call(data,'parent_id') ? data.parent_id ?? null : data.parentId ?? null,
     categories: data.categories?.map(category => category.id) ?? [],
+    wikipedia: { fr: data.wikipedia?.fr ?? '', en: data.wikipedia?.en ?? '' },
+    wikipediaLoaded: data.wikipedia !== undefined,
   };
 }
 
@@ -65,7 +68,14 @@ export function useEditModal(type: EditFormType | (() => EditFormType), mode: Ed
     startDate:form.startDate.trim(), endDate:form.endDate.trim() || 'NOW', date:form.date.trim(),
     location:form.location || null, author:form.author.trim(), isPublic:form.isPublic, parentId:form.parentId,
     categories:[...new Set(form.categories)].map(id => ({id})),
+    ...submittedWikipedia(),
   });
+  /** Le validateur a déjà refusé un titre invalide : seule une valeur vide devient null ici. */
+  function submittedWikipedia(): Pick<EditFormSubmission, 'wikipedia'> {
+    const touched = !!(form.wikipedia.fr.trim() || form.wikipedia.en.trim());
+    if (currentMode() === 'edit' && !form.wikipediaLoaded && !touched) return {};
+    return { wikipedia: { fr: wikipediaTitleFromInput(form.wikipedia.fr, 'fr') ?? null, en: wikipediaTitleFromInput(form.wikipedia.en, 'en') ?? null } };
+  }
   return {
     form,state,isValid,validation,resetForm,updateForm,prepareSubmitData,loadCategories,
     setLoading:(value:boolean) => {state.loading=value;}, setError:(value:string|null) => {state.error=value;},
