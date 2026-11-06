@@ -35,9 +35,9 @@
       </div>
       <!-- Actions mesurables même masquées : l'agrandissement réserve leur largeur complète. -->
       <div ref="actionsRef" class="period-card__actions" :class="{ 'period-card__actions--hidden': !actionsFit }">
+        <span v-if="variant === 'parent'" class="period-card__return" aria-hidden="true">Retour</span>
         <slot name="title-actions" />
       </div>
-      <span v-if="variant === 'parent'" class="period-card__return" aria-hidden="true">Retour</span>
       <Button v-if="variant === 'timeline' && period.hasChildren" class="period-card__drill" variant="ghost" size="xs" icon-only
         :disabled="loading" :aria-label="`Explorer les sous-périodes de ${period.label.fr}`" @click.stop="handleClick">
         <template #icon><Icon icon="mdi:arrow-right" aria-hidden="true" /></template>
