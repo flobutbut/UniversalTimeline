@@ -1,40 +1,44 @@
 # Frises à créer — feuille de route
 
-État au 3 novembre 2026. Ce document recense les frises qu'il serait utile d'ajouter, avec leur place dans l'arbre et ce que la base contient déjà pour les construire. Les règles de fabrication sont dans [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md).
+État au 6 novembre 2026. Ce document recense les frises qu'il serait utile d'ajouter, avec leur place dans l'arbre et ce que la base contient déjà pour les construire. Les règles de fabrication sont dans [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md).
 
 ## Arbre actuel
 
-Réorganisé le 3 novembre 2026 selon les règles d'architecture de [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md) (section 2).
+État du 6 novembre 2026, relevé en base. Les périodes chapeau qui répétaient leur frise ont été retirées (règles de [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md), section 2) : Antiquité (10) et Époque moderne (16) n'ont plus de période et ouvrent leurs récits par des accès racine ; Guerre froide (12) et Renaissance (17) ne gardent que leurs événements.
 
 ```
 Univers moderne (1)
 ├─ Big Bang et ères primordiales (3)
 └─ Histoire géologique de la Terre (11)
    ├─ Histoire du climat (23)
-   └─ Histoire de la vie sur Terre (2)               squelette : éons, ères, Quaternaire
+   └─ Histoire de la vie sur Terre (2)
       ├─ Les cinq grandes extinctions (22)
       ├─ Le temps des dinosaures (29)
-      ├─ Les premiers hominines (38)                 ancrée sur le Cénozoïque
-      └─ Genre Homo (5)                              portail des époques humaines, sur Homo sapiens
-         ├─ Les grandes migrations humaines (46)     thématique, accès depuis Homo sapiens
-         ├─ Histoire des techniques (39)             thématique, ancrée sur Homo sapiens
+      ├─ Les premiers hominines (38)
+      └─ Genre Homo (5)                              espèces du genre en racines
+         ├─ Les grandes migrations humaines (46)
+         ├─ Histoire des techniques (39)             thématique
          ├─ Histoire de l'art (40)                   thématique
+         │  └─ Pablo Picasso (47)                    privée
          ├─ L'esclavage (41)                         thématique
-         ├─ Néolithique et âges des métaux (19)      portail
+         ├─ Néolithique et âges des métaux (19)
          │  ├─ Néolithique (20)
          │  └─ Âges des métaux (21)
-         ├─ Antiquité et premières civilisations (10)
-         │  ├─ Empire romain (7)
-         │  └─ Mésopotamie (26)
+         ├─ Antiquité et premières civilisations (10)  sans période
+         │  ├─ Mésopotamie (26)
+         │  ├─ Antiquité égyptienne (43)
+         │  ├─ Antiquité grecque (44)
+         │  └─ Antiquité romaine (45)
          ├─ Moyen Âge (15)
          │  ├─ Empire byzantin (28)
          │  ├─ Les croisades (32)
          │  ├─ La guerre de Cent Ans (33)
          │  └─ Renaissance (17)
-         ├─ Époque moderne (16)
+         ├─ Époque moderne (16)                      sans période
          │  ├─ Grandes découvertes et empires coloniaux (34)
          │  └─ L'âge des révolutions (27)
-         │     └─ Révolution française (30)
+         │     ├─ Révolution française (30)
+         │     └─ Guerre d'indépendance des États-Unis (42)  quatre théâtres
          └─ Époque contemporaine (37)
             ├─ Révolutions industrielles et énergie (25)
             ├─ Régimes politiques en France depuis l'Empire (35)
@@ -45,10 +49,13 @@ Univers moderne (1)
                ├─ Seconde Guerre mondiale (9)
                ├─ Guerre froide (12)
                └─ Invasion de l'Ukraine par la Russie (18)
-Parcours : Grandes périodes de l'histoire européenne (24) — Antiquité → Moyen Âge → Époque moderne → Époque contemporaine
+Sans parente : Florian Butour (48), privée. Empire romain (7) a été supprimée le 6 novembre, remplacée par Antiquité romaine (45).
+Parcours : Grandes périodes de l'histoire européenne (24), accès racine vers Antiquité, Moyen Âge, Époque moderne et Époque contemporaine.
 ```
 
-Points d'entrée supplémentaires : Âges des métaux → Mésopotamie (période d'Uruk), Histoire du climat → Révolutions industrielles (réchauffement actuel), Révolutions industrielles → L'âge des révolutions (première révolution industrielle), Empire romain → Empire byzantin (Bas-Empire romain), Les cinq grandes extinctions → Le temps des dinosaures (Mésozoïque), Empire byzantin → Les croisades (événement « Sac de Constantinople »), Moyen Âge et Renaissance → Grandes découvertes (événement « Arrivée de Colomb »), L'âge des révolutions → Grandes découvertes (événement « Première abolition de l'esclavage »), L'âge des révolutions → Régimes politiques et → Napoléon et le Premier Empire (Premier Empire), Seconde Guerre mondiale → Régimes politiques (événement « Armistice du 22 juin 1940 »), Époque moderne → Révolutions industrielles (événement « Révolution industrielle »), Époque contemporaine → L'âge des révolutions (événement « Révolution française »), Les premiers hominines → Genre Homo (événement « Apparition du genre Homo ») et → Histoire des techniques (« Outils de Lomekwi »), Histoire des techniques → Néolithique, → Âges des métaux et → Révolutions industrielles (périodes partagées), Histoire des techniques → Moyen Âge (période « Moyen Âge »), Histoire de l'art → Renaissance (période « Renaissance »), Grandes découvertes → L'esclavage (période « Traite atlantique »).
+Chaque sous-frise s'ouvre depuis sa parente, par une ancre sur une période distincte ou par un point d'entrée à la racine (ajoutés le 6 novembre pour 2 et 23 depuis 11, pour 4, 14, 25 et 35 depuis 37, et pour l'Empire byzantin depuis le Moyen Âge). Les accès thématiques entre frises éloignées sont dans l'onglet **Relations** de chaque frise.
+
+Nettoyage du 6 novembre 2026 (état antérieur dans `audits/2026-11-06-nettoyage-chapeaux.before.json`) : chapeaux retirés de Première Guerre mondiale (8), Guerre froide (12), Moyen Âge (15), Renaissance (17), Révolution française (30) et Guerre d'indépendance des États-Unis (42) ; ancre « Apparition des premiers mammifères » retirée de Genre Homo. Gardés volontairement : « Seconde Guerre mondiale » dans la frise 9, qui la distingue de la montée vers la guerre et de la guerre sino-japonaise, « Premier Empire » dans la frise 36, qui suit le Consulat, et « Invasion de l'Ukraine » dans la frise 18, dont elle est le seul contenu.
 
 ## Prochaines frises demandées (3 novembre 2026)
 
@@ -158,4 +165,5 @@ Lecture : sur les techniques et l'art, la préhistoire occupe presque tout l'axe
 
 ## Frises révisées
 
+- **Guerre d'indépendance des États-Unis (42)**, 6 novembre 2026 : l'import Wikidata brut (18 combats en périodes, 62 escarmouches souvent libellées en anglais, aucun jalon majeur) est repris en récit. Quatre théâtres à la racine (Nord, Sud, Ouest, Guerre navale et Antilles) et leurs campagnes (Boston, Québec, New York et New Jersey, Saratoga, Philadelphie, Savannah, Charleston, Floride occidentale, Yorktown, expéditions Sullivan et Crawford, Sainte-Lucie, Brimstone Hill, les Saintes) ; jalons ajoutés (Lexington et Concord, Bunker Hill, Long Island, Trenton, Saratoga, traité d'alliance, Guilford Court House) et repris de la frise 27 (Déclaration d'indépendance, traité de Paris) ; 25 périodes, 31 événements. Ancrée sur « Guerre d'indépendance des États-Unis » dans L'âge des révolutions. Les 40 escarmouches retirées restent au catalogue ; état antérieur dans `audits/2026-11-06-guerre-independance-42.before.json`.
 - **Seconde Guerre mondiale (9)**, 3 novembre 2026 : la guerre sino-japonaise (1937) n'est plus rangée dans la guerre mondiale (1939) ; trois racines (« Montée vers la guerre », la guerre mondiale, la guerre sino-japonaise) ; six fronts (Ouest, Europe du Nord, Méditerranée, Asie-Pacifique, Est, Shoah) avec leurs batailles ; 36 périodes et 36 événements. Apostrophes doublées corrigées dans 18 événements de toutes les frises.

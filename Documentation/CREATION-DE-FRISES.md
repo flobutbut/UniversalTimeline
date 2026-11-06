@@ -53,6 +53,20 @@ Un accès n’exige ni inclusion temporelle, ni période commune aux deux récit
 
 Un récit peut ne contenir que des événements. Il n’a pas besoin d’une période racine artificielle pour être navigable. Une petite frise reste pertinente si son sujet et ses accès sont utiles.
 
+### Retirer une période chapeau existante
+
+Une période qui couvre exactement le sujet de sa frise (« Homo » dans Genre Homo, « Époque moderne » dans la frise du même nom) répète la frise : la retirer de cette frise, sans supprimer la fiche commune. Ses enfants directs deviennent des racines.
+
+Ce retrait emporte les liens posés sur cette période dans la frise :
+
+- **ancres** des sous-frises qui s’y rattachaient ;
+- **points d’entrée** dont elle était l’emplacement dans la source ;
+- **présentations** du parcours qui la visaient dans ce contexte.
+
+Pour chaque sous-frise concernée, rétablir l’accès dans la même opération : ancre ou point d’entrée sur une période réellement distincte de la parente quand elle existe, sinon point d’entrée à la racine de la parente. Une frise parente peut alors ne garder aucune période : elle reste un portail par ses accès racine et ses événements.
+
+Exemples du 6 novembre 2026 : Genre Homo garde ses espèces en racines et Histoire des techniques s’y ancre sur *Homo sapiens* ; Antiquité (10), Époque moderne (16) et Époque contemporaine (37) ouvrent leurs récits par des accès racine ; le Moyen Âge (15) ouvre l’Empire byzantin à la racine depuis que son chapeau est retiré. Une période de même nom que la frise reste justifiée quand la frise est plus large qu’elle : « Seconde Guerre mondiale » dans une frise qui couvre aussi la montée vers la guerre et la guerre sino-japonaise.
+
 ### Créer une frise depuis une période existante
 
 L’action **Créer une frise depuis une période** effectue une transaction qui :

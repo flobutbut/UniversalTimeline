@@ -1,0 +1,42 @@
+{
+  "description": "État avant le nettoyage du 6 novembre 2026 : suppression de la frise 7, retrait de l'ancre EVT_MAMMALS de la frise 5, retrait des périodes chapeau des frises 8, 12, 15, 17, 30 et 42. Les fiches communes (periods, events) ne sont pas modifiées.",
+  "story_7": {"id": 7, "title_fr": "Empire romain", "title_en": "Roman Empire", "description_fr": "De la fondation de Rome à la chute de l'Empire d'Occident — huit siècles d'histoire qui ont façonné la civilisation occidentale, du Sénat républicain aux premiers empereurs chrétiens.", "description_en": "From the founding of Rome to the fall of the Western Empire — eight centuries of history that shaped Western civilisation, from the Republican Senate to the first Christian emperors.", "author": "flobutbut", "is_public": true, "created_at": "2026-04-06T21:03:03.0079+00:00", "updated_at": "2026-11-05T00:16:02.869422+00:00", "parent_story_id": null, "owner_user_id": "727252ea-c32a-40c5-9b58-45baaca6b5e7"},
+  "story_7_categories": [{"story_id": 7, "category_id": "CAT_HIST"}],
+  "story_7_periods": [
+    {"story_id": 7, "period_id": "986d377d-aae5-4ba1-bb51-c5cd8d002cbb", "parent_period_id": "PER_EARTH"},
+    {"story_id": 7, "period_id": "f4427dee-575f-40f5-b674-6997455fed0b", "parent_period_id": "PER_EARTH"},
+    {"story_id": 7, "period_id": "PER_EARTH", "parent_period_id": "Q1747689"},
+    {"story_id": 7, "period_id": "Q170479", "parent_period_id": "Q1747689"},
+    {"story_id": 7, "period_id": "Q1747689", "parent_period_id": null},
+    {"story_id": 7, "period_id": "Q6114", "parent_period_id": "Q1747689"}
+  ],
+  "story_7_events": ["EVT_COLOSSEUM", "EVT_JESUS", "EVT_ROME", "EVT_ROME_FALL", "Q1069958", "Q164800", "Q217450", "Q312682", "Q39671"],
+  "story_7_events_importance": "normal pour tous",
+  "story_7_anchors": [],
+  "story_7_entry_points": [{"id": 4, "source_story_id": 7, "target_story_id": 28, "period_id": "986d377d-aae5-4ba1-bb51-c5cd8d002cbb", "event_id": null, "display_as_period": false}],
+  "story_7_presentations": [],
+  "anchors": [
+    {"id": 2, "story_id": 5, "anchor_type": "period", "anchor_id": "PER_QUATERNARY"},
+    {"id": 22, "story_id": 5, "anchor_type": "event", "anchor_id": "EVT_MAMMALS"},
+    {"id": 39, "story_id": 28, "anchor_type": "period", "anchor_id": "Q12554"}
+  ],
+  "entry_points_from_15": [{"id": 12, "source_story_id": 15, "target_story_id": 34, "period_id": null, "event_id": "EVT_AMERICA", "display_as_period": false}],
+  "story_periods_touched": [
+    {"story_id": 8, "period_id": "955c3337-fd3f-4303-b8a2-d4da6751189a", "parent_period_id": "Q361"},
+    {"story_id": 8, "period_id": "PER_WW1_PRELUDE", "parent_period_id": null},
+    {"story_id": 8, "period_id": "Q361", "parent_period_id": null},
+    {"story_id": 12, "period_id": "Q8683", "parent_period_id": null},
+    {"story_id": 15, "period_id": "a664a308-316b-4b14-9a5f-68dce9e3e249", "parent_period_id": "Q12554"},
+    {"story_id": 15, "period_id": "d5c571fb-43bb-435d-b9fc-a77c46e2d319", "parent_period_id": "Q12554"},
+    {"story_id": 15, "period_id": "Q12554", "parent_period_id": null},
+    {"story_id": 17, "period_id": "e00cf6f6-a795-4810-bda3-ed726296c822", "parent_period_id": null},
+    {"story_id": 30, "period_id": "39e41891-368a-4fdc-b7d6-e6924c1180d1", "parent_period_id": "97f23621-1102-44bc-a0b9-fb7ad230dcd5"},
+    {"story_id": 30, "period_id": "70d2c990-e8fc-4522-b28c-43671b2eacab", "parent_period_id": "97f23621-1102-44bc-a0b9-fb7ad230dcd5"},
+    {"story_id": 30, "period_id": "9b4f9c69-8b1b-452c-9002-379bc86ac8cd", "parent_period_id": "97f23621-1102-44bc-a0b9-fb7ad230dcd5"},
+    {"story_id": 30, "period_id": "a2f740c2-75fd-4aa6-a179-7f830b14ca72", "parent_period_id": "97f23621-1102-44bc-a0b9-fb7ad230dcd5"},
+    {"story_id": 30, "period_id": "97f23621-1102-44bc-a0b9-fb7ad230dcd5", "parent_period_id": null},
+    {"story_id": 42, "period_id": "f4482b81-19af-4f9a-9401-bea2e7b522df", "parent_period_id": null},
+    {"story_id": 42, "children_of": "f4482b81-19af-4f9a-9401-bea2e7b522df", "period_ids": ["0509da28-1300-49c7-b967-d3cf65404123", "12acb20d-71f5-4aa9-bf9a-d739f786a07d", "220ae025-1c85-4cb8-80dd-d78d107d601a", "2969e68f-e842-4e26-885b-331eb23b7f9f", "47e07ccf-5873-41c3-a910-b4fe366b06c0", "5941a5b3-edd2-4fb4-9569-a4b238d12013", "6eb25a30-05eb-45b9-aca1-1bda4b458a4e", "7708353a-0544-4d6e-a43d-bbc6d3315f0e", "9fd6e93b-c63d-4b14-ac67-10a93da43fdf", "a6a6c7fc-1c8b-411f-8337-23abfc1ad7e5", "be213d69-ce6b-4e61-ae4f-26cae8a5b053", "c3b28064-14a2-4d65-9101-04f4c105286f", "d6b2d46b-59b8-48d6-9ab7-238229bb30a1", "dd3cc752-f3d6-4e8d-a7be-31b004c9f4ed", "de13198b-f0f3-4804-bd14-fa19412f06ab", "e964caf8-fe89-4cb4-90d8-253277b67b99", "ee63d7fe-44d0-46fa-91b3-160aa51d6be7", "fb868fee-8378-496c-8882-755a9fcc2c8a"]}
+  ],
+  "note": "Les autres appartenances de la frise 30 (sous-périodes des insurrections, des guerres et des phases) ne changent pas."
+}
