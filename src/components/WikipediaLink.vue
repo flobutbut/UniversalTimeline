@@ -2,18 +2,19 @@
   <a
     v-if="article"
     class="wikipedia-link"
-    :class="{ 'wikipedia-link--compact': compact }"
+    :class="{ 'wikipedia-link--compact': compact, 'wikipedia-link--logo': display === 'logo' }"
     :href="article.url"
     :hreflang="article.language"
     target="_blank"
     rel="noopener noreferrer"
-    title="Voir sur Wikipédia"
+    :title="display === 'logo' ? 'Voir sur Wikipédia' : undefined"
     @click.stop
     @keydown.enter.stop
     @keydown.space.stop
   >
-    <Icon icon="mdi:wikipedia" class="wikipedia-link__icon" aria-hidden="true" />
-    <span class="sr-only">{{ label }} : {{ subject }}{{ article.language === 'en' ? ', article en anglais' : '' }} (nouvel onglet)</span>
+    <Icon v-if="display === 'logo'" icon="mdi:wikipedia" class="wikipedia-link__icon" aria-hidden="true" />
+    <span v-else>{{ label }}</span>
+    <span class="sr-only">{{ display === 'logo' ? label : '' }} : {{ subject }}{{ article.language === 'en' ? ', article en anglais' : '' }} (nouvel onglet)</span>
   </a>
 </template>
 
@@ -30,7 +31,9 @@ const props = withDefaults(defineProps<{
   subject: string;
   /** Pour une barre étroite : texte et marges réduits. */
   compact?: boolean;
-}>(), { titles: null, compact: false });
+  /** `logo` : logo seul avec infobulle ; `text` : « Voir sur Wikipédia » en clair. */
+  display?: 'logo' | 'text';
+}>(), { titles: null, compact: false, display: 'logo' });
 
 const article = computed(() => preferredWikipediaArticle(props.titles));
 const label = computed(() => article.value?.language === 'en' ? 'Voir sur Wikipédia (en)' : 'Voir sur Wikipédia');
@@ -50,6 +53,8 @@ const label = computed(() => article.value?.language === 'en' ? 'Voir sur Wikip�
 }
 .wikipedia-link:hover { text-decoration: underline; }
 .wikipedia-link:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
-.wikipedia-link__icon { display: block; font-size: 1.25em; }
+.wikipedia-link__icon { display: block; width: 1.25em; height: 1.25em; }
+/* Logo seul : boîte carrée centrée, sans ligne de base propre. */
+.wikipedia-link--logo { line-height: 1; }
 .wikipedia-link--compact { font-size: var(--font-size-sm); }
 </style>
