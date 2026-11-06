@@ -17,7 +17,7 @@ Univers moderne (1)
       ├─ Les premiers hominines (38)                 ancrée sur le Cénozoïque
       └─ Genre Homo (5)                              portail des époques humaines, sur Homo sapiens
          ├─ Les grandes migrations humaines (46)     thématique, accès depuis Homo sapiens
-         ├─ Histoire des techniques (39)             thématique, ancrée sur Homo
+         ├─ Histoire des techniques (39)             thématique, ancrée sur Homo sapiens
          ├─ Histoire de l'art (40)                   thématique
          ├─ L'esclavage (41)                         thématique
          ├─ Néolithique et âges des métaux (19)      portail
@@ -144,7 +144,7 @@ Corrigé lors de l'audit : années stockées recalculées (68 périodes, 21 év�
 
 - **Genre Homo (5)** complétée le 3 novembre 2026 par cinq migrations d'*Homo sapiens* : sortie d'Afrique (70 000 ans), grotte Mandrin (54 000 ans), Australie (50 000 ans), Amérique (16 000 ans), Nouvelle-Zélande (1280) ; 12 événements.
 - **Les premiers hominines (38)**, sous Histoire de la vie (2), ancrée sur le Cénozoïque : *Sahelanthropus*, *Orrorin*, ardipithèques, australopithèques, *Kenyanthropus* et paranthropes, avec leurs espèces ; Laetoli, Lomekwi, Lucy, enfant de Taung, *A. sediba* ; 13 périodes, 7 événements.
-- **Histoire des techniques (39)**, sous Genre Homo, ancrée sur « Homo » : Paléolithique (Oldowayen, Acheuléen, Moustérien, Paléolithique supérieur), puis Néolithique, Âges des métaux, Antiquité classique, Moyen Âge, Époque moderne et Ère industrielle ; les fiches existantes sont reprises telles quelles, seule « Antiquité classique » est nouvelle. Du feu au Web, avec les pointes emmanchées de Kathu Pan, les épieux de Schöningen et les pointes de flèche de Sibudu pour le Paléolithique ; 11 périodes, 24 événements. Pistes : voile, aqueducs, moulins, propulseur.
+- **Histoire des techniques (39)**, sous Genre Homo, ancrée sur *Homo sapiens* depuis que la période « Homo » a quitté la frise 5 (rattachement refait le 6 novembre 2026) : Paléolithique (Oldowayen, Acheuléen, Moustérien, Paléolithique supérieur), puis Néolithique, Âges des métaux, Antiquité classique, Moyen Âge, Époque moderne et Ère industrielle ; les fiches existantes sont reprises telles quelles, seule « Antiquité classique » est nouvelle. Du feu au Web, avec les pointes emmanchées de Kathu Pan, les épieux de Schöningen et les pointes de flèche de Sibudu pour le Paléolithique ; 11 périodes, 24 événements. Pistes : voile, aqueducs, moulins, propulseur.
 - **Histoire de l'art (40)**, sous Genre Homo, ancrée sur *Homo sapiens* : neuf grands styles de l'art préhistorique à l'art contemporain, sous-styles pour l'Antiquité, le Moyen Âge et l'art moderne ; de Blombos au Manifeste du surréalisme ; 16 périodes, 20 événements. Surtout européenne : arts d'Asie, d'Afrique et des Amériques à ajouter.
 - **L'esclavage (41)**, sous Genre Homo, ancrée sur *Homo sapiens* : Antiquité (Grèce, Rome, Spartacus), traites orientales, traite atlantique, abolitionnisme, esclavage contemporain ; du Code de Hammurabi à la loi Taubira ; 8 périodes, 15 événements.
 
