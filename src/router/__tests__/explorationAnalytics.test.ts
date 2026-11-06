@@ -65,6 +65,7 @@ it('reports each displayed position once, with how it was reached and how deep i
   expect(calls('timeline_position_viewed')).toEqual([expect.objectContaining({
     story_visibility: 'public', story_id: '7', story_title: 'Frise 7', own_story: false, signed_in: true, via: 'link', depth: 1,
     view: 'period', period_id: 'root-7', period_title: 'Période root-7',
+    child_count: 1, event_count: 1, has_previous: false, has_next: false, story_max_depth: 3,
   })]);
   view.getComponent(PeriodGrid).vm.$emit('period-click', tree('7')[1]); await flushPromises();
   expect(calls('timeline_position_viewed').at(-1)).toEqual(expect.objectContaining({ via: 'period', depth: 2, period_id: 'mid-7' }));
@@ -80,6 +81,12 @@ it('reports each displayed position once, with how it was reached and how deep i
 
   view.getComponent(PeriodGrid).vm.$emit('event-click', event('event-7')); await flushPromises();
   expect(calls('timeline_event_opened')).toEqual([expect.objectContaining({ story_id: '7', event_id: 'event-7', event_title: 'Événement event-7', depth: 2 })]);
+
+  // Entering a period without sub-period: a leaf, at the bottom of the frise.
+  view.getComponent(PeriodGrid).vm.$emit('period-click', tree('7')[2]); await flushPromises();
+  expect(calls('timeline_position_viewed').at(-1)).toEqual(expect.objectContaining({
+    via: 'period', depth: 3, period_id: 'leaf-7', child_count: 0, story_max_depth: 3, has_previous: false, has_next: false,
+  }));
 });
 
 it('counts a private frise without identifying it, nor its periods and events', async () => {

@@ -37,6 +37,7 @@
       <div ref="actionsRef" class="period-card__actions" :class="{ 'period-card__actions--hidden': !actionsFit }">
         <slot name="title-actions" />
       </div>
+      <span v-if="variant === 'parent'" class="period-card__return" aria-hidden="true">Retour</span>
       <Button v-if="variant === 'timeline' && period.hasChildren" class="period-card__drill" variant="ghost" size="xs" icon-only
         :disabled="loading" :aria-label="`Explorer les sous-périodes de ${period.label.fr}`" @click.stop="handleClick">
         <template #icon><Icon icon="mdi:arrow-right" aria-hidden="true" /></template>
@@ -233,9 +234,19 @@ const handleClick = () => {
   box-shadow: var(--shadow-md);
 }
 
-.period-card--parent:hover .main-container {
+.period-card--parent .main-container { transition: transform var(--transition-fast), background-color var(--transition-normal), box-shadow var(--transition-normal); }
+.period-card__return { display: inline-flex; align-items: center; gap: var(--spacing-xs); flex-shrink: 0; margin-left: auto; margin-right: var(--spacing-sm); font: var(--type-meta); color: var(--color-text-secondary); opacity: 0; transform: translateY(2px); transition: opacity var(--transition-fast), transform var(--transition-fast); }
+.period-card--parent:hover .period-card__return,
+.period-card--parent:focus-within .period-card__return { opacity: 1; transform: translateY(0); }
+.period-card--parent:hover .main-container,
+.period-card--parent:focus-within .main-container {
+  transform: translateY(-2px);
   background: var(--color-surface-raised-hover);
   box-shadow: var(--shadow-md);
+}
+@media (prefers-reduced-motion: reduce) {
+  .period-card--parent .main-container, .period-card__return { transition: none; transform: none; }
+  .period-card--parent:hover .main-container, .period-card--parent:focus-within .main-container { transform: none; }
 }
 
 .period-card.selected .main-container {

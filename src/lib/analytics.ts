@@ -57,6 +57,15 @@ export interface TimelineStoryProperties {
   signed_in: boolean;
 }
 
+/** Shape of a timeline position: a period without sub-period is a leaf, the bottom is `depth = story_max_depth`. */
+export interface TimelinePositionShape {
+  child_count: number;
+  event_count: number;
+  has_previous: boolean;
+  has_next: boolean;
+  story_max_depth: number;
+}
+
 export interface SearchCompletedProperties {
   surface: 'header' | 'page';
   outcome: 'story' | 'wikidata' | 'abandon';
@@ -90,7 +99,7 @@ export interface AnalyticsEvents {
   login_succeeded: Record<string, never>;
   login_failed: { reason: string };
   username_set: { first_time: boolean };
-  timeline_position_viewed: TimelineStoryProperties & {
+  timeline_position_viewed: TimelineStoryProperties & TimelinePositionShape & {
     view: 'overview' | 'period'; depth: number; via: TimelineVia; has_context: boolean; period_id?: string; period_title?: string;
   };
   timeline_event_opened: TimelineStoryProperties & { depth: number; event_id?: string; event_title?: string };

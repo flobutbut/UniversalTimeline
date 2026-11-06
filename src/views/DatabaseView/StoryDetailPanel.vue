@@ -327,11 +327,7 @@
                             > Aucune frise associée à cet événement. </div>
 
                           </section>
-                          <section class="event-detail-section" aria-label="Zone de danger">
-                            <h4 class="event-detail-section-title">Zone de danger</h4>
-                            <p class="event-detail-section-description">Cet événement sera retiré de cette frise. Il restera disponible dans le catalogue.</p>
-                            <Button variant="danger" size="sm" :disabled="panelBusy" @click="emit('remove-event', event.id)">Supprimer de cette frise</Button>
-                          </section>
+                          <EntityDangerZone description="Cet événement sera retiré de cette frise. Il restera disponible dans le catalogue." :busy="panelBusy" @remove="emit('remove-event', event.id)" />
                         </div>
                       </div>
                       <aside v-if="hasEventMetadata(event)" class="event-detail-metadata" aria-label="Métadonnées de l’événement">
@@ -409,6 +405,7 @@
 </template>
 
 <script setup lang="ts">
+import EntityDangerZone from './EntityDangerZone.vue';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import { resolveYearsBeforePresent } from '@temporal';
@@ -998,8 +995,8 @@ function childStoriesForColumn(colIdx: number): ChildStorySummary[] {
 .story-period-columns { display: flex; flex: none; flex-direction: column; min-height: 0; }
 .story-period-column--drop-target { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 .story-period-column--drop-target .finder-column-header, .story-period-column--drop-target .finder-column-content { background: var(--color-interaction-hover); }
-.story-period-columns :deep(.finder-item[draggable="true"] .finder-item-content) { cursor: grab; }
-.story-period-columns :deep(.anchored-story-row[draggable="true"] .anchored-story-row__link) { cursor: grab; }
+.story-period-columns :deep(.finder-item[draggable="true"] .finder-item-content) { cursor: pointer; }
+.story-period-columns :deep(.anchored-story-row[draggable="true"] .anchored-story-row__link) { cursor: pointer; }
 .story-period-row--dragging { opacity: .5; }
 .story-period-row--dragging :deep(.finder-item-content), .story-period-row--dragging :deep(.anchored-story-row__link) { cursor: grabbing; }
 .story-period-tree-workspace { display: grid; grid-template-columns: clamp(240px, 30%, 340px) minmax(0, 1fr); flex: none; background: var(--color-surface-default); }

@@ -39,11 +39,7 @@
           </section>
         </div>
         <div v-else class="story-period-detail__context"><p class="story-period-detail__empty">Cette période n’appartient pas encore à la frise. Ajoutez-la pour y organiser des sous-périodes et associer des frises.</p></div>
-        <section v-if="inStory" class="story-period-detail__danger" aria-label="Zone de danger">
-          <h4>Zone de danger</h4>
-          <p class="story-period-detail__hint">Cette période sera retirée de cette frise. Elle restera disponible dans le catalogue.</p>
-          <Button variant="danger" size="sm" :disabled="busy" @click="emit('remove', period.id)">Supprimer de cette frise</Button>
-        </section>
+        <EntityDangerZone v-if="inStory" class="story-period-detail__danger" description="Cette période sera retirée de cette frise. Elle restera disponible dans le catalogue." :busy="busy" @remove="emit('remove', period.id)" />
       </div>
       <aside v-if="hasMetadata" class="story-period-detail__metadata" aria-label="Métadonnées de la période">
         <section v-if="wikidataId" aria-label="Référence Wikidata">
@@ -61,6 +57,7 @@
 </template>
 
 <script setup lang="ts">
+import EntityDangerZone from './EntityDangerZone.vue';
 import { computed } from 'vue';
 import { Icon } from '@iconify/vue';
 import type { ListPeriod, ChildStorySummary, StorySummary } from '@/types/database';
@@ -130,8 +127,6 @@ const hasMetadata = computed(() => !!(wikidataId.value || recordDate(props.perio
 .story-period-detail__metadata h4 { color: var(--color-text-secondary); font: var(--type-label); }
 .story-period-detail__metadata .story-period-detail__reference { font: var(--type-meta); }
 .story-period-detail__metadata .story-period-detail__record { border: 0; padding: 0; }
-.story-period-detail__danger { border: 1px solid var(--color-status-error-foreground); border-radius: var(--radius-md); padding: var(--spacing-lg); }
-.story-period-detail__danger h4 { color: var(--color-status-error-foreground); }
 .story-period-detail__context :deep(.anchored-story-row:hover), .story-period-detail__context :deep(.anchored-story-row:focus-within) { outline: 1px solid var(--color-border-focus); outline-offset: -1px; }
 @container (min-width: 720px) {
   .story-period-detail__layout--with-metadata { grid-template-columns: minmax(0, 1fr) 200px; gap: var(--spacing-2xl); }
