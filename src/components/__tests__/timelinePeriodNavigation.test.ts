@@ -5,6 +5,7 @@ import PeriodCard from '@/views/HomeView/PeriodCard.vue';
 import { StoryApiService } from '@/services/StoryApiService';
 import type { ListPeriod } from '@/types/database';
 import {h} from 'vue';
+import { timelineBounds } from '@/services/TimelineScalingService';
 
 const period = (id: string, hasChildren = false): ListPeriod => ({
   id, label: { fr: id, en: '' }, startDate: 'M65', endDate: 'NOW', hasChildren, categories: [],
@@ -205,4 +206,27 @@ it('shows the full longer child and scales the parent, events and end label to t
   expect(parseFloat(event.style.left)).toBeCloseTo(parseFloat(parentElement.style.marginLeft), 6);
   expect(view.get('.period-grid__end-label').text()).toBe('Fin : 9 septembre 1945');
   expect(view.get('.period-card--parent').text()).toContain('1 septembre 1939');
+});
+
+it.each([
+  ['1804-03-21T12:00:00Z', '2000-01-01T00:00:00Z', false, false],
+  ['1804-03-21T11:59:59Z', '2000-01-01T00:00:00Z', true, false],
+  ['1804-03-21T12:00:00Z', '2000-01-01T00:00:01Z', false, true],
+])('compares calendar clipping at one instant, retaining a real one-second overhang (%s to %s)', (startDate, endDate, before, after) => {
+  const loadedAt = Date.UTC(2026, 10, 6, 12);
+  const bounds = timelineBounds([
+    { startDate: '1804-03-21T12:00:00Z', endDate: '2000-01-01T00:00:00Z' },
+  ], loadedAt)!;
+  vi.spyOn(Date, 'now').mockReturnValue(loadedAt + 60000);
+  const origin = { ...period('origin'), startDate, endDate };
+  view = mount(PeriodGrid, {
+    props: { periods: [{ ...period('empire'), startDate: '1804-05-18', endDate: '1815-06-22' }], events: [],
+      loading: false, currentPeriod: null, parentPeriod: null, currentStoryId: '2', storyBounds: bounds, overviewPeriod: origin },
+    slots: { 'overview-context': ({ style, continuation }) => h(PeriodCard, {
+      period: origin, variant: 'parent', isSelected: false, style, continuesBefore: continuation.before, continuesAfter: continuation.after,
+    }) },
+  });
+  const reference = view.get('.period-card--parent');
+  expect(reference.classes().includes('period-card--continues-before')).toBe(before);
+  expect(reference.classes().includes('period-card--continues-after')).toBe(after);
 });

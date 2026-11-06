@@ -152,6 +152,8 @@ Une période d’origine, ou la carte d’une frise déjà affichée comme péri
 - chaque extrémité qui dépasse se prolonge jusqu’au bord de l’écran, sans arrondi, pour distinguer une coupure d’une vraie borne temporelle ;
 - entièrement hors fenêtre ou sans dates, elle n’est pas dessinée ; le retour reste dans l’en-tête.
 
+Les bornes de la frise proviennent de ses périodes **et** de ses événements : un événement peut donc précéder sa première période. Le cadre conserve les textes de ces dates en plus des coordonnées numériques, afin de comparer les bornes, les cartes et le repère de retour au même instant de référence. Des dates égales ne constituent pas une coupure, même si le chargement du repère arrive plus tard.
+
 Pour une frise affichée comme période à la racine, en l’absence d’une référence chronologique déclarée, le repère reprend la carte existante et les bornes de la frise liée. La cible s’ouvre en vue d’ensemble ; le clic sur ce repère rétablit la position quittée. Le repère se reconstruit depuis le rattachement et l’historique de navigation, y compris après rechargement, sans période ajoutée au catalogue.
 
 Une entrée depuis un événement ou un simple lien à la racine d’une frise ne fabrique aucune période à partir du nom de la source. Le retour reste disponible dans l’en-tête. Des dates inconnues ne justifient pas un positionnement arbitraire sur l’axe.

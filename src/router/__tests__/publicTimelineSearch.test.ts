@@ -425,3 +425,23 @@ it('crosses a displayed frise using the real horizontal controls and restores th
   expect(router.currentRoute.value.query).toEqual({ story: '2', view: 'overview' });
   expect(view.get('button[data-period-direction="previous"]').text()).toContain('revolution');
 });
+
+it('does not mark the frise return as clipped when its event boundary and the viewport have the same calendar date', async () => {
+  let clock = Date.UTC(2026, 10, 6, 12);
+  vi.spyOn(Date, 'now').mockImplementation(() => clock++);
+  vi.mocked(stories.getListStories).mockResolvedValue([summary('1'), {
+    ...summary('2'), startDate: '1804-03-21', endDate: 'TODAY',
+  }]);
+  vi.mocked(stories.getStory).mockImplementation(async id => storyFixture(id,
+    id === '1' ? [{ ...period('revolution'), startDate: '1789', endDate: '1799', hasChildren: false }]
+      : [{ ...period('empire'), startDate: '1804-05-18', endDate: '1815-06-22', hasChildren: false },
+        { ...period('republic'), startDate: '1958-10-04', endDate: 'TODAY', hasChildren: false }],
+    id === '1' ? [] : [{ ...event('civil-code'), date: '1804-03-21', dateYearsBP: 222.616 }],
+    id === '1' ? [{ id: '2', title_fr: 'Régimes politiques', atRoot: true, rootDisplayAsPeriod: true, anchors: [] }] : []));
+  await start('/timeline?story=1&period=revolution');
+  await view.get('button[data-period-direction="next"]').trigger('click'); await flushPromises();
+  const reference = view.get('.period-card--parent');
+  expect(reference.classes()).not.toContain('period-card--continues-before');
+  expect(reference.classes()).not.toContain('period-card--continues-after');
+  expect(view.getComponent(PeriodGrid).props('storyBounds')).toMatchObject({ startDate: '1804-03-21', endDate: 'TODAY' });
+});

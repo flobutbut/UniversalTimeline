@@ -179,7 +179,7 @@ watch([() => props.items, () => props.loading], async () => {
 
 .story-breadcrumb--compact .story-breadcrumb__list { flex-wrap: nowrap; }
 .story-breadcrumb--compact .story-breadcrumb__step { flex: 0 1 auto; align-items: center; }
-.story-breadcrumb--compact .story-breadcrumb__item { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.story-breadcrumb--compact .story-breadcrumb__item:not(.story-breadcrumb__current-control) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .story-breadcrumb__overflow { display: flex; flex: 0 0 auto; }
 .story-breadcrumb__overflow :deep(.base-select__wrapper) { display: flex; }
 .story-breadcrumb__overflow :deep(.story-breadcrumb__menu) { right: auto; width: min(320px, calc(100vw - 32px)); max-height: min(320px, 60dvh); padding: var(--spacing-xs); overflow-y: auto; }

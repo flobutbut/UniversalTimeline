@@ -12,6 +12,7 @@ import { storyNavigationLinks, indexStoryNavigationLinks, rootStoryNavigationLin
 import { timelineHierarchy } from '@/lib/timelineHierarchy';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import { linkedStoryPeriods, linkedStoryPreviewPeriods } from '@/lib/linkedStoryPeriods';
+import { periodCoordinates, timelineBounds, type TimelineBounds } from '@/services/TimelineScalingService';
 
 const ENTRY_STORY_ID = '1';
 
@@ -33,7 +34,7 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   const currentStoryId = ref(ENTRY_STORY_ID);
   const currentStoryPeriods = ref<ListPeriod[]>([]);
   const currentStoryAllEvents = ref<ListEvent[]>([]);
-  const currentStoryBounds = ref<{ startYearsBP?: number; endYearsBP?: number } | null>(null);
+  const currentStoryBounds = ref<TimelineBounds | null>(null);
   const navigationContexts = ref<NavigationContext[]>([]);
   const contextId = ref<string | null>(null);
   const referencePeriodId = ref<string | null>(null);
@@ -105,11 +106,13 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   // A reference keeps its real dates and never extends the destination's temporal window.
   const contextBar = computed<ListPeriod|null>(()=>{
     const period=navigationReference.value?.period,bounds=currentStoryBounds.value;
-    if(!period||bounds?.startYearsBP==null||bounds.endYearsBP==null)return null;
+    if(!period||!bounds)return null;
     const now=Date.now();
+    const frame=periodCoordinates(bounds,now);
+    if(frame.start===null||frame.end===null)return null;
     const start=comparableYearsBeforePresent(period.startDate,period.startYearsBP,now);
     const end=comparableYearsBeforePresent(period.endDate,period.endYearsBP,now);
-    return start!==null&&end!==null&&Math.min(start,bounds.startYearsBP)>Math.max(end,bounds.endYearsBP)?period:null;
+    return start!==null&&end!==null&&Math.min(start,frame.start)>Math.max(end,frame.end)?period:null;
   });
   const returnTitle = computed(()=>{
     if(currentPeriod.value)return null;
@@ -292,12 +295,10 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
       currentStoryPeriods.value = storyPeriods;
       currentStoryAllEvents.value = storyEventRows;
       const now = Date.now();
-      const bounds = [...storyPeriods.flatMap(period => [
-        comparableYearsBeforePresent(period.startDate, period.startYearsBP, now),
-        comparableYearsBeforePresent(period.endDate, period.endYearsBP, now),
-      ]), ...storyEventRows.map(event => comparableYearsBeforePresent(event.date, event.dateYearsBP, now))]
-        .filter((value): value is number => value != null && Number.isFinite(value));
-      currentStoryBounds.value = bounds.length ? { startYearsBP: Math.max(...bounds), endYearsBP: Math.min(...bounds) } : null;
+      currentStoryBounds.value = timelineBounds([...storyPeriods, ...storyEventRows.map(event => ({
+        startDate: event.date, endDate: event.date, startYearsBP: event.dateYearsBP, endYearsBP: event.dateYearsBP,
+      }))], now);
+      const bounds = currentStoryBounds.value ? [currentStoryBounds.value.startYearsBP, currentStoryBounds.value.endYearsBP] : [];
       const restored = focusPath ? { stack: focusPath.slice(0,-1), current: focusPath[focusPath.length-1] } : restorePeriodNav ? resolvePeriodNavFromSnapshot(storyPeriods, restorePeriodNav) : null;
       parentStack.value = restored?.stack ?? [];
       currentPeriod.value = restored?.current ?? null;

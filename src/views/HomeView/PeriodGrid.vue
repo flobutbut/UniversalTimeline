@@ -142,7 +142,7 @@ import type { ListPeriod, ListEvent, Story, StoryAnchor } from '@/types/database
 import { timelineHierarchy } from '@/lib/timelineHierarchy';
 import { layoutSequentialLanes } from '@/lib/sequentialTimelineLanes';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
-import { periodCoordinates } from '@/services/TimelineScalingService';
+import { periodCoordinates, type ScalablePeriod } from '@/services/TimelineScalingService';
 import { listEventYearsBP } from '@/lib/listEventTableHelpers';
 import { useTimelineScaling } from '@/composables/useTimelineScaling';
 import { usePeriodFlip } from '@/composables/usePeriodFlip';
@@ -179,7 +179,7 @@ const props = withDefaults(defineProps<{
   /** Real reference dates, projected into the narrative window without framing it. */
   overviewPeriod?: ListPeriod | null;
   /** Bornes de la story courante : cadre fixe quand aucun currentPeriod n'est actif. */
-  storyBounds?: { startYearsBP?: number; endYearsBP?: number } | null;
+  storyBounds?: ScalablePeriod | null;
   currentStoryId: string;
   /** Infobulle des périodes (titre, dates, courte description) ; désactivée par défaut. */
   periodTooltips?: boolean;
@@ -349,7 +349,9 @@ watch(
   () => {
     // Le cadre inclut la référence et les périodes affichées, même si un enfant déborde.
     const framingPeriod = props.currentPeriod ?? props.storyBounds ?? undefined;
-    try { updateFromPeriods(datedPeriodRows.value.map(row => ({ startYearsBP: row.start, endYearsBP: row.end })), framingPeriod); }
+    const nativeIds = new Set(props.periods.map(period => period.id));
+    // Re-read native dates at the layout's clock; linked cards retain their clipped framing bounds.
+    try { updateFromPeriods(datedPeriodRows.value.map(row => nativeIds.has(row.p.id) ? row.p : { startYearsBP: row.start, endYearsBP: row.end }), framingPeriod); }
     catch (e) { error.value = e instanceof Error ? e.message : 'Erreur de calcul'; }
   },
   { immediate: true }
@@ -359,8 +361,8 @@ watch(
 
 const rawLayouts = computed(() => {
   const map = new Map<string, { left: number; width: number; top: number }>();
-  for (const { p: period, start, end } of sortedPeriodRows.value) {
-    const s = getPeriodLayoutStyle({ startYearsBP: start, endYearsBP: end }, {
+  for (const { p: period } of sortedPeriodRows.value) {
+    const s = getPeriodLayoutStyle(period, {
       row: laneMap.value.get(period.id) ?? 0,
       rowHeight: laneHeight.value,
     });
