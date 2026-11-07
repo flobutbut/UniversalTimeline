@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { expect, it, vi } from 'vitest';
-import { timelineResponse } from '../../../serverless/timelineResponse';
-import { renderSitemap, sitemapResponse } from '../../../serverless/sitemap';
+import { timelineResponse } from '../../../server/src/api/seo/timelineResponse';
+import { renderSitemap, sitemapResponse } from '../../../server/src/api/seo/sitemap';
 import { SITE_ORIGIN } from '../metadata';
 
 const shell = '<html><head><title>Generic</title></head><body><div id="app"></div><script src="/assets/app.js"></script></body></html>';

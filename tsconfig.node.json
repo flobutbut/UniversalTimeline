@@ -10,5 +10,5 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["vite.config.ts", "scripts/seo-plugin.ts", "middleware.ts", "src/seo/metadata.ts", "serverless/**/*.ts"]
+  "include": ["vite.config.ts", "scripts/seo-plugin.ts", "src/seo/metadata.ts", "server/src/api/seo/timelineResponse.ts", "server/src/api/seo/sitemap.ts", "server/src/shared/seoMetadata.ts"]
 }

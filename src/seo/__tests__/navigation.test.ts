@@ -7,7 +7,6 @@ import { installSeo } from '../installSeo';
 import { appRoutes } from '@/router/routes';
 import { SEO_PATHS } from '../metadata';
 import { readFileSync } from 'node:fs';
-import { config as middlewareConfig } from '../../../middleware';
 
 let stop: (() => void) | undefined;
 afterEach(() => { stop?.(); });
@@ -61,5 +60,7 @@ it('keeps every declared production route and alias routable through Vercel', ()
   for (const name of legal) expect(rules.some((rule: { src?: string; status?: number }) => rule.src && !rule.status && new RegExp(rule.src).test(`/legal/${name}`))).toBe(true);
   expect(rules.at(-1)).toMatchObject({ status: 404, dest: '/404.html' });
   expect(config.rewrites[0]).toMatchObject({ source: '/api/(.*)', destination: { service: 'server' } });
-  expect(middlewareConfig.matcher).toContain('/sitemap.xml');
+  for (const source of ['/timeline', '/timeline/', '/sitemap.xml']) {
+    expect(config.rewrites.find((rule: { source: string }) => rule.source === source)?.destination).toEqual({ service: 'server' });
+  }
 });
