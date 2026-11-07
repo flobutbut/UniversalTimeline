@@ -16,6 +16,23 @@ interface StorySnapshotRow extends StoryRow {
   related_stories: Array<Pick<StoryRow, 'id' | 'title_fr' | 'title_en'> & { period_ids: string[]; event_ids: string[] }>;
 }
 
+/** Explicit public predicate also protects the response for authenticated callers. */
+export async function findPublicStoryMetadata(db: TransactionClient, id: string) {
+  return (await db.query<Pick<StoryRow, 'id' | 'title_fr' | 'title_en' | 'description_fr' | 'description_en'>>(`
+    SELECT id, title_fr, title_en, description_fr, description_en
+    FROM public.stories WHERE id = $1 AND is_public = true
+  `, [id])).rows[0];
+}
+
+export async function listPublicSitemapStories(db: TransactionClient) {
+  return (await db.query<Pick<StoryRow, 'id'>>(`
+    SELECT id FROM public.stories
+    WHERE is_public = true AND btrim(COALESCE(title_fr, title_en, '')) <> ''
+      AND btrim(COALESCE(NULLIF(description_fr, ''), description_en, '')) <> ''
+    ORDER BY id
+  `)).rows.map(row => String(row.id));
+}
+
 /** One statement and one RLS snapshot for the whole frise, including its navigation links. */
 export async function findStorySnapshot(db: TransactionClient, id: string) {
   return (await db.query<StorySnapshotRow>(`

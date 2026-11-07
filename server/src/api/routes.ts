@@ -20,6 +20,16 @@ import { parseGeneratedStory, parseGeneratedStoryLookup } from './wikidataGenera
 import { createGeneratedStory, findExistingGeneratedStories } from '../services/wikidataGeneration.js';
 
 const router = express.Router();
+router.get('/seo/stories', endpoint('Le catalogue public est indisponible.', async (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.set('X-Robots-Tag', 'noindex');
+  res.json(await stories.listPublicSitemapStories());
+}));
+router.get('/seo/stories/:id', endpoint('Les informations publiques de la frise sont indisponibles.', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.set('X-Robots-Tag', 'noindex');
+  res.json(await stories.getPublicStoryMetadata(parseStoryId(req.params.id)));
+}));
 router.get('/search/by-generation-keys', endpoint('Erreur lors du rapprochement des faits.', async (req, res) => {
   const keys = parseCsvIds(req.query.keys, 'keys');
   if (keys.some(key => !/^(entity:Q[1-9]\d*|fact:Q[1-9]\d*:P[1-9]\d*:q[1-9]\d*\$[0-9a-f-]{36})$/.test(key))) throw new InputValidationError('keys', 'Une identité de fait est invalide.');
