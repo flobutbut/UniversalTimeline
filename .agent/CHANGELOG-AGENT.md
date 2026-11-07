@@ -2,6 +2,10 @@
 
 # Changelog — documentation agent
 
+## 2026-11-07 — Comparaison de deux frises dans l’exploration
+
+Un bouton « Ajouter une frise », centré sous la timeline, place une seconde frise en dessous (paramètre `compare`). Les deux frises utilisent PeriodGrid, PeriodCard et EventCard. Chacune garde ses périodes, ses événements et sa navigation de timeline, sur place. La dernière frise utilisée fixe l’échelle ; l’autre la suit et descend seule au niveau qui couvre le cadre, avec son propre fil d’Ariane et sans borne de fin. Le survol d’une période étroite agrandit le même intervalle dans les deux frises, et le glissement horizontal anime les deux ensemble. Un même événement présent dans les deux frises est relié par un trait vertical, discret puis renforcé au survol. Avec deux frises, l’affichage passe en compact (une ligne par période, titres figés sur une ligne) ; une bande `--color-timeline-separator` les sépare. Correctifs liés : la hauteur des rangées suit un changement de densité sans attendre un survol, et la rangée des périodes est rognée par `overflow: clip` (elle ne défile plus après un focus au bord). Aucun événement d’audience ajouté. Tests du module, de la grille, d’une frise et de la vue avec `compare` ; vérification complète et navigateur (bureau et 375 px).
+
 ## 2026-11-06 — Menu des frises associées dans le fil d’Ariane
 
 Le conteneur introduit pour aligner le sélecteur courant héritait de la troncature des libellés du breadcrumb compact : les options existaient mais leur panneau était entièrement masqué par `overflow: hidden`. La troncature est désormais limitée aux étapes textuelles ; le sélecteur garde celle de son propre libellé et peut afficher son menu. Vérification visuelle du panneau et de la sélection d’une destination dans le navigateur interne.

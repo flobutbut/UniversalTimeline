@@ -320,6 +320,11 @@ const displayDate = computed(() => {
   line-clamp: 2;
   overflow: hidden;
 }
+/* Frise compacte : le titre figé tient sur une ligne ; la bulle complète revient au survol. */
+.period-grid--compact .event-card.is-default-open:not(:hover, :focus-within, .is-selected) .event-label {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
 .event-card:hover,
 .event-card:focus-within,
 .event-card.is-selected {

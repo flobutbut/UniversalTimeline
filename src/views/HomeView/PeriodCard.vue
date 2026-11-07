@@ -8,6 +8,7 @@
         loading,
         'has-children': period.hasChildren,
         'period-card--expanded': expanded,
+        'period-card--compact': compact,
         'period-card--wrap': wrapContent,
         'period-card--child': !!parentLabel,
         'period-card--continues-before': continuesBefore,
@@ -57,7 +58,7 @@ import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
 import WikipediaLink from '@/components/WikipediaLink.vue';
 import { formatPeriodDateRange } from '@/lib/formatTemporalBoundLabel';
-import { measureTextWidth, periodTextWidths } from '@/lib/measureTextWidth';
+import { measureTextWidth, periodTextExtent, periodTextWidths } from '@/lib/measureTextWidth';
 import type { ListPeriod } from '@/types/database';
 
 const props = withDefaults(
@@ -72,6 +73,8 @@ const props = withDefaults(
     parentLabel?: string;
     continuesBefore?: boolean;
     continuesAfter?: boolean;
+    /** Nom et dates sur une seule ligne, avec les mêmes marges intérieures. */
+    compact?: boolean;
   }>(),
   { variant: 'timeline' }
 );
@@ -101,8 +104,7 @@ function measureActions() {
   const actionsWidth = actions.offsetWidth;
   if (actionsWidth === 0 || props.wrapContent) { actionsFit.value = true; return; }
   const gap = parseFloat(getComputedStyle(main).columnGap) || 0;
-  const widths = periodTextWidths(content, false);
-  const needed = Math.max(0, ...widths);
+  const needed = periodTextExtent(content, false);
   // Espace partagé par le texte et les actions : celui du texte, plus celui des actions quand elles sont dans le flux.
   const shared = content.clientWidth + (actionsFit.value ? actionsWidth + gap : 0);
   actionsFit.value = Math.ceil(needed) + gap + actionsWidth <= shared;
@@ -114,7 +116,9 @@ function measureLink(content: HTMLElement) {
   const header = content.querySelector<HTMLElement>('.period-header');
   if (!title || !link || !header || props.wrapContent) { linkFits.value = true; return; }
   const gap = parseFloat(getComputedStyle(header).columnGap) || 0;
-  linkFits.value = Math.ceil(measureTextWidth(title) + gap + link.offsetWidth) <= content.clientWidth;
+  // Compacte : les dates partagent la ligne du nom et de son lien.
+  const dates = props.compact ? Math.max(0, ...periodTextWidths(content, false).slice(1)) + (parseFloat(getComputedStyle(content).columnGap) || 0) : 0;
+  linkFits.value = Math.ceil(measureTextWidth(title) + gap + link.offsetWidth + dates) <= content.clientWidth;
 }
 
 onMounted(() => {
@@ -124,7 +128,7 @@ onMounted(() => {
   for (const el of [mainRef.value, actionsRef.value]) if (el) observer.observe(el);
 });
 onBeforeUnmount(() => observer?.disconnect());
-watch(() => [props.period.label.fr, periodDateRange.value, props.wrapContent], measureActions, { flush: 'post' });
+watch(() => [props.period.label.fr, periodDateRange.value, props.wrapContent, props.compact], measureActions, { flush: 'post' });
 
 const handleClick = () => {
   if (props.loading) return;
@@ -366,5 +370,17 @@ const handleClick = () => {
 </style>
 
 <style scoped>
+/* Compacte : nom et dates sur une seule ligne ; mêmes marges, la rangée ne garde que la hauteur d'une ligne. */
+.period-card--compact.period-card--timeline { height: calc(var(--line-height-body) + var(--spacing-xs) * 2); }
+.period-card--compact.period-card--parent { min-height: calc(var(--line-height-body) + var(--spacing-xs) * 2); }
+.period-card--compact .card-content { flex-direction: row; align-items: baseline; justify-content: flex-start; gap: var(--spacing-sm); }
+.period-card--compact .period-header { flex: 0 1 auto; }
+/* Le nom passe avant les dates quand la place manque. */
+.period-card--compact .period-footer { flex: 0 9999 auto; min-width: 0; overflow: hidden; }
+.period-card--compact.period-card--wrap .card-content { flex-wrap: wrap; }
+/* Badge des frises associées à la hauteur de la ligne compacte. */
+.period-card--compact :deep(.associated-stories__badge) { min-height: var(--line-height-body); padding: 0 var(--spacing-xs) 0 var(--spacing-sm); gap: var(--spacing-xs); border-radius: var(--radius-sm); }
+.period-card--compact :deep(.associated-stories__arrow) { width: 14px; height: 14px; }
+.period-card--compact .period-card__actions { gap: var(--spacing-xs); }
 .period-card--child .main-container { border-left: 2px solid var(--color-border-dark); padding-left: var(--spacing-lg); }
 </style>

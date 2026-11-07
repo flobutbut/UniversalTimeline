@@ -14,3 +14,12 @@ export function periodTextWidths(card: HTMLElement, withLink = true): number[] {
   const titleWidth = title ? measureTextWidth(title) + (link ? link.offsetWidth + gap : 0) : 0;
   return [titleWidth, ...Array.from(card.querySelectorAll<HTMLElement>('.period-info'), measureTextWidth)];
 }
+
+/** Largeur utile du texte : la plus longue des deux lignes, ou leur somme quand une carte compacte les aligne. */
+export function periodTextExtent(card: HTMLElement, withLink = true): number {
+  const widths = periodTextWidths(card, withLink).filter(width => width > 0);
+  if (!card.closest('.period-card--compact')) return Math.max(0, ...widths);
+  const content = card.matches('.card-content') ? card : card.querySelector<HTMLElement>('.card-content');
+  const gap = content ? parseFloat(getComputedStyle(content).columnGap) || 0 : 0;
+  return widths.reduce((sum, width) => sum + width, 0) + gap * Math.max(0, widths.length - 1);
+}

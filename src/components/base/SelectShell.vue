@@ -165,6 +165,14 @@ defineExpose({
   max-width: min(560px, 92vw);
 }
 
+/* Panneau ouvert au-dessus du champ, pour un sélecteur posé en bas de la vue. */
+.base-select__dropdown--above {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: var(--spacing-xs);
+}
+
 .base-select__dropdown--tall {
   max-height: min(70vh, 520px);
 }

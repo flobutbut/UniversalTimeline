@@ -1,15 +1,17 @@
 import { computed, onScopeDispose, ref, watch, type Ref } from 'vue';
-import { periodTextWidths } from '@/lib/measureTextWidth';
+import { periodTextExtent } from '@/lib/measureTextWidth';
 
 /** Mesure le texte avant l'agrandissement et réserve aussi la place des actions. */
 export function useTimelinePeriodExpansion(
   activeId: () => string | null,
   anchor: (id: string) => HTMLElement | null,
   row: Ref<HTMLElement | null>,
+  /** Hauteur d'une rangée au repos : plus basse pour des cartes compactes sur une ligne. */
+  baseLaneHeight: () => number = () => 56,
 ) {
   const requiredPixels = ref(0);
   const rowWidth = ref(0);
-  const laneHeight = ref(56);
+  const laneHeight = ref(baseLaneHeight());
   const wrapContent = ref(false);
   let textPixels = 0;
   let paddingPixels = 0;
@@ -31,14 +33,14 @@ export function useTimelinePeriodExpansion(
     // à la ligne n'est utile que si la frise entière ne suffit pas, une fois atteinte.
     wrapContent.value = !!card && rowWidth.value > 0 && requiredPixels.value > rowWidth.value
       && card.getBoundingClientRect().width >= rowWidth.value - 1;
-    laneHeight.value = card ? Math.max(56, Math.ceil(card.getBoundingClientRect().height) + 4) : 56;
+    laneHeight.value = card ? Math.max(baseLaneHeight(), Math.ceil(card.getBoundingClientRect().height) + 4) : baseLaneHeight();
   }
 
   watch(activeId, id => {
     const card = id && anchor(id);
     requiredPixels.value = 0;
     textPixels = paddingPixels = 0;
-    laneHeight.value = 56;
+    laneHeight.value = baseLaneHeight();
     wrapContent.value = false;
     if (!card) return;
     const main = card.querySelector<HTMLElement>('.main-container');
@@ -50,8 +52,7 @@ export function useTimelinePeriodExpansion(
     }, 0);
     // Mesurer le texte lui-même : le h3 peut être étroit sans déborder, car son
     // bouton/span enfant masque déjà le texte. Cela vaut aussi sans badge ni flèche.
-    const widths = periodTextWidths(card);
-    textPixels = Math.max(0, ...widths);
+    textPixels = periodTextExtent(card);
     measureFrame();
   }, { flush: 'sync' });
 
@@ -69,6 +70,8 @@ export function useTimelinePeriodExpansion(
       }
     }
   }, { flush: 'post', immediate: true });
+  // Changer de densité change la hauteur des cartes : la rangée suit sans attendre un survol.
+  watch(baseLaneHeight, measureFrame, { flush: 'post' });
   onScopeDispose(() => observer?.disconnect());
 
   return {

@@ -38,6 +38,7 @@ Mis à jour le 2 novembre 2026 après consolidation du design system. Les routes
 - `StorySettingsForm`, `StoryCategoriesForm`, `StoryRelationsPanel`, `StoryMembershipField` éditent leurs domaines respectifs avec les primitives partagées.
 - `EditModal` est le formulaire de création/édition et d'import Wikidata. StoryRelatedPickerModal, ParentStoryPickerModal, RootPeriodModal, MoveStoryPeriodModal et StoryFromPeriodModal couvrent les dialogues métier actifs.
 - `HomeView` / `PeriodGrid` / `PeriodCard` / `EventCard` portent l'exploration ; AssociatedStoriesBadge et StoryBreadcrumb fournissent les liens et le contexte.
+- Comparaison de deux frises dans `HomeView` : `useTimelineComparisonLane` (une frise : navigation de timeline en tête, niveau suivi sinon), `useTimelineComparisonLinks` (traits entre événements communs, repérés par `data-event-id`) et le module pur `src/lib/timelineComparison.ts`. PeriodGrid accepte en option `scaleFrame`, `externalFocus`, `hideEndBound` et `compact`, et expose `getScaleFrame()` / `getFocus()` ; sans ces options, la timeline est inchangée. PeriodCard a une variante `compact` (nom et dates sur une ligne, badge des frises associées à la hauteur de ligne). SelectShell propose `base-select__dropdown--above` pour ouvrir un panneau au-dessus du champ.
 - `StoryTimeline` fournit la miniature et la visualisation intégrée. Les éléments sans date utilisent Button, comme PeriodGrid.
 
 ## Référence et contrôles
