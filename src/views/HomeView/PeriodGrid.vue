@@ -1,5 +1,5 @@
 <template>
-  <div class="period-grid" :aria-busy="loading || undefined">
+  <div class="period-grid" :class="{ 'period-grid--compact': compact }" :aria-busy="loading || undefined">
     <!-- Garder le niveau courant affiché pendant une navigation ou une recherche de stories. -->
     <FeedbackState v-if="loading && !currentPeriod && periods.length === 0 && events.length === 0" kind="loading" message="Chargement de la timeline…" />
     <FeedbackState v-else-if="error" kind="error" :message="error" />
@@ -29,6 +29,7 @@
             v-if="props.currentPeriod"
             ref="parentBarRef"
             variant="parent"
+            :compact="compact"
             :period="props.currentPeriod"
             :style="parentBarStyle"
             :continues-before="parentContinuation.before"
@@ -56,6 +57,7 @@
               :ref="(el: any) => setPeriodRef(el, period.id)"
               :period="period"
               :parent-label="childParentLabels.get(period.id)"
+              :compact="compact"
               :is-selected="false"
               class="timeline-card period-grid__period-position"
               :expanded="activePeriodId === period.id"
@@ -111,6 +113,7 @@
         <EventCard
           v-for="event in events"
           :key="event.id"
+          :data-event-id="event.id"
           :event="event"
           :undated="listEventYearsBP(event) === null"
           :is-selected="selectedEvent?.id === event.id"
@@ -180,12 +183,20 @@ const props = withDefaults(defineProps<{
   overviewPeriod?: ListPeriod | null;
   /** Bornes de la story courante : cadre fixe quand aucun currentPeriod n'est actif. */
   storyBounds?: ScalablePeriod | null;
+  /** Échelle imposée par une autre frise : positions rapportées à ce cadre, sans l'élargir aux périodes affichées. */
+  scaleFrame?: ScalablePeriod | null;
+  /** Périodes sur une seule ligne et titres d'événements figés sur une ligne. */
+  compact?: boolean;
+  /** Masque la borne « Fin : … » : une frise qui suit l’échelle d’une autre n’a pas de fin de vue à annoncer. */
+  hideEndBound?: boolean;
+  /** Agrandissement survolé dans une autre frise sur la même échelle (voir `getFocus`). */
+  externalFocus?: { start: number; end: number; minimum: number } | null;
   currentStoryId: string;
   /** Infobulle des périodes (titre, dates, courte description) ; désactivée par défaut. */
   periodTooltips?: boolean;
   /** Home shares its cached frise read with the cards. Standalone grids can load their own metadata. */
   loadStoryDetails?: (id: string, signal: AbortSignal) => Promise<Story>;
-}>(), { periodTooltips: false, linkedPeriods: () => [], childPeriods: () => [], childLinkedPeriods: () => [], showChildren: false });
+}>(), { compact: false, periodTooltips: false, linkedPeriods: () => [], childPeriods: () => [], childLinkedPeriods: () => [], showChildren: false });
 
 const emit = defineEmits<{
   (e: 'period-click', period: ListPeriod): void;
@@ -195,7 +206,7 @@ const emit = defineEmits<{
   (e: 'story-select', storyId: string, anchor?: StoryAnchor): void;
 }>();
 
-const { updateFromPeriods, getPeriodLayoutStyle, getEventLayoutStyle, getPeriodContinuation } = useTimelineScaling();
+const { updateFromPeriods, getPeriodLayoutStyle, getEventLayoutStyle, getPeriodContinuation, startYears, totalDuration } = useTimelineScaling();
 
 const error = ref<string | null>(null);
 const selectedEvent = ref<ListEvent | null>(null);
@@ -229,6 +240,10 @@ const eventsSurfaceRef = ref<HTMLElement | null>(null);
 defineExpose({
   getSlideLayers: () => [periodSurfaceRef.value, timelineLineRef.value, undatedPeriodsRef.value, eventsSurfaceRef.value]
     .filter((element): element is HTMLElement => element !== null),
+  /** Cadre réellement affiché, pour aligner une autre frise sur la même échelle. */
+  getScaleFrame: () => totalDuration.value > 0 ? { startYearsBP: startYears.value, endYearsBP: startYears.value - totalDuration.value } : null,
+  /** Agrandissement de la période survolée ici, à reporter sur une autre frise de même échelle. */
+  getFocus: () => ownFocus.value,
 });
 
 function setPeriodRef(el: unknown, id: string) {
@@ -257,11 +272,12 @@ const { minimumPct, laneHeight, wrapContent } = useTimelinePeriodExpansion(
   () => activePeriodId.value,
   id => periodElMap.get(id) ?? null,
   periodRowRef,
+  () => props.compact ? 34 : 56,
 );
 /** Borne de fin de la vue affichée à la place de « Période suivante » quand il n'y en a pas. */
 const currentPeriodEnd = computed(() => {
   const period = props.currentPeriod;
-  if (!period?.endDate?.trim()) return null;
+  if (props.hideEndBound || !period?.endDate?.trim()) return null;
   const now = Date.now();
   const latest = [period, ...props.periods].flatMap(candidate => {
     const end = periodCoordinates(candidate, now).end;
@@ -345,8 +361,9 @@ const numLanes = computed(() =>
 const periodRowHeight = computed(() => numLanes.value * laneHeight.value);
 
 watch(
-  [datedPeriodRows, () => props.currentPeriod, () => props.storyBounds],
+  [datedPeriodRows, () => props.currentPeriod, () => props.storyBounds, () => props.scaleFrame],
   () => {
+    if (props.scaleFrame) { updateFromPeriods([], props.scaleFrame); return; }
     // Le cadre inclut la référence et les périodes affichées, même si un enfant déborde.
     const framingPeriod = props.currentPeriod ?? props.storyBounds ?? undefined;
     const nativeIds = new Set(props.periods.map(period => period.id));
@@ -375,15 +392,16 @@ const rawLayouts = computed(() => {
   return map;
 });
 
-const projectPosition = (position: number): number => {
-  if (activePeriodId.value) {
-    const hov = rawLayouts.value.get(activePeriodId.value);
-    if (hov && hov.width < minimumPct.value) {
-      return timelineFocusTransform(position, hov.left, hov.left + hov.width, minimumPct.value);
-    }
-  }
-  return position;
-};
+/** Période trop étroite survolée ici : l'intervalle agrandi, en %, et sa largeur visée. */
+const ownFocus = computed(() => {
+  if (!activePeriodId.value) return null;
+  const hov = rawLayouts.value.get(activePeriodId.value);
+  return hov && hov.width < minimumPct.value ? { start: hov.left, end: hov.left + hov.width, minimum: minimumPct.value } : null;
+});
+/** Le survol local prime ; sinon une frise sur la même échelle peut imposer le sien. */
+const focus = computed(() => ownFocus.value ?? props.externalFocus ?? null);
+const projectPosition = (position: number): number =>
+  focus.value ? timelineFocusTransform(position, focus.value.start, focus.value.end, focus.value.minimum) : position;
 
 const getPeriodCssVars = (period: ListPeriod): Record<string, string> => {
   const raw = rawLayouts.value.get(period.id);
@@ -643,6 +661,8 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
   position: relative;
   width: 100%;
   overflow: hidden;
+  /* Rogner sans créer de zone défilable : le focus d'une carte agrandie au bord ne décale plus la rangée. */
+  overflow: clip;
 }
 
 .timeline-line {

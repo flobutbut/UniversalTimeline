@@ -48,6 +48,8 @@
   --color-data-period-root: var(--palette-green-600);
   --color-data-event: var(--palette-copper-600);
   --color-data-frise: var(--palette-purple-600);
+  /* Bande qui sépare deux frises comparées ; chaque frise garde le fond de l’application. */
+  --color-timeline-separator: var(--palette-neutral-950);
   --color-switch-track-off: var(--palette-neutral-500);
   --color-switch-thumb: var(--palette-neutral-0);
   --shadow-sm: 0 1px 2px rgb(24 24 27 / 6%);
@@ -176,6 +178,7 @@
   --color-data-period-root: var(--palette-green-400);
   --color-data-event: var(--palette-copper-400);
   --color-data-frise: var(--palette-purple-400);
+  --color-timeline-separator: var(--palette-neutral-950);
   --color-switch-track-off: var(--palette-neutral-400);
   --color-switch-thumb: var(--palette-neutral-950);
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 35%);
