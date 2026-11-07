@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
+import { seoPlugin } from './scripts/seo-plugin'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), seoPlugin()],
+  define: { 'import.meta.env.VITE_SEO_INDEXING_ALLOWED': JSON.stringify(process.env.VERCEL_ENV !== 'preview') },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

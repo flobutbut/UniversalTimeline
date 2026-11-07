@@ -14,6 +14,12 @@ import { creatorAuthor, editorAuthor } from './storyAuthor.js';
 import { principalContext } from '../auth/context.js';
 
 const db = { query };
+export const listPublicSitemapStories = () => stories.listPublicSitemapStories(db);
+export async function getPublicStoryMetadata(id: string) {
+  const row = await stories.findPublicStoryMetadata(db, id);
+  if (!row) throw new NotFoundError('Frise non trouvée');
+  return { id: String(row.id), title: row.title_fr || row.title_en || '', description: row.description_fr || row.description_en || '' };
+}
 export async function listStories() {
   const rows = await stories.listStories(db);
   const candidates = [...new Map(rows.map(row => [String(row.id), row])).values()].flatMap(row => [

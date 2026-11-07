@@ -8,6 +8,8 @@ import { useAuthStore } from './stores/useAuthStore'
 import { useConsentStore } from './stores/useConsentStore'
 import { installAnalytics } from './lib/analytics'
 import { installVisitCounting } from './lib/visitCounting'
+import { useDataStore } from './stores/useDataStore'
+import { installSeo } from './seo/installSeo'
 
 const app = createApp(App)
 app.use(createPinia())
@@ -19,4 +21,5 @@ installAnalytics(consent)
 installVisitCounting(() => consent.anonymousAllowed)
 installAccessGuard(router, auth)
 app.use(router)
+installSeo(router, useDataStore(), import.meta.env.PROD && import.meta.env.VITE_SEO_INDEXING_ALLOWED !== false)
 app.mount('#app')

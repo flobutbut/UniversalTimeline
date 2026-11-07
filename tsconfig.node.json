@@ -1,10 +1,14 @@
 {
   "compilerOptions": {
     "composite": true,
+    "outDir": ".cache/types-node",
+    "tsBuildInfoFile": ".cache/types-node/tsconfig.tsbuildinfo",
     "skipLibCheck": true,
     "module": "ESNext",
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "scripts/seo-plugin.ts", "middleware.ts", "src/seo/metadata.ts", "serverless/**/*.ts"]
 }
