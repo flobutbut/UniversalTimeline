@@ -2,7 +2,7 @@ import express, { type Router, type RequestHandler } from 'express';
 import cors from 'cors';
 import { apiErrorHandler } from './api/errors.js';
 
-export function createApp(options: { routes: Router; healthcheck: () => Promise<unknown>; isStopping: () => boolean; frontendOrigin?: string; access?: RequestHandler }) {
+export function createApp(options: { routes: Router; healthcheck: () => Promise<unknown>; isStopping: () => boolean; frontendOrigin?: string; access?: RequestHandler; publicPages?: RequestHandler }) {
   const app = express();
   app.disable('x-powered-by');
   app.use((_req, res, next) => {
@@ -25,6 +25,7 @@ export function createApp(options: { routes: Router; healthcheck: () => Promise<
     try { await options.healthcheck(); res.json({ status: 'ok', database: 'connected' }); }
     catch { res.status(503).json({ status: 'unavailable', database: 'disconnected' }); }
   });
+  if (options.publicPages) app.use(options.publicPages);
   app.use((_req, res) => { res.status(404).json({ error: 'Route introuvable' }); });
   app.use(apiErrorHandler);
   return app;

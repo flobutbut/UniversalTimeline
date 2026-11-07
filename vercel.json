@@ -33,6 +33,18 @@
       }
     },
     {
+      "source": "/timeline",
+      "destination": { "service": "server" }
+    },
+    {
+      "source": "/timeline/",
+      "destination": { "service": "server" }
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": { "service": "server" }
+    },
+    {
       "source": "/(.*)",
       "destination": {
         "service": "app"

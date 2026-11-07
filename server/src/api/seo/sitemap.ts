@@ -1,4 +1,4 @@
-import { escapeHtml, SITE_ORIGIN, SITEMAP_PATHS, timelineStoryId } from '../src/seo/metadata.js';
+import { escapeHtml, SITE_ORIGIN, SITEMAP_PATHS, timelineStoryId } from '../../shared/seoMetadata.js';
 import type { FetchPublicResource } from './timelineResponse.js';
 
 export function renderSitemap(ids: string[] = [], allowIndexing = true): string {

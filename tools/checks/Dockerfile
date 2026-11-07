@@ -7,10 +7,9 @@ COPY server/package.json server/yarn.lock ./server/
 RUN --mount=type=cache,target=/usr/local/share/.cache/yarn,sharing=locked yarn --cwd server install --frozen-lockfile --non-interactive
 
 FROM dependencies AS checks
-COPY --chown=node:node tsconfig*.json vite.config.ts vitest.config.ts index.html vercel.json middleware.ts ./
+COPY --chown=node:node tsconfig*.json vite.config.ts vitest.config.ts index.html vercel.json ./
 COPY --chown=node:node public ./public
 COPY --chown=node:node src ./src
-COPY --chown=node:node serverless ./serverless
 COPY --chown=node:node server/src ./server/src
 COPY --chown=node:node server/test ./server/test
 COPY --chown=node:node server/tsconfig.json ./server/

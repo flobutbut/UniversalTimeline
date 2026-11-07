@@ -7,9 +7,6 @@
 !vitest.config.ts
 !index.html
 !vercel.json
-!middleware.ts
-!serverless/
-!serverless/**
 !public/
 !public/**
 !src/

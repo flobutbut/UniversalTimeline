@@ -1,4 +1,4 @@
-import { pageMetadata, renderMetadata, timelineStoryId, type PublicStoryMetadata } from '../src/seo/metadata.js';
+import { pageMetadata, renderMetadata, timelineStoryId, type PublicStoryMetadata } from '../../shared/seoMetadata.js';
 
 export type FetchPublicResource = (url: URL, options: RequestInit) => Promise<Response>;
 

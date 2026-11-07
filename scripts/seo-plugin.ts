@@ -2,8 +2,8 @@ import { readFile, mkdir, writeFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import type { Plugin, ResolvedConfig, PreviewServer } from 'vite';
 import { isKnownPage, normalizePath, pageMetadata, renderMetadata, SEO_PATHS, SITE_ORIGIN } from '../src/seo/metadata';
-import { timelineResponse } from '../serverless/timelineResponse';
-import { renderSitemap, sitemapResponse } from '../serverless/sitemap';
+import { timelineResponse } from '../server/src/api/seo/timelineResponse';
+import { renderSitemap, sitemapResponse } from '../server/src/api/seo/sitemap';
 
 /** Static heads for existing routes; no rendering or modification of the application UI. */
 export function seoPlugin(): Plugin {
