@@ -11,7 +11,7 @@ import { normalizeWikidataId } from '@/services/wikidataTransport';
 export function useWikidataForm(options: {
   form: EditFormData;
   context: () => { open: boolean; mode: string; type: 'period' | 'event' | 'story'; data: unknown; busy?: boolean };
-  categoryIds: () => ReadonlySet<string>;
+  tagIds: () => ReadonlySet<string>;
   onChildrenCount: (count: number | null) => void;
   onImported?: () => void;
 }) {
@@ -54,7 +54,7 @@ export function useWikidataForm(options: {
       const warnings = [...payload.warnings ?? []];
       applying = true;
       try {
-        applyWikidataImportPayloadToFormDraft(form, payload, { availableCategoryIds: options.categoryIds(), onChildrenCount: options.onChildrenCount });
+        applyWikidataImportPayloadToFormDraft(form, payload, { availableTagIds: options.tagIds(), onChildrenCount: options.onChildrenCount });
         form.qid = normalizeWikidataId(qid);
       } finally { applying = false; }
       retryAvailable.value = warnings.length > 0;

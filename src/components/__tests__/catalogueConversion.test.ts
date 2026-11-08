@@ -14,16 +14,16 @@ import type { EditFormSubmission } from '@/types/editForm';
 import type { Period, Story } from '@/types/database';
 
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn(), post: vi.fn() } }));
-const category = { id: 'politique', label: { fr: 'Politique', en: '' } };
+const category = { id: 'politique', label: { fr: 'Politique', en: '' }, family: 'societes', position: 1, parentId: null };
 const period = (id: string, parentId: string | null = null): Period => ({ id, parentId, storyParentId: parentId, hasParent: !!parentId, hasChildren: false, label: { fr: id, en: '' }, description: { fr: `À propos de ${id}`, en: '' }, wikidata_id: `Q${id.length}`, startDate: '1789-07-14', endDate: '1789-07-15', categories: [category], children: [], temporalLocation: '' });
 const story: Story = {
   id: '1', title: { fr: 'Révolution', en: '' }, author: '', isPublic: false, categories: [],
   periods: [period('root'), period('bastille', 'root')],
-  events: [{ id: 'terror', label: { fr: 'Terreur', en: '' }, date: '1793-09-05', wikidata_id: 'Q20', categories: [category] }],
+  events: [{ id: 'terror', label: { fr: 'Terreur', en: '' }, date: '1793-09-05', wikidata_id: 'Q20', categories: [], tags: [category] }],
 };
 const submission = (patch: Partial<EditFormSubmission>): EditFormSubmission => ({
   qid: 'Q20', title: { fr: 'Terreur', en: '' }, description: { fr: null, en: null }, startDate: '', endDate: '', date: '',
-  location: null, author: '', isPublic: false, parentId: null, categories: [{ id: 'politique' }], ...patch,
+  location: null, author: '', isPublic: false, parentId: null, tags: ['politique'], ...patch,
 });
 let view: ReturnType<typeof mount>;
 const button = (name: string) => view.findAll('button').find(item => item.text() === name);
@@ -60,7 +60,7 @@ it('converts the event shown in its fiche into a period prefilled from the event
   await button('Convertir en période')!.trigger('click'); await flushPromises();
   const modal = view.getComponent({ name: 'EditModal' });
   expect(modal.props()).toMatchObject({ type: 'period', mode: 'create', convertFrom: 'event' });
-  expect(modal.props('data')).toMatchObject({ qid: 'Q20', label: { fr: 'Terreur' }, startDate: '1793-09-05', endDate: '', categories: [{ id: 'politique' }] });
+  expect(modal.props('data')).toMatchObject({ qid: 'Q20', label: { fr: 'Terreur' }, startDate: '1793-09-05', endDate: '', tags: [{ id: 'politique' }] });
   modal.vm.$emit('submit', submission({ startDate: '1793-09-05', endDate: '1794-07-28' })); await flushPromises();
   expect(convert).toHaveBeenCalledWith('terror', expect.objectContaining({ qid: 'Q20', startDate: '1793-09-05', endDate: '1794-07-28' }));
   expect(view.emitted('entity-converted')).toHaveLength(1);

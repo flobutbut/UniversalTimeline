@@ -10,7 +10,7 @@ import { useDataStore } from '@/stores/useDataStore';
 import type { SearchHit } from '@/services/SearchApiService';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { EventApiService } from '@/services/EventApiService';
-import { CategoryService } from '@/services/CategoryService';
+import { TagService } from '@/services/TagService';
 import { apiClient } from '@/services/ApiClient';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
 import { databaseRecordLocation, searchHitLocation } from '@/router/searchTarget';
@@ -53,7 +53,7 @@ beforeEach(() => {
   vi.spyOn(periods, 'getPeriod').mockImplementation(async id => period(id, id === 'leaf' ? 'child' : id === 'child' ? 'root' : null));
   vi.spyOn(periods, 'loadChildren').mockImplementation(async id => id === 'root' ? [period('child', 'root')] : id === 'child' ? [period('leaf', 'child')] : []);
   vi.spyOn(EventApiService.getInstance(), 'getListEvents').mockResolvedValue([event]);
-  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  vi.spyOn(TagService.getInstance(), 'getTags').mockResolvedValue([]);
   vi.mocked(apiClient.get).mockResolvedValue([]);
 });
 afterEach(() => { view?.unmount(); router?.options.history.destroy(); document.body.innerHTML = ''; vi.useRealTimers(); vi.restoreAllMocks(); vi.clearAllMocks(); });

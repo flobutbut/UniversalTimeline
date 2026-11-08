@@ -1,3 +1,5 @@
+import { mergeSuggestedTags } from './tags';
+
 /** Brouillon de formulaire modifiable par un import Wikidata (EditModal). */
 export interface WikidataImportFormDraft {
   title: { fr: string; en: string };
@@ -6,7 +8,8 @@ export interface WikidataImportFormDraft {
   endDate: string;
   date: string;
   location: string;
-  categories: string[];
+  tags: string[];
+  nonThematic?: boolean;
   wikipedia?: { fr: string; en: string };
 }
 
@@ -18,7 +21,7 @@ export interface WikidataImportPayload {
   date?: string;
   location?: string;
   childrenCount?: number | null;
-  suggestedCategoryIds?: string[];
+  suggestedTagIds?: string[];
   /** Q-id parent (P361 « partie de ») — résolu côté UI vers un id base si possible. */
   parentWikidataId?: string;
   /** Absent quand la lecture facultative a échoué : la saisie en cours est conservée. */
@@ -26,23 +29,12 @@ export interface WikidataImportPayload {
   warnings?: string[];
 }
 
-export function mergeSuggestedCategoriesFromWikidata(
-  current: readonly string[],
-  suggested: readonly string[] | undefined,
-  availableIds: ReadonlySet<string>
-): string[] | null {
-  if (!suggested?.length) return null;
-  const matched = suggested.filter((id) => availableIds.has(id));
-  if (matched.length === 0) return null;
-  return [...new Set([...current, ...matched])];
-}
-
 /** Applique les champs reconnus d'un import Wikidata au brouillon (mutation). */
 export function applyWikidataImportPayloadToFormDraft(
   form: WikidataImportFormDraft,
   data: WikidataImportPayload,
   ctx: {
-    availableCategoryIds: ReadonlySet<string>;
+    availableTagIds: ReadonlySet<string>;
     onChildrenCount?: (count: number | null) => void;
   }
 ): void {
@@ -65,10 +57,6 @@ export function applyWikidataImportPayloadToFormDraft(
   if (data.childrenCount !== undefined && ctx.onChildrenCount) {
     ctx.onChildrenCount(data.childrenCount);
   }
-  const merged = mergeSuggestedCategoriesFromWikidata(
-    form.categories,
-    data.suggestedCategoryIds,
-    ctx.availableCategoryIds
-  );
-  if (merged) form.categories = merged;
+  const merged = form.nonThematic ? null : mergeSuggestedTags(form.tags, data.suggestedTagIds, ctx.availableTagIds);
+  if (merged) form.tags = merged;
 }

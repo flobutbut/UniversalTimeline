@@ -82,18 +82,18 @@ it('refuses an invalid association operation before opening a transaction', asyn
   expect(res.status).toHaveBeenCalledWith(400);noSql();
 });
 it('refuses object/array query parameters instead of coercing them into strings', async () => {
-  for(const search of [{q:['a','b']},{q:'a',category:{}},{q:'a',only:['periods']},{q:'a',only:'other'}]) {
+  for(const search of [{q:['a','b']},{q:'a',tag:{}},{q:'a',only:['periods']},{q:'a',only:'other'}]) {
     expect((await call('get','/search',{}, {},search)).status).toHaveBeenCalledWith(400);
   }
   expect((await call('get','/stories/suggestions',{}, {},{story_id:'1',period_ids:['a']})).status).toHaveBeenCalledWith(400);
   noSql();
 });
-it('filters both entity searches with the actual varchar category ID contract', async () => {
-  const res=await call('get','/search',{}, {},{q:'label',category:'legacy-category'});
+it('filters both entity searches by tag, including its sub-domains', async () => {
+  const res=await call('get','/search',{}, {},{q:'label',tag:'conflits'});
   expect(res.json).toHaveBeenCalledWith({periods:[],events:[]});
   expect(query).toHaveBeenCalledTimes(2);
   for(const [sql,params] of vi.mocked(query).mock.calls) {
-    expect(sql).toContain('category_id'); expect(sql).not.toContain('::uuid'); expect(params).toEqual(['label','legacy-category']);
+    expect(sql).toContain('t.parent_id=$2'); expect(params).toEqual(['label','conflits']);
   }
 });
 it('normalizes recognized keys without accepting a client-supplied owner or identifier for a story', () => {

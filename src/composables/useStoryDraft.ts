@@ -3,8 +3,8 @@ import { useEditModal } from './useEditModal';
 import type { EditFormData, EditFormSubmission } from '@/types/editForm';
 import type { Story } from '@/types/database';
 
-/** Groupes de champs qu'un onglet édite : textes (titres, descriptions, auteur) ou catégories. */
-export type StoryDraftFields = 'text' | 'categories';
+/** Groupes de champs qu'un onglet édite : textes (titres, descriptions, auteur) ou tags. */
+export type StoryDraftFields = 'text' | 'tags';
 
 interface StoryDraftOptions {
   story: () => Story;
@@ -13,7 +13,7 @@ interface StoryDraftOptions {
   fields: StoryDraftFields[];
 }
 
-type DraftValues = Pick<EditFormData, 'title' | 'description' | 'author' | 'categories'>;
+type DraftValues = Pick<EditFormData, 'title' | 'description' | 'author' | 'tags'>;
 
 /**
  * Brouillon d'une frise éditée directement dans un onglet.
@@ -21,19 +21,19 @@ type DraftValues = Pick<EditFormData, 'title' | 'description' | 'author' | 'cate
  * pour qu'un onglet ne réécrive jamais ce qu'un autre vient de changer.
  */
 export function useStoryDraft({ story, busy, error, fields }: StoryDraftOptions) {
-  const { form, state, validation, updateForm, prepareSubmitData, loadCategories } = useEditModal('story', 'edit', story());
+  const { form, state, validation, updateForm, prepareSubmitData, loadTags } = useEditModal('story', 'edit', story());
   const editsText = fields.includes('text');
-  const editsCategories = fields.includes('categories');
+  const editsTags = fields.includes('tags');
 
   const snapshot = (values: DraftValues) => JSON.stringify([
     editsText ? [values.title.fr, values.title.en, values.description.fr, values.description.en, values.author] : null,
-    editsCategories ? [...values.categories].sort() : null,
+    editsTags ? [...values.tags] : null,
   ]);
   const storySnapshot = computed(() => {
     const saved = story();
     return snapshot({
       title: { fr: saved.title.fr, en: saved.title.en }, description: { fr: saved.description?.fr ?? '', en: saved.description?.en ?? '' },
-      author: saved.author ?? '', categories: saved.categories.map(category => category.id),
+      author: saved.author ?? '', tags: saved.tags?.map(tag => tag.id) ?? [],
     });
   });
   const formSnapshot = computed(() => snapshot(form));
@@ -48,9 +48,9 @@ export function useStoryDraft({ story, busy, error, fields }: StoryDraftOptions)
   });
   watch(error, value => { if (value) submittedSnapshot.value = null; });
 
-  // Le catalogue des catégories ne conditionne que les onglets qui les éditent.
+  // La grille des tags ne conditionne que les onglets qui les éditent.
   const canSubmit = computed(() => !busy() && dirty.value && validation.value.isValid
-    && (!editsCategories || (!state.categoriesLoading && !state.categoriesError)));
+    && (!editsTags || (!state.tagsLoading && !state.tagsError)));
 
   function cancel() {
     if (busy()) return;
@@ -61,12 +61,12 @@ export function useStoryDraft({ story, busy, error, fields }: StoryDraftOptions)
   function submit(): EditFormSubmission | null {
     if (!canSubmit.value) return null;
     submittedSnapshot.value = formSnapshot.value;
-    const edited = { title: { ...form.title }, description: { ...form.description }, author: form.author, categories: [...form.categories] };
+    const edited = { title: { ...form.title }, description: { ...form.description }, author: form.author, tags: [...form.tags] };
     updateForm(story());
     if (editsText) Object.assign(form, { title: edited.title, description: edited.description, author: edited.author });
-    if (editsCategories) form.categories = edited.categories;
+    if (editsTags) form.tags = edited.tags;
     return prepareSubmitData();
   }
 
-  return { form, state, validation, dirty, canSubmit, cancel, submit, loadCategories };
+  return { form, state, validation, dirty, canSubmit, cancel, submit, loadTags };
 }

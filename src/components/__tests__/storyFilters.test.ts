@@ -65,7 +65,7 @@ it('opens from an « Ajouter un filtre » disclosure button', async () => {
   await trigger.trigger('click');
   expect(trigger.attributes('aria-expanded')).toBe('true');
   expect(body().get(`#${trigger.attributes('aria-controls')}`).attributes('role')).toBe('menu');
-  expect(body().findAll('[role="menuitem"]').map(item => item.text())).toEqual(['Visibilité', 'Tags', 'Dates', 'Période']);
+  expect(body().findAll('[role="menuitem"]').map(item => item.text())).toEqual(['Visibilité', 'Tag', 'Dates', 'Période']);
   expect(body().find('input[type="range"]').exists()).toBe(false);
 });
 it('presents visibility values immediately without an intermediate select', async () => {
@@ -92,11 +92,11 @@ it('navigates filter types by keyboard and returns focus on Escape', async () =>
 });
 
 it('shows tag values on hover and opens the same list directly from an active chip', async () => {
-  view = mount(StoryFilters, { props: { modelValue: 'all', categories: ['geo'], categoryOptions: [
+  view = mount(StoryFilters, { props: { modelValue: 'all', tags: ['geo'], tagOptions: [
     { value: 'geo', label: 'Géologie' }, { value: 'history', label: 'Histoire' },
   ] }, attachTo: document.body });
   await view.findAll('button').find(button => button.text() === 'Ajouter un filtre')!.trigger('click');
-  const tags = body().findAll('[role="menuitem"]').find(item => item.text() === 'Tags')!;
+  const tags = body().findAll('[role="menuitem"]').find(item => item.text() === 'Tag')!;
   await tags.trigger('mouseenter');
   expect(body().findAll('[role="option"]').map(item => item.text())).toEqual(['Géologie', 'Histoire']);
   expect(body().find('[role="combobox"]').exists()).toBe(false);
@@ -106,7 +106,7 @@ it('shows tag values on hover and opens the same list directly from an active ch
   expect(body().find('[role="menuitem"]').exists()).toBe(false);
   expect(body().get('[role="listbox"]').attributes('aria-label')).toBe('Tags');
   await body().findAll('[role="option"]').find(item => item.text() === 'Histoire')!.trigger('click');
-  expect(view.emitted('update:categories')!.at(-1)).toEqual([['geo', 'history']]);
+  expect(view.emitted('update:tags')!.at(-1)).toEqual([['geo', 'history']]);
 });
 
 it('adds a temporal trigger without applying a range and edits it from the toolbar', async () => {

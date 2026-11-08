@@ -2,14 +2,14 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { mount, flushPromises } from '@vue/test-utils';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
-import { CategoryService } from '@/services/CategoryService';
+import { TagService } from '@/services/TagService';
 import { ConflictResolutionService } from '@/services/ConflictResolutionService';
 import { validateEntityQid } from '@/services/validateEntityQid';
 
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn() } }));
 let view: ReturnType<typeof mount>;
 const data = { id: 'self', wikidata_id: 'Q123', label: { fr: 'Terre', en: '' }, startDate: 'M65', endDate: 'NOW', categories: [], hasChildren: true, children: [] };
-beforeEach(() => { setActivePinia(createPinia()); vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]); });
+beforeEach(() => { setActivePinia(createPinia()); vi.spyOn(TagService.getInstance(), 'getTags').mockResolvedValue([]); });
 afterEach(() => { view?.unmount(); vi.restoreAllMocks(); });
 
 it('rejects invalid Q-ids before any existence lookup', async () => {

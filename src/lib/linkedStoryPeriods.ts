@@ -8,7 +8,7 @@ export function linkedStoryPeriods(story: Story | null, parentId: string | null,
     if (!shown) return [];
     const summary = summaries.find(row => row.id === child.id);
     return [{ id: `linked-story:${child.id}`, linkedStoryId: child.id, label: child.title,
-      startDate: summary?.startDate ?? '', endDate: summary?.endDate ?? '', categories: summary?.categories ?? [], description: summary?.description,
+      startDate: summary?.startDate ?? '', endDate: summary?.endDate ?? '', categories: summary?.categories ?? [], ...(summary?.tags ? { tags: summary.tags } : {}), description: summary?.description,
       ...(parentId ? { sourceAnchor: { type: 'period' as const, id: parentId } } : {}) }];
   });
 }

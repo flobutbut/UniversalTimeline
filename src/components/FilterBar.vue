@@ -87,10 +87,10 @@
       </div>
       <div class="filter-bar__select">
         <Select
-          v-model="categoryId"
-          :options="categoryOptions"
-          placeholder="Toutes les catégories"
-          :searchable="categoryOptions.length > 10"
+          v-model="tagId"
+          :options="tagOptions"
+          placeholder="Tous les tags"
+          :searchable="tagOptions.length > 10"
           size="sm"
         />
       </div>
@@ -116,7 +116,7 @@ import { formatSelectListPeriodLine } from '@/lib/selectListPeriodHelpers';
 import { formatStoryEventDateLabel } from '@/lib/formatTemporalBoundLabel';
 import { generateDomUid } from '@/utils/generateDomUid';
 
-export interface FilterBarCategoryOption {
+export interface FilterBarTagOption {
   value: string;
   label: string;
 }
@@ -133,7 +133,7 @@ const props = withDefaults(
     searchPlaceholder?: string;
     addButtonLabel?: string;
     /** En mode périodes uniquement. */
-    categoryOptions: FilterBarCategoryOption[];
+    tagOptions: FilterBarTagOption[];
     /** Mode `periods` : résultats filtrés ; mode `events` : ignoré (tableau vide par défaut). */
     suggestions?: ListPeriod[];
     /** Mode `events` : autocomplétion ; mode `periods` : ignoré. */
@@ -149,7 +149,7 @@ const props = withDefaults(
     title: undefined,
     searchPlaceholder: undefined,
     addButtonLabel: undefined,
-    categoryOptions: () => [],
+    tagOptions: () => [],
     suggestions: () => [],
     eventSuggestions: () => [],
     allowWikidataCreate: true,
@@ -167,7 +167,7 @@ const emit = defineEmits<{
 }>();
 
 const search = defineModel<string>('search', { default: '' });
-const categoryId = defineModel<string>('categoryId', { default: '' });
+const tagId = defineModel<string>('tagId', { default: '' });
 
 const searchWrapRef = ref<HTMLElement | null>(null);
 const searchInputRef = ref<{ focus: () => void }>();

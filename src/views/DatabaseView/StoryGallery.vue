@@ -2,7 +2,7 @@
   <section class="story-gallery" aria-label="Toutes les frises">
     <div class="story-gallery__header">
       <CatalogueToolbar v-model:search="search" placeholder="Rechercher une frise…">
-        <template #filters><StoryFilters v-model="visibility" v-model:time-range="timeRange" v-model:period="period" v-model:categories="categories" :category-options="categoryOptions" /></template>
+        <template #filters><StoryFilters v-model="visibility" v-model:time-range="timeRange" v-model:period="period" v-model:tags="tags" :tag-options="tagOptions" /></template>
         <template #actions>
           <div class="story-gallery__views" role="group" aria-label="Affichage des frises">
             <Button variant="tertiary" size="sm" icon-only :pressed="view === 'cards'" aria-label="Afficher en cartes" @click="setView('cards')"><template #icon><Icon icon="mdi:view-grid" width="18" height="18" /></template></Button>
@@ -62,13 +62,13 @@ import type { PeriodFilter } from '@/components/filters/filterTypes';
 import type { StoryTimeRange } from '@/lib/storyTimeFilter';
 import { formatRecordAge, formatRecordDate, formatStorySpan } from '@/lib/storyListDates';
 
-const props = withDefaults(defineProps<{ stories: StorySummary[]; totalStories: number; categoryOptions: { value: string; label: string }[]; error?: string | null; /** False when the account has no username yet. */ canCreate?: boolean }>(), { error: null, canCreate: true });
+const props = withDefaults(defineProps<{ stories: StorySummary[]; totalStories: number; tagOptions: { value: string; label: string; group?: string }[]; error?: string | null; /** False when the account has no username yet. */ canCreate?: boolean }>(), { error: null, canCreate: true });
 defineEmits<{ open: [story: StorySummary]; create: [] }>();
 const search = defineModel<string>('search', { required: true });
 const visibility = defineModel<'all' | 'public' | 'private'>('visibility', { required: true });
 const period = defineModel<PeriodFilter | null>('period', { default: null });
 const timeRange = defineModel<StoryTimeRange | null>('timeRange', { required: true });
-const categories = defineModel<string[]>('categories', { required: true });
+const tags = defineModel<string[]>('tags', { required: true });
 
 // Préférence d'affichage propre à ce navigateur ; la page reste utilisable sans stockage.
 const VIEW_KEY = 'frises:view';

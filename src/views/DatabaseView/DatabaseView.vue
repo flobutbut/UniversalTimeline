@@ -6,7 +6,7 @@
       <FeedbackState v-if="targetLoading" kind="loading" layout="inline" message="Ouverture de la fiche…" />
       <FeedbackState v-else-if="targetError" kind="error" layout="inline" :message="targetError" retryable @retry="retryTarget" />
       <StoryTabsBar :tabs="openTabs" :active-id="selectedStoryId" @select="onTabSelect" @close="onTabClose" @reorder="storyTabs.reorder" />
-      <StoryGallery v-if="!selectedStoryId" v-model:search="storySearch" v-model:visibility="storyVisibility" v-model:time-range="storyTimeRange" v-model:period="storyPeriodFilter" v-model:categories="storyCategories" :stories="visibleStories" :total-stories="filteredStories.length" :category-options="storyCategoryOptions" :error="state.storyError" :can-create="auth.canCreateStories" class="database-view__content" @open="openStory" @create="handleAddStory" />
+      <StoryGallery v-if="!selectedStoryId" v-model:search="storySearch" v-model:visibility="storyVisibility" v-model:time-range="storyTimeRange" v-model:period="storyPeriodFilter" v-model:tags="storyTagIds" :stories="visibleStories" :total-stories="filteredStories.length" :tag-options="storyTagOptions" :error="state.storyError" :can-create="auth.canCreateStories" class="database-view__content" @open="openStory" @create="handleAddStory" />
       <div v-else class="database-story-detail-wrap database-view__content">
         <StoryDetailPanel :key="selectedStoryId" :story="selectedStory" :loading="state.loadingStoryDetails" :updating="relationsBusy || visibilityBusy || state.loadingDetails || saveLoading || deleteLoading" :error="state.storyError" :settings-error="storySettingsError"
           @retry="retryStory" @period-imported="retryStory" @remove-period="removePeriodFromStory" @remove-event="removeEventFromStory" @add-periods="addPeriodsToStory" @event-added="retryStory" @entity-converted="retryStory"
@@ -51,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import { matchesTags, tagFilterOptions } from '@/lib/tags';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import type { EditFormSubmission } from '@/types/editForm';
 import { computed, onMounted, ref, watch, inject } from 'vue';
@@ -131,20 +132,16 @@ const storyVisibility = ref<'all' | 'public' | 'private'>('all');
 /** One reference instant per evaluation, so story bounds and the range are read at the same time. */
 const storyTimeRange = ref<StoryTimeRange | null>(null);
 const storyPeriodFilter = ref<PeriodFilter | null>(null);
-/** Tags (catégories) des frises : une frise reste visible si elle porte l'un des tags choisis. */
-const storyCategories = ref<string[]>([]);
-const storyCategoryOptions = computed(() => {
-  const labels = new Map<string, string>();
-  for (const story of filteredStories.value) for (const category of story.categories) if (!labels.has(category.id)) labels.set(category.id, category.label.fr || category.label.en || category.id);
-  return [...labels].map(([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label, 'fr', { sensitivity: 'base' }));
-});
+/** Une frise reste visible si elle porte l'un des tags choisis. */
+const storyTagIds = ref<string[]>([]);
+const storyTagOptions = computed(() => tagFilterOptions(filteredStories.value));
 const visibleStories = computed(() => {
   const query = storySearch.value.trim().toLocaleLowerCase('fr');
   const now = Date.now();
   return filteredStories.value.filter(story => (!query || `${story.title.fr} ${story.title.en}`.toLocaleLowerCase('fr').includes(query)) && (storyVisibility.value === 'all' || story.isPublic === (storyVisibility.value === 'public'))
     && (!storyTimeRange.value || storyOverlapsRange(story, storyTimeRange.value, now))
     && (!storyPeriodFilter.value || storyOverlapsRange(story, storyPeriodFilter.value.range, now))
-    && (!storyCategories.value.length || story.categories.some(category => storyCategories.value.includes(category.id))));
+    && matchesTags(story, storyTagIds.value));
 });
 const storyTabs = useStoryTabs();
 const openTabs = computed(() => storyTabs.openIds.value.flatMap(id => {

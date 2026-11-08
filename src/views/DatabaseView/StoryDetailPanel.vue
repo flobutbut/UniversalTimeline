@@ -79,8 +79,8 @@
               hide-title
               hide-add
               v-model:search="periodHeaderSearch"
-              v-model:category-id="periodFilterCategoryId"
-              :category-options="storyPeriodCategoryFilterOptions"
+              v-model:tag-id="periodFilterTagId"
+              :tag-options="storyPeriodTagFilterOptions"
               :suggestions="periodSearchSuggestions"
               :search-loading="periodSearchLoading"
               :search-error="periodSearchError"
@@ -124,7 +124,7 @@
           <div v-if="treeViewVisited && (story.periods?.length || story.childStories?.length || showExternalInFinder)" v-show="periodLayout === 'tree'" class="story-period-tree-workspace">
             <div class="story-period-tree-workspace__navigation">
               <StoryPeriodTree :story-id="story.id" :periods="story.periods" :additional-periods="finderPeriods" :selected-id="selectedPeriodId"
-                :search="periodHeaderSearch" :category-id="periodFilterCategoryId" :show-additional="showExternalInFinder" :loaded-branch-ids="loadedBranchIds"
+                :search="periodHeaderSearch" :tag-id="periodFilterTagId" :show-additional="showExternalInFinder" :loaded-branch-ids="loadedBranchIds"
                 @select="onTreePeriodSelect" @expanded-change="onTreeExpandedChange">
                 <template #header-actions>
                   <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">Ajouter une période</Button>
@@ -189,7 +189,7 @@
                         :label="storyPeriodLabelForFinder(row.item)"
                         :start-date="storyPeriodDateFields(row.item).startDate"
                         :end-date="storyPeriodDateFields(row.item).endDate"
-                        :categories="storyPeriodCategories(row.item)"
+                        :tags="storyPeriodTags(row.item)"
                         :selected="selectedPeriodId === row.item.id"
                         :has-children="finderRowHasChildren(row.item, row.inStory)"
                         :item-id="row.item.id"
@@ -243,8 +243,8 @@
               hide-title
               hide-add
               v-model:search="eventHeaderSearch"
-              v-model:category-id="eventFilterCategoryId"
-              :category-options="storyEventCategoryFilterOptions"
+              v-model:tag-id="eventFilterTagId"
+              :tag-options="storyEventTagFilterOptions"
               :event-suggestions="eventSearchSuggestions"
               :search-loading="eventSearchLoading"
               :search-error="eventSearchError"
@@ -294,9 +294,7 @@
                         </header>
                         <section class="event-detail-section" aria-label="Catégories de l’événement">
                           <h4 class="event-detail-section-title">Catégories</h4>
-                          <ul v-if="event.categories.length" class="event-detail-categories">
-                            <li v-for="category in event.categories" :key="category.id"><Tag :label="category.label.fr?.trim() || category.label.en?.trim() || category.id" /></li>
-                          </ul>
+                          <p v-if="event.tags?.length" class="event-detail-categories"><ThematicTags :tags="event.tags" /></p>
                           <p v-else class="event-detail-empty">Aucune catégorie renseignée.</p>
                         </section>
 
@@ -369,7 +367,7 @@
               @set-parent="(parentId, periodId) => emit('set-parent', parentId, periodId)" />
           </div>
           <div class="story-overview__section">
-            <StoryCategoriesForm :story="story" :editable="auth.canEditStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
+            <StoryTagsForm :story="story" :editable="auth.canEditStory(story)" :busy="panelBusy" :error="settingsError" @save="emit('save-story', $event)" />
           </div>
           <StoryNavigationPanel :story="story" :busy="panelBusy" @saved="emit('retry')" />
           <!-- Les actions destructrices restent en fin de page, après tout le contenu modifiable. -->
@@ -415,7 +413,6 @@ import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
 import WikipediaLink from '@/components/WikipediaLink.vue';
-import Tag from '@/components/base/Tag.vue';
 import { DateService } from '@/services/DateService';
 import { listEventYearsBP } from '@/lib/listEventTableHelpers';
 import RootPeriodModal from './RootPeriodModal.vue';
@@ -424,7 +421,9 @@ import MoveStoryLinkModal from './MoveStoryLinkModal.vue';
 import StoryReadOnlyColumns from './StoryReadOnlyColumns.vue';
 import StorySettingsForm from './StorySettingsForm.vue';
 import StoryDangerZone from './StoryDangerZone.vue';
-import StoryCategoriesForm from './StoryCategoriesForm.vue';
+import StoryTagsForm from './StoryTagsForm.vue';
+import ThematicTags from '@/components/ThematicTags.vue';
+import { matchesTags, tagFilterOptions } from '@/lib/tags';
 import StoryRelationsPanel from './StoryRelationsPanel.vue';
 import StoryNavigationPanel from './StoryNavigationPanel.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -468,7 +467,7 @@ import {
   listPeriodToStoryPeriodInput,
   storyPeriodLabelForFinder,
   storyPeriodDateFields,
-  storyPeriodCategories,
+  storyPeriodTags,
   storyPeriodHasChildrenInStory,
 } from '@/lib/storyPeriodFinderColumns';
 import type { EventImportance, Story, StoryAnchor, ChildStorySummary, ListEvent, ListPeriod } from '@/types/database';
@@ -642,10 +641,10 @@ const treeViewVisited = ref(false);
 const treeExpandedIds = ref<string[]>([]);
 
 const periodHeaderSearch = ref('');
-const periodFilterCategoryId = ref('');
+const periodFilterTagId = ref('');
 
 const eventHeaderSearch = ref('');
-const eventFilterCategoryId = ref('');
+const eventFilterTagId = ref('');
 
 const dataStore = useDataStore();
 const previewLinks = computed(() => linkedStoryPreviewPeriods(props.story,dataStore.stories));
@@ -774,43 +773,19 @@ const finderDisplayColumns = computed<FinderColumnRow[][]>(() => {
   return cols;
 });
 
-const storyPeriodCategoryFilterOptions = computed(() => {
-  const map = new Map<string, { id: string; label: { fr: string; en: string } }>();
-  for (const p of props.story?.periods ?? []) {
-    for (const cat of p.categories ?? []) {
-      if (!map.has(cat.id)) map.set(cat.id, cat as { id: string; label: { fr: string; en: string } });
-    }
-  }
-  const rest = [...map.values()]
-    .sort((a, b) => a.label.fr.localeCompare(b.label.fr, 'fr', { sensitivity: 'base' }))
-    .map((c) => ({ value: c.id, label: c.label.fr }));
-  return [{ value: '', label: 'Toutes les catégories' }, ...rest];
-});
+const allTagsOption = { value: '', label: 'Tous les tags' };
+const storyPeriodTagFilterOptions = computed(() => [allTagsOption, ...tagFilterOptions(props.story?.periods ?? [])]);
+const storyEventTagFilterOptions = computed(() => [allTagsOption, ...tagFilterOptions(props.story?.events ?? [])]);
 
-const storyEventCategoryFilterOptions = computed(() => {
-  const map = new Map<string, { id: string; label: { fr: string; en: string } }>();
-  for (const ev of props.story?.events ?? []) {
-    for (const cat of ev.categories ?? []) {
-      if (!map.has(cat.id)) map.set(cat.id, cat as { id: string; label: { fr: string; en: string } });
-    }
-  }
-  const rest = [...map.values()]
-    .sort((a, b) => a.label.fr.localeCompare(b.label.fr, 'fr', { sensitivity: 'base' }))
-    .map((c) => ({ value: c.id, label: c.label.fr }));
-  return [{ value: '', label: 'Toutes les catégories' }, ...rest];
-});
-
-function periodRowMatchesCategory(row: FinderColumnRow, categoryId: string): boolean {
-  if (!categoryId) return true;
-  const cats = storyPeriodCategories(row.item);
-  return cats?.some((c) => c.id === categoryId) ?? false;
+function periodRowMatchesTag(row: FinderColumnRow, tagId: string): boolean {
+  return matchesTags({ tags: storyPeriodTags(row.item) }, tagId ? [tagId] : []);
 }
 
 const finderDisplayColumnsFiltered = computed(() => {
-  const catId = periodFilterCategoryId.value;
+  const tagId = periodFilterTagId.value;
   const cols = finderDisplayColumns.value;
-  if (!catId) return cols;
-  return cols.map((col) => col.filter((row) => periodRowMatchesCategory(row, catId)));
+  if (!tagId) return cols;
+  return cols.map((col) => col.filter((row) => periodRowMatchesTag(row, tagId)));
 });
 const visibleFinderColumns = computed(() => readonlyStory.value ? finderDisplayColumnsFiltered.value.slice(0,readonlyStory.value.column + 1) : finderDisplayColumnsFiltered.value);
 watch(() => finderSelectedPath.value.join(','), () => { readonlyStory.value = null; }, { flush: 'sync' });
@@ -821,30 +796,28 @@ watch(() => JSON.stringify(props.story?.childStories), () => {
 });
 
 const eventsFilteredForList = computed(() => {
-  const catId = eventFilterCategoryId.value;
-  const evs = props.story?.events ?? [];
-  if (!catId) return evs;
-  return evs.filter((e) => e.categories?.some((c) => c.id === catId) ?? false);
+  const tagId = eventFilterTagId.value;
+  return (props.story?.events ?? []).filter(event => matchesTags(event, tagId ? [tagId] : []));
 });
 
 const { results: periodSearchSuggestions, loading: periodSearchLoading, error: periodSearchError, retry: retryPeriodSearch } = useDebouncedSearch(
   () => periodHeaderSearch.value,
   async (query, signal) => {
-    const hits = await SearchApiService.getInstance().searchLocal(query, { onlyPeriods: true, categoryId: periodFilterCategoryId.value || undefined, signal });
+    const hits = await SearchApiService.getInstance().searchLocal(query, { onlyPeriods: true, tagId: periodFilterTagId.value || undefined, signal });
     return hits.filter(hit => hit.type === 'period').map(localSearchHitToPeriod);
   },
-  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, periodFilterCategoryId.value], enabled: () => !!props.story && !props.loading && !props.error && activeTab.value === 'periods' },
+  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, periodFilterTagId.value], enabled: () => !!props.story && !props.loading && !props.error && activeTab.value === 'periods' },
 );
 const { results: eventSearchSuggestions, loading: eventSearchLoading, error: eventSearchError, retry: retryEventSearch } = useDebouncedSearch(
   () => eventHeaderSearch.value,
   async (query, signal) => {
-    const hits = await SearchApiService.getInstance().searchLocal(query, { onlyEvents: true, categoryId: eventFilterCategoryId.value || undefined, signal });
+    const hits = await SearchApiService.getInstance().searchLocal(query, { onlyEvents: true, tagId: eventFilterTagId.value || undefined, signal });
     return hits.filter(hit => hit.type === 'event').map(localSearchHitToEvent);
   },
-  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, eventFilterCategoryId.value], enabled: () => !!props.story && !props.loading && !props.error && activeTab.value === 'events' },
+  { minLength: 1, delayMs: 250, criteria: () => [props.story?.id, eventFilterTagId.value], enabled: () => !!props.story && !props.loading && !props.error && activeTab.value === 'events' },
 );
 
-watch([periodHeaderSearch, periodFilterCategoryId, activeTab, () => props.loading, () => props.error], cancelFinder, { flush: 'sync' });
+watch([periodHeaderSearch, periodFilterTagId, activeTab, () => props.loading, () => props.error], cancelFinder, { flush: 'sync' });
 
 watch(
   [activeTab, eventsFilteredForList],
@@ -899,8 +872,8 @@ function finderRowHasChildren(item: StoryPeriodInput, inStory: boolean): boolean
 watch(() => props.story?.id, () => {
   movingStoryLink.value = null; readonlyStory.value = null;
   movingPeriodId.value = null;
-  periodHeaderSearch.value = ''; periodFilterCategoryId.value = '';
-  eventHeaderSearch.value = ''; eventFilterCategoryId.value = '';
+  periodHeaderSearch.value = ''; periodFilterTagId.value = '';
+  eventHeaderSearch.value = ''; eventFilterTagId.value = '';
   selectedEventId.value = null;
   showRootPicker.value = false;
   showChildStoryPicker.value = false;

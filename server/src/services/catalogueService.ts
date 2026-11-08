@@ -6,7 +6,9 @@ import { NotFoundError } from '../domain/errors.js';
 import * as catalogue from '../repositories/catalogueRepository.js';
 import { replaceEntityCategories, listDetailedCategories, listCategories as readCategories } from '../repositories/categoryRepository.js';
 import { deleteUnusedPeriod } from './periodDeletion.js';
-import { groupCategories, mapPeriodList, mapPeriodDetail, mapEventDetail, mapCategory } from './mappers.js';
+import { saveEntityTags, savePeriodTagging } from './entityTags.js';
+import { listTags as readTags } from '../repositories/tagRepository.js';
+import { groupCategories, mapPeriodList, mapPeriodDetail, mapEventDetail, mapCategory, mapTag } from './mappers.js';
 
 const db = { query };
 export async function listPeriods() {
@@ -34,7 +36,7 @@ export function createEvent(data: EventWrite & { id: string }) {
   return withTransaction(async client => {
     const row = await catalogue.insertEvent(client, data, computeYearsBP(data.date));
     await replaceEntityCategories(client, 'event', row.id, data.categories);
-    return { ...row, categories: await readEntityCategories(client, 'event', row.id) };
+    return { ...row, categories: await readEntityCategories(client, 'event', row.id), tags: await saveEntityTags(client, 'event', row.id, data.tags) };
   });
 }
 export async function updateEvent(id: string, data: EventWrite) {
@@ -42,7 +44,7 @@ export async function updateEvent(id: string, data: EventWrite) {
     const row = await catalogue.updateEvent(client, id, data, computeYearsBP(data.date));
     if (!row) return undefined;
     await replaceEntityCategories(client, 'event', id, data.categories);
-    return { ...row, categories: await readEntityCategories(client, 'event', id) };
+    return { ...row, categories: await readEntityCategories(client, 'event', id), tags: await saveEntityTags(client, 'event', id, data.tags) };
   });
   if (!row) throw new NotFoundError('Événement non trouvé');
   return row;
@@ -52,7 +54,7 @@ export function createPeriod(data: PeriodWrite & { id: string }) {
   return withTransaction(async client => {
     const row = await catalogue.insertPeriod(client, data, computeYearsBP(data.start_date, now), computeYearsBP(data.end_date, now));
     await replaceEntityCategories(client, 'period', data.id, data.categories);
-    return { ...row, categories: await readEntityCategories(client, 'period', data.id) };
+    return { ...row, categories: await readEntityCategories(client, 'period', data.id), ...await savePeriodTagging(client, data.id, data) };
   });
 }
 export async function updatePeriod(id: string, data: PeriodWrite) {
@@ -61,7 +63,7 @@ export async function updatePeriod(id: string, data: PeriodWrite) {
     const row = await catalogue.updatePeriod(client, id, data, computeYearsBP(data.start_date, now), computeYearsBP(data.end_date, now));
     if (!row) return undefined;
     await replaceEntityCategories(client, 'period', id, data.categories);
-    return { ...row, categories: await readEntityCategories(client, 'period', id) };
+    return { ...row, categories: await readEntityCategories(client, 'period', id), ...await savePeriodTagging(client, id, data) };
   });
   if (!row) throw new NotFoundError('Période non trouvée');
   return row;
@@ -73,3 +75,4 @@ export async function deleteEvent(id: string) {
 }
 
 export const listCategories = () => readCategories(db);
+export const listTags = async () => (await readTags(db)).map(row => ({ ...mapTag(row), description: row.description_fr }));

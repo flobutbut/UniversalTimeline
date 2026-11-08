@@ -22,8 +22,8 @@
           <slot>{{ label.fr }}</slot>
         </span></template>
         <template #details><span class="finder-item-dates">
-          <span v-if="categories && categories.length" class="finder-item-category">{{ categories[0].label.fr }}</span>
-          <span v-if="categories && categories.length" class="finder-item-date-sep"> · </span>
+          <span v-if="tags?.length" class="finder-item-category">{{ tags[0].label.fr }}</span>
+          <span v-if="tags?.length" class="finder-item-date-sep"> · </span>
           {{ dateSubtitle }}
         </span></template>
       </ItemSummary>
@@ -63,7 +63,7 @@
  * story — événements : `hide-chevron`, `date-subtitle-override`, slot actions.
  */
 import { computed, ref, watchPostEffect } from 'vue';
-import type { MultilingualText, Category } from '@/types/database';
+import type { MultilingualText, TagRef } from '@/types/database';
 import { formatFinderItemDateRangeSubtitle } from '@/lib/finderItemDateLabels';
 import ChevronIcon from '@/components/icons/ChevronIcon.vue';
 import ItemSummary from '@/components/base/ItemSummary.vue';
@@ -79,7 +79,7 @@ const props = defineProps<{
   itemId: string;
   startDate?: string;
   endDate?: string;
-  categories?: Category[];
+  tags?: TagRef[];
   /** Désactive le drag HTML5 (ex. périodes d'une story en mode colonnes). */
   draggable?: boolean;
   /** Masque le bouton Modifier / Ajouter en fin de ligne. */

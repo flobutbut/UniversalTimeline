@@ -4,7 +4,8 @@ import { NotFoundError, StoryAssociationError } from '../domain/errors.js';
 import type { EventImportance, StoryWrite } from '../domain/writeInputs.js';
 import * as stories from '../repositories/storyRepository.js';
 import { replaceEntityCategories } from '../repositories/categoryRepository.js';
-import { description, localized, groupCategories, mapCategory, mapPeriodDetail, mapEventDetail } from './mappers.js';
+import { saveEntityTags } from './entityTags.js';
+import { description, localized, groupCategories, mapCategory, mappedTags, mapPeriodDetail, mapEventDetail } from './mappers.js';
 import { aggregateStoryTemporalBounds } from '../domain/storyTemporalBounds.js';
 import * as associations from './storyAssociations.js';
 import type { AssociationKind } from '../repositories/storyRelationsRepository.js';
@@ -28,7 +29,7 @@ export async function listStories() {
   ]);
   const bounds = new Map(aggregateStoryTemporalBounds(candidates).map(bound => [String(bound.story_id), bound]));
   return groupCategories(rows, row => ({
-    id: row.id, title_fr: row.title_fr, title_en: row.title_en,
+    ...mappedTags(row), id: row.id, title_fr: row.title_fr, title_en: row.title_en,
     description_fr: row.description_fr, description_en: row.description_en,
     author: row.author, is_public: row.is_public, owner_user_id: row.owner_user_id,
     parent_story_id: row.parent_story_id ?? null,
@@ -51,7 +52,7 @@ export async function getStory(id: string) {
     id: row.id, title: localized(row.title_fr, row.title_en), description: description(row.description_fr, row.description_en),
     author: row.author, isPublic: row.is_public, ownerUserId: row.owner_user_id, created_at: row.created_at,
     parent_story_id: row.parent_story_id ?? null,
-    categories, periods, events, childStories,
+    categories, ...mappedTags(row), periods, events, childStories,
     navigationContexts: (row.navigation_contexts ?? []).map(context => ({
       id: String(context.id), title: localized(context.title_fr, context.title_en), periods: context.periods,
       presentations: context.presentations.map(view => ({ periodId: view.period_id, storyId: String(view.story_id), title: localized(view.title_fr, view.title_en) })),
@@ -73,7 +74,7 @@ export function createStory(data: StoryWrite, placement: { parentStoryId: string
     const row = await stories.insertStory(client, { ...data, author: await creatorAuthor(client, data.author) });
     await replaceEntityCategories(client, 'story', row.id, data.categories);
     if (placement) await associations.linkChildStories(client, placement.parentStoryId, [String(row.id)], placement.anchor);
-    return { ...row, parent_story_id: placement ? Number(placement.parentStoryId) : row.parent_story_id ?? null, categories: await readEntityCategories(client, 'story', row.id) };
+    return { ...row, parent_story_id: placement ? Number(placement.parentStoryId) : row.parent_story_id ?? null, categories: await readEntityCategories(client, 'story', row.id), tags: await saveEntityTags(client, 'story', row.id, data.tags) };
   });
 }
 export async function updateStory(id: string, data: StoryWrite) {
@@ -81,7 +82,7 @@ export async function updateStory(id: string, data: StoryWrite) {
     const row = await stories.updateStory(client, id, { ...data, author: editorAuthor(data.author) });
     if (!row) return undefined;
     await replaceEntityCategories(client, 'story', id, data.categories);
-    return { ...row, categories: await readEntityCategories(client, 'story', id) };
+    return { ...row, categories: await readEntityCategories(client, 'story', id), tags: await saveEntityTags(client, 'story', id, data.tags) };
   });
   if (!row) throw new NotFoundError('Frise non trouvée');
   return row;

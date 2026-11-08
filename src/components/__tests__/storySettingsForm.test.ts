@@ -1,18 +1,18 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import StorySettingsForm from '@/views/DatabaseView/StorySettingsForm.vue';
-import { CategoryService } from '@/services/CategoryService';
+import { TagService } from '@/services/TagService';
 import type { Story } from '@/types/database';
 
 const story: Story = {
   id: '1', title: { fr: 'Guerre froide', en: 'Cold War' }, description: { fr: 'Résumé', en: 'Summary' }, author: 'Auteur',
-  isPublic: true, categories: [{ id: 'c1', label: { fr: 'Histoire', en: 'History' } }], periods: [], events: [],
+  isPublic: true, categories: [], tags: [{ id: 'c1', label: { fr: 'Histoire', en: 'History' }, family: 'societes', position: 1, parentId: null }], periods: [], events: [],
 };
 let view: ReturnType<typeof mount>;
 const button = (label: string) => view.findAll('button').find(item => item.text() === label);
 const titleFr = () => view.get('input[placeholder="Titre en français"]');
 beforeEach(() => {
-  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([{ id: 'c1', label: 'Histoire' }]);
+  vi.spyOn(TagService.getInstance(), 'getTags').mockResolvedValue([{ id: 'c1', label: { fr: 'Histoire', en: 'History' }, family: 'societes', position: 1, parentId: null }]);
 });
 afterEach(() => { view?.unmount(); vi.restoreAllMocks(); });
 
@@ -51,12 +51,12 @@ it('emits the submission and settles on the saved frise', async () => {
   await flushPromises();
   await titleFr().setValue('Nouvelle frise');
   await view.get('form').trigger('submit');
-  const submission = view.emitted('save')![0][0] as { title: { fr: string }; author: string; categories: Array<{ id: string }> };
+  const submission = view.emitted('save')![0][0] as { title: { fr: string }; author: string; tags: string[] };
   expect(submission.title.fr).toBe('Nouvelle frise');
   expect(submission.author).toBe('Auteur');
   expect(submission.title).toEqual({ fr: 'Nouvelle frise', en: 'Cold War' });
   expect(submission).toMatchObject({ isPublic: true });
-  expect(submission.categories).toEqual([{ id: 'c1' }]);
+  expect(submission.tags).toEqual(['c1']);
   await view.setProps({ story: { ...story, title: { fr: 'Nouvelle frise', en: 'Cold War' } } });
   expect(button('Enregistrer')).toBeUndefined();
 });
@@ -90,14 +90,14 @@ it('sends the saved tags and visibility with its text draft, never a stale copy'
   view = mount(StorySettingsForm, { props: { story, editable: true } });
   await flushPromises();
   await titleFr().setValue('Brouillon');
-  await view.setProps({ story: { ...story, categories: [{ id: 'c2', label: { fr: 'Science', en: '' } }] } });
+  await view.setProps({ story: { ...story, tags: [{ id: 'c2', label: { fr: 'Science', en: '' }, family: 'societes', position: 1, parentId: null }] } });
   expect((titleFr().element as HTMLInputElement).value).toBe('Brouillon');
   await view.get('form').trigger('submit');
-  expect(view.emitted('save')![0][0]).toMatchObject({ title: { fr: 'Brouillon' }, categories: [{ id: 'c2' }], isPublic: true });
+  expect(view.emitted('save')![0][0]).toMatchObject({ title: { fr: 'Brouillon' }, tags: ['c2'], isPublic: true });
 });
 
 it('saves its text even when the tag catalogue cannot load', async () => {
-  vi.mocked(CategoryService.getInstance().getCategories).mockRejectedValue(new Error('offline'));
+  vi.mocked(TagService.getInstance().getTags).mockRejectedValue(new Error('offline'));
   view = mount(StorySettingsForm, { props: { story, editable: true } });
   await flushPromises();
   await titleFr().setValue('Brouillon');

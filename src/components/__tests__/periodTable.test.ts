@@ -29,7 +29,7 @@ it('uses the shared table and sorts each period boundary chronologically with un
   view = mount(PeriodsView); await flushPromises();
   expect(view.findComponent(CatalogueTable).exists()).toBe(true);
   expect(view.findAll('[role="columnheader"]').map(header => header.text().replace('▲', '').trim()))
-    .toEqual(['', 'Nom', 'Début', 'Fin', 'Catégories', 'Frises', 'Modifié', 'Actions']);
+    .toEqual(['', 'Nom', 'Début', 'Fin', 'Tags', 'Frises', 'Modifié', 'Actions']);
   for (const boundary of ['début', 'fin']) {
     const sort = view.get(`button[aria-label="Trier par ${boundary}"]`);
     await sort.trigger('click'); expect(ids()).toEqual(['Ancienne', 'Récente', 'Inconnue']);
@@ -40,16 +40,16 @@ it('uses the shared table and sorts each period boundary chronologically with un
 
 it('filters table rows by category and keeps the date columns keyboard resizable', async () => {
   vi.mocked(PeriodApiService.getInstance().getListPeriods).mockResolvedValue([
-    { ...period('Géologie', 'M65', 'NOW'), categories: [{ id: 'geo', label: { fr: 'Géologie', en: '' } }] },
+    { ...period('Géologie', 'M65', 'NOW'), categories: [], tags: [{ id: 'geo', label: { fr: 'Géologie', en: '' }, family: 'societes', position: 1, parentId: null }] },
     period('Autre', 'M8', 'NOW'),
   ]);
   view = mount(PeriodsView); await flushPromises();
-  view.getComponent(CatalogueFilters).vm.$emit('update:categories', ['geo']); await flushPromises();
+  view.getComponent(CatalogueFilters).vm.$emit('update:tags', ['geo']); await flushPromises();
   expect(ids()).toEqual(['Géologie']);
   const handle = view.get('[role="separator"][aria-label="Largeur de la colonne Fin"]');
   await handle.trigger('keydown', { key: 'ArrowRight' }); expect(handle.attributes('aria-valuenow')).toBe('170');
   await handle.trigger('keydown', { key: 'End' }); expect(handle.attributes('aria-valuenow')).toBe('280');
-  view.getComponent(CatalogueFilters).vm.$emit('update:categories', ['missing']); await flushPromises();
+  view.getComponent(CatalogueFilters).vm.$emit('update:tags', ['missing']); await flushPromises();
   expect(view.get('[role="table"]').text()).toContain('Aucune période trouvée');
 });
 
@@ -80,10 +80,10 @@ it('loads period memberships on arrival and distinguishes their failure from no 
 });
 
 it('combines the frise filter with category and text filters and resets to the whole catalogue', async () => {
-  const category = { id: 'geo', label: { fr: 'Géologie', en: '' } };
+  const category = { id: 'geo', label: { fr: 'Géologie', en: '' }, family: 'societes', position: 1, parentId: null };
   vi.mocked(PeriodApiService.getInstance().getListPeriods).mockResolvedValue([
-    { ...period('Cambrien', 'M538', 'M486'), categories: [category] },
-    { ...period('Jurassique', 'M201', 'M145'), categories: [category] },
+    { ...period('Cambrien', 'M538', 'M486'), categories: [], tags: [category] },
+    { ...period('Jurassique', 'M201', 'M145'), categories: [], tags: [category] },
     period('Antiquité', '-3200', '476'),
   ]);
   vi.mocked(StoryApiService.getInstance().getListStories).mockResolvedValue([
@@ -99,12 +99,12 @@ it('combines the frise filter with category and text filters and resets to the w
   filters.vm.$emit('update:storyIds', ['life']); await flushPromises();
   expect(ids()).toEqual(['Antiquité', 'Cambrien']);
   expect(view.get('.table-row[data-item-id="Cambrien"] .col-stories').text()).toContain('Histoire de la vie');
-  filters.vm.$emit('update:categories', ['geo']); await flushPromises();
+  filters.vm.$emit('update:tags', ['geo']); await flushPromises();
   expect(ids()).toEqual(['Cambrien']);
   await view.get('input[placeholder="Rechercher une période…"]').setValue('Jurassique');
   expect(ids()).toEqual([]);
   await view.get('input[placeholder="Rechercher une période…"]').setValue('');
-  filters.vm.$emit('update:storyIds', []); filters.vm.$emit('update:categories', []); await flushPromises();
+  filters.vm.$emit('update:storyIds', []); filters.vm.$emit('update:tags', []); await flushPromises();
   expect(ids()).toEqual(['Antiquité', 'Cambrien', 'Jurassique']);
 });
 

@@ -12,12 +12,12 @@ let view: ReturnType<typeof mount>;
 const ids = () => view.findAll('.table-row').map(row => row.attributes('data-item-id'));
 beforeEach(() => {
   setActivePinia(createPinia());
-  const category = { id: 'geo', label: { fr: 'Géologie', en: '' } };
+  const category = { id: 'geo', label: { fr: 'Géologie', en: '' }, family: 'societes', position: 1, parentId: null };
   vi.spyOn(EventApiService.getInstance(), 'getListEvents').mockResolvedValue([
-    { id: 'inside', label: { fr: 'Inclus', en: '' }, date: 'M20', categories: [category] },
-    { id: 'outside', label: { fr: 'Ancien', en: '' }, date: 'M80', categories: [category] },
+    { id: 'inside', label: { fr: 'Inclus', en: '' }, date: 'M20', categories: [], tags: [category] },
+    { id: 'outside', label: { fr: 'Ancien', en: '' }, date: 'M80', categories: [], tags: [category] },
     { id: 'untagged', label: { fr: 'Sans catégorie', en: '' }, date: 'M20', categories: [] },
-    { id: 'unknown', label: { fr: 'Sans date', en: '' }, date: '', categories: [category] },
+    { id: 'unknown', label: { fr: 'Sans date', en: '' }, date: '', categories: [], tags: [category] },
   ]);
   vi.spyOn(PeriodApiService.getInstance(), 'getListPeriods').mockResolvedValue([]);
   vi.spyOn(StoryApiService.getInstance(), 'getListStories').mockResolvedValue([]);
@@ -32,11 +32,11 @@ it('combines category, frise and temporal filters and restores unknown dates whe
   const filters = view.getComponent(CatalogueFilters);
   filters.vm.$emit('update:timeRange', { oldBP: 50e6, recentBP: 10e6 }); await flushPromises();
   expect(ids()).toEqual(['inside', 'untagged']);
-  filters.vm.$emit('update:categories', ['geo']); filters.vm.$emit('update:storyIds', ['life']); await flushPromises();
+  filters.vm.$emit('update:tags', ['geo']); filters.vm.$emit('update:storyIds', ['life']); await flushPromises();
   expect(ids()).toEqual(['inside']);
   filters.vm.$emit('update:timeRange', null); await flushPromises();
   expect(ids()).toEqual(['inside', 'unknown']);
-  filters.vm.$emit('update:categories', []); filters.vm.$emit('update:storyIds', []); await flushPromises();
+  filters.vm.$emit('update:tags', []); filters.vm.$emit('update:storyIds', []); await flushPromises();
   expect(ids()).toEqual(['inside', 'outside', 'untagged', 'unknown']);
 });
 
@@ -63,6 +63,6 @@ it('sorts the frise column alphabetically and keeps sorting when filters change'
   await sort.trigger('click'); expect(ids()).toEqual(['outside', 'inside', 'untagged', 'unknown']);
   await sort.trigger('click'); expect(ids()).toEqual(['inside', 'untagged', 'unknown', 'outside']);
   expect(sort.element.closest('[role="columnheader"]')?.getAttribute('aria-sort')).toBe('descending');
-  view.getComponent(CatalogueFilters).vm.$emit('update:categories', ['geo']); await flushPromises();
+  view.getComponent(CatalogueFilters).vm.$emit('update:tags', ['geo']); await flushPromises();
   expect(ids()).toEqual(['inside', 'unknown', 'outside']);
 });

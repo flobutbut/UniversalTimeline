@@ -2,8 +2,8 @@
   <div class="catalogue-view">
     <CatalogueToolbar v-model:search="filterSearch" placeholder="Rechercher une période…">
       <template #filters>
-        <CatalogueFilters context="periods" v-model:categories="filterCategoryIds" v-model:story-ids="filterStoryIds" v-model:time-range="timeRange"
-          :category-options="periodCategoryFilterOptions" :story-options="storyFilterOptions"
+        <CatalogueFilters context="periods" v-model:tags="tagIds" v-model:story-ids="filterStoryIds" v-model:time-range="timeRange"
+          :tag-options="periodTagFilterOptions" :story-options="storyFilterOptions"
           :stories-loading="storyLinks.loading.value" :stories-error="storyLinks.error.value" @retry-stories="storyLinks.load" />
       </template>
       <template #actions><Button variant="primary" size="sm" @click="openCreateModal">+ Ajouter une période</Button></template>
@@ -30,7 +30,7 @@
         <span class="col-label" role="cell">{{ item.label.fr || item.label.en }}</span>
         <span class="col-date" role="cell">{{ formatEventListDateForDisplay(item.startDate) }}</span>
         <span class="col-date" role="cell">{{ formatEventListDateForDisplay(item.endDate) }}</span>
-        <span class="col-categories" role="cell"><Tag v-for="cat in item.categories" :key="cat.id" :label="cat.label.fr" variant="accent" /></span>
+        <span class="col-categories" role="cell"><ThematicTags :tags="item.tags ?? []" /></span>
         <span class="col-stories" role="cell">
           <span v-if="storyLinks.loading.value" class="col-stories__state">…</span>
           <span v-else-if="storyLinks.error.value" class="col-stories__state">—</span>
@@ -94,12 +94,16 @@ import { useEntityBulkActions } from '@/composables/useEntityBulkActions';
 import type { CatalogueColumn } from '@/components/catalogue/columns';
 import Button from '@/components/base/Button.vue';
 import Tag from '@/components/base/Tag.vue';
+import ThematicTags from '@/components/ThematicTags.vue';
+import { useCatalogueFilterState } from '@/composables/useCatalogueFilterState';
+import { matchesCatalogueFilters } from '@/lib/catalogueFilters';
+import { tagFilterOptions, tagsSortKey } from '@/lib/tags';
 import { compareYearsOldestFirst } from '@temporal';
 import { periodCoordinates } from '@/services/TimelineScalingService';
-import { formatEventListDateForDisplay, formatListEventLastEditFr, listEventCategoriesSortKey, listEventUpdatedTimestampMs } from '@/lib/listEventTableHelpers';
+import { formatEventListDateForDisplay, formatListEventLastEditFr, listEventUpdatedTimestampMs } from '@/lib/listEventTableHelpers';
 import CatalogueToolbar from '@/components/filters/CatalogueToolbar.vue';
 import CatalogueFilters from '@/components/filters/CatalogueFilters.vue';
-import { storyOverlapsRange, type StoryTimeRange } from '@/lib/storyTimeFilter';
+import { storyOverlapsRange } from '@/lib/storyTimeFilter';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
 import StoryMembershipField from '@/components/StoryMembershipField.vue';
 import { useGraphModals } from '@/composables/useGraphModals';
@@ -122,7 +126,7 @@ const periodColumns: CatalogueColumn[] = [
   { key: 'label', label: 'Nom', sortLabel: 'Trier par nom', width: 360, minWidth: 140, maxWidth: 720, resizable: true },
   { key: 'start', label: 'Début', sortLabel: 'Trier par début', width: 160, minWidth: 100, maxWidth: 280, resizable: true },
   { key: 'end', label: 'Fin', sortLabel: 'Trier par fin', width: 160, minWidth: 100, maxWidth: 280, resizable: true },
-  { key: 'categories', label: 'Catégories', sortLabel: 'Trier par catégories', minWidth: 120 },
+  { key: 'categories', label: 'Tags', sortLabel: 'Trier par tags', minWidth: 120 },
   { key: 'stories', label: 'Frises', sortLabel: 'Trier par frises', minWidth: 160 },
   { key: 'updated', label: 'Modifié', sortLabel: 'Trier par modification', width: 150 },
   { key: 'actions', label: 'Actions', width: 88 },
@@ -135,17 +139,13 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 const initialized = ref(false);
 const filterSearch = ref('');
-const filterCategoryIds = ref<string[]>([]);
-const timeRange = ref<StoryTimeRange | null>(null);
-const filterStoryIds = ref<string[]>([]);
+const { tagIds, storyIds: filterStoryIds, timeRange, state: filterState, reset: resetFilters } = useCatalogueFilterState();
 const storyFilterOptions = computed(() => stories.value.map(story => ({ value: story.id, label: story.title.fr || story.title.en || `Frise ${story.id}` }))
     .sort((a, b) => a.label.localeCompare(b.label, 'fr')));
 const allPeriods = computed(() => store.periods.filter(p => !p.id.startsWith('wikidata:')));
 const visiblePeriods = computed(() => {
   const q = filterSearch.value.trim().toLocaleLowerCase('fr');
-  return allPeriods.value.filter(p => (!filterStoryIds.value.length || filterStoryIds.value.some(id => storyLinks.storyIdsOf(p.id).includes(id)))
-    && (!filterCategoryIds.value.length || p.categories.some(c => filterCategoryIds.value.includes(c.id)))
-    && (!timeRange.value || storyOverlapsRange(p, timeRange.value))
+  return allPeriods.value.filter(p => matchesCatalogueFilters(p, filterState.value, { storyIdsOf: item => storyLinks.storyIdsOf(item.id), overlaps: storyOverlapsRange })
     && (!q || [p.label.fr, p.label.en, p.description?.fr, p.description?.en].some(v => v?.toLocaleLowerCase('fr').includes(q))))
     .sort((a, b) => {
       let comparison = 0;
@@ -154,18 +154,14 @@ const visiblePeriods = computed(() => {
         const ya = periodCoordinates(a)[key], yb = periodCoordinates(b)[key];
         if (ya === null || yb === null) return compareYearsOldestFirst(ya, yb);
         comparison = yb - ya;
-      } else if (sortColumn.value === 'categories') comparison = listEventCategoriesSortKey(a).localeCompare(listEventCategoriesSortKey(b), 'fr', { sensitivity: 'base' });
+      } else if (sortColumn.value === 'categories') comparison = tagsSortKey(a).localeCompare(tagsSortKey(b), 'fr', { sensitivity: 'base' });
       else if (sortColumn.value === 'stories') comparison = storyLinks.sortKeyOf(a.id).localeCompare(storyLinks.sortKeyOf(b.id), 'fr', { sensitivity: 'base' });
       else if (sortColumn.value === 'updated') comparison = listEventUpdatedTimestampMs(a) - listEventUpdatedTimestampMs(b);
       else comparison = (a.label.fr || a.label.en).localeCompare(b.label.fr || b.label.en, 'fr', { sensitivity: 'base' });
       return sortDir.value === 'asc' ? comparison : -comparison;
     });
 });
-const periodCategoryFilterOptions = computed(() => {
-  const categories = new Map(allPeriods.value.flatMap(p => p.categories.map(c => [c.id, c] as const)));
-  return [...categories.values()]
-    .sort((a,b) => a.label.fr.localeCompare(b.label.fr, 'fr')).map(c => ({ value: c.id, label: c.label.fr }));
-});
+const periodTagFilterOptions = computed(() => tagFilterOptions(allPeriods.value));
 const bulk = useEntityBulkActions('period', () => visiblePeriods.value, storyLinks);
 const {
   showEditModal, showAddModal, selectedPeriod, loading: openingLoading, openingError, retryOpening, cancelOpening,
@@ -181,12 +177,12 @@ function openEditModal(id: string) {
   cancelTarget();
   void handleEdit(id);
 }
-watch([filterSearch, filterCategoryIds, filterStoryIds, timeRange], cancelOpening, { flush: 'sync' });
+watch([filterSearch, tagIds, filterStoryIds, timeRange], cancelOpening, { flush: 'sync' });
 watch(() => showEditModal.value && selectedPeriod.value?.id, id => { if (id) void storyLinks.load(); });
 const { loading: targetLoading, error: targetError, retry: retryTarget, cancel: cancelTarget } = useSearchTarget(
   'period', () => initialized.value && !loading.value && !error.value,
   async (target, isCurrent) => {
-    filterSearch.value = ''; filterCategoryIds.value = []; filterStoryIds.value = []; timeRange.value = null;
+    filterSearch.value = ''; resetFilters();
     if (target.kind === 'wikidata') handleAddPeriod(0, { wikidata_id: target.qid });
     else {
       const period = await PeriodApiService.getInstance().getPeriod(target.id);

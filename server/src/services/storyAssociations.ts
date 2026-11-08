@@ -6,6 +6,7 @@ import * as relations from '../repositories/storyRelationsRepository.js';
 import { periodSubtree, itemsWithinPeriod } from '../domain/storySplit.js';
 import { comparableYearsBeforePresent } from '../shared/temporal.js';
 import { readEntityCategories, replaceEntityCategories } from '../repositories/categoryRepository.js';
+import { readEntityTags, replaceEntityTags } from '../repositories/tagRepository.js';
 import { creatorAuthor } from './storyAuthor.js';
 
 async function requireWritableStory(client: TransactionClient, storyId: string) {
@@ -116,5 +117,7 @@ export async function createStoryFromPeriod(client: TransactionClient, sourceId:
   }
   const categories = (await readEntityCategories(client, 'story', sourceId)).map(category => category.id);
   if (categories.length) await replaceEntityCategories(client, 'story', story.id, categories);
+  const tags = (await readEntityTags(client, 'story', sourceId)).map(tag => tag.id);
+  if (tags.length) await replaceEntityTags(client, 'story', story.id, tags);
   return { id: storyId, parentStoryId: sourceId, periodId, periodCount: narrative.length, eventCount: eventIds.length, movedPeriodCount: moved.length, linkedStoryCount: linked.length };
 }

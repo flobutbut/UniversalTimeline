@@ -12,6 +12,9 @@ export interface ListPeriod {
   startDate: string;
   endDate: string;
   categories: Category[];
+  /** Absents tant que la lecture ne transporte pas le classement. */
+  tags?: TagRef[];
+  nonThematic?: boolean;
   /** Champs enrichis (API mapToPeriod, finder, enfants Wikidata virtuels) */
   parentId?: string | null;
   /** Parent inside this frise; catalogue records have no hierarchy. */
@@ -39,6 +42,7 @@ export interface ListEvent {
   label: MultilingualText;
   date: string;
   categories: Category[];
+  tags?: TagRef[];
   dateYearsBP?: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -53,6 +57,7 @@ export interface ListStory {
   ownerUserId?: string | null;
   title: MultilingualText;
   categories: Category[];
+  tags?: TagRef[];
   /** Borne temporelle agrégée (liste stories) : min / max sur périodes + dates d'événements. */
   startDate?: string;
   endDate?: string;
@@ -76,6 +81,15 @@ export interface StorySuggestion {
 export interface MultilingualText {
   fr: string;
   en: string;
+}
+
+/** Domaine thématique d'une fiche ; le premier de la liste est le principal. */
+export interface TagRef {
+  id: string;
+  label: MultilingualText;
+  family: string;
+  position: number;
+  parentId: string | null;
 }
 
 export interface Category {

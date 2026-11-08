@@ -51,7 +51,7 @@ const emit = defineEmits<{
 }>();
 
 // Les textes anglais et l'auteur ne sont pas affichés : le brouillon conserve leurs valeurs enregistrées.
-// La visibilité (StoryDangerZone) et les catégories (StoryCategoriesForm) reprennent toujours la frise enregistrée.
+// La visibilité (StoryDangerZone) et les tags (StoryTagsForm) reprennent toujours la frise enregistrée.
 const { form, validation, dirty, canSubmit, cancel, submit } = useStoryDraft({
   story: () => props.story, busy: () => props.busy, error: () => props.error, fields: ['text'],
 });

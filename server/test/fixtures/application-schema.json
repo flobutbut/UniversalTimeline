@@ -118,6 +118,64 @@
       "rls": true
     },
     {
+      "name": "event_tags",
+      "columns": [
+        {
+          "name": "event_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "tag_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "position",
+          "type": "smallint",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "event_tags_event_id_fkey",
+          "definition": "FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "event_tags_event_id_position_key",
+          "definition": "UNIQUE (event_id, \"position\")",
+          "kind": "u"
+        },
+        {
+          "name": "event_tags_pkey",
+          "definition": "PRIMARY KEY (event_id, tag_id)",
+          "kind": "p"
+        },
+        {
+          "name": "event_tags_position_check",
+          "definition": "CHECK (\"position\" >= 1 AND \"position\" <= 3)",
+          "kind": "c"
+        },
+        {
+          "name": "event_tags_tag_id_fkey",
+          "definition": "FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE RESTRICT",
+          "kind": "f"
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX event_tags_tag_id_idx ON public.event_tags USING btree (tag_id)"
+      ],
+      "triggers": [],
+      "rls": true
+    },
+    {
       "name": "events",
       "columns": [
         {
@@ -295,6 +353,64 @@
       "rls": true
     },
     {
+      "name": "period_tags",
+      "columns": [
+        {
+          "name": "period_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "tag_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "position",
+          "type": "smallint",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "period_tags_period_id_fkey",
+          "definition": "FOREIGN KEY (period_id) REFERENCES periods(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "period_tags_period_id_position_key",
+          "definition": "UNIQUE (period_id, \"position\")",
+          "kind": "u"
+        },
+        {
+          "name": "period_tags_pkey",
+          "definition": "PRIMARY KEY (period_id, tag_id)",
+          "kind": "p"
+        },
+        {
+          "name": "period_tags_position_check",
+          "definition": "CHECK (\"position\" >= 1 AND \"position\" <= 3)",
+          "kind": "c"
+        },
+        {
+          "name": "period_tags_tag_id_fkey",
+          "definition": "FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE RESTRICT",
+          "kind": "f"
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX period_tags_tag_id_idx ON public.period_tags USING btree (tag_id)"
+      ],
+      "triggers": [],
+      "rls": true
+    },
+    {
       "name": "periods",
       "columns": [
         {
@@ -421,6 +537,13 @@
           "type": "text",
           "notNull": false,
           "default": null,
+          "identity": ""
+        },
+        {
+          "name": "non_thematic",
+          "type": "boolean",
+          "notNull": true,
+          "default": "false",
           "identity": ""
         }
       ],
@@ -1044,6 +1167,183 @@
         "CREATE TRIGGER trg_story_period_hierarchy BEFORE INSERT OR UPDATE ON story_periods FOR EACH ROW EXECUTE FUNCTION check_story_period_hierarchy()"
       ],
       "rls": true
+    },
+    {
+      "name": "story_tags",
+      "columns": [
+        {
+          "name": "story_id",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "tag_id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "position",
+          "type": "smallint",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "story_tags_pkey",
+          "definition": "PRIMARY KEY (story_id, tag_id)",
+          "kind": "p"
+        },
+        {
+          "name": "story_tags_position_check",
+          "definition": "CHECK (\"position\" >= 1 AND \"position\" <= 3)",
+          "kind": "c"
+        },
+        {
+          "name": "story_tags_story_id_fkey",
+          "definition": "FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE",
+          "kind": "f"
+        },
+        {
+          "name": "story_tags_story_id_position_key",
+          "definition": "UNIQUE (story_id, \"position\")",
+          "kind": "u"
+        },
+        {
+          "name": "story_tags_tag_id_fkey",
+          "definition": "FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE RESTRICT",
+          "kind": "f"
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX story_tags_tag_id_idx ON public.story_tags USING btree (tag_id)"
+      ],
+      "triggers": [],
+      "rls": true
+    },
+    {
+      "name": "tags",
+      "columns": [
+        {
+          "name": "id",
+          "type": "character varying",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "parent_id",
+          "type": "character varying",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "family",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "label_fr",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "label_en",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "description_fr",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "description_en",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "position",
+          "type": "smallint",
+          "notNull": true,
+          "default": null,
+          "identity": ""
+        },
+        {
+          "name": "taxonomy_version",
+          "type": "smallint",
+          "notNull": true,
+          "default": "1",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": "now()",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": "now()",
+          "identity": ""
+        }
+      ],
+      "constraints": [
+        {
+          "name": "tags_family_check",
+          "definition": "CHECK (family = ANY (ARRAY['monde-vivant'::text, 'societes'::text, 'productions'::text]))",
+          "kind": "c"
+        },
+        {
+          "name": "tags_id_check",
+          "definition": "CHECK (id::text ~ '^[a-z]+(-[a-z]+)*$'::text)",
+          "kind": "c"
+        },
+        {
+          "name": "tags_parent_id_fkey",
+          "definition": "FOREIGN KEY (parent_id) REFERENCES tags(id) ON DELETE RESTRICT",
+          "kind": "f"
+        },
+        {
+          "name": "tags_parent_is_other",
+          "definition": "CHECK (parent_id IS NULL OR parent_id::text <> id::text)",
+          "kind": "c"
+        },
+        {
+          "name": "tags_pkey",
+          "definition": "PRIMARY KEY (id)",
+          "kind": "p"
+        },
+        {
+          "name": "tags_position_key",
+          "definition": "UNIQUE (\"position\")",
+          "kind": "u"
+        }
+      ],
+      "indexes": [],
+      "triggers": [
+        "CREATE TRIGGER trg_tags_updated_at BEFORE UPDATE ON tags FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      ],
+      "rls": true
     }
   ],
   "policies": [
@@ -1081,6 +1381,29 @@
       "command": "ALL",
       "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
       "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "event_tags",
+      "name": "event_tags_read",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "true",
+      "check": null
+    },
+    {
+      "table": "event_tags",
+      "name": "event_tags_write",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "ALL",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))"
     },
     {
       "table": "events",
@@ -1127,6 +1450,29 @@
       "command": "ALL",
       "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
       "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "period_tags",
+      "name": "period_tags_read",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "true",
+      "check": null
+    },
+    {
+      "table": "period_tags",
+      "name": "period_tags_write",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "ALL",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))"
     },
     {
       "table": "periods",
@@ -1388,6 +1734,41 @@
       "command": "ALL",
       "using": "access_private.can_edit_story(story_id)",
       "check": "access_private.can_edit_story(story_id)"
+    },
+    {
+      "table": "story_tags",
+      "name": "story_tags_read",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "(EXISTS ( SELECT 1\n   FROM stories s\n  WHERE (s.id = story_tags.story_id)))",
+      "check": null
+    },
+    {
+      "table": "story_tags",
+      "name": "story_tags_write",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "ALL",
+      "using": "access_private.can_edit_story(story_id)",
+      "check": "access_private.can_edit_story(story_id)"
+    },
+    {
+      "table": "tags",
+      "name": "tags_read",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "command": "SELECT",
+      "using": "true",
+      "check": null
     }
   ]
 }

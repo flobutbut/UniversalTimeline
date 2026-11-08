@@ -6,8 +6,7 @@ import EventsView from '@/views/EventsView/EventsView.vue';
 import DatabaseView from '@/views/DatabaseView/DatabaseView.vue';
 import PeriodsView from '@/views/GraphView/Periods.vue';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
-import Select from '@/components/base/Select.vue';
-import { CategoryService } from '@/services/CategoryService';
+import { TagService } from '@/services/TagService';
 import { WikidataQueryService } from '@/services/WikidataQueryService';
 import { apiClient } from '@/services/ApiClient';
 import { useDataStore } from '@/stores/useDataStore';
@@ -19,7 +18,7 @@ const event = { id: 'e', wikidata_id: 'Q123', label_fr: 'Événement', date: 'M6
 beforeEach(() => {
   vi.resetAllMocks(); setActivePinia(createPinia()); vi.spyOn(useUiStore(), 'notify').mockImplementation(({ show: vi.fn(), hide: vi.fn() }).show); vi.spyOn(useUiStore(), 'hideNotification').mockImplementation(({ show: vi.fn(), hide: vi.fn() }).hide);
   vi.spyOn(console, 'error').mockImplementation(() => {});
-  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  vi.spyOn(TagService.getInstance(), 'getTags').mockResolvedValue([]);
   vi.mocked(apiClient.get).mockImplementation(async url => {
     if (url === '/events') return [event] as any;
     if (url === '/periods' || url === '/stories' || url === '/events/story-links') return [] as any;
@@ -83,9 +82,7 @@ it('blocks duplicate submissions and modal dismissal while an event save is pend
   expect(button('Mettre à jour').attributes('disabled')).toBeDefined();
   expect(button('Annuler').attributes('disabled')).toBeDefined();
   expect(view.get('fieldset').attributes('disabled')).toBeDefined();
-  const categories = view.getComponent(EditModal).getComponent(Select);
-  await categories.get('[role="combobox"]').trigger('click');
-  expect(categories.find('[role="listbox"]').exists()).toBe(false);
+  expect(view.getComponent(EditModal).get('.tag-picker').attributes('disabled')).toBeDefined();
   await view.get('form').trigger('submit');
   await view.get('.modal-overlay').trigger('click');
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
@@ -172,11 +169,11 @@ it('keeps the graph draft and store intact when atomic creation fails, then save
 });
 
 it('keeps the draft and blocks saving when categories fail, then reloads real categories on retry', async () => {
-  vi.mocked(CategoryService.getInstance().getCategories).mockRejectedValueOnce(new Error('Categories hors ligne')).mockResolvedValueOnce([{ id: 'real-uuid', label: 'Réelle' }]);
+  vi.mocked(TagService.getInstance().getTags).mockRejectedValueOnce(new Error('Categories hors ligne')).mockResolvedValueOnce([{ id: 'real-uuid', label: { fr: 'Réelle', en: '' }, family: 'societes', position: 1, parentId: null }]);
   view = mount(EventsView); await flushPromises();
   await button('Modifier').trigger('click'); await flushPromises();
   await view.get('input[placeholder="Titre en français"]').setValue('Mon brouillon');
-  expect(view.get('[role="alert"]').text()).toContain('Impossible de charger les catégories');
+  expect(view.get('[role="alert"]').text()).toContain('Impossible de charger les tags');
   expect(button('Mettre à jour').attributes('disabled')).toBeDefined();
   await view.get('form').trigger('submit'); await flushPromises(); expect(apiClient.put).not.toHaveBeenCalled();
   await button('Réessayer').trigger('click'); await flushPromises();

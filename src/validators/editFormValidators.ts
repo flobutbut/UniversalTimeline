@@ -1,3 +1,4 @@
+import { MAX_TAGS } from '@/lib/tags';
 import { parseTemporal, periodDateErrors } from '@temporal';
 import type { EditFormType } from '@/types/editForm';
 import { wikipediaTitleFromInput } from '@/lib/wikipedia';
@@ -67,10 +68,8 @@ export class EditFormValidator {
       }
       if (type === 'period' && data.parentId !== undefined && data.parentId !== null && (typeof data.parentId !== 'string' || !data.parentId.trim() || data.parentId.length > 200 || /[\u0000-\u001f\u007f]/.test(data.parentId))) fields.parentId = 'Le parent doit être un identifiant valide ou vide.';
     }
-    if (data.categories !== undefined && (!Array.isArray(data.categories) || data.categories.length > 500 || data.categories.some(category => {
-      const id = typeof category === 'string' ? category : record(category)?.id;
-      return typeof id !== 'string' || !id.trim() || id.length > 200 || /[\u0000-\u001f\u007f]/.test(id);
-    }))) fields.categories = 'La sélection de catégories est invalide.';
+    if (data.tags !== undefined && (!Array.isArray(data.tags) || data.tags.length > MAX_TAGS || new Set(data.tags).size !== data.tags.length
+      || data.tags.some(id => typeof id !== 'string' || !id.trim()))) fields.tags = `Choisissez ${MAX_TAGS} tags distincts au maximum.`;
     return result(fields);
   }
 }

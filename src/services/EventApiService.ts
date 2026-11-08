@@ -40,7 +40,7 @@ export class EventApiService {
     const payload = {
       ...buildNewEntityCoreFields(formData),
       date: formData.date,
-      categories: formData.categories || [],
+      tags: formData.tags,
     };
     return mapToEvent(await apiClient.post<EventDto>('/events', payload));
   }
@@ -52,6 +52,7 @@ export class EventApiService {
       description: { fr: formData.description?.fr ?? '', en: formData.description?.en ?? formData.description?.fr ?? '' },
       date: formData.date,
       categories: formData.categories,
+      tags: formData.tags,
       ...(formData.wikipedia ? { wikipedia: formData.wikipedia } : {}),
     };
     return mapToEvent(await apiClient.put<EventDto>(`/events/${eventId}`, payload));
@@ -61,7 +62,7 @@ export class EventApiService {
   async convertToPeriod(eventId: string, formData: PeriodFormPayload): Promise<Period> {
     const payload = {
       ...buildNewEntityCoreFields(formData),
-      start_date: formData.startDate, end_date: formData.endDate || 'NOW', categories: formData.categories || [],
+      start_date: formData.startDate, end_date: formData.endDate || 'NOW', categories: formData.categories, tags: formData.tags, nonThematic: formData.nonThematic,
     };
     return mapToPeriod(await apiClient.post<PeriodDto>(`/events/${encodeURIComponent(eventId)}/convert-to-period`, payload));
   }

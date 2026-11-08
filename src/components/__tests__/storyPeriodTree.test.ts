@@ -19,7 +19,7 @@ it('keeps only frise roots, honors explicit placement and attaches suggestions w
 });
 
 it('keeps matching descendants and their ancestors for combined accent-insensitive search and category filters', () => {
-  const tree = buildStoryPeriodTree([...periods, period('Éocène', 'child', { categories: [{ id: 'geo', label: { fr: 'Géologie', en: '' } }] })]);
+  const tree = buildStoryPeriodTree([...periods, period('Éocène', 'child', { tags: [{ id: 'geo', label: { fr: 'Géologie', en: '' }, family: 'societes', position: 1, parentId: null }] })]);
   const result = filterStoryPeriodTree(tree, 'eocene', 'geo');
   expect(result.map(node => node.period.id)).toEqual(['root']);
   expect(result[0].children[0].children.map(node => node.period.id)).toEqual(['Éocène']);

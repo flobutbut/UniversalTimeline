@@ -6,20 +6,20 @@ import HomeView from '@/views/HomeView.vue';
 import { apiClient } from '@/services/ApiClient';
 
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn() } }));
-const category = (id: string) => ({ id, label: { fr: id, en: id } });
-const event = (id: string, label: string, categories: ReturnType<typeof category>[]) => ({
-  id, wikidata_id: null, label_fr: label, label_en: label, date: 'M540', date_years_bp: 540000000, categories,
+const tag = (id: string) => ({ id, label: { fr: id, en: id }, family: 'societes', position: 1, parentId: null });
+const event = (id: string, label: string, tags: ReturnType<typeof tag>[]) => ({
+  id, wikidata_id: null, label_fr: label, label_en: label, date: 'M540', date_years_bp: 540000000, categories: [], tags,
 });
 const events = [
-  event('euk', 'Eukaryota', [category('micro'), category('bio')]),
-  event('cambrian', 'Explosion cambrienne', [category('paleo'), category('bio')]),
-  event('other', 'Autre événement', [category('geo')]),
+  event('euk', 'Eukaryota', [tag('bio'), tag('micro')]),
+  event('cambrian', 'Explosion cambrienne', [tag('bio'), tag('paleo')]),
+  event('other', 'Autre événement', [tag('geo'), tag('bio')]),
   event('none', 'Sans catégorie', []),
 ];
 let view: VueWrapper;
 let router: Router;
 const card = (label: string) => view.get(`button[aria-label="Afficher l’événement ${label}"]`);
-const highlighted = () => view.findAll('.event-card.is-category-active .event-label').map(e => e.text());
+const highlighted = () => view.findAll('.event-card.is-tag-active .event-label').map(e => e.text());
 async function select(label: string) { await card(label).trigger('click'); await flushPromises(); }
 beforeEach(async () => {
   vi.mocked(apiClient.get).mockImplementation(async path => {
@@ -39,7 +39,7 @@ beforeEach(async () => {
 });
 afterEach(() => { view?.unmount(); router?.options.history.destroy(); vi.resetAllMocks(); });
 
-it('highlights events sharing any category, including a non-first category, from a fresh timeline load', async () => {
+it('highlights events sharing the primary tag, not a secondary one, from a fresh timeline load', async () => {
   await flushPromises();
   expect(highlighted()).toEqual([]);
   await select('Eukaryota');

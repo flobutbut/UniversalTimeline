@@ -89,8 +89,8 @@ const wikipediaField = (body: Record<string, unknown>) => {
   return wikipedia === undefined ? {} : { wikipedia };
 };
 
-type EntityWriteInput = Omit<EventWrite, 'date' | 'categories'> & { categories: unknown };
-type PeriodWriteInput = Omit<PeriodWrite, 'categories'> & { categories: unknown };
+type EntityWriteInput = Omit<EventWrite, 'date' | 'categories' | 'tags'> & { categories: unknown; tags: unknown };
+type PeriodWriteInput = Omit<PeriodWrite, 'categories' | 'tags' | 'non_thematic'> & { categories: unknown; tags: unknown; non_thematic: unknown };
 
 export function parseEventWrite(value: unknown, create: true): EntityWriteInput & { id: string; date: string };
 export function parseEventWrite(value: unknown, create: false): EntityWriteInput & { date: string };
@@ -100,7 +100,7 @@ export function parseEventWrite(value: unknown, create: boolean): EntityWriteInp
     id: create ? parseEntityId(body.id) : undefined,
     wikidata_id: parseQid(body.wikidata_id),
     label: label(body.label, 'label'), description: bilingual(body.description, 'description'),
-    date: dateText(body.date, 'date', true)!, categories: body.categories,
+    date: dateText(body.date, 'date', true)!, categories: body.categories, tags: body.tags,
     ...wikipediaField(body),
   };
 }
@@ -116,7 +116,7 @@ export function parsePeriodWrite(value: unknown, create: boolean): PeriodWriteIn
     label: label(body.label, 'label'), description: bilingual(body.description, 'description'),
     start_date: dateText(body.start_date, 'start_date', true)!,
     end_date: dateText(body.end_date, 'end_date') || (create ? 'NOW' : 'TODAY'),
-    categories: body.categories,
+    categories: body.categories, tags: body.tags, non_thematic: body.nonThematic,
     ...wikipediaField(body),
   };
   const errors = periodDateErrors(parsed.start_date, parsed.end_date);
@@ -135,7 +135,7 @@ export function parseStoryWrite(value: unknown) {
     title: label(body.title, 'title'), description: bilingual(body.description, 'description'),
     // Optional: a signed-in account always signs with its own name (services/storyService).
     author: body.author === undefined || body.author === null ? null : text(body.author, 'author', 255, true),
-    isPublic, categories: body.categories,
+    isPublic, categories: body.categories, tags: body.tags,
   };
 }
 

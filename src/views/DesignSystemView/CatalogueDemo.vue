@@ -4,7 +4,7 @@
     <p>Barre de recherche et filtres communs. Les tableaux exposent une densité compacte pour les données et confortable pour les frises.</p>
     <h2>CatalogueToolbar · CatalogueFilters · CatalogueTable</h2>
     <CatalogueToolbar v-model:search="search" placeholder="Rechercher dans la démonstration…">
-      <template #filters><CatalogueFilters context="events" v-model:categories="categories" v-model:story-ids="storyIds" v-model:time-range="range" :category-options="categoryOptions" :story-options="storyOptions" /></template>
+      <template #filters><CatalogueFilters context="events" v-model:tags="categories" v-model:story-ids="storyIds" v-model:time-range="range" :tag-options="categoryOptions" :story-options="storyOptions" /></template>
       <template #actions><Button size="sm" @click="notice('Ajouter un événement')">Ajouter un événement</Button></template>
     </CatalogueToolbar>
     <Tabs v-model="density" :tabs="[{ value: 'compact', label: 'Compacte' }, { value: 'comfortable', label: 'Confortable' }]" />
@@ -17,7 +17,7 @@
     <Tabs v-model="galleryState" :tabs="[{ value: 'catalogue', label: 'Catalogue' }, { value: 'empty', label: 'Sans frise' }]" />
     <div class="gallery-example">
       <StoryTabsBar :tabs="tabs" :active-id="active" @select="active = $event" @close="closeTab" @reorder="reorderTab" />
-      <StoryGallery v-model:search="gallerySearch" v-model:visibility="visibility" v-model:time-range="galleryRange" v-model:period="period" v-model:categories="galleryCategories" :stories="visibleStories" :total-stories="sampleStories.length" :category-options="categoryOptions" @open="openStory" @create="notice('Créer une frise')" />
+      <StoryGallery v-model:search="gallerySearch" v-model:visibility="visibility" v-model:time-range="galleryRange" v-model:period="period" v-model:tags="galleryCategories" :stories="visibleStories" :total-stories="sampleStories.length" :tag-options="categoryOptions" @open="openStory" @create="notice('Créer une frise')" />
     </div>
   </section>
 </template>

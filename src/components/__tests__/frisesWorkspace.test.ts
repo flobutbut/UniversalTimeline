@@ -9,7 +9,7 @@ import FilterValueList from '@/components/filters/FilterValueList.vue';
 import { StoryApiService } from '@/services/StoryApiService';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { EventApiService } from '@/services/EventApiService';
-import { CategoryService } from '@/services/CategoryService';
+import { TagService } from '@/services/TagService';
 import { useUiStore } from '@/stores/useUiStore';
 import type { Period, Story, StorySummary } from '@/types/database';
 
@@ -99,16 +99,16 @@ it('distinguishes an unsuccessful search from a catalogue with no frises', async
   expect(view.find('.feedback-state').exists()).toBe(false);
 });
 it('filters the cards by tag from the filter panel and removes one tag from its chip', async () => {
-  const tag = (id: string, fr: string) => ({ id, label: { fr, en: '' } });
+  const tag = (id: string, fr: string, position: number) => ({ id, label: { fr, en: '' }, family: 'societes', position, parentId: null });
   vi.mocked(api.getListStories).mockResolvedValue([
-    { ...summaries[0], categories: [tag('war', 'Guerres'), tag('politics', 'Politique')] },
-    { ...summaries[1], categories: [tag('politics', 'Politique')] },
+    { ...summaries[0], categories: [], tags: [tag('war', 'Guerres', 1), tag('politics', 'Politique', 2)] },
+    { ...summaries[1], categories: [], tags: [tag('politics', 'Politique', 2)] },
   ]);
   await start();
   await button('Ajouter un filtre').trigger('click');
-  await new DOMWrapper(document.body).findAll('[role="menuitem"]').find(item => item.text() === 'Tags')!.trigger('click');
+  await new DOMWrapper(document.body).findAll('[role="menuitem"]').find(item => item.text() === 'Tag')!.trigger('click');
   const tags = view.getComponent(StoryFilters).findAllComponents(FilterValueList).find(select => select.props('label') === 'Tags')!;
-  expect(tags.props('options')).toEqual([{ value: 'war', label: 'Guerres' }, { value: 'politics', label: 'Politique' }]);
+  expect(tags.props('options')).toEqual([{ value: 'war', label: 'Guerres', group: 'Sociétés' }, { value: 'politics', label: 'Politique', group: 'Sociétés' }]);
   tags.vm.$emit('update:modelValue', ['war']); await flushPromises();
   expect(cards()).toEqual(['Guerre froide']);
   expect(view.get('.filter-chip').text()).toBe('Guerres');
@@ -233,7 +233,7 @@ it('filters the frise list by time overlap and clears it from the chip', async (
   expect(view.find('.filter-chip').exists()).toBe(false);
 });
 it('saves the frise settings from the Propriétés tab and reloads the frise', async () => {
-  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  vi.spyOn(TagService.getInstance(), 'getTags').mockResolvedValue([]);
   const update = vi.spyOn(api, 'updateStory').mockImplementation(async (id, data) => ({ ...summaries[0], title: data.title }));
   vi.mocked(api.getStory).mockImplementation(async id => ({ ...story(id), title: update.mock.calls.length ? { fr: 'Guerre froide renommée', en: 'Cold War' } : story(id).title }));
   await start('/database?story=1');
@@ -247,7 +247,7 @@ it('saves the frise settings from the Propriétés tab and reloads the frise', a
   expect(button('Enregistrer')).toBeUndefined();
 });
 it('changes the frise visibility from the danger zone after confirmation', async () => {
-  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  vi.spyOn(TagService.getInstance(), 'getTags').mockResolvedValue([]);
   const update = vi.spyOn(api, 'updateStory').mockImplementation(async (id, data) => ({ ...summaries[0], isPublic: data.isPublic ?? true }));
   vi.mocked(api.getStory).mockImplementation(async id => ({ ...story(id), isPublic: !update.mock.calls.length }));
   await start('/database?story=1');
@@ -280,7 +280,7 @@ it('filters frises by a selected period independently from the date range', asyn
 });
 
 it('opens the newly created frise directly in its own tab and URL', async () => {
-  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  vi.spyOn(TagService.getInstance(), 'getTags').mockResolvedValue([]);
   const created = { ...summaries[1], id: '3', title: { fr: 'Ma frise', en: '' }, isPublic: true };
   vi.spyOn(api, 'createStory').mockResolvedValue(created);
   vi.mocked(api.getStory).mockResolvedValue({ ...created, periods: [], events: [], parentStories: [] });
@@ -298,7 +298,7 @@ it('opens the newly created frise directly in its own tab and URL', async () => 
 });
 
 it('guides an empty frise through period and event creation and its entry points', async () => {
-  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  vi.spyOn(TagService.getInstance(), 'getTags').mockResolvedValue([]);
   await start('/database?story=2');
   await button('Ajouter une période').trigger('click'); await flushPromises();
   expect(view.getComponent({ name: 'EditModal' }).props()).toMatchObject({ type: 'period', mode: 'create', data: { parent_id: null } });
