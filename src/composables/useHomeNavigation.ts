@@ -67,10 +67,17 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
       const same=returnPath.value.findIndex(frame=>frame.storyId===currentStoryId.value);
       if(same>=0)returnPath.value=returnPath.value.slice(0,same);
       visitedStories.value = [...returnPath.value.map(({anchor:_anchor,anchorStoryId:_source,...position},index)=>({...position,returnPath:cloneReturnPath().slice(0,index)})), positionTarget(currentPeriod.value?.id)];
-      return;
+    } else {
+      const index = visitedStories.value.findIndex(entry => entry.storyId === target.storyId);
+      visitedStories.value = [...(index < 0 ? visitedStories.value : visitedStories.value.slice(0, index)), target];
     }
-    const index = visitedStories.value.findIndex(entry => entry.storyId === target.storyId);
-    visitedStories.value = [...(index < 0 ? visitedStories.value : visitedStories.value.slice(0, index)), target];
+    keepUniverseFirst();
+  }
+  /** Recherche, lien direct, redirection : l'Univers reste en tête du fil, sans créer d'étape de retour ni de passage. */
+  function keepUniverseFirst() {
+    if (visitedStories.value.some(entry => entry.storyId === ENTRY_STORY_ID)) return;
+    if (!stories.value.some(story => String(story.id) === ENTRY_STORY_ID)) return;
+    visitedStories.value = [{ storyId: ENTRY_STORY_ID, view: 'overview' }, ...visitedStories.value];
   }
   const chronologicalPeriodId = computed(() => currentPeriod.value?.id ?? referencePeriodId.value);
   const usesContextNeighbors = computed(() => !!chronologicalPeriodId.value && !!selectedContext.value &&
