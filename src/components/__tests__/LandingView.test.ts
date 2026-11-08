@@ -26,20 +26,23 @@ async function start(signedIn: boolean) {
 }
 afterEach(() => { view?.unmount(); router?.options.history.destroy(); if (pinia) disposePinia(pinia); vi.restoreAllMocks(); });
 
-it('turns each usage example into a measured link towards creating a frise', async () => {
+it('turns each usage example into a measured link towards a public frise', async () => {
   await start(false);
   const examples = view.findAll('.workspace-example a.example-row');
   expect(examples.map(link => link.attributes('data-attr'))).toEqual(['landing-cta-example_course', 'landing-cta-example_research', 'landing-cta-example_project']);
-  for (const link of examples) expect(link.attributes('href')).toBe('/login?mode=signup&redirect=/database');
+  expect(examples.map(link => link.attributes('href'))).toEqual(['/timeline?story=30', '/timeline?story=22', '/timeline?story=14']);
   expect(examples[0]!.text()).toContain('Donner des repères à un cours');
-  expect(examples[0]!.get('.sr-only').text()).toContain('créer un compte');
+  expect(examples[0]!.text()).toContain('Voir « Révolution française »');
+  expect(examples[0]!.get('.sr-only').text()).toContain('ouvrir cet exemple');
 });
 
-it('sends a signed-in visitor straight to their workspace', async () => {
+it('keeps the examples on public frises and the creation link on the account path', async () => {
+  await start(false);
+  expect(view.get('[data-attr="landing-cta-create"]').attributes('href')).toBe('/login?mode=signup&redirect=/database');
+  view.unmount(); router.options.history.destroy(); disposePinia(pinia);
   await start(true);
-  const link = view.get('.workspace-example a.example-row');
-  expect(link.attributes('href')).toBe('/database');
-  expect(link.get('.sr-only').text()).toContain('mon espace');
+  expect(view.get('.workspace-example a.example-row').attributes('href')).toBe('/timeline?story=30');
+  expect(view.get('[data-attr="landing-cta-create"]').attributes('href')).toBe('/database');
 });
 
 it('opens exploration from Mon espace while keeping creation links in Frises', async () => {

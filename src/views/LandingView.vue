@@ -37,9 +37,9 @@ onMounted(() => {
 onBeforeUnmount(() => sectionObserver?.disconnect());
 const accountTarget = computed(() => canUseWorkspace(auth) ? { name: 'database' } : { name: 'login', query: { mode: 'signup', redirect: '/database' } });
 const usageExamples = [
-  { id: 'course', title: 'Donner des repères à un cours', audience: 'Enseignement et transmission', type: 'PÉRIODES' },
-  { id: 'research', title: 'Situer un travail de recherche', audience: 'Études et monde académique', type: 'CONTEXTE' },
-  { id: 'project', title: 'Retracer l’histoire d’un projet', audience: 'Usages personnels et professionnels', type: 'ÉVÉNEMENTS' },
+  { id: 'course', title: 'Donner des repères à un cours', audience: 'Enseignement et transmission', type: 'PÉRIODES', story: { id: '30', title: 'Révolution française' } },
+  { id: 'research', title: 'Situer un travail de recherche', audience: 'Études et monde académique', type: 'CONTEXTE', story: { id: '22', title: 'Les cinq grandes extinctions' } },
+  { id: 'project', title: 'Retracer l’histoire d’un projet', audience: 'Usages personnels et professionnels', type: 'ÉVÉNEMENTS', story: { id: '14', title: 'Conquête spatiale' } },
 ];
 const visibility = ref<'public' | 'private'>('public');
 const visibilityTabs = [{ value: 'public' as const, label: 'Publique' }, { value: 'private' as const, label: 'Privée' }];
@@ -114,13 +114,13 @@ const questions = [
       </div>
       <div class="workspace-example">
         <div class="example-header"><span>À CHAQUE SUJET, SA FRISE</span><span>Exemples d’usages</span></div>
-        <!-- Visitors clicked these rows expecting them to open something: each one leads to creating a frise. -->
-        <RouterLink v-for="example in usageExamples" :key="example.id" :to="accountTarget" class="example-row" :data-attr="`landing-cta-example_${example.id}`">
+        <!-- Visitors clicked these rows expecting to see an example, then left the sign-up form at once: each opens a public frise. -->
+        <RouterLink v-for="example in usageExamples" :key="example.id" :to="{ path: '/timeline', query: { story: example.story.id } }" class="example-row" :data-attr="`landing-cta-example_${example.id}`">
           <span class="example-indicator" :class="`indicator-${example.id}`" />
-          <div><strong>{{ example.title }}</strong><p>{{ example.audience }}</p></div>
+          <div><strong>{{ example.title }}</strong><p>{{ example.audience }} · Voir « {{ example.story.title }} »</p></div>
           <span class="example-type">{{ example.type }}</span>
           <Icon icon="mdi:arrow-right" class="example-arrow" aria-hidden="true" />
-          <span class="sr-only">{{ canUseWorkspace(auth) ? ' : créer cette frise dans mon espace' : ' : créer un compte pour composer cette frise' }}</span>
+          <span class="sr-only"> : ouvrir cet exemple</span>
         </RouterLink>
         <div class="visibility-example">
           <span>Votre frise, votre choix <small>Exemple de visibilité</small></span>
