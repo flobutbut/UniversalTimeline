@@ -1,8 +1,9 @@
 import type { TransactionClient } from '../api/transaction.js';
 import type { EventImportance, StoryWrite } from '../domain/writeInputs.js';
-import type { StoryRow, JoinedStoryRow, JoinedPeriodRow, JoinedEventRow, ChildStoryRow, TemporalCandidate, PeriodRow, CategoryRow } from './rows.js';
+import type { StoryRow, JoinedStoryRow, JoinedPeriodRow, JoinedEventRow, ChildStoryRow, TemporalCandidate, PeriodRow, CategoryRow, TagColumns } from './rows.js';
+import { tagsColumn } from './tagRepository.js';
 
-interface StorySnapshotRow extends StoryRow {
+interface StorySnapshotRow extends StoryRow, TagColumns {
   categories: CategoryRow[];
   periods: Array<JoinedPeriodRow & Pick<PeriodRow, 'has_children'>>;
   events: Array<JoinedEventRow & { importance: EventImportance }>;
@@ -70,10 +71,12 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
       (SELECT COALESCE(jsonb_agg(to_jsonb(c) ORDER BY c.id), '[]')
        FROM public.story_categories sc JOIN public.categories c ON c.id = sc.category_id
        WHERE sc.story_id = s.id) AS categories,
+      ${tagsColumn('story', 's.id')},
       (SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY p.start_date, p.id, p.category_id), '[]') FROM (
         SELECT p.*, NULL::varchar AS parent_id, sp.parent_period_id AS story_parent_id,
           EXISTS(SELECT 1 FROM public.story_periods child
                  WHERE child.story_id = sp.story_id AND child.parent_period_id = p.id) AS has_children,
+          ${tagsColumn('period', 'p.id')},
           c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
         FROM public.story_periods sp JOIN public.periods p ON p.id = sp.period_id
         LEFT JOIN public.period_categories pc ON pc.period_id = p.id
@@ -81,7 +84,7 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
         WHERE sp.story_id = s.id
       ) p) AS periods,
       (SELECT COALESCE(jsonb_agg(to_jsonb(e) ORDER BY e.date, e.id, e.category_id), '[]') FROM (
-        SELECT e.*, se.importance, c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
+        SELECT e.*, se.importance, ${tagsColumn('event', 'e.id')}, c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
         FROM public.story_events se JOIN public.events e ON e.id = se.event_id
         LEFT JOIN public.event_categories ec ON ec.event_id = e.id
         LEFT JOIN public.categories c ON c.id = ec.category_id
@@ -150,6 +153,7 @@ export async function listStories(db: TransactionClient) {
         (SELECT COALESCE(json_agg(json_build_object(
           'id', e.id, 'date', e.date, 'date_years_bp', e.date_years_bp
         ) ORDER BY e.id), '[]') FROM public.story_events se JOIN public.events e ON e.id = se.event_id WHERE se.story_id = s.id) AS preview_events,
+        ${tagsColumn('story', 's.id')},
         c.id as category_id,
         c.label_fr as category_label_fr,
         c.label_en as category_label_en
@@ -177,6 +181,7 @@ export async function listStoryEvents(db: TransactionClient, id: string) {
   return (await db.query<JoinedEventRow>(`
       SELECT
         e.*,
+        ${tagsColumn('event', 'e.id')},
         c.id as category_id,
         c.label_fr as category_label_fr,
         c.label_en as category_label_en

@@ -8,6 +8,16 @@ import * as conversion from '../repositories/catalogueConversionRepository.js';
 import { deletePeriod } from '../repositories/periodHierarchyRepository.js';
 import { replaceEntityCategories } from '../repositories/categoryRepository.js';
 import { readEntityCategories } from './entityCategories.js';
+import { readEntityTags } from '../repositories/tagRepository.js';
+import { saveEntityTags, savePeriodTagging } from './entityTags.js';
+
+/** The old record is deleted with its links: what the form did not send is carried over before that. */
+async function carriedClassification(client: TransactionClient, kind: conversion.CatalogueKind, id: string, data: { categories?: string[]; tags?: string[] }) {
+  return {
+    categories: data.categories ?? (await readEntityCategories(client, kind, id)).map(category => category.id),
+    tags: data.tags ?? (await readEntityTags(client, kind, id)).map(tag => tag.id),
+  };
+}
 
 /**
  * A conversion replaces the catalogue record everywhere: every frise, entry point and anchor that used it
@@ -38,10 +48,12 @@ export function convertPeriodToEvent(periodId: string, data: EventWrite & { id: 
     }
     const row = await catalogue.insertEvent(client, data, computeYearsBP(data.date));
     const provenance = await conversion.transferSource(client, 'period', periodId, row.id, data.wikipedia === undefined);
-    await replaceEntityCategories(client, 'event', row.id, data.categories);
+    const carried = await carriedClassification(client, 'period', periodId, data);
+    await replaceEntityCategories(client, 'event', row.id, carried.categories);
+    const tags = await saveEntityTags(client, 'event', row.id, carried.tags);
     await conversion.transferMemberships(client, 'period', periodId, row.id);
     await deletePeriod(client, periodId);
-    return { ...row, ...provenance, ...(provenance.source_key ? { wikidata_id: null } : {}), categories: await readEntityCategories(client, 'event', row.id), stories };
+    return { ...row, ...provenance, ...(provenance.source_key ? { wikidata_id: null } : {}), categories: await readEntityCategories(client, 'event', row.id), tags, stories };
   });
 }
 
@@ -51,9 +63,11 @@ export function convertEventToPeriod(eventId: string, data: PeriodWrite & { id: 
     const stories = await prepare(client, 'event', eventId);
     const row = await catalogue.insertPeriod(client, data, computeYearsBP(data.start_date, now), computeYearsBP(data.end_date, now));
     const provenance = await conversion.transferSource(client, 'event', eventId, row.id, data.wikipedia === undefined);
-    await replaceEntityCategories(client, 'period', row.id, data.categories);
+    const carried = await carriedClassification(client, 'event', eventId, data);
+    await replaceEntityCategories(client, 'period', row.id, carried.categories);
+    const tagging = await savePeriodTagging(client, row.id, { ...data, tags: data.non_thematic ? [] : carried.tags });
     await conversion.transferMemberships(client, 'event', eventId, row.id);
     await catalogue.deleteEvent(client, eventId);
-    return { ...row, ...provenance, ...(provenance.source_key ? { wikidata_id: null } : {}), categories: await readEntityCategories(client, 'period', row.id), stories };
+    return { ...row, ...provenance, ...(provenance.source_key ? { wikidata_id: null } : {}), categories: await readEntityCategories(client, 'period', row.id), ...tagging, stories };
   });
 }

@@ -63,7 +63,6 @@ export function useGraphModals() {
       selectedPeriod.value = {
         ...period,
         description: period.description || { fr: '', en: '' },
-        categories: period.categories || [],
         hasParent: period.hasParent || false,
         children: period.children || [],
         temporalLocation: period.temporalLocation || '',

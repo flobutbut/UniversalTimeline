@@ -118,7 +118,7 @@
           :undated="listEventYearsBP(event) === null"
           :is-selected="selectedEvent?.id === event.id"
           :is-default-open="defaultOpenEventIds.has(event.id)"
-          :is-category-active="isCategoryActive(event)"
+          :is-tag-active="isTagActive(event)"
           :card-style="getEventStyles(event)"
           :align="getEventAlign(event)"
           :other-story-count="otherStoryCount(event.id)"
@@ -136,6 +136,7 @@
 </template>
 
 <script setup lang="ts">
+import { primaryTag } from '@/lib/tags';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import Button from '@/components/base/Button.vue';
 import { Icon } from '@iconify/vue';
@@ -535,10 +536,11 @@ onDeactivated(() => {
   periodFlip.cancel();
 });
 
-const isCategoryActive = (event: ListEvent): boolean => {
+/** Compare les tags principaux : des domaines larges partagés en second plan surligneraient presque tout. */
+const isTagActive = (event: ListEvent): boolean => {
   if (!selectedEvent.value || selectedEvent.value.id === event.id) return false;
-  const selectedIds = new Set(selectedEvent.value.categories.map(c => c.id));
-  return event.categories.some(c => selectedIds.has(c.id));
+  const selected = primaryTag(selectedEvent.value);
+  return !!selected && primaryTag(event)?.id === selected.id;
 };
 
 const goBack = () => {

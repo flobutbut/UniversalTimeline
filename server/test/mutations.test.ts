@@ -51,8 +51,9 @@ for (const entity of ['events', 'periods', 'stories']) {
       expect(sql[1]).toMatch(new RegExp(`UPDATE public.${entity}`));
       expect(sql[2]).toMatch(/DELETE FROM public\.\w+_categories/);
       expect(sql[3]).toMatch(/SELECT c.id/);
-      expect(sql[4]).toBe('COMMIT');
-      expect(res.json).toHaveBeenCalledWith({ id: 'entity-1', categories: [] });
+      expect(sql[4]).toMatch(/SELECT t.id/);
+      expect(sql[5]).toBe('COMMIT');
+      expect(res.json).toHaveBeenCalledWith({ id: 'entity-1', categories: [], tags: [] });
       expect(query).not.toHaveBeenCalled();
       expect(client.release).toHaveBeenCalledOnce();
     });
@@ -60,10 +61,11 @@ for (const entity of ['events', 'periods', 'stories']) {
     it('preserves associations when the categories field is absent', async () => {
       await call('put', `/${entity}/:id`, body);
       const sql = client.query.mock.calls.map(args => args[0] as string);
-      expect(sql).toHaveLength(4);
+      expect(sql).toHaveLength(5);
       expect(sql.some(statement => /^(DELETE|INSERT).*_categories/.test(statement))).toBe(false);
       expect(sql[2]).toMatch(/SELECT c.id/);
-      expect(sql[3]).toBe('COMMIT');
+      expect(sql[3]).toMatch(/SELECT t.id/);
+      expect(sql[4]).toBe('COMMIT');
     });
 
     it.each([null, 'invalid', [{}], [{ id: '' }]])('rejects malformed categories before any write (%j)', async categories => {
@@ -238,7 +240,7 @@ describe('DELETE /periods/:id', () => {
 it('returns 201 only after event and categories have committed', async () => {
   const res = await call('post', '/events', { id: 'entity-1', label: { fr: 'Event' }, date: 'M65', categories: [{ id: 'cat-1' }] });
   expect(res.status).toHaveBeenCalledWith(201);
-  expect(res.json).toHaveBeenCalledWith({ id: 'entity-1', categories: [] });
+  expect(res.json).toHaveBeenCalledWith({ id: 'entity-1', categories: [], tags: [] });
   expect(client.query.mock.calls.at(-1)?.[0]).toBe('COMMIT');
 });
 

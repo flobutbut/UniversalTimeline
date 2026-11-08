@@ -1,6 +1,7 @@
 import type { TransactionClient } from '../api/transaction.js';
 import type { EventWrite, PeriodWrite } from '../domain/writeInputs.js';
 import type { PeriodRow, PeriodRecord, EventRow, JoinedPeriodListRow, JoinedEventRow } from './rows.js';
+import { tagsColumn } from './tagRepository.js';
 
 export async function insertEvent(client: TransactionClient, data: EventWrite & { id: string }, yearsBP: number | null) {
   const { id, wikidata_id, label, description, date, wikipedia } = data;
@@ -99,7 +100,7 @@ export async function listPeriods(db: TransactionClient) {
   return (await db.query<JoinedPeriodListRow>(`
     SELECT p.source_key, p.wikidata_source, p.wikipedia_title_fr, p.wikipedia_title_en, p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
            p.start_date, p.end_date, NULL::varchar AS parent_id, p.start_years_bp, p.end_years_bp,
-           false AS has_children,
+           false AS has_children, p.non_thematic, ${tagsColumn('period', 'p.id')},
            c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
     FROM public.periods p
     LEFT JOIN public.period_categories pc ON p.id = pc.period_id
@@ -109,7 +110,7 @@ export async function listPeriods(db: TransactionClient) {
 }
 export async function listEvents(db: TransactionClient) {
   return (await db.query<JoinedEventRow>(`
-    SELECT e.*, c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
+    SELECT e.*, ${tagsColumn('event', 'e.id')}, c.id AS category_id, c.label_fr AS category_label_fr, c.label_en AS category_label_en
     FROM public.events e
     LEFT JOIN public.event_categories ec ON e.id = ec.event_id
     LEFT JOIN public.categories c ON ec.category_id = c.id
@@ -117,12 +118,12 @@ export async function listEvents(db: TransactionClient) {
   `)).rows;
 }
 export async function findEvent(db: TransactionClient, id: string) {
-  return (await db.query<EventRow>('SELECT * FROM public.events WHERE id = $1', [id])).rows[0];
+  return (await db.query<EventRow>(`SELECT e.*, ${tagsColumn('event', 'e.id')} FROM public.events e WHERE e.id = $1`, [id])).rows[0];
 }
 export async function findPeriod(db: TransactionClient, value: string, by: 'id' | 'wikidata_id') {
   return (await db.query<PeriodRow>(`
     SELECT p.source_key, p.wikidata_source, p.wikipedia_title_fr, p.wikipedia_title_en, p.id, p.wikidata_id, p.label_fr, p.label_en, p.description_fr, p.description_en,
-           p.start_date, p.end_date, NULL::varchar AS parent_id, p.start_years_bp, p.end_years_bp,
+           p.start_date, p.end_date, NULL::varchar AS parent_id, p.start_years_bp, p.end_years_bp, p.non_thematic, ${tagsColumn('period', 'p.id')},
            p.created_at, p.updated_at,
            false AS has_children
     FROM public.periods p WHERE p.${by} = $1

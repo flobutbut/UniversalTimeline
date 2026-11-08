@@ -1,4 +1,5 @@
 import { parseEntityId } from './inputValidation.js';
+import { parseTagging } from './entityTags.js';
 
 export class InvalidCategoriesError extends Error {
   constructor() {
@@ -20,6 +21,8 @@ export function parseCategoryIds(categories: unknown): string[] | undefined {
 }
 
 
-export function parseWriteCategories<T extends { categories: unknown }>(input: T) {
-  return { ...input, categories: parseCategoryIds(input.categories) };
+export function parseWriteCategories<T extends { categories: unknown; tags: unknown; non_thematic?: unknown }>(input: T) {
+  const { tags, non_thematic } = parseTagging(input.tags, input.non_thematic);
+  const { non_thematic: _raw, ...rest } = input;
+  return { ...rest, categories: parseCategoryIds(input.categories), tags, ...('non_thematic' in input ? { non_thematic } : {}) };
 }

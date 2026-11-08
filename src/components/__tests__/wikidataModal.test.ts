@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { mount, flushPromises } from '@vue/test-utils';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
-import { CategoryService } from '@/services/CategoryService';
+import { TagService } from '@/services/TagService';
 import { WikidataQueryService } from '@/services/WikidataQueryService';
 import { SearchApiService } from '@/services/SearchApiService';
 import { apiClient } from '@/services/ApiClient';
@@ -20,7 +20,7 @@ async function start() {
 beforeEach(() => {
   setActivePinia(createPinia()); vi.spyOn(useUiStore(), 'notify').mockImplementation(({ show: vi.fn(), hide: vi.fn() }).show); vi.spyOn(useUiStore(), 'hideNotification').mockImplementation(({ show: vi.fn(), hide: vi.fn() }).hide);
   vi.mocked(apiClient.get).mockResolvedValue([]);
-  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  vi.spyOn(TagService.getInstance(), 'getTags').mockResolvedValue([]);
   vi.spyOn(WikidataQueryService.getInstance(), 'loadEvent').mockResolvedValue(imported);
   vi.spyOn(WikidataQueryService.getInstance(), 'getEntityClasses').mockResolvedValue([]);
   vi.spyOn(WikidataQueryService.getInstance(), 'getWikipediaTitles').mockResolvedValue(new Map());

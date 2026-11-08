@@ -16,10 +16,10 @@ const event = { label: 'Depuis Wikidata', date: '1944-06-06', description: { fr:
 const period = { label: { fr: 'Période importée', en: '' }, temporalData: [{ startDate: 'M65', endDate: 'M8', location: 'Monde' }], children: [] };
 let scope: EffectScope;
 function setup(type: 'event' | 'period' = 'event') {
-  const form = reactive<EditFormData>({ qid: 'Q123', title: { fr: 'Mon brouillon', en: '' }, description: { fr: '', en: '' }, date: 'M65', startDate: 'M100', endDate: 'NOW', categories: ['manual'], parentId: 'chosen', location: '', author: '', isPublic: false });
+  const form = reactive<EditFormData>({ qid: 'Q123', title: { fr: 'Mon brouillon', en: '' }, description: { fr: '', en: '' }, date: 'M65', startDate: 'M100', endDate: 'NOW', tags: ['manual'], tagsLoaded: true, nonThematic: false, parentId: 'chosen', location: '', author: '', isPublic: false });
   const context = reactive({ open: true, type, mode: 'create', data: {} as unknown, busy: false });
   const count = vi.fn();
-  const flow = scope.run(() => useWikidataForm({ form, context: () => ({ ...context }), categoryIds: () => new Set(['manual']), onChildrenCount: count }))!;
+  const flow = scope.run(() => useWikidataForm({ form, context: () => ({ ...context }), tagIds: () => new Set(['manual']), onChildrenCount: count }))!;
   return { form, context, flow, count };
 }
 beforeEach(() => {
@@ -56,7 +56,7 @@ it('keeps loading until categories and parent enrichment finish, including a zer
 it('displays optional enrichment failures without discarding the main data or manual categories', async () => {
   vi.mocked(WikidataQueryService.getInstance().getEntityClasses).mockRejectedValue(new Error('Catégories inaccessibles'));
   const { form, flow } = setup('period'); await flow.importCurrent();
-  expect(form.title.fr).toBe('Période importée'); expect(form.categories).toEqual(['manual']); expect(form.parentId).toBe('chosen');
+  expect(form.title.fr).toBe('Période importée'); expect(form.tags).toEqual(['manual']); expect(form.parentId).toBe('chosen');
   expect(flow.notice.value).toContain('catégories'); expect(flow.error.value).toBeNull();
 });
 
@@ -103,7 +103,7 @@ it('discards the old retry target when the modal switches to a different draft',
 });
 it('preserves categories and sets an unknown child count, offering a fresh retry for optional failures',async()=>{
   vi.mocked(WikidataQueryService.getInstance().loadPeriod).mockResolvedValueOnce({...period,childrenPreloaded:false,warnings:['Nombre de sous-périodes indéterminé']} as any);
-  const {form,flow,count}=setup('period');await flow.importCurrent();expect(count).toHaveBeenCalledWith(null);expect(form.categories).toEqual(['manual']);expect(flow.retryAvailable.value).toBe(true);expect(flow.error.value).toBeNull();
+  const {form,flow,count}=setup('period');await flow.importCurrent();expect(count).toHaveBeenCalledWith(null);expect(form.tags).toEqual(['manual']);expect(flow.retryAvailable.value).toBe(true);expect(flow.error.value).toBeNull();
   await flow.retry();expect(count).toHaveBeenLastCalledWith(0);expect(flow.retryAvailable.value).toBe(false);
   expect(WikidataQueryService.getInstance().loadPeriod).toHaveBeenLastCalledWith('Q123',expect.objectContaining({force:true}));
 });

@@ -15,12 +15,12 @@ export async function searchStoryTimelines(q: string) {
     match: row.matched_type ? { type: row.matched_type, label: localized(row.matched_label_fr ?? '', row.matched_label_en) } : null,
   }));
 }
-export async function search(q: string, categoryId: string, only: SearchScope, qids?: string[]) {
+export async function search(q: string, tagId: string, only: SearchScope, qids?: string[]) {
   const periodsOnly = only === 'period' || only === 'periods';
   const eventsOnly = only === 'event' || only === 'events';
   const [periods, events] = await Promise.all([
-    eventsOnly ? [] : searchPeriods({ query }, q, categoryId, periodsOnly ? 300 : 120, qids),
-    periodsOnly ? [] : searchEvents({ query }, q, categoryId, eventsOnly ? 300 : 20, qids),
+    eventsOnly ? [] : searchPeriods({ query }, q, tagId, periodsOnly ? 300 : 120, qids),
+    periodsOnly ? [] : searchEvents({ query }, q, tagId, eventsOnly ? 300 : 20, qids),
   ]);
   return {
     periods: periods.map(row => ({

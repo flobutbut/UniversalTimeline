@@ -9,7 +9,7 @@
       <div class="finder-column-header"><h2>{{ index ? label(path[index - 1]) : story.title.fr || story.title.en }}</h2><span class="story-readonly-column__label">Lecture seule</span></div>
       <div class="finder-column-content">
         <FinderItem v-for="period in periods" :key="period.id" :item-id="period.id" :label="storyPeriodLabelForFinder(period)" :start-date="period.startDate" :end-date="period.endDate"
-          :categories="period.categories" :selected="selected === period.id" :has-children="story.periods.some(child => getStoryPeriodParentId(child) === period.id)"
+          :tags="storyPeriodTags(period)" :selected="selected === period.id" :has-children="story.periods.some(child => getStoryPeriodParentId(child) === period.id)"
           :draggable="false" hide-row-action is-external-catalog :data-readonly-period-id="period.id" @click="select(period.id)" />
         <p v-if="!periods.length" class="finder-empty-column">Aucune sous-période</p>
       </div>
@@ -22,7 +22,7 @@ import FinderItem from '@/views/GraphView/FinderItem.vue';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import { useDataStore } from '@/stores/useDataStore';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { buildStoryFinderPathFromSelectedPeriodId, getStoryPeriodChildren, getStoryPeriodRoots, storyPeriodLabelForFinder } from '@/lib/storyPeriodFinderColumns';
+import { buildStoryFinderPathFromSelectedPeriodId, getStoryPeriodChildren, getStoryPeriodRoots, storyPeriodLabelForFinder, storyPeriodTags } from '@/lib/storyPeriodFinderColumns';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import type { Story } from '@/types/database';
 const props = defineProps<{ storyId: string }>();

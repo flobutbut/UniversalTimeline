@@ -19,10 +19,10 @@
           <p v-else class="story-period-detail__empty story-period-detail__description">Aucune description renseignée.</p>
           <WikipediaLink :titles="period.wikipedia" :subject="period.label.fr || period.label.en" class="story-period-detail__wikipedia" />
         </header>
-        <section aria-label="Catégories de la période">
-          <h4>Catégories</h4>
-          <ul v-if="period.categories.length" class="story-period-detail__categories"><li v-for="category in period.categories" :key="category.id"><Tag :label="category.label.fr?.trim() || category.label.en?.trim() || category.id" /></li></ul>
-          <p v-else class="story-period-detail__empty">Aucune catégorie renseignée.</p>
+        <section aria-label="Tags de la période">
+          <h4>Tags</h4>
+          <p v-if="period.tags?.length" class="story-period-detail__categories"><ThematicTags :tags="period.tags" /></p>
+          <p v-else class="story-period-detail__empty">Aucun tag renseigné.</p>
         </section>
         <div v-if="inStory" class="story-period-detail__context" aria-label="Organisation dans cette frise">
           <section>
@@ -64,7 +64,7 @@ import { computed } from 'vue';
 import { Icon } from '@iconify/vue';
 import type { ListPeriod, ChildStorySummary, StorySummary } from '@/types/database';
 import Button from '@/components/base/Button.vue';
-import Tag from '@/components/base/Tag.vue';
+import ThematicTags from '@/components/ThematicTags.vue';
 import AnchoredStoryRow from './AnchoredStoryRow.vue';
 import { DateService } from '@/services/DateService';
 import { formatRecordDate } from '@/lib/storyListDates';

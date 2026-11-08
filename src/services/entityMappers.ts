@@ -1,5 +1,5 @@
-import type { ApiId, ApiText, ApiTimestamp, CategoryDto, PeriodDto, EventDto, StoryDto } from '@/types/api';
-import type { Category, MultilingualText, Period, Event, Story, StorySummary, StorySuggestion, WikipediaTitles } from '@/types/database';
+import type { ApiId, ApiText, ApiTimestamp, CategoryDto, TagDto, PeriodDto, EventDto, StoryDto } from '@/types/api';
+import type { Category, TagRef, MultilingualText, Period, Event, Story, StorySummary, StorySuggestion, WikipediaTitles } from '@/types/database';
 import { resolveYearsBeforePresent } from '@temporal';
 import { EVENT_IMPORTANCES } from '@/lib/eventImportance';
 
@@ -40,6 +40,15 @@ export function mapToCategory(row: CategoryDto): Category {
     ...(details ? { description: details } : {}),
   };
 }
+export function mapToTag(row: TagDto): TagRef {
+  return { id: apiId(row.id), label: text(row.label), family: row.family, position: row.position, parentId: row.parentId == null ? null : apiId(row.parentId) };
+}
+/** Une lecture sans classement ne vaut pas une fiche sans tag. */
+function tags(rows: TagDto[] | null | undefined): { tags?: TagRef[] } {
+  if (rows == null) return {};
+  if (!Array.isArray(rows)) throw new Error('Réponse API invalide : tags mal formés.');
+  return { tags: rows.map(mapToTag) };
+}
 /** Les titres ne sont lus que lorsque la réponse les transporte ; aucun objet vide n'est fabriqué. */
 function wikipedia(row: PeriodDto | EventDto): { wikipedia?: WikipediaTitles } {
   const hasColumns = row.wikipedia_title_fr !== undefined || row.wikipedia_title_en !== undefined;
@@ -49,7 +58,7 @@ function wikipedia(row: PeriodDto | EventDto): { wikipedia?: WikipediaTitles } {
 }
 function metadata(row: PeriodDto | EventDto | StoryDto) {
   return {
-    id: apiId(row.id), categories: categories(row.categories), description: description(row),
+    id: apiId(row.id), categories: categories(row.categories), ...tags(row.tags), description: description(row),
     createdAt: timestamp(row.created_at ?? row.createdAt), updatedAt: timestamp(row.updated_at ?? row.updatedAt),
   };
 }
@@ -59,7 +68,7 @@ export function mapToPeriod(row: PeriodDto): Period {
   const rawParent = Object.prototype.hasOwnProperty.call(row, 'parent_id') ? row.parent_id : row.parentId;
   const parentId = rawParent != null && rawParent !== '' ? apiId(rawParent) : null;
   return {
-    ...metadata(row), ...(row.sourceKey ? { sourceKey: row.sourceKey } : {}), ...(row.wikidataSource ? { wikidataSource: row.wikidataSource } : {}), ...wikipedia(row), wikidata_id: row.wikidata_id ?? '', label: text(row.label, row.label_fr, row.label_en),
+    ...metadata(row), ...((row.non_thematic ?? row.nonThematic) != null ? { nonThematic: (row.non_thematic ?? row.nonThematic)! } : {}), ...(row.sourceKey ? { sourceKey: row.sourceKey } : {}), ...(row.wikidataSource ? { wikidataSource: row.wikidataSource } : {}), ...wikipedia(row), wikidata_id: row.wikidata_id ?? '', label: text(row.label, row.label_fr, row.label_en),
     startDate, endDate,
     startYearsBP: years(row.start_years_bp ?? row.startYearsBP, startDate), endYearsBP: years(row.end_years_bp ?? row.endYearsBP, endDate),
     ...(row.story_parent_id !== undefined || row.storyParentId !== undefined ? { storyParentId: (row.story_parent_id !== undefined ? row.story_parent_id : row.storyParentId) == null ? null : apiId((row.story_parent_id !== undefined ? row.story_parent_id : row.storyParentId)!) } : {}),

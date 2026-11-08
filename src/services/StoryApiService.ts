@@ -11,7 +11,7 @@ export interface StoryFromPeriodResult { id: string; periodCount: number; eventC
 // Le serveur signe la frise avec le compte connecté ; un auteur vide n'est pas transmis.
 const storyPayload = (data: StoryFormPayload): StoryFormPayload => ({
   title: data.title, description: data.description, author: data.author?.trim() || undefined,
-  isPublic: data.isPublic, categories: data.categories,
+  isPublic: data.isPublic, categories: data.categories, tags: data.tags,
 });
 
 export class StoryApiService {

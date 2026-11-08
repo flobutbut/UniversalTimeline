@@ -90,8 +90,8 @@ it('keeps the period and category filters working together in the real events vi
     if (url === '/periods') return [root,child] as any;
     if (url === '/periods/root/children') return [child] as any;
     if (url === '/events') return [
-      { id: 'inside', label_fr: 'Inclus', date: 'M20', date_years_bp: 20000000, categories: [{ id: 'cat', label: { fr: 'Catégorie', en: '' } }] },
-      { id: 'outside', label_fr: 'Hors période', date: 'M80', date_years_bp: 80000000, categories: [{ id: 'cat', label: { fr: 'Catégorie', en: '' } }] },
+      { id: 'inside', label_fr: 'Inclus', date: 'M20', date_years_bp: 20000000, tags: [{ id: 'cat', label: { fr: 'Catégorie', en: '' }, family: 'societes', position: 1, parentId: null }] },
+      { id: 'outside', label_fr: 'Hors période', date: 'M80', date_years_bp: 80000000, tags: [{ id: 'cat', label: { fr: 'Catégorie', en: '' }, family: 'societes', position: 1, parentId: null }] },
       { id: 'uncategorized', label_fr: 'Sans catégorie', date: 'M20', date_years_bp: 20000000, categories: [] },
     ] as any;
     throw new Error(`Unexpected read ${url}`);
@@ -101,7 +101,7 @@ it('keeps the period and category filters working together in the real events vi
   await view.findAll('[role="menuitem"]').find(item => item.text() === 'Période')!.trigger('click');
   view.getComponent(PeriodFilterPicker).vm.$emit('update:modelValue', 'child'); await flushPromises();
   expect(view.text()).toContain('Inclus'); expect(view.text()).toContain('Sans catégorie'); expect(view.text()).not.toContain('Hors période');
-  view.getComponent(CatalogueFilters).vm.$emit('update:categories', ['cat']); await flushPromises();
+  view.getComponent(CatalogueFilters).vm.$emit('update:tags', ['cat']); await flushPromises();
   expect(view.text()).toContain('Inclus'); expect(view.text()).not.toContain('Sans catégorie');
   await button('Toutes les périodes').trigger('click'); await flushPromises();
   expect(view.text()).toContain('Hors période'); expect(view.text()).not.toContain('Sans catégorie');

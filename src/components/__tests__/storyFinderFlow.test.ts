@@ -76,12 +76,12 @@ it.each(['periods', 'events'] as const)('shows %s search errors and retries with
   const searchApi = vi.mocked(SearchApiService.getInstance().searchLocal).mockRejectedValueOnce(new Error('Recherche impossible')).mockResolvedValueOnce([hit('Résultat', mode === 'periods' ? 'period' : 'event')]);
   await start();
   if (mode === 'events') { view.getComponent(Tabs).vm.$emit('update:modelValue', 'events'); await flushPromises(); }
-  view.getComponent(FilterBar).vm.$emit('update:categoryId', 'geo'); await search('terre');
+  view.getComponent(FilterBar).vm.$emit('update:tagId', 'geo'); await search('terre');
   const body = new DOMWrapper(document.body);
   expect(body.get('[role="alert"]').text()).toContain('Recherche impossible'); expect(body.text()).not.toContain('Aucun résultat');
   await body.get('[role="alert"] button').trigger('click'); await flushPromises();
   expect(body.get('.filter-bar-dd__choose').text()).toContain('Résultat');
-  expect(searchApi.mock.calls[1][1]).toMatchObject({ categoryId: 'geo', ...(mode === 'periods' ? { onlyPeriods: true } : { onlyEvents: true }) });
+  expect(searchApi.mock.calls[1][1]).toMatchObject({ tagId: 'geo', ...(mode === 'periods' ? { onlyPeriods: true } : { onlyEvents: true }) });
 });
 
 it('aborts story search on tab or story changes and ignores its old results', async () => {
@@ -276,7 +276,7 @@ it('keeps the full preview visible through column exploration, category changes 
   }
   view.getComponent({ name: 'StoryTimeline' }).vm.$emit('deselect'); await flushPromises();
   expectFullPreview();
-  view.getComponent(FilterBar).vm.$emit('update:categoryId', 'no-match'); await flushPromises();
+  view.getComponent(FilterBar).vm.$emit('update:tagId', 'no-match'); await flushPromises();
   expectFullPreview();
   view.getComponent(Tabs).vm.$emit('update:modelValue', 'events'); await flushPromises();
   expectFullPreview();
@@ -331,7 +331,7 @@ it('edits the event importance for this frise from the event detail', async () =
 
 it('preselects the first visible event and preserves an explicit choice when changing tabs', async () => {
   const data = story('one');
-  data.events.push({ ...data.events[0], id: 'second', label: { fr: 'Deuxième', en: '' }, categories: [{ id:'geo', label:{fr:'Géologie',en:''} }] });
+  data.events.push({ ...data.events[0], id: 'second', label: { fr: 'Deuxième', en: '' }, categories: [], tags: [{ id:'geo', label:{fr:'Géologie',en:''}, family: 'societes', position: 1, parentId: null }] });
   await start(data);
   view.getComponent(Tabs).vm.$emit('update:modelValue', 'events'); await flushPromises();
   expect(selected()).toEqual(['event']);
@@ -341,7 +341,7 @@ it('preselects the first visible event and preserves an explicit choice when cha
   view.getComponent(Tabs).vm.$emit('update:modelValue', 'events'); await flushPromises();
   expect(selected()).toEqual(['second']);
   view.findAllComponents(FinderItem).find(row => row.props('itemId') === 'event')!.vm.$emit('click'); await flushPromises();
-  view.getComponent(FilterBar).vm.$emit('update:categoryId', 'geo'); await flushPromises();
+  view.getComponent(FilterBar).vm.$emit('update:tagId', 'geo'); await flushPromises();
   expect(selected()).toEqual(['second']);
 });
 
@@ -350,7 +350,7 @@ it('shows the selected frise event description, categories, reference and record
   Object.assign(data.events[0], {
     label: { fr: ' ', en: 'Apollo 11' }, description: { fr: ' ', en: 'First crewed Moon landing.\nA historic mission.' },
     date: '1969-07-21', wikidata_id: 'Q43653',
-    categories: [{ id: 'space', label: { fr: 'Conquête spatiale', en: '' } }, { id: 'science', label: { fr: ' ', en: 'Science' } }],
+    categories: [], tags: [{ id: 'space', label: { fr: 'Conquête spatiale', en: '' }, family: 'societes', position: 1, parentId: null }, { id: 'science', label: { fr: '', en: 'Science' }, family: 'societes', position: 1, parentId: null }],
     createdAt: new Date('2026-04-05T12:00:00Z'), updatedAt: new Date('2026-10-30T12:00:00Z'),
   });
   await start(data);
@@ -360,7 +360,7 @@ it('shows the selected frise event description, categories, reference and record
   expect(detail.get('h3').text()).toBe('Apollo 11');
   expect(detail.get('.event-detail-date').text()).toBe('21 juillet 1969');
   expect(detail.get('.event-detail-description').text()).toContain('First crewed Moon landing.\nA historic mission.');
-  expect(detail.findAll('.event-detail-categories li').map(item => item.text())).toEqual(['Conquête spatiale', 'Science']);
+  expect(detail.findAll('.event-detail-categories .ui-tag').map(item => item.text())).toEqual(['Conquête spatiale', 'Science']);
   expect(detail.get('.event-detail-reference a').attributes()).toMatchObject({ href: 'https://www.wikidata.org/wiki/Q43653', target: '_blank', rel: 'noopener noreferrer' });
   expect(detail.get('.event-detail-record').text()).toContain('5 avril 2026');
   expect(detail.get('.event-detail-record').text()).toContain('30 octobre 2026');
@@ -519,7 +519,7 @@ it('opens on periods and puts properties last, with settings, categories and rel
   expect(tabs.props('modelValue')).toBe('overview');
   expect(view.findComponent({ name: 'StoryTimeline' }).exists()).toBe(true);
   const overview = view.get('.story-overview');
-  expect(overview.findAll('h3').map(title => title.text())).toEqual(['Paramètres de la frise', 'Points d’entrée vers cette frise', 'Catégories de la frise', 'Parcours chronologique']);
+  expect(overview.findAll('h3').map(title => title.text())).toEqual(['Paramètres de la frise', 'Points d’entrée vers cette frise', 'Tags de la frise', 'Parcours chronologique']);
   expect(overview.element.lastElementChild?.classList.contains('story-danger-zone')).toBe(true);
   expect(view.find('.story-period-columns').exists()).toBe(false);
   await button('Périodes').trigger('click'); await flushPromises();

@@ -99,6 +99,7 @@ try {
     ['wikidata_generation', 'wikidataGeneration.postgres.mjs'], ['conversion', 'catalogueConversion.postgres.mjs'],
     ['wikidata_sources', 'wikidataSourcesMigration.postgres.mjs'],
     ['wikipedia_titles', 'wikipediaTitles.postgres.mjs'],
+    ['taxonomy_tags', 'taxonomyTags.postgres.mjs'],
     ['story_structure', 'storyStructure.postgres.mjs'],
     ['navigation_wrappers', 'navigationWrappers.postgres.mjs'],
   ]) await postgresSuite(name, file, restore);

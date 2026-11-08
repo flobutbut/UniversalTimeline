@@ -2,13 +2,13 @@ import { beforeEach, afterEach, it, expect, vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
-import { CategoryService } from '@/services/CategoryService';
+import { TagService } from '@/services/TagService';
 import { EditFormValidator } from '@/validators/editFormValidators';
 
 let view: ReturnType<typeof mount>;
 const button = () => view.findAll('button').find(node=>['Créer','Mettre à jour'].includes(node.text()))!;
 const period = {wikidata_id:'Q123',label:{fr:'Période',en:''},startDate:'M65',endDate:'NOW',categories:[]};
-beforeEach(()=>{setActivePinia(createPinia());vi.spyOn(CategoryService.getInstance(),'getCategories').mockResolvedValue([]);});
+beforeEach(()=>{setActivePinia(createPinia());vi.spyOn(TagService.getInstance(),'getTags').mockResolvedValue([]);});
 afterEach(()=>{if(view?.exists()) view.unmount();vi.restoreAllMocks();});
 
 it('creates a story without author field: the signed-in account signs it',async()=>{

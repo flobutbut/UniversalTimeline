@@ -123,16 +123,16 @@ export function useDatabaseView() {
       if (type === 'period') {
         const period = await PeriodApiService.getInstance().getPeriod(item.id);
         if (!isCurrent()) return;
-        modalState.value.currentItem = { ...period, description: period.description || { fr: '', en: '' }, categories: period.categories || [] };
+        modalState.value.currentItem = { ...period, description: period.description || { fr: '', en: '' } };
       } else if (type === 'event') {
         const event = events.value.find(e => e.id === item.id) ?? (await EventApiService.getInstance().getListEvents()).find(event => event.id === item.id);
         if (!isCurrent()) return;
         if (!event) throw new Error('Événement non trouvé dans le store');
-        modalState.value.currentItem = { ...event, description: event.description || { fr: '', en: '' }, categories: event.categories || [] };
+        modalState.value.currentItem = { ...event, description: event.description || { fr: '', en: '' } };
       } else if (type === 'story') {
         const story = stories.value.find(s => s.id === item.id);
         if (!story) throw new Error('Frise non trouvée dans le store');
-        modalState.value.currentItem = { ...story, description: story.description || { fr: '', en: '' }, categories: story.categories || [] };
+        modalState.value.currentItem = { ...story, description: story.description || { fr: '', en: '' } };
       }
 
       state.value.loadingDetails = false;

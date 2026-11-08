@@ -11,9 +11,17 @@ export interface CategoryDto {
   description?: ApiText | null;
   description_fr?: string | null; description_en?: string | null;
 }
+export interface TagDto {
+  id: ApiId;
+  label?: ApiText | null;
+  family: string;
+  position: number;
+  parentId?: ApiId | null;
+}
 interface MetadataDto {
   id: ApiId;
   categories?: CategoryDto[] | null;
+  tags?: TagDto[] | null;
   description?: ApiText | null;
   description_fr?: string | null; description_en?: string | null;
   created_at?: ApiTimestamp; updated_at?: ApiTimestamp;
@@ -40,6 +48,7 @@ export interface PeriodDto extends EntityDto {
   has_children?: boolean | null; hasChildren?: boolean | null;
   children?: ApiId[];
   temporal_location?: string | null; temporalLocation?: string | null;
+  non_thematic?: boolean | null; nonThematic?: boolean | null;
 }
 /** One period or event membership in a story readable by the current account. */
 export type StoryLinkDto = { story_id: string | number } & ({ event_id: string } | { period_id: string });
@@ -77,6 +86,9 @@ export interface EntityFormPayload extends NewEntityFormCore {
   parentId?: string | null;
   startDate?: string; endDate?: string; date?: string;
   categories?: Array<{ id: string }>;
+  /** Principal en premier. Omis : la mise à jour conserve les tags enregistrés. */
+  tags?: string[];
+  nonThematic?: boolean;
   temporalLocation?: string | null; location?: string | null;
 }
 export interface StoryFormPayload {
@@ -86,6 +98,7 @@ export interface StoryFormPayload {
   author?: string;
   isPublic?: boolean;
   categories?: Array<{ id: string }>;
+  tags?: string[];
   /** Création seulement : frise parente et ancre, enregistrées dans la même transaction. */
   storyPlacement?: { parentStoryId: string; anchorPeriodId: string | null } | null;
 }

@@ -6,7 +6,7 @@ import PeriodsView from '@/views/GraphView/Periods.vue';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
 import UiFeedbackHost from '@/components/UiFeedbackHost.vue';
 import { apiClient } from '@/services/ApiClient';
-import { CategoryService } from '@/services/CategoryService';
+import { TagService } from '@/services/TagService';
 import { WikidataQueryService } from '@/services/WikidataQueryService';
 
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn(), delete: vi.fn() } }));
@@ -16,7 +16,7 @@ let confirm: ReturnType<typeof mount>;
 
 beforeEach(async () => {
   vi.resetAllMocks(); setActivePinia(createPinia()); vi.spyOn(useUiStore(), 'notify').mockImplementation((toast).show); vi.spyOn(useUiStore(), 'hideNotification').mockImplementation((toast).hide);
-  vi.spyOn(CategoryService.getInstance(), 'getCategories').mockResolvedValue([]);
+  vi.spyOn(TagService.getInstance(), 'getTags').mockResolvedValue([]);
   vi.spyOn(WikidataQueryService.getInstance(), 'loadPeriodChildrenByWikidataId').mockResolvedValue([]);
   vi.mocked(apiClient.get).mockImplementation(async url => {
     if (url === '/periods/leaf/children') return [] as any;

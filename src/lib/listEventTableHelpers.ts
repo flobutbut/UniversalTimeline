@@ -7,14 +7,6 @@ export function listEventYearsBP(e: Pick<ListEvent, 'date' | 'dateYearsBP'>): nu
   return resolveYearsBeforePresent(e.date, e.dateYearsBP);
 }
 
-/** Clé de tri stable sur les libellés de catégories (FR). */
-export function listEventCategoriesSortKey(e: Pick<ListEvent, 'categories'>): string {
-  return [...(e.categories ?? [])]
-    .map((c) => c.label.fr || '')
-    .sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }))
-    .join('\u0001');
-}
-
 /** Horodatage `updatedAt` en ms pour tri (0 si absent / invalide). */
 export function listEventUpdatedTimestampMs(e: Pick<ListEvent, 'updatedAt'>): number {
   const u = e.updatedAt;

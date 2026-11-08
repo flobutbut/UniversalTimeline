@@ -33,7 +33,7 @@ export function useCatalogueConversion(storyId: () => string | null | undefined,
   const common = (item: ListPeriod | ListEvent): EditInitialData => ({
     ...(item.sourceKey ? { sourceKey: item.sourceKey } : {}),
     qid: item.wikidata_id ?? '', label: { ...item.label }, description: item.description ? { ...item.description } : null,
-    categories: item.categories.map(category => ({ id: category.id })),
+    ...(item.tags ? { tags: item.tags.map(tag => ({ id: tag.id })) } : {}),
   });
   /** An event keeps the start of the period; its duration is deliberately not carried over. */
   function fromPeriod(period: ListPeriod) {

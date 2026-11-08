@@ -70,6 +70,11 @@ before(async () => {
   await pool.query(await readFile(new URL('../../database/migrations/20261102223946_story_event_importance.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261104234615_wikidata_fact_sources.sql', import.meta.url),'utf8'));
   await pool.query(await readFile(new URL('../../database/migrations/20261106100000_wikipedia_titles.sql', import.meta.url),'utf8'));
+  // Test double: this suite stops before the editor migration, which the tag policies rely on in production.
+  await pool.query(`CREATE SCHEMA IF NOT EXISTS access_private; GRANT USAGE ON SCHEMA access_private TO authenticated;
+    CREATE FUNCTION access_private.can_edit_story(target integer) RETURNS boolean LANGUAGE sql STABLE AS $$ SELECT EXISTS (SELECT 1 FROM public.stories s WHERE s.id = target AND s.owner_user_id = auth.uid()) $$;
+    GRANT EXECUTE ON FUNCTION access_private.can_edit_story(integer) TO authenticated;`);
+  await pool.query(await readFile(new URL('../../database/migrations/20261108120000_taxonomy_tags.sql', import.meta.url),'utf8'));
   // Frises are signed by a username: both accounts sign up with one.
   await pool.query(`INSERT INTO auth.users (id, raw_user_meta_data) VALUES ($1, '{"username":"Alice"}'),($2, '{"username":"Bob"}')`, [alice,bob]);
 });

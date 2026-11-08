@@ -24,6 +24,7 @@ before(async()=>{
  const marker=baseline.indexOf('-- Editors can maintain public frises');assert.ok(marker>0);
  await pool.query(baseline.slice(0,marker)+'COMMIT;');
  await pool.query(await readFile(new URL('../../database/migrations/20261103143455_public_story_editors.sql',import.meta.url),'utf8'));
+ await pool.query(await readFile(new URL('../../database/migrations/20261108120000_taxonomy_tags.sql',import.meta.url),'utf8'));
 });
 beforeEach(async()=>{
  await pool.query(`TRUNCATE ${applicationTables.map(t=>'public.'+t).join(',')},admin_private.audit_log RESTART IDENTITY CASCADE`);await pool.query('DELETE FROM auth.users');

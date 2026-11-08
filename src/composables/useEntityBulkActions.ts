@@ -1,3 +1,4 @@
+import { tagLabel } from '@/lib/tags';
 import { computed } from 'vue';
 import { useCatalogueBulkActions, type CatalogueBulkAction } from './useCatalogueBulkActions';
 import type { useStoryLinks } from './useStoryLinks';
@@ -35,6 +36,7 @@ export function useEntityBulkActions(kind: 'period' | 'event', items: () => Arra
     },
     csvRow: item => ({ ID: item.id, Nom: item.label.fr || item.label.en,
       ...('startDate' in item ? { Début: item.startDate, Fin: item.endDate } : { Date: item.date }),
+      Tags: (item.tags ?? []).map(tagLabel).join(', '),
       Catégories: item.categories.map(category => category.label.fr || category.label.en).join(', '),
       Frises: links.storyIdsOf(item.id).map(id => store.storyById(id)?.title.fr || id).join(', '),
     }),

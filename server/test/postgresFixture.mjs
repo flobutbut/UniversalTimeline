@@ -4,7 +4,9 @@ import pg from 'pg';
 export const alice = '00000000-0000-0000-0000-000000000001';
 export const bob = '00000000-0000-0000-0000-000000000002';
 export const category = '00000000-0000-0000-0000-000000000010';
-export const applicationTables = ['categories', 'event_categories', 'events', 'period_categories', 'periods', 'profiles', 'stories', 'story_anchors', 'story_categories', 'story_entry_points', 'story_events', 'story_period_presentations', 'story_periods'];
+export const applicationTables = ['categories', 'event_categories', 'event_tags', 'events', 'period_categories', 'period_tags', 'periods', 'profiles', 'stories', 'story_anchors', 'story_categories', 'story_entry_points', 'story_events', 'story_period_presentations', 'story_periods', 'story_tags'];
+/** The tag grid ships with the schema: it is part of the contract but holds no application data. */
+const schemaTables = [...applicationTables, 'tags'];
 
 export function testPool(database = process.env.TIMELINE_TEST_DATABASE) {
   const socket = process.env.TIMELINE_TEST_SOCKET;
@@ -42,7 +44,7 @@ export async function snapshotRows(pool) {
 
 export async function schemaContract(pool) {
   const tables = [];
-  for (const name of applicationTables) {
+  for (const name of schemaTables) {
     const { rows: [table] } = await pool.query(`SELECT c.oid, c.relrowsecurity AS rls FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname=$1`, [name]);
     assert.ok(table, `Missing table: ${name}`);
     const columns = (await pool.query(`SELECT a.attname AS name, format_type(a.atttypid,a.atttypmod) AS type, a.attnotnull AS "notNull", pg_get_expr(d.adbin,d.adrelid) AS "default", a.attidentity AS identity FROM pg_attribute a LEFT JOIN pg_attrdef d ON d.adrelid=a.attrelid AND d.adnum=a.attnum WHERE a.attrelid=$1 AND a.attnum>0 AND NOT a.attisdropped ORDER BY a.attnum`, [table.oid])).rows;

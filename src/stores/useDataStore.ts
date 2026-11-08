@@ -71,8 +71,9 @@ export const useDataStore = defineStore('data', () => {
       const mapped = raw.map(source => {
         const period = PeriodApiService.mapPeriod(source);
         const known = periodById(period.id);
-        // This endpoint omits categories and child flags: absence is not emptiness.
+        // This endpoint omits categories, tags and child flags: absence is not emptiness.
         if (known && source.categories === undefined) period.categories = known.categories;
+        if (known && source.tags === undefined) { period.tags = known.tags; period.nonThematic = known.nonThematic; }
         if (known && source.has_children === undefined && source.hasChildren === undefined) period.hasChildren = known.hasChildren;
         return period;
       }).filter(p => !deletedPeriodIds.has(p.id));

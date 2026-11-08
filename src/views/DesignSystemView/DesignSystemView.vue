@@ -504,8 +504,8 @@
           <FilterBar
             hide-title
             v-model:search="dsPhSearch"
-            v-model:category-id="dsPhCategory"
-            :category-options="dsDemoCategoryOptions"
+            v-model:tag-id="dsPhCategory"
+            :tag-options="dsDemoCategoryOptions"
             :suggestions="dsPeriodSuggestions"
             :allow-wikidata-create="false"
             @add="onDsPhAdd"
@@ -522,8 +522,8 @@
             mode="events"
             hide-title
             v-model:search="dsEvSearch"
-            v-model:category-id="dsEvCategory"
-            :category-options="dsDemoCategoryOptions"
+            v-model:tag-id="dsEvCategory"
+            :tag-options="dsDemoCategoryOptions"
             :event-suggestions="dsEventSuggestions"
             @add="onDsEvAdd"
             @pick-event="onDsEvPick"

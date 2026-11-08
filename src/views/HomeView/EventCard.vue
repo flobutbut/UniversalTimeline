@@ -5,7 +5,7 @@
       'is-selected': isSelected,
       'is-default-open': isDefaultOpen && !undated,
       'event-card--undated': undated,
-      'is-category-active': isCategoryActive,
+      'is-tag-active': isTagActive,
       'align-start': align === 'start',
       'align-end': align === 'end',
     }"
@@ -59,7 +59,7 @@ const props = withDefaults(
     isSelected: boolean;
     /** Tooltip compact visible sans survol ; le survol et la sélection l'enrichissent. */
     isDefaultOpen?: boolean;
-    isCategoryActive: boolean;
+    isTagActive: boolean;
     align?: 'start' | 'center' | 'end';
     undated?: boolean;
     cardStyle: {
@@ -185,7 +185,7 @@ const displayDate = computed(() => {
   transform: translate(-50%, -50%) scale(1.3);
 }
 
-.is-category-active .event-dot {
+.is-tag-active .event-dot {
   padding: 0;
   border: 0;
   background-color: var(--color-primary);

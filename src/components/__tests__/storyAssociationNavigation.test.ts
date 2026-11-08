@@ -12,8 +12,8 @@ import { StoryApiService } from '@/services/StoryApiService';
 import type { Period, Story } from '@/types/database';
 
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn() } }));
-const category = { id: 'geo', label: { fr: 'Géologie', en: '' } };
-const period = (id: string, parentId: string | null = null): Period => ({ id, parentId, hasParent: !!parentId, hasChildren: id !== 'leaf', children: [], label: { fr: id, en: '' }, startDate: 'M65', endDate: 'NOW', categories: [category], temporalLocation: '' });
+const category = { id: 'geo', label: { fr: 'Géologie', en: '' }, family: 'societes', position: 1, parentId: null };
+const period = (id: string, parentId: string | null = null): Period => ({ id, parentId, hasParent: !!parentId, hasChildren: id !== 'leaf', children: [], label: { fr: id, en: '' }, startDate: 'M65', endDate: 'NOW', categories: [], tags: [category], temporalLocation: '' });
 const root = period('root'); const branch = period('branch', 'root'); const leaf = period('leaf', 'branch');
 const detail = (added = false): Story => ({ id: '1', title: { fr: 'Ma frise', en: '' }, author: '', isPublic: false, categories: [], periods: added ? [root,branch,leaf,period('extra','branch')] : [root,branch,leaf], events: [] });
 const api = StoryApiService.getInstance();
@@ -43,7 +43,7 @@ async function start() {
   for (const id of ['root', 'branch', 'leaf']) {
     await row(id).get('.finder-item-content').trigger('click'); await flushPromises();
   }
-  panel().getComponent(FilterBar).vm.$emit('update:categoryId', 'geo'); await flushPromises();
+  panel().getComponent(FilterBar).vm.$emit('update:tagId', 'geo'); await flushPromises();
   expect(selected()).toEqual(['leaf']);
   expect(panel().findAll('.finder-column')).toHaveLength(4);
 }
@@ -60,7 +60,7 @@ it('keeps the tree, DOM, filters and scroll positions during the write and detai
  refreshing.resolve(detail(true));await flushPromises();
  expect(panel().get('.story-detail-panel__finder-columns-wrap').element).toBe(tree);expect(tree.scrollLeft).toBe(220);
  expect(row('leaf').element).toBe(selectedRow);expect(selected()).toEqual(['leaf']);
- expect(panel().getComponent(FilterBar).props('categoryId')).toBe('geo');
+ expect(panel().getComponent(FilterBar).props('tagId')).toBe('geo');
 });
 it('keeps the tree available after a refused write instead of replacing it with an error page',async()=>{
  vi.mocked(api.changeAssociations).mockRejectedValueOnce({response:{data:{error:'Ajout refusé'}}});await start();

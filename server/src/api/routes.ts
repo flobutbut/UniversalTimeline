@@ -61,9 +61,9 @@ router.get('/search/semantic', endpoint('La recherche par sens est indisponible.
 router.get('/search', endpoint('Erreur lors de la recherche', async (req, res) => {
   const q = parseSearchText(req.query.q, 'q');
   if (!q) return res.json({ periods: [], events: [] });
-  const category = parseSearchText(req.query.category, 'category', 200);
+  const tag = parseSearchText(req.query.tag, 'tag', 64);
   const only = parseSearchScope(req.query.only);
-  res.json(await search(q, category, only));
+  res.json(await search(q, tag, only));
 }));
 router.get('/periods', endpoint('Erreur lors de la récupération des périodes', async (_req, res) => {
   res.json(await catalogue.listPeriods());
@@ -153,6 +153,9 @@ router.get('/stories/:storyId/periods', endpoint('Erreur lors de la récupérati
 }));
 router.get('/stories/:storyId/events', endpoint('Erreur lors de la récupération des événements de la frise', async (req, res) => {
   res.json(await stories.listStoryEvents(parseStoryId(req.params.storyId, 'storyId')));
+}));
+router.get('/tags', endpoint('Erreur lors de la récupération des tags', async (_req, res) => {
+  res.json(await catalogue.listTags());
 }));
 router.get('/categories', endpoint('Erreur lors de la récupération des catégories', async (_req, res) => {
   res.json(await catalogue.listCategories());

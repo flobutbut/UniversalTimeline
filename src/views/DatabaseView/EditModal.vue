@@ -1,8 +1,8 @@
 <template>
   <ModalShell :title="modalTitle" height="auto" :busy="loading" @close="closeModal">
     <FeedbackState kind="error" layout="inline" v-if="error" role="alert" >{{ error }}</FeedbackState>
-    <FeedbackState kind="error" layout="inline" v-if="editState.categoriesError"  role="alert">
-      {{ editState.categoriesError }} <Button variant="tertiary" size="sm" type="button" :disabled="loading || editState.categoriesLoading" @click="loadCategories">Réessayer</Button>
+    <FeedbackState kind="error" layout="inline" v-if="editState.tagsError"  role="alert">
+      {{ editState.tagsError }} <Button variant="tertiary" size="sm" type="button" :disabled="loading || editState.tagsLoading" @click="loadTags">Réessayer</Button>
     </FeedbackState>
     <template
       v-if="mode === 'create' && !convertFrom && (type === 'period' || type === 'event')"
@@ -132,16 +132,8 @@
             </Button>
           </div>
           <div class="form-group">
-            <BaseSelect
-              v-model="form.categories"
-              :error="fieldError('categories')"
-              :options="editState.categories.map(cat => ({ value: cat.id, label: cat.label }))"
-              label="Catégories"
-              placeholder="Sélectionner des catégories"
-              :multiple="true"
-              :loading="editState.categoriesLoading"
-              :disabled="loading || editState.categoriesLoading"
-            />
+            <Switch v-if="type === 'period'" v-model="form.nonThematic" label="Période non thématique (ère, règne, dynastie, régime)" label-first />
+            <TagPicker v-if="!form.nonThematic" v-model="form.tags" :options="editState.tags" :loading="editState.tagsLoading" :disabled="loading" :error="fieldError('tags')" />
           </div>
         </div>
 
@@ -294,16 +286,7 @@
 
         <div class="form-row" v-if="type === 'story'">
           <div class="form-group full-width">
-            <BaseSelect
-              v-model="form.categories"
-              :error="fieldError('categories')"
-              :options="editState.categories.map(cat => ({ value: cat.id, label: cat.label }))"
-              label="Catégories"
-              placeholder="Sélectionner des catégories"
-              :multiple="true"
-              :loading="editState.categoriesLoading"
-              :disabled="loading || editState.categoriesLoading"
-            />
+            <TagPicker v-model="form.tags" :options="editState.tags" :loading="editState.tagsLoading" :disabled="loading" :error="fieldError('tags')" />
           </div>
         </div>
       </fieldset>
@@ -343,7 +326,7 @@
       <Button
         variant="primary"
         type="button"
-        :disabled="loading || wikidataApplyLoading || (isStoryCreation && !storyPlacement.complete) || (!selectedExistingEntity && (!editState.isValid || !!editState.qidError || editState.categoriesLoading || !!editState.categoriesError))"
+        :disabled="loading || wikidataApplyLoading || (isStoryCreation && !storyPlacement.complete) || (!selectedExistingEntity && (!editState.isValid || !!editState.qidError || editState.tagsLoading || !!editState.tagsError))"
         @click="handleSubmit"
       >
         {{ selectedExistingEntity ? 'Ajouter à la frise' : mode === 'edit' ? 'Mettre à jour' : convertFrom ? 'Convertir' : 'Créer' }}
@@ -353,6 +336,7 @@
 </template>
 
 <script setup lang="ts">
+import TagPicker from '@/components/TagPicker.vue';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import { watch, ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import type { EditInitialData, EditFormSubmission, StoryPlacementDraft } from '@/types/editForm';
@@ -377,7 +361,6 @@ import Input from '@/components/base/Input.vue';
 import DateInput from '@/components/base/DateInput.vue';
 import SearchInput from '@/components/base/SearchInput.vue';
 import Switch from '@/components/base/Switch.vue';
-import BaseSelect from '@/components/base/Select.vue';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -419,7 +402,7 @@ const conversionNotice = computed(() => props.convertFrom === 'period'
   : 'L’événement sera remplacé par cette période, à la racine de chaque frise qui l’utilise, puis supprimé du catalogue. Son importance n’est pas conservée.');
 
 // Initialisation des composables
-const { form, state: editState, validation, resetForm, updateForm, prepareSubmitData, loadCategories, setQidError, setQidExists, setChildrenCount } = useEditModal(() => props.type, () => props.mode, props.data);
+const { form, state: editState, validation, resetForm, updateForm, prepareSubmitData, loadTags, setQidError, setQidExists, setChildrenCount } = useEditModal(() => props.type, () => props.mode, props.data);
 const touched = reactive(new Set<string>());
 const submitted = ref(false);
 const touch = (field: string) => { touched.add(field); };
@@ -428,7 +411,7 @@ const toast = useToast();
 const wikidataForm = useWikidataForm({
   form,
   context: () => ({ open: props.isOpen, mode: props.mode, type: props.type, data: props.data, busy: props.loading }),
-  categoryIds: () => new Set(editState.categories.map(category => category.id)),
+  tagIds: () => new Set(editState.tags.map(tag => tag.id)),
   onChildrenCount: count => setChildrenCount(count === null ? null : String(count)),
   onImported: () => { Object.keys(validation.value.fields).forEach(touch); void validateQid(); },
 });
@@ -570,7 +553,7 @@ const handleSubmit = () => {
     else if (props.type === 'event') emit('select-event', selectedExistingEntity.value.id);
     return;
   }
-  if (editState.categoriesLoading || editState.categoriesError) return;
+  if (editState.tagsLoading || editState.tagsError) return;
   submitted.value = true;
   if (!validation.value.isValid || editState.qidError) return;
   try {

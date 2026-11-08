@@ -53,7 +53,7 @@ export async function searchStories(db: TransactionClient, pattern: string) {
 export type SearchPeriodRow = Pick<PeriodRow, 'id' | 'wikidata_id' | 'label_fr' | 'label_en' | 'start_date' | 'end_date' | 'parent_id' | 'start_years_bp' | 'end_years_bp' | 'has_children'>;
 export type SearchEventRow = Pick<EventRow, 'id' | 'wikidata_id' | 'label_fr' | 'label_en' | 'description_fr' | 'date' | 'date_years_bp'>;
 /** Accent-insensitive words, French lexemes and typo tolerance; all user text stays bound. */
-function catalogueSearch(kind: 'periods' | 'events', categoryId: string, limit: number, byQids = false) {
+function catalogueSearch(kind: 'periods' | 'events', tagId: string, limit: number, byQids = false) {
   const period = kind === 'periods';
   const alias = period ? 'p' : 'e';
   const columns = period
@@ -69,7 +69,7 @@ function catalogueSearch(kind: 'periods' | 'events', categoryId: string, limit: 
       extensions.unaccent(lower(concat_ws(' ', ${alias}.label_fr, ${alias}.label_en))) AS title,
       extensions.unaccent(lower(concat_ws(' ', ${alias}.label_fr, ${alias}.label_en, ${alias}.description_fr, ${alias}.description_en, ${alias}.wikidata_id, ${alias}.id::text))) AS document
     FROM public.${kind} ${alias}
-    ${byQids ? `WHERE ${alias}.wikidata_id=ANY($2::text[])` : categoryId ? `WHERE EXISTS(SELECT 1 FROM public.${period ? 'period_categories' : 'event_categories'} cat WHERE cat.${period ? 'period_id' : 'event_id'}=${alias}.id AND cat.category_id=$2)` : ''}
+    ${byQids ? `WHERE ${alias}.wikidata_id=ANY($2::text[])` : tagId ? `WHERE EXISTS(SELECT 1 FROM public.${period ? 'period_tags' : 'event_tags'} link JOIN public.tags t ON t.id=link.tag_id WHERE link.${period ? 'period_id' : 'event_id'}=${alias}.id AND (t.id=$2 OR t.parent_id=$2))` : ''}
   ), scored AS (
     SELECT d.*, CASE WHEN lower(d.id::text)=q.text OR lower(d.wikidata_id)=q.text THEN 100 ELSE 0 END
       + CASE WHEN strpos(d.title,q.text)>0 THEN 12 ELSE 0 END
@@ -81,9 +81,9 @@ function catalogueSearch(kind: 'periods' | 'events', categoryId: string, limit: 
       OR (length(q.text)>=4 AND extensions.word_similarity(q.text,d.document)>=CASE WHEN length(q.text)=4 THEN 0.55 ELSE 0.4 END)`}
   ) SELECT * FROM scored ORDER BY search_score DESC, label_fr, id LIMIT ${limit}`;
 }
-export async function searchPeriods(db: TransactionClient, query: string, categoryId: string, limit: 120 | 300, qids?: string[]) {
-  return (await db.query<SearchPeriodRow>(catalogueSearch('periods', categoryId, limit, !!qids?.length), qids?.length ? [query, qids] : categoryId ? [query, categoryId] : [query])).rows;
+export async function searchPeriods(db: TransactionClient, query: string, tagId: string, limit: 120 | 300, qids?: string[]) {
+  return (await db.query<SearchPeriodRow>(catalogueSearch('periods', tagId, limit, !!qids?.length), qids?.length ? [query, qids] : tagId ? [query, tagId] : [query])).rows;
 }
-export async function searchEvents(db: TransactionClient, query: string, categoryId: string, limit: 20 | 300, qids?: string[]) {
-  return (await db.query<SearchEventRow>(catalogueSearch('events', categoryId, limit, !!qids?.length), qids?.length ? [query, qids] : categoryId ? [query, categoryId] : [query])).rows;
+export async function searchEvents(db: TransactionClient, query: string, tagId: string, limit: 20 | 300, qids?: string[]) {
+  return (await db.query<SearchEventRow>(catalogueSearch('events', tagId, limit, !!qids?.length), qids?.length ? [query, qids] : tagId ? [query, tagId] : [query])).rows;
 }

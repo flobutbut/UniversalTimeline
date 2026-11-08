@@ -2,7 +2,7 @@ import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import { compareStoryPeriodsByLabel } from '@/lib/periodTreeLabelKey';
 import { getStoryPeriodBoundaryYearsBP } from '@/lib/storyPeriodBoundaryYbp';
 import type { StoryPeriodInput } from '@/types/periodTree';
-import type { Category, ListPeriod, MultilingualText } from '@/types/database';
+import type { TagRef, ListPeriod, MultilingualText } from '@/types/database';
 
 export function listPeriodToStoryPeriodInput(p: ListPeriod): StoryPeriodInput {
   return {
@@ -13,6 +13,7 @@ export function listPeriodToStoryPeriodInput(p: ListPeriod): StoryPeriodInput {
     parentId: p.parentId ?? null,
     ...(p.storyParentId !== undefined ? { storyParentId: p.storyParentId } : {}),
     categories: p.categories,
+    ...(p.tags ? { tags: p.tags } : {}),
   };
 }
 
@@ -140,9 +141,9 @@ export function storyPeriodDateFields(p: StoryPeriodInput): { startDate?: string
   };
 }
 
-export function storyPeriodCategories(p: StoryPeriodInput): Category[] | undefined {
-  const c = (p as { categories?: Category[] }).categories;
-  return Array.isArray(c) && c.length ? c : undefined;
+export function storyPeriodTags(p: StoryPeriodInput): TagRef[] | undefined {
+  const tags = (p as { tags?: TagRef[] }).tags;
+  return Array.isArray(tags) && tags.length ? tags : undefined;
 }
 
 export function storyPeriodHasChildrenInStory(periods: StoryPeriodInput[], periodId: string): boolean {

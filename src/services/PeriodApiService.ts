@@ -66,7 +66,8 @@ export class PeriodApiService {
       start_date: formData.startDate,
       end_date: formData.endDate || 'NOW',
       children: [],
-      categories: formData.categories,
+      tags: formData.tags,
+      nonThematic: formData.nonThematic,
     };
 
     return mapToPeriod(await apiClient.post<PeriodDto>('/periods', payload));
@@ -82,7 +83,9 @@ export class PeriodApiService {
       },
       start_date: formData.startDate,
       end_date: formData.endDate || null,
-      categories: formData.categories || [],
+      categories: formData.categories,
+      tags: formData.tags,
+      nonThematic: formData.nonThematic,
       ...(formData.wikipedia ? { wikipedia: formData.wikipedia } : {}),
     };
     const data = await apiClient.put<PeriodDto>(`/periods/${periodId}`, payload);
@@ -91,7 +94,7 @@ export class PeriodApiService {
 
   /** Replaces the period everywhere by a new event (frises, entry points, anchors); no automatic retry. */
   async convertToEvent(periodId: string, formData: EventFormPayload): Promise<Event> {
-    const payload = { ...buildNewEntityCoreFields(formData), date: formData.date, categories: formData.categories || [] };
+    const payload = { ...buildNewEntityCoreFields(formData), date: formData.date, categories: formData.categories, tags: formData.tags };
     return mapToEvent(await apiClient.post<EventDto>(`/periods/${encodeURIComponent(periodId)}/convert-to-event`, payload));
   }
 

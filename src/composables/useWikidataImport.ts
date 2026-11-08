@@ -1,5 +1,5 @@
 import { WikidataQueryService } from '@/services/WikidataQueryService';
-import { mapWikidataClassesToCategories } from '@/services/WikidataCategoryMapper';
+import { mapWikidataClassesToTags } from '@/services/WikidataTagMapper';
 import type { TemporalLocation } from '@/types/geological';
 import { ref, onScopeDispose } from 'vue';
 import { useLatestRequest } from './useLatestRequest';
@@ -92,8 +92,8 @@ export function useWikidataImport() {
     if (data && 'warnings' in data && Array.isArray(data.warnings)) warnings.push(...data.warnings);
     if (!data) throw new Error('Aucune donnée trouvée pour ce Q-id');
     const transformed = transformWikidataData(data, type);
-    const suggestedCategoryIds = mapWikidataClassesToCategories(wikidataClasses);
-    if (suggestedCategoryIds.length) transformed.suggestedCategoryIds = suggestedCategoryIds;
+    const suggestedTagIds = mapWikidataClassesToTags(wikidataClasses);
+    if (suggestedTagIds.length) transformed.suggestedTagIds = suggestedTagIds;
     if (wikipedia) transformed.wikipedia = wikipedia;
     if (warnings.length) transformed.warnings = warnings;
     return transformed;

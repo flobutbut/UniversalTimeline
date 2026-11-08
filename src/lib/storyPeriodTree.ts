@@ -1,3 +1,4 @@
+import { matchesTags } from './tags';
 import type { ListPeriod } from '@/types/database';
 import { getStoryPeriodParentId } from './storyPeriodParent';
 import { compareStoryPeriodsByStartOldestFirst } from './storyPeriodFinderColumns';
@@ -38,13 +39,13 @@ export function buildStoryPeriodTree(periods: ListPeriod[], additional: ListPeri
 }
 
 const normalized = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr').trim();
-export function filterStoryPeriodTree(nodes: StoryPeriodTreeNode[], search: string, categoryId: string): StoryPeriodTreeNode[] {
+export function filterStoryPeriodTree(nodes: StoryPeriodTreeNode[], search: string, tagId: string): StoryPeriodTreeNode[] {
   const query = normalized(search);
-  if (!query && !categoryId) return nodes;
+  if (!query && !tagId) return nodes;
   return nodes.flatMap(node => {
-    const children = filterStoryPeriodTree(node.children, search, categoryId);
+    const children = filterStoryPeriodTree(node.children, search, tagId);
     const label = node.period.label.fr?.trim() || node.period.label.en || '';
-    const matches = (!query || normalized(label).includes(query)) && (!categoryId || node.period.categories.some(category => category.id === categoryId));
+    const matches = (!query || normalized(label).includes(query)) && (!tagId || matchesTags(node.period, [tagId]));
     return matches || children.length ? [{ ...node, children }] : [];
   });
 }

@@ -46,6 +46,7 @@ export async function exportOwnStories(client: TransactionClient) {
            (SELECT coalesce(json_agg(json_build_object('period_id', sp.period_id, 'parent_period_id', sp.parent_period_id) ORDER BY sp.period_id), '[]')
               FROM public.story_periods sp WHERE sp.story_id = s.id) AS periods,
            (SELECT coalesce(json_agg(se.event_id ORDER BY se.event_id), '[]') FROM public.story_events se WHERE se.story_id = s.id) AS events,
-           (SELECT coalesce(json_agg(sc.category_id ORDER BY sc.category_id), '[]') FROM public.story_categories sc WHERE sc.story_id = s.id) AS categories
+           (SELECT coalesce(json_agg(sc.category_id ORDER BY sc.category_id), '[]') FROM public.story_categories sc WHERE sc.story_id = s.id) AS categories,
+           (SELECT coalesce(json_agg(st.tag_id ORDER BY st.position), '[]') FROM public.story_tags st WHERE st.story_id = s.id) AS tags
     FROM public.stories s WHERE s.owner_user_id = (SELECT auth.uid()) ORDER BY s.id`)).rows;
 }

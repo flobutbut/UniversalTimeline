@@ -18,6 +18,8 @@
             <StoryBreadcrumb class="home-view__period-breadcrumb" :items="primaryLane.periodCrumbs.value" :current-navigable="!primaryLeads" :loading="loading" @navigate="primaryLane.actions.periodCrumb" />
           </div>
           <div class="home-view__header-actions">
+            <Select v-if="!routeError && primaryLane.eventFilter.available.value" class="home-view__subject" compact :searchable="false" placeholder="Sujets des événements"
+              :model-value="primaryLane.eventFilter.subject.value" :options="primaryLane.eventFilter.options.value" @update:model-value="primaryLane.eventFilter.select" />
             <Switch v-model="showPeriodChildren" label="Étendre" label-first variant="sm" :disabled="loading" />
             <Button v-if="auth.signedIn && !routeError && !error" variant="tertiary" size="sm" :disabled="loading"
               :to="{ name: 'database', query: { story: primaryLane.storyId.value ?? currentStoryId } }">Détail de la frise</Button>
@@ -78,6 +80,8 @@
               :loading="secondaryNav.loading.value" @navigate="secondaryLane.actions.periodCrumb" />
           </div>
           <div class="home-view__header-actions">
+            <Select v-if="secondaryLane.eventFilter.available.value" class="home-view__subject" compact :searchable="false" placeholder="Sujets des événements de la seconde frise"
+              :model-value="secondaryLane.eventFilter.subject.value" :options="secondaryLane.eventFilter.options.value" @update:model-value="secondaryLane.eventFilter.select" />
             <Button variant="ghost" size="xs" icon-only aria-label="Retirer la seconde frise" title="Retirer la seconde frise" @click="removeComparedStory">
               <template #icon><Icon icon="mdi:close" aria-hidden="true" /></template>
             </Button>
@@ -421,10 +425,18 @@ onActivated(() => {
 .home-view__story-selector :deep(.base-select__placeholder) { color: var(--color-text-primary); opacity: 1; font-weight: var(--font-weight-semibold); }
 .home-view__story-selector :deep(.base-select__indicators) { margin-left: var(--spacing-xs); }
 .home-view__story-selector :deep(.base-select__dropdown) { right: auto; width: max-content; min-width: 100%; max-width: min(320px, 85vw); }
+/* Sujet des événements : un select discret, aligné à droite avec les actions de la frise. */
+.home-view__subject { width: auto; min-width: 0; }
+.home-view__subject :deep(.base-select__trigger) { min-height: 0; padding: var(--spacing-xs) var(--spacing-sm); border: 0; background: transparent; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+.home-view__subject :deep(.base-select__trigger:hover) { background: var(--color-interaction-hover); }
+.home-view__subject :deep(.base-select__value) { font: inherit; }
+.home-view__subject :deep(.base-select__dropdown) { left: auto; right: 0; width: max-content; min-width: 100%; max-width: min(320px, 85vw); }
 .home-view__header-actions { grid-column: 2; grid-row: 1; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: var(--spacing-sm); margin-block: var(--spacing-sm) var(--spacing-xs); }
 @media (max-width: 768px) {
   .home-view__header { grid-template-columns: minmax(0, 1fr) auto; }
   .home-view__header-actions { grid-column: 2; grid-row: 1; }
+  /* Avec le select, les actions passent sous le fil d'Ariane pour ne pas le recouvrir. */
+  .home-view__header:has(.home-view__subject) .home-view__header-actions { grid-column: 1 / -1; grid-row: 2; }
 }
 .home-view__breadcrumbs > .story-breadcrumb + .story-breadcrumb { padding-top: 0; }
 .home-view__story-breadcrumb :deep(.story-breadcrumb__item) { padding-bottom: 0; }

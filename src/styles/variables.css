@@ -4,6 +4,23 @@
    Surfaces : background = application, default = chrome/champs, raised = cartes,
    subtle = regroupements. Une sélection utilise toujours son couple fond/texte. */
 :root {
+  /* Domaines thématiques : teintes de repère, mêlées à la surface à l'affichage. */
+  --tag-cosmos: #5b5bd6;
+  --tag-terre: #8d6e3f;
+  --tag-vivant: #2f9e5a;
+  --tag-peuplement-societe: #d6860a;
+  --tag-pouvoir-institutions: #7b2cbf;
+  --tag-conflits: #c92a2a;
+  --tag-economie-echanges: #0f9d8a;
+  --tag-territoires-exploration: #1c7ed6;
+  --tag-sante-corps: #e64980;
+  --tag-catastrophes: #495057;
+  --tag-techniques-inventions: #4263eb;
+  --tag-sciences-savoirs: #15aabf;
+  --tag-philosophie-ideologies: #9775fa;
+  --tag-religions-spiritualites: #b08900;
+  --tag-arts-culture-loisirs: #f76707;
+  --tag-sport: #74b816;
   color-scheme: light;
   --color-background-default: var(--palette-neutral-200);
   --color-surface-default: var(--palette-neutral-0);

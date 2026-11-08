@@ -321,10 +321,10 @@ export class SearchApiService {
 
   async searchLocal(
     q: string,
-    opts?: { categoryId?: string; onlyPeriods?: boolean; onlyEvents?: boolean; signal?: AbortSignal },
+    opts?: { tagId?: string; onlyPeriods?: boolean; onlyEvents?: boolean; signal?: AbortSignal },
   ): Promise<LocalSearchResult[]> {
     const params = new URLSearchParams({ q });
-    if (opts?.categoryId) params.set('category', opts.categoryId);
+    if (opts?.tagId) params.set('tag', opts.tagId);
     if (opts?.onlyPeriods) params.set('only', 'periods');
     else if (opts?.onlyEvents) params.set('only', 'events');
     const data = await apiClient.get<ApiSearchResponse>(`/search?${params.toString()}`, opts?.signal ? { signal: opts.signal } : undefined);

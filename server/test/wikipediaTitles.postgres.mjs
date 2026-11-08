@@ -11,6 +11,7 @@ const pool = testPool();
 const read = path => readFile(new URL(path, import.meta.url), 'utf8');
 const baseline = await read('../../database/baseline/application.sql');
 const migration = await read('../../database/migrations/20261106100000_wikipedia_titles.sql');
+const tagMigration = await read('../../database/migrations/20261108120000_taxonomy_tags.sql');
 const backfill = await read('../../database/data/20261106_wikipedia_titles.sql');
 const rollback = await read('../../database/data/20261106_wikipedia_titles_rollback.sql');
 const tx = operation => runInTransaction(pool, async client => {
@@ -46,6 +47,7 @@ before(async () => {
   Object.assign(migrated, { beforeRows: await snapshot(), beforePolicies: await policies() });
   await pool.query(migration);
   Object.assign(migrated, { afterRows: await snapshot(), afterPolicies: await policies() });
+  await pool.query(tagMigration);
 });
 after(() => pool.end());
 

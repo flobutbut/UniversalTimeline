@@ -2,8 +2,8 @@
   <div class="catalogue-view">
     <CatalogueToolbar v-model:search="search" placeholder="Rechercher un événement…">
       <template #filters>
-        <CatalogueFilters context="events" v-model:categories="selectedCategoryIds" v-model:story-ids="selectedStoryIds" v-model:time-range="timeRange" v-model:period="periodFilter"
-          :category-options="categorySelectOptions" :story-options="storySelectOptions"
+        <CatalogueFilters context="events" v-model:tags="tagIds" v-model:story-ids="selectedStoryIds" v-model:time-range="timeRange" v-model:period="periodFilter"
+          :tag-options="tagSelectOptions" :story-options="storySelectOptions"
           :stories-loading="storyLinks.loading.value" :stories-error="storyLinks.error.value" @retry-stories="storyLinks.load" />
       </template>
       <template #actions><Button variant="primary" size="sm" @click="openCreateModal">+ Ajouter un événement</Button></template>
@@ -26,7 +26,7 @@
         <span class="col-label" role="cell">{{ event.label.fr }}</span>
         <span class="col-date" role="cell">{{ formatEventListDateForDisplay(event.date) }}</span>
         <span class="col-categories" role="cell">
-          <Tag v-for="cat in event.categories" :key="cat.id" :label="cat.label.fr" variant="accent" />
+          <ThematicTags :tags="event.tags ?? []" />
         </span>
         <span class="col-stories" role="cell">
           <span v-if="storyLinks.loading.value" class="col-stories__state">…</span>
@@ -91,17 +91,18 @@ import { compareYearsOldestFirst } from '@temporal';
 import {
   formatEventListDateForDisplay,
   formatListEventLastEditFr,
-  listEventCategoriesSortKey,
   listEventUpdatedTimestampMs,
   listEventYearsBP,
 } from '@/lib/listEventTableHelpers';
 import EditModal from '@/views/DatabaseView/EditModal.vue';
 import Button from '@/components/base/Button.vue';
 import Tag from '@/components/base/Tag.vue';
+import ThematicTags from '@/components/ThematicTags.vue';
+import { useCatalogueFilterState } from '@/composables/useCatalogueFilterState';
+import { matchesCatalogueFilters } from '@/lib/catalogueFilters';
+import { tagFilterOptions, tagsSortKey } from '@/lib/tags';
 import CatalogueToolbar from '@/components/filters/CatalogueToolbar.vue';
 import CatalogueFilters from '@/components/filters/CatalogueFilters.vue';
-import type { PeriodFilter } from '@/components/filters/filterTypes';
-import type { StoryTimeRange } from '@/lib/storyTimeFilter';
 import CatalogueTable from '@/components/catalogue/CatalogueTable.vue';
 import CatalogueBulkBar from '@/components/catalogue/CatalogueBulkBar.vue';
 import { useEntityBulkActions } from '@/composables/useEntityBulkActions';
@@ -127,7 +128,7 @@ const sortDir = ref<'asc' | 'desc'>('asc');
 const eventColumns: CatalogueColumn[] = [
   { key: 'label', label: 'Nom', sortLabel: 'Trier par nom', width: 360, minWidth: 140, maxWidth: 720, resizable: true },
   { key: 'date', label: 'Date', sortLabel: 'Trier par date', width: 160, minWidth: 100, maxWidth: 280, resizable: true },
-  { key: 'categories', label: 'Catégories', sortLabel: 'Trier par catégories', minWidth: 120 },
+  { key: 'categories', label: 'Tags', sortLabel: 'Trier par tags', minWidth: 120 },
   { key: 'stories', label: 'Frises', sortLabel: 'Trier par frises', minWidth: 160 },
   { key: 'updated', label: 'Modifié', sortLabel: 'Trier par modification', width: 150 },
   { key: 'actions', label: 'Actions', width: 88 },
@@ -158,9 +159,7 @@ const displayEvents = computed(() => {
       if (ya === null || yb === null) return compareYearsOldestFirst(ya, yb);
       cmp = yb - ya;
     } else if (col === 'categories') {
-      cmp = listEventCategoriesSortKey(a).localeCompare(listEventCategoriesSortKey(b), 'fr', {
-        sensitivity: 'base',
-      });
+      cmp = tagsSortKey(a).localeCompare(tagsSortKey(b), 'fr', { sensitivity: 'base' });
     } else if (col === 'stories') {
       cmp = storyLinks.sortKeyOf(a.id).localeCompare(storyLinks.sortKeyOf(b.id), 'fr', { sensitivity: 'base' });
     } else if (col === 'updated') {
@@ -174,22 +173,8 @@ const displayEvents = computed(() => {
 // ── Filtres ────────────────────────────────────────────────────────────────────
 
 const search = ref('');
-const selectedCategoryIds = ref<string[]>([]);
-const selectedStoryIds = ref<string[]>([]);
-const timeRange = ref<StoryTimeRange | null>(null);
-const periodFilter = ref<PeriodFilter | null>(null);
-
-const availableCategories = computed(() => {
-  const map = new Map<string, { id: string; label: { fr: string; en: string } }>();
-  for (const e of events.value) {
-    for (const cat of e.categories ?? []) {
-      if (!map.has(cat.id)) map.set(cat.id, cat);
-    }
-  }
-  return [...map.values()].sort((a, b) => a.label.fr.localeCompare(b.label.fr));
-});
-
-const categorySelectOptions = computed(() => availableCategories.value.map(c => ({ value: c.id, label: c.label.fr })));
+const { tagIds, storyIds: selectedStoryIds, timeRange, period: periodFilter, state: filterState } = useCatalogueFilterState();
+const tagSelectOptions = computed(() => tagFilterOptions(events.value));
 const storySelectOptions = computed(() => stories.value.map(story => ({ value: story.id, label: story.title.fr || story.title.en || `Frise ${story.id}` }))
   .sort((a, b) => a.label.localeCompare(b.label, 'fr')));
 
@@ -199,20 +184,13 @@ const filteredEvents = computed(() => {
   return events.value.filter(e => {
     // Filtre texte
     if (q && !e.label.fr.toLowerCase().includes(q)) return false;
-
-    // Filtre catégorie
-    if (selectedCategoryIds.value.length) {
-      if (!e.categories?.some(c => selectedCategoryIds.value.includes(c.id))) return false;
-    }
-
-    if (selectedStoryIds.value.length && !selectedStoryIds.value.some(id => storyLinks.storyIdsOf(e.id).includes(id))) return false;
-    for (const range of [timeRange.value, periodFilter.value?.range]) {
-      if (!range) continue;
-      const date = listEventYearsBP(e);
-      if (date === null || date > range.oldBP || date < range.recentBP) return false;
-    }
-
-    return true;
+    return matchesCatalogueFilters(e, filterState.value, {
+      storyIdsOf: item => storyLinks.storyIdsOf(item.id),
+      overlaps: (item, range) => {
+        const date = listEventYearsBP(item);
+        return date !== null && date <= range.oldBP && date >= range.recentBP;
+      },
+    });
   });
 });
 const bulk = useEntityBulkActions('event', () => displayEvents.value, storyLinks);
