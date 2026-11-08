@@ -485,7 +485,7 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
   const handleEventClick = async (_event: ListEvent) => {};
 
   return {
-    loading, error, retryLoad, parentStack, currentPeriod, displayedPeriods, periodChildren, storyEvents, currentStoryPeriods,
+    loading, error, retryLoad, parentStack, currentPeriod, displayedPeriods, periodChildren, storyEvents, currentStoryPeriods, currentStory, currentStoryAllEvents,
     currentStoryId, breadcrumb, storyBreadcrumb, currentStoryBounds, previousPeriod, nextPeriod, navigationContexts, contextId, referencePeriodId, returnPath,
     contextBar, contextStories, contextStoryId, rootStories, headerStories, linkedPeriods, childLinkedPeriods, returnTitle, navigationChoices, chooseNavigationTarget, selectNavigationContext,
     loadInitialData, openStory, handlePeriodClick, handleEventClick, goBack, selectStory, navigateToBreadcrumb, navigateToStoryBreadcrumb, navigateAdjacentPeriod,

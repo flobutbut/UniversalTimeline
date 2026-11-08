@@ -4,6 +4,7 @@ import { useDataStore } from '@/stores/useDataStore';
 import type { TimelineTarget } from '@/lib/timelineNavigation';
 import { eventsInFrame, followLevel, type ScaleFrame } from '@/lib/timelineComparison';
 import type { ListPeriod, Story, StoryAnchor } from '@/types/database';
+import { useTimelineEventFilter } from './useTimelineEventFilter';
 
 export type TimelineLaneKey = 'primary' | 'secondary';
 type HomeNavigation = ReturnType<typeof useHomeNavigation>;
@@ -54,6 +55,13 @@ export function useTimelineComparisonLane(options: {
     ? followLevel(story.value, frame.value, dataStore.stories, Date.now()) : null);
   const ancestors = computed(() => followed.value?.ancestors ?? []);
 
+  // La règle de départ se calcule sur toute la frise, pas sur le niveau affiché.
+  const eventFilter = useTimelineEventFilter(() => {
+    if (!leads.value) return story.value;
+    const current = nav.currentStory.value;
+    return current ? { id: current.id, tags: current.tags, events: nav.currentStoryAllEvents.value } : null;
+  });
+
   /** Mener depuis cette frise, à la position demandée. */
   function lead(target: TimelineTarget) {
     leader.value = key;
@@ -69,7 +77,7 @@ export function useTimelineComparisonLane(options: {
   const grid = computed(() => {
     if (leads.value) return {
       periods: nav.displayedPeriods.value, childPeriods: nav.periodChildren.value, childLinkedPeriods: nav.childLinkedPeriods.value,
-      linkedPeriods: nav.linkedPeriods.value, events: nav.storyEvents.value, loading: nav.loading.value,
+      linkedPeriods: nav.linkedPeriods.value, events: eventFilter.apply(nav.storyEvents.value), loading: nav.loading.value,
       parentPeriod: nav.parentStack.value[nav.parentStack.value.length - 1] ?? null, currentPeriod: nav.currentPeriod.value,
       overviewNavigation: !!nav.returnTitle.value, overviewPeriod: nav.contextBar.value,
       previousPeriod: nav.previousPeriod.value, nextPeriod: nav.nextPeriod.value,
@@ -78,7 +86,7 @@ export function useTimelineComparisonLane(options: {
     const level = followed.value;
     return {
       periods: level?.periods ?? [], childPeriods: [], childLinkedPeriods: [], linkedPeriods: level?.linked ?? [],
-      events: story.value && frame.value ? eventsInFrame(story.value.events, frame.value, Date.now()) : [], loading: false,
+      events: story.value && frame.value ? eventFilter.apply(eventsInFrame(story.value.events, frame.value, Date.now())) : [], loading: false,
       parentPeriod: ancestors.value[ancestors.value.length - 2] ?? null, currentPeriod: ancestors.value[ancestors.value.length - 1] ?? null,
       overviewNavigation: false, overviewPeriod: null, previousPeriod: null, nextPeriod: null,
       // Sa vue est bornée par l’autre frise : la fin de sa période de contexte n’est pas celle de la vue.
@@ -117,5 +125,5 @@ export function useTimelineComparisonLane(options: {
     periodCrumb(index: number) { if (leads.value) void handlers.periodCrumb(index); else leadAt(ancestors.value[index]); },
   };
 
-  return { key, nav, storyId, story, leads, ancestors, grid, title, storyCrumbs, periodCrumbs, actions, lead, leadAt };
+  return { key, nav, storyId, story, leads, ancestors, grid, title, storyCrumbs, periodCrumbs, actions, lead, leadAt, eventFilter };
 }

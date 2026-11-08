@@ -38,6 +38,10 @@ Niveau 2 prévu, non créé : droit et justice (sous `pouvoir-institutions`), é
 - Fait biographique : il hérite du domaine de la personne. « Biographie » n'est pas un tag ; un filtre « Personnalités » serait une dimension séparée, combinée en ET.
 - Un tag sans aucune fiche, comme `sport` aujourd'hui, reste dans la grille mais n'est pas proposé dans les filtres.
 
+## Filtre de la vue exploration
+
+Sur toute frise qui couvre au moins deux sujets, un select discret figure dans l'en-tête. À partir de 16 événements, l'exploration part d'une sélection réduite : les événements dont le tag principal appartient aux tags de la frise, ou à son sujet le plus représenté si elle n'en a pas. Les événements majeurs et les fiches non classées restent visibles dans cet état « L'essentiel ». Le select propose aussi « Tous les sujets » et chaque sujet présent, seul ; en dessous de 16 événements, la frise s'ouvre sur « Tous les sujets ». Le filtre ne touche pas les périodes, se fait par frise comparée et revient à l'état de départ au changement de frise. Une frise d'un seul thème ne s'allège pas avec les tags : seul le niveau d'importance pourrait le faire.
+
 ## Correspondance avec les anciennes catégories
 
 Effectifs : fiches liées dans le catalogue, en événements / périodes / frises. L'accord compare chaque règle au classement manuel des 300 fiches de l'échantillon ; il est indicatif, car ce classement a été fait par un seul annotateur.

@@ -19,7 +19,7 @@ function fakeNav(storyId = '1') {
   const leaf: ListPeriod | null = null;
   return {
     currentStoryId: ref(storyId), displayedPeriods: ref([]), periodChildren: computed(() => []), childLinkedPeriods: computed(() => []),
-    linkedPeriods: computed(() => []), storyEvents: ref([]), loading: ref(false), parentStack: ref([]), currentPeriod: ref(leaf),
+    linkedPeriods: computed(() => []), storyEvents: ref([]), currentStory: ref(null), currentStoryAllEvents: ref([]), loading: ref(false), parentStack: ref([]), currentPeriod: ref(leaf),
     returnTitle: computed(() => ''), contextBar: computed(() => null), previousPeriod: computed(() => null), nextPeriod: computed(() => null),
     currentStoryBounds: ref(null), storyBreadcrumb: computed(() => [{ id: `story:${storyId}`, title: 'Frise', kind: 'story' }]), breadcrumb: computed(() => []),
     chooseNavigationTarget: vi.fn(), handlePeriodClick: vi.fn(), goBack: vi.fn(), navigateAdjacentPeriod: vi.fn(), selectStory: vi.fn(),
