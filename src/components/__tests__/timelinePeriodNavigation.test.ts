@@ -188,6 +188,17 @@ it('shows the end of the view instead of a missing next period', async () => {
   expect(view.find('.period-grid__end-label').exists()).toBe(false);
 });
 
+it('announces the end of the whole frise on its overview, without showing neighbors', async () => {
+  view = mount(PeriodGrid, { props: { periods: [period('leaf')], events: [], loading: false, currentPeriod: null, parentPeriod: null, currentStoryId: '1',
+    storyBounds: { startDate: 'M65', endDate: 'NOW' }, nextPeriod: period('newer') } });
+  expect(view.get('.period-grid__end-label').text()).toBe("Aujourd'hui");
+  expect(view.find('[data-period-direction]').exists()).toBe(false);
+  await view.setProps({ storyBounds: { startDate: 'M65', endDate: '476' }, periods: [{ ...period('leaf'), endDate: '476' }] });
+  expect(view.get('.period-grid__end-label').text()).toMatch(/^Fin : 476/);
+  await view.setProps({ hideEndBound: true });
+  expect(view.find('nav').exists()).toBe(false);
+});
+
 it('shows the full longer child and scales the parent, events and end label to the same interval', async () => {
   // Legacy numeric coordinates were imported at a different reference date.
   vi.spyOn(Date, 'now').mockReturnValue(Date.UTC(2026, 10, 3));

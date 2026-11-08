@@ -19,7 +19,7 @@
           </div>
           <div class="home-view__header-actions">
             <Switch v-model="showPeriodChildren" label="Étendre" label-first variant="sm" :disabled="loading" />
-            <Button v-if="!routeError && !error" variant="tertiary" size="sm" :disabled="loading"
+            <Button v-if="auth.signedIn && !routeError && !error" variant="tertiary" size="sm" :disabled="loading"
               :to="{ name: 'database', query: { story: primaryLane.storyId.value ?? currentStoryId } }">Détail de la frise</Button>
           </div>
         </div>
