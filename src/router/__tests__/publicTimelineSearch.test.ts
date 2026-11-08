@@ -259,15 +259,19 @@ it('separates visited frises from local periods and restores a visited position 
   await router.push('/timeline?story=8&period=leaf-8'); await flushPromises();
   await router.push('/timeline?story=2'); await flushPromises();
   const visited = () => view.get('nav[aria-label="Fil d’Ariane des frises"]');
-  expect(visited().findAll('li').map(item => item.text())).toEqual(['Frise : Frise 7', '/Frise : Frise 8', '/Frise : Frise 2']);
+  // Quatre étapes pour trois places : l'Univers passe dans le menu du fil compacté.
+  expect(visited().findAll('li').map(item => item.text())).toEqual(['', '/Frise : Frise 7', '/Frise : Frise 8', '/Frise : Frise 2']);
+  await visited().get('.story-breadcrumb__overflow button').trigger('click'); await flushPromises();
+  expect(visited().findAll('[role="menuitem"]').map(item => item.text())).toEqual(['Frise : Frise 1']);
+  await visited().get('.story-breadcrumb__overflow button').trigger('click'); await flushPromises();
   const local = view.get('nav[aria-label="Fil d’Ariane de la timeline"]');
   expect(local.text()).toBe('root-2'); expect(local.text()).not.toContain('Frise');
-  await visited().findAll('button')[1].trigger('click'); await flushPromises();
+  await visited().findAll('button').find(button => button.text() === 'Frise : Frise 8')!.trigger('click'); await flushPromises();
   expect(router.currentRoute.value.fullPath).toBe('/timeline?story=8&period=leaf-8');
-  expect(visited().findAll('li')).toHaveLength(2);
+  expect(visited().findAll('li')).toHaveLength(3);
   expect(view.get('nav[aria-label="Fil d’Ariane de la timeline"]').text()).toBe('root-8/leaf-8');
   await router.push('/timeline?story=7&view=overview'); await flushPromises();
-  expect(visited().findAll('li')).toHaveLength(1);
+  expect(visited().findAll('li')).toHaveLength(2);
   expect(view.find('nav[aria-label="Fil d’Ariane de la timeline"]').exists()).toBe(false);
 });
 
@@ -294,13 +298,13 @@ it('starts a catalogue selection on its Universe path instead of appending the p
   expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').findAll('li')).toHaveLength(3);
 });
 
-it('resets a catalogue entry to the selected frise when no Universe path exists, including the same frise', async () => {
+it('resets a catalogue entry to the Universe and the selected frise when no Universe path exists, including the same frise', async () => {
   await start('/timeline?story=7');
   await router.push('/timeline?story=8'); await flushPromises();
-  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').findAll('li')).toHaveLength(2);
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').findAll('li')).toHaveLength(3);
   await router.push('/timeline?story=8&entry=universe'); await flushPromises();
   expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('8');
-  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').text()).toBe('Frise : Frise 8');
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').text()).toBe('Frise : Frise 1/Frise : Frise 8');
 });
 
 it('discards a computed entry path when a newer timeline position is opened', async () => {
@@ -317,7 +321,7 @@ it('discards a computed entry path when a newer timeline position is opened', as
   resolve(storyFixture('2')); await flushPromises();
   expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('7');
   expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('leaf-7');
-  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').text()).toBe('Frise : Frise 7');
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').text()).toBe('Frise : Frise 1/Frise : Frise 7');
 });
 it('keeps an empty story empty instead of displaying unrelated catalogue content', async () => {
   vi.mocked(stories.getStory).mockResolvedValue(storyFixture('8'));

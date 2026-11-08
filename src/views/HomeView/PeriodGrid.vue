@@ -6,21 +6,21 @@
     <FeedbackState v-else-if="!loading && !currentPeriod && !overviewNavigation && periods.length === 0 && events.length === 0" message="Aucune période à afficher" />
     <div v-else class="timeline-container">
       <div class="periods-container">
-        <nav v-if="(props.currentPeriod || props.overviewNavigation) && !loading && (previousPeriod || nextPeriod || currentPeriodEnd)" class="period-grid__navigation" aria-label="Périodes de même niveau">
-          <Button v-if="previousPeriod" variant="ghost" size="sm" data-period-direction="previous"
+        <nav v-if="!loading && (viewEndLabel || (showsNeighbors && (previousPeriod || nextPeriod)))" class="period-grid__navigation" aria-label="Périodes de même niveau">
+          <Button v-if="showsNeighbors && previousPeriod" variant="ghost" size="sm" data-period-direction="previous"
             :title="`Période précédente : ${previousPeriod.label.fr || previousPeriod.label.en}`"
             @click="navigatePeriod('previous')">
             <template #icon><Icon icon="mdi:arrow-left" aria-hidden="true" /></template>
             Période précédente<span> - {{ previousPeriod.label.fr || previousPeriod.label.en }}</span>
           </Button>
-          <Button v-if="nextPeriod" class="period-grid__next-control" variant="ghost" size="sm" data-period-direction="next"
+          <Button v-if="showsNeighbors && nextPeriod" class="period-grid__next-control" variant="ghost" size="sm" data-period-direction="next"
             :title="`Période suivante : ${nextPeriod.label.fr || nextPeriod.label.en}`"
             @click="navigatePeriod('next')">
             Période suivante<span> - {{ nextPeriod.label.fr || nextPeriod.label.en }}</span>
             <Icon icon="mdi:arrow-right" class="period-grid__next-icon" aria-hidden="true" />
           </Button>
           <!-- Sans période suivante, la vue s'arrête au présent ou à la fin de la frise : annoncer cette borne. -->
-          <span v-else-if="currentPeriodEnd" class="period-grid__end-label">{{ currentPeriodEnd }}</span>
+          <span v-else-if="viewEndLabel" class="period-grid__end-label">{{ viewEndLabel }}</span>
         </nav>
         <div ref="periodSurfaceRef" class="period-grid__surface">
           <slot v-if="!props.currentPeriod && (!overviewPeriod || overviewPeriodStyle)" name="overview-context" :style="overviewPeriodStyle" :continuation="overviewContinuation" />
@@ -274,16 +274,18 @@ const { minimumPct, laneHeight, wrapContent } = useTimelinePeriodExpansion(
   periodRowRef,
   () => props.compact ? 34 : 56,
 );
-/** Borne de fin de la vue affichée à la place de « Période suivante » quand il n'y en a pas. */
-const currentPeriodEnd = computed(() => {
-  const period = props.currentPeriod;
-  if (props.hideEndBound || !period?.endDate?.trim()) return null;
+/** Les voisins n'existent que dans une période ouverte ou un retour vers une frise source. */
+const showsNeighbors = computed(() => !!props.currentPeriod || !!props.overviewNavigation);
+/** Borne de fin de la vue (période ouverte, sinon frise entière), à la place de « Période suivante » quand il n'y en a pas. */
+const viewEndLabel = computed(() => {
+  const frame = props.currentPeriod ?? props.storyBounds;
+  if (props.hideEndBound || !frame?.endDate?.trim()) return null;
   const now = Date.now();
-  const latest = [period, ...props.periods].flatMap(candidate => {
+  const latest = [frame, ...props.periods].flatMap(candidate => {
     const end = periodCoordinates(candidate, now).end;
     return end !== null && candidate.endDate?.trim() ? [{ end, raw: candidate.endDate }] : [];
   }).sort((a, b) => a.end - b.end)[0];
-  const end = latest?.raw ?? period.endDate;
+  const end = latest?.raw ?? frame.endDate;
   const label = formatTemporalBoundLabel(end);
   return label === "aujourd'hui" ? "Aujourd'hui" : `Fin : ${label}`;
 });

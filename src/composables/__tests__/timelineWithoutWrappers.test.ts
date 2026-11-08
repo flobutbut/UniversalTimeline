@@ -52,7 +52,7 @@ it('crosses narratives temporally while keeping the original return and local su
   nav.navigateAdjacentPeriod('next');await vi.waitFor(()=>expect(nav.currentStoryId.value).toBe('16'));
   await vi.waitFor(()=>expect(nav.loading.value).toBe(false));
   expect(nav.currentPeriod.value).toBeNull();expect(nav.storyEvents.value).toHaveLength(1);expect(nav.returnPath.value).toHaveLength(1);
-  expect(nav.storyBreadcrumb.value.map(p=>p.id)).toEqual(['story:50','story:16']);
+  expect(nav.storyBreadcrumb.value.map(p=>p.id)).toEqual(['story:1','story:50','story:16']);
   await nav.goBack();expect(nav.currentStoryId.value).toBe('50');expect(nav.currentPeriod.value?.id).toBe('middle');
 });
 it('accepts the old period URL as a reference after the wrapper is removed',async()=>{

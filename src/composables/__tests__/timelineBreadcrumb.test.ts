@@ -169,10 +169,28 @@ it('does not present the editorial parent chain as temporal ancestors on a direc
   ] as never);
   await nav.openStory('2');
   expect(ids()).toEqual(['story:2/period:other-root']);
-  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:2']);
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:2']);
   await nav.goBack();
   expect(nav.currentStoryId.value).toBe('2');
   expect(nav.currentPeriod.value).toBeNull();
+});
+
+it('keeps the Universe first after a search or a redirect, without reading other frises', async () => {
+  await nav.openStory('3', { storyId: '3' });
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:3']);
+  expect(StoryApiService.getInstance().getStory).toHaveBeenCalledExactlyOnceWith('3');
+  expect(nav.returnPath.value).toEqual([]);
+  await nav.openStory('2', { storyId: '2' });
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:3', 'story:2']);
+  await nav.navigateToStoryBreadcrumb(0);
+  expect(nav.currentStoryId.value).toBe('1');
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1']);
+});
+
+it('does not add an Universe the reader cannot open', async () => {
+  vi.mocked(StoryApiService.getInstance().getListStories).mockResolvedValue([{ id: '2', title: { fr: 'Autre frise', en: '' }, categories: [] }] as never);
+  await nav.openStory('2', { storyId: '2' });
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:2']);
 });
 
 it('returns through the visited-frise breadcrumb to the exact period left behind', async () => {
