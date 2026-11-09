@@ -135,7 +135,7 @@ Dans l’onglet **Périodes**, la vue **Colonnes** permet de glisser une périod
 
 Les cartes des frises associées disposent du même menu à trois points que les périodes : **Voir la frise**, **Déplacer**, **Afficher comme une période** et **Supprimer**. Cette dernière action retire seulement le lien à cet endroit. Le chevron ouvre les sous-périodes de la frise dans des colonnes atténuées en **lecture seule** ; pour les modifier, ouvrir le détail de cette frise.
 
-**Afficher comme une période** remplace le badge par une carte temporelle utilisant les bornes de la frise liée. Ce choix appartient au rattachement et ne crée aucune période dans le catalogue. La carte reste limitée à la fenêtre active, ouvre la frise cible et conserve le retour à l’origine. Le menu permet de revenir à **Afficher dans le badge**. Les flèches temporelles ne changent pas de rôle.
+**Afficher comme une période** remplace le badge par une carte temporelle utilisant les bornes de la frise liée : dans la période ouverte, la frise n’est plus listée dans le badge, sauf si sa carte est hors de la fenêtre ; vue depuis le niveau au-dessus, où la carte n’est pas visible, elle reste dans le badge de la période. Ce choix appartient au rattachement et ne crée aucune période dans le catalogue. La carte reste limitée à la fenêtre active, ouvre la frise cible et conserve le retour à l’origine. Le menu permet de revenir à **Afficher dans le badge**. Les flèches temporelles ne changent pas de rôle.
 
 Ce choix actualise aussi l’aperçu du détail de la frise : chaque rattachement affiché comme une période y possède sa propre barre, avec les dates de la cible et son parent local. La barre suit le pliage de ce parent ; son clic ouvre les colonnes de lecture seule de la frise associée.
 

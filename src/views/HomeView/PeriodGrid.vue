@@ -46,7 +46,7 @@
           >
             <template #title-actions>
               <AssociatedStoriesBadge v-if="props.currentPeriod" :story-id="currentStoryId" :period-id="props.currentPeriod.id" :period-label="props.currentPeriod.label.fr || props.currentPeriod.label.en"
-                :stories="associatedByPeriod.get(props.currentPeriod.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading" :comparison="comparison" @compare="emit('story-compare', $event)"
+                :stories="currentPeriodStories" :loading="associationsLoading" :error="associationsError" :disabled="loading" :comparison="comparison" @compare="emit('story-compare', $event)"
                 @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: props.currentPeriod.id })" />
             </template>
           </PeriodCard>
@@ -379,6 +379,12 @@ const sortedPeriodRows = computed(() => {
 });
 
 const sortedPeriods = computed(() => sortedPeriodRows.value.map(row => row.p));
+/** Une frise visible en carte dans la période ouverte n'est pas répétée dans son badge ; hors fenêtre, elle y reste. */
+const currentPeriodStories = computed(() => {
+  if (!props.currentPeriod) return [];
+  const cards = new Set(sortedPeriods.value.flatMap(period => 'linkedStoryId' in period ? [period.linkedStoryId] : []));
+  return (associatedByPeriod.value.get(props.currentPeriod.id) ?? []).filter(story => !cards.has(story.id));
+});
 
 const laneMap = computed(() => new Map(sortedPeriodRows.value.map(({ p, lane }) => [p.id,lane])));
 
