@@ -212,6 +212,8 @@ Le moteur ramène toute date sur un seul axe, en années avant aujourd'hui. Le t
 - **Auteur** : le nom d'utilisateur du compte propriétaire. L'API l'impose à la création ; un script doit écrire le nom du compte créateur, sans identifiant de compte codé en dur dans cette procédure.
 - **Propriétaire et visibilité** : `owner_user_id` du compte. `is_public = true` seulement pour une frise relue et respectant les conditions de publication de la section 3.
 - **Événements de contexte** : relier aussi les causes et conséquences. Exemples : volcanisme et impact pour les extinctions, Arrhenius et la courbe de Keeling pour le climat.
+- **Une frise par lieu ou époque** : un événement va sur la frise de son pays, de sa civilisation ou de son époque, pas sur toutes celles qui couvrent les mêmes dates. Bouddha est sur la frise de l'Inde, pas sur celles de l'Égypte, de la Grèce ou de Rome. Une invention ou une découverte va sur la frise du pays concerné.
+- **Événements majeurs** : à partir de 16 événements, une frise sans tag s'ouvre sur son sujet le plus représenté et ses événements majeurs. Marquer majeurs les événements qui doivent rester visibles à l'ouverture, notamment les grandes inventions sur une frise de pays.
 
 ## 8. Écrire en base
 

@@ -84,8 +84,8 @@ Bilan fait après la création des frises Chine, Angleterre et monde islamique :
 
 ### 3. Les frises maigres à étoffer
 
-- **Antiquité grecque (44)** : 5 périodes et 3 événements.
-- **Antiquité romaine (45)** : 4 événements.
+- **Antiquité grecque (44)** : **fait**, 21 événements depuis le 9 novembre 2026.
+- **Antiquité romaine (45)** : **fait**, 21 événements depuis le 9 novembre 2026.
 - **Big Bang et ères primordiales (3)** : 2 événements.
 - **Guerre froide (12)** : aucune période.
 - **Invasion de l'Ukraine par la Russie (18)** : une seule période et aucun événement.
@@ -164,6 +164,7 @@ Elles réutilisent beaucoup de fiches existantes et se relient aux frises chrono
 
 Audit du 3 novembre 2026 : ancres, rattachements et hiérarchie des frises sont cohérents. Restent à décider :
 
+- **Fiches sans frise** (relevé du 9 novembre 2026) : 41 événements ne sont sur aucune frise : 40 petits combats de la guerre d'indépendance américaine, retirés lors de la révision de la frise 42, et « Cinquième République française », doublon de « Constitution du 4 octobre 1958 ». À supprimer ou à garder selon décision.
 - **Import Wikidata** : `WikidataGenerationService` et le préremplissage (`SearchApiService`) lisent l'API JSON de Wikidata, où `-0490` signifie 490 av. J.-C., mais transmettent la date telle quelle au moteur, qui la lit comme 491. À convertir à l'import vers les formats canoniques (voir [CREATION-DE-FRISES.md](CREATION-DE-FRISES.md), section 5).
 - **Frises maigres** : Ukraine (aucun événement), Guerre froide (1 période), Big Bang (2 événements). Les six ères primordiales de la frise 3 ont un début égal à leur fin (durées inférieures à quelques minutes) ; gardées ainsi.
 - **Libellés incohérents avec l'identifiant** : `PER_MILKYWAY` (« Terre »), `PER_EARTH` (« Empire romain »), `EVT_DINOSAURS` (« Premiers reptiles », 318 Ma : le libellé et la date sont justes, seul l'identifiant trompe).
@@ -205,5 +206,6 @@ Lecture : sur les techniques et l'art, la préhistoire occupe presque tout l'axe
 
 ## Frises révisées
 
+- **Rationalisation et enrichissement des événements**, 9 novembre 2026, sur 32 frises existantes, sans nouvelle frise. Règle appliquée : un événement va sur la frise de son lieu ou de son époque, pas sur toutes celles qui couvrent les mêmes dates. 22 retraits : Égypte (43), Grèce (44) et Rome (45) partageaient une liste recopiée (Bouddha, Stonehenge, Hammurabi, fondation de Rome, Marathon) ; Hégire, Göbekli Tepe et agriculture quittent Antiquité (10) ; monuments néolithiques et écriture quittent les Âges des métaux (21) ; XIIIe amendement et loi d'or quittent Grandes découvertes (34). 53 rattachements de fiches existantes, dont César, Actium, le Colisée et l'édit de Milan, jusque-là sur aucune frise. 172 nouvelles fiches taguées, dont 94 inventions et découvertes rangées sur la frise de leur pays (France, Angleterre, États-Unis, Chine, Inde, monde islamique), les autres sur Égypte, Grèce, Rome, Moyen Âge, Renaissance, Époque moderne et Époque contemporaine. Autres thèmes : santé, arts, religions, philosophie, économie, catastrophes, et premières fiches `sport`. Une inscription majeure rend les grandes inventions visibles dans « L'essentiel » des frises de pays. Antiquité (10) commence désormais à l'écriture et ouvre aussi l'Inde (55) et la Chine (52). Copernic, Galilée et Einstein, sans frise de pays, sont sur Renaissance, Époque moderne et Époque contemporaine : une frise **Révolutions scientifiques** reste à créer.
 - **Guerre d'indépendance des États-Unis (42)**, 6 novembre 2026 : l'import Wikidata brut (18 combats en périodes, 62 escarmouches souvent libellées en anglais, aucun jalon majeur) est repris en récit. Quatre théâtres à la racine (Nord, Sud, Ouest, Guerre navale et Antilles) et leurs campagnes (Boston, Québec, New York et New Jersey, Saratoga, Philadelphie, Savannah, Charleston, Floride occidentale, Yorktown, expéditions Sullivan et Crawford, Sainte-Lucie, Brimstone Hill, les Saintes) ; jalons ajoutés (Lexington et Concord, Bunker Hill, Long Island, Trenton, Saratoga, traité d'alliance, Guilford Court House) et repris de la frise 27 (Déclaration d'indépendance, traité de Paris) ; 25 périodes, 31 événements. Ancrée sur « Guerre d'indépendance des États-Unis » dans L'âge des révolutions. Les 40 escarmouches retirées restent au catalogue ; état antérieur dans `audits/2026-11-06-guerre-independance-42.before.json`.
 - **Seconde Guerre mondiale (9)**, 3 novembre 2026 : la guerre sino-japonaise (1937) n'est plus rangée dans la guerre mondiale (1939) ; trois racines (« Montée vers la guerre », la guerre mondiale, la guerre sino-japonaise) ; six fronts (Ouest, Europe du Nord, Méditerranée, Asie-Pacifique, Est, Shoah) avec leurs batailles ; 36 périodes et 36 événements. Apostrophes doublées corrigées dans 18 événements de toutes les frises.
