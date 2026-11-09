@@ -91,8 +91,8 @@ watch([filter, subjectFilter], () => { offset.value = 0; void load(); });
   <section class="admin-feedback" aria-labelledby="admin-feedback-title">
     <header class="admin-feedback__header">
       <div><h2 id="admin-feedback-title">Retours utilisateurs</h2><p>{{ total }} retour(s) {{ filters.subject || filters.status ? 'correspondant(s)' : 'reçu(s)' }}</p></div>
-      <div class="admin-feedback__actions">
-        <Switch variant="sm" :model-value="feature.enabled" label="Activer les avis" :disabled="!feature.loaded || feature.saving" @update:model-value="feature.setEnabled" />
+      <div class="admin-feedback__actions admin-feedback__header-actions">
+        <Switch variant="sm" label-first :model-value="feature.enabled" label="Activer les avis" :disabled="!feature.loaded || feature.saving" @update:model-value="feature.setEnabled" />
         <Button variant="secondary" size="sm" :disabled="loading || !!saving" @click="load(); feature.refresh()">Actualiser</Button>
       </div>
     </header>
@@ -152,6 +152,7 @@ watch([filter, subjectFilter], () => { offset.value = 0; void load(); });
 .admin-feedback__message { white-space: pre-wrap; overflow-wrap: anywhere; }
 .admin-feedback__page { overflow-wrap: anywhere; font: var(--type-meta); }
 .admin-feedback__actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-sm); }
+.admin-feedback__header-actions { gap: var(--spacing-xl); }
 .admin-feedback__reply { display: flex; flex-direction: column; gap: var(--spacing-lg); padding-top: var(--spacing-lg); }
 .admin-feedback__notifications { display: flex; align-items: center; min-height: var(--field-height-lg); margin-left: auto; }
 .admin-feedback__notifications :deep(.switch__label) { white-space: normal; }
