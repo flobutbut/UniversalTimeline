@@ -16,15 +16,19 @@ it('starts from the tags of the frise that its events actually use', () => {
   expect(defaultEventTagIds({ tags: [conflits, pouvoir], events })).toEqual(['conflits']);
 });
 
-it('falls back to the most represented subject without usable frise tags', () => {
+it('falls back to the two most represented subjects without usable frise tags', () => {
   const events = [...many(6, pouvoir), ...many(11, conflits), ...many(3, arts)];
-  expect(defaultEventTagIds({ tags: [], events })).toEqual(['conflits']);
-  expect(defaultEventTagIds({ tags: [tag('sport', 16)], events })).toEqual(['conflits']);
+  expect(defaultEventTagIds({ tags: [], events })).toEqual(['conflits', 'pouvoir']);
+  expect(defaultEventTagIds({ tags: [tag('sport', 16)], events })).toEqual(['conflits', 'pouvoir']);
   expect(defaultEventTagIds({ events: many(20) })).toBeNull();
 });
 
+it('keeps a single subject when the frise covers only one', () => {
+  expect(defaultEventTagIds({ events: many(20, conflits) })).toEqual(['conflits']);
+});
+
 it('breaks a tie with the grid order', () => {
-  expect(defaultEventTagIds({ events: [...many(10, conflits), ...many(10, pouvoir)] })).toEqual(['pouvoir']);
+  expect(defaultEventTagIds({ events: [...many(10, arts), ...many(10, conflits), ...many(10, pouvoir)] })).toEqual(['pouvoir', 'conflits']);
 });
 
 it('filters on the primary tag only, keeps major and unclassified events', () => {

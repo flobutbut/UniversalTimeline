@@ -215,7 +215,7 @@ Le moteur ramène toute date sur un seul axe, en années avant aujourd'hui. Le t
 - **Une frise par lieu ou époque** : un événement va sur la frise de son pays, de sa civilisation ou de son époque, pas sur toutes celles qui couvrent les mêmes dates. Bouddha est sur la frise de l'Inde, pas sur celles de l'Égypte, de la Grèce ou de Rome. Une invention ou une découverte va sur la frise du pays concerné.
 - **Fait commun à plusieurs frises** : réutiliser la même fiche. Une période ne se partage que sous un parent qui la contient et sans chevaucher ce qui la suit ; sinon, passer par ses événements clés et un lien entre les frises.
 - **Pas de doublon sur une frise** : ne pas y mettre à la fois la période et un événement du même nom à la même date.
-- **Événements majeurs** : à partir de 16 événements, une frise sans tag s'ouvre sur son sujet le plus représenté et ses événements majeurs. Marquer majeurs les événements qui doivent rester visibles à l'ouverture, notamment les grandes inventions sur une frise de pays.
+- **Événements majeurs** : à partir de 16 événements, une frise sans tag s'ouvre sur ses deux sujets les plus représentés et ses événements majeurs. Marquer majeurs les événements qui doivent rester visibles à l'ouverture, notamment les grandes inventions sur une frise de pays.
 
 ## 8. Écrire en base
 

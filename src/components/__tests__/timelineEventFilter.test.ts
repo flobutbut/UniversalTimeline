@@ -9,9 +9,9 @@ import { apiClient } from '@/services/ApiClient';
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn() } }));
 const tag = (id: string, position: number) => ({ id, label: { fr: id, en: id }, family: 'societes', position, parentId: null });
 const row = (id: string, tags: ReturnType<typeof tag>[], importance = 'normal') => ({ id, wikidata_id: null, label_fr: id, label_en: id, date: 'M540', date_years_bp: 540000000, categories: [], tags, importance });
-const conflits = tag('Conflits', 6); const arts = tag('Arts', 15);
-const events = [...Array.from({ length: 12 }, (_, i) => row(`guerre-${i}`, [conflits])), ...Array.from({ length: 3 }, (_, i) => row(`art-${i}`, [arts])), row('art-majeur', [arts], 'major')];
-const small = events.slice(0, 15);
+const conflits = tag('Conflits', 6); const arts = tag('Arts', 15); const politique = tag('Politique', 5);
+const repeat = (count: number, prefix: string, subject: ReturnType<typeof tag>) => Array.from({ length: count }, (_, i) => row(`${prefix}-${i}`, [subject]));
+const events = [...repeat(12, 'guerre', conflits), ...repeat(3, 'art', arts), row('art-majeur', [arts], 'major'), ...repeat(5, 'loi', politique)];const small = events.slice(0, 15);
 const period = { id: 'earth', label_fr: 'Terre', start_date: 'G4.54', end_date: 'NOW', has_children: false };
 let view: VueWrapper;
 let router: Router;
@@ -38,20 +38,22 @@ beforeEach(async () => {
 });
 afterEach(() => { view?.unmount(); router?.options.history.destroy(); vi.resetAllMocks(); });
 
-it('opens on the essential events and keeps major ones', () => {
-  expect(cards()).toHaveLength(13);
+it('opens an untagged frise on its two main subjects and keeps major ones', () => {
+  expect(cards()).toHaveLength(18);
+  expect(cards()).toContain('guerre-0');
+  expect(cards()).toContain('loi-0');
   expect(cards()).toContain('art-majeur');
   expect(cards()).not.toContain('art-0');
-  expect((subject()!.props('options') as { label: string }[]).map(option => option.label)).toEqual(['L’essentiel', 'Tous les sujets', 'Conflits (12)', 'Arts (4)']);
+  expect((subject()!.props('options') as { label: string }[]).map(option => option.label)).toEqual(['L’essentiel', 'Tous les sujets', 'Conflits (12)', 'Politique (5)', 'Arts (4)']);
 });
 
 it('shows a chosen subject alone, every subject, then the essential events again', async () => {
   await choose('Arts (4)');
   expect(cards().sort()).toEqual(['art-0', 'art-1', 'art-2', 'art-majeur']);
   await choose('Tous les sujets');
-  expect(cards()).toHaveLength(16);
+  expect(cards()).toHaveLength(21);
   await choose('L’essentiel');
-  expect(cards()).toHaveLength(13);
+  expect(cards()).toHaveLength(18);
 });
 
 it('opens a short frise on every subject, still lets one be isolated, and resets when the frise changes', async () => {
@@ -62,7 +64,7 @@ it('opens a short frise on every subject, still lets one be isolated, and resets
   await choose('Arts (3)');
   expect(cards()).toHaveLength(3);
   await router.push('/timeline?story=1'); await flushPromises();
-  expect(cards()).toHaveLength(13);
+  expect(cards()).toHaveLength(18);
 });
 
 it('offers no select when the frise has a single subject', async () => {
