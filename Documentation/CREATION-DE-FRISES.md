@@ -1,6 +1,6 @@
 # Créer une frise — règles et bonnes pratiques
 
-Guide mis à jour le 4 novembre 2026 pour le moteur de navigation de l’exploration. Il distingue le contenu d’une frise, ses points d’entrée, son parcours chronologique et le chemin suivi par le lecteur. Le modèle technique est décrit dans [RELATIONS-FRISES.md](RELATIONS-FRISES.md), et les sujets envisagés dans [FRISES-A-CREER.md](FRISES-A-CREER.md).
+Guide mis à jour le 9 novembre 2026. Il distingue le contenu d’une frise, ses points d’entrée, son parcours chronologique et le chemin suivi par le lecteur. Le modèle technique est décrit dans [RELATIONS-FRISES.md](RELATIONS-FRISES.md), les tags dans [TAXONOMIE-TAGS.md](TAXONOMIE-TAGS.md), et les sujets envisagés dans [FRISES-A-CREER.md](FRISES-A-CREER.md).
 
 ## 1. Le modèle en bref
 
@@ -8,10 +8,11 @@ Une frise organise des périodes et des événements du catalogue partagé. Elle
 
 | Élément | Stockage | Rôle |
 | --- | --- | --- |
-| Faits communs : nom, description, dates, Wikidata, catégories | `periods`, `events` | Une modification s’applique partout où la fiche est utilisée. |
+| Faits communs : nom, description, dates, Wikidata, titres Wikipédia, tags | `periods`, `events`, `period_tags`, `event_tags` | Une modification s’applique partout où la fiche est utilisée. |
 | Période et parent local dans un récit | `story_periods` | Un `parent_period_id` NULL désigne une racine locale. Une même période peut avoir des parents différents selon la frise. |
-| Événement dans un récit | `story_events` | Appartenance explicite ; affichage selon sa date, sans parent de période obligatoire. |
-| Accès depuis une autre frise | `story_entry_points` | Depuis une période, un événement ou la racine de la source ; plusieurs sources et emplacements sont permis. |
+| Événement dans un récit | `story_events` | Appartenance explicite, avec une importance propre à la frise (`major`, `normal`, `minor`) ; affichage selon sa date, sans parent de période obligatoire. |
+| Accès depuis une autre frise | `story_entry_points` | Depuis une période, un événement ou la racine de la source ; plusieurs sources et emplacements sont permis. `display_as_period` affiche le lien comme une carte temporelle. |
+| Thèmes de la frise | `story_tags` | Seulement pour une frise définie par un sujet ; une frise définie par un lieu ou une époque n’en a pas. |
 | Place dans un parcours chronologique | `story_period_presentations` | La frise présente une période d’un contexte de référence, sans devoir la contenir. |
 | Parent et ancres historiques | `stories.parent_story_id`, `story_anchors` | Rattachements conservés pour compatibilité et certaines opérations de création ; ils ne définissent pas seuls le chemin du lecteur. |
 | Chemin de retour | État de l’historique du navigateur | Positions quittées avec leur contexte ; ce chemin n’est pas une relation à enregistrer en base. |
@@ -69,7 +70,7 @@ Exemples du 6 novembre 2026 : Genre Homo garde ses espèces en racines et Histoi
 
 ### Créer une frise depuis une période existante
 
-L’action **Créer une frise depuis une période** effectue une transaction qui :
+L’action du menu d’une période, qui ouvre **Créer une frise à partir de cette période**, effectue une transaction qui :
 
 1. garde la période choisie dans la source comme point d’accès ;
 2. déplace ses sous-périodes vers la nouvelle frise, sans recopier la période choisie comme chapeau ; ses enfants directs deviennent les racines du nouveau récit ;
@@ -110,7 +111,7 @@ Dans **Relations → Parcours chronologique**, choisir la frise de référence e
 
 ### Contrainte actuelle de publication
 
-Depuis le 5 novembre 2026, le formulaire et l’API autorisent la création manuelle et la publication d’une frise sans `parent_story_id`. La modale et la fiche signalent l’absence de point d’entrée et orientent vers **Propriétés** pour en ajouter un. Le rattachement proposé par **Choisir la frise parente** reste facultatif ; aucune période chapeau dans la cible n’est nécessaire. La génération Wikidata crée encore un brouillon privé.
+Depuis le 5 novembre 2026, le formulaire et l’API autorisent la création manuelle et la publication d’une frise sans `parent_story_id`. La modale et la fiche signalent l’absence de point d’entrée et orientent vers **Propriétés** pour en ajouter un. Le rattachement proposé par **Choisir la frise parente** reste facultatif ; aucune période chapeau dans la cible n’est nécessaire. La génération depuis Wikidata (`/generate`) crée encore un brouillon privé, faute de parent.
 
 Cette contrainte ne signifie pas que la navigation exige un parent unique. Ne pas confondre le parent historique, les sources d’accès et le chemin visité.
 
@@ -139,6 +140,16 @@ Les cartes des frises associées disposent du même menu à trois points que les
 Ce choix actualise aussi l’aperçu du détail de la frise : chaque rattachement affiché comme une période y possède sa propre barre, avec les dates de la cible et son parent local. La barre suit le pliage de ce parent ; son clic ouvre les colonnes de lecture seule de la frise associée.
 
 Dans cet aperçu, périodes et sous-frises sont classées chronologiquement. Les éléments successifs continuent sur la même ligne. Chaque chevauchement fait descendre d’une ligne ; les éléments suivants ne réutilisent jamais les lignes supérieures, même lorsqu’elles se libèrent.
+
+### Ouverture et filtre de sujets
+
+En dessous de 16 événements, une frise s’ouvre sur tous ses événements. À partir de 16, elle s’ouvre sur « L’essentiel » : ses tags s’ils existent, sinon le sujet déterminé par ses événements (voir section 7), plus les événements majeurs. Un select discret de l’en-tête propose aussi « Tous les sujets » et chaque sujet présent, dès que la frise en couvre au moins deux. Ce filtre ne concerne que les événements : les périodes restent affichées. Détail dans [TAXONOMIE-TAGS.md](TAXONOMIE-TAGS.md).
+
+L’importance se règle pour chaque frise, dans le détail de l’événement (**Majeur**, **Normal**, **Mineur**). Un même événement peut être majeur ici et normal ailleurs.
+
+### Comparer des frises
+
+`/timeline?compare=<id>&compare=<id>` ajoute des frises sous la frise principale, sur une même échelle. Chaque frise garde sa navigation et son filtre ; seules les actions temporelles explicites changent le cadre des autres. **Étendre** n’est pas disponible en comparaison. Une frise n’a rien à prévoir pour être comparable : des dates justes suffisent. Détail dans [EXPLORATION-FRISES-MULTIPLES.md](EXPLORATION-FRISES-MULTIPLES.md).
 
 ### Fenêtre temporelle et origine de navigation
 
@@ -208,7 +219,12 @@ Le moteur ramène toute date sur un seul axe, en années avant aujourd'hui. Le t
 ## 7. Contenu
 
 - **Titre et description en français et en anglais.** La description de frise tient en une ou deux phrases et dit ce que la frise montre. Celle de chaque fiche est factuelle et courte (une phrase), sans dates répétées.
-- **Catégories** : deux ou trois catégories existantes par fiche et par frise, parmi `CAT_ANTHRO`, `CAT_ART`, `CAT_ASTRO`, `CAT_BIO_EVO`, `CAT_BOT`, `CAT_CHEM`, `CAT_COSMO`, `CAT_ECO` (économie), `CAT_ECO_SYS` (écologie), `CAT_GEO`, `CAT_HIST`, `CAT_MICRO`, `CAT_OCEAN`, `CAT_PALEO`, `CAT_PART`, `CAT_PHILO`, `CAT_PHYS`, `CAT_TECH`. Ne pas créer de catégorie au passage.
+- **Tags** : de 1 à 3 par fiche, parmi les 16 domaines de [TAXONOMIE-TAGS.md](TAXONOMIE-TAGS.md) ; le premier est le principal. Un tag est un domaine, jamais un lieu ni une époque.
+- **Périodes sans thème** : une ère, un règne, une dynastie ou un régime reçoit `non_thematic = true` et aucun tag. Une guerre ou un mouvement est thématique.
+- **Tags de frise** : seulement pour ses thèmes. Histoire de France n’a aucun tag au titre de son lieu.
+- **Catégories historiques** : restées en base, elles ne sont plus visibles ni modifiables dans l’interface. Ne pas les réécrire depuis un formulaire ni en créer de nouvelles. Un script peut en poser une parmi les existantes (`CAT_HIST`, `CAT_TECH`, etc.) ; ce sont les tags qui servent à l’affichage et aux filtres.
+- **Titres Wikipédia** : `wikipedia_title_fr` et `wikipedia_title_en` contiennent un titre d’article, jamais une URL. Les reprendre des liens de la fiche Wikidata et vérifier qu’ils existent. L’article français est affiché en priorité, sinon l’anglais. Un fait dérivé n’a pas de lien.
+- **Période ou événement** : un fait qui dure est une période, un fait ponctuel un événement. Pour corriger une fiche, utiliser **Convertir en événement** ou **Convertir en période** : la fiche est remplacée partout, en une transaction.
 - **Auteur** : le nom d'utilisateur du compte propriétaire. L'API l'impose à la création ; un script doit écrire le nom du compte créateur, sans identifiant de compte codé en dur dans cette procédure.
 - **Propriétaire et visibilité** : `owner_user_id` du compte. `is_public = true` seulement pour une frise relue et respectant les conditions de publication de la section 3.
 - **Événements de contexte** : relier aussi les causes et conséquences. Exemples : volcanisme et impact pour les extinctions, Arrhenius et la courbe de Keeling pour le climat.
@@ -235,13 +251,17 @@ Pour les points d’entrée, `POST /stories/:sourceId/entry-points` reçoit `chi
 
 Pour déplacer un rattachement, `POST /stories/:sourceId/entry-points/move` reçoit `targetStoryId`, `from` et `to`. Chaque emplacement est explicitement `null` pour la racine, ou `{ anchorType: 'period' | 'event', anchorId: '…' }`. Le retrait et le nouveau rattachement sont enregistrés dans une seule transaction ; une origine devenue périmée est refusée. Le parent historique et les autres accès sont conservés. Si l’occurrence déplacée était une présentation chronologique, cette présentation précise est retirée du parcours et remplacée par le nouvel accès ; les autres présentations restent intactes. Une frise visible à la racine seulement grâce à un événement peut recevoir un rattachement à une période sans perdre son accès par événement.
 
+Pour changer l’affichage d’un lien (badge ou période), `POST /stories/:sourceId/entry-points/display`. Pour l’importance d’un événement dans une frise, `PUT /stories/:storyId/events/:eventId/importance`.
+
 Pour une présentation chronologique, `POST /stories/:contextId/presentations` reçoit `periodId`, `targetStoryId` et `operation`. La période appartient au contexte ; elle n’a pas à appartenir au récit cible. Aucun lien précédent/suivant n’est enregistré séparément.
 
 ### Création ou migration par script
 
 - Lire l’existant et préparer un lot limité avec son retour arrière. Pour une modification de relations, préserver les destinations accessibles avant l’opération.
 - Utiliser le moteur partagé pour les dates et les contrôles de bornes ; générer les nouveaux identifiants de fiches et récupérer les identifiants de frises créées par `RETURNING`.
-- Regrouper la création de la frise, ses catégories, les fiches nécessaires, leurs appartenances et leurs liens dans une transaction. Insérer les parents locaux avant leurs enfants.
+- Regrouper la création de la frise, ses tags, les fiches nécessaires, leurs appartenances et leurs liens dans une transaction. Insérer les parents locaux avant leurs enfants.
+- Faire refuser le lot par la transaction si une fiche a changé : libellé introuvable ou ambigu, Q-id déjà pris, période hors de son parent, ancre utilisée par un lien.
+- Après l’écriture, comparer ce qui est en base à la source du lot, et vérifier qu’aucun lien ne pointe vers un élément retiré de sa frise.
 - Ne pas dupliquer une période dans une cible pour satisfaire une référence chronologique. Lors d’un découpage, reproduire la transaction de la section 2, pas seulement copier les appartenances.
 - Relire le lot et obtenir l’autorisation requise pour la cible avant toute écriture distante. Une répétition sur une base locale jetable peut vérifier le lot et son inverse ; elle n’applique rien à la production.
 - Ne pas utiliser l’API REST publique de Supabase pour contourner les validations. Ne pas supprimer une fiche du catalogue lorsqu’on veut seulement la retirer d’une frise.
@@ -251,13 +271,13 @@ Les changements de schéma et tests de mutation utilisent une base PostgreSQL 17
 
 ## 9. Après la création
 
-1. **Contrôler le contenu** : périodes, parents locaux, événements, dates et catégories. Vérifier qu’aucun chapeau n’a été ajouté seulement pour la navigation.
+1. **Contrôler le contenu** : périodes, parents locaux, événements, dates et tags. Vérifier qu’aucun chapeau n’a été ajouté seulement pour la navigation.
 2. **Entrer par chaque source utile** : période, événement ou racine selon les liens créés. Contrôler la conservation des autres accès et la durée propre de la cible.
 3. **Tester le retour**, après rechargement du même onglet et depuis deux origines différentes. Vérifier la position quittée, pas seulement le nom de la frise.
 4. **Tester les flèches** : voisins temporels du contexte, subdivisions locales, début et fin du parcours. Aucun saut thématique implicite.
 5. **Tester le cadrage de l’origine** : recouvrement partiel, couverture complète, origine hors fenêtre et entrée par événement. La barre respecte les dates ; le retour reste disponible quand aucune barre ne convient.
 6. **Tester une entrée directe** (`/timeline?story=<id>`), avec `context` et `reference` si l’entrée doit préciser un rattachement. Vérifier les choix proposés lorsqu’il existe plusieurs vues ou contextes.
-7. **Vérifier l’affichage** : précision des dates, lignes de périodes, badges dans leur emplacement, fil des frises compact et accès aux étapes masquées. Recharger la liste si une création externe n’est pas encore visible.
+7. **Vérifier l’affichage** : précision des dates, lignes de périodes, badges dans leur emplacement, fil des frises compact et accès aux étapes masquées. Sur une frise d’au moins 16 événements, contrôler ce que montre « L’essentiel » et ce qu’un ajout y a déplacé. Recharger la liste si une création externe n’est pas encore visible.
 8. **Mettre à jour la feuille de route** et les comptes rendus concernés en distinguant le modèle prévu, le code disponible et les changements effectivement appliqués en base.
 
 ## Liste de contrôle
@@ -271,7 +291,8 @@ Les changements de schéma et tests de mutation utilisent une base PostgreSQL 17
 - [ ] Les flèches restent temporelles et le retour retrouve la position d’origine.
 - [ ] Le repère d’origine respecte la fenêtre active ou laisse place au retour dans l’en-tête.
 - [ ] Les dates utilisent le moteur partagé, leur précision réelle et des intervalles du plus ancien au plus récent.
-- [ ] Les textes, catégories, auteur, droits et conditions de publication ont été vérifiés.
+- [ ] Les textes, tags, titres Wikipédia, auteur, droits et conditions de publication ont été vérifiés.
+- [ ] Chaque événement est sur la frise de son lieu ou de son époque, sans doublon avec une période du même nom.
 - [ ] En cas de script, le lot et son inverse sont relus, la transaction est cohérente et l’écriture sur la cible est autorisée.
 - [ ] Les cas critiques ont été vérifiés dans l’exploration et la feuille de route est à jour.
 
@@ -279,4 +300,4 @@ Les changements de schéma et tests de mutation utilisent une base PostgreSQL 17
 
 Le guide décrit le nouveau comportement du code ; il ne signifie pas que toutes les anciennes frises ont déjà été nettoyées. La couverture de toute une frise ne suffit pas à conclure qu’une période est inutile : sa fonction narrative doit être examinée.
 
-Le schéma de compatibilité a été appliqué. Le lot préparé de retrait des quatre références historiques et d’ajout des accès racine attend la mise en ligne coordonnée de l’API et du frontend. Voir [le suivi de mise en œuvre](../audits/navigation-2026-11-04/implementation.md) pour l’état des opérations, sans déduire cet état des seuls exemples de ce guide.
+Le moteur de navigation est en production et les périodes chapeau ont été retirées le 6 novembre 2026. L’historique de ces opérations et des révisions de contenu est tenu dans [FRISES-A-CREER.md](FRISES-A-CREER.md) ; ne pas déduire l’état de la base des seuls exemples de ce guide.
