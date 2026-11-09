@@ -37,6 +37,7 @@ beforeEach(() => {
   vi.spyOn(stories, 'getListStories').mockResolvedValue(['1', '7', '8'].map(summary));
   vi.spyOn(stories, 'getStoryPeriods').mockImplementation(async id => tree(id));
   vi.spyOn(stories, 'getSuggestions').mockResolvedValue([]);
+  vi.spyOn(searches, 'searchStoryEvents').mockResolvedValue([]);
   vi.spyOn(searches, 'searchStories').mockResolvedValue([{ id: '7', label: { fr: 'Frise 7', en: '' }, description: { fr: '', en: '' }, matchedOn: 'content' }]);
   vi.spyOn(searches, 'searchWikidataEntityLabels').mockResolvedValue([]);
 });
@@ -104,7 +105,7 @@ it('reports a search that opens a frise, then the position it led to', async () 
   await vi.advanceTimersByTimeAsync(600); await flushPromises();
   await input.trigger('keydown', { key: 'ArrowDown' }); await input.trigger('keydown', { key: 'Enter' }); await flushPromises();
   expect(calls('search_completed')).toEqual([{ surface: 'header', outcome: 'story', query_length: 8, reformulations: 0,
-    story_results: 1, wikidata_results: 0, position: 1, matched_on: 'content' }]);
+    story_results: 1, event_results: 0, wikidata_results: 0, position: 1, matched_on: 'content' }]);
   expect(calls('timeline_position_viewed').at(-1)).toEqual(expect.objectContaining({ via: 'search', story_id: '7' }));
 });
 

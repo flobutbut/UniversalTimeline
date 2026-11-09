@@ -15,10 +15,11 @@ export function useTimelineEventFilter(source: () => (FilterableStory & { id: st
   // Il faut au moins deux sujets réels pour qu'il y ait quelque chose à choisir.
   const available = computed(() => options.value.filter(option => option.value !== ALL_EVENTS && option.value !== ESSENTIAL_EVENTS).length > 1);
 
-  function apply(rows: ListEvent[]) {
+  /** `keep` : événement demandé explicitement, affiché quel que soit le sujet choisi. */
+  function apply(rows: ListEvent[], keep?: string | null) {
     if (!available.value || subject.value === ALL_EVENTS) return rows;
-    if (subject.value === ESSENTIAL_EVENTS) return rows.filter(event => isEventShown(event, defaults.value));
-    return rows.filter(event => isEventOfSubject(event, subject.value));
+    if (subject.value === ESSENTIAL_EVENTS) return rows.filter(event => event.id === keep || isEventShown(event, defaults.value));
+    return rows.filter(event => event.id === keep || isEventOfSubject(event, subject.value));
   }
   function select(value: unknown) { if (typeof value === 'string') chosen.value = value; }
 

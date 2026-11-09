@@ -1,13 +1,13 @@
 import type { LocationQuery, RouteLocationRaw } from 'vue-router';
 import type { GlobalSearchResult, SearchHit } from '@/services/SearchApiService';
 import { normalizeWikidataId } from '@/services/wikidataTransport';
-import { readStoryTarget, storyTimelineLocation } from './storyTarget';
+import { readStoryTarget, storyEventLocation, storyTimelineLocation } from './storyTarget';
 
 /** The header and dedicated search page share the same validated destinations. */
 export function globalSearchLocation(hit: GlobalSearchResult): RouteLocationRaw {
-  return 'fromWikidata' in hit && hit.fromWikidata
-    ? { name: 'wikidata-generation', query: { wikidata: normalizeWikidataId(hit.id) } }
-    : storyTimelineLocation(hit.id);
+  if ('fromWikidata' in hit && hit.fromWikidata) return { name: 'wikidata-generation', query: { wikidata: normalizeWikidataId(hit.id) } };
+  if ('storyId' in hit) return storyEventLocation(hit.storyId, hit.id);
+  return storyTimelineLocation(hit.id);
 }
 
 export type SearchTarget = { kind: 'local'; id: string } | { kind: 'wikidata'; qid: string };

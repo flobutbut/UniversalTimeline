@@ -35,6 +35,7 @@ beforeEach(() => {
   vi.spyOn(stories, 'getListStories').mockResolvedValue(['1', '2', '7', '8'].map(summary));
   vi.spyOn(stories, 'getStoryPeriods').mockImplementation(async id => [period(`root-${id}`), period(`leaf-${id}`, `root-${id}`)]);
   vi.spyOn(stories, 'getSuggestions').mockResolvedValue([]);
+  vi.spyOn(searches, 'searchStoryEvents').mockResolvedValue([]);
   vi.spyOn(searches, 'searchStories').mockResolvedValue([{ id: '7', label: { fr: 'Frise 7', en: '' }, description: { fr: 'Résumé', en: '' }, matchedOn: 'content' }]);
   vi.spyOn(searches, 'searchWikidataEntityLabels').mockResolvedValue([]);
 });

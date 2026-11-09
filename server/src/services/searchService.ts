@@ -1,5 +1,5 @@
 import { query } from '../api/database.js';
-import { searchPeriods, searchEvents, searchStories, findGeneratedCatalogueRows } from '../repositories/searchRepository.js';
+import { searchPeriods, searchEvents, searchStories, searchStoryEvents, findGeneratedCatalogueRows } from '../repositories/searchRepository.js';
 import { localized, numeric } from './mappers.js';
 export type SearchScope = '' | 'period' | 'periods' | 'event' | 'events';
 export async function searchGeneratedCatalogue(keys: string[], only: SearchScope) {
@@ -8,11 +8,16 @@ export async function searchGeneratedCatalogue(keys: string[], only: SearchScope
   return { periods: periods.map(row => ({ id: row.id, sourceKey: row.source_key ?? `entity:${row.wikidata_id}`, wikidataSource: row.wikidata_source, wikidataId: row.wikidata_id, label: localized(row.label_fr, row.label_en), description: row.description_fr, startDate: row.start_date, endDate: row.end_date })), events: events.map(row => ({ id: row.id, sourceKey: row.source_key ?? `entity:${row.wikidata_id}`, wikidataSource: row.wikidata_source, wikidataId: row.wikidata_id, label: localized(row.label_fr, row.label_en), description: row.description_fr, date: row.date })) };
 }
 export async function searchStoryTimelines(q: string) {
-  const pattern = `%${q.replace(/[\\%_]/g, '\\$&')}%`;
-  return (await searchStories({ query }, pattern)).map(row => ({
+  return (await searchStories({ query }, q)).map(row => ({
     id: String(row.id), label: localized(row.title_fr, row.title_en),
     description: localized(row.description_fr ?? '', row.description_en), matchedOn: row.matched_on,
     match: row.matched_type ? { type: row.matched_type, label: localized(row.matched_label_fr ?? '', row.matched_label_en) } : null,
+  }));
+}
+export async function searchTimelineEvents(q: string) {
+  return (await searchStoryEvents({ query }, q)).map(row => ({
+    id: row.id, label: localized(row.label_fr, row.label_en), description: localized(row.description_fr ?? '', row.description_en),
+    date: row.date, storyId: String(row.story_id), storyLabel: localized(row.story_title_fr, row.story_title_en),
   }));
 }
 export async function search(q: string, tagId: string, only: SearchScope, qids?: string[]) {

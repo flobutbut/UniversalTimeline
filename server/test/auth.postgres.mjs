@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 import pg from 'pg';
 import { applyPrincipal } from '../dist/auth/context.js';
 import { checkAccessSchema } from '../dist/auth/preflight.js';
-import { searchStories } from '../dist/repositories/searchRepository.js';
+import { searchStories, searchStoryEvents } from '../dist/repositories/searchRepository.js';
 import { runInTransaction } from '../dist/api/transaction.js';
 
 const socket = process.env.TIMELINE_TEST_SOCKET; const database = process.env.TIMELINE_TEST_DATABASE;
@@ -21,19 +21,20 @@ const sql = (userId, text, params = []) => scoped(userId, client => client.query
 before(async () => {
   await pool.query(`
     CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN;
+    CREATE SCHEMA extensions; CREATE EXTENSION unaccent WITH SCHEMA extensions; CREATE EXTENSION pg_trgm WITH SCHEMA extensions; GRANT USAGE ON SCHEMA extensions TO anon, authenticated;
     CREATE SCHEMA auth; GRANT USAGE ON SCHEMA auth TO anon, authenticated;
     CREATE TABLE auth.users (id uuid PRIMARY KEY, email text, email_confirmed_at timestamptz, is_anonymous boolean DEFAULT false, raw_app_meta_data jsonb DEFAULT '{}');
     CREATE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE SET search_path='' AS $$
       SELECT coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb $$;
     CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE SET search_path='' AS $$ SELECT nullif(auth.jwt()->>'sub','')::uuid $$;
     CREATE TABLE public.periods (id text PRIMARY KEY, label_fr text DEFAULT '', label_en text DEFAULT '', description_fr text, description_en text, wikidata_id text);
-    CREATE TABLE public.events (id text PRIMARY KEY, label_fr text DEFAULT '', label_en text DEFAULT '', description_fr text, description_en text, wikidata_id text);
+    CREATE TABLE public.events (id text PRIMARY KEY, label_fr text DEFAULT '', label_en text DEFAULT '', description_fr text, description_en text, wikidata_id text, date text);
     CREATE TABLE public.categories (id text PRIMARY KEY);
     CREATE TABLE public.period_categories (period_id text REFERENCES periods, category_id text REFERENCES categories);
     CREATE TABLE public.event_categories (event_id text REFERENCES events, category_id text REFERENCES categories);
     CREATE TABLE public.stories (id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY, title_fr text NOT NULL, title_en text DEFAULT '', description_fr text, description_en text, is_public boolean DEFAULT true, parent_story_id integer REFERENCES stories);
     CREATE TABLE public.story_periods (story_id integer REFERENCES stories, period_id text REFERENCES periods);
-    CREATE TABLE public.story_events (story_id integer REFERENCES stories, event_id text REFERENCES events);
+    CREATE TABLE public.story_events (story_id integer REFERENCES stories, event_id text REFERENCES events, importance text NOT NULL DEFAULT 'normal');
     CREATE TABLE public.story_categories (story_id integer REFERENCES stories, category_id text REFERENCES categories);
     CREATE TABLE public.story_anchors (id serial PRIMARY KEY, story_id integer REFERENCES stories, anchor_type text, anchor_id text);
     INSERT INTO public.stories (title_fr) VALUES ('Legacy');
@@ -166,34 +167,51 @@ test('ownership attribution preserves each story visibility, hierarchy and categ
 
 test('story search enforces public/owner visibility for direct title matches', async () => {
   const found = (user, term) => scoped(user, client => searchStories(client, term));
-  assert.deepEqual((await found(null, '%private%')).map(row => row.id), []);
-  assert.deepEqual((await found(alice, '%private%')).map(row => row.id), [2]);
-  assert.deepEqual((await found(bob, '%private%')).map(row => row.id), [3]);
-  assert.deepEqual((await found(null, '%public%')).map(row => row.id), [1, 4]);
+  assert.deepEqual((await found(null, 'private')).map(row => row.id), []);
+  assert.deepEqual((await found(alice, 'private')).map(row => row.id), [2]);
+  assert.deepEqual((await found(bob, 'private')).map(row => row.id), [3]);
+  assert.deepEqual((await found(null, 'public')).map(row => row.id), [1, 4]);
 });
 test('story search finds associated periods and events without leaking private memberships or duplicating stories', async () => {
   await pool.query("UPDATE public.periods SET label_fr='Crétacé'; UPDATE public.events SET label_fr='Crétacé'; INSERT INTO public.story_periods VALUES (1,'p'); INSERT INTO public.story_events VALUES (1,'e');");
-  const found = user => scoped(user, client => searchStories(client, '%Crétacé%'));
+  const found = user => scoped(user, client => searchStories(client, 'Crétacé'));
   assert.deepEqual((await found(null)).map(row => row.id), [1]);
   assert.deepEqual((await found(bob)).map(row => row.id), [1]);
   assert.deepEqual((await found(alice)).map(row => row.id).sort(), [1, 2]);
 });
 test('story search ranks title matches before descriptions and associated content', async () => {
   await pool.query("UPDATE public.stories SET title_fr='Crétacé' WHERE id=1; UPDATE public.stories SET description_fr='Le Crétacé' WHERE id=4; UPDATE public.periods SET label_fr='Crétacé';");
-  const rows = await scoped(alice, client => searchStories(client, '%Crétacé%'));
+  const rows = await scoped(alice, client => searchStories(client, 'Crétacé'));
   assert.deepEqual(rows.map(row => [row.id, row.matched_on]), [[1,'title'],[4,'description'],[2,'content']]);
 });
-test('story search treats escaped wildcard characters literally', async () => {
-  await pool.query("UPDATE public.stories SET title_fr='50% du temps' WHERE id=1; UPDATE public.stories SET title_fr='500 du temps' WHERE id=4;");
-  const rows = await scoped(null, client => searchStories(client, '%50\\%%'));
-  assert.deepEqual(rows.map(row => row.id), [1]);
+test('story search ignores accents, word order, small words and plurals, and keeps wildcards inert', async () => {
+  await pool.query("UPDATE public.stories SET title_fr='Révolution française' WHERE id=1; UPDATE public.stories SET title_fr='50% du temps' WHERE id=4;");
+  const ids = async term => (await scoped(null, client => searchStories(client, term))).map(row => row.id);
+  for (const term of ['revolution francaise', 'française la révolution', 'revolutions', 'revol']) assert.deepEqual(await ids(term), [1], term);
+  assert.deepEqual(await ids('%_%'), []);
+  assert.deepEqual(await ids('50%'), [4]);
+});
+test('typos only widen a search that found nothing exact', async () => {
+  await pool.query("UPDATE public.stories SET title_fr='Bataille de Waterloo' WHERE id=1; UPDATE public.stories SET title_fr='Water' WHERE id=4;");
+  const ids = async term => (await scoped(null, client => searchStories(client, term))).map(row => row.id);
+  assert.deepEqual(await ids('waterlo'), [1]);
+  assert.deepEqual(await ids('watrloo'), [1]);
+});
+test('event search reaches only events of accessible frises and opens the major occurrence', async () => {
+  await pool.query("UPDATE public.events SET label_fr='Prise de la Bastille',label_en='Storming of the Bastille';");
+  const found = user => scoped(user, client => searchStoryEvents(client, 'bastille prise'));
+  assert.deepEqual(await found(null), []);
+  assert.deepEqual(await found(bob), []);
+  assert.deepEqual((await found(alice)).map(row => [row.id, row.story_id]), [['e', 2]]);
+  await pool.query("INSERT INTO public.story_events VALUES (1,'e','normal'),(4,'e','major')");
+  assert.deepEqual((await found(null)).map(row => [row.id, row.story_id]), [['e', 4]]);
 });
 
 
 test('story search returns the precise period or event label behind a match', async () => {
   await pool.query("UPDATE public.periods SET label_fr='Jurassique'; UPDATE public.events SET label_fr='crise de Cuba',label_en='Cuban crisis'; INSERT INTO public.story_periods VALUES (1,'p'); INSERT INTO public.story_events VALUES (1,'e');");
-  const period = await scoped(null, client => searchStories(client, '%Jurassique%'));
+  const period = await scoped(null, client => searchStories(client, 'Jurassique'));
   assert.deepEqual(period.map(row => [row.id, row.matched_type, row.matched_label_fr]), [[1,'period','Jurassique']]);
-  const event = await scoped(null, client => searchStories(client, '%Cuba%'));
+  const event = await scoped(null, client => searchStories(client, 'Cuba'));
   assert.deepEqual(event.map(row => [row.id, row.matched_type, row.matched_label_fr]), [[1,'event','crise de Cuba']]);
 });

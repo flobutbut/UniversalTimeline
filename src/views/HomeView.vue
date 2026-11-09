@@ -424,7 +424,7 @@ const {
 let initialized = false;
 let consumedPosition = '';
 let previousRouteName: unknown = null;
-watch([() => route.query.story, () => route.query.period, () => route.query.context, () => route.query.reference, () => route.query.view, () => route.query.entry, () => route.query.empty, () => route.name], () => {
+watch([() => route.query.story, () => route.query.period, () => route.query.context, () => route.query.reference, () => route.query.view, () => route.query.entry, () => route.query.event, () => route.query.empty, () => route.name], () => {
   const from = previousRouteName; previousRouteName = route.name;
   if (route.name !== 'timeline') return;
   // An in-page action, an announced search, the browser history inside the page, or an entry from elsewhere.

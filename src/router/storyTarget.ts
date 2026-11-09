@@ -14,6 +14,11 @@ export function storyTimelineLocation(id: string): RouteLocationRaw {
   return { name: 'timeline', query: { story } };
 }
 
+/** A frise opened on one of its events: the timeline finds the period and opens the event's details. */
+export function storyEventLocation(storyId: string, eventId: string): RouteLocationRaw {
+  return { name: 'timeline', query: { story: readStoryTarget(storyId), event: eventId } };
+}
+
 export function timelineLocation(target: TimelineTarget): RouteLocationRaw {
   return { name: 'timeline', query: {
     story: target.storyId,
@@ -34,11 +39,13 @@ export function readTimelinePosition(query: Record<string, unknown>) {
   if (raw !== undefined && (typeof raw !== 'string' || !raw.trim() || raw.length > 200 || /[\u0000-\u001f\u007f]/.test(raw))) {
     throw new Error('La période demandée est invalide.');
   }
+  const event = query.event;
+  if (event !== undefined && (typeof event !== 'string' || !event.trim() || event.length > 200 || /[\u0000-\u001f\u007f]/.test(event))) throw new Error('L’événement demandé est invalide.');
   if (query.view !== undefined && (query.view !== 'overview' || raw !== undefined)) {
     throw new Error('La vue demandée est invalide.');
   }
   if (query.entry !== undefined && query.entry !== 'universe') throw new Error('Le point d’entrée demandé est invalide.');
-  return { ...(contextId ? { contextId } : {}), ...(typeof raw === 'string' ? { periodId: raw } : {}), ...(typeof reference === 'string' ? { referencePeriodId: reference } : {}),
+  return { ...(contextId ? { contextId } : {}), ...(typeof raw === 'string' ? { periodId: raw } : {}), ...(typeof reference === 'string' ? { referencePeriodId: reference } : {}), ...(typeof event === 'string' ? { eventId: event } : {}),
     ...(query.view === 'overview' ? { view: 'overview' as const } : {}),
     ...(query.entry === 'universe' ? { entry: 'universe' as const } : {}) };
 }

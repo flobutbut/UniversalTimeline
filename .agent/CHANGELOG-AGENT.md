@@ -377,3 +377,7 @@ Les trois lignes d'exemples de la section « Vos frises » (`LandingView.vue`) a
 ## 2026-11-05 — Mesure anonyme sans cookie et exclusion de l'éditeur
 
 `useConsentStore` : trois modes (`MeasurementMode` : `off`, `exempt`, `consented`), choix `anonymous` (opposition à la mesure anonyme), `CONSENT_VERSION` 3, `markInternalDevice` (`ut-internal-device`). Le traceur PostHog suit le mode via `apply` : persistance mémoire sans accord, cookies avec accord, nouvel identifiant à chaque changement de mode, propriété `measurement` sur chaque événement, termes de recherche seulement en mode consenti. `main.ts` exclut les appareils où un administrateur se connecte et coupe aussi Vercel en cas d'opposition. Bandeau (interrupteur « Mesure anonyme sans cookie »), profil, politiques de confidentialité et cookies, registre RGPD, règle 30 et plan d'analyse mis à jour.
+
+## 2026-11-09 — Recherche tolérante et événements
+
+La recherche globale compare désormais mot à mot (accents, ordre, pluriels, petits mots, fautes en dernier recours) et liste les événements des frises accessibles via `/api/search/story-events`. Un résultat ouvre `/timeline?story=<id>&event=<id>` sur la bonne période, bulle ouverte. Événement `search_completed` : `outcome: event`, `event_results`.

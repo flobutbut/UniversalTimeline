@@ -6,7 +6,7 @@ import { useDataStore } from '@/stores/useDataStore';
 import type { ListPeriod, ListEvent, StoryAnchor, NavigationContext, Story } from '@/types/database';
 import { storyChildrenOf, resolvePeriodNavFromSnapshot, type StoryPeriodNavSnapshot } from '@/lib/homeStoryPeriodNav';
 
-import { timelineLevel, levelNeighbors, timelinePeriodPath, periodPresentationTargets, type TimelineTarget, type TimelineReturnFrame } from '@/lib/timelineNavigation';
+import { eventPeriodPath, timelineLevel, levelNeighbors, timelinePeriodPath, periodPresentationTargets, type TimelineTarget, type TimelineReturnFrame } from '@/lib/timelineNavigation';
 import { universeStoryTrail } from '@/lib/universeStoryTrail';
 import { storyNavigationLinks, indexStoryNavigationLinks, rootStoryNavigationLinks } from '@/lib/storyNavigationLinks';
 import { timelineHierarchy } from '@/lib/timelineHierarchy';
@@ -32,6 +32,8 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
   });
   const storyEvents = ref<ListEvent[]>([]);
   const currentStoryId = ref(ENTRY_STORY_ID);
+  /** Événement demandé par l'URL : il reste visible et sa bulle s'ouvre. */
+  const focusedEventId = ref<string | null>(null);
   const currentStoryPeriods = ref<ListPeriod[]>([]);
   const currentStoryAllEvents = ref<ListEvent[]>([]);
   const currentStoryBounds = ref<TimelineBounds | null>(null);
@@ -231,6 +233,7 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
     currentPeriod.value = path?.[path.length - 1] ?? null;
     displayedPeriods.value = childrenOf(currentPeriod.value?.id ?? null);
     storyEvents.value = eventsForPeriod(currentPeriod.value);
+    focusedEventId.value = null;
     recordStoryVisit();
   }
 
@@ -290,8 +293,11 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
       const legacyReference=target?.periodId && !story.periods.some(p=>p.id===target.periodId) && referenceIds.includes(target.periodId) ? target.periodId : undefined;
       referencePeriodId.value=requestedReference??legacyReference??(referenceIds.length===1?referenceIds[0]:null);
       const overview = requestedTarget?.view === 'overview';
-      const focusId = !overview ? (legacyReference?undefined:requestedTarget?.periodId) ?? (!restorePeriodNav && referenceIds.length === 1 && storyChildrenOf(referenceIds[0], story.periods).length > 0 ? referenceIds[0] : undefined) : undefined;
-      const focusPath = focusId ? timelinePeriodPath(story.periods, focusId) : null;
+      const focusedEvent = target?.eventId ? story.events.find(event => event.id === target.eventId) : undefined;
+      // Sans événement retrouvé (retiré de la frise depuis le lien), la frise s'ouvre normalement.
+      const eventPath = focusedEvent && !target?.periodId ? eventPeriodPath(story.periods, focusedEvent, Date.now()) : null;
+      const focusId = !overview && !eventPath ? (legacyReference?undefined:requestedTarget?.periodId) ?? (!restorePeriodNav && referenceIds.length === 1 && storyChildrenOf(referenceIds[0], story.periods).length > 0 ? referenceIds[0] : undefined) : undefined;
+      const focusPath = eventPath?.length ? eventPath : focusId ? timelinePeriodPath(story.periods, focusId) : null;
       if (focusId && !focusPath) throw new Error('Cette période n’appartient plus à la frise.');
       const entryTrail = target?.entry === 'universe'
         ? await universeStoryTrail(story, new Set(stories.value.map(story => story.id)), dataStore.ensureStoryLoaded, isCurrent)
@@ -309,7 +315,7 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
       const restored = focusPath ? { stack: focusPath.slice(0,-1), current: focusPath[focusPath.length-1] } : restorePeriodNav ? resolvePeriodNavFromSnapshot(storyPeriods, restorePeriodNav) : null;
       parentStack.value = restored?.stack ?? [];
       currentPeriod.value = restored?.current ?? null;
-      if (!restored && !overview && expandSingleRoot && !referencePeriodId.value) {
+      if (!restored && !overview && !eventPath && expandSingleRoot && !referencePeriodId.value) {
         const roots = childrenOf(null);
         if (roots.length === 1 && roots[0].hasChildren) {
           const root = roots[0];
@@ -324,6 +330,7 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
       }
       displayedPeriods.value = childrenOf(currentPeriod.value?.id ?? null);
       storyEvents.value = eventsForPeriod(currentPeriod.value);
+      focusedEventId.value = focusedEvent?.id ?? null;
       if (entryTrail) {
         visitedStories.value = entryTrail;
         returnPath.value=entryTrail.map(({entry:_entry,returnPath:_returns,...position})=>position);
@@ -486,7 +493,7 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
   const handleEventClick = async (_event: ListEvent) => {};
 
   return {
-    loading, error, retryLoad, parentStack, currentPeriod, displayedPeriods, periodChildren, storyEvents, currentStoryPeriods, currentStory, currentStoryAllEvents,
+    loading, error, retryLoad, parentStack, currentPeriod, displayedPeriods, periodChildren, storyEvents, currentStoryPeriods, currentStory, currentStoryAllEvents, focusedEventId,
     getPosition: () => positionTarget(currentPeriod.value?.id),
     currentStoryId, breadcrumb, storyBreadcrumb, currentStoryBounds, previousPeriod, nextPeriod, navigationContexts, contextId, referencePeriodId, returnPath,
     contextBar, contextStories, contextStoryId, rootStories, headerStories, linkedPeriods, childLinkedPeriods, returnTitle, navigationChoices, chooseNavigationTarget, selectNavigationContext,

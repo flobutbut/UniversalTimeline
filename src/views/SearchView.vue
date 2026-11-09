@@ -3,7 +3,7 @@
     <div class="search-page__content">
       <Button :to="returnPath" variant="tertiary" size="sm"><template #icon><Icon icon="mdi:arrow-left" aria-hidden="true" /></template>Retour</Button>
       <h1 id="search-page-title">Rechercher</h1>
-      <p class="search-page__description">Trouvez une frise ou un sujet Wikidata.</p>
+      <p class="search-page__description">Trouvez une frise, un événement ou un sujet Wikidata.</p>
       <p v-if="error" role="alert">{{ error }}</p>
       <GlobalSearch :key="auth.identityVersion" page autofocus @select="selectResult" />
     </div>

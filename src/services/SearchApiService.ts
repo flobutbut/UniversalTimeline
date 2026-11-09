@@ -251,6 +251,17 @@ export interface StorySearchResult {
   match?: { type: 'period' | 'event'; label: { fr: string; en: string } } | null;
 }
 
+/** Événement d'une frise accessible, avec la frise où l'ouvrir. */
+export interface StoryEventSearchResult {
+  id: string;
+  label: { fr: string; en: string };
+  description: { fr: string; en: string };
+  date?: string;
+  dateLabel: string;
+  storyId: string;
+  storyLabel: { fr: string; en: string };
+}
+
 /** Résultat `wbsearchentities` sans filtre sur les claims (complétion formulaires). */
 export interface WikidataEntityLabelHit {
   searchOrigin?: 'semantic';
@@ -260,7 +271,7 @@ export interface WikidataEntityLabelHit {
   description?: string;
 }
 
-export type GlobalSearchResult = StorySearchResult | (WikidataEntityLabelHit & { fromWikidata: true });
+export type GlobalSearchResult = StorySearchResult | StoryEventSearchResult | (WikidataEntityLabelHit & { fromWikidata: true });
 
 interface ApiSearchResponse {
   periods: Array<{
@@ -292,6 +303,11 @@ export class SearchApiService {
 
   async searchStories(q: string, options?: { signal?: AbortSignal }): Promise<StorySearchResult[]> {
     return apiClient.get<StorySearchResult[]>(`/search/stories?${new URLSearchParams({ q })}`, options);
+  }
+
+  async searchStoryEvents(q: string, options?: { signal?: AbortSignal }): Promise<StoryEventSearchResult[]> {
+    const rows = await apiClient.get<Array<Omit<StoryEventSearchResult, 'dateLabel'>>>(`/search/story-events?${new URLSearchParams({ q })}`, options);
+    return rows.map(row => ({ ...row, dateLabel: formatSearchResultDateBound(row.date) }));
   }
 
   async searchLocalByWikidataIds(ids: string[], type: 'period' | 'event', signal?: AbortSignal): Promise<LocalSearchResult[]> {

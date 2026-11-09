@@ -1,12 +1,35 @@
 import { comparableYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
-import type { ListPeriod, NavigationContext, StoryAnchor } from '@/types/database';
+import type { ListEvent, ListPeriod, NavigationContext, StoryAnchor } from '@/types/database';
 import { storyChildrenOf } from './homeStoryPeriodNav';
 import { getStoryPeriodParentId } from './storyPeriodParent';
 
-export interface TimelinePosition { storyId: string; periodId?: string; contextId?: string; referencePeriodId?: string; view?: 'overview' }
+export interface TimelinePosition { storyId: string; periodId?: string; contextId?: string; referencePeriodId?: string; view?: 'overview'; eventId?: string }
 /** Exact source position and clicked location. Stored in browser history, never as catalogue content. */
 export interface TimelineReturnFrame extends TimelinePosition { anchor?: StoryAnchor; anchorStoryId?: string }
 export interface TimelineTarget extends TimelinePosition { entry?: 'universe'; returnPath?: TimelineReturnFrame[] }
+
+/**
+ * Periods to enter so an event shows among its neighbours: the deepest chain that contains its
+ * date, stopping before leaf periods. Empty for an undated event or one outside every period.
+ */
+export function eventPeriodPath(periods: ListPeriod[], event: ListEvent, now: number): ListPeriod[] {
+  const years = comparableYearsBeforePresent(event.date, event.dateYearsBP, now);
+  if (years === null) return [];
+  const path: ListPeriod[] = [];
+  const seen = new Set<string>();
+  const contains = (period: ListPeriod) => {
+    const start = comparableYearsBeforePresent(period.startDate, period.startYearsBP, now);
+    const end = comparableYearsBeforePresent(period.endDate, period.endYearsBP, now);
+    return start !== null && end !== null && years <= start && years >= end;
+  };
+  for (;;) {
+    const next = storyChildrenOf(path[path.length - 1]?.id ?? null, periods)
+      .find(period => !seen.has(period.id) && storyChildrenOf(period.id, periods).length > 0 && contains(period));
+    if (!next) return path;
+    seen.add(next.id);
+    path.push(next);
+  }
+}
 
 /** Full path in this frise, including leaves; invalid paths cannot become navigation targets. */
 export function timelinePeriodPath(periods: ListPeriod[], id: string): ListPeriod[] | null {
