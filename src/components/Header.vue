@@ -13,7 +13,7 @@
         <GlobalSearch :key="auth.identityVersion" @select="emit('select-search', $event)" />
       </div>
       <div ref="rightRef" class="header-right">
-        <Button v-if="hasSearch && searchMinified" class="header-search-open" :to="{ name: 'search', query: { from: route.fullPath } }" variant="tertiary" size="sm" icon-only aria-label="Rechercher une frise ou un sujet Wikidata" title="Rechercher">
+        <Button v-if="hasSearch && searchMinified" class="header-search-open" :to="{ name: 'search', query: { from: route.fullPath } }" variant="tertiary" size="sm" icon-only aria-label="Rechercher une frise, un événement ou un sujet Wikidata" title="Rechercher">
           <template #icon><DesignIcon name="search" /></template>
         </Button>
         <div v-if="tabs.length" class="header-nav-wrap" :class="{ 'header-nav-wrap--collapsed': navCollapsed }" :inert="navCollapsed ? true : undefined" :aria-hidden="navCollapsed || undefined">

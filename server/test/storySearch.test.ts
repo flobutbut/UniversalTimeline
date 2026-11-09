@@ -14,12 +14,12 @@ async function search(q: unknown) {
 it('returns only story presentation data and binds a literal search term once', async () => {
   db.mockResolvedValueOnce({ rows: [{ id: 7, title_fr: 'Guerre froide', title_en: null, description_fr: 'Résumé', description_en: null, matched_on: 'content', matched_type: 'event', matched_label_fr: 'plan Marshall', matched_label_en: null }] } as never);
   expect(await search(' Marshall ')).toEqual({ status: 200, body: [{ id: '7', label: { fr: 'Guerre froide', en: 'Guerre froide' }, description: { fr: 'Résumé', en: 'Résumé' }, matchedOn: 'content', match: { type: 'event', label: { fr: 'plan Marshall', en: 'plan Marshall' } } }] });
-  expect(db).toHaveBeenCalledOnce(); expect(db.mock.calls[0][1]).toEqual(['%Marshall%']);
+  expect(db).toHaveBeenCalledOnce(); expect(db.mock.calls[0][1]?.[0]).toBe('Marshall');
 });
-it('escapes ILIKE wildcards while keeping quotes in a bound parameter', async () => {
+it('keeps user text in a bound parameter', async () => {
   db.mockResolvedValueOnce({ rows: [] } as never);
   await search("50%_\\'OR 1=1");
-  expect(db.mock.calls[0][1]).toEqual(["%50\\%\\_\\\\'OR 1=1%"]);
+  expect(db.mock.calls[0][1]?.[0]).toBe("50%_\\'OR 1=1");
   expect(db.mock.calls[0][0]).not.toContain('OR 1=1');
 });
 it.each([undefined, '', ' ', 'a'])('does not query for an empty or short search: %s', async q => {

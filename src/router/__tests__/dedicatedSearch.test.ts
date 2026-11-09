@@ -14,6 +14,7 @@ let view: ReturnType<typeof mount>, router: Router;
 const api = SearchApiService.getInstance();
 beforeEach(() => {
   vi.useFakeTimers();
+  vi.spyOn(api, 'searchStoryEvents').mockResolvedValue([]);
   vi.spyOn(api, 'searchStories').mockResolvedValue([{ id: '9', label: { fr: 'Seconde Guerre mondiale', en: '' }, description: { fr: '1939–1945', en: '' }, matchedOn: 'title' }]);
   vi.spyOn(api, 'searchWikidataEntityLabels').mockResolvedValue([{ id: 'Q6534', label: 'Révolution française' }]);
 });

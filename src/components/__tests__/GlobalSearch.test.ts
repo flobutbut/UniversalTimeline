@@ -13,6 +13,7 @@ async function search(q: string) {
 beforeEach(() => {
   vi.useFakeTimers();
   vi.spyOn(api, 'searchStories').mockResolvedValue([]);
+  vi.spyOn(api, 'searchStoryEvents').mockResolvedValue([]);
   vi.spyOn(api, 'searchWikidataEntityLabels').mockResolvedValue([]);
   vi.spyOn(api, 'searchLocal'); vi.spyOn(api, 'searchWikidata');
   view = mount(GlobalSearch, { attachTo: document.body });
@@ -49,7 +50,7 @@ it('offers stories with their description and explains a match through associate
 it('distinguishes a pending search, an error and an empty result', async () => {
   const pending = deferred<StorySearchResult[]>(); vi.mocked(api.searchStories).mockReturnValueOnce(pending.promise);
   await search('Terre'); expect(view.text()).toContain('Recherche de frises'); expect(view.text()).not.toContain('Aucune frise');
-  pending.resolve([]); await vi.advanceTimersByTimeAsync(600); await flushPromises(); expect(view.text()).toContain('Aucune frise ni sujet Wikidata trouvé');
+  pending.resolve([]); await vi.advanceTimersByTimeAsync(600); await flushPromises(); expect(view.text()).toContain('Aucune frise, aucun événement ni sujet Wikidata trouvé');
   vi.mocked(api.searchStories).mockRejectedValueOnce(new Error('Recherche indisponible')).mockResolvedValueOnce([story]);
   await search('Marshall'); expect(view.get('[role="alert"]').text()).toContain('Recherche indisponible');
   expect(view.text()).not.toContain('Aucune frise trouvée');
@@ -121,4 +122,26 @@ it('does not invent a content match for a title-only result', async () => {
   await search('Guerre');
   expect(view.find('.gs__match').exists()).toBe(false);
   expect(view.text()).not.toMatch(/story|stories/i);
+});
+
+it('lists events between frises and Wikidata, with their date and frise', async () => {
+  vi.mocked(api.searchStories).mockResolvedValue([{ ...story, match: null }]);
+  vi.mocked(api.searchStoryEvents).mockResolvedValue([{ id: 'waterloo', label: { fr: 'Bataille de Waterloo', en: '' }, description: { fr: '', en: '' }, date: '1815-06-18', dateLabel: '18 juin 1815', storyId: '27', storyLabel: { fr: 'L’âge des révolutions', en: '' } }]);
+  vi.mocked(api.searchWikidataEntityLabels).mockResolvedValue([{ id: 'Q48314', label: 'Waterloo' }]);
+  await search('waterloo'); await vi.advanceTimersByTimeAsync(600); await flushPromises();
+  expect(view.findAll('.gs__section').map(row => row.text())).toEqual(['Frises', 'Événements', 'Wikidata · générer une frise']);
+  expect(view.findAll('[role=option]')[1].text()).toContain('18 juin 1815');
+  expect(view.findAll('[role=option]')[1].text()).toContain('L’âge des révolutions');
+  await view.findAll('[role=option]')[1].trigger('click');
+  expect(view.emitted('select')?.[0]?.[0]).toMatchObject({ id: 'waterloo', storyId: '27' });
+});
+
+it('keeps frises usable when the event search fails, and can retry it', async () => {
+  vi.mocked(api.searchStories).mockResolvedValue([{ ...story, match: null }]);
+  vi.mocked(api.searchStoryEvents).mockRejectedValueOnce(new Error('Événements indisponibles')).mockResolvedValueOnce([]);
+  await search('guerre');
+  expect(view.text()).toContain('Événements indisponibles');
+  expect(view.findAll('[role=option]')).toHaveLength(1);
+  await view.findAll('button').find(button => button.text() === 'Réessayer')!.trigger('click'); await flushPromises();
+  expect(view.text()).not.toContain('Événements indisponibles');
 });

@@ -68,11 +68,12 @@ export interface TimelinePositionShape {
 
 export interface SearchCompletedProperties {
   surface: 'header' | 'page';
-  outcome: 'story' | 'wikidata' | 'abandon';
+  outcome: 'story' | 'event' | 'wikidata' | 'abandon';
   query_length: number;
   reformulations: number;
   /** Results of the last settled query; null while unknown or when that source failed. */
   story_results: number | null;
+  event_results: number | null;
   wikidata_results: number | null;
   position?: number;
   matched_on?: 'title' | 'description' | 'content';

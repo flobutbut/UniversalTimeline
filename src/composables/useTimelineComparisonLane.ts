@@ -95,7 +95,7 @@ export function useTimelineComparisonLane(options: {
   const grid = computed(() => {
     if (leads.value) return {
       periods: nav.displayedPeriods.value, childPeriods: nav.periodChildren.value, childLinkedPeriods: nav.childLinkedPeriods.value,
-      linkedPeriods: nav.linkedPeriods.value, events: eventFilter.apply(nav.storyEvents.value), loading: nav.loading.value,
+      linkedPeriods: nav.linkedPeriods.value, events: eventFilter.apply(nav.storyEvents.value, nav.focusedEventId.value), focusEventId: nav.focusedEventId.value, loading: nav.loading.value,
       parentPeriod: nav.parentStack.value[nav.parentStack.value.length - 1] ?? null, currentPeriod: nav.currentPeriod.value,
       overviewNavigation: !!nav.returnTitle.value, overviewPeriod: nav.contextBar.value,
       previousPeriod: nav.previousPeriod.value, nextPeriod: nav.nextPeriod.value,
@@ -104,7 +104,7 @@ export function useTimelineComparisonLane(options: {
     const level = followed.value;
     return {
       periods: level?.periods ?? [], childPeriods: [], childLinkedPeriods: [], linkedPeriods: level?.linked ?? [],
-      events: story.value && frame.value ? eventFilter.apply(eventsInFrame(story.value.events, frame.value, Date.now())) : [], loading: followingLoading.value,
+      events: story.value && frame.value ? eventFilter.apply(eventsInFrame(story.value.events, frame.value, Date.now())) : [], focusEventId: null, loading: followingLoading.value,
       parentPeriod: ancestors.value[ancestors.value.length - 2] ?? null, currentPeriod: ancestors.value[ancestors.value.length - 1] ?? null,
       overviewNavigation: false, overviewPeriod: null, previousPeriod: null, nextPeriod: null,
       // Sa vue est bornée par l’autre frise : la fin de sa période de contexte n’est pas celle de la vue.

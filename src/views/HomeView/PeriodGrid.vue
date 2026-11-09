@@ -146,7 +146,7 @@ import { primaryTag } from '@/lib/tags';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import Button from '@/components/base/Button.vue';
 import { Icon } from '@iconify/vue';
-import { ref, computed, watch, onActivated, onDeactivated, onScopeDispose } from 'vue';
+import { ref, computed, watch, nextTick, onActivated, onDeactivated, onScopeDispose } from 'vue';
 
 import type { ListPeriod, ListEvent, Story, StoryAnchor } from '@/types/database';
 import { timelineHierarchy } from '@/lib/timelineHierarchy';
@@ -208,6 +208,8 @@ const props = withDefaults(defineProps<{
   hideEndBound?: boolean;
   /** Agrandissement survolé dans une autre frise sur la même échelle (voir `getFocus`). */
   externalFocus?: { start: number; end: number; minimum: number } | null;
+  /** Événement à ouvrir une fois affiché (résultat de recherche, lien direct). */
+  focusEventId?: string | null;
   currentStoryId: string;
   /** Infobulle des périodes (titre, dates, courte description) ; désactivée par défaut. */
   periodTooltips?: boolean;
@@ -552,6 +554,19 @@ watch(() => props.minimized, () => { selectedEvent.value = null; resetActiveEven
 watch(() => props.events, events => {
   if (selectedEvent.value && !events.some(event => event.id === selectedEvent.value!.id)) selectedEvent.value = null;
 });
+
+// Une seule ouverture par demande : refermer la bulle ne doit pas la rouvrir au prochain rendu.
+let openedFocus: string | null = null;
+watch([() => props.focusEventId, () => props.events], async ([id]) => {
+  if (!id) { openedFocus = null; return; }
+  const event = props.events.find(row => row.id === id);
+  if (openedFocus === id || props.minimized || !event) return;
+  openedFocus = id;
+  selectedEvent.value = event;
+  await nextTick();
+  const card = [...(eventsSurfaceRef.value?.querySelectorAll<HTMLElement>('[data-event-id]') ?? [])].find(element => element.dataset.eventId === id);
+  card?.querySelector('button')?.focus({ preventScroll: true });
+}, { immediate: true });
 
 onActivated(() => { active.value = true; });
 onDeactivated(() => {

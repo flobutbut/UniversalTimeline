@@ -11,7 +11,7 @@ import type { Response } from 'express';
 import * as catalogue from '../services/catalogueService.js';
 import { convertEventToPeriod, convertPeriodToEvent } from '../services/catalogueConversion.js';
 import * as stories from '../services/storyService.js';
-import { search, searchStoryTimelines, searchGeneratedCatalogue } from '../services/searchService.js';
+import { search, searchStoryTimelines, searchTimelineEvents, searchGeneratedCatalogue } from '../services/searchService.js';
 import { semanticSearch } from '../services/semanticSearch.js';
 import { loadStoryTemporalBounds } from '../services/storyTemporalBounds.js';
 import * as profiles from '../services/profileService.js';
@@ -39,6 +39,11 @@ router.get('/search/by-generation-keys', endpoint('Erreur lors du rapprochement 
 router.get('/search/stories', endpoint('Erreur lors de la recherche de frises', async (req, res) => {
   const q = parseSearchText(req.query.q, 'q');
   res.json(q.length < 2 ? [] : await searchStoryTimelines(q));
+}));
+
+router.get('/search/story-events', endpoint('Erreur lors de la recherche d’événements', async (req, res) => {
+  const q = parseSearchText(req.query.q, 'q');
+  res.json(q.length < 2 ? [] : await searchTimelineEvents(q));
 }));
 
 router.get('/search/by-wikidata', endpoint('Erreur lors du rapprochement des résultats.', async (req, res) => {

@@ -3,8 +3,8 @@
     <SearchInput
       ref="searchRef"
       v-model="query"
-      placeholder="Rechercher une frise ou un sujet…"
-      aria-label="Rechercher une frise ou un sujet Wikidata"
+      placeholder="Rechercher une frise, un événement…"
+      aria-label="Rechercher une frise, un événement ou un sujet Wikidata"
       autocomplete="off"
       role="combobox"
       aria-autocomplete="list"
@@ -24,17 +24,24 @@
       <div v-else-if="error" class="gs__status" role="alert">
         {{ error }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retrySource">Réessayer</Button>
       </div>
+      <div v-if="storyEvents.loading.value" class="gs__status" role="status">Recherche d’événements…</div>
+      <div v-else-if="storyEvents.error.value" class="gs__status" role="alert">
+        {{ storyEvents.error.value }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retryEvents">Réessayer</Button>
+      </div>
       <div v-if="wikidata.loading.value" class="gs__status" role="status">Recherche Wikidata…</div>
       <div v-if="wikidata.error.value" class="gs__status" role="alert">
         {{ wikidata.error.value }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retryWikidata">Réessayer Wikidata</Button>
       </div>
-      <div v-if="hasResults" :id="listId" role="listbox" aria-label="Frises et sujets Wikidata trouvés">
-        <template v-for="(hit, i) in allHits" :key="`${isWikidata(hit) ? 'wd' : 'story'}:${hit.id}`">
-        <div v-if="i === 0 || isWikidata(hit) !== isWikidata(allHits[i - 1]!)" class="gs__section" aria-hidden="true">{{ isWikidata(hit) ? 'Wikidata · générer une frise' : 'Frises' }}</div>
+      <div v-if="hasResults" :id="listId" role="listbox" aria-label="Frises, événements et sujets Wikidata trouvés">
+        <template v-for="(hit, i) in allHits" :key="`${section(hit)}:${hit.id}`">
+        <div v-if="i === 0 || section(hit) !== section(allHits[i - 1]!)" class="gs__section" aria-hidden="true">{{ SECTION_TITLES[section(hit)] }}</div>
         <button :id="optionId(i)" type="button" role="option" tabindex="-1" :aria-selected="cursor === i" class="gs__item" :class="{ 'gs__item--active': cursor === i }" @mousedown.prevent @click="selectHit(hit)">
-          <Icon :icon="isWikidata(hit) ? 'mdi:earth' : 'mdi:timeline-text-outline'" class="gs__icon" aria-hidden="true" />
+          <Icon :icon="SECTION_ICONS[section(hit)]" class="gs__icon" aria-hidden="true" />
           <ItemSummary v-if="isWikidata(hit)" class="gs__content" :title="hit.label" :description="hit.description">
             <template #meta>Aperçu d’une frise depuis ce sujet</template>
+          </ItemSummary>
+          <ItemSummary v-else-if="isStoryEvent(hit)" class="gs__content" :title="hit.label.fr || hit.label.en" :description="hit.description.fr || hit.description.en">
+            <template #meta><span class="gs__match"><span v-if="hit.dateLabel" class="gs__event-date">{{ hit.dateLabel }}</span><span v-if="hit.dateLabel" aria-hidden="true">·</span><span class="gs__match-label">{{ hit.storyLabel.fr || hit.storyLabel.en }}</span></span></template>
           </ItemSummary>
           <ItemSummary v-else class="gs__content" :title="hit.label.fr || hit.label.en" :description="hit.description.fr || hit.description.en">
             <template v-if="hit.match" #meta>
@@ -48,7 +55,7 @@
         </button>
         </template>
       </div>
-      <div v-if="!loading && !error && !wikidata.loading.value && !wikidata.error.value && !hasResults" class="gs__status" role="status">Aucune frise ni sujet Wikidata trouvé. Essayez un autre mot-clé.</div>
+      <div v-if="!loading && !error && !storyEvents.loading.value && !storyEvents.error.value && !wikidata.loading.value && !wikidata.error.value && !hasResults" class="gs__status" role="status">Aucune frise, aucun événement ni sujet Wikidata trouvé. Essayez un autre mot-clé.</div>
       <span class="sr-only" role="status">{{ hasResults ? `${allHits.length} résultats. Utilisez les flèches puis Entrée pour choisir.` : '' }}</span>
     </component>
   </div>
@@ -61,7 +68,7 @@ import { ref, computed, onMounted, onScopeDispose } from 'vue';
 import SearchInput from './base/SearchInput.vue';
 import ItemSummary from './base/ItemSummary.vue';
 import { Icon } from '@iconify/vue';
-import { SearchApiService, type GlobalSearchResult, type WikidataEntityLabelHit } from '@/services/SearchApiService';
+import { SearchApiService, type GlobalSearchResult, type StoryEventSearchResult, type WikidataEntityLabelHit } from '@/services/SearchApiService';
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { useSuggestionNavigation } from '@/composables/useSuggestionNavigation';
 import { useSearchAnalytics } from '@/composables/useSearchAnalytics';
@@ -76,17 +83,25 @@ const service = SearchApiService.getInstance();
 const { results: stories, loading, error, retry } = useDebouncedSearch(
   () => query.value, (q, signal) => service.searchStories(q, { signal }), { delayMs: 250, enabled: () => props.page || focused.value },
 );
+const storyEvents = useDebouncedSearch(
+  () => query.value, (q, signal) => service.searchStoryEvents(q, { signal }), { delayMs: 250, enabled: () => props.page || focused.value },
+);
 const wikidata = useDebouncedSearch(
   () => query.value, (q, signal) => service.searchWikidataEntityLabels(q, { signal }), { delayMs: 600, enabled: () => props.page || focused.value },
 );
 function isWikidata(hit: GlobalSearchResult): hit is WikidataEntityLabelHit & { fromWikidata: true } { return 'fromWikidata' in hit && hit.fromWikidata === true; }
-const allHits = computed<GlobalSearchResult[]>(() => [...stories.value, ...wikidata.results.value.map(hit => ({ ...hit, fromWikidata: true as const }))]);
+function isStoryEvent(hit: GlobalSearchResult): hit is StoryEventSearchResult { return 'storyId' in hit; }
+type Section = 'story' | 'event' | 'wikidata';
+const SECTION_TITLES: Record<Section, string> = { story: 'Frises', event: 'Événements', wikidata: 'Wikidata · générer une frise' };
+const SECTION_ICONS: Record<Section, string> = { story: 'mdi:timeline-text-outline', event: 'mdi:calendar-blank-outline', wikidata: 'mdi:earth' };
+function section(hit: GlobalSearchResult): Section { return isWikidata(hit) ? 'wikidata' : isStoryEvent(hit) ? 'event' : 'story'; }
+const allHits = computed<GlobalSearchResult[]>(() => [...stories.value, ...storyEvents.results.value, ...wikidata.results.value.map(hit => ({ ...hit, fromWikidata: true as const }))]);
 const hasResults = computed(() => allHits.value.length > 0);
 const dropdownVisible = computed(() => (props.page || focused.value) && query.value.trim().length >= 2);
 const { listId, optionId, cursor, activeId, move, reset, current } = useSuggestionNavigation(() => allHits.value, () => dropdownVisible.value);
 const analytics = useSearchAnalytics({
   surface: () => props.page ? 'page' : 'header', query: () => query.value, enabled: () => props.page || focused.value,
-  stories: { results: stories, loading, error }, wikidata: wikidata,
+  stories: { results: stories, loading, error }, events: storyEvents, wikidata: wikidata,
 });
 let blurTimer: ReturnType<typeof setTimeout> | undefined;
 function onFocus() {
@@ -107,6 +122,7 @@ onScopeDispose(() => clearTimeout(blurTimer));
 onMounted(() => { if (props.autofocus) searchRef.value?.focus(); });
 function confirm() { const hit = current(); if (hit) selectHit(hit); }
 function retrySource() { searchRef.value?.focus(); return retry(); }
+function retryEvents() { searchRef.value?.focus(); return storyEvents.retry(); }
 function retryWikidata() { searchRef.value?.focus(); return wikidata.retry(); }
 function dismiss() { analytics.abandoned(); query.value = ''; reset(); focused.value = false; searchRef.value?.blur(); }
 function selectHit(hit: GlobalSearchResult) { analytics.selected(hit, allHits.value.indexOf(hit) + 1); emit('select', hit); clear(); }
@@ -188,6 +204,7 @@ function clear() {
 .gs__match-type { display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; font-size: var(--font-size-xs); color: var(--color-text-secondary); }
 
 .gs__match-type svg { width: 14px; height: 14px; }
+.gs__event-date { flex-shrink: 0; }
 .gs__match-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 480px) {

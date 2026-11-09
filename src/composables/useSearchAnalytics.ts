@@ -32,24 +32,26 @@ export function useSearchAnalytics(options: {
   query: () => string;
   enabled: () => boolean;
   stories: SourceState<unknown>;
+  events: SourceState<unknown>;
   wikidata: SourceState<unknown>;
 }) {
   let active = false;
   const queries = new Set<string>();
-  let settled: { query: string; stories: number | null; wikidata: number | null } | null = null;
+  let settled: { query: string; stories: number | null; events: number | null; wikidata: number | null } | null = null;
 
   watch(options.query, value => { if (value.trim().length >= 2) active = true; });
-  function record(source: 'stories' | 'wikidata', state: SourceState<unknown>) {
+  function record(source: 'stories' | 'events' | 'wikidata', state: SourceState<unknown>) {
     watch([state.loading, state.error, state.results], () => {
       const query = options.query().trim();
       // A cancellation (closed field, cleared query) resets the results: it is not an answer.
       if (state.loading.value || !options.enabled() || query.length < 2) return;
-      if (settled?.query !== query) settled = { query, stories: null, wikidata: null };
+      if (settled?.query !== query) settled = { query, stories: null, events: null, wikidata: null };
       settled[source] = state.error.value ? null : state.results.value.length;
       queries.add(query);
     });
   }
   record('stories', options.stories);
+  record('events', options.events);
   record('wikidata', options.wikidata);
 
   function finish(outcome: SearchCompletedProperties['outcome'], extra: Partial<SearchCompletedProperties> = {}, transport?: 'sendBeacon') {
@@ -58,7 +60,7 @@ export function useSearchAnalytics(options: {
     const last = settled?.query === query ? settled : null;
     const properties: SearchCompletedProperties = {
       surface: options.surface(), outcome, query_length: query.length, reformulations: Math.max(0, queries.size - 1),
-      story_results: last?.stories ?? null, wikidata_results: last?.wikidata ?? null, ...extra,
+      story_results: last?.stories ?? null, event_results: last?.events ?? null, wikidata_results: last?.wikidata ?? null, ...extra,
     };
     // The typed term needs consent: an anonymous visit only counts the search.
     if (properties.story_results === 0 && measurementMode() === 'consented') {
@@ -72,6 +74,9 @@ export function useSearchAnalytics(options: {
   function selected(hit: GlobalSearchResult, position: number) {
     if ('fromWikidata' in hit && hit.fromWikidata) {
       finish('wikidata', { position, wikidata_id: hit.id, wikidata_label: hit.label.slice(0, 100) });
+    } else if ('storyId' in hit) {
+      announceTimelineEntry('search');
+      finish('event', { position });
     } else {
       // The frise is identified (when public) by the timeline event that follows, marked as coming from the search.
       announceTimelineEntry('search');

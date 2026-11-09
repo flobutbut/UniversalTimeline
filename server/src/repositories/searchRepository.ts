@@ -16,39 +16,94 @@ export type SearchStoryRow = Pick<StoryRow, 'id' | 'title_fr' | 'title_en' | 'de
   matched_label_en: string | null;
 };
 
-/** One result per accessible story. The caller's transaction applies its RLS role. */
-export async function searchStories(db: TransactionClient, pattern: string) {
+export type SearchStoryEventRow = Pick<EventRow, 'id' | 'label_fr' | 'label_en' | 'description_fr' | 'description_en' | 'date'> & {
+  story_id: number;
+  story_title_fr: string;
+  story_title_en: string | null;
+};
+
+const STOP_WORDS = ['la', 'le', 'les', 'de', 'du', 'des', 'en', 'au', 'aux', 'sur', 'et', 'un', 'une', 'the', 'of', 'in', 'on', 'an', 'and'];
+const normalized = (...columns: string[]) => `extensions.unaccent(lower(concat_ws(' ', ${columns.join(', ')})))`;
+/** Words of the query ($1), without accents, final plural or small words; only small words are kept if nothing else remains. */
+const QUERY_TERMS = `terms AS (
+    SELECT extensions.unaccent(lower($1::text)) AS text,
+      ARRAY(SELECT CASE WHEN length(word) >= 5 THEN regexp_replace(word, 's$', '') ELSE word END
+        FROM regexp_split_to_table(extensions.unaccent(lower($1::text)), '[^a-z0-9]+') word WHERE length(word) >= 2) AS words
+  ), q AS (
+    SELECT text, COALESCE(NULLIF(ARRAY(SELECT word FROM unnest(words) word WHERE word <> ALL($2::text[])), '{}'::text[]), words) AS tokens FROM terms
+  )`;
+/** Every word starts a word of the document. */
+const hasWords = (document: string) => `NOT EXISTS (SELECT 1 FROM unnest(q.tokens) token WHERE ${document} !~ ('\\m' || token))`;
+/** Same, with typo tolerance on the words long enough to tell apart. */
+const resemblesWords = (document: string) => `NOT EXISTS (SELECT 1 FROM unnest(q.tokens) token WHERE ${document} !~ ('\\m' || token) AND (length(token) < 5 OR extensions.word_similarity(token, ${document}) < 0.5))`;
+const inputs = (query: string) => [query, STOP_WORDS];
+
+/**
+ * One result per accessible story; the caller's transaction applies its RLS role. Typo-tolerant
+ * results only appear when no exact word matched, so a correct word never brings near neighbours.
+ */
+export async function searchStories(db: TransactionClient, query: string) {
   return (await db.query<SearchStoryRow>(`
-    SELECT s.id, s.title_fr, s.title_en, s.description_fr, s.description_en,
-           CASE WHEN s.title_fr ILIKE $1 OR s.title_en ILIKE $1 THEN 'title'
-                WHEN s.description_fr ILIKE $1 OR s.description_en ILIKE $1 THEN 'description'
-                ELSE 'content' END AS matched_on,
-           matched.kind AS matched_type, matched.label_fr AS matched_label_fr, matched.label_en AS matched_label_en
-    FROM public.stories s
-    LEFT JOIN LATERAL (
-      SELECT candidates.* FROM (
-        SELECT p.id, 'period' AS kind, p.label_fr, p.label_en,
-               CASE WHEN p.label_fr ILIKE $1 OR p.label_en ILIKE $1 THEN 0 ELSE 1 END AS priority
-        FROM public.story_periods sp JOIN public.periods p ON p.id = sp.period_id
-        WHERE sp.story_id = s.id AND (p.label_fr ILIKE $1 OR p.label_en ILIKE $1
-          OR p.description_fr ILIKE $1 OR p.description_en ILIKE $1 OR p.wikidata_id ILIKE $1)
-        UNION ALL
-        SELECT e.id, 'event' AS kind, e.label_fr, e.label_en,
-               CASE WHEN e.label_fr ILIKE $1 OR e.label_en ILIKE $1 THEN 0 ELSE 1 END AS priority
-        FROM public.story_events se JOIN public.events e ON e.id = se.event_id
-        WHERE se.story_id = s.id AND (e.label_fr ILIKE $1 OR e.label_en ILIKE $1
-          OR e.description_fr ILIKE $1 OR e.description_en ILIKE $1 OR e.wikidata_id ILIKE $1)
-      ) candidates
-      ORDER BY priority, kind, label_fr, id LIMIT 1
-    ) matched ON true
-    WHERE s.title_fr ILIKE $1 OR s.title_en ILIKE $1
-       OR s.description_fr ILIKE $1 OR s.description_en ILIKE $1
-       OR matched.id IS NOT NULL
-    ORDER BY CASE WHEN s.title_fr ILIKE $1 OR s.title_en ILIKE $1 THEN 0
-                  WHEN s.description_fr ILIKE $1 OR s.description_en ILIKE $1 THEN 1 ELSE 2 END,
-             s.title_fr, s.id
+    WITH ${QUERY_TERMS}, story_text AS (
+      SELECT s.id, s.title_fr, s.title_en, s.description_fr, s.description_en,
+             ${normalized('s.title_fr', 's.title_en')} AS title,
+             ${normalized('s.title_fr', 's.title_en', 's.description_fr', 's.description_en')} AS document
+      FROM public.stories s
+    ), content AS (
+      SELECT sp.story_id, p.id, 'period' AS kind, p.label_fr, p.label_en, ${normalized('p.label_fr', 'p.label_en')} AS title,
+             ${normalized('p.label_fr', 'p.label_en', 'p.description_fr', 'p.description_en', 'p.wikidata_id')} AS document
+      FROM public.story_periods sp JOIN public.periods p ON p.id = sp.period_id
+      UNION ALL
+      SELECT se.story_id, e.id, 'event' AS kind, e.label_fr, e.label_en, ${normalized('e.label_fr', 'e.label_en')} AS title,
+             ${normalized('e.label_fr', 'e.label_en', 'e.description_fr', 'e.description_en', 'e.wikidata_id')} AS document
+      FROM public.story_events se JOIN public.events e ON e.id = se.event_id
+    ), candidates AS (
+      SELECT s.*, q.text, matched.kind AS matched_type, matched.label_fr AS matched_label_fr, matched.label_en AS matched_label_en,
+             CASE WHEN ${hasWords('s.document')} OR matched.exact THEN 0 ELSE 1 END AS tier,
+             CASE WHEN ${resemblesWords('s.title')} THEN 'title' WHEN ${resemblesWords('s.document')} THEN 'description' ELSE 'content' END AS matched_on
+      FROM story_text s CROSS JOIN q
+      LEFT JOIN LATERAL (
+        SELECT c.id, c.kind, c.label_fr, c.label_en, ${hasWords('c.document')} AS exact
+        FROM content c WHERE c.story_id = s.id AND ${resemblesWords('c.document')}
+        ORDER BY ${hasWords('c.document')} DESC, ${hasWords('c.title')} DESC, extensions.word_similarity(q.text, c.title) DESC, c.kind, c.label_fr, c.id LIMIT 1
+      ) matched ON true
+      WHERE cardinality(q.tokens) > 0 AND (${resemblesWords('s.document')} OR matched.id IS NOT NULL)
+    )
+    SELECT id, title_fr, title_en, description_fr, description_en, matched_on, matched_type, matched_label_fr, matched_label_en
+    FROM candidates WHERE tier = (SELECT min(tier) FROM candidates)
+    ORDER BY CASE matched_on WHEN 'title' THEN 0 WHEN 'description' THEN 1 ELSE 2 END,
+             strpos(title, text) > 0 DESC, extensions.word_similarity(text, title) DESC, title_fr, id
     LIMIT 20
-  `, [pattern])).rows;
+  `, inputs(query))).rows;
+}
+
+/** Events of accessible stories only, each opened in its most relevant frise: major there first, then the most focused. */
+export async function searchStoryEvents(db: TransactionClient, query: string) {
+  return (await db.query<SearchStoryEventRow>(`
+    WITH ${QUERY_TERMS}, event_text AS (
+      SELECT e.id, e.label_fr, e.label_en, e.description_fr, e.description_en, e.date,
+             ${normalized('e.label_fr', 'e.label_en')} AS title,
+             ${normalized('e.label_fr', 'e.label_en', 'e.description_fr', 'e.description_en', 'e.wikidata_id')} AS document
+      FROM public.events e
+    ), candidates AS (
+      SELECT e.*, q.text, CASE WHEN ${hasWords('e.document')} THEN 0 ELSE 1 END AS tier, ${hasWords('e.title')} AS in_title,
+             home.id AS story_id, home.title_fr AS story_title_fr, home.title_en AS story_title_en
+      FROM event_text e CROSS JOIN q
+      JOIN LATERAL (
+        SELECT s.id, s.title_fr, s.title_en
+        FROM public.story_events se JOIN public.stories s ON s.id = se.story_id
+        WHERE se.event_id = e.id
+        ORDER BY CASE se.importance WHEN 'major' THEN 0 WHEN 'normal' THEN 1 ELSE 2 END,
+                 (SELECT count(*) FROM public.story_events siblings WHERE siblings.story_id = s.id), s.id
+        LIMIT 1
+      ) home ON true
+      WHERE cardinality(q.tokens) > 0 AND ${resemblesWords('e.document')}
+    )
+    SELECT id, label_fr, label_en, description_fr, description_en, date, story_id, story_title_fr, story_title_en
+    FROM candidates WHERE tier = (SELECT min(tier) FROM candidates)
+    ORDER BY in_title DESC, strpos(title, text) > 0 DESC, extensions.word_similarity(text, title) DESC, label_fr, id
+    LIMIT 12
+  `, inputs(query))).rows;
 }
 export type SearchPeriodRow = Pick<PeriodRow, 'id' | 'wikidata_id' | 'label_fr' | 'label_en' | 'start_date' | 'end_date' | 'parent_id' | 'start_years_bp' | 'end_years_bp' | 'has_children'>;
 export type SearchEventRow = Pick<EventRow, 'id' | 'wikidata_id' | 'label_fr' | 'label_en' | 'description_fr' | 'date' | 'date_years_bp'>;
