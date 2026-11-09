@@ -107,6 +107,20 @@ it('adds several frises and excludes every open frise from the picker', async ()
   expect(view.findAll('.period-grid--compact')).toHaveLength(3);
 });
 
+it('inserts an associated frise right below its origin and hides the action once it is open', async () => {
+  vi.mocked(StoryApiService.getInstance().getStory).mockImplementation(async id => id === '1'
+    ? { ...stories['1'], childStories: [{ id: '3', title: { fr: 'Frise 3', en: '' }, anchors: [], atRoot: true }] }
+    : stories[id]);
+  await open('/timeline?story=1&compare=2');
+  const addFromHeader = () => document.body.querySelector<HTMLElement>('[aria-label="Ajouter Frise 3 sous cette frise"]');
+  await sectionFor('1').get('.home-view__story-selector button').trigger('click'); await settle();
+  addFromHeader()!.click(); await settle(); await flushPromises();
+  expect(storyOrder()).toEqual(['1', '3', '2']);
+  expect(router.currentRoute.value.query).toEqual({ story: '1', compare: ['3', '2'] });
+  expect(document.activeElement?.getAttribute('aria-label')).toBe('Replier Frise 3');
+  expect(addFromHeader()).toBeNull();
+});
+
 it('restores all frises and their visual order, ignoring invalid, repeated and unknown order entries', async () => {
   await open('/timeline?story=1&compare=2&compare=abc&compare=3&compare=2&compare=1&order=3&order=1&order=3&order=999');
   expect(storyOrder()).toEqual(['3', '1', '2']);
@@ -283,7 +297,7 @@ it('restores focus to the primary story selector after the last comparison is re
   const remove = view.get('[aria-label="Retirer Frise 2"]');
   (remove.element as HTMLElement).focus();
   await remove.trigger('click'); await settle();
-  expect(document.activeElement).toBe(sectionFor('1').get('.home-view__story-selector [role="combobox"]').element);
+  expect(document.activeElement).toBe(sectionFor('1').get('.home-view__story-selector button').element);
 });
 
 it('keeps the overlay add control unavailable while a chronological slide is active', async () => {

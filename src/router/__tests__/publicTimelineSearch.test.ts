@@ -125,9 +125,9 @@ it.each([
     ].slice(0, count) : []));
   await start('/timeline?story=38');
   const header = view.get('.home-view__story-selector');
-  await header.get('[role="combobox"]').trigger('click'); await flushPromises();
-  const options = document.body.querySelectorAll<HTMLElement>('[role="option"]');
-  expect([...options].map(option => option.querySelector('.base-select__option-text')?.textContent?.trim())).toEqual(['Vue d’ensemble de la frise', ...['Genre Homo', 'Histoire des techniques'].slice(0, count)]);
+  await header.get('button').trigger('click'); await flushPromises();
+  const options = document.body.querySelectorAll<HTMLElement>('.associated-stories__item');
+  expect([...options].map(option => option.querySelector('strong')?.textContent?.trim())).toEqual(['Vue d’ensemble de la frise', ...['Genre Homo', 'Histoire des techniques'].slice(0, count)]);
   options[1].click();
   await flushPromises();
   expect(router.currentRoute.value.query.story).toBe('5');
@@ -387,8 +387,8 @@ it.each(['card', 'selector'])('uses the normal period return when entering a fri
   if (entry === 'card') {
     await view.get('[data-period-id="linked-story:2"] .period-card__title-action').trigger('click');
   } else {
-    await view.get('.home-view__story-selector [role="combobox"]').trigger('click'); await flushPromises();
-    await view.findAll('[role="option"]')[1].trigger('click');
+    await view.get('.home-view__story-selector button').trigger('click'); await flushPromises();
+    document.body.querySelectorAll<HTMLElement>('.associated-stories__item')[1].click();
   }
   await flushPromises();
   const grid = view.getComponent(PeriodGrid);

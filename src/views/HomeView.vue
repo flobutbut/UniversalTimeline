@@ -24,9 +24,9 @@
               <StoryBreadcrumb class="home-view__story-breadcrumb" :items="lane.storyCrumbs.value" :max-visible="3" label="Fil d’Ariane des frises"
                 current-navigable :loading="lane.loading.value" @navigate="lane.actions.storyCrumb">
                 <template v-if="lane.leads.value && lane.nav.headerStories.value.length" #current="{ item }">
-                  <Select class="home-view__story-selector" :model-value="null" :placeholder="item.title" compact :searchable="false" :disabled="lane.loading.value"
-                    :options="[{ value: lane.nav.currentStoryId.value, label: 'Vue d’ensemble de la frise' }, ...lane.nav.headerStories.value.map(story => ({ value: story.id, label: story.title.fr || story.title.en }))]"
-                    @update:model-value="value => typeof value === 'string' && selectHeaderStory(lane, value)" />
+                  <AssociatedStoriesBadge class="home-view__story-selector" :story-id="lane.nav.currentStoryId.value" period-id="" :period-label="item.title" :trigger-label="item.title"
+                    overview-label="Vue d’ensemble de la frise" :stories="lane.nav.headerStories.value" :disabled="lane.loading.value" :comparison="storyComparison"
+                    @overview="selectHeaderStory(lane, lane.nav.currentStoryId.value)" @select="id => selectHeaderStory(lane, id)" @compare="id => addComparedStory(id, lane)" />
                 </template>
               </StoryBreadcrumb>
               <StoryBreadcrumb class="home-view__period-breadcrumb" :items="lane.periodCrumbs.value" :current-navigable="!lane.leads.value"
@@ -71,14 +71,14 @@
               :show-children="!comparing && showPeriodChildren" :compact="comparing" :minimized="comparing && lane.collapsed.value" :axis-viewport="!comparing ? timelineViewport : null" :external-focus="sharedFocus"
               :load-story-details="dataStore.ensureStoryLoaded" period-tooltips natural-height
               @period-click="lane.actions.periodClick" @event-click="event => lane === primaryLane ? onEventClick(event) : lane.nav.handleEventClick(event)"
-              @go-back="lane.actions.goBack" @navigate-period="lane.actions.navigatePeriod" @story-select="lane.actions.storySelect">
+              @go-back="lane.actions.goBack" @navigate-period="lane.actions.navigatePeriod" @story-select="lane.actions.storySelect" :comparison="storyComparison" @story-compare="id => addComparedStory(id, lane)">
               <template v-if="lane.leads.value && lane.nav.contextBar.value" #overview-context="{ style, continuation }">
                 <PeriodCard variant="parent" :compact="comparing" :period="lane.nav.contextBar.value" :style="style" :continues-before="continuation.before" :continues-after="continuation.after"
                   :is-selected="false" :loading="lane.loading.value" @back="lane.actions.goBack">
                   <template #title-actions>
                     <span v-if="!lane.nav.returnPath.value.length" class="home-view__context-label">Période de référence</span>
                     <AssociatedStoriesBadge :story-id="lane.nav.currentStoryId.value" :period-id="lane.nav.contextBar.value.id" :period-label="lane.nav.contextBar.value.label.fr"
-                      :stories="lane.nav.contextStories.value" :disabled="lane.loading.value" @select="id => lane.actions.storySelect(id, contextAnchorFor(lane), lane.nav.contextStoryId.value)" />
+                      :stories="lane.nav.contextStories.value" :disabled="lane.loading.value" :comparison="storyComparison" @compare="id => addComparedStory(id, lane)" @select="id => lane.actions.storySelect(id, contextAnchorFor(lane), lane.nav.contextStoryId.value)" />
                   </template>
                 </PeriodCard>
               </template>
@@ -223,6 +223,7 @@ async function loadEmptyCatalogue() {
 const pickingStory = ref(false);
 const comparisonOptions = computed(() => [...dataStore.stories].filter(story => !panels.value.some(panel => panel.storyId.value === story.id))
   .sort((a, b) => (a.title.fr || '').localeCompare(b.title.fr || '', 'fr')).map(story => ({ value: story.id, label: story.title.fr || story.title.en })));
+const storyComparison = computed(() => ({ ids: new Set(comparisonOptions.value.map(option => option.value)), disabled: loading.value || slidePhase.value !== 'idle' || !!routeError.value }));
 function replaceComparison() {
   if (route.name !== 'timeline') return;
   const primary = primaryLane.value;
@@ -243,11 +244,18 @@ function replaceComparison() {
   void router.replace({ name: 'timeline', query: updated,
     ...(Array.isArray(returns) ? { state: { timelineReturnPath: JSON.parse(JSON.stringify(returns)) } } : {}) });
 }
-function addComparedStory(id: string) {
-  if (!comparisonOptions.value.some(option => option.value === id)) return;
-  workspace.add(id);
+async function addComparedStory(id: string, source?: ComparisonPanel) {
+  const option = comparisonOptions.value.find(option => option.value === id);
+  if (!option) return;
+  const panel = workspace.add(id);
+  // Depuis un lien, la frise vient juste sous celle d’origine ; le bouton général complète la pile.
+  if (panel && source) workspace.move(panel.key, panels.value.indexOf(source) + 1);
   pickingStory.value = false;
   replaceComparison();
+  if (!panel || !source) return;
+  panelAnnouncement.value = `${option.label} ajoutée sous ${source.title.value}.`;
+  await nextTick();
+  focusPanel(panel.key);
 }
 async function removeComparedStory(panel: ComparisonPanel) {
   if (!comparing.value) return;
@@ -496,12 +504,6 @@ onActivated(() => {
 .home-view__breadcrumbs { grid-column: 2; min-width: 0; }
 .home-view__drag { grid-column: 1; grid-row: 1; cursor: grab; margin-top: var(--spacing-sm); }
 .home-view__drag:active { cursor: grabbing; }
-.home-view__story-selector { width: auto; min-width: 0; }
-.home-view__story-selector :deep(.base-select__trigger) { min-height: 0; padding: 0; border: 0; background: transparent; color: var(--color-text-primary); font: inherit; }
-.home-view__story-selector :deep(.base-select__value) { font: inherit; }
-.home-view__story-selector :deep(.base-select__placeholder) { color: var(--color-text-primary); opacity: 1; font-weight: var(--font-weight-semibold); }
-.home-view__story-selector :deep(.base-select__indicators) { margin-left: var(--spacing-xs); }
-.home-view__story-selector :deep(.base-select__dropdown) { right: auto; width: max-content; min-width: 100%; max-width: min(320px, 85vw); }
 /* Sujet des événements : un select discret, aligné à droite avec les actions de la frise. */
 .home-view__subject { width: auto; min-width: 0; }
 .home-view__subject :deep(.base-select__trigger) { min-height: 0; padding: var(--spacing-xs) var(--spacing-sm); border: 0; background: transparent; color: var(--color-text-secondary); font-size: var(--font-size-sm); }

@@ -72,3 +72,6 @@ export function sharedEventIds(a: ListEvent[], b: ListEvent[]): string[] {
   const other = new Set(b.map(event => event.id));
   return a.filter(event => other.has(event.id)).map(event => event.id);
 }
+
+/** Frises ajoutables à la comparaison depuis un lien, et disponibilité de l’action. */
+export interface StoryComparisonControl { ids: ReadonlySet<string>; disabled: boolean }

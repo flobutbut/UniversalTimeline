@@ -40,7 +40,7 @@
         <span v-if="variant === 'parent'" class="period-card__return" aria-hidden="true">Retour</span>
         <slot name="title-actions" />
       </div>
-      <Button v-if="variant === 'timeline' && period.hasChildren" class="period-card__drill" variant="ghost" size="xs" icon-only
+      <Button v-if="variant === 'timeline' && period.hasChildren" class="period-card__drill" :class="{ 'period-card__drill--hidden': !drillFits }" variant="ghost" size="xs" icon-only
         :disabled="loading" :aria-label="`Explorer les sous-périodes de ${period.label.fr}`" @click.stop="handleClick">
         <template #icon><Icon icon="mdi:arrow-right" aria-hidden="true" /></template>
       </Button>
@@ -92,6 +92,8 @@ const mainRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
 const actionsRef = ref<HTMLElement | null>(null);
 const actionsFit = ref(true);
+/** La flèche cède aussi la place au texte ; le titre reste le moyen d'explorer la période. */
+const drillFits = ref(true);
 /** Le nom passe avant le lien : sans place pour les deux, le lien attend l'agrandissement de la barre. */
 const linkFits = ref(true);
 let observer: ResizeObserver | undefined;
@@ -102,12 +104,15 @@ function measureActions() {
   if (!main || !content || !actions) return;
   measureLink(content);
   const actionsWidth = actions.offsetWidth;
-  if (actionsWidth === 0 || props.wrapContent) { actionsFit.value = true; return; }
+  const drillWidth = main.querySelector<HTMLElement>('.period-card__drill')?.offsetWidth ?? 0;
+  if (props.wrapContent) { actionsFit.value = drillFits.value = true; return; }
   const gap = parseFloat(getComputedStyle(main).columnGap) || 0;
-  const needed = periodTextExtent(content, false);
-  // Espace partagé par le texte et les actions : celui du texte, plus celui des actions quand elles sont dans le flux.
-  const shared = content.clientWidth + (actionsFit.value ? actionsWidth + gap : 0);
-  actionsFit.value = Math.ceil(needed) + gap + actionsWidth <= shared;
+  const needed = Math.ceil(periodTextExtent(content, false));
+  const inFlow = (width: number, fits: boolean) => width > 0 && fits ? width + gap : 0;
+  // Espace partagé par le texte et les contrôles : celui du texte, plus celui des contrôles encore dans le flux.
+  const shared = content.clientWidth + inFlow(actionsWidth, actionsFit.value) + inFlow(drillWidth, drillFits.value);
+  drillFits.value = drillWidth === 0 || needed + gap + drillWidth <= shared;
+  actionsFit.value = actionsWidth === 0 || needed + gap + actionsWidth + inFlow(drillWidth, drillFits.value) <= shared;
 }
 
 function measureLink(content: HTMLElement) {
@@ -248,7 +253,8 @@ const handleClick = () => {
 .period-card.selected .period-card__wikipedia.wikipedia-link { color: var(--color-text-on-selected); }
 
 /* Hors du flux mais mesurable ; invisible aussi au clavier et aux lecteurs d’écran. */
-.period-card__actions--hidden {
+.period-card__actions--hidden,
+.period-card .period-card__drill--hidden {
   position: absolute;
   visibility: hidden;
   pointer-events: none;

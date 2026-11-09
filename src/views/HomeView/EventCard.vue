@@ -36,10 +36,14 @@
       <!-- Autres frises contenant l'événement : listées directement, rien s'il n'y en a pas -->
       <section v-if="storySuggestions.length > 0" class="event-stories" aria-label="Autres frises associées à cet événement">
         <ul class="event-stories-list">
-          <li v-for="s in storySuggestions" :key="s.id">
+          <li v-for="s in storySuggestions" :key="s.id" class="event-story-row">
             <button class="event-story-item" type="button" @click.stop="$emit('story-select', s.id)">
               {{ s.title?.fr || s.title?.en }}
             </button>
+            <Button v-if="comparison?.ids.has(s.id)" variant="ghost" size="xs" icon-only type="button" :disabled="comparison.disabled"
+              :aria-label="`Ajouter ${s.title?.fr || s.title?.en} sous cette frise`" title="Ajouter sous cette frise" @click.stop="$emit('story-compare', s.id)">
+              <template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template>
+            </Button>
           </li>
         </ul>
       </section>
@@ -50,6 +54,8 @@
 <script setup lang="ts">
 import Button from '@/components/base/Button.vue';
 import WikipediaLink from '@/components/WikipediaLink.vue';
+import { Icon } from '@iconify/vue';
+import type { StoryComparisonControl } from '@/lib/timelineComparison';
 import { computed, ref } from 'vue';
 import type { ListEvent, StorySuggestion } from '@/types/database';
 import { DateService } from '@/services/DateService';
@@ -75,6 +81,7 @@ const props = withDefaults(
     otherStoryCount?: number | null;
     suggestionsLoading?: boolean;
     suggestionsError?: string | null;
+    comparison?: StoryComparisonControl;
   }>(),
   { isDefaultOpen: false, storySuggestions: () => [], otherStoryCount: null, suggestionsLoading: false, suggestionsError: null }
 );
@@ -82,6 +89,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'click', ev: MouseEvent): void;
   (e: 'story-select', storyId: string): void;
+  (e: 'story-compare', storyId: string): void;
   (e: 'retry-suggestions'): void;
   /** Tooltip complet affiché par survol ou focus : la grille libère sa place. */
   (e: 'active-change', active: boolean): void;
@@ -422,10 +430,22 @@ const displayDate = computed(() => {
   margin: 0 calc(var(--spacing-sm) * -1);
   padding: 0;
   list-style: none;
+  /* Environ cinq frises visibles ; la bulle garde sa taille et la pile ne défile pas à sa place. */
+  max-height: calc(var(--spacing-xs) * 40);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.event-story-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .event-story-item {
   display: block;
+  flex: 1;
+  min-width: 0;
   width: 100%;
   padding: var(--spacing-xs) var(--spacing-sm);
   border: none;

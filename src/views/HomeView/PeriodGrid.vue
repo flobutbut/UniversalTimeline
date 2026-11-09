@@ -46,7 +46,7 @@
           >
             <template #title-actions>
               <AssociatedStoriesBadge v-if="props.currentPeriod" :story-id="currentStoryId" :period-id="props.currentPeriod.id" :period-label="props.currentPeriod.label.fr || props.currentPeriod.label.en"
-                :stories="associatedByPeriod.get(props.currentPeriod.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
+                :stories="associatedByPeriod.get(props.currentPeriod.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading" :comparison="comparison" @compare="emit('story-compare', $event)"
                 @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: props.currentPeriod.id })" />
             </template>
           </PeriodCard>
@@ -76,7 +76,7 @@
             >
               <template #title-actions>
                 <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
-                  :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
+                  :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading" :comparison="comparison" @compare="emit('story-compare', $event)"
                   @open-change="value => setPeriodAssociationsOpen(period.id, value)"
                   @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: period.id })" />
               </template>
@@ -90,7 +90,7 @@
         <span v-for="period in undatedPeriods" :key="`p:${period.id}`" class="period-grid__undated-item">
           <Button variant="tertiary" size="xs" type="button" :disabled="loading" @click="selectPeriod(period)">{{ period.label.fr }}</Button>
           <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
-            :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading"
+            :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading" :comparison="comparison" @compare="emit('story-compare', $event)"
             @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: period.id })" />
         </span>
       </div>
@@ -132,7 +132,9 @@
           @retry-suggestions="retryEventSuggestions"
           @click="selectEvent(event)"
           @active-change="(isActive: boolean) => setActiveEvent(event.id, isActive)"
+          :comparison="comparison"
           @story-select="(id: string) => emit('story-select', id, { type: 'event', id: event.id })"
+          @story-compare="(id: string) => emit('story-compare', id)"
         />
       </div>
     </div>
@@ -170,6 +172,7 @@ import EventCard from './EventCard.vue';
 import AssociatedStoriesBadge from './AssociatedStoriesBadge.vue';
 import { useTimelineAssociatedStories } from '@/composables/useTimelineAssociatedStories';
 import type { LinkedStoryPeriod } from '@/lib/linkedStoryPeriods';
+import type { StoryComparisonControl } from '@/lib/timelineComparison';
 
 const props = withDefaults(defineProps<{
   periods: ListPeriod[];
@@ -210,6 +213,8 @@ const props = withDefaults(defineProps<{
   periodTooltips?: boolean;
   /** Home shares its cached frise read with the cards. Standalone grids can load their own metadata. */
   loadStoryDetails?: (id: string, signal: AbortSignal) => Promise<Story>;
+  /** Ajout d’une frise associée sous celle-ci ; absent, les liens restent en simple ouverture. */
+  comparison?: StoryComparisonControl;
 }>(), { compact: false, outsideFrame: false, naturalHeight: false, minimized: false, periodTooltips: false, linkedPeriods: () => [], childPeriods: () => [], childLinkedPeriods: () => [], showChildren: false });
 
 const emit = defineEmits<{
@@ -218,6 +223,7 @@ const emit = defineEmits<{
   (e: 'go-back'): void;
   (e: 'navigate-period', direction: 'previous' | 'next'): void;
   (e: 'story-select', storyId: string, anchor?: StoryAnchor): void;
+  (e: 'story-compare', storyId: string): void;
 }>();
 
 const { updateFromPeriods, getPeriodLayoutStyle, getEventLayoutStyle, getPeriodContinuation, startYears, totalDuration } = useTimelineScaling();

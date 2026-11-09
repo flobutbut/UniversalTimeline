@@ -25,7 +25,7 @@ const detail = (id: string, childStories: ChildStorySummary[] = []): Story => ({
 const gridProps = { periods: [leaf, { ...leaf, id: 'other' }], events: [], currentStoryId: 'one', currentPeriod: root, parentPeriod: null, loading: false };
 let view: ReturnType<typeof mount>;
 const body = () => new DOMWrapper(document.body);
-const badge = () => view.get('.associated-stories__badge');
+const badge = () => view.get('.associated-stories__badge:not(.associated-stories__badge--title)');
 const settle = async () => { await vi.advanceTimersByTimeAsync(0); await flushPromises(); };
 function deferred<T>() { let resolve!: (value: T) => void; const promise = new Promise<T>(yes => { resolve = yes; }); return { promise, resolve }; }
 beforeEach(() => {
