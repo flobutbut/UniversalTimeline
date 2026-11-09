@@ -39,7 +39,7 @@ beforeEach(() => {
   vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (this: HTMLElement) {
     if (!this.matches('.card-content')) return 0;
     const actions = this.closest('.period-card')?.querySelector('.period-card__actions');
-    return Math.max(0, cardWidth - (actions?.classList.contains('period-card__actions--hidden') ? 0 : badgeWidth) - drillWidth);
+    return Math.max(0, cardWidth - (actions?.classList.contains('period-card__actions--hidden') ? 0 : badgeWidth) - (this.parentElement?.querySelector('.period-card__drill--hidden') ? 0 : drillWidth));
   });
   vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
     return this.classList.contains('period-row') ? new DOMRect(0, 100, rowWidth, 56)
@@ -62,6 +62,7 @@ it('reserves the badge and drill control width, then reveals the badge at the ex
   await vi.advanceTimersByTimeAsync(0); await flushPromises();
   for (const callback of observers) callback(); await settled();
   expect(card().get('.period-card__actions').classes()).toContain('period-card__actions--hidden');
+  expect(card().get('.period-card__drill').classes()).toContain('period-card__drill--hidden');
   await card().trigger('mouseenter'); await settled();
   expect(pct('first', '--period-width')).toBeCloseTo(47);
   const boundary = pct('first', '--period-left') + pct('first', '--period-width');
@@ -70,6 +71,7 @@ it('reserves the badge and drill control width, then reveals the badge at the ex
   cardWidth = 470;
   for (const callback of observers) callback(); await settled();
   expect(card().get('.period-card__actions').classes()).not.toContain('period-card__actions--hidden');
+  expect(card().get('.period-card__drill').classes()).not.toContain('period-card__drill--hidden');
   expect(card().get('.associated-stories__badge').text()).toBe('1 frise associée');
   await card().get('.associated-stories__badge').trigger('click'); await settled();
   expect(document.querySelector('[role="dialog"]')?.textContent).toContain('Autre frise');
