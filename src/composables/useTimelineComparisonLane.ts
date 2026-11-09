@@ -1,12 +1,13 @@
-import { computed, ref, shallowRef, watch, type Ref } from 'vue';
+import { computed, onScopeDispose, ref, shallowRef, watch, type Ref } from 'vue';
 import type { useHomeNavigation } from '@/composables/useHomeNavigation';
 import { useDataStore } from '@/stores/useDataStore';
 import type { TimelineTarget } from '@/lib/timelineNavigation';
-import { eventsInFrame, followLevel, type ScaleFrame } from '@/lib/timelineComparison';
+import { eventsInFrame, followLevel, storyOutsideFrame, type ScaleFrame } from '@/lib/timelineComparison';
 import type { ListPeriod, Story, StoryAnchor } from '@/types/database';
 import { useTimelineEventFilter } from './useTimelineEventFilter';
 
-export type TimelineLaneKey = 'primary' | 'secondary';
+/** Identité stable du panneau, indépendante de sa place et de la frise qu’il visite. */
+export type TimelineLaneKey = string;
 type HomeNavigation = ReturnType<typeof useHomeNavigation>;
 
 /** Actions de la frise quand elle mène ; la vue peut y brancher sa mesure d’audience et son animation. */
@@ -36,20 +37,35 @@ export function useTimelineComparisonLane(options: {
   const storyId = ref<string | null>(null);
   const story = shallowRef<Story | null>(null);
   const leads = computed(() => leader.value === key);
+  const followingLoading = ref(false);
+  const followingError = ref<string | null>(null);
+  let request = 0;
+  onScopeDispose(() => { request++; }, true);
 
   // En tête, la frise peut changer d’elle-même (frise associée, parcours) : son identifiant suit.
   watch(nav.currentStoryId, id => { if (leads.value && storyId.value !== null) storyId.value = id; });
   // Le détail n’est lu que pour suivre : en tête, la navigation de la timeline a déjà le sien.
-  watch([storyId, leads], async ([id, leading]) => {
-    if (!id) { story.value = null; return; }
-    if (leading || story.value?.id === id) return;
+  async function loadFollowing() {
+    const token = ++request;
+    const id = storyId.value;
+    followingError.value = null;
+    followingLoading.value = false;
+    if (story.value?.id !== id) story.value = null;
+    if (!id || leads.value || story.value?.id === id) return;
+    followingLoading.value = true;
     try {
       const loaded = await dataStore.ensureStoryLoaded(id);
-      if (storyId.value === id) story.value = loaded;
-    } catch {
-      if (storyId.value === id) story.value = null;
+      if (request === token) story.value = loaded;
+    } catch (cause) {
+      if (request === token) followingError.value = cause instanceof Error ? cause.message : 'Impossible de charger cette frise.';
+    } finally {
+      if (request === token) followingLoading.value = false;
     }
-  }, { immediate: true });
+  }
+  watch([storyId, leads], loadFollowing, { immediate: true });
+  const loading = computed(() => leads.value ? nav.loading.value : followingLoading.value);
+  const error = computed(() => leads.value ? nav.error.value : followingError.value);
+  function retry() { if (leads.value) void nav.retryLoad(); else void loadFollowing(); }
 
   const followed = computed(() => !leads.value && story.value && frame.value
     ? followLevel(story.value, frame.value, dataStore.stories, Date.now()) : null);
@@ -57,9 +73,11 @@ export function useTimelineComparisonLane(options: {
 
   // La règle de départ se calcule sur toute la frise, pas sur le niveau affiché.
   const eventFilter = useTimelineEventFilter(() => {
-    if (!leads.value) return story.value;
     const current = nav.currentStory.value;
-    return current ? { id: current.id, tags: current.tags, events: nav.currentStoryAllEvents.value } : null;
+    // Le passage meneuse/suiveuse ne doit pas exposer temporairement une source nulle,
+    // qui effacerait le sujet choisi pendant la lecture du détail de suivi.
+    if (current?.id === storyId.value && (leads.value || !story.value)) return { id: current.id, tags: current.tags, events: nav.currentStoryAllEvents.value };
+    return story.value;
   });
 
   /** Mener depuis cette frise, à la position demandée. */
@@ -81,16 +99,18 @@ export function useTimelineComparisonLane(options: {
       parentPeriod: nav.parentStack.value[nav.parentStack.value.length - 1] ?? null, currentPeriod: nav.currentPeriod.value,
       overviewNavigation: !!nav.returnTitle.value, overviewPeriod: nav.contextBar.value,
       previousPeriod: nav.previousPeriod.value, nextPeriod: nav.nextPeriod.value,
-      storyBounds: nav.currentStoryBounds.value, scaleFrame: null, hideEndBound: false, currentStoryId: nav.currentStoryId.value,
+      storyBounds: nav.currentStoryBounds.value, scaleFrame: null, outsideFrame: false, hideEndBound: false, currentStoryId: nav.currentStoryId.value,
     };
     const level = followed.value;
     return {
       periods: level?.periods ?? [], childPeriods: [], childLinkedPeriods: [], linkedPeriods: level?.linked ?? [],
-      events: story.value && frame.value ? eventFilter.apply(eventsInFrame(story.value.events, frame.value, Date.now())) : [], loading: false,
+      events: story.value && frame.value ? eventFilter.apply(eventsInFrame(story.value.events, frame.value, Date.now())) : [], loading: followingLoading.value,
       parentPeriod: ancestors.value[ancestors.value.length - 2] ?? null, currentPeriod: ancestors.value[ancestors.value.length - 1] ?? null,
       overviewNavigation: false, overviewPeriod: null, previousPeriod: null, nextPeriod: null,
       // Sa vue est bornée par l’autre frise : la fin de sa période de contexte n’est pas celle de la vue.
-      storyBounds: frame.value, scaleFrame: frame.value, hideEndBound: true, currentStoryId: story.value?.id ?? storyId.value ?? '',
+      storyBounds: frame.value, scaleFrame: frame.value,
+      outsideFrame: !!(story.value && frame.value && storyOutsideFrame(story.value, frame.value, dataStore.stories, Date.now())),
+      hideEndBound: true, currentStoryId: story.value?.id ?? storyId.value ?? '',
     };
   });
 
@@ -125,5 +145,5 @@ export function useTimelineComparisonLane(options: {
     periodCrumb(index: number) { if (leads.value) void handlers.periodCrumb(index); else leadAt(ancestors.value[index]); },
   };
 
-  return { key, nav, storyId, story, leads, ancestors, grid, title, storyCrumbs, periodCrumbs, actions, lead, leadAt, eventFilter };
+  return { key, nav, storyId, story, leads, ancestors, grid, title, storyCrumbs, periodCrumbs, actions, lead, leadAt, eventFilter, loading, error, retry };
 }

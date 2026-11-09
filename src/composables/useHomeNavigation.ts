@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, unref, type Ref } from 'vue';
 import { comparableYearsBeforePresent } from '@temporal';
 import { storeToRefs } from 'pinia';
 import { useLatestRequest } from './useLatestRequest';
@@ -16,7 +16,7 @@ import { periodCoordinates, timelineBounds, type TimelineBounds } from '@/servic
 
 const ENTRY_STORY_ID = '1';
 
-export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void) {
+export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void) | Ref<((target: TimelineTarget) => void) | undefined>) {
   const dataStore = useDataStore();
   const { periods, events, stories } = storeToRefs(dataStore);
   const navigation = useLatestRequest();
@@ -449,7 +449,8 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
     loading.value = false;
     error.value = null;
     navigationChoices.value = [];
-    if (navigateTo) { pendingTarget=target;navigateTo(target); return; }
+    const routeNavigation = unref(navigateTo);
+    if (routeNavigation) { pendingTarget=target;routeNavigation(target); return; }
     // Les usages sans routeur conservent la même sémantique et le même chemin.
     if (!target.entry && target.storyId === currentStoryId.value && (target.periodId || target.view === 'overview') &&
       (!target.contextId || target.contextId === contextId.value) && (!target.periodId || currentStoryPeriods.value.some(p=>p.id===target.periodId))) {
@@ -486,6 +487,7 @@ export function useHomeNavigation(navigateTo?: (target: TimelineTarget) => void)
 
   return {
     loading, error, retryLoad, parentStack, currentPeriod, displayedPeriods, periodChildren, storyEvents, currentStoryPeriods, currentStory, currentStoryAllEvents,
+    getPosition: () => positionTarget(currentPeriod.value?.id),
     currentStoryId, breadcrumb, storyBreadcrumb, currentStoryBounds, previousPeriod, nextPeriod, navigationContexts, contextId, referencePeriodId, returnPath,
     contextBar, contextStories, contextStoryId, rootStories, headerStories, linkedPeriods, childLinkedPeriods, returnTitle, navigationChoices, chooseNavigationTarget, selectNavigationContext,
     loadInitialData, openStory, handlePeriodClick, handleEventClick, goBack, selectStory, navigateToBreadcrumb, navigateToStoryBreadcrumb, navigateAdjacentPeriod,

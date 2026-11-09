@@ -57,6 +57,16 @@ export const eventsInFrame = (events: ListEvent[], frame: ScaleFrame, now: numbe
   return bp !== null && bp <= frame.startYearsBP && bp >= frame.endYearsBP;
 });
 
+/** Une frise datée hors cadre n’est pas vide ; ne pas confondre avec des dates inconnues. */
+export function storyOutsideFrame(story: Story, frame: ScaleFrame, summaries: StorySummary[], now: number): boolean {
+  const periods = [...story.periods, ...linkedStoryPreviewPeriods(story, summaries)];
+  const datedPeriods = periods.filter(period => bounds(period, now) !== null);
+  const datedEvents = story.events.filter(event => comparableYearsBeforePresent(event.date, event.dateYearsBP, now) !== null);
+  return (datedPeriods.length > 0 || datedEvents.length > 0)
+    && !datedPeriods.some(period => crosses(period, frame, now))
+    && eventsInFrame(datedEvents, frame, now).length === 0;
+}
+
 /** Événements présents dans les deux frises : même fiche du catalogue, donc même date sur l’échelle partagée. */
 export function sharedEventIds(a: ListEvent[], b: ListEvent[]): string[] {
   const other = new Set(b.map(event => event.id));

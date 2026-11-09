@@ -1,12 +1,12 @@
 <template>
-  <div class="period-grid" :class="{ 'period-grid--compact': compact }" :aria-busy="loading || undefined">
+  <div ref="gridRoot" class="period-grid" :class="{ 'period-grid--compact': compact || minimized, 'period-grid--minimized': minimized, 'period-grid--axis-centered': !!axisViewport, 'period-grid--natural-height': naturalHeight || minimized || !!axisViewport }" :style="axisCenterStyle" :aria-busy="loading || undefined">
     <!-- Garder le niveau courant affiché pendant une navigation ou une recherche de stories. -->
     <FeedbackState v-if="loading && !currentPeriod && periods.length === 0 && events.length === 0" kind="loading" message="Chargement de la timeline…" />
     <FeedbackState v-else-if="error" kind="error" :message="error" />
-    <FeedbackState v-else-if="!loading && !currentPeriod && !overviewNavigation && periods.length === 0 && events.length === 0" message="Aucune période à afficher" />
+    <FeedbackState v-else-if="!loading && !currentPeriod && !overviewNavigation && periods.length === 0 && events.length === 0" :message="outsideFrame ? 'Hors de la période affichée' : 'Aucune période à afficher'" />
     <div v-else class="timeline-container">
       <div class="periods-container">
-        <nav v-if="!loading && (viewEndLabel || (showsNeighbors && (previousPeriod || nextPeriod)))" class="period-grid__navigation" aria-label="Périodes de même niveau">
+        <nav v-if="!minimized && !loading && (viewEndLabel || (showsNeighbors && (previousPeriod || nextPeriod)))" class="period-grid__navigation" aria-label="Périodes de même niveau">
           <Button v-if="showsNeighbors && previousPeriod" variant="ghost" size="sm" data-period-direction="previous"
             :title="`Période précédente : ${previousPeriod.label.fr || previousPeriod.label.en}`"
             @click="navigatePeriod('previous')">
@@ -23,13 +23,13 @@
           <span v-else-if="viewEndLabel" class="period-grid__end-label">{{ viewEndLabel }}</span>
         </nav>
         <div ref="periodSurfaceRef" class="period-grid__surface">
-          <slot v-if="!props.currentPeriod && (!overviewPeriod || overviewPeriodStyle)" name="overview-context" :style="overviewPeriodStyle" :continuation="overviewContinuation" />
-          <FeedbackState v-if="!loading && !currentPeriod && overviewNavigation && periods.length === 0 && events.length === 0" message="Aucune période à afficher" />
+          <slot v-if="!minimized && !props.currentPeriod && (!overviewPeriod || overviewPeriodStyle)" name="overview-context" :style="overviewPeriodStyle" :continuation="overviewContinuation" />
+          <FeedbackState v-if="!loading && !currentPeriod && overviewNavigation && periods.length === 0 && events.length === 0" :message="outsideFrame ? 'Hors de la période affichée' : 'Aucune période à afficher'" />
           <PeriodCard
-            v-if="props.currentPeriod"
+            v-if="props.currentPeriod && (!minimized || renderedPeriods.length === 0)"
             ref="parentBarRef"
             variant="parent"
-            :compact="compact"
+            :compact="compact || minimized"
             :period="props.currentPeriod"
             :style="parentBarStyle"
             :continues-before="parentContinuation.before"
@@ -56,8 +56,10 @@
               :key="period.id"
               :ref="(el: any) => setPeriodRef(el, period.id)"
               :period="period"
+              :continues-before="getPeriodContinuation(period).before"
+              :continues-after="getPeriodContinuation(period).after"
               :parent-label="childParentLabels.get(period.id)"
-              :compact="compact"
+              :compact="compact || minimized"
               :is-selected="false"
               class="timeline-card period-grid__period-position"
               :expanded="activePeriodId === period.id"
@@ -117,10 +119,12 @@
           :event="event"
           :undated="listEventYearsBP(event) === null"
           :is-selected="selectedEvent?.id === event.id"
-          :is-default-open="defaultOpenEventIds.has(event.id)"
+          :is-default-open="!minimized && defaultOpenEventIds.has(event.id)"
+          :minimized="minimized"
           :is-tag-active="isTagActive(event)"
           :card-style="getEventStyles(event)"
           :align="getEventAlign(event)"
+          :frame-width="eventsWidth"
           :other-story-count="otherStoryCount(event.id)"
           :story-suggestions="selectedEvent?.id === event.id ? eventStorySuggestions : []"
           :suggestions-loading="selectedEvent?.id === event.id && eventSuggestionsLoading"
@@ -149,6 +153,7 @@ import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import { periodCoordinates, type ScalablePeriod } from '@/services/TimelineScalingService';
 import { listEventYearsBP } from '@/lib/listEventTableHelpers';
 import { useTimelineScaling } from '@/composables/useTimelineScaling';
+import { useTimelineAxisCenter } from '@/composables/useTimelineAxisCenter';
 import { usePeriodFlip } from '@/composables/usePeriodFlip';
 import { useTimelinePeriodTooltip } from '@/composables/useTimelinePeriodTooltip';
 import { useTimelinePeriodExpansion } from '@/composables/useTimelinePeriodExpansion';
@@ -186,8 +191,16 @@ const props = withDefaults(defineProps<{
   storyBounds?: ScalablePeriod | null;
   /** Échelle imposée par une autre frise : positions rapportées à ce cadre, sans l'élargir aux périodes affichées. */
   scaleFrame?: ScalablePeriod | null;
+  /** La frise contient des éléments datés, tous hors du cadre commun. */
+  outsideFrame?: boolean;
   /** Périodes sur une seule ligne et titres d'événements figés sur une ligne. */
   compact?: boolean;
+  /** La pile d’exploration porte le scroll ; les autres usages gardent leur viewport interne. */
+  naturalHeight?: boolean;
+  /** Vue réduite : périodes, axe et points d’événement, sans cartes persistantes. */
+  minimized?: boolean;
+  /** Vue seule : cadrer la ligne de temps au milieu de ce viewport, indépendamment des cartes. */
+  axisViewport?: HTMLElement | null;
   /** Masque la borne « Fin : … » : une frise qui suit l’échelle d’une autre n’a pas de fin de vue à annoncer. */
   hideEndBound?: boolean;
   /** Agrandissement survolé dans une autre frise sur la même échelle (voir `getFocus`). */
@@ -197,7 +210,7 @@ const props = withDefaults(defineProps<{
   periodTooltips?: boolean;
   /** Home shares its cached frise read with the cards. Standalone grids can load their own metadata. */
   loadStoryDetails?: (id: string, signal: AbortSignal) => Promise<Story>;
-}>(), { compact: false, periodTooltips: false, linkedPeriods: () => [], childPeriods: () => [], childLinkedPeriods: () => [], showChildren: false });
+}>(), { compact: false, outsideFrame: false, naturalHeight: false, minimized: false, periodTooltips: false, linkedPeriods: () => [], childPeriods: () => [], childLinkedPeriods: () => [], showChildren: false });
 
 const emit = defineEmits<{
   (e: 'period-click', period: ListPeriod): void;
@@ -231,6 +244,7 @@ const otherStoryCount = (id: string) => associationsLoading.value || association
 
 /** Ref vers la barre parent (PeriodCard variant="parent"). */
 const parentBarRef = ref<any>(null);
+const gridRoot = ref<HTMLElement | null>(null);
 /** Map id → élément DOM des cartes de période. */
 const periodElMap = new Map<string, HTMLElement>();
 const periodRowRef = ref<HTMLElement | null>(null);
@@ -238,6 +252,11 @@ const periodSurfaceRef = ref<HTMLElement | null>(null);
 const timelineLineRef = ref<HTMLElement | null>(null);
 const undatedPeriodsRef = ref<HTMLElement | null>(null);
 const eventsSurfaceRef = ref<HTMLElement | null>(null);
+const axisCenterStyle = useTimelineAxisCenter({
+  viewport: () => props.axisViewport ?? null, grid: gridRoot, axis: timelineLineRef, ready: () => active.value && !props.loading,
+  resetOn: [() => props.currentStoryId, () => props.currentPeriod, () => props.periods, () => props.linkedPeriods,
+    () => props.childPeriods, () => props.childLinkedPeriods, () => props.showChildren, () => props.events, () => props.overviewPeriod],
+});
 defineExpose({
   getSlideLayers: () => [periodSurfaceRef.value, timelineLineRef.value, undatedPeriodsRef.value, eventsSurfaceRef.value]
     .filter((element): element is HTMLElement => element !== null),
@@ -273,7 +292,7 @@ const { minimumPct, laneHeight, wrapContent } = useTimelinePeriodExpansion(
   () => activePeriodId.value,
   id => periodElMap.get(id) ?? null,
   periodRowRef,
-  () => props.compact ? 34 : 56,
+  () => props.compact || props.minimized ? 34 : 56,
 );
 /** Les voisins n'existent que dans une période ouverte ou un retour vers une frise source. */
 const showsNeighbors = computed(() => !!props.currentPeriod || !!props.overviewNavigation);
@@ -361,7 +380,7 @@ const numLanes = computed(() =>
   laneMap.value.size === 0 ? 1 : Math.max(...laneMap.value.values()) + 1
 );
 
-const periodRowHeight = computed(() => numLanes.value * laneHeight.value);
+const periodRowHeight = computed(() => props.minimized && !laneMap.value.size ? 0 : numLanes.value * laneHeight.value);
 
 watch(
   [datedPeriodRows, () => props.currentPeriod, () => props.storyBounds, () => props.scaleFrame],
@@ -523,6 +542,7 @@ const selectEvent = (event: ListEvent) => {
 };
 
 watch([() => props.currentStoryId, () => props.currentPeriod?.id], () => { selectedEvent.value = null; resetActiveEvent(); }, { flush: 'sync' });
+watch(() => props.minimized, () => { selectedEvent.value = null; resetActiveEvent(); periodDetails.reset(); });
 watch(() => props.events, events => {
   if (selectedEvent.value && !events.some(event => event.id === selectedEvent.value!.id)) selectedEvent.value = null;
 });
@@ -623,6 +643,7 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
 
 
 .period-grid {
+  --timeline-caption-height: calc(var(--spacing-2xl) + var(--spacing-md) + var(--line-height-body) * 2 + var(--line-height-small) * 3);
   height: 100%;
   width: 100%;
   display: flex;
@@ -679,7 +700,8 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
 }
 
 .events-container {
-  /* Keep half the visible container below the axis, so scrolling can bring it to the centre. */
+  /* Le viewport autonome réserve une demi-hauteur sous l’axe.
+     La variante de l’exploration réserve uniquement la hauteur des légendes. */
   flex: 0 0 auto;
   min-height: 50cqh;
   position: relative;
@@ -687,6 +709,30 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
   z-index: var(--z-index-timeline-item);
   width: 100%;
 }
+
+/* La hauteur naturelle est une variante explicite de l’exploration ; ne pas
+   changer le défilement des autres usages de cette grille partagée. */
+.period-grid--natural-height { height: auto; overflow: visible; container-type: normal; background: var(--timeline-panel-background, var(--color-background-default)); }
+.period-grid--natural-height .period-row { overflow-clip-margin: var(--spacing-md); }
+.period-grid--natural-height .timeline-container { min-height: 0; }
+.period-grid--natural-height .events-container { min-height: var(--timeline-caption-height); }
+
+/* Élever le conteneur, pas seulement sa carte : le détail doit passer au-dessus
+   des événements et périodes des frises suivantes sans quitter son ancrage.
+   Rester dans la couche timeline, sous les menus et les modales de l’application. */
+.events-container:has(.event-card.is-selected) { z-index: calc(var(--z-index-timeline-item) + var(--z-index-local-bump)); }
+.events-container:has(.event-card:focus-within) { z-index: calc(var(--z-index-timeline-item) + var(--z-index-local-bump) * 2); }
+.events-container:has(.event-card:hover) { z-index: calc(var(--z-index-timeline-item) + var(--z-index-local-bump) * 3); }
+
+/* La ligne, et non le centre des blocs, fixe le cadrage de la vue seule. */
+.period-grid--axis-centered .periods-container { flex: 0 0 auto; min-height: var(--timeline-before-axis, 0px); }
+.period-grid--axis-centered .events-container { min-height: max(var(--timeline-caption-height), var(--timeline-after-axis, 0px)); }
+
+/* La vue réduite conserve la même projection et les mêmes cibles interactives. */
+.period-grid--minimized { padding-block: var(--spacing-xs); }
+.period-grid--minimized .timeline-container { flex: 0 0 auto; min-height: 0; }
+.period-grid--minimized .periods-container { flex: 0 0 auto; }
+.period-grid--minimized .events-container { min-height: var(--spacing-sm); }
 
 /* ─── Cartes de période : entrée en fondu décalé ──────────────────────────── */
 

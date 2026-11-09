@@ -70,3 +70,21 @@ it('offers no select when the frise has a single subject', async () => {
   expect(subject()).toBeUndefined();
   expect(cards()).toHaveLength(12);
 });
+
+it('keeps each subject selection through leadership changes, collapse and reorder', async () => {
+  await router.push('/timeline?story=1&compare=2&compare=3'); await flushPromises();
+  const panel = (id: string) => view.get(`[data-story-id="${id}"]`);
+  const subjects = (id: string) => panel(id).findAllComponents(Select).find(select => select.classes('home-view__subject'))!;
+  subjects('1').vm.$emit('update:modelValue', 'Arts');
+  subjects('2').vm.$emit('update:modelValue', 'Conflits'); await flushPromises();
+  const selected = [subjects('1').props('modelValue'), subjects('2').props('modelValue')];
+  await panel('2').get('.home-view__story-breadcrumb button').trigger('click'); await flushPromises();
+  expect(panel('2').attributes('data-leading')).toBe('true');
+  expect([subjects('1').props('modelValue'), subjects('2').props('modelValue')]).toEqual(selected);
+  await view.get('[aria-label="Replier Courte"]').trigger('click'); await flushPromises();
+  await view.get('[aria-label="Monter Courte"]').trigger('click'); await flushPromises();
+  await view.get('[aria-label="Déplier Courte"]').trigger('click'); await flushPromises();
+  expect([subjects('1').props('modelValue'), subjects('2').props('modelValue')]).toEqual(selected);
+  expect(panel('1').findAll('.event-card')).toHaveLength(4);
+  expect(panel('2').findAll('.event-card')).toHaveLength(12);
+});
