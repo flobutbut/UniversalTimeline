@@ -3,6 +3,8 @@ import { matchesTags, primaryTag, tagLabel } from './tags';
 
 /** En dessous, une frise reste lisible : elle s'ouvre sur tous ses événements. */
 export const TIMELINE_FILTER_MIN_EVENTS = 16;
+/** Sujets retenus à l'ouverture d'une frise sans tag : un seul ferait disparaître le reste dès qu'un thème domine. */
+const UNTAGGED_STORY_SUBJECTS = 2;
 export const ESSENTIAL_EVENTS = '__essentiel';
 export const ALL_EVENTS = '__tous';
 
@@ -17,13 +19,13 @@ function primaryCounts(events: readonly ListEvent[]) {
   return [...counts.values()].sort((a, b) => b.count - a.count || a.tag.position - b.tag.position);
 }
 
-/** Sujets actifs à l'ouverture ; null : tout est affiché. Une frise sans tag part de son sujet le plus représenté. */
+/** Sujets actifs à l'ouverture ; null : tout est affiché. Une frise sans tag part de ses deux sujets les plus représentés. */
 export function defaultEventTagIds(story: FilterableStory): string[] | null {
   if (story.events.length < TIMELINE_FILTER_MIN_EVENTS) return null;
   const counts = primaryCounts(story.events);
   const own = story.tags?.map(tag => tag.id).filter(id => counts.some(({ tag }) => tag.id === id)) ?? [];
   if (own.length) return own;
-  return counts.length ? [counts[0].tag.id] : null;
+  return counts.length ? counts.slice(0, UNTAGGED_STORY_SUBJECTS).map(({ tag }) => tag.id) : null;
 }
 
 /** Un événement majeur reste visible, et une fiche pas encore classée n'est jamais masquée pour autant. */
