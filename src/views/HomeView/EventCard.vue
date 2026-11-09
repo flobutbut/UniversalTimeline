@@ -6,6 +6,7 @@
       'is-default-open': isDefaultOpen && !undated,
       'event-card--undated': undated,
       'is-tag-active': isTagActive,
+      'event-card--minimized': minimized,
       'align-start': align === 'start',
       'align-end': align === 'end',
     }"
@@ -18,10 +19,10 @@
     <button :class="undated ? 'event-undated-trigger' : 'event-dot'" type="button" :aria-label="`Afficher l’événement ${displayLabel}`" :aria-pressed="isSelected" @click.stop="$emit('click', $event)">{{ undated ? displayLabel : '' }}</button>
 
     <!-- Ligne toujours ancrée sur le dot, indépendante du décalage du tooltip -->
-    <div class="event-vertical-line"></div>
+    <div v-show="!minimized" class="event-vertical-line"></div>
 
     <!-- Bulle d'info décalée selon l'alignement -->
-    <div class="event-info-box" @click.stop="$emit('click', $event)">
+    <div class="event-info-box" :class="{ 'event-info-box--bounded': frameWidth && !undated }" :style="tooltipBounds" @click.stop="$emit('click', $event)">
       <button type="button" class="event-label" :aria-label="`${isSelected ? 'Libérer' : 'Figer'} l’infobulle de ${displayLabel}`" :aria-pressed="isSelected">{{ displayLabel }}</button>
       <div class="event-date">{{ displayDate }}</div>
       <div v-if="otherStoryCount" class="event-meta event-story-count">{{ otherStoryCount }} {{ otherStoryCount > 1 ? 'autres frises associées' : 'autre frise associée' }}</div>
@@ -62,6 +63,9 @@ const props = withDefaults(
     isTagActive: boolean;
     align?: 'start' | 'center' | 'end';
     undated?: boolean;
+    minimized?: boolean;
+    /** Largeur mesurée de l’axe, pour garder le détail dans la frise aux petits écrans. */
+    frameWidth?: number;
     cardStyle: {
       width: string;
       left: string;
@@ -87,6 +91,18 @@ const hovered = ref(false);
 const focused = ref(false);
 function setHovered(value: boolean) { hovered.value = value; emit('active-change', hovered.value || focused.value); }
 function setFocused(value: boolean) { focused.value = value; emit('active-change', hovered.value || focused.value); }
+
+// Les limites sont relatives au point : la carte reste dans son composant et son
+// pont de survol suit le même ancrage, même lorsque son texte s’élargit.
+const tooltipBounds = computed(() => {
+  if (!props.frameWidth || props.undated) return;
+  const x = parseFloat(props.cardStyle.left) / 100 * props.frameWidth;
+  return {
+    '--event-tooltip-left-limit': `${-6 - x}px`,
+    '--event-tooltip-right-limit': `${props.frameWidth + 6 - x}px`,
+    '--event-tooltip-frame-width': `${props.frameWidth + 12}px`,
+  };
+});
 
 const displayLabel = computed(() => {
   const raw = props.event.label as unknown;
@@ -205,6 +221,12 @@ const displayDate = computed(() => {
   z-index: var(--z-index-tooltip);
 }
 
+/* Un détail fermé ne doit pas agrandir la pile, surtout dans une frise réduite.
+   L'ouverture conserve le même élément et le pont de survol point → détail. */
+.event-card:not(.event-card--undated, .is-default-open, .is-selected, :hover, :focus-within) .event-info-box {
+  display: none;
+}
+
 .event-info-box {
   --event-tooltip-anchor: 50%;
   position: absolute;
@@ -233,12 +255,23 @@ const displayDate = computed(() => {
 
 .align-start .event-info-box {
   --event-tooltip-anchor: 6px;
+  --event-tooltip-preferred-shift: -6px;
   transform: translateX(-6px);
 }
 
 .align-end .event-info-box {
   --event-tooltip-anchor: calc(100% - 6px);
+  --event-tooltip-preferred-shift: calc(-100% + 6px);
   transform: translateX(calc(-100% + 6px));
+}
+
+/* Borner la carte enrichie sans changer la place des légendes au repos.
+   Le pont utilise exactement la même translation que la carte. */
+.event-card:is(:hover, :focus-within, .is-selected) .event-info-box--bounded {
+  --event-tooltip-shift: clamp(var(--event-tooltip-left-limit), var(--event-tooltip-preferred-shift, -50%), calc(var(--event-tooltip-right-limit) - 100%));
+  --event-tooltip-anchor: calc(-1 * var(--event-tooltip-shift));
+  transform: translateX(var(--event-tooltip-shift));
+  max-width: min(calc(var(--spacing-xs) * 60), var(--event-tooltip-frame-width));
 }
 
 .event-card:hover .event-vertical-line,

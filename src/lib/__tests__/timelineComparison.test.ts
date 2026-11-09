@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ListEvent, Period, Story } from '@/types/database';
-import { eventsInFrame, followLevel, sharedEventIds, type ScaleFrame } from '@/lib/timelineComparison';
+import { eventsInFrame, followLevel, sharedEventIds, storyOutsideFrame, type ScaleFrame } from '@/lib/timelineComparison';
 import { periodCoordinates } from '@/services/TimelineScalingService';
 
 const now = Date.UTC(2026, 10, 6);
@@ -40,5 +40,24 @@ describe('frise ajoutée qui suit l’échelle de la frise principale', () => {
 describe('événements communs', () => {
   it('relie seulement la même fiche présente dans les deux frises', () => {
     expect(sharedEventIds([event('declaration', '1776-07-04'), event('bastille', '1789-07-14')], usa.events)).toEqual(['declaration']);
+  });
+});
+
+
+describe('frise hors de la période affichée', () => {
+  it('distinguishes out-of-frame periods from empty and undated content', () => {
+    const window = frame('1700', '1800');
+    expect(storyOutsideFrame(story('outside', [period('future', '2100', '2200')]), window, [], now)).toBe(true);
+    expect(storyOutsideFrame(story('empty', []), window, [], now)).toBe(false);
+    expect(storyOutsideFrame(story('unknown', [period('unknown', 'unknown', 'unknown')], [event('undated', 'unknown')]), window, [], now)).toBe(false);
+    expect(storyOutsideFrame(usa, window, [], now)).toBe(false);
+  });
+
+  it('takes dated events into account even without periods and includes the frame boundaries', () => {
+    const window = frame('1700', '1800');
+    expect(storyOutsideFrame(story('outside', [], [event('past', '1600')]), window, [], now)).toBe(true);
+    for (const date of ['1700', '1776', '1800']) {
+      expect(storyOutsideFrame(story('inside', [], [event('event', date)]), window, [], now)).toBe(false);
+    }
   });
 });
