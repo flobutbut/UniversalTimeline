@@ -14,6 +14,7 @@
       <Tag label="Erreur" variant="error" />
     </div>
     <h2>FeedbackState</h2>
+    <FeedbackState kind="success" message="Votre retour est enregistré." />
     <FeedbackState kind="loading" message="Chargement du catalogue…" />
     <FeedbackState kind="error" :message="retryDone ? 'La nouvelle tentative a été déclenchée (démonstration).' : 'Le catalogue est momentanément indisponible.'" retryable @retry="retryDone = true" />
     <FeedbackState message="Aucune frise ne correspond aux filtres."><template #actions><Button variant="tertiary" size="sm" @click="showReset">Effacer les filtres</Button></template></FeedbackState>
@@ -41,7 +42,7 @@ const showReset = () => toast.show('Filtres effacés — démonstration', 'info'
 const tagVisible = ref(true);
 const retryDone = ref(false);
 const roles = ['body', 'compact', 'label', 'meta', 'micro', 'panel-title', 'action'];
-const iconNames = ['timeline', 'frises', 'sun', 'plus', 'search', 'filter', 'event', 'down', 'remove', 'chevron', 'close', 'account', 'tab-close', 'tag-close', 'list'] as const;
+const iconNames = ['timeline', 'frises', 'sun', 'plus', 'search', 'filter', 'event', 'down', 'remove', 'chevron', 'close', 'account', 'tab-close', 'tag-close', 'list', 'star', 'star-filled'] as const;
 </script>
 <style scoped>
 .patterns-demo { max-width: 960px; }

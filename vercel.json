@@ -1,6 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "services": {
     "app": {
       "root": ".",
@@ -14,15 +16,26 @@
           "src": "^/legal/(mentions-legales|confidentialite|cookies|conditions)/?$",
           "dest": "/__seo__/legal/$1.html"
         },
-        { "handle": "filesystem" },
-        { "src": "^/.*$", "dest": "/404.html", "status": 404 }
+        {
+          "handle": "filesystem"
+        },
+        {
+          "src": "^/.*$",
+          "dest": "/404.html",
+          "status": 404
+        }
       ]
     },
     "server": {
       "root": "server",
       "framework": "express",
       "entrypoint": "src/vercel.ts",
-      "buildCommand": "tsc --noEmit"
+      "buildCommand": "tsc --noEmit",
+      "functions": {
+        "src/vercel.ts": {
+          "includeFiles": "{package.json,certs/prod-ca-2021.crt}"
+        }
+      }
     }
   },
   "rewrites": [
@@ -34,15 +47,21 @@
     },
     {
       "source": "/timeline",
-      "destination": { "service": "server" }
+      "destination": {
+        "service": "server"
+      }
     },
     {
       "source": "/timeline/",
-      "destination": { "service": "server" }
+      "destination": {
+        "service": "server"
+      }
     },
     {
       "source": "/sitemap.xml",
-      "destination": { "service": "server" }
+      "destination": {
+        "service": "server"
+      }
     },
     {
       "source": "/(.*)",

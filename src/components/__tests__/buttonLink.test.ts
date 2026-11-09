@@ -31,3 +31,10 @@ it('falls back to an ordinary link outside a router', () => {
   const view = mount(Button, { props: { to: { path: '/timeline', query: { story: '14' } } }, slots: { default: 'Voir' } });
   expect(view.get('a').attributes('href')).toBe('/timeline?story=14');
 });
+
+it('keeps mailto destinations as native links even inside the router', async () => {
+  const r = router(); await r.push('/'); await r.isReady();
+  const to = 'mailto:user%40example.test?subject=Votre%20retour';
+  const view = mount(Button, { props: { to }, slots: { default: 'Répondre' }, global: { plugins: [r] } });
+  expect(view.get('a').attributes('href')).toBe(to);
+});

@@ -32,6 +32,11 @@ it('exposes only the reviewed Supabase migrations and explicit ownership operati
     '20261104234615_wikidata_fact_sources.sql',
     '20261106100000_wikipedia_titles.sql',
     '20261108120000_taxonomy_tags.sql',
+    '20261109220108_user_feedback.sql',
+    '20261109221920_feedback_email_notifications.sql',
+    '20261109222916_feedback_list_filters.sql',
+    '20261109223738_feedback_delete.sql',
+    '20261109230646_feedback_feature_switch.sql',
   ]);
   expect(readdirSync(root + 'database/operations').sort()).toEqual(['assign_admin_role.sql', 'assign_legacy_stories.sql']);
   expect(readdirSync(root + 'database').filter(name => /\.(sh|sql)$/.test(name))).toEqual([]);

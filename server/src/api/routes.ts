@@ -1,4 +1,8 @@
 import express from 'express';
+import { createHmac, randomBytes } from 'node:crypto';
+import { parseFeedback, parseFeedbackEmail, parseFeedbackStatus, parseFeedbackFilters } from './feedbackInput.js';
+import * as feedback from '../services/feedbackService.js';
+import { feedbackNotificationSettings, setFeedbackNotifications, deliverFeedbackNotifications } from '../services/feedbackNotifications.js';
 import { endpoint } from './handler.js';
 import { parseWriteCategories } from './entityCategories.js';
 import {
@@ -20,6 +24,24 @@ import { parseGeneratedStory, parseGeneratedStoryLookup } from './wikidataGenera
 import { createGeneratedStory, findExistingGeneratedStories } from '../services/wikidataGeneration.js';
 
 const router = express.Router();
+// A rotating keyed fingerprint limits bursts without retaining the visitor’s IP address.
+const feedbackSalt = randomBytes(32);
+router.get('/feedback/settings', endpoint('Lecture des paramètres impossible.', async (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(await feedback.feedbackSettings());
+}));
+router.post('/feedback', endpoint('Impossible d’envoyer votre retour.', async (req, res) => {
+  // Vercel overwrites X-Forwarded-For. Elsewhere use only the direct peer, never a client-supplied header.
+  const peer = (process.env.VERCEL === '1' ? req.get('x-forwarded-for')?.split(',')[0]?.trim() : undefined)
+    || req.ip || req.socket?.remoteAddress || 'unknown';
+  const fingerprint = createHmac('sha256', feedbackSalt).update(`${new Date().toISOString().slice(0, 10)}:${peer}`).digest('hex');
+  res.status(201).json(await feedback.submitFeedback(parseFeedback(req.body), fingerprint));
+}));
+router.put('/feedback/:id/email', endpoint('Impossible d’enregistrer votre adresse e-mail.', async (req, res) => {
+  const { token, email } = parseFeedbackEmail(req.body);
+  await feedback.addFeedbackEmail(parseUserId(req.params.id), token, email);
+  res.status(204).send();
+}));
 router.get('/seo/stories', endpoint('Le catalogue public est indisponible.', async (_req, res) => {
   res.set('Cache-Control', 'no-store');
   res.set('X-Robots-Tag', 'noindex');
@@ -333,6 +355,34 @@ const isAdmin = (res: Response) => {
 };
 router.get('/admin/dashboard', endpoint('Lecture du tableau de bord impossible', async (_req, res) => {
   if (isAdmin(res)) res.json(await admin.dashboard());
+}));
+router.get('/admin/feedback', endpoint('Lecture des retours impossible.', async (req, res) => {
+  if (!isAdmin(res)) return;
+  const offset = req.query.offset ?? '0';
+  if (typeof offset !== 'string' || !/^\d{1,7}$/.test(offset)) throw new InputValidationError('offset', 'Page invalide.');
+  const filters = parseFeedbackFilters(req.query);
+  await deliverFeedbackNotifications();
+  res.json(await feedback.listFeedback(Number(offset), filters));
+}));
+router.get('/admin/feedback/notifications', endpoint('Lecture des notifications impossible.', async (_req, res) => {
+  if (isAdmin(res)) res.json(await feedbackNotificationSettings());
+}));
+router.put('/admin/feedback/settings', endpoint('Enregistrement des paramètres impossible.', async (req, res) => {
+  if (isAdmin(res)) res.json(await feedback.feedbackSettings(parseFlag(req.body, 'enabled')));
+}));
+router.put('/admin/feedback/notifications', endpoint('Enregistrement des notifications impossible.', async (req, res) => {
+  if (!isAdmin(res)) return;
+  res.json(await setFeedbackNotifications(parseFlag(req.body, 'enabled')));
+}));
+router.put('/admin/feedback/:id/status', endpoint('Changement de statut impossible.', async (req, res) => {
+  if (!isAdmin(res)) return;
+  await feedback.setFeedbackStatus(parseUserId(req.params.id), parseFeedbackStatus(req.body));
+  res.status(204).send();
+}));
+router.delete('/admin/feedback/:id', endpoint('Suppression du retour impossible.', async (req, res) => {
+  if (!isAdmin(res)) return;
+  await feedback.deleteFeedback(parseUserId(req.params.id));
+  res.status(204).send();
 }));
 router.get('/admin/relations', endpoint('Lecture des relations impossible', async (_req, res) => {
   if (isAdmin(res)) res.json(await admin.relations());

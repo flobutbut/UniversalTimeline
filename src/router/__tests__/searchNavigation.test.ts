@@ -16,6 +16,7 @@ import EditModal from '@/views/DatabaseView/EditModal.vue';
 import { databaseRecordLocation, searchHitLocation } from '@/router/searchTarget';
 import type { Period, ListEvent } from '@/types/database';
 
+vi.mock('@/services/FeedbackApiService', () => ({ feedbackApi: { settings: vi.fn().mockResolvedValue({ enabled: false }) } }));
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() } }));
 vi.mock('@/views/HomeView.vue', () => ({ default: { name: 'HomeView', template: '<div>Timeline publique</div>' } }));
 vi.mock('@/views/LoginView.vue', () => ({ default: { template: '<div>Connexion requise</div>' } }));

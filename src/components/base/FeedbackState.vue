@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import Button from './Button.vue';
 import LoadingSpinner from './LoadingSpinner.vue';
-withDefaults(defineProps<{ kind?: 'loading' | 'error' | 'empty'; layout?: 'inline' | 'panel'; title?: string; message?: string | null; retryable?: boolean; retryLabel?: string }>(), { kind: 'empty', layout: 'panel', retryLabel: 'Réessayer' });
+withDefaults(defineProps<{ kind?: 'loading' | 'error' | 'empty' | 'success'; layout?: 'inline' | 'panel'; title?: string; message?: string | null; retryable?: boolean; retryLabel?: string }>(), { kind: 'empty', layout: 'panel', retryLabel: 'Réessayer' });
 defineEmits<{ retry: [] }>();
 </script>
 <style scoped>
@@ -27,6 +27,8 @@ defineEmits<{ retry: [] }>();
 .feedback-state__title { margin: 0 0 var(--spacing-sm); color: var(--color-text-heading); font: var(--type-panel-title); }
 .feedback-state__icon { display: flex; align-items: center; justify-content: center; padding: var(--spacing-lg); border-radius: var(--radius-lg); background: var(--color-surface-subtle); color: var(--color-text-link); }
 .feedback-state--error { color: var(--color-status-error-foreground); }
+.feedback-state--success { min-height: 0; padding: var(--spacing-lg); gap: var(--spacing-sm); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-status-success-background); color: var(--color-status-success-foreground); font: var(--type-label); }
+.feedback-state--success .feedback-state__icon { padding: 0; background: transparent; color: inherit; }
 .feedback-state__actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); align-items: center; }
 .feedback-state--panel .feedback-state__actions { justify-content: center; }
 </style>

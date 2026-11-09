@@ -53,3 +53,11 @@ export function withTransaction<T>(operation: (client: TransactionClient) => Pro
 export async function closePool() {
   await pool.end();
 }
+
+/** Internal mail delivery only. Never propagate a visitor's identity into this transaction. */
+export function withFeedbackDeliveryTransaction<T>(operation: (client: TransactionClient) => Promise<T>): Promise<T> {
+  return runInTransaction(pool, async client => {
+    await client.query('SET LOCAL ROLE service_role');
+    return operation(client);
+  });
+}

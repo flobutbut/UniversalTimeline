@@ -5,3 +5,7 @@ database/**
 .codex/**
 .env*
 **/.env*
+# Build locally for verification; Vercel must compile the service from its TypeScript entrypoint.
+dist/**
+server/dist/**
+**/*.tsbuildinfo

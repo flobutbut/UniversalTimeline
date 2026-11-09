@@ -15,8 +15,11 @@ try {
   throw error;
 }
 
-export default createApp({
+const app: express.Express = createApp({
   routes, healthcheck: testConnection, isStopping: () => false,
   frontendOrigin: process.env.FRONTEND_ORIGIN, access: configuredAccessMiddleware(),
   publicPages: createSeoPages(process.env.FRONTEND_ORIGIN ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : SITE_ORIGIN), process.env.VERCEL_ENV !== 'preview', createPublicSeoRead()),
 });
+import express from 'express';
+
+export default app;

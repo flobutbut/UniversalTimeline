@@ -15,6 +15,7 @@ import type { ListEvent, Period } from '@/types/database';
 import { storyFixture } from '@/testFixtures/story';
 import { apiClient } from '@/services/ApiClient';
 
+vi.mock('@/services/FeedbackApiService', () => ({ feedbackApi: { settings: vi.fn().mockResolvedValue({ enabled: false }) } }));
 vi.mock('@/components/ThemeToggle.vue', () => ({ default: { template: '<button>Thème</button>' } }));
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
 const period = (id: string, parentId: string | null = null): Period => ({ id, parentId, label: { fr: id, en: '' }, startDate: 'M65', endDate: 'NOW', startYearsBP: 65000000, endYearsBP: 0, categories: [], hasParent: !!parentId, hasChildren: !parentId, children: [], temporalLocation: '' });

@@ -3,7 +3,7 @@ import Button from '@/components/base/Button.vue';
 import { RouterView } from 'vue-router'
 import Header from '@/components/Header.vue'
 import UiFeedbackHost from '@/components/UiFeedbackHost.vue'
-import CookieConsent from '@/components/CookieConsent.vue'
+import FeedbackWidget from '@/components/FeedbackWidget.vue'
 import { useAppNavigation } from '@/composables/useAppNavigation'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { computed, watch } from 'vue'
@@ -44,7 +44,7 @@ watch([() => auth.identityVersion, allowed], () => {
       </RouterView>
     </main>
     <UiFeedbackHost />
-    <CookieConsent />
+    <FeedbackWidget />
   </div>
 </template>
 
