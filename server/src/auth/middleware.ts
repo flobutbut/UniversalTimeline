@@ -23,7 +23,9 @@ export function createAccessMiddleware(verify: VerifyToken): RequestHandler {
         if (isSuspended(user)) { res.status(403).json({ error: 'Ce compte est suspendu.' }); return; }
         principal = { userId: user.id, isAdmin: user.app_metadata?.role === 'admin', isEditor: user.app_metadata?.role === 'editor' };
       }
-      if (!principal.userId && !['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+      const publicFeedback = (req.method === 'POST' && req.path === '/feedback')
+        || (req.method === 'PUT' && /^\/feedback\/[0-9a-f-]{36}\/email$/i.test(req.path));
+      if (!principal.userId && !publicFeedback && !['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
         res.status(401).json({ error: 'Connexion requise.' }); return;
       }
       res.locals.principal = principal;

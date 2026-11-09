@@ -51,6 +51,18 @@ Le lot `data/20261109_tags_lot4_frises.sql` pose 54 liens de tags sur 35 frises 
 
 Les fichiers `data/20261102_catalogue_*` contiennent les textes sourcés et le lot transactionnel de correction de l’audit du 2 novembre 2026, déjà appliqué au projet actif. Le [compte rendu](../Documentation/PERFORMANCE-ET-CATALOGUE.md) décrit les décisions et la validation. Ces corrections ciblent les anciennes fiches recensées et ne doivent pas être exécutées sur une nouvelle base vide. Le retour arrière refuse les contenus ou relations modifiés depuis l’application.
 
+## Retours utilisateurs — 9 novembre 2026
+
+La migration additive `20261109220108_user_feedback.sql` ajoute le stockage privé des feedbacks et les routines de dépôt, suivi par e-mail et traitement administrateur. Appliquée au projet actif le 9 novembre 2026, vérifiée par lecture des droits et par des tests PostgreSQL locaux. La baseline inclut ce schéma pour les installations vides. Voir [Retours utilisateurs](../Documentation/FEEDBACK-UTILISATEURS.md).
+
+La migration `20261109221920_feedback_email_notifications.sql`, appliquée le même jour et intégrée à la baseline, mémorise les abonnements des administrateurs et les envois en attente. Le destinataire provient de l’adresse confirmée du compte Auth. Le SMTP de production est configuré dans Vercel et validé par un envoi reçu chez Hostinger ; les paramètres locaux restent indépendants.
+
+La migration `20261109222916_feedback_list_filters.sql`, également appliquée et intégrée à la baseline, ajoute les filtres combinables d’objet et de statut avant pagination, avec un compteur des résultats correspondants.
+
+La migration `20261109223738_feedback_delete.sql` ajoute la suppression ciblée d’un retour et de ses notifications en attente, réservée aux administrateurs. Appliquée et intégrée à la baseline le même jour.
+
+La migration `20261109230646_feedback_feature_switch.sql`, appliquée le 10 novembre 2026 et intégrée à la baseline, ajoute le switch global « Activer les avis ». Elle conserve les retours existants, bloque les écritures publiques à la désactivation et annule les notifications en attente.
+
 ## Archives
 
 Les anciens initialiseurs Docker, imports, scripts de sauvegarde, migrations Prisma/anciens modèles et dumps sont conservés comme textes dans [archive/](archive/README.md), avec leur chemin d’origine et leur SHA-256. Certains anciens scripts détruisent des données ou remplacent les IDs ; ils sont incompatibles avec le schéma courant. La routine historique `maintain_period_relations()` a été retirée avec le classement global le 2 novembre 2026. Les fichiers d’archive restent inchangés.

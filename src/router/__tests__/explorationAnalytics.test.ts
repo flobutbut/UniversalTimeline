@@ -15,6 +15,7 @@ import type { ListEvent, Period } from '@/types/database';
 import { storyFixture } from '@/testFixtures/story';
 
 const analytics = vi.hoisted(() => ({ track: vi.fn(), mode: 'consented' as 'exempt' | 'consented' }));
+vi.mock('@/services/FeedbackApiService', () => ({ feedbackApi: { settings: vi.fn().mockResolvedValue({ enabled: false }) } }));
 vi.mock('@/lib/analytics', async original => ({ ...(await original<typeof import('@/lib/analytics')>()), track: analytics.track, measurementMode: () => analytics.mode }));
 vi.mock('@/components/ThemeToggle.vue', () => ({ default: { template: '<button>Thème</button>' } }));
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));

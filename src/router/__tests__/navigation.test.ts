@@ -14,6 +14,7 @@ import HomeView from '@/views/HomeView.vue';
 import { storyFixture } from '@/testFixtures/story';
 
 const counts = vi.hoisted(() => ({ eventsImports: 0, databaseImports: 0, graphImports: 0, designImports: 0, eventsUnmounted: 0 }));
+vi.mock('@/services/FeedbackApiService', () => ({ feedbackApi: { settings: vi.fn().mockResolvedValue({ enabled: false }) } }));
 vi.mock('@/components/GlobalSearch.vue', () => ({ default: { template: '<input aria-label="Recherche globale" />' } }));
 vi.mock('@/components/ThemeToggle.vue', () => ({ default: { template: '<button>Thème</button>' } }));
 vi.mock('@/services/ApiClient', () => ({ apiClient: { get: vi.fn() } }));

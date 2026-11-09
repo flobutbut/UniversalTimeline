@@ -2,6 +2,7 @@ import type { ErrorRequestHandler, Response } from 'express';
 import { InvalidCategoriesError } from './entityCategories.js';
 import { NotFoundError, PeriodHierarchyError, PeriodDeletionError, StoryAssociationError, ProfileError, AdminError, CatalogueConversionError, WikidataGenerationConflictError } from '../domain/errors.js';
 import { InputValidationError } from './inputValidation.js';
+import { FeedbackError } from '../domain/errors.js';
 
 interface ErrorMessages { conflict?: string; busy?: string; foreignKey?: string }
 const record = (error: unknown): Record<string, unknown> => error !== null && typeof error === 'object' ? error as Record<string, unknown> : {};
@@ -17,6 +18,7 @@ export function logServerError(event: string, error: unknown, operation?: string
 export function publicApiError(error: unknown, fallback: string, messages: ErrorMessages = {}): { status: number; message: string } {
   if (error instanceof WikidataGenerationConflictError) return { status: 409, message: error.message };
   if (error instanceof NotFoundError) return { status: 404, message: error.message };
+  if (error instanceof FeedbackError) return { status: error.status, message: error.message };
   if (error instanceof InputValidationError) return { status: 400, message: error.message };
   if (error instanceof InvalidCategoriesError) return { status: 400, message: error.message };
   if (error instanceof PeriodHierarchyError || error instanceof PeriodDeletionError || error instanceof StoryAssociationError || error instanceof ProfileError || error instanceof AdminError || error instanceof CatalogueConversionError) return { status: error.status, message: error.message };
@@ -24,6 +26,7 @@ export function publicApiError(error: unknown, fallback: string, messages: Error
   if (fields.type === 'entity.parse.failed') return { status: 400, message: 'Le corps de la requête doit être un JSON valide.' };
   if (fields.type === 'entity.too.large') return { status: 413, message: 'Le contenu de la requête est trop volumineux.' };
   switch (fields.code) {
+    case 'UT503': return { status: 503, message: 'Les retours utilisateurs sont désactivés.' };
     case '42501': return { status: 403, message: 'Vous n’avez pas accès à cette opération.' };
     case '23505': return { status: 409, message: messages.conflict ?? 'Cet identifiant est déjà utilisé.' };
     case '23514': return { status: 409, message: 'Ce classement est invalide ou créerait un cycle dans la frise.' };

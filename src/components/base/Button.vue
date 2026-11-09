@@ -1,8 +1,8 @@
 <template>
   <!-- Avec `to`, une vraie navigation (clic milieu, ⌘-clic, annoncée comme lien) ; sinon un bouton. -->
   <component
-    :is="isLink ? (router ? RouterLink : 'a') : 'button'"
-    v-bind="isLink ? (router ? { to } : { href: plainHref }) : { disabled, type, 'aria-pressed': pressed === undefined ? undefined : pressed }"
+    :is="isLink ? (isRouterLink ? RouterLink : 'a') : 'button'"
+    v-bind="isLink ? (isRouterLink ? { to } : { href: plainHref }) : { disabled, type, 'aria-pressed': pressed === undefined ? undefined : pressed }"
     :class="[
       'base-button',
       `base-button--${variant}`,
@@ -54,6 +54,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 const isLink = computed(() => props.to !== undefined && !props.disabled);
 const { router, plainHref } = useLinkDestination(() => props.to);
+const isRouterLink = computed(() => !!router && !(typeof props.to === 'string' && /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(props.to)));
 
 defineEmits<{
   (e: 'click', event: MouseEvent): void;

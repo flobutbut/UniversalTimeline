@@ -9,6 +9,7 @@ import { installAccessGuard } from '@/router/access';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { SearchApiService } from '@/services/SearchApiService';
 
+vi.mock('@/services/FeedbackApiService', () => ({ feedbackApi: { settings: vi.fn().mockResolvedValue({ enabled: false }) } }));
 vi.mock('@/components/ThemeToggle.vue', () => ({ default: { template: '<button>Thème</button>' } }));
 let view: ReturnType<typeof mount>, router: Router;
 const api = SearchApiService.getInstance();
