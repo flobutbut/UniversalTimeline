@@ -98,6 +98,23 @@ test('loads complete timeline snapshots and shared-content links under the calle
   assert.deepEqual(other.payload.relatedStories.map(s=>s.id),['3']);
   assert.equal((await call('get','/stories/:id',{}, {id:'2'},null)).statusCode,404);
 });
+test('the lightweight graph preserves navigation links and private isolation without fetching entity details', async () => {
+  await pool.query("INSERT INTO story_periods VALUES (1,'root'),(3,'root'); INSERT INTO story_events VALUES(1,'event'),(3,'event'); UPDATE stories SET parent_story_id=1 WHERE id=2");
+  for (const userId of [null,alice,bob]) {
+    const graph=await call('get','/stories/navigation',{}, {},userId);
+    assert.equal(graph.statusCode,200);
+    const readable=(await scoped(userId,c=>c.query('SELECT id FROM stories ORDER BY id'))).rows.map(r=>String(r.id));
+    assert.deepEqual(graph.payload.map(n=>n.id),readable);
+    for(const node of graph.payload) {
+      const full=(await call('get','/stories/:id',{}, {id:node.id},userId)).payload;
+      assert.deepEqual(node.relatedStories.map(r=>({id:r.id,periodIds:r.periodIds.sort(),eventIds:r.eventIds.sort()})).sort((a,b)=>a.id.localeCompare(b.id)),full.relatedStories.map(r=>({id:r.id,periodIds:r.periodIds.sort(),eventIds:r.eventIds.sort()})).sort((a,b)=>a.id.localeCompare(b.id)));
+      assert.deepEqual(node.childStories.map(c=>({id:c.id,atRoot:c.atRoot,anchors:c.anchors})),full.childStories.map(c=>({id:c.id,atRoot:c.atRoot,anchors:c.anchors})));
+      assert.ok(node.relatedStories.every(r=>readable.includes(r.id)));
+      assert.ok(node.childStories.every(r=>readable.includes(r.id)));
+      assert.ok(!JSON.stringify(node).includes('description'));
+    }
+  }
+});
 test('adds multiple sources and locations without replacing legacy entry points, then removes only the chosen location', async () => {
   await pool.query("INSERT INTO stories(title_fr,title_en,author,owner_user_id) VALUES ('Autre source','Other source','Alice',$1)", [alice]);
   await pool.query("INSERT INTO story_periods(story_id,period_id) VALUES (1,'root'),(4,'root'); INSERT INTO story_events VALUES (1,'event')");
@@ -204,4 +221,15 @@ test('a missing target period rolls back enrollment in the context', async () =>
   const response = await call('post','/stories/:contextId/presentations',{periodId:'root',targetStoryId:'3',operation:'add'},{contextId:'1'});
   assert.ok(response.statusCode >= 400);
   assert.equal((await pool.query("SELECT * FROM story_periods WHERE story_id=1 AND period_id='root'")).rowCount,0);
+});
+
+
+test('a successful edit is immediately visible to its owner and a visitor after COMMIT',async()=>{
+  const changed=await call('put','/stories/:id',{title:{fr:'Lecture immédiate'},categories:[]},{id:'1'});
+  assert.equal(changed.statusCode,200);
+  for(const userId of [alice,null]) {
+    const read=await call('get','/stories/:id',{}, {id:'1'},userId);
+    assert.equal(read.statusCode,200);
+    assert.equal(read.payload.title.fr,'Lecture immédiate');
+  }
 });

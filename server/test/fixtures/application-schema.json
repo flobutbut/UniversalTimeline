@@ -1378,8 +1378,30 @@
       "roles": [
         "authenticated"
       ],
-      "command": "ALL",
+      "command": "UPDATE",
       "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "event_categories",
+      "name": "write_delete_event_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": null
+    },
+    {
+      "table": "event_categories",
+      "name": "write_insert_event_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
       "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
     },
     {
@@ -1401,8 +1423,30 @@
       "roles": [
         "authenticated"
       ],
-      "command": "ALL",
+      "command": "UPDATE",
       "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "event_tags",
+      "name": "write_delete_event_tags",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))",
+      "check": null
+    },
+    {
+      "table": "event_tags",
+      "name": "write_insert_event_tags",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
       "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))"
     },
     {
@@ -1424,8 +1468,30 @@
       "roles": [
         "authenticated"
       ],
-      "command": "ALL",
+      "command": "UPDATE",
       "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "events",
+      "name": "write_delete_events",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": null
+    },
+    {
+      "table": "events",
+      "name": "write_insert_events",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
       "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
     },
     {
@@ -1447,8 +1513,30 @@
       "roles": [
         "authenticated"
       ],
-      "command": "ALL",
+      "command": "UPDATE",
       "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "period_categories",
+      "name": "write_delete_period_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": null
+    },
+    {
+      "table": "period_categories",
+      "name": "write_insert_period_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
       "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
     },
     {
@@ -1470,8 +1558,30 @@
       "roles": [
         "authenticated"
       ],
-      "command": "ALL",
+      "command": "UPDATE",
       "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "period_tags",
+      "name": "write_delete_period_tags",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))",
+      "check": null
+    },
+    {
+      "table": "period_tags",
+      "name": "write_insert_period_tags",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
       "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))"
     },
     {
@@ -1493,8 +1603,30 @@
       "roles": [
         "authenticated"
       ],
-      "command": "ALL",
+      "command": "UPDATE",
       "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+    },
+    {
+      "table": "periods",
+      "name": "write_delete_periods",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "check": null
+    },
+    {
+      "table": "periods",
+      "name": "write_insert_periods",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
       "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
     },
     {
@@ -1594,8 +1726,30 @@
       "roles": [
         "authenticated"
       ],
-      "command": "ALL",
+      "command": "UPDATE",
       "using": "access_private.can_edit_story(story_id)",
+      "check": "access_private.can_edit_story(story_id)"
+    },
+    {
+      "table": "story_anchors",
+      "name": "write_delete_story_anchors",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "access_private.can_edit_story(story_id)",
+      "check": null
+    },
+    {
+      "table": "story_anchors",
+      "name": "write_insert_story_anchors",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
       "check": "access_private.can_edit_story(story_id)"
     },
     {
@@ -1617,8 +1771,30 @@
       "roles": [
         "authenticated"
       ],
-      "command": "ALL",
+      "command": "UPDATE",
       "using": "access_private.can_edit_story(story_id)",
+      "check": "access_private.can_edit_story(story_id)"
+    },
+    {
+      "table": "story_categories",
+      "name": "write_delete_story_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "access_private.can_edit_story(story_id)",
+      "check": null
+    },
+    {
+      "table": "story_categories",
+      "name": "write_insert_story_categories",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
       "check": "access_private.can_edit_story(story_id)"
     },
     {
@@ -1674,8 +1850,30 @@
       "roles": [
         "authenticated"
       ],
-      "command": "ALL",
+      "command": "UPDATE",
       "using": "access_private.can_edit_story(story_id)",
+      "check": "access_private.can_edit_story(story_id)"
+    },
+    {
+      "table": "story_events",
+      "name": "write_delete_story_events",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "access_private.can_edit_story(story_id)",
+      "check": null
+    },
+    {
+      "table": "story_events",
+      "name": "write_insert_story_events",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
       "check": "access_private.can_edit_story(story_id)"
     },
     {
@@ -1731,8 +1929,30 @@
       "roles": [
         "authenticated"
       ],
-      "command": "ALL",
+      "command": "UPDATE",
       "using": "access_private.can_edit_story(story_id)",
+      "check": "access_private.can_edit_story(story_id)"
+    },
+    {
+      "table": "story_periods",
+      "name": "write_delete_story_periods",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "access_private.can_edit_story(story_id)",
+      "check": null
+    },
+    {
+      "table": "story_periods",
+      "name": "write_insert_story_periods",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
       "check": "access_private.can_edit_story(story_id)"
     },
     {
@@ -1754,8 +1974,30 @@
       "roles": [
         "authenticated"
       ],
-      "command": "ALL",
+      "command": "UPDATE",
       "using": "access_private.can_edit_story(story_id)",
+      "check": "access_private.can_edit_story(story_id)"
+    },
+    {
+      "table": "story_tags",
+      "name": "write_delete_story_tags",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "DELETE",
+      "using": "access_private.can_edit_story(story_id)",
+      "check": null
+    },
+    {
+      "table": "story_tags",
+      "name": "write_insert_story_tags",
+      "permissive": "PERMISSIVE",
+      "roles": [
+        "authenticated"
+      ],
+      "command": "INSERT",
+      "using": null,
       "check": "access_private.can_edit_story(story_id)"
     },
     {

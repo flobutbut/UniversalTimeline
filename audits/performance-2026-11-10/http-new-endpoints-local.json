@@ -1,0 +1,50 @@
+[
+  {
+    "path": "/api/stories?view=summary",
+    "sample": 1,
+    "status": 200,
+    "totalMs": 862,
+    "bytes": 48677,
+    "count": 50
+  },
+  {
+    "path": "/api/stories?view=summary",
+    "sample": 2,
+    "status": 200,
+    "totalMs": 209,
+    "bytes": 48677,
+    "count": 50
+  },
+  {
+    "path": "/api/stories?view=summary",
+    "sample": 3,
+    "status": 200,
+    "totalMs": 216,
+    "bytes": 48677,
+    "count": 50
+  },
+  {
+    "path": "/api/stories/navigation",
+    "sample": 1,
+    "status": 200,
+    "totalMs": 168,
+    "bytes": 276657,
+    "count": 50
+  },
+  {
+    "path": "/api/stories/navigation",
+    "sample": 2,
+    "status": 200,
+    "totalMs": 168,
+    "bytes": 276657,
+    "count": 50
+  },
+  {
+    "path": "/api/stories/navigation",
+    "sample": 3,
+    "status": 200,
+    "totalMs": 161,
+    "bytes": 276657,
+    "count": 50
+  }
+]

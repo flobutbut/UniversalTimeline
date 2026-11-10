@@ -13,15 +13,18 @@ import { changeEntryPoints, moveEntryPoint, changeEntryDisplay, type EntryLocati
 import { changePresentation, lockWritableStory, setRelationLockTimeout } from '../repositories/storyRelationsRepository.js';
 import { creatorAuthor, editorAuthor } from './storyAuthor.js';
 import { principalContext } from '../auth/context.js';
+import { readNavigationGraph } from '../repositories/storyNavigationRepository.js';
+import { buildNavigationSnapshots } from '../domain/storyNavigation.js';
 
 const db = { query };
+export async function listNavigationStories() { return buildNavigationSnapshots(await readNavigationGraph(db)); }
 export const listPublicSitemapStories = () => stories.listPublicSitemapStories(db);
 export async function getPublicStoryMetadata(id: string) {
   const row = await stories.findPublicStoryMetadata(db, id);
   if (!row) throw new NotFoundError('Frise non trouvée');
   return { id: String(row.id), title: row.title_fr || row.title_en || '', description: row.description_fr || row.description_en || '' };
 }
-export async function listStories() {
+export async function listStories(compact = false) {
   const rows = await stories.listStories(db);
   const candidates = [...new Map(rows.map(row => [String(row.id), row])).values()].flatMap(row => [
     ...(row.preview_periods ?? []).map(period => ({ ...period, story_id: row.id })),
@@ -34,7 +37,7 @@ export async function listStories() {
     author: row.author, is_public: row.is_public, owner_user_id: row.owner_user_id,
     parent_story_id: row.parent_story_id ?? null,
     created_at: row.created_at, updated_at: row.updated_at,
-    preview_periods: row.preview_periods ?? [], preview_events: row.preview_events ?? [],
+    ...(compact ? {} : { preview_periods: row.preview_periods ?? [], preview_events: row.preview_events ?? [] }),
     start_date: bounds.get(String(row.id))?.start_date ?? null, end_date: bounds.get(String(row.id))?.end_date ?? null,
   }));
 }

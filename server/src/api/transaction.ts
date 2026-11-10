@@ -1,4 +1,5 @@
 import type { PoolClient, QueryResult, QueryResultRow } from 'pg';
+import { measureTiming } from './metrics.js';
 
 export interface TransactionClient {
   query<Row extends QueryResultRow = QueryResultRow>(text: string, params?: unknown[]): Promise<QueryResult<Row>>;
@@ -12,16 +13,16 @@ export async function runInTransaction<T>(
   provider: ConnectionProvider,
   operation: (client: TransactionClient) => Promise<T>,
 ): Promise<T> {
-  const client = await provider.connect();
+  const client = await measureTiming('dbWaitMs', () => provider.connect());
   let discard = false;
   try {
-    await client.query('BEGIN');
+    await measureTiming('sqlMs', () => client.query("BEGIN; SET LOCAL statement_timeout = '15s'; SET LOCAL idle_in_transaction_session_timeout = '15s'"));
     const result = await operation(client);
-    await client.query('COMMIT');
+    await measureTiming('sqlMs', () => client.query('COMMIT'));
     return result;
   } catch (error) {
     try {
-      await client.query('ROLLBACK');
+      await measureTiming('sqlMs', () => client.query('ROLLBACK'));
     } catch {
       discard = true;
     }

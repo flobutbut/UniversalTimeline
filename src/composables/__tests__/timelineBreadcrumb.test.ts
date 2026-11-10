@@ -178,7 +178,7 @@ it('does not present the editorial parent chain as temporal ancestors on a direc
 it('keeps the Universe first after a search or a redirect, without reading other frises', async () => {
   await nav.openStory('3', { storyId: '3' });
   expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:3']);
-  expect(StoryApiService.getInstance().getStory).toHaveBeenCalledExactlyOnceWith('3');
+  expect(StoryApiService.getInstance().getStory).toHaveBeenCalledExactlyOnceWith('3', { signal: expect.any(AbortSignal) });
   expect(nav.returnPath.value).toEqual([]);
   await nav.openStory('2', { storyId: '2' });
   expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:3', 'story:2']);

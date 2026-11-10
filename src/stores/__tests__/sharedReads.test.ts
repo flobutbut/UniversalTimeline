@@ -129,6 +129,16 @@ it('refreshes shared-link snapshots while retaining unrelated period lists after
   await Promise.all([store.ensureStoryLoaded('a'), store.ensureStoryLoaded('b'), store.ensureStoryPeriodsLoaded('a'), store.ensureStoryPeriodsLoaded('b'), store.ensureStoriesLoaded()]);
   expect(details).toHaveBeenCalledTimes(4); expect(periods).toHaveBeenCalledTimes(3); expect(list).toHaveBeenCalledTimes(2);
 });
+it('upgrades a compact catalogue to gallery previews, then shares that richer cache with exploration', async () => {
+  const list=vi.spyOn(StoryApiService.getInstance(),'getListStories').mockImplementation(async options => options?.compact ? [story('a')] : [{...story('a'),previewPeriods:[period('preview')]}]);
+  const store=useDataStore();
+  await store.ensureStoriesLoaded(false,true);
+  expect(store.stories[0].previewPeriods).toBeUndefined();
+  await store.ensureStoriesLoaded();
+  expect(store.stories[0].previewPeriods?.[0].id).toBe('preview');
+  await store.ensureStoriesLoaded(false,true);
+  expect(list).toHaveBeenCalledTimes(2);
+});
 
 it('does not erase known category and hierarchy enrichment from the sparse story-period endpoint', async () => {
   const store = useDataStore();

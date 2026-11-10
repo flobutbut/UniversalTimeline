@@ -151,7 +151,7 @@ it('includes displayed cards when entering directly through another presentation
   vi.mocked(StoryApiService.getInstance().getStory).mockImplementation(id => id === '1'
     ? sourceResponse : Promise.resolve(data.get(id)!));
   const opening = nav.openStory('4');
-  await vi.waitFor(() => expect(StoryApiService.getInstance().getStory).toHaveBeenCalledWith('1'));
+  await vi.waitFor(() => expect(StoryApiService.getInstance().getStory).toHaveBeenCalledWith('1', { signal: expect.any(AbortSignal) }));
   expect(nav.loading.value).toBe(true);
   resolveSource(source); await opening;
   expect(nav.currentPeriod.value?.id).toBe('before');

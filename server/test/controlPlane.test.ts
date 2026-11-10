@@ -29,6 +29,11 @@ it('preserves explicit domain refusals but never trusts an arbitrary error statu
   expect(publicApiError(new PeriodDeletionError(404, 'Période absente'), 'Échec')).toEqual({ status: 404, message: 'Période absente' });
   expect(publicApiError({ status: 400, message: 'Private SQL' }, 'Échec')).toEqual({ status: 500, message: 'Échec' });
 });
+it('recognizes pool saturation without treating every internal SQL error as transient', () => {
+  expect(publicApiError({code:'XX000',message:'(EMAXCONNSESSION) max clients reached in session mode - max clients are limited to pool_size: 15'},'Échec').status).toBe(503);
+  expect(publicApiError({code:'XX000',message:'unexpected internal bug'},'Échec').status).toBe(500);
+  expect(publicApiError(new Error('timeout exceeded when trying to connect'),'Échec').status).toBe(503);
+});
 
 it.each([['entity.parse.failed', 400], ['entity.too.large', 413]] as const)('handles JSON middleware error %s without reflecting its body', (type, status) => {
   const res = response(); apiErrorHandler({ type, body: 'secret', message: 'Private body' }, {} as any, res as any, vi.fn());

@@ -7,6 +7,7 @@ import { createRequestCache, type RequestStatus } from '@/lib/requestCache';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { EventApiService } from '@/services/EventApiService';
 import { StoryApiService } from '@/services/StoryApiService';
+import type { StoryNavigationSnapshot } from '../../server/src/shared/storyNavigation';
 
 export const useDataStore = defineStore('data', () => {
   const periods = ref<ListPeriod[]>([]);
@@ -18,8 +19,10 @@ export const useDataStore = defineStore('data', () => {
   const error = computed(() => requests.roots?.error ?? null);
   const storyPeriodsCache = new Map<string, ListPeriod[]>();
   const storyDetailsCache = new Map<string, Story>();
+  const navigationStories = new Map<string, StoryNavigationSnapshot>();
   const storyEventsCache = new Map<string, ListEvent[]>();
   const deletedPeriodIds = new Set<string>();
+  let storyPreviewsLoaded = false;
 
   const rootPeriods = computed(() => periods.value.filter(p => !p.hasParent && !p.parentId));
   const periodById = (id: string) => periods.value.find(p => p.id === id) ?? null;
@@ -34,6 +37,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function mergePeriods(rows: ListPeriod[]) {
+    const merged = new Map(periods.value.map(period => [period.id, period]));
     for (const period of rows) {
       if (!deletedPeriodIds.has(period.id)) {
         const cataloguePeriod = { ...period };
@@ -43,12 +47,13 @@ export const useDataStore = defineStore('data', () => {
           cataloguePeriod.hasChildren = false;
         }
         delete cataloguePeriod.storyParentId;
-        periods.value = upsertById(periods.value, cataloguePeriod);
+        merged.set(period.id, cataloguePeriod);
       }
     }
     // A saved period replaces its temporary Wikidata suggestion.
-    const savedQids = new Set(periods.value.filter(p => !p.id.startsWith('wikidata:')).map(p => p.wikidata_id).filter(Boolean));
-    periods.value = periods.value.filter(p => !p.id.startsWith('wikidata:') || !savedQids.has(p.wikidata_id));
+    const all = [...merged.values()];
+    const savedQids = new Set(all.filter(p => !p.id.startsWith('wikidata:')).map(p => p.wikidata_id).filter(Boolean));
+    periods.value = all.filter(p => !p.id.startsWith('wikidata:') || !savedQids.has(p.wikidata_id));
   }
 
   async function ensureRootsLoaded(force = false): Promise<void> {
@@ -91,27 +96,44 @@ export const useDataStore = defineStore('data', () => {
     return (storyEventsCache.get(storyId) ?? []).map(event => eventById(event.id) ?? event);
   }
 
-  async function ensureStoryLoaded(storyId: string): Promise<Story> {
-    await reads.load(`story-detail:${storyId}`, () => StoryApiService.getInstance().getStory(storyId), story => {
+  async function ensureStoryLoaded(storyId: string, signal?: AbortSignal): Promise<Story> {
+    await reads.load(`story-detail:${storyId}`, transport => StoryApiService.getInstance().getStory(storyId, { signal: transport }), story => {
       mergePeriods(story.periods);
       const byId = new Map(events.value.map(event => [event.id, event]));
       // L'importance appartient à cette frise : le catalogue partagé n'en garde pas trace.
       for (const { importance: _importance, ...event } of story.events) byId.set(event.id, event);
       events.value = [...byId.values()];
       storyDetailsCache.set(storyId, story);
-    });
+    }, false, signal);
     return storyDetailsCache.get(storyId)!;
+  }
+  async function ensureNavigationStoryLoaded(storyId: string, signal?: AbortSignal): Promise<StoryNavigationSnapshot> {
+    await reads.load('navigation-graph', signal => StoryApiService.getInstance().getNavigationStories(signal), rows => {
+      navigationStories.clear();
+      for (const row of rows) navigationStories.set(row.id, row);
+    }, false, signal);
+    const story = navigationStories.get(storyId);
+    if (!story) throw new Error('Parcours de frise inaccessible.');
+    return story;
   }
 
   async function ensureEventsLoaded(force = false): Promise<void> {
     await reads.load('events', () => EventApiService.getInstance().getListEvents(), rows => { events.value = rows; }, force);
   }
 
-  async function ensureStoriesLoaded(force = false): Promise<void> {
-    await reads.load('stories', () => StoryApiService.getInstance().getListStories(), rows => { stories.value = rows; }, force);
+  async function ensureStoriesLoaded(force = false, compact = false, signal?: AbortSignal): Promise<void> {
+    await reads.load('stories', transport => StoryApiService.getInstance().getListStories({ compact, signal: transport }), rows => {
+      if (!compact) storyPreviewsLoaded = true;
+      const previous = new Map(stories.value.map(row => [row.id, row]));
+      stories.value = compact ? rows.map(row => ({ ...previous.get(row.id), ...row })) : rows;
+    }, force || (!compact && !storyPreviewsLoaded), signal);
+    // A full-gallery consumer may have joined a compact read already in flight.
+    if (!compact && !storyPreviewsLoaded) await ensureStoriesLoaded(true, false, signal);
   }
 
   function invalidateStory(storyId: string) {
+    storyPreviewsLoaded = false;
+    reads.invalidate('navigation-graph'); navigationStories.clear();
     reads.invalidate(`story-periods:${storyId}`);
     // Shared-content links in any snapshot may change when one membership or title changes.
     reads.invalidateMatching(key => key.startsWith('story-detail:'));
@@ -123,6 +145,8 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function invalidateStories() {
+    storyPreviewsLoaded = false;
+    reads.invalidate('navigation-graph'); navigationStories.clear();
     reads.invalidateMatching(key => key.startsWith('story-'));
     reads.invalidate('stories');
     storyPeriodsCache.clear();
@@ -203,6 +227,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function resetData() {
+    storyPreviewsLoaded = false;
     reads.clear();
     for (const key of Object.keys(requests)) delete requests[key];
     periods.value = [];
@@ -210,6 +235,7 @@ export const useDataStore = defineStore('data', () => {
     stories.value = [];
     storyPeriodsCache.clear();
     storyDetailsCache.clear();
+    navigationStories.clear();
     storyEventsCache.clear();
     deletedPeriodIds.clear();
   }
@@ -218,7 +244,7 @@ export const useDataStore = defineStore('data', () => {
     periods, events, stories, loading, error, requests,
     rootPeriods, periodById, eventById, storyById, childrenOf,
     ensureRootsLoaded, ensureChildrenLoaded, ensureStoryPeriodsLoaded, ensureStoryEventsLoaded, ensureStoryLoaded,
-    ensureEventsLoaded, ensureStoriesLoaded, invalidateCatalogue,
+    ensureEventsLoaded, ensureStoriesLoaded, ensureNavigationStoryLoaded, invalidateCatalogue,
     cachePeriod: (period: ListPeriod) => mergePeriods([period]),
     updatePeriods, updateEvents, updateStories, resetData, addPeriodSuggestions,
     upsertSavedPeriod, removeDeletedPeriod, upsertSavedEvent, upsertSavedStory, invalidateStory, invalidateStories,

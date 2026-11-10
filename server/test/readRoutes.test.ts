@@ -102,6 +102,14 @@ it('preserves story ownership and public visibility on the list while aggregatin
   expect((await get('/stories')).body).toEqual([{ ...story, parent_story_id: null, start_date: 'M65', end_date: 'NOW', categories, preview_periods: [period], preview_events: [] }]);
   expect(db).toHaveBeenCalledOnce();
 });
+it('returns the same dates and categories in a compact catalogue without sending every preview', async () => {
+  rows([{ ...story, ...category, preview_periods: [period] }]);
+  const result=await get('/stories',{}, {view:'summary'});
+  expect(result.status).toBe(200);
+  expect(result.body[0]).toMatchObject({id:7,start_date:'M65',end_date:'NOW',categories});
+  expect(result.body[0]).not.toHaveProperty('preview_periods');
+  expect(result.body[0]).not.toHaveProperty('preview_events');
+});
 it('keeps the detail contract for stories, periods, events, child IDs and anchors', async () => {
   rows([{ ...story, categories: [], periods: [{ ...period, story_parent_id: 'frise-parent', ...category }], events: [{ ...event, ...noCategory }], child_stories: [
     { id: 8, title_fr: 'Enfant', title_en: null, anchors: [{ type: 'period', id: 'legacy-period' }] },

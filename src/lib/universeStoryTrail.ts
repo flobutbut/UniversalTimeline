@@ -1,10 +1,10 @@
-import type { Story } from '@/types/database';
-import { storyChildrenOf } from './homeStoryPeriodNav';
+import type { StoryNavigationSnapshot } from '../../server/src/shared/storyNavigation';
+import { getStoryPeriodParentId } from './storyPeriodParent';
 import { storyNavigationLinks } from './storyNavigationLinks';
 import { timelinePeriodPath, type TimelineTarget } from './timelineNavigation';
 
 /** Position depuis laquelle le lien vers la frise suivante est effectivement accessible. */
-function entryToward(story: Story, nextStoryId: string): TimelineTarget | null {
+function entryToward(story: StoryNavigationSnapshot, nextStoryId: string): TimelineTarget | null {
   const link = storyNavigationLinks(story).find(link => link.id === nextStoryId && (link.anchors.length || link.atRoot));
   if (!link) return null;
   if(link.atRoot)return {storyId:story.id,view:'overview'};
@@ -15,7 +15,7 @@ function entryToward(story: Story, nextStoryId: string): TimelineTarget | null {
   const path = paths[0];
   const anchor = path ? path[path.length - 1] : undefined;
   // Une feuille se rejoint depuis son parent, où son badge reste accessible.
-  const period = anchor && storyChildrenOf(anchor.id, story.periods).length ? anchor : path?.[path.length - 2];
+  const period = anchor && story.periods.some(p => getStoryPeriodParentId(p) === anchor.id) ? anchor : path?.[path.length - 2];
   return { storyId: story.id, ...(period ? { periodId: period.id } : { view: 'overview' }) };
 }
 
@@ -25,20 +25,20 @@ function entryToward(story: Story, nextStoryId: string): TimelineTarget | null {
  * de navigation. Ni les dates ni un parent éditorial seul ne créent un passage.
  */
 export async function universeStoryTrail(
-  destination: Story,
+  destination: StoryNavigationSnapshot,
   readableIds: ReadonlySet<string>,
-  loadStory: (id: string) => Promise<Story>,
+  loadStory: (id: string) => Promise<StoryNavigationSnapshot>,
   stillCurrent: () => boolean = () => true,
 ): Promise<TimelineTarget[]> {
   const rootId = '1';
   if (destination.id === rootId || !readableIds.has(rootId)) return [];
   const visited = new Set([destination.id]);
-  const reads = new Map<string, Promise<Story>>();
+  const reads = new Map<string, Promise<StoryNavigationSnapshot>>();
   const read = (id: string) => {
     if (!reads.has(id)) reads.set(id, loadStory(id));
     return reads.get(id)!;
   };
-  let frontier: Array<{ story: Story; trail: TimelineTarget[] }> = [{ story: destination, trail: [] }];
+  let frontier: Array<{ story: StoryNavigationSnapshot; trail: TimelineTarget[] }> = [{ story: destination, trail: [] }];
   while (frontier.length && stillCurrent()) {
     const candidates = new Map<string, typeof frontier>();
     for (const node of frontier) {
@@ -53,7 +53,7 @@ export async function universeStoryTrail(
         connections.push(node); candidates.set(id, connections);
       }
     }
-    const extend = (story: Story, connections: typeof frontier) => {
+    const extend = (story: StoryNavigationSnapshot, connections: typeof frontier) => {
       for (const node of connections) {
         const target = entryToward(story, node.story.id);
         if (target) return [target, ...node.trail];

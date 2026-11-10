@@ -18,7 +18,7 @@ describe('transaction lifecycle', () => {
       return 'saved';
     });
     expect(result).toBe('saved');
-    expect(client.query.mock.calls.map(call => call[0])).toEqual(['BEGIN', 'UPDATE first', 'UPDATE second', 'COMMIT']);
+    expect(client.query.mock.calls.map(call => call[0].startsWith('BEGIN;') ? 'BEGIN' : call[0])).toEqual(['BEGIN', 'UPDATE first', 'UPDATE second', 'COMMIT']);
     expect(client.release).toHaveBeenCalledExactlyOnceWith(false);
   });
 
@@ -29,7 +29,7 @@ describe('transaction lifecycle', () => {
       await connection.query('DELETE associations');
       throw failure;
     })).rejects.toBe(failure);
-    expect(client.query.mock.calls.map(call => call[0])).toEqual(['BEGIN', 'DELETE associations', 'ROLLBACK']);
+    expect(client.query.mock.calls.map(call => call[0].startsWith('BEGIN;') ? 'BEGIN' : call[0])).toEqual(['BEGIN', 'DELETE associations', 'ROLLBACK']);
     expect(client.release).toHaveBeenCalledExactlyOnceWith(false);
   });
 
@@ -51,7 +51,7 @@ describe('transaction lifecycle', () => {
       return { rows: [] };
     });
     await expect(runInTransaction(provider, async () => 'saved')).rejects.toThrow('commit failed');
-    expect(client.query.mock.calls.map(call => call[0])).toEqual(['BEGIN', 'COMMIT', 'ROLLBACK']);
+    expect(client.query.mock.calls.map(call => call[0].startsWith('BEGIN;') ? 'BEGIN' : call[0])).toEqual(['BEGIN', 'COMMIT', 'ROLLBACK']);
     expect(client.release).toHaveBeenCalledOnce();
   });
 

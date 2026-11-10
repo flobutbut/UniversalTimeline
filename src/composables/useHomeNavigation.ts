@@ -260,6 +260,7 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
 
   const loadInitialData = async (restorePeriodNav?: StoryPeriodNavSnapshot | null, expandSingleRoot = false, verifyStory = false) => {
     const isCurrent = navigation.begin();
+    const signal = navigation.signal;
     const storyId = currentStoryId.value;
     const target = requestedTarget;
     retry = () => loadInitialData(restorePeriodNav, expandSingleRoot, verifyStory);
@@ -268,8 +269,8 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
     if (target?.entry === 'universe') visitedStories.value = [];
     try {
       const [story] = await Promise.all([
-        dataStore.ensureStoryLoaded(storyId),
-        dataStore.ensureStoriesLoaded(),
+        dataStore.ensureStoryLoaded(storyId, signal),
+        dataStore.ensureStoriesLoaded(false, true, signal),
       ]);
       if (!isCurrent()) return;
       if (verifyStory) {
@@ -300,7 +301,7 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
       const focusPath = eventPath?.length ? eventPath : focusId ? timelinePeriodPath(story.periods, focusId) : null;
       if (focusId && !focusPath) throw new Error('Cette période n’appartient plus à la frise.');
       const entryTrail = target?.entry === 'universe'
-        ? await universeStoryTrail(story, new Set(stories.value.map(story => story.id)), dataStore.ensureStoryLoaded, isCurrent)
+        ? await universeStoryTrail(story, new Set(stories.value.map(story => story.id)), id => dataStore.ensureNavigationStoryLoaded(id, signal), isCurrent)
         : null;
       if (!isCurrent()) return;
       const storyPeriods = story.periods;
@@ -341,7 +342,7 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
       if(sourceId) {
         if(sourceId===storyId)entryStory.value=story;
         else {
-          const reading=dataStore.ensureStoryLoaded(sourceId).then(source=>{if(isCurrent())entryStory.value=source;}).catch(()=>undefined);
+          const reading=dataStore.ensureStoryLoaded(sourceId,signal).then(source=>{if(isCurrent())entryStory.value=source;}).catch(()=>undefined);
           // A declared context already exposes native peers: resolve its cards before enabling them.
           // An ordinary entry must not delay a new destination on an older, still loading source.
           if(referencePeriodId.value)await reading;
@@ -423,7 +424,7 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
     loading.value = true;
     error.value = null;
     try {
-      const story = await dataStore.ensureStoryLoaded(id);
+      const story = await dataStore.ensureStoryLoaded(id, navigation.signal);
       if (!isCurrent()) return;
       const reference=navigationReference.value;
       const sourceId=sourceStoryId??(anchor&&reference?.anchor?.type===anchor.type&&reference.anchor.id===anchor.id?reference.storyId:currentStoryId.value);

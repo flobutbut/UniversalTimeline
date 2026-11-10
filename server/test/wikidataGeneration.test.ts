@@ -29,7 +29,7 @@ it('creates a private frise, UUID catalogue records and associations in one tran
   const res = await call(payload()); const sql = client.query.mock.calls.map(([statement]) => statement);
   expect(res.status).toHaveBeenCalledWith(201);
   expect(res.json).toHaveBeenCalledWith({ id: '42', periodCount: 1, eventCount: 1 });
-  expect(sql[0]).toBe('BEGIN'); expect(sql.at(-1)).toBe('COMMIT');
+  expect(sql[0]).toMatch(/^BEGIN;/); expect(sql.at(-1)).toBe('COMMIT');
   const story = client.query.mock.calls.find(([statement]) => /INSERT INTO public.stories/.test(statement));
   expect(story?.[1][5]).toBe(false); expect(story?.[1][2]).toBe('Source : https://www.wikidata.org/wiki/Q1');
   const imports = client.query.mock.calls.filter(([statement]) => /INSERT INTO public.(events|periods) /.test(statement));

@@ -5,6 +5,7 @@ import type { StoryDto, PeriodDto, StoryFormPayload, StoryLinkDto } from '@/type
 import { mapToListStory, mapToStory, mapToStorySuggestion } from './entityMappers';
 import type { WikidataTimelineItem, ExistingWikidataStory } from '@/types/wikidataGeneration';
 import { effectiveWikidataParent } from '@/lib/wikidataHierarchy';
+import type { StoryNavigationSnapshot } from '../../server/src/shared/storyNavigation';
 export { mapToListStory } from './entityMappers';
 export interface StoryFromPeriodResult { id: string; periodCount: number; eventCount: number; movedPeriodCount: number; linkedStoryCount: number }
 
@@ -26,9 +27,14 @@ export class StoryApiService {
     return StoryApiService.instance;
   }
 
-  async getListStories(): Promise<StorySummary[]> {
-    const data = await apiClient.get<StoryDto[]>('/stories');
+  async getListStories(options?: { compact?: boolean; signal?: AbortSignal }): Promise<StorySummary[]> {
+    const data = await apiClient.get<StoryDto[]>(options?.compact ? '/stories?view=summary' : '/stories', { signal: options?.signal });
     return data.map(mapToListStory);
+  }
+  async getNavigationStories(signal?: AbortSignal): Promise<StoryNavigationSnapshot[]> {
+    const rows = await apiClient.get<StoryNavigationSnapshot[]>('/stories/navigation', { signal });
+    if (!Array.isArray(rows) || rows.some(row => !/^[1-9]\d*$/.test(row.id) || !Array.isArray(row.periods) || !Array.isArray(row.events))) throw new Error('Parcours des frises indisponibles.');
+    return rows;
   }
 
   async getStory(storyId: string, options?: { signal?: AbortSignal }): Promise<Story> {

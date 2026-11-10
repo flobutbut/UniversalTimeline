@@ -24,7 +24,7 @@ async function select(label: string) { await card(label).trigger('click'); await
 beforeEach(async () => {
   vi.mocked(apiClient.get).mockImplementation(async path => {
     if (path === '/stories/1') return { id: 1, title_fr: 'Univers', childStories: [], periods: [{ id: 'earth', label_fr: 'Terre', start_date: 'G4.54', end_date: 'NOW', has_children: false }], events };
-    if (path === '/stories') return [{ id: 1, title_fr: 'Univers', categories: [] }];
+    if ((path === '/stories' || path === '/stories?view=summary')) return [{ id: 1, title_fr: 'Univers', categories: [] }];
     if (path === '/stories/1/periods') return [{ id: 'earth', label_fr: 'Terre', start_date: 'G4.54', end_date: 'NOW', has_children: false }];
     if (path === '/stories/1/events') return events;
     if (path.startsWith('/stories/suggestions?')) return [];

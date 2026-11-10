@@ -1,0 +1,506 @@
+{
+  "measuredAt": "2026-11-10T10:29:24.007Z",
+  "poolerLimitErrors": {
+    "result": [
+      {
+        "error_entries": 65,
+        "first_seen": "2026-11-10T10:13:23.008407",
+        "last_seen": "2026-11-10T10:22:54.711763",
+        "mode": "proxy"
+      },
+      {
+        "error_entries": 118,
+        "first_seen": "2026-11-10T10:13:23.008147",
+        "last_seen": "2026-11-10T10:27:42.407441",
+        "mode": "session"
+      }
+    ]
+  },
+  "historicalQueryStats": [
+    {
+      "rolname": "authenticated",
+      "calls": 338,
+      "mean_ms": "765.31",
+      "max_ms": "11836.19",
+      "total_ms": "258674.7",
+      "queryid": "8639264139360615269",
+      "query_hash": "cbee6448cb494275b10212b629a57c60",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    },
+    {
+      "rolname": "authenticated",
+      "calls": 420,
+      "mean_ms": "79.46",
+      "max_ms": "289.65",
+      "total_ms": "33374.1",
+      "queryid": "1978392845900502962",
+      "query_hash": "b197ba248ccf900666f200116925a859",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    },
+    {
+      "rolname": "authenticated",
+      "calls": 448,
+      "mean_ms": "71.16",
+      "max_ms": "393.60",
+      "total_ms": "31880.9",
+      "queryid": "8861925574195094072",
+      "query_hash": "b8adc5637dc08ec034f8491e1cb3cce7",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    },
+    {
+      "rolname": "authenticated",
+      "calls": 302,
+      "mean_ms": "51.71",
+      "max_ms": "132.70",
+      "total_ms": "15615.6",
+      "queryid": "-2443801913161142959",
+      "query_hash": "b8adc5637dc08ec034f8491e1cb3cce7",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    },
+    {
+      "rolname": "authenticated",
+      "calls": 238,
+      "mean_ms": "35.60",
+      "max_ms": "242.88",
+      "total_ms": "8473.6",
+      "queryid": "-2561826904775556183",
+      "query_hash": "97965456295d87ab278286a9387c2d7c",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    },
+    {
+      "rolname": "authenticated",
+      "calls": 53,
+      "mean_ms": "52.54",
+      "max_ms": "93.73",
+      "total_ms": "2784.8",
+      "queryid": "-3689057243672452568",
+      "query_hash": "1ffe30a2477344e4debf583fcdebefbf",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    },
+    {
+      "rolname": "anon",
+      "calls": 171,
+      "mean_ms": "12.94",
+      "max_ms": "128.57",
+      "total_ms": "2212.8",
+      "queryid": "1978392845900502962",
+      "query_hash": "b197ba248ccf900666f200116925a859",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    },
+    {
+      "rolname": "anon",
+      "calls": 132,
+      "mean_ms": "15.53",
+      "max_ms": "79.82",
+      "total_ms": "2050.1",
+      "queryid": "8639264139360615269",
+      "query_hash": "cbee6448cb494275b10212b629a57c60",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    },
+    {
+      "rolname": "anon",
+      "calls": 119,
+      "mean_ms": "10.22",
+      "max_ms": "61.50",
+      "total_ms": "1215.7",
+      "queryid": "8861925574195094072",
+      "query_hash": "b8adc5637dc08ec034f8491e1cb3cce7",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    },
+    {
+      "rolname": "authenticated",
+      "calls": 170,
+      "mean_ms": "6.12",
+      "max_ms": "24.92",
+      "total_ms": "1040.8",
+      "queryid": "667032919054917619",
+      "query_hash": "20bf720705c658a72685802acd4c274c",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    },
+    {
+      "rolname": "authenticated",
+      "calls": 171,
+      "mean_ms": "5.49",
+      "max_ms": "18.52",
+      "total_ms": "939.6",
+      "queryid": "4118236574779517070",
+      "query_hash": "b735a502146fc47e98f016928ff673aa",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    },
+    {
+      "rolname": "anon",
+      "calls": 83,
+      "mean_ms": "9.03",
+      "max_ms": "64.89",
+      "total_ms": "749.7",
+      "queryid": "-2561826904775556183",
+      "query_hash": "97965456295d87ab278286a9387c2d7c",
+      "shape": "WITH entry_links AS (\n      SELECT source_story_id, target_story_id,\n        CAS"
+    }
+  ],
+  "advisors": {
+    "result": {
+      "lints": [
+        {
+          "name": "unindexed_foreign_keys",
+          "title": "Unindexed foreign keys",
+          "level": "INFO",
+          "facing": "EXTERNAL",
+          "categories": [
+            "PERFORMANCE"
+          ],
+          "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+          "count": 7,
+          "findings": [
+            {
+              "detail": "Table \\`public.categories\\` has a foreign key \\`categories_parent_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+              "metadata": {
+                "name": "categories",
+                "type": "table",
+                "schema": "public",
+                "fkey_name": "categories_parent_id_fkey",
+                "fkey_columns": [
+                  2
+                ]
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.event_categories\\` has a foreign key \\`event_categories_category_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+              "metadata": {
+                "name": "event_categories",
+                "type": "table",
+                "schema": "public",
+                "fkey_name": "event_categories_category_id_fkey",
+                "fkey_columns": [
+                  2
+                ]
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.period_categories\\` has a foreign key \\`period_categories_category_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+              "metadata": {
+                "name": "period_categories",
+                "type": "table",
+                "schema": "public",
+                "fkey_name": "period_categories_category_id_fkey",
+                "fkey_columns": [
+                  2
+                ]
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.stories\\` has a foreign key \\`stories_parent_same_owner\\` without a covering index. This can lead to suboptimal query performance.",
+              "metadata": {
+                "name": "stories",
+                "type": "table",
+                "schema": "public",
+                "fkey_name": "stories_parent_same_owner",
+                "fkey_columns": [
+                  10,
+                  13
+                ]
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.story_categories\\` has a foreign key \\`story_categories_category_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+              "metadata": {
+                "name": "story_categories",
+                "type": "table",
+                "schema": "public",
+                "fkey_name": "story_categories_category_id_fkey",
+                "fkey_columns": [
+                  2
+                ]
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.story_periods\\` has a foreign key \\`story_periods_parent_in_same_story\\` without a covering index. This can lead to suboptimal query performance.",
+              "metadata": {
+                "name": "story_periods",
+                "type": "table",
+                "schema": "public",
+                "fkey_name": "story_periods_parent_in_same_story",
+                "fkey_columns": [
+                  1,
+                  3
+                ]
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.tags\\` has a foreign key \\`tags_parent_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+              "metadata": {
+                "name": "tags",
+                "type": "table",
+                "schema": "public",
+                "fkey_name": "tags_parent_id_fkey",
+                "fkey_columns": [
+                  2
+                ]
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            }
+          ]
+        },
+        {
+          "name": "auth_rls_initplan",
+          "title": "Auth RLS Initialization Plan",
+          "level": "WARN",
+          "facing": "EXTERNAL",
+          "categories": [
+            "PERFORMANCE"
+          ],
+          "description": "Detects if calls to \\`current_setting()\\` and \\`auth.<function>()\\` in RLS policies are being unnecessarily re-evaluated for each row",
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0003_auth_rls_initplan",
+          "count": 6,
+          "findings": [
+            {
+              "detail": "Table \\`public.periods\\` has a row level security policy \\`ut_write_periods\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+              "metadata": {
+                "name": "periods",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.events\\` has a row level security policy \\`ut_write_events\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+              "metadata": {
+                "name": "events",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.period_categories\\` has a row level security policy \\`ut_write_period_categories\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+              "metadata": {
+                "name": "period_categories",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.event_categories\\` has a row level security policy \\`ut_write_event_categories\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+              "metadata": {
+                "name": "event_categories",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.stories\\` has a row level security policy \\`ut_insert_stories\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+              "metadata": {
+                "name": "stories",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.stories\\` has a row level security policy \\`ut_delete_stories\\` that re-evaluates current_setting() or auth.<function>() for each row. This produces suboptimal query performance at scale. Resolve the issue by replacing \\`auth.<function>()\\` with \\`(select auth.<function>())\\`. See [docs](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select) for more info.",
+              "metadata": {
+                "name": "stories",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            }
+          ]
+        },
+        {
+          "name": "unused_index",
+          "title": "Unused Index",
+          "level": "INFO",
+          "facing": "EXTERNAL",
+          "categories": [
+            "PERFORMANCE"
+          ],
+          "description": "Detects if an index has never been used and may be a candidate for removal.",
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+          "count": 4,
+          "findings": [
+            {
+              "detail": "Index \\`period_tags_tag_id_idx\\` on table \\`public.period_tags\\` has not been used",
+              "metadata": {
+                "name": "period_tags",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Index \\`event_tags_tag_id_idx\\` on table \\`public.event_tags\\` has not been used",
+              "metadata": {
+                "name": "event_tags",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Index \\`story_tags_tag_id_idx\\` on table \\`public.story_tags\\` has not been used",
+              "metadata": {
+                "name": "story_tags",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Index \\`feedback_notification_user_idx\\` on table \\`feedback_private.notification_deliveries\\` has not been used",
+              "metadata": {
+                "name": "notification_deliveries",
+                "type": "table",
+                "schema": "feedback_private"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            }
+          ]
+        },
+        {
+          "name": "multiple_permissive_policies",
+          "title": "Multiple Permissive Policies",
+          "level": "WARN",
+          "facing": "EXTERNAL",
+          "categories": [
+            "PERFORMANCE"
+          ],
+          "description": "Detects if multiple permissive row level security policies are present on a table for the same \\`role\\` and \\`action\\` (e.g. insert). Multiple permissive policies are suboptimal for performance as each policy must be executed for every relevant query.",
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0006_multiple_permissive_policies",
+          "count": 11,
+          "findings": [
+            {
+              "detail": "Table \\`public.event_categories\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{ut_read_event_categories,ut_write_event_categories}\\`",
+              "metadata": {
+                "name": "event_categories",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.event_tags\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{event_tags_read,event_tags_write}\\`",
+              "metadata": {
+                "name": "event_tags",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.events\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{ut_read_events,ut_write_events}\\`",
+              "metadata": {
+                "name": "events",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.period_categories\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{ut_read_period_categories,ut_write_period_categories}\\`",
+              "metadata": {
+                "name": "period_categories",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.period_tags\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{period_tags_read,period_tags_write}\\`",
+              "metadata": {
+                "name": "period_tags",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.periods\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{ut_read_periods,ut_write_periods}\\`",
+              "metadata": {
+                "name": "periods",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.story_anchors\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{ut_read_story_anchors,ut_write_story_anchors}\\`",
+              "metadata": {
+                "name": "story_anchors",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.story_categories\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{ut_read_story_categories,ut_write_story_categories}\\`",
+              "metadata": {
+                "name": "story_categories",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.story_events\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{ut_read_story_events,ut_write_story_events}\\`",
+              "metadata": {
+                "name": "story_events",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.story_periods\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{ut_read_story_periods,ut_write_story_periods}\\`",
+              "metadata": {
+                "name": "story_periods",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            },
+            {
+              "detail": "Table \\`public.story_tags\\` has multiple permissive policies for role \\`authenticated\\` for action \\`SELECT\\`. Policies include \\`{story_tags_read,story_tags_write}\\`",
+              "metadata": {
+                "name": "story_tags",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-11-10T10:29:23.748Z"
+            }
+          ]
+        },
+        {
+          "name": "auth_db_connections_absolute",
+          "title": "Auth DB Connection Strategy is not Percentage",
+          "level": "INFO",
+          "facing": "EXTERNAL",
+          "categories": [
+            "PERFORMANCE"
+          ],
+          "description": "Using a percentage based allocation connection strategy for Auth can help to improve the server's performance when increasing instance size.",
+          "remediation": "https://supabase.com/docs/guides/deployment/going-into-prod",
+          "count": 1,
+          "findings": [
+            {
+              "detail": "Your project's Auth server is configured to use at most 10 connections. Increasing the instance size without manually adjusting this number will not improve the performance of the Auth server. Switch to a percentage based connection allocation strategy instead.",
+              "metadata": {
+                "type": "auth",
+                "entity": "Auth"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

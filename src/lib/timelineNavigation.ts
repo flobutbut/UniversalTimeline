@@ -32,10 +32,10 @@ export function eventPeriodPath(periods: ListPeriod[], event: ListEvent, now: nu
 }
 
 /** Full path in this frise, including leaves; invalid paths cannot become navigation targets. */
-export function timelinePeriodPath(periods: ListPeriod[], id: string): ListPeriod[] | null {
+export function timelinePeriodPath<T extends { id: string; storyParentId?: string | null; parentId?: string | null }>(periods: T[], id: string): T[] | null {
   const byId = new Map(periods.map(p => [p.id, p]));
   const seen = new Set<string>();
-  const path: ListPeriod[] = [];
+  const path: T[] = [];
   let period = byId.get(id);
   if (!period) return null;
   while (period) {

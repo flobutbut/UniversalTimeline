@@ -33,6 +33,7 @@ beforeEach(() => {
   vi.spyOn(periods, 'getListPeriods').mockResolvedValue([period('unrelated-catalogue')]);
   vi.spyOn(events, 'getListEvents').mockResolvedValue([event('unrelated-event')]);
   vi.spyOn(events, 'getStoryListEvents').mockImplementation(async id => [event(`event-${id}`)]);
+  vi.spyOn(stories, 'getNavigationStories').mockResolvedValue([]);
   vi.spyOn(stories, 'getListStories').mockResolvedValue(['1', '2', '7', '8'].map(summary));
   vi.spyOn(stories, 'getStoryPeriods').mockImplementation(async id => [period(`root-${id}`), period(`leaf-${id}`, `root-${id}`)]);
   vi.spyOn(stories, 'getSuggestions').mockResolvedValue([]);
@@ -283,6 +284,7 @@ it('starts a catalogue selection on its Universe path instead of appending the p
       id === '1' || id === '2' ? [{ id: id === '1' ? '2' : '8', title_fr: `Frise ${id === '1' ? '2' : '8'}`, anchors: [{ type: 'period', id: `root-${id}` }] }] : []),
     parentStories: id === '8' || id === '2' ? [{ id: id === '8' ? '2' : '1', title: {fr:'Parente',en:''}, anchors: [] }] : [],
   }));
+  vi.mocked(stories.getNavigationStories).mockImplementation(async () => Promise.all(['1', '2', '7', '8'].map(id => stories.getStory(id))));
   await start('/timeline?story=7&period=leaf-7');
   await router.push('/database'); await flushPromises();
   await router.push('/timeline?story=8&entry=universe'); await flushPromises(); await flushPromises();
@@ -310,17 +312,17 @@ it('resets a catalogue entry to the Universe and the selected frise when no Univ
 });
 
 it('discards a computed entry path when a newer timeline position is opened', async () => {
-  let resolve!: (value: ReturnType<typeof storyFixture>) => void;
+  let resolve!: (value: ReturnType<typeof storyFixture>[]) => void;
   vi.mocked(stories.getStory).mockImplementation(async id => {
-    if (id === '2') return new Promise(yes => { resolve = yes; });
     return { ...storyFixture(id, [period(`root-${id}`), period(`leaf-${id}`, `root-${id}`)]),
       parentStories: id === '8' ? [{ id: '2', title: {fr:'Parente',en:''}, anchors: [] }] : [] };
   });
+  vi.mocked(stories.getNavigationStories).mockImplementation(() => new Promise(yes => { resolve = yes; }));
   await start('/timeline?story=7');
   await router.push('/timeline?story=8&entry=universe'); await flushPromises();
   expect(view.find('nav[aria-label="Fil d’Ariane des frises"]').exists()).toBe(false);
   await router.push('/timeline?story=7&period=leaf-7'); await flushPromises();
-  resolve(storyFixture('2')); await flushPromises();
+  resolve([storyFixture('2')]); await flushPromises();
   expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('7');
   expect(view.getComponent(PeriodGrid).props('currentPeriod').id).toBe('leaf-7');
   expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').text()).toBe('Frise : Frise 1/Frise : Frise 7');

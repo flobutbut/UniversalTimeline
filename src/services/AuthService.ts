@@ -11,7 +11,7 @@ async function initialize(): Promise<void> {
   if (enabled !== null) return;
   if (initialization) return initialization;
   initialization = (async () => {
-    const response = await fetch('/api/access', { cache: 'no-store' });
+    const response = await fetch('/api/access', { cache: 'no-store', signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new Error('Impossible de vérifier les accès. Réessayez.');
     const data: unknown = await response.json();
     if (!data || typeof (data as { enabled?: unknown }).enabled !== 'boolean') throw new Error('Configuration des accès invalide.');
@@ -41,7 +41,7 @@ export const authService = {
   async getAccount(): Promise<Account | null> {
     const token = await this.getAccessToken();
     if (!token) return null;
-    const response = await fetch('/api/account', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+    const response = await fetch('/api/account', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store', signal: AbortSignal.timeout(15000) });
     if (response.status === 401) { rejectedToken = token; return null; }
     if (!response.ok) throw new Error('Impossible de vérifier votre compte. Réessayez.');
     const account: unknown = await response.json();

@@ -47,7 +47,7 @@ for (const entity of ['events', 'periods', 'stories']) {
     it('clears all categories for an explicit empty array and commits afterwards', async () => {
       const res = await call('put', `/${entity}/:id`, { ...body, categories: [] });
       const sql = client.query.mock.calls.map(args => args[0] as string);
-      expect(sql[0]).toBe('BEGIN');
+      expect(sql[0]).toMatch(/^BEGIN;/);
       expect(sql[1]).toMatch(new RegExp(`UPDATE public.${entity}`));
       expect(sql[2]).toMatch(/DELETE FROM public\.\w+_categories/);
       expect(sql[3]).toMatch(/SELECT c.id/);
@@ -174,7 +174,7 @@ describe('DELETE /periods/:id', () => {
   it('locks before checking dependencies, deletes only the period links and commits before success', async () => {
     const res = await call('delete', '/periods/:id');
     const sql = client.query.mock.calls.map(args => args[0]);
-    expect(sql[0]).toBe('BEGIN');
+    expect(sql[0]).toMatch(/^BEGIN;/);
     expect(sql[1]).toContain('lock_timeout');
     expect(sql[2]).toContain('FOR UPDATE');
     expect(sql[4]).toBe('DELETE FROM public.period_categories WHERE period_id = $1');

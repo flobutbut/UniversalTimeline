@@ -119,14 +119,19 @@ export async function findStorySnapshot(db: TransactionClient, id: string) {
       ) parent) AS parent_stories,
       (SELECT COALESCE(jsonb_agg(to_jsonb(related) ORDER BY related.id), '[]') FROM (
         SELECT other.id, other.title_fr, other.title_en,
-          ARRAY(SELECT link.period_id FROM public.story_periods link
-                JOIN public.story_periods current ON current.period_id = link.period_id AND current.story_id = s.id
-                WHERE link.story_id = other.id ORDER BY link.period_id) AS period_ids,
-          ARRAY(SELECT link.event_id FROM public.story_events link
-                JOIN public.story_events current ON current.event_id = link.event_id AND current.story_id = s.id
-                WHERE link.story_id = other.id ORDER BY link.event_id) AS event_ids
-        FROM public.stories other WHERE other.id <> s.id
-      ) related WHERE cardinality(related.period_ids) > 0 OR cardinality(related.event_ids) > 0) AS related_stories
+          COALESCE(array_agg(DISTINCT shared.entity_id ORDER BY shared.entity_id) FILTER (WHERE shared.kind='period'), ARRAY[]::varchar[]) AS period_ids,
+          COALESCE(array_agg(DISTINCT shared.entity_id ORDER BY shared.entity_id) FILTER (WHERE shared.kind='event'), ARRAY[]::varchar[]) AS event_ids
+        FROM (
+          SELECT link.story_id, link.period_id AS entity_id, 'period' AS kind
+          FROM public.story_periods current JOIN public.story_periods link ON link.period_id=current.period_id
+          WHERE current.story_id=s.id AND link.story_id<>s.id
+          UNION ALL
+          SELECT link.story_id, link.event_id, 'event'
+          FROM public.story_events current JOIN public.story_events link ON link.event_id=current.event_id
+          WHERE current.story_id=s.id AND link.story_id<>s.id
+        ) shared JOIN public.stories other ON other.id=shared.story_id
+        GROUP BY other.id, other.title_fr, other.title_en
+      ) related) AS related_stories
     FROM public.stories s WHERE s.id = $1
   `, [id])).rows[0];
 }

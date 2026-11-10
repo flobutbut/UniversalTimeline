@@ -150,7 +150,7 @@ export function useDatabaseView() {
     state.value.loading = true;
     state.value.error = null;
     try {
-      await Promise.all([dataStore.ensureRootsLoaded(), dataStore.ensureEventsLoaded(), dataStore.ensureStoriesLoaded()]);
+      await dataStore.ensureStoriesLoaded(false, false, initialRequests.signal);
     } catch (cause) {
       if (isCurrent()) state.value.error = cause instanceof Error ? cause.message : 'Erreur lors du chargement des données';
     } finally {
@@ -166,7 +166,7 @@ export function useDatabaseView() {
     state.value.storyError = null;
     state.value.loadingStoryDetails = true;
     try {
-      const detail = await dataStore.ensureStoryLoaded(story.id);
+      const detail = await dataStore.ensureStoryLoaded(story.id, detailRequests.signal);
       if (isCurrent()) selectedStory.value = detail;
     } catch (cause) {
       if (isCurrent()) state.value.storyError = cause instanceof Error ? cause.message : 'Erreur lors du chargement de la frise';
@@ -195,7 +195,7 @@ export function useDatabaseView() {
     const isCurrent = detailRequests.begin();
     state.value.storyError = null;
     try {
-      const detail = await dataStore.ensureStoryLoaded(storyId);
+      const detail = await dataStore.ensureStoryLoaded(storyId, detailRequests.signal);
       if (isCurrent() && selectedStoryId.value === storyId) selectedStory.value = detail;
     } finally {
       if (isCurrent()) state.value.loadingStoryDetails = false;

@@ -25,6 +25,7 @@ before(async()=>{
  await pool.query(baseline.slice(0,marker)+'COMMIT;');
  await pool.query(await readFile(new URL('../../database/migrations/20261103143455_public_story_editors.sql',import.meta.url),'utf8'));
  await pool.query(await readFile(new URL('../../database/migrations/20261108120000_taxonomy_tags.sql',import.meta.url),'utf8'));
+ await pool.query(await readFile(new URL('../../database/migrations/20261110103843_performance_read_policies.sql',import.meta.url),'utf8'));
 });
 beforeEach(async()=>{
  await pool.query(`TRUNCATE ${applicationTables.map(t=>'public.'+t).join(',')},admin_private.audit_log RESTART IDENTITY CASCADE`);await pool.query('DELETE FROM auth.users');
@@ -35,6 +36,14 @@ beforeEach(async()=>{
  await pool.query("INSERT INTO story_periods(story_id,period_id) VALUES(1,'root'),(2,'root'),(4,'root'); INSERT INTO story_events(story_id,event_id) VALUES(1,'event'),(2,'event')");
 });
 after(()=>pool.end());
+test('read plans never invoke the write permission helper and retain the legacy startup contract',async()=>{
+ for(const table of ['story_periods','story_events','story_categories','story_anchors','story_tags']) {
+  const plan=await sql(ordinary,`EXPLAIN (FORMAT JSON) SELECT * FROM public.${table}`);
+  assert.doesNotMatch(JSON.stringify(plan.rows),/can_edit_story/);
+ }
+ assert.equal((await pool.query("SELECT count(*)::int n FROM pg_policies WHERE schemaname='public' AND policyname LIKE 'ut_%'")).rows[0].n,21);
+ assert.equal((await pool.query("SELECT count(*)::int n FROM pg_policies WHERE schemaname='public' AND cmd='ALL'")).rows[0].n,0);
+});
 test('editor and admin can edit another public frise, ordinary accounts cannot, private frises stay private',async()=>{
  const changed=await call('put','/stories/:id',{params:{id:'1'},body:{title:{fr:'Corrigée'},author:'Usurpation',isPublic:true,categories:[{id:category}]}});
  assert.equal(changed.statusCode,200);assert.equal(changed.payload.title_fr,'Corrigée');assert.equal(changed.payload.author,'Bob');

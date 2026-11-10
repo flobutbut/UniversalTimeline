@@ -4,11 +4,13 @@ import { getCurrentScope, onScopeDispose } from 'vue';
 export function useLatestRequest() {
   let version = 0;
   let active = true;
-  const cancel = () => { version++; };
+  let controller = new AbortController();
+  const cancel = () => { version++; controller.abort(); controller = new AbortController(); };
   if (getCurrentScope()) onScopeDispose(() => { active = false; cancel(); });
   const begin = () => {
+    cancel();
     const requestVersion = ++version;
     return () => active && requestVersion === version;
   };
-  return { begin, cancel };
+  return { begin, cancel, get signal() { return controller.signal; } };
 }

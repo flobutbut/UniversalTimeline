@@ -1,19 +1,13 @@
 import { testConnection } from './api/database.js';
 import routes from './api/routes.js';
-import { logServerError } from './api/errors.js';
 import { createApp } from './app.js';
 import { configuredAccessMiddleware } from './auth/config.js';
 import { createSeoPages } from './api/seo/pages.js';
 import { SITE_ORIGIN } from './shared/seoMetadata.js';
 import { createPublicSeoRead } from './api/seo/publicRead.js';
 
-// Vercel entrypoint: the platform owns listening and shutdown, so the schema check gates module load instead of listen.
-try {
-  await testConnection();
-} catch (error) {
-  logServerError('startup_failed', error);
-  throw error;
-}
+// Data transactions verify schema/roles before use. A transient connection refusal
+// must not prevent Express from serving a controlled error or /api/access.
 
 const app: express.Express = createApp({
   routes, healthcheck: testConnection, isStopping: () => false,

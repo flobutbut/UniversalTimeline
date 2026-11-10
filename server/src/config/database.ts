@@ -22,6 +22,9 @@ export function createDatabaseConfig(env: NodeJS.ProcessEnv = process.env): Pool
       throw new Error('Retirez les options SSL de DATABASE_URL ; utilisez DB_SSL_CA_PATH pour le certificat Supabase.');
     }
   }
+  // Existing Vercel secrets use Supavisor's session endpoint. Keep credentials and
+  // verified TLS intact while using transaction pooling for ephemeral instances.
+  if (env.VERCEL === '1' && url.hostname.endsWith('.pooler.supabase.com') && (!url.port || url.port === '5432')) url.port = '6543';
   return {
     connectionString: url.toString(),
     ssl: {
@@ -30,8 +33,7 @@ export function createDatabaseConfig(env: NodeJS.ProcessEnv = process.env): Pool
     },
     max: 5,
     connectionTimeoutMillis: 10000,
-    idleTimeoutMillis: 30000,
-    statement_timeout: 15000,
+    idleTimeoutMillis: env.VERCEL === '1' ? 5000 : 30000,
     application_name: 'universal-timeline-api',
   };
 }

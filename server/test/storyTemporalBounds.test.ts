@@ -57,7 +57,7 @@ it('returns the same bounds on the list and the dedicated API endpoint', async (
   async function get(path: string) {
     const handler = router.stack.find((layer: any) => layer.route?.path === path && layer.route.methods.get).route.stack[0].handle;
     const res = { json: vi.fn(), status: vi.fn() }; res.status.mockReturnValue(res);
-    await handler({}, res); return res.json.mock.calls[0][0];
+    await handler({ query: {} }, res); return res.json.mock.calls[0][0];
   }
   const list = await get('/stories'); const bounds = await get('/stories/temporal-bounds');
   expect(list[0]).toMatchObject({ start_date: 'M65', end_date: 'M8' });

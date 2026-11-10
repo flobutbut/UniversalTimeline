@@ -110,10 +110,14 @@ router.post('/events', endpoint("Erreur lors de la création de l'événement", 
   const result = await catalogue.createEvent(data);
   res.status(201).json(result);
 }, { conflict: 'Un événement avec cet ID existe déjà' }));
-router.get('/stories', endpoint('Erreur lors de la récupération des frises', async (_req, res) => {
-  res.json(await stories.listStories());
+router.get('/stories', endpoint('Erreur lors de la récupération des frises', async (req, res) => {
+  if (req.query.view !== undefined && req.query.view !== 'summary') throw new InputValidationError('view', 'Vue de frises invalide.');
+  res.json(await stories.listStories(req.query.view === 'summary'));
 }));
 // Static paths must precede /stories/:id.
+router.get('/stories/navigation', endpoint('Impossible de charger les parcours des frises.', async (_req, res) => {
+  res.json(await stories.listNavigationStories());
+}));
 router.get('/stories/wikidata-matches', endpoint('Impossible de vérifier les frises existantes.', async (req, res) => {
   res.set('Cache-Control', 'no-store');
   const { qid, title } = parseGeneratedStoryLookup(req.query);

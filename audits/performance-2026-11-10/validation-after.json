@@ -1,0 +1,121 @@
+{
+  "applicationTests": 1920,
+  "postgresSuites": [
+    {
+      "suite": "auth",
+      "tests": 26,
+      "passed": 26,
+      "failed": 0
+    },
+    {
+      "suite": "periodHierarchy",
+      "tests": 10,
+      "passed": 10,
+      "failed": 0
+    },
+    {
+      "suite": "periodDeletion",
+      "tests": 7,
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "suite": "functionPrivileges",
+      "tests": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "suite": "atomicWrites",
+      "tests": 47,
+      "passed": 47,
+      "failed": 0
+    },
+    {
+      "suite": "profiles",
+      "tests": 10,
+      "passed": 10,
+      "failed": 0
+    },
+    {
+      "suite": "admin",
+      "tests": 15,
+      "passed": 15,
+      "failed": 0
+    },
+    {
+      "suite": "feedback",
+      "tests": 10,
+      "passed": 10,
+      "failed": 0
+    },
+    {
+      "suite": "wikidataGeneration",
+      "tests": 20,
+      "passed": 20,
+      "failed": 0
+    },
+    {
+      "suite": "catalogueConversion",
+      "tests": 8,
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "suite": "storyPresentations",
+      "tests": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "suite": "wikidataSourcesMigration",
+      "tests": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "suite": "wikipediaTitles",
+      "tests": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "suite": "taxonomyTags",
+      "tests": 21,
+      "passed": 21,
+      "failed": 0
+    },
+    {
+      "suite": "storyStructure",
+      "tests": 8,
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "suite": "navigationWrappers",
+      "tests": 14,
+      "passed": 14,
+      "failed": 0
+    },
+    {
+      "suite": "publicEditors",
+      "tests": 7,
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "suite": "timeline-pg-reload.log",
+      "tests": 19,
+      "passed": 19,
+      "failed": 0
+    },
+    {
+      "suite": "timeline-pg-restore-final.log",
+      "tests": 3,
+      "passed": 3,
+      "failed": 0
+    }
+  ],
+  "serverDependencyVulnerabilities": 0,
+  "schemaMigrationAppliedToProduction": false
+}

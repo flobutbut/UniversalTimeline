@@ -6,13 +6,21 @@ import { FeedbackError } from '../domain/errors.js';
 
 interface ErrorMessages { conflict?: string; busy?: string; foreignKey?: string }
 const record = (error: unknown): Record<string, unknown> => error !== null && typeof error === 'object' ? error as Record<string, unknown> : {};
+export function databaseFailureReason(error: unknown): string | undefined {
+  const fields = record(error);
+  if (fields.code === 'XX000' && typeof fields.message === 'string' && /\b(?:EMAXCONNSESSION|MaxClientsInSessionMode|max clients reached in session mode)\b/i.test(fields.message)) return 'database_pool_full';
+  if (['53300', 'ECONNRESET', 'ECONNREFUSED', 'ENOTFOUND', 'EHOSTUNREACH', 'ETIMEDOUT', '08006', '08001', '57P01', '57014'].includes(String(fields.code))) return 'database_unavailable';
+  if (fields instanceof Error && /^(?:timeout exceeded when trying to connect|Connection terminated due to connection timeout)$/.test(fields.message)) return 'database_connection_timeout';
+  return undefined;
+}
 
 /** Never log messages/stacks, request bodies, SQL, parameters or connection URLs. */
 export function logServerError(event: string, error: unknown, operation?: string) {
   const fields = record(error);
   const code = typeof fields.code === 'string' && /^[A-Z0-9_]{2,32}$/.test(fields.code) ? fields.code : undefined;
   const kind = error instanceof Error && /^[A-Za-z][\w]{0,40}$/.test(error.name) ? error.name : 'UnknownError';
-  console.error(JSON.stringify({ event, kind, ...(code ? { code } : {}), ...(operation ? { operation } : {}) }));
+  const reason = databaseFailureReason(error);
+  console.error(JSON.stringify({ event, kind, ...(code ? { code } : {}), ...(reason ? { reason } : {}), ...(operation ? { operation } : {}) }));
 }
 
 export function publicApiError(error: unknown, fallback: string, messages: ErrorMessages = {}): { status: number; message: string } {
@@ -23,6 +31,7 @@ export function publicApiError(error: unknown, fallback: string, messages: Error
   if (error instanceof InvalidCategoriesError) return { status: 400, message: error.message };
   if (error instanceof PeriodHierarchyError || error instanceof PeriodDeletionError || error instanceof StoryAssociationError || error instanceof ProfileError || error instanceof AdminError || error instanceof CatalogueConversionError) return { status: error.status, message: error.message };
   const fields = record(error);
+  if (databaseFailureReason(error)) return { status: 503, message: 'La base de données est temporairement indisponible. Réessayez.' };
   if (fields.type === 'entity.parse.failed') return { status: 400, message: 'Le corps de la requête doit être un JSON valide.' };
   if (fields.type === 'entity.too.large') return { status: 413, message: 'Le contenu de la requête est trop volumineux.' };
   switch (fields.code) {
@@ -41,6 +50,7 @@ export function publicApiError(error: unknown, fallback: string, messages: Error
 
 export function sendApiError(res: Response, error: unknown, fallback: string, messages?: ErrorMessages) {
   const failure = publicApiError(error, fallback, messages);
+  if (failure.status === 503) res.set?.('Retry-After', '2');
   if (failure.status >= 500) logServerError('api_error', error, fallback);
   return res.status(failure.status).json({ error: failure.message, ...(error instanceof InputValidationError ? { fields: error.fields } : {}), ...(error instanceof WikidataGenerationConflictError ? { existingStories: error.existingStories } : {}) });
 }

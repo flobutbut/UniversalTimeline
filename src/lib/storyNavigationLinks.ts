@@ -1,9 +1,10 @@
 import { hasStoryRootLocation } from './storyRelationLocations';
 import type { Story, StoryAnchor, StorySuggestion, ChildStorySummary } from '@/types/database';
+import type { StoryNavigationSnapshot } from '../../server/src/shared/storyNavigation';
 type NavigationLink = StorySuggestion & { anchors: ChildStorySummary['anchors']; atRoot?: boolean; rootDisplayAsPeriod?: boolean };
 
 /** Child anchors first, then shared content; all links come from one readable frise snapshot. */
-export function storyNavigationLinks(story: Story): NavigationLink[] {
+export function storyNavigationLinks(story: StoryNavigationSnapshot): NavigationLink[] {
   const periods = new Set(story.periods.map(period => period.id));
   const events = new Set(story.events.map(event => event.id));
   const links = new Map<string, NavigationLink>();

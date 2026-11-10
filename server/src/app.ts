@@ -1,6 +1,7 @@
 import express, { type Router, type RequestHandler } from 'express';
 import cors from 'cors';
 import { apiErrorHandler } from './api/errors.js';
+import { requestMetrics } from './api/metrics.js';
 
 export function createApp(options: { routes: Router; healthcheck: () => Promise<unknown>; isStopping: () => boolean; frontendOrigin?: string; access?: RequestHandler; publicPages?: RequestHandler }) {
   const app = express();
@@ -10,6 +11,7 @@ export function createApp(options: { routes: Router; healthcheck: () => Promise<
     next();
   });
   app.use(cors({ origin: options.frontendOrigin ?? 'http://127.0.0.1:5173' }));
+  app.use(requestMetrics);
   app.use('/api/stories/from-wikidata', express.json({ limit: '512kb' }));
   app.use(express.json());
   app.get('/api/access', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json({ enabled: !!options.access }); });

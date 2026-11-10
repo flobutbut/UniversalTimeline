@@ -1,5 +1,6 @@
 import type { RequestHandler } from 'express';
 import { principalContext, type Principal } from './context.js';
+import { measureTiming } from '../api/metrics.js';
 
 export interface VerifiedUser { id: string; is_anonymous?: boolean; app_metadata?: Record<string, unknown>; banned_until?: string | null }
 
@@ -16,7 +17,7 @@ export function createAccessMiddleware(verify: VerifyToken): RequestHandler {
       if (header) {
         const token = /^Bearer ([^\s]+)$/i.exec(header)?.[1];
         if (!token) { res.status(401).json({ error: 'Connexion requise.' }); return; }
-        const user = await verify(token);
+        const user = await measureTiming('authMs', () => verify(token));
         if (!user || user.is_anonymous || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(user.id)) {
           res.status(401).json({ error: 'Session expirée ou invalide. Reconnectez-vous.' }); return;
         }

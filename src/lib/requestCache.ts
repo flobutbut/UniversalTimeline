@@ -13,23 +13,45 @@ export interface RequestStatus {
 /** Shares reads, including empty results. Only the current request may publish. */
 export function createRequestCache(onStatus: (key: string, status: RequestStatus) => void) {
   const loaded = new Set<string>();
-  const pending = new Map<string, Promise<void>>();
+  interface Pending { promise: Promise<void>; controller: AbortController; readers: number; settled: boolean }
+  const pending = new Map<string, Pending>();
   const revisions = new Map<string, number>();
   let epoch = 0;
 
-  async function load<T>(key: string, fetch: () => Promise<T>, apply: (value: T) => void, force = false): Promise<void> {
+  function join(entry: Pending, signal?: AbortSignal): Promise<void> {
+    entry.readers++;
+    return new Promise<void>((resolve, reject) => {
+      let done = false;
+      const finish = (action: () => void) => {
+        if (done) return;
+        done = true; signal?.removeEventListener('abort', cancel); entry.readers--;
+        if (!entry.readers && !entry.settled) entry.controller.abort();
+        action();
+      };
+      const cancel = () => finish(() => reject(new DOMException('Lecture annulée', 'AbortError')));
+      signal?.addEventListener('abort', cancel, { once: true });
+      entry.promise.then(() => finish(resolve), error => finish(() => reject(error)));
+      if (signal?.aborted) cancel();
+    });
+  }
+
+  async function load<T>(key: string, fetch: (signal: AbortSignal) => Promise<T>, apply: (value: T) => void, force = false, signal?: AbortSignal): Promise<void> {
+    signal?.throwIfAborted();
     const shared = pending.get(key);
-    if (shared) return shared;
+    if (shared && !shared.controller.signal.aborted) return join(shared, signal);
     if (!force && loaded.has(key)) return;
     const version = revisions.get(key) ?? 0;
     const startedEpoch = epoch;
     const isCurrent = () => startedEpoch === epoch && version === (revisions.get(key) ?? 0);
     onStatus(key, { loading: true, error: null });
+    const controller = new AbortController();
+    const entry: Pending = { promise: undefined!, controller, readers: 0, settled: false };
 
     // Defer fetch until the promise is registered, including synchronous failures.
-    const request = Promise.resolve().then(fetch).then(async value => {
+    const request = Promise.resolve().then(() => { controller.signal.throwIfAborted(); return fetch(controller.signal); }).then(async value => {
       if (startedEpoch !== epoch) throw new SupersededRequestError();
-      if (!isCurrent()) return load(key, fetch, apply);
+      controller.signal.throwIfAborted();
+      if (!isCurrent()) return load(key, fetch, apply, false, controller.signal);
       try {
         apply(value);
       } catch (cause) {
@@ -40,15 +62,21 @@ export function createRequestCache(onStatus: (key: string, status: RequestStatus
       onStatus(key, { loading: false, error: null });
     }, async cause => {
       if (startedEpoch !== epoch) throw new SupersededRequestError();
+      controller.signal.throwIfAborted();
       // A mutation invalidates both successful and failed older responses.
-      if (!isCurrent()) return load(key, fetch, apply);
+      if (!isCurrent()) return load(key, fetch, apply, false, controller.signal);
       onStatus(key, { loading: false, error: cause instanceof Error ? cause.message : 'Erreur de chargement' });
       throw cause;
     }).finally(() => {
-      if (pending.get(key) === request) pending.delete(key);
+      entry.settled = true;
+      if (pending.get(key) === entry) {
+        pending.delete(key);
+        if (controller.signal.aborted) onStatus(key, { loading: false, error: null });
+      }
     });
-    pending.set(key, request);
-    return request;
+    entry.promise = request;
+    pending.set(key, entry);
+    return join(entry, signal);
   }
 
   function invalidate(key: string) {
@@ -67,6 +95,7 @@ export function createRequestCache(onStatus: (key: string, status: RequestStatus
   function clear() {
     epoch++;
     loaded.clear();
+    for (const entry of pending.values()) entry.controller.abort();
     pending.clear();
     revisions.clear();
   }

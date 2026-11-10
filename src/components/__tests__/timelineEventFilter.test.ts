@@ -27,7 +27,7 @@ beforeEach(async () => {
     if (path === '/stories/1') return { id: 1, title_fr: 'Dense', childStories: [], tags: [], periods: [period], events };
     if (path === '/stories/2') return { id: 2, title_fr: 'Courte', childStories: [], tags: [], periods: [period], events: small };
     if (path === '/stories/3') return { id: 3, title_fr: 'Un sujet', childStories: [], tags: [], periods: [period], events: events.slice(0, 12) };
-    if (path === '/stories') return [{ id: 1, title_fr: 'Dense', categories: [] }, { id: 2, title_fr: 'Courte', categories: [] }, { id: 3, title_fr: 'Un sujet', categories: [] }];
+    if ((path === '/stories' || path === '/stories?view=summary')) return [{ id: 1, title_fr: 'Dense', categories: [] }, { id: 2, title_fr: 'Courte', categories: [] }, { id: 3, title_fr: 'Un sujet', categories: [] }];
     if (path.startsWith('/stories/suggestions?')) return [];
     throw new Error(`Lecture inattendue : ${path}`);
   });
