@@ -1,0 +1,308 @@
+{
+  "reference_time": "2026-11-12T12:00:00Z",
+  "stories": [
+    {
+      "key": "marcopolo",
+      "parent_story_id": 15,
+      "title_fr": "Marco Polo",
+      "title_en": "Marco Polo",
+      "description_fr": "De Venise à la cour de Kubilai Khan : la route de la soie, dix-sept années passées en Chine, le retour par l’océan Indien et le récit dicté en prison à Gênes.",
+      "description_en": "From Venice to the court of Kublai Khan: the Silk Road, seventeen years spent in China, the return by the Indian Ocean and the account dictated in prison in Genoa.",
+      "tags": [
+        "territoires-exploration",
+        "economie-echanges"
+      ],
+      "periods": [
+        {
+          "period_id": "855bf9b0-c041-448c-b5f6-93bd7c5ecb56",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "b2720529-e26c-492b-a6be-504bed1a241a",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "05b4f43c-24eb-4965-ad68-cee60d438c9e",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "9e8c5ab1-8d4f-404c-8ed4-8a7568e9c82e",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "f619cde6-2e7d-4e62-8bae-f26e8bd4962f",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "9258c86c-cbff-409c-9288-2a27a1f3fa48",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "aebd9a6a-0417-4324-8451-2a88da942277",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "6c050a8c-64d8-423e-9485-81c26612fb67",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "864c9f60-6b44-4f6a-9f0b-e5e6e46c86af",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "55f0eb26-0cb9-4802-adc2-6270d1da90f8",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "3bdbb6b1-cdfb-4e4d-8b98-2af3296d7aa7",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "57e12a0e-0841-4f8f-ac43-f464112a0544",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 15,
+          "event_id": "3bdbb6b1-cdfb-4e4d-8b98-2af3296d7aa7"
+        },
+        {
+          "source_story_id": 52,
+          "event_id": "3bdbb6b1-cdfb-4e4d-8b98-2af3296d7aa7"
+        }
+      ]
+    }
+  ],
+  "reusedPeriods": {},
+  "reusedEvents": {
+    "3bdbb6b1-cdfb-4e4d-8b98-2af3296d7aa7": {
+      "date": "1298",
+      "q": "Q654562"
+    }
+  },
+  "newPeriods": [
+    {
+      "row": {
+        "id": "855bf9b0-c041-448c-b5f6-93bd7c5ecb56",
+        "label_fr": "Jeunesse de Marco Polo à Venise",
+        "label_en": "Marco Polo’s youth in Venice",
+        "description_fr": "Marco grandit dans une famille de marchands vénitiens, tandis que son père et son oncle commercent jusqu’en Asie centrale.",
+        "description_en": "Marco grows up in a family of Venetian merchants while his father and uncle trade as far as Central Asia.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1254",
+        "end_date": "1271",
+        "start_years_bp": 772.847364818617,
+        "end_years_bp": 755.848049281314,
+        "non_thematic": false
+      },
+      "tags": [
+        "peuplement-societe",
+        "economie-echanges"
+      ]
+    },
+    {
+      "row": {
+        "id": "b2720529-e26c-492b-a6be-504bed1a241a",
+        "label_fr": "Voyage de Marco Polo vers la Chine",
+        "label_en": "Marco Polo’s journey to China",
+        "description_fr": "Avec son père Niccolò et son oncle Maffeo, Marco traverse l’Anatolie, la Perse, le Pamir et le désert de Gobi.",
+        "description_en": "With his father Niccolò and his uncle Maffeo, Marco crosses Anatolia, Persia, the Pamirs and the Gobi Desert.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1271",
+        "end_date": "1275",
+        "start_years_bp": 755.848049281314,
+        "end_years_bp": 751.848049281314,
+        "non_thematic": false
+      },
+      "tags": [
+        "territoires-exploration",
+        "economie-echanges"
+      ]
+    },
+    {
+      "row": {
+        "id": "05b4f43c-24eb-4965-ad68-cee60d438c9e",
+        "label_fr": "Marco Polo au service de Kubilai Khan",
+        "label_en": "Marco Polo in the service of Kublai Khan",
+        "description_fr": "Selon son récit, Marco remplit des missions pour l’empereur mongol dans plusieurs provinces de Chine ; les sources chinoises ne le mentionnent pas.",
+        "description_en": "By his own account, Marco carries out missions for the Mongol emperor in several provinces of China; Chinese sources do not mention him.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1275",
+        "end_date": "1292",
+        "start_years_bp": 751.848049281314,
+        "end_years_bp": 734.848733744011,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "territoires-exploration"
+      ]
+    },
+    {
+      "row": {
+        "id": "9e8c5ab1-8d4f-404c-8ed4-8a7568e9c82e",
+        "label_fr": "Retour de Marco Polo par la mer",
+        "label_en": "Marco Polo’s return by sea",
+        "description_fr": "Les Polo accompagnent une princesse mongole jusqu’en Perse par Sumatra, Ceylan et l’Inde, puis regagnent Venise.",
+        "description_en": "The Polos escort a Mongol princess to Persia by way of Sumatra, Ceylon and India, then make their way back to Venice.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1292",
+        "end_date": "1295",
+        "start_years_bp": 734.848733744011,
+        "end_years_bp": 731.848049281314,
+        "non_thematic": false
+      },
+      "tags": [
+        "territoires-exploration"
+      ]
+    },
+    {
+      "row": {
+        "id": "f619cde6-2e7d-4e62-8bae-f26e8bd4962f",
+        "label_fr": "Marco Polo marchand à Venise",
+        "label_en": "Marco Polo as a merchant in Venice",
+        "description_fr": "Rentré riche, Marco reprend le commerce, se marie et voit son récit circuler dans toute l’Europe.",
+        "description_en": "Back home a rich man, Marco returns to trade, marries and sees his account circulate throughout Europe.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1295",
+        "end_date": "1324-01-08",
+        "start_years_bp": 731.848049281314,
+        "end_years_bp": 702.832306639288,
+        "non_thematic": false
+      },
+      "tags": [
+        "economie-echanges"
+      ]
+    }
+  ],
+  "newEvents": [
+    {
+      "row": {
+        "id": "9258c86c-cbff-409c-9288-2a27a1f3fa48",
+        "label_fr": "Naissance de Marco Polo",
+        "label_en": "Birth of Marco Polo",
+        "description_fr": "Marco Polo naît à Venise ; la tradition retient le 15 septembre 1254.",
+        "description_en": "Marco Polo is born in Venice; tradition gives 15 September 1254.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1254",
+        "date_years_bp": 772.847364818617
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "aebd9a6a-0417-4324-8451-2a88da942277",
+        "label_fr": "Départ des Polo pour l’Orient",
+        "label_en": "The Polos set out for the East",
+        "description_fr": "À dix-sept ans, Marco quitte Venise avec son père et son oncle, porteurs de lettres du pape pour le grand khan.",
+        "description_en": "Aged seventeen, Marco leaves Venice with his father and uncle, who carry letters from the pope for the Great Khan.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1271",
+        "date_years_bp": 755.848049281314
+      },
+      "tags": [
+        "territoires-exploration"
+      ]
+    },
+    {
+      "row": {
+        "id": "6c050a8c-64d8-423e-9485-81c26612fb67",
+        "label_fr": "Arrivée des Polo à la cour de Kubilai Khan",
+        "label_en": "The Polos arrive at the court of Kublai Khan",
+        "description_fr": "Après plus de trois ans de route, les Polo sont reçus par l’empereur à Shangdu, sa résidence d’été.",
+        "description_en": "After more than three years on the road, the Polos are received by the emperor at Shangdu, his summer residence.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1275",
+        "date_years_bp": 751.848049281314
+      },
+      "tags": [
+        "territoires-exploration",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "864c9f60-6b44-4f6a-9f0b-e5e6e46c86af",
+        "label_fr": "Retour de Marco Polo à Venise",
+        "label_en": "Marco Polo returns to Venice",
+        "description_fr": "Les trois voyageurs retrouvent Venise après vingt-quatre ans d’absence.",
+        "description_en": "The three travellers return to Venice after twenty-four years away.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1295",
+        "date_years_bp": 731.848049281314
+      },
+      "tags": [
+        "territoires-exploration"
+      ]
+    },
+    {
+      "row": {
+        "id": "55f0eb26-0cb9-4802-adc2-6270d1da90f8",
+        "label_fr": "Bataille de Curzola",
+        "label_en": "Battle of Curzola",
+        "description_fr": "La flotte de Gênes bat celle de Venise en Adriatique ; selon la tradition, Marco Polo y est fait prisonnier.",
+        "description_en": "The Genoese fleet defeats the Venetian fleet in the Adriatic; according to tradition, Marco Polo is taken prisoner there.",
+        "wikidata_id": "Q2139987",
+        "wikipedia_title_fr": "Bataille de Curzola",
+        "wikipedia_title_en": "Battle of Curzola",
+        "date": "1298-09-09",
+        "date_years_bp": 728.160164271047
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "57e12a0e-0841-4f8f-ac43-f464112a0544",
+        "label_fr": "Mort de Marco Polo",
+        "label_en": "Death of Marco Polo",
+        "description_fr": "Marco Polo meurt à Venise, laissant un testament qui détaille sa fortune.",
+        "description_en": "Marco Polo dies in Venice, leaving a will that details his fortune.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1324-01-08",
+        "date_years_bp": 702.832306639288
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    }
+  ]
+}

@@ -59,7 +59,7 @@ const check = (cond, message) => `IF NOT (${cond}) THEN RAISE EXCEPTION ${q(mess
 const sources = [...new Set(stories.flatMap(s => [s.parent, ...s.entries.map(e => e[0])]))].sort((a, b) => a - b);
 const sourceTitles = content.sources ?? JSON.parse(readFileSync(new URL('./sources.json', import.meta.url), 'utf8'));
 const L = [];
-L.push(HEAD(`Création de ${lot.count} frises.`));
+L.push(HEAD(lot.heading ?? `Création de ${lot.count} frises.`));
 L.push('DO $people$ DECLARE owner uuid; writer text; sid integer; BEGIN');
 L.push(check(`(SELECT count(DISTINCT owner_user_id) FROM public.stories WHERE id IN (${sources.join(',')}))=1 AND (SELECT count(DISTINCT author) FROM public.stories WHERE id IN (${sources.join(',')}))=1`, 'Les frises sources n’ont pas un propriétaire et un auteur uniques.'));
 L.push(`SELECT owner_user_id,author INTO owner,writer FROM public.stories WHERE id=${sources[0]};`);

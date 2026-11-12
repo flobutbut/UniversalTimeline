@@ -175,16 +175,34 @@ it('does not present the editorial parent chain as temporal ancestors on a direc
   expect(nav.currentPeriod.value).toBeNull();
 });
 
-it('keeps the Universe first after a search or a redirect, without reading other frises', async () => {
+it('restarts the path from the Universe on each search or redirect, without reading other frises', async () => {
   await nav.openStory('3', { storyId: '3' });
   expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:3']);
   expect(StoryApiService.getInstance().getStory).toHaveBeenCalledExactlyOnceWith('3', { signal: expect.any(AbortSignal) });
   expect(nav.returnPath.value).toEqual([]);
+  // Une seconde recherche remplace la première : le fil n'est pas un historique des résultats ouverts.
   await nav.openStory('2', { storyId: '2' });
-  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:3', 'story:2']);
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:2']);
+  expect(nav.returnPath.value).toEqual([]);
   await nav.navigateToStoryBreadcrumb(0);
   expect(nav.currentStoryId.value).toBe('1');
   expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1']);
+});
+
+it('drops the frises visited before a search, then keeps following associations from the result', async () => {
+  await descend(); await nav.selectStory('2');
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:2']);
+  await nav.openStory('3', { storyId: '3' });
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:3']);
+  await nav.selectStory('2');
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:3', 'story:2']);
+});
+
+it('keeps the visited path when a searched frise fails to load', async () => {
+  await nav.openStory('3', { storyId: '3' });
+  vi.mocked(StoryApiService.getInstance().getStory).mockRejectedValueOnce(new Error('Indisponible'));
+  await nav.openStory('2', { storyId: '2' });
+  expect(nav.storyBreadcrumb.value.map(item => item.id)).toEqual(['story:1', 'story:3']);
 });
 
 it('does not add an Universe the reader cannot open', async () => {
