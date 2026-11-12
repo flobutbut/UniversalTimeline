@@ -198,6 +198,8 @@ test('gives authenticated inserts sequence usage without anonymous access or set
 });
 test('updates timestamps through the restricted trigger without exposing the legacy repair routine', async () => {
   await pool.query("INSERT INTO periods(id,label_fr,label_en,start_date,end_date,updated_at) VALUES ('old','Ancienne','Old','M65','NOW','1970-01-01')");
+  // The shared catalogue is edited by the record's creator (or an editor), not by any account.
+  await pool.query("INSERT INTO catalogue_private.record_creators(kind,entity_id,user_id) VALUES('period','old',$1)",[alice]);
   const result=await call('put','/periods/:id',{wikidata_id:'Q999907',label:{fr:'Modifiée'},start_date:'M65',end_date:'NOW'},{id:'old'});
   assert.equal(result.statusCode,200);
   assert.ok(new Date(result.payload.updated_at).getUTCFullYear()>2020);

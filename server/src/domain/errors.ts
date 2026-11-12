@@ -11,7 +11,7 @@ export class PeriodHierarchyError extends Error {
   constructor(public readonly status: 400 | 404 | 409, message: string) { super(message); }
 }
 export class PeriodDeletionError extends Error {
-  constructor(public readonly status: 404 | 409, message: string) { super(message); }
+  constructor(public readonly status: 403 | 404 | 409, message: string) { super(message); }
 }
 export class StoryAssociationError extends Error {
   constructor(public readonly status: 400 | 404 | 409, message: string) { super(message); }
@@ -23,5 +23,5 @@ export class ProfileError extends Error {
   constructor(public readonly status: 404 | 409 | 412, message: string) { super(message); }
 }
 export class CatalogueConversionError extends Error {
-  constructor(public readonly status: 404 | 409, message: string) { super(message); }
+  constructor(public readonly status: 403 | 404 | 409, message: string) { super(message); }
 }

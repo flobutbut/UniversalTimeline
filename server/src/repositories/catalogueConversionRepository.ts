@@ -11,6 +11,10 @@ export async function lockEntity(client: TransactionClient, kind: CatalogueKind,
 }
 
 /** Uses invisible to RLS: frises of other owners and chronological views of a period. */
+/** Same rule as the database guard: an editor, or the creator while no frise of another account uses the record. */
+export async function canEditRecord(client: TransactionClient, kind: CatalogueKind, id: string) {
+  return (await client.query<{ allowed: boolean }>('SELECT catalogue_private.can_edit_record($1, $2) AS allowed', [kind, id])).rows[0].allowed === true;
+}
 export async function readBlockers(client: TransactionClient, kind: CatalogueKind, id: string) {
   return (await client.query<{ result: { foreign_stories: number; presentations: number } }>(
     'SELECT catalogue_private.conversion_blockers($1, $2) AS result', [kind, id],
