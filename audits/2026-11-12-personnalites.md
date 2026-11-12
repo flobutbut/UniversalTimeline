@@ -114,3 +114,13 @@ Total : 11 frises publiques, 43 périodes et 60 événements nouveaux, 26 évén
 ## Répétition locale
 
 Même protocole : création réussie (onze frises, parents locaux et accès racine conformes), seconde exécution refusée, retour arrière ramenant la base à son état initial.
+
+---
+
+# Quatrième lot — Marco Polo
+
+État : **appliqué en production le 12 novembre 2026** (frise 85), comptes relus en base. Fichiers : `database/data/20261112_personnalites_lot4.sql`, son `_rollback.sql`, son `.json` ; texte éditorial dans `20261112_personnalites_source/content4.mjs`.
+
+Frise **Marco Polo**, sous Moyen Âge (15), ouverte depuis « Le Livre de Marco Polo » dans Moyen Âge et Histoire de la Chine (52). Cinq phases de vie (Venise, voyage aller, service de Kubilai Khan, retour par la mer, retour à Venise) et sept événements, dont le livre existant et la bataille de Curzola (Q2139987), où la tradition place sa capture. Naissance en 1254 (le 15 septembre, date traditionnelle, n’est pas retenu comme jour) ; le rôle de Marco auprès de Kubilai n’est connu que par son propre récit, ce que dit la description.
+
+Répétition locale : création réussie, seconde exécution refusée, retour arrière ramenant l’état initial. Le jeu d’essai (`seed.mjs`) gère désormais les lots sans période réutilisée ; les trois lots précédents se régénèrent à l’identique.
