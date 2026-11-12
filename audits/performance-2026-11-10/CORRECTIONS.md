@@ -14,7 +14,7 @@
 - Fusion des périodes en une seule passe avec Map, au lieu de recopier et parcourir tout le tableau pour chaque élément reçu.
 - Mesures de durée par route normalisée : total, Auth, attente du pool, SQL et identifiant de requête généré. Aucun token, body, paramètre SQL ou identifiant de contenu n’est journalisé.
 
-## Comparaisons avant migration de production
+## Mesures intermédiaires avant migration de production
 
 La réécriture SQL a été mesurée sur la base actuelle, en lecture seule, sous le rôle connecté avec la même identité synthétique publique que l’audit. Un échantillon par mesure : ces chiffres ne sont pas des percentiles.
 
@@ -36,10 +36,28 @@ Le catalogue compact représente **48 677 octets** de JSON, contre **355 273 oct
 
 Les protections du compte, la vérification distante des sessions et les invalidations nécessaires aux liens partagés sont conservées. Aucun contenu réel n’a été modifié pour tester une sauvegarde.
 
-## Migration encore en attente d’autorisation spécifique
+## Migration de production appliquée
 
 `database/migrations/20261110103843_performance_read_policies.sql` est testée et intégrée à la baseline pour une nouvelle installation. Elle sépare 11 politiques `ALL` en INSERT, UPDATE et DELETE **en recopiant les prédicats existants à l’identique**, sans les faire participer aux SELECT. Les noms historiques sont conservés sur UPDATE ; les nouvelles politiques ne changent pas le nombre de 21 noms `ut_` attendu par les anciens serveurs. Le schéma existant reste donc compatible avec le code livré avant cette migration.
 
-La revue automatique a refusé son application à la production, en exigeant une autorisation explicite pour le remplacement des politiques d’accès sur 11 tables. Une demande précise a été présentée à l’utilisateur ; aucun accord n’était encore reçu lors de la rédaction. **La migration n’a pas été appliquée en production.** Le coût restant de la liste sous le rôle connecté demande cette dernière étape, puis une nouvelle mesure.
+La migration a été appliquée après autorisation explicite de l’utilisateur, sous la version distante **20261110110221**. La revue automatique exigeait cette confirmation pour le remplacement de politiques d’accès ; l’autorisation et celle de publier le commit ont été obtenues avant les actions. Les 11 politiques ALL ne participent plus aux lectures et le contrôle historique retrouve toujours ses 21 politiques ut_. Les empreintes de stories, périodes, événements et de leurs associations sont identiques avant et après migration.
 
-Le code peut être déployé indépendamment de cette migration. Le suivi du déploiement et la recette publique seront ajoutés après publication.
+## Livraison et mesures finales
+
+Le commit **ec361b18cc2ac8146d85cf20746604efd8aaa8cf** a été publié sur main après autorisation explicite. Vercel le déclare READY ; le domaine public sert la nouvelle API (nouvelle route de graphe et identifiants de requête présents).
+
+| Lecture SQL connectée | Avant | Après code et migration |
+| --- | ---: | ---: |
+| Liste | 1 255 ms | 28,14 ms |
+| Détail Univers | 891 ms | 4,47 ms |
+| Détail Histoire de France | 1 118 ms | 14,64 ms |
+
+Ces mesures isolées concernent le temps d’exécution SQL, pas toute la page. Elles utilisent une identité synthétique à droits publics sous le rôle connecté ; les plans sont dans `db-plans-final.json`.
+
+Recette HTTP publique à **12 h 06, heure de Paris** : 30 appels, aucune erreur. Médianes : Univers 73,5 ms, Histoire de France 99,5 ms, catalogue compact 114 ms. Le premier appel Univers a pris 669 ms ; les réponses chaudes ne résument donc pas le démarrage à froid. Le graphe contient les mêmes 50 identifiants publics que le catalogue, sans lien vers une frise absente de cet ensemble. Accès anonyme au compte : 401 ; frise inexistante : 404 ; page HTML timeline : 200.
+
+Navigateur en production avec le compte connecté : Histoire de France affichée avec son parcours et ses événements, puis ouverture de son espace d’édition réussie. Aucun contenu de production n’a été modifié pour la recette ; le scénario écriture puis lecture immédiate a été vérifié sur la base jetable.
+
+Les logs Supavisor de **12 h 05 à 12 h 07 min 44 s** confirment `mode=transaction` pour `universal-timeline-api`, sans EMAXCONNSESSION dans la fenêtre. L’avertissement sur les politiques permissives multiples a disparu. Les avis restants sur les index et les appels Auth dans les écritures ne démontrent pas un coût des lectures ; aucun index n’a été supprimé pour faire disparaître un diagnostic. Les quatre informations de sécurité RLS sans politique concernent des tables fermées par défaut ; aucun nouvel accès n’a été ouvert.
+
+La [CI GitHub du commit déployé](https://github.com/flobutbut/UniversalTimeline/actions/runs/42804164717) est terminée avec succès : installation vierge, audits, builds, tests PostgreSQL 17 et restauration. Les corrections et la migration sont en production ; aucun accord supplémentaire ne reste requis.

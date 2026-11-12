@@ -1,0 +1,1598 @@
+{
+ "periods": [
+  {
+   "id": "b7e57449-fe71-4400-affb-a11324f864b3",
+   "wikidata_id": null,
+   "label_fr": "Révolution française",
+   "label_en": "Révolution française",
+   "description_fr": "période de l'histoire de France et de ses colonies, du 5 mai 1789 au 9 novembre 1799",
+   "description_en": "période de l'histoire de France et de ses colonies, du 5 mai 1789 au 9 novembre 1799",
+   "start_date": "1789-07-14",
+   "end_date": "1799-11-09",
+   "start_years_bp": 237.30168591740184,
+   "end_years_bp": 226.9799884499138,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-03T10:34:42.474699+00:00",
+   "updated_at": "2026-11-06T12:38:20.618423+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Révolution française",
+   "wikipedia_title_en": "French Revolution",
+   "non_thematic": false
+  },
+  {
+   "id": "8923819c-cc1f-4da3-8503-4a485d186b0f",
+   "wikidata_id": "Q1",
+   "label_fr": "Univers",
+   "label_en": "Universe",
+   "description_fr": "ensemble de tout ce qui existe : énergie, espace, temps et matière",
+   "description_en": "totality consisting of space, time, matter and energy",
+   "start_date": "G13.798",
+   "end_date": "TODAY",
+   "start_years_bp": 13798000000,
+   "end_years_bp": 0,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-10-31T20:10:47.075235+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Univers",
+   "wikipedia_title_en": "Universe",
+   "non_thematic": false
+  },
+  {
+   "id": "b34af765-32cd-4d01-820d-2934fc21c2aa",
+   "wikidata_id": "Q2469",
+   "label_fr": "Galaxie d'Andromède",
+   "label_en": "Andromeda Galaxy",
+   "description_fr": "galaxie spirale de la constellation d'Andromède, membre du Groupe local",
+   "description_en": "barred spiral galaxy within the Local Group",
+   "start_date": "G10",
+   "end_date": "TODAY",
+   "start_years_bp": 10000000000,
+   "end_years_bp": 0,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-10-31T21:27:20.269387+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Galaxie d'Andromède",
+   "wikipedia_title_en": "Andromeda Galaxy",
+   "non_thematic": false
+  },
+  {
+   "id": "33d633cb-2c04-4fbc-bd1c-256cbf3d8efa",
+   "wikidata_id": "Q12544",
+   "label_fr": "Empire byzantin",
+   "label_en": "Byzantine Empire",
+   "description_fr": "L’Empire romain d’Orient, de Constantinople, survit mille ans à la chute de Rome et transmet l’héritage grec et romain.",
+   "description_en": "The Eastern Roman Empire, ruled from Constantinople, outlives Rome by a thousand years and hands down the Greek and Roman legacy.",
+   "start_date": "0395-01-17",
+   "end_date": "1453-05-29",
+   "start_years_bp": 1631.761,
+   "end_years_bp": 573.42,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-02T15:58:10.251275+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Empire byzantin",
+   "wikipedia_title_en": "Byzantine Empire",
+   "non_thematic": true
+  },
+  {
+   "id": "11177ae2-95bd-44ff-86bc-3a8b6c335a53",
+   "wikidata_id": "Q620965",
+   "label_fr": "coup d'État du 18 Brumaire an VIII",
+   "label_en": "coup d'État du 18 Brumaire an VIII",
+   "description_fr": "coup d’État du 9 novembre 1799 organisé par Emmanuel-Joseph Sieyès et exécuté par Napoléon Bonaparte",
+   "description_en": "coup d’État du 9 novembre 1799 organisé par Emmanuel-Joseph Sieyès et exécuté par Napoléon Bonaparte",
+   "start_date": "1799-11-09",
+   "end_date": "1799-11-10",
+   "start_years_bp": 226.9799884485829,
+   "end_years_bp": 226.97725059779577,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-03T10:34:42.474699+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Coup d'État du 18 Brumaire",
+   "wikipedia_title_en": "Coup of 18 Brumaire",
+   "non_thematic": false
+  },
+  {
+   "id": "e26cf03d-4760-49f4-8e2f-ccf54e4c6a47",
+   "wikidata_id": "Q12546",
+   "label_fr": "Croisades",
+   "label_en": "Crusades",
+   "description_fr": "Expéditions armées de l’Occident chrétien pour prendre puis défendre Jérusalem et la Terre sainte.",
+   "description_en": "Armed expeditions from Latin Christendom to take and then defend Jerusalem and the Holy Land.",
+   "start_date": "1095-11-27",
+   "end_date": "1291-05-18",
+   "start_years_bp": 930.918,
+   "end_years_bp": 735.449,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-03T16:16:15.218648+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Croisade",
+   "wikipedia_title_en": "Crusades",
+   "non_thematic": false
+  },
+  {
+   "id": "Q40244",
+   "wikidata_id": "Q41493",
+   "label_fr": "Antiquité",
+   "label_en": "Ancient history",
+   "description_fr": "Période de l'histoire humaine couvrant les premières civilisations écrites jusqu'à la chute de l'Empire romain d'Occident en 476. Elle voit naître l'écriture, les grandes religions, la philosophie et les premiers empires.",
+   "description_en": "Period of human history spanning the first writing-based civilisations to the fall of the Western Roman Empire in 476. It saw the birth of writing, great religions, philosophy and the first empires.",
+   "start_date": "3200 BCE",
+   "end_date": "0476-09-04",
+   "start_years_bp": 5225.733,
+   "end_years_bp": 1550.132,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-04-06T21:31:06.86195+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Antiquité",
+   "wikipedia_title_en": "Ancient history",
+   "non_thematic": true
+  },
+  {
+   "id": "Q11537",
+   "wikidata_id": "Q11772",
+   "label_fr": "Antiquité grecque",
+   "label_en": "Ancient Greece",
+   "description_fr": "Civilisation grecque s'étendant de la période mycénienne jusqu'à la conquête romaine, marquée par l'essor de la philosophie, des arts et de la démocratie.",
+   "description_en": "Greek civilisation spanning from the Mycenaean period to the Roman conquest, marked by the rise of philosophy, arts and democracy.",
+   "start_date": "1600 BCE",
+   "end_date": "31 BCE",
+   "start_years_bp": 3625.766,
+   "end_years_bp": 2056.799,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-04-06T22:55:48.211363+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Grèce antique",
+   "wikipedia_title_en": "Ancient Greece",
+   "non_thematic": true
+  },
+  {
+   "id": "Q1747689",
+   "wikidata_id": "Q1747689",
+   "label_fr": "Antiquité romaine",
+   "label_en": "Ancient Rome",
+   "description_fr": "Civilisation romaine depuis la fondation légendaire de Rome en 753 av. J.-C. jusqu'à la chute de l'Empire romain d'Occident en 476 apr. J.-C.",
+   "description_en": "Roman civilisation from the legendary founding of Rome in 753 BC to the fall of the Western Roman Empire in 476 AD.",
+   "start_date": "753 BCE",
+   "end_date": "0476-09-04",
+   "start_years_bp": 2778.784,
+   "end_years_bp": 1550.132,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-04-06T23:00:26.596269+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Rome antique",
+   "wikipedia_title_en": "Ancient Rome",
+   "non_thematic": true
+  },
+  {
+   "id": "Q11769",
+   "wikidata_id": "Q6495391",
+   "label_fr": "Histoire contemporaine",
+   "label_en": "Contemporary history",
+   "description_fr": "Période historique courant de la Révolution française à nos jours, marquée par les révolutions industrielles et politiques, les deux guerres mondiales et la mondialisation.",
+   "description_en": "Historical period from the French Revolution to the present day, marked by industrial and political revolutions, two world wars and globalisation.",
+   "start_date": "1789",
+   "end_date": "TODAY",
+   "start_years_bp": 237.826017,
+   "end_years_bp": 0,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-04-06T21:31:06.86195+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Époque contemporaine",
+   "wikipedia_title_en": "Late modern period",
+   "non_thematic": true
+  },
+  {
+   "id": "Q484757",
+   "wikidata_id": "Q714601",
+   "label_fr": "Égypte prédynastique",
+   "label_en": "Predynastic Egypt",
+   "description_fr": "Période avant l'unification de l'Égypte, caractérisée par l'émergence de l'agriculture et des premières communautés organisées.",
+   "description_en": "Period before the unification of Egypt, characterised by the emergence of agriculture and the first organised communities.",
+   "start_date": "5500 BCE",
+   "end_date": "3100 BCE",
+   "start_years_bp": 7525.686,
+   "end_years_bp": 5125.735,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-04-06T22:56:21.552798+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Période prédynastique égyptienne",
+   "wikipedia_title_en": "Predynastic Egypt",
+   "non_thematic": true
+  },
+  {
+   "id": "PER_BIGBANG",
+   "wikidata_id": "Q323",
+   "label_fr": "Big Bang",
+   "label_en": "Big Bang",
+   "description_fr": "Le modèle du Big Bang décrit l’évolution d’un Univers initialement très chaud et dense, en expansion depuis environ 13,8 milliards d’années. Il relie l’expansion cosmique, les éléments légers et le fond diffus cosmologique.",
+   "description_en": "The Big Bang model describes the evolution of an initially hot, dense universe expanding for about 13.8 billion years. It connects cosmic expansion, light elements and the cosmic microwave background.",
+   "start_date": "G13.8",
+   "end_date": "G11.8",
+   "start_years_bp": 13800000000,
+   "end_years_bp": 11800000000,
+   "color": null,
+   "image_url": null,
+   "created_at": "2025-06-13T12:42:13.948686+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Big Bang",
+   "wikipedia_title_en": "Big Bang",
+   "non_thematic": false
+  },
+  {
+   "id": "Q11768",
+   "wikidata_id": "Q11768",
+   "label_fr": "Antiquité égyptienne",
+   "label_en": "Ancient Egypt",
+   "description_fr": "L'une des plus anciennes civilisations du monde, établie le long du Nil pendant plus de 3 000 ans.",
+   "description_en": "One of the oldest civilisations in the world, established along the Nile for over 3,000 years.",
+   "start_date": "3150 BCE",
+   "end_date": "30 BCE",
+   "start_years_bp": 5175.734,
+   "end_years_bp": 2055.8,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-04-06T22:55:48.211363+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Égypte antique",
+   "wikipedia_title_en": "Ancient Egypt",
+   "non_thematic": true
+  },
+  {
+   "id": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+   "wikidata_id": "Q180046",
+   "label_fr": "Conquête spatiale",
+   "label_en": "Space exploration",
+   "description_fr": "Exploration de l'espace par des engins et des équipages humains, depuis le lancement de Spoutnik 1.",
+   "description_en": "Exploration of outer space by spacecraft and human crews, since the launch of Sputnik 1.",
+   "start_date": "1957-10-04",
+   "end_date": "TODAY",
+   "start_years_bp": 69.07582496393502,
+   "end_years_bp": 0,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-10-31T22:40:53.881876+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Exploration spatiale",
+   "wikipedia_title_en": "Space exploration",
+   "non_thematic": false
+  },
+  {
+   "id": "c1050f5c-bf19-4ec7-a078-7e7dfe8574b6",
+   "wikidata_id": null,
+   "label_fr": "Peuplement de la planète",
+   "label_en": "Peopling of the planet",
+   "description_fr": "Des premiers humains archaïques à Homo sapiens, les chasseurs-cueilleurs gagnent tous les continents sauf l’Antarctique.",
+   "description_en": "From the first archaic humans to Homo sapiens, hunter-gatherers reach every continent except Antarctica.",
+   "start_date": "M2.12",
+   "end_date": "K12",
+   "start_years_bp": 2120000,
+   "end_years_bp": 12000,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-05T06:49:55.587216+00:00",
+   "updated_at": "2026-11-05T06:49:55.587216+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": null,
+   "non_thematic": false
+  },
+  {
+   "id": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+   "wikidata_id": "Q171283",
+   "label_fr": "Homo",
+   "label_en": "Homo",
+   "description_fr": "genre qui réunit Homo sapiens et les espèces apparentées",
+   "description_en": "genus of mammals",
+   "start_date": "M2.8",
+   "end_date": "TODAY",
+   "start_years_bp": 2800000,
+   "end_years_bp": 0,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-04-06T08:25:52.311484+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Homo",
+   "wikipedia_title_en": "Homo",
+   "non_thematic": false
+  },
+  {
+   "id": "30c6d6df-f10b-4788-aa65-41c1614c9595",
+   "wikidata_id": "Q273348",
+   "label_fr": "Guerres d’Italie",
+   "label_en": "Italian Wars",
+   "description_fr": "Les rois de France disputent l’Italie aux Habsbourg et en rapportent l’art de la Renaissance.",
+   "description_en": "The kings of France contest Italy with the Habsburgs and bring back Renaissance art.",
+   "start_date": "1494",
+   "end_date": "1559",
+   "start_years_bp": 532.836,
+   "end_years_bp": 467.839,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-06T08:49:43.209851+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Guerres d'Italie",
+   "wikipedia_title_en": "Italian Wars",
+   "non_thematic": false
+  },
+  {
+   "id": "fd216ffa-0552-48b2-9dbf-b1a551c8bcb8",
+   "wikidata_id": "Q2015687",
+   "label_fr": "Guerre arméno-azerbaïdjanaise",
+   "label_en": "Armenian–Azerbaijani War",
+   "description_fr": "Ensemble de conflits territoriaux entre les républiques d’Arménie et d’Azerbaïdjan entre 1918 et 1920, dans le contexte de l’effondrement des empires russe et ottoman. Il se distingue des guerres plus récentes du Haut-Karabakh.",
+   "description_en": "1918-20 series of territorial conflicts between Armenia and Azerbaijan",
+   "start_date": "1918-03-30",
+   "end_date": "1920-11-28",
+   "start_years_bp": 108.599,
+   "end_years_bp": 105.932,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-04-06T09:40:52.583778+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Guerre arméno-azerbaïdjanaise",
+   "wikipedia_title_en": "Armenian–Azerbaijani war (1918–1920)",
+   "non_thematic": false
+  },
+  {
+   "id": "be213d69-ce6b-4e61-ae4f-26cae8a5b053",
+   "wikidata_id": "Q2113284",
+   "label_fr": "bataille des Rice Boats",
+   "label_en": "bataille des Rice Boats",
+   "description_fr": "bataille terrestre et navale de la guerre d'indépendance américaine",
+   "description_en": "bataille terrestre et navale de la guerre d'indépendance américaine",
+   "start_date": "1776-03-02",
+   "end_date": "1776-03-03",
+   "start_years_bp": 250.669352434532,
+   "end_years_bp": 250.666614583745,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Bataille des Rice Boats",
+   "wikipedia_title_en": "Battle of the Rice Boats",
+   "non_thematic": false
+  },
+  {
+   "id": "755ef543-0561-492d-b391-13b06852434e",
+   "wikidata_id": "Q4691908",
+   "label_fr": "Âge des révolutions",
+   "label_en": "Age of Revolution",
+   "description_fr": "Des deux côtés de l’Atlantique, les révolutions renversent l’ordre monarchique et diffusent les idées de souveraineté du peuple, de droits et de nation.",
+   "description_en": "On both sides of the Atlantic, revolutions overturn the monarchical order and spread the ideas of popular sovereignty, rights and nationhood.",
+   "start_date": "1765",
+   "end_date": "1849",
+   "start_years_bp": 261.831,
+   "end_years_bp": 177.833,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-02T15:47:02.74268+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Age of Revolution",
+   "non_thematic": false
+  },
+  {
+   "id": "d6b2d46b-59b8-48d6-9ab7-238229bb30a1",
+   "wikidata_id": "Q16253782",
+   "label_fr": "Battle of the Delaware Capes",
+   "label_en": "Battle of the Delaware Capes",
+   "description_fr": "1782 battle",
+   "description_en": "1782 battle",
+   "start_date": "1782-12-20",
+   "end_date": "1782-12-21",
+   "start_years_bp": 243.868531077363,
+   "end_years_bp": 243.865793226576,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of the Delaware Capes",
+   "non_thematic": false
+  },
+  {
+   "id": "9fd6e93b-c63d-4b14-ac67-10a93da43fdf",
+   "wikidata_id": "Q19873117",
+   "label_fr": "Battle of Guadeloupe",
+   "label_en": "Battle of Guadeloupe",
+   "description_fr": "bataille navale",
+   "description_en": "bataille navale",
+   "start_date": "1779-12-21",
+   "end_date": "1779-12-22",
+   "start_years_bp": 246.866477690762,
+   "end_years_bp": 246.863739839975,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Guadeloupe (1779)",
+   "non_thematic": false
+  },
+  {
+   "id": "7708353a-0544-4d6e-a43d-bbc6d3315f0e",
+   "wikidata_id": "Q105987346",
+   "label_fr": "Asgill Affair",
+   "label_en": "Asgill Affair",
+   "description_fr": "Planned execution of Charles Asgill, 1982",
+   "description_en": "Planned execution of Charles Asgill, 1982",
+   "start_date": "1782-04-12",
+   "end_date": "1782-11-17",
+   "start_years_bp": 244.558469473217,
+   "end_years_bp": 243.958880150835,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Asgill Affair",
+   "non_thematic": false
+  },
+  {
+   "id": "2e2d2c0d-e2aa-442a-91bd-a4f5a646533d",
+   "wikidata_id": "Q3577291",
+   "label_fr": "ère républicaine",
+   "label_en": "ère républicaine",
+   "description_fr": "période postérieure à la proclamation de l'abolition de la monarchie constitutionnelle française et de la naissance de la Première République française",
+   "description_en": "période postérieure à la proclamation de l'abolition de la monarchie constitutionnelle française et de la naissance de la Première République française",
+   "start_date": "1792-09-21",
+   "end_date": "1804-05-18",
+   "start_years_bp": 234.1120897446257,
+   "end_years_bp": 222.45979679459148,
+   "color": null,
+   "image_url": null,
+   "created_at": "2026-11-03T10:34:42.474699+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Ère républicaine",
+   "wikipedia_title_en": null,
+   "non_thematic": true
+  }
+ ],
+ "events": [
+  {
+   "id": "58b0e0fc-ebae-42b4-ad99-c7e0e7fa1c35",
+   "wikidata_id": "Q1031740",
+   "label_fr": "Grey's raid",
+   "label_en": "Grey's raid",
+   "description_fr": "British raid in Massachusetts during the American Revolutionary War",
+   "description_en": "British raid in Massachusetts during the American Revolutionary War",
+   "date": "1778",
+   "date_years_bp": 248.834992402369,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Grey's raid"
+  },
+  {
+   "id": "a80f5c77-e14c-4639-ae8b-1d84d8a7f8dd",
+   "wikidata_id": "Q137262644",
+   "label_fr": "Raid on Cumberland County Court House",
+   "label_en": "Raid on Cumberland County Court House",
+   "description_fr": "1781 Loyalist raid during the American Revolutionary War",
+   "description_en": "1781 Loyalist raid during the American Revolutionary War",
+   "date": "1781-08-14",
+   "date_years_bp": 245.218291514215,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-03T23:32:36.171304+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": null
+  },
+  {
+   "id": "3f4b6aca-be8a-4c47-a8e2-b1c748e9db52",
+   "wikidata_id": "Q137276300",
+   "label_fr": "Battle of Beatty's Bridge",
+   "label_en": "Battle of Beatty's Bridge",
+   "description_fr": "1781 battle of the American Revolutionary War",
+   "description_en": "1781 battle of the American Revolutionary War",
+   "date": "1781-08-04",
+   "date_years_bp": 245.245670022118,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-03T23:32:36.171304+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": null
+  },
+  {
+   "id": "8a44cefb-cd95-43b0-9f09-910c0c4eab3e",
+   "wikidata_id": "Q137276306",
+   "label_fr": "Battle of Little Raft Swamp",
+   "label_en": "Battle of Little Raft Swamp",
+   "description_fr": "1781 battle of the American Revolutionary War",
+   "description_en": "1781 battle of the American Revolutionary War",
+   "date": "1781-09-01",
+   "date_years_bp": 245.169010200142,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-03T23:32:36.171304+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": null
+  },
+  {
+   "id": "039912af-18cc-42c9-9065-1b980251fd28",
+   "wikidata_id": "Q16565665",
+   "label_fr": "Fort St. Joseph (Michigan)",
+   "label_en": "Fort St. Joseph (Michigan)",
+   "description_fr": "1781 Spanish victory in the American Revolutionary War",
+   "description_en": "1781 Spanish victory in the American Revolutionary War",
+   "date": "1781-02-12",
+   "date_years_bp": 245.719318209655,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-03T23:32:36.171304+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": null
+  },
+  {
+   "id": "ecbcea89-7794-4e6e-834c-6c47b2557bee",
+   "wikidata_id": "Q19863992",
+   "label_fr": "Action at Osborne's",
+   "label_en": "Action at Osborne's",
+   "description_fr": "",
+   "description_en": "",
+   "date": "1781-04-27",
+   "date_years_bp": 245.516717252516,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Action at Osborne's"
+  },
+  {
+   "id": "9f50851a-f1a7-489e-97c3-da3455d4bab6",
+   "wikidata_id": "Q200686",
+   "label_fr": "Cinquième République française",
+   "label_en": "Cinquième République française",
+   "description_fr": "régime politique et période de l'histoire de France",
+   "description_en": "régime politique et période de l'histoire de France",
+   "date": "1958-10-04",
+   "date_years_bp": 68.0888230036505,
+   "created_at": "2026-11-05T10:37:20.742163+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": {
+    "qid": "Q200686",
+    "start": [
+     {
+      "time": "+1958-10-04T00:00:00Z",
+      "after": 0,
+      "before": 0,
+      "precision": 11,
+      "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+     }
+    ],
+    "property": "P571",
+    "references": 0,
+    "statementId": "Q200686$ba5d6a78-4d36-bc5d-6530-dbb58ecba52d"
+   },
+   "wikipedia_title_fr": "Cinquième République (France)",
+   "wikipedia_title_en": "French Fifth Republic"
+  },
+  {
+   "id": "5804c8d0-8350-440b-914a-a822fe4ee7a4",
+   "wikidata_id": "Q1238033",
+   "label_fr": "bataille de Fort Anne",
+   "label_en": "bataille de Fort Anne",
+   "description_fr": "bataille de la guerre d'indépendance des États-Unis",
+   "description_en": "bataille de la guerre d'indépendance des États-Unis",
+   "date": "1777-07-08",
+   "date_years_bp": 249.319591992864,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Bataille de Fort Ann",
+   "wikipedia_title_en": "Battle of Fort Anne"
+  },
+  {
+   "id": "57b04feb-0bc1-4e9b-80b8-d1887be608fd",
+   "wikidata_id": "Q1444121",
+   "label_fr": "bataille navale de Louisbourg",
+   "label_en": "bataille navale de Louisbourg",
+   "description_fr": "bataille navale",
+   "description_en": "bataille navale",
+   "date": "1781-07-21",
+   "date_years_bp": 245.283999933613,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Bataille navale de Louisbourg",
+   "wikipedia_title_en": "Action of 21 July 1781"
+  },
+  {
+   "id": "70fe5e6a-e642-4827-9e8f-d20909f88e1b",
+   "wikidata_id": "Q1780878",
+   "label_fr": "Front de l'Ouest de la guerre d'indépendance des États-Unis",
+   "label_en": "Front de l'Ouest de la guerre d'indépendance des États-Unis",
+   "description_fr": "zone de conflit pendant la guerre d'indépendance des États-Unis",
+   "description_en": "zone de conflit pendant la guerre d'indépendance des États-Unis",
+   "date": "1775",
+   "date_years_bp": 251.835676868583,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Théâtre occidental de la guerre d'indépendance des États-Unis",
+   "wikipedia_title_en": "Western theater of the American Revolutionary War"
+  },
+  {
+   "id": "6cf7a564-f79a-4b9f-8b51-30f84a6c03aa",
+   "wikidata_id": "Q1862538",
+   "label_fr": "Battle of Cobleskill",
+   "label_en": "Battle of Cobleskill",
+   "description_fr": "1778 American Revolutionary War raid",
+   "description_en": "1778 American Revolutionary War raid",
+   "date": "1778-05-30",
+   "date_years_bp": 248.427052638984,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Cobleskill"
+  },
+  {
+   "id": "22687f48-8829-4b7c-8e55-7199254163eb",
+   "wikidata_id": "Q1949707",
+   "label_fr": "bataille de Beaufort",
+   "label_en": "bataille de Beaufort",
+   "description_fr": "bataille de la guerre d'indépendance des États-Unis",
+   "description_en": "bataille de la guerre d'indépendance des États-Unis",
+   "date": "1779-02-03",
+   "date_years_bp": 247.745327793083,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Beaufort"
+  },
+  {
+   "id": "8973334d-3eb2-4c46-9dce-07a8da0a656c",
+   "wikidata_id": "Q2112104",
+   "label_fr": "bataille de Staten Island",
+   "label_en": "bataille de Staten Island",
+   "description_fr": "1777 Part of the American Revolutionary War",
+   "description_en": "1777 Part of the American Revolutionary War",
+   "date": "1777-08-22",
+   "date_years_bp": 249.196388710992,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Bataille de Staten Island",
+   "wikipedia_title_en": "Battle of Staten Island"
+  },
+  {
+   "id": "ea8037ac-c930-4b74-9227-cb2bc0f59c61",
+   "wikidata_id": "Q2237194",
+   "label_fr": "bataille des forts Clinton et Montgomery",
+   "label_en": "bataille des forts Clinton et Montgomery",
+   "description_fr": "bataille de la guerre d'indépendance des États-Unis",
+   "description_en": "bataille de la guerre d'indépendance des États-Unis",
+   "date": "1777-10-06",
+   "date_years_bp": 249.073185425825,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Bataille des forts Clinton et Montgomery",
+   "wikipedia_title_en": "Battle of Forts Clinton and Montgomery"
+  },
+  {
+   "id": "d310f454-f158-4bbd-b372-936111b31237",
+   "wikidata_id": "Q12001363",
+   "label_fr": "bataille de Crooked Billet",
+   "label_en": "bataille de Crooked Billet",
+   "description_fr": "1778 historic site",
+   "description_en": "1778 historic site",
+   "date": "1778-05-01",
+   "date_years_bp": 248.506450309022,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Crooked Billet"
+  },
+  {
+   "id": "d717519c-b2cf-453f-8bf1-1d93795f42b0",
+   "wikidata_id": "Q14680788",
+   "label_fr": "Raid de Colbert",
+   "label_en": "Raid de Colbert",
+   "description_fr": "Bataille de 1783 de la guerre d'indépendance américaine",
+   "description_en": "Bataille de 1783 de la guerre d'indépendance américaine",
+   "date": "1783-04-17",
+   "date_years_bp": 243.54546468388,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Colbert raid"
+  },
+  {
+   "id": "6eaab574-200e-4a74-9571-2f192c4a4380",
+   "wikidata_id": "Q14774038",
+   "label_fr": "Sugarloaf Massacre",
+   "label_en": "Sugarloaf Massacre",
+   "description_fr": "massacre during the American Revolutionary War",
+   "description_en": "massacre during the American Revolutionary War",
+   "date": "1780-09-11",
+   "date_years_bp": 246.140947230144,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Sugarloaf massacre"
+  },
+  {
+   "id": "49d8c376-afae-422d-8d26-9da2dd534033",
+   "wikidata_id": "Q16158049",
+   "label_fr": "combat du 15 février 1783",
+   "label_en": "combat du 15 février 1783",
+   "description_fr": "bataille navale",
+   "description_en": "bataille navale",
+   "date": "1783-02-15",
+   "date_years_bp": 243.71247358218,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Combat du 15 février 1783",
+   "wikipedia_title_en": "Action of 15 February 1783"
+  },
+  {
+   "id": "f039c88b-2bf8-40da-a648-b7a17b5297cf",
+   "wikidata_id": "Q16158065",
+   "label_fr": "Action of 25 February 1781",
+   "label_en": "Action of 25 February 1781",
+   "description_fr": "naval engagement",
+   "description_en": "naval engagement",
+   "date": "1781-02-25",
+   "date_years_bp": 245.683726148978,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Action of 25 February 1781"
+  },
+  {
+   "id": "6e844fb9-3d13-4732-9254-fcca3c5f6bc9",
+   "wikidata_id": "Q16158090",
+   "label_fr": "Action of 4 September 1782",
+   "label_en": "Action of 4 September 1782",
+   "description_fr": "",
+   "description_en": "",
+   "date": "1782-09-04",
+   "date_years_bp": 244.161481111396,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Action of 4 September 1782"
+  },
+  {
+   "id": "8a63c903-4f9d-47af-8d87-26c8ccd5a369",
+   "wikidata_id": "Q16158101",
+   "label_fr": "Action of 5 September 1782",
+   "label_en": "Action of 5 September 1782",
+   "description_fr": "bataille navale",
+   "description_en": "bataille navale",
+   "date": "1782-09-05",
+   "date_years_bp": 244.158743260641,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Action of 5 September 1782"
+  },
+  {
+   "id": "4c2680a8-e2c2-42c9-afe5-b96e54305c7d",
+   "wikidata_id": "Q16158127",
+   "label_fr": "Action of 7 June 1780",
+   "label_en": "Action of 7 June 1780",
+   "description_fr": "bataille navale",
+   "description_en": "bataille navale",
+   "date": "1780-06-07",
+   "date_years_bp": 246.403780906184,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Action of 7 June 1780"
+  },
+  {
+   "id": "e4e7dc7c-32b7-49b9-b57a-b5161b45e7f7",
+   "wikidata_id": "Q16847890",
+   "label_fr": "Intelligence in the Battle of Princeton",
+   "label_en": "Intelligence in the Battle of Princeton",
+   "description_fr": "1777 battle",
+   "description_en": "1777 battle",
+   "date": "1777-01-03",
+   "date_years_bp": 249.828832241203,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Intelligence in the Battle of Princeton"
+  },
+  {
+   "id": "959d371f-4fb6-4026-a7e1-e5e95ae82079",
+   "wikidata_id": "Q17389316",
+   "label_fr": "combat du 30 septembre 1780",
+   "label_en": "combat du 30 septembre 1780",
+   "description_fr": "bataille navale",
+   "description_en": "bataille navale",
+   "date": "1780-09-30",
+   "date_years_bp": 246.088928066076,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Combat du 30 septembre 1780",
+   "wikipedia_title_en": "Action of 30 September 1780"
+  },
+  {
+   "id": "326f2f76-529b-46de-ac01-9952d503f400",
+   "wikidata_id": "Q17509662",
+   "label_fr": "Action of 2 September 1781",
+   "label_en": "Action of 2 September 1781",
+   "description_fr": "bataille navale",
+   "description_en": "bataille navale",
+   "date": "1781-09-02",
+   "date_years_bp": 245.166272350876,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Action of 2 September 1781"
+  },
+  {
+   "id": "ea901b25-4e5f-4124-85ab-c9ce9e5d2591",
+   "wikidata_id": "Q17515525",
+   "label_fr": "Battle of Videau's Bridge",
+   "label_en": "Battle of Videau's Bridge",
+   "description_fr": "1782 battle",
+   "description_en": "1782 battle",
+   "date": "1782-01-02",
+   "date_years_bp": 244.832254554877,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Videau's Bridge"
+  },
+  {
+   "id": "51e520f4-94f7-44b5-9784-fc05d7658dd2",
+   "wikidata_id": "Q17515528",
+   "label_fr": "bataille de Fairhaven",
+   "label_en": "bataille de Fairhaven",
+   "description_fr": "naval engagement in the American Revolution",
+   "description_en": "naval engagement in the American Revolution",
+   "date": "1775-05-14",
+   "date_years_bp": 251.471542713736,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": "Bataille de Fairhaven",
+   "wikipedia_title_en": "Battle off Fairhaven"
+  },
+  {
+   "id": "9956f0f4-6da3-405a-a193-b327c1370ebc",
+   "wikidata_id": "Q18204832",
+   "label_fr": "Action of 17 February 1783",
+   "label_en": "Action of 17 February 1783",
+   "description_fr": "naval engagement between Jamaica and Cuba",
+   "description_en": "naval engagement between Jamaica and Cuba",
+   "date": "1783-02-17",
+   "date_years_bp": 243.706997881778,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Action of 17 February 1783"
+  },
+  {
+   "id": "ccbe24bd-0b70-4113-a47c-1aa88c4c6d87",
+   "wikidata_id": "Q18920213",
+   "label_fr": "Action of 20 November 1779",
+   "label_en": "Action of 20 November 1779",
+   "description_fr": "1779 minor naval engagement of the European theater of the American Revolutionary War",
+   "description_en": "1779 minor naval engagement of the European theater of the American Revolutionary War",
+   "date": "1779-11-20",
+   "date_years_bp": 246.951351064751,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Action of 20 November 1779"
+  },
+  {
+   "id": "c7a06251-ddda-4b43-9fe8-e99ba38b0f93",
+   "wikidata_id": "Q19865266",
+   "label_fr": "Battle of Edgar's Lane",
+   "label_en": "Battle of Edgar's Lane",
+   "description_fr": "1778 skirmish in Hastings-on-Hudson, New York",
+   "description_en": "1778 skirmish in Hastings-on-Hudson, New York",
+   "date": "1778-09-30",
+   "date_years_bp": 248.090296992452,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Edgar's Lane"
+  },
+  {
+   "id": "fecc8355-e397-464e-9cbd-5d396ae3e508",
+   "wikidata_id": "Q19868029",
+   "label_fr": "Burning of Fairfield",
+   "label_en": "Burning of Fairfield",
+   "description_fr": "American Revolutionary War action",
+   "description_en": "American Revolutionary War action",
+   "date": "1779-07-07",
+   "date_years_bp": 247.323698772182,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Burning of Fairfield (1779)"
+  },
+  {
+   "id": "b3d9a7a7-5cf1-45dc-abde-11441adc47f6",
+   "wikidata_id": "Q19882090",
+   "label_fr": "Battle of Wambaw",
+   "label_en": "Battle of Wambaw",
+   "description_fr": "battle in the American Revolutionary War",
+   "description_en": "battle in the American Revolutionary War",
+   "date": "1782-02-24",
+   "date_years_bp": 244.687148464269,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Wambaw"
+  },
+  {
+   "id": "88c28f47-02d6-4e35-b828-e72f07d66e98",
+   "wikidata_id": "Q21187832",
+   "label_fr": "bataille de Mamaroneck",
+   "label_en": "bataille de Mamaroneck",
+   "description_fr": "1776 battle",
+   "description_en": "1776 battle",
+   "date": "1776-10-22",
+   "date_years_bp": 250.028695350375,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Mamaroneck"
+  },
+  {
+   "id": "db009497-e904-4ae2-a5b8-3f9d6b891053",
+   "wikidata_id": "Q116797337",
+   "label_fr": "Battle of Elizabethtown",
+   "label_en": "Battle of Elizabethtown",
+   "description_fr": "1781 battle of the American Revolutionary War",
+   "description_en": "1781 battle of the American Revolutionary War",
+   "date": "1781-08-27",
+   "date_years_bp": 245.182699453317,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Elizabethtown"
+  },
+  {
+   "id": "9e8bb9f3-b40b-4b38-9b8c-deecbda7982b",
+   "wikidata_id": "Q124344830",
+   "label_fr": "Action of 11 September 1778",
+   "label_en": "Action of 11 September 1778",
+   "description_fr": "",
+   "description_en": "",
+   "date": "1778-09-11",
+   "date_years_bp": 248.142316154429,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Action of 11 September 1778"
+  },
+  {
+   "id": "0f30f8c9-803a-4df4-b7b9-f068e78ad7d3",
+   "wikidata_id": "Q135100297",
+   "label_fr": "Action of 31 January 1779",
+   "label_en": "Action of 31 January 1779",
+   "description_fr": "1779 naval battle",
+   "description_en": "1779 naval battle",
+   "date": "1779-01-31",
+   "date_years_bp": 247.753541342941,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Action of 31 January 1779"
+  },
+  {
+   "id": "ff0d9a96-16ae-483e-9665-5e91b3259660",
+   "wikidata_id": "Q135350396",
+   "label_fr": "Battle of Hammond's Store",
+   "label_en": "Battle of Hammond's Store",
+   "description_fr": "bataille de la guerre d'indépendance des États-Unis",
+   "description_en": "bataille de la guerre d'indépendance des États-Unis",
+   "date": "1780-12-30",
+   "date_years_bp": 245.839783642768,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Hammond's Store"
+  },
+  {
+   "id": "18ce3676-cde6-4a4e-99b3-6eed5b1d038e",
+   "wikidata_id": "Q136723606",
+   "label_fr": "The First Salute",
+   "label_en": "The First Salute",
+   "description_fr": "Dutch recognition of independent USA",
+   "description_en": "Dutch recognition of independent USA",
+   "date": "1776-11-16",
+   "date_years_bp": 249.960249077465,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "The First Salute"
+  },
+  {
+   "id": "7c753f08-754f-455f-b816-df20d4b2db9f",
+   "wikidata_id": "Q138018817",
+   "label_fr": "Battle of Moca",
+   "label_en": "Battle of Moca",
+   "description_fr": "1779 naval battle",
+   "description_en": "1779 naval battle",
+   "date": "1779-06-08",
+   "date_years_bp": 247.403096442537,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Moca (1779)"
+  },
+  {
+   "id": "311fa0ef-219f-46d3-98f6-aaec5fc475d5",
+   "wikidata_id": "Q139500029",
+   "label_fr": "New York Armory Raid",
+   "label_en": "New York Armory Raid",
+   "description_fr": "1775 raid",
+   "description_en": "1775 raid",
+   "date": "1775-04-23",
+   "date_years_bp": 251.529037578777,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "New York Armory Raid"
+  },
+  {
+   "id": "dc40e5fb-aa3a-43aa-8bee-7a0eac9da6ee",
+   "wikidata_id": "Q139964063",
+   "label_fr": "Battle of Rockfish",
+   "label_en": "Battle of Rockfish",
+   "description_fr": "1781 battle of the American Revolutionary War",
+   "description_en": "1781 battle of the American Revolutionary War",
+   "date": "1781-08-21",
+   "date_years_bp": 245.199126558991,
+   "created_at": "2026-11-03T23:32:36.171304+00:00",
+   "updated_at": "2026-11-06T11:21:48.798258+00:00",
+   "source_key": null,
+   "wikidata_source": null,
+   "wikipedia_title_fr": null,
+   "wikipedia_title_en": "Battle of Rockfish"
+  }
+ ],
+ "period_tags": [
+  {
+   "period_id": "b7e57449-fe71-4400-affb-a11324f864b3",
+   "tag_id": "pouvoir-institutions",
+   "position": 1
+  },
+  {
+   "period_id": "b7e57449-fe71-4400-affb-a11324f864b3",
+   "tag_id": "conflits",
+   "position": 2
+  },
+  {
+   "period_id": "8923819c-cc1f-4da3-8503-4a485d186b0f",
+   "tag_id": "cosmos",
+   "position": 1
+  },
+  {
+   "period_id": "b34af765-32cd-4d01-820d-2934fc21c2aa",
+   "tag_id": "cosmos",
+   "position": 1
+  },
+  {
+   "period_id": "11177ae2-95bd-44ff-86bc-3a8b6c335a53",
+   "tag_id": "pouvoir-institutions",
+   "position": 1
+  },
+  {
+   "period_id": "e26cf03d-4760-49f4-8e2f-ccf54e4c6a47",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "period_id": "e26cf03d-4760-49f4-8e2f-ccf54e4c6a47",
+   "tag_id": "religions-spiritualites",
+   "position": 2
+  },
+  {
+   "period_id": "PER_BIGBANG",
+   "tag_id": "cosmos",
+   "position": 1
+  },
+  {
+   "period_id": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+   "tag_id": "techniques-inventions",
+   "position": 1
+  },
+  {
+   "period_id": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+   "tag_id": "territoires-exploration",
+   "position": 2
+  },
+  {
+   "period_id": "c1050f5c-bf19-4ec7-a078-7e7dfe8574b6",
+   "tag_id": "peuplement-societe",
+   "position": 1
+  },
+  {
+   "period_id": "c1050f5c-bf19-4ec7-a078-7e7dfe8574b6",
+   "tag_id": "vivant",
+   "position": 2
+  },
+  {
+   "period_id": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+   "tag_id": "vivant",
+   "position": 1
+  },
+  {
+   "period_id": "30c6d6df-f10b-4788-aa65-41c1614c9595",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "period_id": "fd216ffa-0552-48b2-9dbf-b1a551c8bcb8",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "period_id": "be213d69-ce6b-4e61-ae4f-26cae8a5b053",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "period_id": "755ef543-0561-492d-b391-13b06852434e",
+   "tag_id": "pouvoir-institutions",
+   "position": 1
+  },
+  {
+   "period_id": "755ef543-0561-492d-b391-13b06852434e",
+   "tag_id": "conflits",
+   "position": 2
+  },
+  {
+   "period_id": "d6b2d46b-59b8-48d6-9ab7-238229bb30a1",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "period_id": "9fd6e93b-c63d-4b14-ac67-10a93da43fdf",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "period_id": "7708353a-0544-4d6e-a43d-bbc6d3315f0e",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "period_id": "7708353a-0544-4d6e-a43d-bbc6d3315f0e",
+   "tag_id": "pouvoir-institutions",
+   "position": 2
+  }
+ ],
+ "event_tags": [
+  {
+   "event_id": "58b0e0fc-ebae-42b4-ad99-c7e0e7fa1c35",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "a80f5c77-e14c-4639-ae8b-1d84d8a7f8dd",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "3f4b6aca-be8a-4c47-a8e2-b1c748e9db52",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "8a44cefb-cd95-43b0-9f09-910c0c4eab3e",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "039912af-18cc-42c9-9065-1b980251fd28",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "ecbcea89-7794-4e6e-834c-6c47b2557bee",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "9f50851a-f1a7-489e-97c3-da3455d4bab6",
+   "tag_id": "pouvoir-institutions",
+   "position": 1
+  },
+  {
+   "event_id": "5804c8d0-8350-440b-914a-a822fe4ee7a4",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "57b04feb-0bc1-4e9b-80b8-d1887be608fd",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "70fe5e6a-e642-4827-9e8f-d20909f88e1b",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "6cf7a564-f79a-4b9f-8b51-30f84a6c03aa",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "22687f48-8829-4b7c-8e55-7199254163eb",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "8973334d-3eb2-4c46-9dce-07a8da0a656c",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "ea8037ac-c930-4b74-9227-cb2bc0f59c61",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "d310f454-f158-4bbd-b372-936111b31237",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "d717519c-b2cf-453f-8bf1-1d93795f42b0",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "6eaab574-200e-4a74-9571-2f192c4a4380",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "49d8c376-afae-422d-8d26-9da2dd534033",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "f039c88b-2bf8-40da-a648-b7a17b5297cf",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "6e844fb9-3d13-4732-9254-fcca3c5f6bc9",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "8a63c903-4f9d-47af-8d87-26c8ccd5a369",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "4c2680a8-e2c2-42c9-afe5-b96e54305c7d",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "e4e7dc7c-32b7-49b9-b57a-b5161b45e7f7",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "959d371f-4fb6-4026-a7e1-e5e95ae82079",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "326f2f76-529b-46de-ac01-9952d503f400",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "ea901b25-4e5f-4124-85ab-c9ce9e5d2591",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "51e520f4-94f7-44b5-9784-fc05d7658dd2",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "9956f0f4-6da3-405a-a193-b327c1370ebc",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "ccbe24bd-0b70-4113-a47c-1aa88c4c6d87",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "c7a06251-ddda-4b43-9fe8-e99ba38b0f93",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "fecc8355-e397-464e-9cbd-5d396ae3e508",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "b3d9a7a7-5cf1-45dc-abde-11441adc47f6",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "88c28f47-02d6-4e35-b828-e72f07d66e98",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "db009497-e904-4ae2-a5b8-3f9d6b891053",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "9e8bb9f3-b40b-4b38-9b8c-deecbda7982b",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "0f30f8c9-803a-4df4-b7b9-f068e78ad7d3",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "ff0d9a96-16ae-483e-9665-5e91b3259660",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "18ce3676-cde6-4a4e-99b3-6eed5b1d038e",
+   "tag_id": "pouvoir-institutions",
+   "position": 1
+  },
+  {
+   "event_id": "7c753f08-754f-455f-b816-df20d4b2db9f",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "311fa0ef-219f-46d3-98f6-aaec5fc475d5",
+   "tag_id": "conflits",
+   "position": 1
+  },
+  {
+   "event_id": "dc40e5fb-aa3a-43aa-8bee-7a0eac9da6ee",
+   "tag_id": "conflits",
+   "position": 1
+  }
+ ],
+ "period_categories": [
+  {
+   "period_id": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+   "category_id": "CAT_BIO_EVO"
+  },
+  {
+   "period_id": "e29900d8-67e3-4f49-8907-fa7c86d77021",
+   "category_id": "CAT_ANTHRO"
+  },
+  {
+   "period_id": "fd216ffa-0552-48b2-9dbf-b1a551c8bcb8",
+   "category_id": "CAT_HIST"
+  },
+  {
+   "period_id": "Q11537",
+   "category_id": "CAT_HIST"
+  },
+  {
+   "period_id": "Q11768",
+   "category_id": "CAT_HIST"
+  },
+  {
+   "period_id": "Q40244",
+   "category_id": "CAT_HIST"
+  },
+  {
+   "period_id": "Q11769",
+   "category_id": "CAT_HIST"
+  },
+  {
+   "period_id": "Q484757",
+   "category_id": "CAT_HIST"
+  },
+  {
+   "period_id": "Q1747689",
+   "category_id": "CAT_HIST"
+  },
+  {
+   "period_id": "b34af765-32cd-4d01-820d-2934fc21c2aa",
+   "category_id": "CAT_ASTRO"
+  },
+  {
+   "period_id": "PER_BIGBANG",
+   "category_id": "CAT_COSMO"
+  },
+  {
+   "period_id": "PER_BIGBANG",
+   "category_id": "CAT_PHYS"
+  },
+  {
+   "period_id": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+   "category_id": "CAT_TECH"
+  },
+  {
+   "period_id": "bfcd2499-f121-4998-aa27-f75c08a3fd24",
+   "category_id": "CAT_HIST"
+  },
+  {
+   "period_id": "8923819c-cc1f-4da3-8503-4a485d186b0f",
+   "category_id": "CAT_COSMO"
+  },
+  {
+   "period_id": "8923819c-cc1f-4da3-8503-4a485d186b0f",
+   "category_id": "CAT_ASTRO"
+  },
+  {
+   "period_id": "755ef543-0561-492d-b391-13b06852434e",
+   "category_id": "CAT_HIST"
+  },
+  {
+   "period_id": "755ef543-0561-492d-b391-13b06852434e",
+   "category_id": "CAT_PHILO"
+  },
+  {
+   "period_id": "33d633cb-2c04-4fbc-bd1c-256cbf3d8efa",
+   "category_id": "CAT_HIST"
+  },
+  {
+   "period_id": "e26cf03d-4760-49f4-8e2f-ccf54e4c6a47",
+   "category_id": "CAT_HIST"
+  },
+  {
+   "period_id": "e26cf03d-4760-49f4-8e2f-ccf54e4c6a47",
+   "category_id": "CAT_PHILO"
+  },
+  {
+   "period_id": "c1050f5c-bf19-4ec7-a078-7e7dfe8574b6",
+   "category_id": "CAT_ANTHRO"
+  },
+  {
+   "period_id": "c1050f5c-bf19-4ec7-a078-7e7dfe8574b6",
+   "category_id": "CAT_PALEO"
+  },
+  {
+   "period_id": "30c6d6df-f10b-4788-aa65-41c1614c9595",
+   "category_id": "CAT_HIST"
+  }
+ ],
+ "event_categories": null
+}

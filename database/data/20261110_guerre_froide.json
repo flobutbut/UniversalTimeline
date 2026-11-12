@@ -1,0 +1,538 @@
+{
+  "reference_time": "2026-11-10T12:00:00Z",
+  "newPeriods": [
+    {
+      "row": {
+        "id": "12be7cc5-4350-4b9f-aa1a-cde0e147419c",
+        "label_fr": "De la Grande Alliance aux deux blocs",
+        "label_en": "From the Grand Alliance to two blocs",
+        "description_fr": "À Yalta, les Alliés négocient encore ensemble ; les désaccords sur l’Europe, la division de l’Allemagne et la guerre de Corée creusent ensuite le fossé entre Washington et Moscou.",
+        "description_en": "The Allies still negotiate together at Yalta; disputes over Europe, the division of Germany and the Korean War then deepen the rift between Washington and Moscow.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1945-02-04",
+        "end_date": "1955-05-14",
+        "start_years_bp": 81.7645448323066,
+        "end_years_bp": 71.4948665297741,
+        "non_thematic": false
+      },
+      "parent": null,
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "b2212510-4206-4000-ae22-2c8b47d7443a",
+        "label_fr": "Crises des blocs et détente",
+        "label_en": "Bloc confrontations and détente",
+        "description_fr": "Berlin et Cuba mettent les blocs face à face ; tandis que la guerre s’intensifie au Vietnam et que les non-alignés s’organisent, Washington et Moscou négocient des limites à leurs arsenaux.",
+        "description_en": "Berlin and Cuba bring the blocs face to face; as the war in Vietnam escalates and non-aligned states organise, Washington and Moscow negotiate limits on their arsenals.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1955-05-14",
+        "end_date": "1975-08-01",
+        "start_years_bp": 71.4948665297741,
+        "end_years_bp": 51.2785763175907,
+        "non_thematic": false
+      },
+      "parent": null,
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "ba855a2e-1af1-4856-8219-95392657a103",
+        "label_fr": "De la détente au regain des tensions",
+        "label_en": "From détente to renewed tensions",
+        "description_fr": "Les engagements d’Helsinki offrent un point d’appui aux dissidents ; la guerre en Afghanistan et la crise des euromissiles ravivent les tensions entre les blocs.",
+        "description_en": "The Helsinki commitments give dissidents a point of reference; the war in Afghanistan and the Euromissile crisis sharpen tensions between the blocs.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1975-08-01",
+        "end_date": "1985-03-11",
+        "start_years_bp": 51.2785763175907,
+        "end_years_bp": 41.668720054757,
+        "non_thematic": false
+      },
+      "parent": null,
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "2cea90d2-c74b-491f-beea-7927c148cb99",
+        "label_fr": "Réformes soviétiques et fin des blocs",
+        "label_en": "Soviet reforms and the end of the blocs",
+        "description_fr": "Les réformes de Gorbatchev et la reprise du désarmement accompagnent les révolutions en Europe de l’Est, la réunification allemande et la dissolution de l’URSS.",
+        "description_en": "Gorbachev’s reforms and renewed arms reductions accompany revolutions in Eastern Europe, German reunification and the dissolution of the Soviet Union.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1985-03-11",
+        "end_date": "1991-12-26",
+        "start_years_bp": 41.668720054757,
+        "end_years_bp": 34.8761122518823,
+        "non_thematic": false
+      },
+      "parent": null,
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "8123038c-d61a-4f30-890f-de66ef22c906",
+        "label_fr": "Blocus de Berlin",
+        "label_en": "Berlin Blockade",
+        "description_fr": "L’URSS coupe les accès terrestres et fluviaux aux secteurs occidentaux de Berlin, que les Alliés occidentaux ravitaillent par un pont aérien.",
+        "description_en": "The Soviet Union cuts land and water access to the western sectors of Berlin, which the Western Allies supply by air.",
+        "wikidata_id": "Q151349",
+        "wikipedia_title_fr": "Blocus de Berlin",
+        "wikipedia_title_en": "Berlin Blockade",
+        "start_date": "1948-06-24",
+        "end_date": "1949-05-12",
+        "start_years_bp": 78.3805612594114,
+        "end_years_bp": 77.4989733059548,
+        "non_thematic": false
+      },
+      "parent": "12be7cc5-4350-4b9f-aa1a-cde0e147419c",
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ]
+    }
+  ],
+  "newEvents": [
+    {
+      "row": {
+        "id": "77f4599c-c54f-4f60-b40e-958a9ff79770",
+        "label_fr": "Truman expose sa doctrine au Congrès",
+        "label_en": "Truman outlines his doctrine to Congress",
+        "description_fr": "Harry Truman demande une aide pour la Grèce et la Turquie et engage les États-Unis à soutenir les peuples qu’il estime menacés de subordination.",
+        "description_en": "Harry Truman asks Congress to aid Greece and Turkey and pledges US support for peoples he considers threatened with subjugation.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1947-03-12",
+        "date_years_bp": 79.6673511293635
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "philosophie-ideologies"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "611fc887-ef46-474b-a1c6-43fa897fcc1f",
+        "label_fr": "Traité de l’Atlantique nord",
+        "label_en": "North Atlantic Treaty",
+        "description_fr": "Douze pays d’Europe et d’Amérique du Nord signent à Washington le traité de défense collective qui fonde l’OTAN.",
+        "description_en": "Twelve European and North American countries sign the collective defence treaty in Washington that establishes NATO.",
+        "wikidata_id": "Q877399",
+        "wikipedia_title_fr": "Traité de l'Atlantique nord",
+        "wikipedia_title_en": "North Atlantic Treaty",
+        "date": "1949-04-04",
+        "date_years_bp": 77.6030116358658
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "1ec385cb-caca-4832-bf9c-c753f4f7545d",
+        "label_fr": "Signature du pacte de Varsovie",
+        "label_en": "Signing of the Warsaw Pact",
+        "description_fr": "L’URSS et sept États d’Europe de l’Est concluent une alliance militaire après l’entrée de la République fédérale d’Allemagne dans l’OTAN.",
+        "description_en": "The Soviet Union and seven Eastern European states form a military alliance after West Germany joins NATO.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1955-05-14",
+        "date_years_bp": 71.4948665297741
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "9644ac86-5064-4655-8a45-7484370dad73",
+        "label_fr": "Début du soulèvement de Budapest",
+        "label_en": "Budapest uprising begins",
+        "description_fr": "Une manifestation étudiante à Budapest devient un soulèvement contre le régime ; une intervention soviétique l’écrase en novembre.",
+        "description_en": "A student demonstration in Budapest develops into an uprising against the regime; Soviet intervention crushes it in November.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1956-10-23",
+        "date_years_bp": 70.0492813141684
+      },
+      "tags": [
+        "peuplement-societe",
+        "conflits"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "b6a26f65-687d-48f4-896c-9185062a119e",
+        "label_fr": "Début de la construction du mur de Berlin",
+        "label_en": "Construction of the Berlin Wall begins",
+        "description_fr": "Les autorités est-allemandes ferment la frontière entre les secteurs de Berlin et commencent à installer les barrières qui deviendront le mur.",
+        "description_en": "East German authorities seal the border between the sectors of Berlin and begin installing the barriers that will become the Wall.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1961-08-13",
+        "date_years_bp": 65.2443531827515
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "peuplement-societe"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "99bb9a8a-c59e-495c-b3d7-e06c225fcf44",
+        "label_fr": "Les troupes du pacte de Varsovie entrent en Tchécoslovaquie",
+        "label_en": "Warsaw Pact troops enter Czechoslovakia",
+        "description_fr": "Dans la nuit du 20 au 21 août, des troupes conduites par l’URSS franchissent la frontière pour mettre fin aux réformes du Printemps de Prague.",
+        "description_en": "On the night of 20–21 August, Soviet-led troops cross the border to halt the Prague Spring reforms.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1968-08-20",
+        "date_years_bp": 58.2245037645448
+      },
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "1ec51f6d-9147-4ca4-8e99-b518da6d492a",
+        "label_fr": "Signature des accords SALT I",
+        "label_en": "SALT I agreements signed",
+        "description_fr": "À Moscou, Nixon et Brejnev signent le traité sur les défenses antimissiles et un accord provisoire limitant certains lanceurs stratégiques offensifs.",
+        "description_en": "In Moscow, Nixon and Brezhnev sign the Anti-Ballistic Missile Treaty and an interim agreement limiting certain offensive strategic launchers.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1972-05-26",
+        "date_years_bp": 54.4599589322382
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "2387d31a-1cd7-47be-8d34-92d0b837def8",
+        "label_fr": "Entrée des troupes soviétiques en Afghanistan",
+        "label_en": "Soviet troops enter Afghanistan",
+        "description_fr": "L’URSS intervient militairement pour maintenir à Kaboul un pouvoir allié, engageant ses forces dans une guerre qui dure près de dix ans.",
+        "description_en": "The USSR intervenes to keep an allied government in Kabul, committing its forces to a war that lasts nearly a decade.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1979-12",
+        "date_years_bp": 46.9445585215606
+      },
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "640dfa78-75ab-4ad1-a06b-511bd99504e5",
+        "label_fr": "Accord de Gdańsk",
+        "label_en": "Gdańsk Agreement",
+        "description_fr": "Au terme des grèves du littoral polonais, les autorités acceptent le principe de syndicats indépendants, ouvrant la voie à Solidarność.",
+        "description_en": "Following strikes on the Polish coast, the authorities accept independent trade unions, paving the way for Solidarity.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1980-08-31",
+        "date_years_bp": 46.1943874058864
+      },
+      "tags": [
+        "peuplement-societe",
+        "pouvoir-institutions"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "b3e99e6d-3375-4eff-9cde-9107964bec95",
+        "label_fr": "Gorbatchev à la tête du Parti communiste soviétique",
+        "label_en": "Gorbachev becomes Soviet Communist Party leader",
+        "description_fr": "Le Comité central choisit Mikhaïl Gorbatchev comme secrétaire général ; il engagera les réformes connues sous les noms de perestroïka et de glasnost.",
+        "description_en": "The Central Committee elects Mikhail Gorbachev general secretary; he will pursue the reforms known as perestroika and glasnost.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1985-03-11",
+        "date_years_bp": 41.668720054757
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "a9c27759-5da9-439b-9b26-030c07443c24",
+        "label_fr": "Traité sur les forces nucléaires à portée intermédiaire",
+        "label_en": "Intermediate-Range Nuclear Forces Treaty",
+        "description_fr": "À Washington, Reagan et Gorbatchev signent un traité qui prévoit l’élimination de toute une catégorie de missiles terrestres américains et soviétiques.",
+        "description_en": "In Washington, Reagan and Gorbachev sign a treaty providing for the elimination of an entire class of US and Soviet ground-launched missiles.",
+        "wikidata_id": "Q169401",
+        "wikipedia_title_fr": "Traité sur les forces nucléaires à portée intermédiaire",
+        "wikipedia_title_en": "Intermediate-Range Nuclear Forces Treaty",
+        "date": "1987-12-08",
+        "date_years_bp": 38.9253935660507
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "446fa502-a885-4e19-a026-3e3cd04421b2",
+        "label_fr": "Fin du retrait soviétique d’Afghanistan",
+        "label_en": "Soviet withdrawal from Afghanistan completed",
+        "description_fr": "Les dernières troupes soviétiques quittent l’Afghanistan conformément au calendrier des accords de Genève ; la guerre dans le pays se poursuit.",
+        "description_en": "The last Soviet troops leave Afghanistan on the timetable agreed in Geneva; the war in the country continues.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1989-02-15",
+        "date_years_bp": 37.7344284736482
+      },
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "444ba1d2-c342-4feb-a84f-d1b26f0d8850",
+        "label_fr": "Réunification allemande",
+        "label_en": "German reunification",
+        "description_fr": "La République démocratique allemande rejoint la République fédérale d’Allemagne ; Berlin redevient la capitale du pays réuni.",
+        "description_en": "The German Democratic Republic joins the Federal Republic of Germany; Berlin becomes the capital of the reunited country.",
+        "wikidata_id": "Q56039",
+        "wikipedia_title_fr": "Réunification allemande",
+        "wikipedia_title_en": "German reunification",
+        "date": "1990-10-03",
+        "date_years_bp": 36.1054072553046
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ],
+      "importance": "major"
+    }
+  ],
+  "reusedPeriods": [
+    {
+      "story_id": 12,
+      "period_id": "d83a0bfc-45d5-4054-a30b-4b5efe3787c7",
+      "parent_period_id": "12be7cc5-4350-4b9f-aa1a-cde0e147419c"
+    },
+    {
+      "story_id": 12,
+      "period_id": "23289f28-7cf0-4dd7-b729-c5595998b49c",
+      "parent_period_id": "b2212510-4206-4000-ae22-2c8b47d7443a"
+    }
+  ],
+  "reusedEvents": [
+    {
+      "story_id": 12,
+      "event_id": "72e19322-22bd-4af1-b9ef-9e48a5b3c003",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "a8428ec8-8d13-438f-b98f-9ed8260686c8",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "b05b6b0e-9a71-4ba4-9786-0256c908a0c4",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "6da1e30e-3a78-4138-81a1-ff828951819e",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "8c3522a0-8c46-4135-8395-2219b81e7eb7",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "9c6c046f-0282-45ec-b99a-974a57ebeb57",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "35642ae2-f4b8-42a3-a841-97c586601899",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "6ea72d76-5e42-47e5-8fd0-17152c3a1250",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "f1dd389e-64f9-44e7-beac-7aad17591503",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "5fb5c213-512a-4ff5-910e-4b92a4ff744e",
+      "importance": "normal"
+    }
+  ],
+  "existingImportance": [
+    {
+      "story_id": 12,
+      "event_id": "2bf8b54a-22fe-43fc-8fcf-39eada08d71d",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "8993258a-a1d4-496d-a6df-3567ea5092aa",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "a39bb21a-ca41-44f7-b255-04fd45e017d9",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "f333fba5-79ba-4089-be07-9b880ebf524d",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "EVT_MOON_LAND",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "b5348782-15a1-4a97-a7b6-5d0c7c633c7c",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "3e4be33b-eb5d-413f-9258-6c4aece720c0",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "Q69163529",
+      "importance": "major"
+    },
+    {
+      "story_id": 12,
+      "event_id": "e717e829-22dc-4943-a92d-0128294c094e",
+      "importance": "major"
+    }
+  ],
+  "addedEntries": [
+    {
+      "source_story_id": 12,
+      "target_story_id": 9,
+      "period_id": null,
+      "event_id": "72e19322-22bd-4af1-b9ef-9e48a5b3c003",
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 12,
+      "target_story_id": 50,
+      "period_id": null,
+      "event_id": "77f4599c-c54f-4f60-b40e-958a9ff79770",
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 12,
+      "target_story_id": 52,
+      "period_id": null,
+      "event_id": "b5348782-15a1-4a97-a7b6-5d0c7c633c7c",
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 12,
+      "target_story_id": 14,
+      "period_id": null,
+      "event_id": "a39bb21a-ca41-44f7-b255-04fd45e017d9",
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 12,
+      "target_story_id": 56,
+      "period_id": null,
+      "event_id": "6ea72d76-5e42-47e5-8fd0-17152c3a1250",
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 14,
+      "target_story_id": 12,
+      "period_id": "fa5c357a-0750-43f4-9351-10a255374c62",
+      "event_id": null,
+      "display_as_period": false
+    }
+  ],
+  "eventUpdates": [
+    {
+      "id": "3e4be33b-eb5d-413f-9258-6c4aece720c0",
+      "description_fr": "Trente-cinq États signent l’Acte final de la Conférence sur la sécurité et la coopération en Europe et prennent des engagements politiques concernant notamment les frontières et les droits humains.",
+      "description_en": "Thirty-five states sign the Final Act of the Conference on Security and Co-operation in Europe, making political commitments on issues including borders and human rights."
+    },
+    {
+      "id": "Q69163529",
+      "description_fr": "Après une annonce confuse des autorités est-allemandes, des foules gagnent les postes-frontières ; les gardes ouvrent les passages dans la soirée.",
+      "description_en": "After a confused announcement by East German authorities, crowds gather at the checkpoints and guards open the crossings that evening."
+    },
+    {
+      "id": "f333fba5-79ba-4089-be07-9b880ebf524d",
+      "description_fr": "Kennedy est informé de la présence de missiles soviétiques à Cuba ; la confrontation qui suit se dénoue par un accord sur leur retrait.",
+      "description_en": "Kennedy is briefed on Soviet missiles in Cuba; the ensuing confrontation ends with an agreement to withdraw them."
+    }
+  ],
+  "storyUpdate": {
+    "description_fr": "De Yalta à la dissolution de l’URSS, suivez la formation des blocs, les guerres en Asie, les choix des non-alignés et les négociations qui transforment la rivalité entre Washington et Moscou.",
+    "description_en": "From Yalta to the dissolution of the Soviet Union, trace the formation of the blocs, wars in Asia, the choices of non-aligned states and the negotiations that reshape US–Soviet rivalry."
+  }
+}

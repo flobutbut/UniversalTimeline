@@ -1,0 +1,3343 @@
+{
+  "stories": [
+    {
+      "id": 15,
+      "title_fr": "Moyen Âge",
+      "title_en": "Middle Ages and early modern period",
+      "description_fr": "De la chute de l'Empire romain d'Occident à la Révolution française.",
+      "description_en": "From the fall of the Western Roman Empire to the French Revolution.",
+      "author": "flobutbut",
+      "is_public": true,
+      "created_at": "2026-10-31T22:52:52.33049+00:00",
+      "updated_at": "2026-11-03T20:07:20.071544+00:00",
+      "parent_story_id": 5
+    },
+    {
+      "id": 11,
+      "title_fr": "Histoire géologique de la Terre",
+      "title_en": "Geological history of the Earth",
+      "description_fr": "Histoire géologique de la terre depuis sa création jusqu'a aujourd'hui",
+      "description_en": "Histoire géologique de la terre depuis sa création jusqu'a aujourd'hui",
+      "author": "flobutbut",
+      "is_public": true,
+      "created_at": "2026-04-12T22:01:37.152694+00:00",
+      "updated_at": "2026-11-02T20:08:02.904502+00:00",
+      "parent_story_id": 1
+    },
+    {
+      "id": 37,
+      "title_fr": "Époque contemporaine",
+      "title_en": "Contemporary era",
+      "description_fr": "De la Révolution française à aujourd’hui : révolutions politiques et industrielles, guerres mondiales, conquête spatiale et régimes politiques.",
+      "description_en": "From the French Revolution to the present day: political and industrial revolutions, world wars, space exploration and political regimes.",
+      "author": "flobutbut",
+      "is_public": true,
+      "created_at": "2026-11-03T20:07:20.071544+00:00",
+      "updated_at": "2026-11-03T20:07:20.071544+00:00",
+      "parent_story_id": 5
+    },
+    {
+      "id": 16,
+      "title_fr": "Époque moderne",
+      "title_en": "Époque moderne",
+      "description_fr": "De l’arrivée de Colomb en Amérique à la Révolution française : grandes découvertes, empires coloniaux, Lumières et révolutions.",
+      "description_en": "From Columbus reaching the Americas to the French Revolution: the Age of Discovery, colonial empires, the Enlightenment and revolutions.",
+      "author": "flobutbut",
+      "is_public": true,
+      "created_at": "2026-11-01T08:44:44.683429+00:00",
+      "updated_at": "2026-11-03T20:07:20.071544+00:00",
+      "parent_story_id": 5
+    },
+    {
+      "id": 22,
+      "title_fr": "Les cinq grandes extinctions",
+      "title_en": "The Big Five mass extinctions",
+      "description_fr": "Cinq fois en 540 millions d’années, plus des trois quarts des espèces ont disparu en peu de temps. Pour chaque crise, la frise montre ce qui précède, les causes (glaciation, volcanisme géant, impact), les vagues d’extinction et la reprise, jusqu’à la sixième extinction en cours et la façon dont on les a découvertes.",
+      "description_en": "Five times in 540 million years, more than three quarters of species vanished in a short time. For each crisis, the timeline shows what came before, the causes (glaciation, giant volcanism, impact), the extinction pulses and the recovery, up to the ongoing sixth extinction and how scientists uncovered them.",
+      "author": "flobutbut",
+      "is_public": true,
+      "created_at": "2026-11-02T11:24:03.348195+00:00",
+      "updated_at": "2026-11-04T22:11:10.434417+00:00",
+      "parent_story_id": 2
+    },
+    {
+      "id": 46,
+      "title_fr": "Les grandes migrations humaines",
+      "title_en": "The great human migrations",
+      "description_fr": "Depuis plus de deux millions d’années, les humains se déplacent. La frise suit les sorties d’Afrique, le peuplement des continents et des îles, l’expansion des agriculteurs et des navigateurs, les migrations des peuples, puis les migrations de masse et les exils contemporains.",
+      "description_en": "Humans have been on the move for more than two million years. The timeline follows the exits from Africa, the settlement of continents and islands, the spread of farmers and seafarers, the migrations of peoples, then mass migration and modern exile.",
+      "author": "flobutbut",
+      "is_public": true,
+      "created_at": "2026-11-05T06:49:55.587216+00:00",
+      "updated_at": "2026-11-05T06:49:55.587216+00:00",
+      "parent_story_id": 5
+    },
+    {
+      "id": 20,
+      "title_fr": "Néolithique",
+      "title_en": "Neolithic",
+      "description_fr": "De Göbekli Tepe aux mégalithes : les premiers agriculteurs, villages et monuments, du Proche-Orient à l’Europe et à la Chine (vers 9600 – 3000 av. J.-C.).",
+      "description_en": "From Göbekli Tepe to the megaliths: the first farmers, villages and monuments, from the Near East to Europe and China (c. 9600 – 3000 BC).",
+      "author": "flobutbut",
+      "is_public": true,
+      "created_at": "2026-11-02T10:32:21.689747+00:00",
+      "updated_at": "2026-11-02T20:08:02.904502+00:00",
+      "parent_story_id": 19
+    },
+    {
+      "id": 23,
+      "title_fr": "Histoire du climat",
+      "title_en": "History of Earth’s climate",
+      "description_fr": "De la glaciation huronienne au réchauffement actuel : les grandes phases froides et chaudes de la Terre, leurs déclencheurs (oxygène, volcanisme, cycles orbitaux, CO₂) et, depuis 1850, l’empreinte humaine.",
+      "description_en": "From the Huronian glaciation to current warming: Earth’s great cold and warm phases, their triggers (oxygen, volcanism, orbital cycles, CO₂) and, since 1850, the human footprint.",
+      "author": "flobutbut",
+      "is_public": true,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-02T20:08:02.904502+00:00",
+      "parent_story_id": 11
+    },
+    {
+      "id": 25,
+      "title_fr": "Révolutions industrielles et énergie",
+      "title_en": "Industrial revolutions and energy",
+      "description_fr": "Du charbon et de la vapeur au pétrole, à l’électricité et au numérique : comment l’industrie a transformé nos sociétés depuis 1760, et comment la combustion des énergies fossiles a lancé le réchauffement climatique actuel.",
+      "description_en": "From coal and steam to oil, electricity and digital technology: how industry has transformed our societies since 1760, and how burning fossil fuels set off current global warming.",
+      "author": "flobutbut",
+      "is_public": true,
+      "created_at": "2026-11-02T15:32:07.642198+00:00",
+      "updated_at": "2026-11-03T20:07:20.071544+00:00",
+      "parent_story_id": 37
+    },
+    {
+      "id": 29,
+      "title_fr": "Le temps des dinosaures",
+      "title_en": "The age of dinosaurs",
+      "description_fr": "Du Trias au Crétacé, 186 millions d’années : premiers dinosaures, sauropodes géants, premiers oiseaux et plantes à fleurs, jusqu’au tyrannosaure et à l’impact de Chicxulub.",
+      "description_en": "From the Triassic to the Cretaceous, 186 million years: the first dinosaurs, giant sauropods, the first birds and flowering plants, up to Tyrannosaurus and the Chicxulub impact.",
+      "author": "flobutbut",
+      "is_public": true,
+      "created_at": "2026-11-02T16:08:22.439055+00:00",
+      "updated_at": "2026-11-02T20:08:02.904502+00:00",
+      "parent_story_id": 2
+    },
+    {
+      "id": 39,
+      "title_fr": "Histoire des techniques",
+      "title_en": "History of technology",
+      "description_fr": "Des premiers outils de pierre à Internet : les inventions qui ont changé la vie des humains.",
+      "description_en": "From the first stone tools to the Internet: the inventions that changed human life.",
+      "author": "flobutbut",
+      "is_public": true,
+      "created_at": "2026-11-03T22:08:38.336164+00:00",
+      "updated_at": "2026-11-06T00:43:31.817044+00:00",
+      "parent_story_id": 5
+    }
+  ],
+  "periods": [
+    {
+      "id": "PER_QUATERNARY",
+      "wikidata_id": "Q26185",
+      "label_fr": "Quaternaire",
+      "label_en": "Quaternary",
+      "description_fr": "troisième et actuelle période géologique du Cénozoïque, -2,58 Ma au présent",
+      "description_en": "third and current period of the Cenozoic Era",
+      "start_date": "M2.58",
+      "end_date": "TODAY",
+      "start_years_bp": 2580000,
+      "end_years_bp": 0,
+      "color": null,
+      "image_url": null,
+      "created_at": "2025-06-13T12:42:13.948686+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Quaternaire",
+      "wikipedia_title_en": "Quaternary",
+      "non_thematic": true
+    },
+    {
+      "id": "3f664826-3a21-419f-a040-55b62803bca4",
+      "wikidata_id": "Q25546",
+      "label_fr": "Pléistocène",
+      "label_en": "Pleistocene",
+      "description_fr": "première époque géologique du Quaternaire, 2,58 Ma à 11 700 ans avant le présent",
+      "description_en": "first epoch of the Quaternary Period",
+      "start_date": "M2.58",
+      "end_date": "9700 BCE",
+      "start_years_bp": 2580000,
+      "end_years_bp": 11725.601,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-04-06T05:58:34.801718+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Pléistocène",
+      "wikipedia_title_en": "Pleistocene",
+      "non_thematic": true
+    },
+    {
+      "id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "wikidata_id": "Q25445",
+      "label_fr": "Holocène",
+      "label_en": "Holocene",
+      "description_fr": "deuxième et actuelle époque géologique du Quaternaire, depuis 12 000 ans avant le présent",
+      "description_en": "second and current epoch of the Quaternary Period",
+      "start_date": "9700 BCE",
+      "end_date": "TODAY",
+      "start_years_bp": 11725.601,
+      "end_years_bp": 0,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-04-06T05:58:46.209743+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Holocène",
+      "wikipedia_title_en": "Holocene",
+      "non_thematic": true
+    },
+    {
+      "id": "6fa87489-6d36-423a-a5a9-7eda1ab9badd",
+      "wikidata_id": "Q7942",
+      "label_fr": "Réchauffement climatique actuel",
+      "label_en": "Current global warming",
+      "description_fr": "Hausse rapide des températures depuis l’ère industrielle, due aux émissions humaines de gaz à effet de serre.",
+      "description_en": "Rapid temperature rise since the industrial era, caused by human greenhouse gas emissions.",
+      "start_date": "1850",
+      "end_date": "TODAY",
+      "start_years_bp": 176.834,
+      "end_years_bp": 0,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Réchauffement climatique",
+      "wikipedia_title_en": "Global warming",
+      "non_thematic": false
+    },
+    {
+      "id": "1bed4622-1d47-46da-9249-a7e10b676ab8",
+      "wikidata_id": "Q55826",
+      "label_fr": "Maximum thermique du Paléocène-Éocène",
+      "label_en": "Paleocene–Eocene Thermal Maximum",
+      "description_fr": "Réchauffement rapide de 5 à 8 °C provoqué par une injection massive de carbone : l’analogue géologique le plus étudié du réchauffement actuel.",
+      "description_en": "A rapid 5–8 °C warming caused by a massive carbon release: the most studied geological analogue of current warming.",
+      "start_date": "M56",
+      "end_date": "M55.8",
+      "start_years_bp": 56000000,
+      "end_years_bp": 55800000,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Maximum thermique du passage Paléocène-Éocène",
+      "wikipedia_title_en": "Paleocene–Eocene thermal maximum",
+      "non_thematic": false
+    },
+    {
+      "id": "2418eb78-4792-48b6-a1e0-9f458f010655",
+      "wikidata_id": "Q190530",
+      "label_fr": "Petit âge glaciaire",
+      "label_en": "Little Ice Age",
+      "description_fr": "Refroidissement modéré, marqué par l’avancée des glaciers alpins, des hivers rigoureux et des disettes.",
+      "description_en": "A moderate cooling marked by advancing Alpine glaciers, harsh winters and food shortages.",
+      "start_date": "1300",
+      "end_date": "1850",
+      "start_years_bp": 726.821,
+      "end_years_bp": 176.834,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Petit âge glaciaire",
+      "wikipedia_title_en": "Little Ice Age",
+      "non_thematic": false
+    },
+    {
+      "id": "cf42e843-25b9-4750-a520-b33fb66e759e",
+      "wikidata_id": "Q498819",
+      "label_fr": "Optimum climatique médiéval",
+      "label_en": "Medieval Warm Period",
+      "description_fr": "Période plus douce dans l’Atlantique Nord, contemporaine de l’installation des Vikings au Groenland.",
+      "description_en": "A milder period in the North Atlantic, contemporary with the Norse settlement of Greenland.",
+      "start_date": "0950",
+      "end_date": "1250",
+      "start_years_bp": 1076.815,
+      "end_years_bp": 776.82,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Optimum climatique médiéval",
+      "wikipedia_title_en": "Medieval Warm Period",
+      "non_thematic": false
+    },
+    {
+      "id": "PER_CRYOGENIAN",
+      "wikidata_id": "Q507402",
+      "label_fr": "Cryogénien",
+      "label_en": "Cryogenian",
+      "description_fr": "deuxième période du Néoprotérozoïque",
+      "description_en": "second period of the Neoproterozoic Era",
+      "start_date": "M720",
+      "end_date": "M635",
+      "start_years_bp": 720000000,
+      "end_years_bp": 635000000,
+      "color": null,
+      "image_url": null,
+      "created_at": "2025-06-13T12:42:13.948686+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Cryogénien",
+      "wikipedia_title_en": "Cryogenian",
+      "non_thematic": true
+    },
+    {
+      "id": "9cf0a438-f17c-4dbd-a00c-8d01305c711c",
+      "wikidata_id": "Q685167",
+      "label_fr": "Glaciation du Karoo",
+      "label_en": "Karoo Ice Age",
+      "description_fr": "Longue glaciation du Gondwana, favorisée par la baisse du CO₂ due à l’expansion des forêts du Carbonifère.",
+      "description_en": "Long glaciation of Gondwana, favoured by the CO₂ drawdown of the spreading Carboniferous forests.",
+      "start_date": "M360",
+      "end_date": "M260",
+      "start_years_bp": 360000000,
+      "end_years_bp": 260000000,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Glaciation du Karoo",
+      "wikipedia_title_en": "Late Paleozoic icehouse",
+      "non_thematic": false
+    },
+    {
+      "id": "9729cb6c-f444-4281-846c-ec78c5b3c573",
+      "wikidata_id": "Q944279",
+      "label_fr": "Dryas récent",
+      "label_en": "Younger Dryas",
+      "description_fr": "Brusque retour du froid à la fin de la dernière glaciation, avant le réchauffement de l’Holocène.",
+      "description_en": "Abrupt return to cold conditions at the end of the last glaciation, before Holocene warming.",
+      "start_date": "10900 BCE",
+      "end_date": "9700 BCE",
+      "start_years_bp": 12925.577,
+      "end_years_bp": 11725.601,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T10:21:58.703667+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Dryas récent",
+      "wikipedia_title_en": "Younger Dryas",
+      "non_thematic": false
+    },
+    {
+      "id": "8659fa39-5cde-421f-92ca-f10aa20e8299",
+      "wikidata_id": "Q1144136",
+      "label_fr": "Glaciation marinoenne",
+      "label_en": "Marinoan glaciation",
+      "description_fr": "Second épisode de « Terre boule de neige » : la glace s’étend jusqu’aux tropiques avant un réchauffement brutal par le CO₂ volcanique.",
+      "description_en": "Second “Snowball Earth” episode: ice reaches the tropics before an abrupt warming driven by volcanic CO₂.",
+      "start_date": "M650",
+      "end_date": "M635",
+      "start_years_bp": 650000000,
+      "end_years_bp": 635000000,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Glaciation marinoenne",
+      "wikipedia_title_en": "Marinoan glaciation",
+      "non_thematic": false
+    },
+    {
+      "id": "6bd93f0b-228e-443e-bbbe-ee0d3eb9b05e",
+      "wikidata_id": "Q1295340",
+      "label_fr": "Eémien",
+      "label_en": "Eemian",
+      "description_fr": "Dernier interglaciaire, un peu plus chaud qu’aujourd’hui, avec un niveau marin plus haut de plusieurs mètres.",
+      "description_en": "The last interglacial, slightly warmer than today, with sea level several metres higher.",
+      "start_date": "K130",
+      "end_date": "K115",
+      "start_years_bp": 130000,
+      "end_years_bp": 115000,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Éémien",
+      "wikipedia_title_en": "Last Interglacial",
+      "non_thematic": false
+    },
+    {
+      "id": "bdfa109a-864c-4ae8-adb9-b7e9aec9443f",
+      "wikidata_id": "Q1979625",
+      "label_fr": "Dernier maximum glaciaire",
+      "label_en": "Last Glacial Maximum",
+      "description_fr": "Extension maximale des calottes : le niveau des mers est environ 120 m plus bas qu’aujourd’hui.",
+      "description_en": "Maximum extent of the ice sheets: sea level is about 120 m lower than today.",
+      "start_date": "K26.5",
+      "end_date": "K19",
+      "start_years_bp": 26500,
+      "end_years_bp": 19000,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Dernier maximum glaciaire",
+      "wikipedia_title_en": "Last Glacial Maximum",
+      "non_thematic": false
+    },
+    {
+      "id": "430dd9d5-3756-458c-80b6-0ad34c2e844f",
+      "wikidata_id": "Q2511922",
+      "label_fr": "Optimum climatique de l’Holocène",
+      "label_en": "Holocene climatic optimum",
+      "description_fr": "Phase chaude de l’Holocène : le Sahara est vert et parsemé de lacs.",
+      "description_en": "A warm phase of the Holocene: the Sahara is green and dotted with lakes.",
+      "start_date": "7000 BCE",
+      "end_date": "3000 BCE",
+      "start_years_bp": 9025.652,
+      "end_years_bp": 5025.734,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Optimum climatique de l'Holocène",
+      "wikipedia_title_en": "Holocene climatic optimum",
+      "non_thematic": false
+    },
+    {
+      "id": "0560995c-c751-4707-a5cd-5a09c848aae6",
+      "wikidata_id": "Q5044049",
+      "label_fr": "Épisode pluvial du Carnien",
+      "label_en": "Carnian Pluvial Event",
+      "description_fr": "Crise climatique humide liée au volcanisme de Wrangellia, après laquelle les dinosaures se diversifient.",
+      "description_en": "Humid climate crisis linked to Wrangellia volcanism, after which dinosaurs diversify.",
+      "start_date": "M234",
+      "end_date": "M232",
+      "start_years_bp": 234000000,
+      "end_years_bp": 232000000,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-04T22:11:10.434417+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Épisode pluvial du Carnien",
+      "wikipedia_title_en": "Carnian pluvial episode",
+      "non_thematic": false
+    },
+    {
+      "id": "49650a85-b139-494f-83e3-866700a9631d",
+      "wikidata_id": "Q5184702",
+      "label_fr": "Optimum thermique du Crétacé",
+      "label_en": "Cretaceous Thermal Maximum",
+      "description_fr": "L’un des climats les plus chauds du Phanérozoïque : océans très chauds, aucune calotte polaire.",
+      "description_en": "One of the warmest climates of the Phanerozoic: very warm oceans and no polar ice caps.",
+      "start_date": "M93.9",
+      "end_date": "M89.8",
+      "start_years_bp": 93900000,
+      "end_years_bp": 89800000,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": null,
+      "wikipedia_title_en": "Cretaceous Thermal Maximum",
+      "non_thematic": false
+    },
+    {
+      "id": "4cae203f-2aea-43af-8419-23fd4fe6b4fa",
+      "wikidata_id": "Q6495334",
+      "label_fr": "Glaciation de l’Ordovicien supérieur",
+      "label_en": "Late Ordovician glaciation",
+      "description_fr": "Calotte glaciaire sur le Gondwana et chute du niveau des mers : principale cause de la première grande extinction.",
+      "description_en": "Ice sheet over Gondwana and falling sea level: the main cause of the first mass extinction.",
+      "start_date": "M445.2",
+      "end_date": "M443.8",
+      "start_years_bp": 445200000,
+      "end_years_bp": 443800000,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T11:24:03.348195+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Glaciation de l'Ordovicien supérieur",
+      "wikipedia_title_en": "Late Ordovician glaciation",
+      "non_thematic": false
+    },
+    {
+      "id": "ec055b57-d7d5-40da-91dd-2f82b4154371",
+      "wikidata_id": "Q12903986",
+      "label_fr": "Grande accélération",
+      "label_en": "Great Acceleration",
+      "description_fr": "Après 1950, population, consommation d’énergie, émissions et usage des ressources s’envolent ensemble.",
+      "description_en": "After 1950, population, energy use, emissions and resource consumption all soar together.",
+      "start_date": "1950",
+      "end_date": "TODAY",
+      "start_years_bp": 76.837,
+      "end_years_bp": 0,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T15:32:07.642198+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Grande accélération",
+      "wikipedia_title_en": "Great Acceleration",
+      "non_thematic": false
+    },
+    {
+      "id": "55988cb3-56e7-490e-b6fe-a53aadfa173e",
+      "wikidata_id": "Q25379710",
+      "label_fr": "Optimum climatique de l’Éocène",
+      "label_en": "Early Eocene Climatic Optimum",
+      "description_fr": "Sommet de la « serre » du Cénozoïque, avant le long refroidissement qui mène aux glaciations actuelles.",
+      "description_en": "The peak of the Cenozoic “greenhouse”, before the long cooling that led to today’s ice ages.",
+      "start_date": "M53",
+      "end_date": "M49",
+      "start_years_bp": 53000000,
+      "end_years_bp": 49000000,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Optimum climatique de l'Éocène",
+      "wikipedia_title_en": "Early Eocene Climatic Optimum",
+      "non_thematic": false
+    },
+    {
+      "id": "bfe9a9f1-0ec3-49da-9517-581d5dde2c35",
+      "wikidata_id": "Q64707157",
+      "label_fr": "Transition du Pléistocène moyen",
+      "label_en": "Mid-Pleistocene Transition",
+      "description_fr": "Les cycles glaciaires passent d’un rythme de 41 000 à 100 000 ans, avec des glaciations plus longues et plus intenses.",
+      "description_en": "Glacial cycles shift from a 41,000-year to a 100,000-year rhythm, with longer and stronger glaciations.",
+      "start_date": "M1.25",
+      "end_date": "K700",
+      "start_years_bp": 1250000,
+      "end_years_bp": 700000,
+      "color": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": null,
+      "wikipedia_title_en": "Mid-Pleistocene Transition",
+      "non_thematic": false
+    }
+  ],
+  "events": [
+    {
+      "id": "76bdb818-be2d-45e1-960b-9ca2e44d3841",
+      "wikidata_id": "Q63431199",
+      "label_fr": "Arrhenius calcule l’effet de serre du CO₂",
+      "label_en": "Arrhenius quantifies the CO₂ greenhouse effect",
+      "description_fr": "Svante Arrhenius estime le réchauffement causé par un doublement du CO₂ atmosphérique : premier lien chiffré entre combustion et climat.",
+      "description_en": "Svante Arrhenius estimates the warming from a doubling of atmospheric CO₂: the first quantified link between burning fuel and climate.",
+      "date": "1896-04",
+      "date_years_bp": 130.586,
+      "created_at": "2026-11-02T15:32:07.642198+00:00",
+      "updated_at": "2026-11-06T12:38:20.618423+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Svante August Arrhenius",
+      "wikipedia_title_en": null
+    },
+    {
+      "id": "75f26427-ad7b-43ff-9d44-08659e073351",
+      "wikidata_id": "Q581103",
+      "label_fr": "Hiver volcanique de 536",
+      "label_en": "Volcanic winter of 536",
+      "description_fr": "Un voile de cendres assombrit le ciel ; étés froids, mauvaises récoltes et famines de l’Europe à la Chine.",
+      "description_en": "A veil of ash darkens the sky; cold summers, failed harvests and famines from Europe to China.",
+      "date": "0536",
+      "date_years_bp": 1490.822,
+      "created_at": "2026-11-07T14:53:03.237032+00:00",
+      "updated_at": "2026-11-07T14:53:03.237032+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": null,
+      "wikipedia_title_en": null
+    },
+    {
+      "id": "0bae7a06-eed3-4249-98e1-f9c1ab266c65",
+      "wikidata_id": "Q2535354",
+      "label_fr": "Éruption du Samalas",
+      "label_en": "1257 Samalas eruption",
+      "description_fr": "Sur l’île de Lombok, l’une des plus fortes éruptions de l’ère commune refroidit le climat mondial.",
+      "description_en": "On the island of Lombok, one of the strongest eruptions of the Common Era cools the global climate.",
+      "date": "1257",
+      "date_years_bp": 769.833,
+      "created_at": "2026-11-07T14:53:03.237032+00:00",
+      "updated_at": "2026-11-07T14:53:03.237032+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": null,
+      "wikipedia_title_en": null
+    },
+    {
+      "id": "18c4c56e-9504-419d-a735-dff82ce6af6f",
+      "wikidata_id": null,
+      "label_fr": "Éruption du Laki",
+      "label_en": "1783 Laki eruption",
+      "description_fr": "En Islande, huit mois d’émissions de gaz tuent le bétail et un cinquième de la population ; brouillards et famine en Europe.",
+      "description_en": "In Iceland, eight months of gas emissions kill livestock and a fifth of the population; fog and famine across Europe.",
+      "date": "1783-06-08",
+      "date_years_bp": 243.413,
+      "created_at": "2026-11-07T14:53:03.237032+00:00",
+      "updated_at": "2026-11-07T14:53:03.237032+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": null,
+      "wikipedia_title_en": null
+    },
+    {
+      "id": "77593b9e-1bd6-44ba-948b-cd192e43332f",
+      "wikidata_id": "Q31191031",
+      "label_fr": "Éruption du Pinatubo",
+      "label_en": "1991 eruption of Mount Pinatubo",
+      "description_fr": "Aux Philippines, la deuxième plus forte éruption du XXe siècle refroidit la planète d’environ 0,5 °C.",
+      "description_en": "In the Philippines, the second-largest eruption of the 20th century cools the planet by about 0.5 °C.",
+      "date": "1991-06-15",
+      "date_years_bp": 35.399,
+      "created_at": "2026-11-07T14:53:03.237032+00:00",
+      "updated_at": "2026-11-07T14:53:03.237032+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": null,
+      "wikipedia_title_en": null
+    },
+    {
+      "id": "EVT_HURON_GLAC",
+      "wikidata_id": "Q24322",
+      "label_fr": "Glaciation huronienne",
+      "label_en": "Huronian glaciation",
+      "description_fr": "Les dépôts glaciaires du Huronien témoignent de plusieurs épisodes de refroidissement au Paléoprotérozoïque, autour de 2,4 milliards d’années. Certains ont pu atteindre les basses latitudes, dans le contexte des changements de l’oxygénation terrestre.",
+      "description_en": "Huronian glacial deposits record several Paleoproterozoic cooling episodes around 2.4 billion years ago. Some may have reached low latitudes amid changes in Earth’s oxygenation.",
+      "date": "G2.4",
+      "date_years_bp": 2400000000,
+      "created_at": "2025-06-13T12:42:13.952374+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Glaciation huronienne",
+      "wikipedia_title_en": "Huronian glaciation"
+    },
+    {
+      "id": "da2ac15a-c5b2-4dfd-b656-624b643236d0",
+      "wikidata_id": "Q47359",
+      "label_fr": "Protocole de Kyoto",
+      "label_en": "Kyoto Protocol",
+      "description_fr": "Premier accord fixant des objectifs chiffrés de réduction des émissions aux pays industrialisés.",
+      "description_en": "The first agreement setting quantified emission cuts for industrialised countries.",
+      "date": "1997-12-11",
+      "date_years_bp": 28.894,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Protocole de Kyoto",
+      "wikipedia_title_en": "Kyoto Protocol"
+    },
+    {
+      "id": "469d4e69-dba2-45c4-88a4-369589b89701",
+      "wikidata_id": "Q55816",
+      "label_fr": "Impact de Chicxulub",
+      "label_en": "Chicxulub impact",
+      "description_fr": "Un astéroïde d’une dizaine de kilomètres frappe le Yucatán et laisse un cratère de 180 km.",
+      "description_en": "An asteroid about ten kilometres wide strikes the Yucatán, leaving a 180 km crater.",
+      "date": "M66.04",
+      "date_years_bp": 66040000,
+      "created_at": "2026-11-02T11:24:03.348195+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Cratère de Chicxulub",
+      "wikipedia_title_en": "Chicxulub crater"
+    },
+    {
+      "id": "Q141118",
+      "wikidata_id": "Q141118",
+      "label_fr": "Extinction Permien-Trias",
+      "label_en": "Permian–Triassic extinction",
+      "description_fr": "cas d’extinction de masse le plus grave de la chronologie de la Terre",
+      "description_en": "mass extinction event at the end of the Permian Period approximately 250 million years ago",
+      "date": "M251.9",
+      "date_years_bp": 251900000,
+      "created_at": "2025-06-13T21:26:19.179711+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Extinction Permien-Trias",
+      "wikipedia_title_en": "Permian–Triassic extinction event"
+    },
+    {
+      "id": "22b24db2-5451-406e-b4ed-77d51e8baa5e",
+      "wikidata_id": "Q171183",
+      "label_fr": "Création du GIEC",
+      "label_en": "IPCC established",
+      "description_fr": "Le Groupe d’experts intergouvernemental sur l’évolution du climat est créé pour évaluer l’état des connaissances.",
+      "description_en": "The Intergovernmental Panel on Climate Change is set up to assess the state of knowledge.",
+      "date": "1988-11",
+      "date_years_bp": 38.003,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Groupe d'experts intergouvernemental sur l'évolution du climat",
+      "wikipedia_title_en": "Intergovernmental Panel on Climate Change"
+    },
+    {
+      "id": "c0a4d0eb-a68a-47c0-85e0-46da99b0afcc",
+      "wikidata_id": "Q209625",
+      "label_fr": "Année sans été",
+      "label_en": "Year Without a Summer",
+      "description_fr": "Conséquence du Tambora : récoltes perdues et famines en Europe et en Amérique du Nord.",
+      "description_en": "A consequence of Tambora: failed harvests and famine in Europe and North America.",
+      "date": "1816",
+      "date_years_bp": 210.835,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Année sans été",
+      "wikipedia_title_en": "Year Without a Summer"
+    },
+    {
+      "id": "3a36bedd-a0dc-4f58-8165-e1f3ad1ac4ee",
+      "wikidata_id": "Q224858",
+      "label_fr": "Début de la courbe de Keeling",
+      "label_en": "Start of the Keeling Curve",
+      "description_fr": "Premières mesures continues du CO₂ atmosphérique à Mauna Loa, qui révèlent sa hausse régulière.",
+      "description_en": "First continuous measurements of atmospheric CO₂ at Mauna Loa, revealing its steady rise.",
+      "date": "1958-03",
+      "date_years_bp": 68.675,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Courbe de Keeling",
+      "wikipedia_title_en": "Keeling Curve"
+    },
+    {
+      "id": "EVT_LAST_GLAC",
+      "wikidata_id": "Q754949",
+      "label_fr": "Fin de la dernière période glaciaire",
+      "label_en": "End of last glacial period",
+      "description_fr": "Vers 11 700 ans avant le présent, la transition vers l’Holocène marque la fin de la dernière période glaciaire. Les calottes ne disparaissent pas toutes : le climat entre dans une phase interglaciaire.",
+      "description_en": "Around 11,700 years ago, the transition to the Holocene marks the end of the last glacial period. Ice sheets do not all disappear; climate enters an interglacial phase.",
+      "date": "K11.7",
+      "date_years_bp": 11700,
+      "created_at": "2025-06-13T12:42:13.952374+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Dernière période glaciaire",
+      "wikipedia_title_en": "Last Glacial Period"
+    },
+    {
+      "id": "EVT_GOE",
+      "wikidata_id": "Q837561",
+      "label_fr": "Apparition de l'oxygène atmosphérique (Grande Oxydation)",
+      "label_en": "Great Oxygenation Event",
+      "description_fr": "Au début du Protérozoïque, l’oxygène produit par la photosynthèse commence à s’accumuler durablement dans l’atmosphère. Cette transition transforme la chimie des océans et les conditions de vie ; sa chronologie précise reste étudiée.",
+      "description_en": "Early in the Proterozoic, oxygen produced by photosynthesis begins to accumulate persistently in the atmosphere. This transition transforms ocean chemistry and living conditions; its detailed timing remains under study.",
+      "date": "G2.45",
+      "date_years_bp": 2450000000,
+      "created_at": "2025-06-13T12:42:13.952374+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Grande Oxydation",
+      "wikipedia_title_en": "Great Oxidation Event"
+    },
+    {
+      "id": "EVT_QUAT_GLAC",
+      "wikidata_id": "Q1040770",
+      "label_fr": "Début des glaciations quaternaires",
+      "label_en": "Start of Quaternary glaciation",
+      "description_fr": "Le début du Quaternaire, vers 2,58 millions d’années, marque un repère pour l’intensification des cycles glaciaires de l’hémisphère Nord. Ces alternances de phases froides et tempérées rythment le Pléistocène.",
+      "description_en": "The beginning of the Quaternary, about 2.58 million years ago, marks a reference point for intensified Northern Hemisphere glacial cycles. Alternating cold and warmer phases characterize the Pleistocene.",
+      "date": "K2580",
+      "date_years_bp": 2580000,
+      "created_at": "2025-06-13T12:42:13.952374+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Glaciations quaternaires",
+      "wikipedia_title_en": "Quaternary glaciation"
+    },
+    {
+      "id": "7144612b-d26b-464d-8cae-3b027103f113",
+      "wikidata_id": "Q1065985",
+      "label_fr": "Extinction de l’Ordovicien-Silurien",
+      "label_en": "Ordovician–Silurian extinction",
+      "description_fr": "Première des cinq grandes extinctions : environ 85 % des espèces marines disparaissent en deux vagues.",
+      "description_en": "First of the Big Five: about 85% of marine species vanish in two waves.",
+      "date": "M445",
+      "date_years_bp": 445000000,
+      "created_at": "2026-11-02T11:24:03.348195+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Extinction Ordovicien-Silurien",
+      "wikipedia_title_en": "Late Ordovician mass extinction"
+    },
+    {
+      "id": "EVT_STURT_GLAC",
+      "wikidata_id": "Q1450075",
+      "label_fr": "Glaciation sturtienne",
+      "label_en": "Sturtian glaciation",
+      "description_fr": "La glaciation sturtienne est un épisode majeur du Cryogénien, débutant vers 717 millions d’années. Des dépôts glaciaires de basses latitudes étayent l’hypothèse d’une Terre alors largement englacée.",
+      "description_en": "The Sturtian glaciation is a major Cryogenian episode beginning around 717 million years ago. Low-latitude glacial deposits support the hypothesis of a largely ice-covered Earth.",
+      "date": "M717",
+      "date_years_bp": 717000000,
+      "created_at": "2025-06-13T12:42:13.952374+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Glaciation sturtienne",
+      "wikipedia_title_en": "Sturtian glaciation"
+    },
+    {
+      "id": "fc68983d-1c47-4887-bb92-33d6649187a7",
+      "wikidata_id": "Q1542955",
+      "label_fr": "Grande Coupure",
+      "label_en": "Eocene–Oligocene transition",
+      "description_fr": "Brusque refroidissement à la limite Éocène-Oligocène : naissance de la calotte antarctique et renouvellement de la faune.",
+      "description_en": "Abrupt cooling at the Eocene–Oligocene boundary: the Antarctic ice sheet forms and fauna turns over.",
+      "date": "M33.9",
+      "date_years_bp": 33900000,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Grande Coupure",
+      "wikipedia_title_en": "Eocene–Oligocene extinction event"
+    },
+    {
+      "id": "eee1074e-4022-42a5-835b-1ab864c0b705",
+      "wikidata_id": "Q3591483",
+      "label_fr": "Éruption du Tambora",
+      "label_en": "1815 eruption of Mount Tambora",
+      "description_fr": "La plus puissante éruption de l’histoire récente projette assez d’aérosols pour refroidir le climat mondial.",
+      "description_en": "The most powerful eruption in recorded history sends enough aerosols aloft to cool the global climate.",
+      "date": "1815-04-10",
+      "date_years_bp": 211.563,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Éruption du Tambora en 1815",
+      "wikipedia_title_en": "1815 eruption of Mount Tambora"
+    },
+    {
+      "id": "88936004-e14d-4cea-bac8-d28a867a8994",
+      "wikidata_id": "Q5038049",
+      "label_fr": "Effondrement de la forêt tropicale du Carbonifère",
+      "label_en": "Carboniferous rainforest collapse",
+      "description_fr": "L’assèchement du climat fragmente les forêts houillères d’Euramérique et fait disparaître de nombreuses plantes et amphibiens.",
+      "description_en": "A drying climate breaks up the coal forests of Euramerica and wipes out many plants and amphibians.",
+      "date": "M307",
+      "date_years_bp": 307000000,
+      "created_at": "2026-11-04T22:11:10.434417+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Effondrement de la forêt tropicale du Carbonifère",
+      "wikipedia_title_en": "Carboniferous rainforest collapse"
+    },
+    {
+      "id": "6111336b-a062-4e8b-9f43-107f6562024c",
+      "wikidata_id": "Q21707860",
+      "label_fr": "Accord de Paris",
+      "label_en": "Paris Agreement",
+      "description_fr": "Engagement mondial à limiter le réchauffement bien en dessous de 2 °C par rapport à l’ère préindustrielle.",
+      "description_en": "A global commitment to keep warming well below 2 °C above pre-industrial levels.",
+      "date": "2015-12-12",
+      "date_years_bp": 10.893,
+      "created_at": "2026-11-02T12:30:02.950214+00:00",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "source_key": null,
+      "wikidata_source": null,
+      "wikipedia_title_fr": "Accord de Paris sur le climat",
+      "wikipedia_title_en": "Paris Agreement"
+    }
+  ],
+  "story_periods": [
+    {
+      "story_id": 25,
+      "period_id": "7eb75249-d6ac-437b-83ed-f1adb45a8cd1",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 11,
+      "period_id": "771a1b53-5ffe-474e-85a4-b62e12dbdab8",
+      "parent_period_id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story_id": 25,
+      "period_id": "fd149cb7-9cc9-44b8-aaee-e32327e0343e",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 23,
+      "period_id": "PER_CRYOGENIAN",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 23,
+      "period_id": "4cae203f-2aea-43af-8419-23fd4fe6b4fa",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 23,
+      "period_id": "PER_QUATERNARY",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 23,
+      "period_id": "3f664826-3a21-419f-a040-55b62803bca4",
+      "parent_period_id": "PER_QUATERNARY"
+    },
+    {
+      "story_id": 25,
+      "period_id": "ec055b57-d7d5-40da-91dd-2f82b4154371",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 23,
+      "period_id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "parent_period_id": "PER_QUATERNARY"
+    },
+    {
+      "story_id": 23,
+      "period_id": "8659fa39-5cde-421f-92ca-f10aa20e8299",
+      "parent_period_id": "PER_CRYOGENIAN"
+    },
+    {
+      "story_id": 23,
+      "period_id": "9cf0a438-f17c-4dbd-a00c-8d01305c711c",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 23,
+      "period_id": "49650a85-b139-494f-83e3-866700a9631d",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 23,
+      "period_id": "1bed4622-1d47-46da-9249-a7e10b676ab8",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 23,
+      "period_id": "55988cb3-56e7-490e-b6fe-a53aadfa173e",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 23,
+      "period_id": "bfe9a9f1-0ec3-49da-9517-581d5dde2c35",
+      "parent_period_id": "3f664826-3a21-419f-a040-55b62803bca4"
+    },
+    {
+      "story_id": 23,
+      "period_id": "6bd93f0b-228e-443e-bbbe-ee0d3eb9b05e",
+      "parent_period_id": "3f664826-3a21-419f-a040-55b62803bca4"
+    },
+    {
+      "story_id": 23,
+      "period_id": "bdfa109a-864c-4ae8-adb9-b7e9aec9443f",
+      "parent_period_id": "3f664826-3a21-419f-a040-55b62803bca4"
+    },
+    {
+      "story_id": 23,
+      "period_id": "430dd9d5-3756-458c-80b6-0ad34c2e844f",
+      "parent_period_id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story_id": 23,
+      "period_id": "cf42e843-25b9-4750-a520-b33fb66e759e",
+      "parent_period_id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story_id": 23,
+      "period_id": "2418eb78-4792-48b6-a1e0-9f458f010655",
+      "parent_period_id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story_id": 23,
+      "period_id": "6fa87489-6d36-423a-a5a9-7eda1ab9badd",
+      "parent_period_id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story_id": 20,
+      "period_id": "ce637529-1c39-48ce-80a0-79a3b9e59185",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 20,
+      "period_id": "ee0d6158-29d5-4228-9961-3e035f0a270b",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 20,
+      "period_id": "7107b409-b8a5-45d8-832b-077a1ec5a6cd",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 25,
+      "period_id": "f5a0b771-f025-454b-8999-317c829a53c6",
+      "parent_period_id": "ec055b57-d7d5-40da-91dd-2f82b4154371"
+    },
+    {
+      "story_id": 25,
+      "period_id": "6fa87489-6d36-423a-a5a9-7eda1ab9badd",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 20,
+      "period_id": "56b0f980-fc39-44a1-b647-2ecfd4689793",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 20,
+      "period_id": "4223b878-d545-46fd-afc8-15bf9627664a",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 23,
+      "period_id": "9729cb6c-f444-4281-846c-ec78c5b3c573",
+      "parent_period_id": "3f664826-3a21-419f-a040-55b62803bca4"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_PALEOZOIC",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 22,
+      "period_id": "00cc0d70-f486-4516-9d8f-739ea30442b6",
+      "parent_period_id": "PER_TRIASSIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "0560995c-c751-4707-a5cd-5a09c848aae6",
+      "parent_period_id": "PER_TRIASSIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "1bed4622-1d47-46da-9249-a7e10b676ab8",
+      "parent_period_id": "PER_PALEOGENE"
+    },
+    {
+      "story_id": 22,
+      "period_id": "5ff185a7-c45a-42e5-bcbd-be08740280e7",
+      "parent_period_id": "PER_QUATERNARY"
+    },
+    {
+      "story_id": 22,
+      "period_id": "ec055b57-d7d5-40da-91dd-2f82b4154371",
+      "parent_period_id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3"
+    },
+    {
+      "story_id": 22,
+      "period_id": "1577f981-d388-4211-b26d-db695cd31d4d",
+      "parent_period_id": "PER_ORDOVICIAN"
+    },
+    {
+      "story_id": 22,
+      "period_id": "14bee4a4-4462-4b33-96cc-99e06881d7c6",
+      "parent_period_id": "PER_DEVONIAN"
+    },
+    {
+      "story_id": 22,
+      "period_id": "243c2f0a-c36b-4ea8-8497-75a5e3900bf4",
+      "parent_period_id": "PER_PERMIAN"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_HADEAN",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 11,
+      "period_id": "Q104168",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 11,
+      "period_id": "Q104162",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 11,
+      "period_id": "Q101313",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 11,
+      "period_id": "Q731470",
+      "parent_period_id": "Q104168"
+    },
+    {
+      "story_id": 11,
+      "period_id": "Q607992",
+      "parent_period_id": "Q104168"
+    },
+    {
+      "story_id": 11,
+      "period_id": "Q645135",
+      "parent_period_id": "Q104168"
+    },
+    {
+      "story_id": 11,
+      "period_id": "Q738167",
+      "parent_period_id": "Q104168"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_CENOZOIC",
+      "parent_period_id": "Q101313"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_MESOZOIC",
+      "parent_period_id": "Q101313"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_PALEOZOIC",
+      "parent_period_id": "Q101313"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_MESOPROTEROZOIC",
+      "parent_period_id": "Q104162"
+    },
+    {
+      "story_id": 11,
+      "period_id": "Q191935",
+      "parent_period_id": "Q104162"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_PALEOPROTEROZOIC",
+      "parent_period_id": "Q104162"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_CRYOGENIAN",
+      "parent_period_id": "Q191935"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_NEOGENE",
+      "parent_period_id": "PER_CENOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_PALEOGENE",
+      "parent_period_id": "PER_CENOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_QUATERNARY",
+      "parent_period_id": "PER_CENOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_CRETACEOUS",
+      "parent_period_id": "PER_MESOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_JURASSIC",
+      "parent_period_id": "PER_MESOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_TRIASSIC",
+      "parent_period_id": "PER_MESOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_CAMBRIAN",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_CARBONIFEROUS",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_DEVONIAN",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_ORDOVICIAN",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_PERMIAN",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "PER_SILURIAN",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 11,
+      "period_id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "parent_period_id": "PER_QUATERNARY"
+    },
+    {
+      "story_id": 11,
+      "period_id": "3f664826-3a21-419f-a040-55b62803bca4",
+      "parent_period_id": "PER_QUATERNARY"
+    },
+    {
+      "story_id": 15,
+      "period_id": "d5c571fb-43bb-435d-b9fc-a77c46e2d319",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 15,
+      "period_id": "a664a308-316b-4b14-9a5f-68dce9e3e249",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 22,
+      "period_id": "213d4f29-b839-4493-87e2-ab566d74734f",
+      "parent_period_id": "PER_TRIASSIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "418dcf15-402a-42fa-b335-7e5984106dba",
+      "parent_period_id": "PER_CRETACEOUS"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_CAMBRIAN",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_CARBONIFEROUS",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_CENOZOIC",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_DEVONIAN",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_MESOZOIC",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_ORDOVICIAN",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_PERMIAN",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_TRIASSIC",
+      "parent_period_id": "PER_MESOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_JURASSIC",
+      "parent_period_id": "PER_MESOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_CRETACEOUS",
+      "parent_period_id": "PER_MESOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_PALEOGENE",
+      "parent_period_id": "PER_CENOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_NEOGENE",
+      "parent_period_id": "PER_CENOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_QUATERNARY",
+      "parent_period_id": "PER_CENOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "parent_period_id": "PER_QUATERNARY"
+    },
+    {
+      "story_id": 22,
+      "period_id": "PER_SILURIAN",
+      "parent_period_id": "PER_PALEOZOIC"
+    },
+    {
+      "story_id": 22,
+      "period_id": "4cae203f-2aea-43af-8419-23fd4fe6b4fa",
+      "parent_period_id": "PER_ORDOVICIAN"
+    },
+    {
+      "story_id": 22,
+      "period_id": "092c5cb7-1142-44e2-b6fc-2e0f2e598270",
+      "parent_period_id": "PER_DEVONIAN"
+    },
+    {
+      "story_id": 22,
+      "period_id": "48ba8ead-0f0f-4d67-bbcd-ff4d95ae2ee7",
+      "parent_period_id": "PER_PERMIAN"
+    },
+    {
+      "story_id": 29,
+      "period_id": "00cc0d70-f486-4516-9d8f-739ea30442b6",
+      "parent_period_id": "PER_TRIASSIC"
+    },
+    {
+      "story_id": 29,
+      "period_id": "5267beba-804a-4970-a394-1db89bb3dd7a",
+      "parent_period_id": "PER_TRIASSIC"
+    },
+    {
+      "story_id": 29,
+      "period_id": "8241b7da-41d6-4cce-b13a-130361f6e49e",
+      "parent_period_id": "PER_TRIASSIC"
+    },
+    {
+      "story_id": 29,
+      "period_id": "a8c918ca-25c4-4578-8f3c-47b0c972f5ae",
+      "parent_period_id": "PER_JURASSIC"
+    },
+    {
+      "story_id": 29,
+      "period_id": "8d004648-8ef0-4dd5-a3f4-9b534e1da72c",
+      "parent_period_id": "PER_JURASSIC"
+    },
+    {
+      "story_id": 29,
+      "period_id": "ee671a4f-a62f-474b-aba2-a51c8e342491",
+      "parent_period_id": "PER_JURASSIC"
+    },
+    {
+      "story_id": 29,
+      "period_id": "0fd8a46a-4292-472c-8d90-ac34a3c41883",
+      "parent_period_id": "PER_CRETACEOUS"
+    },
+    {
+      "story_id": 29,
+      "period_id": "57313004-7164-49f7-8a4b-b6b25d6ede9f",
+      "parent_period_id": "PER_CRETACEOUS"
+    },
+    {
+      "story_id": 29,
+      "period_id": "PER_TRIASSIC",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 29,
+      "period_id": "0f3a625b-f13c-41a7-813e-d9ccd160750e",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 29,
+      "period_id": "PER_JURASSIC",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 29,
+      "period_id": "PER_CRETACEOUS",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 39,
+      "period_id": "cd060dce-deef-49ce-b7eb-badd3ba2da46",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 39,
+      "period_id": "Q12554",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 39,
+      "period_id": "Q7432",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 39,
+      "period_id": "2bba6939-7288-4f0a-9e4e-19d299285178",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 39,
+      "period_id": "5a5efc35-d1f4-4663-a413-09733dd2a147",
+      "parent_period_id": "2bba6939-7288-4f0a-9e4e-19d299285178"
+    },
+    {
+      "story_id": 39,
+      "period_id": "37723d21-d2d4-41ab-a16c-621adfd5edc6",
+      "parent_period_id": "2bba6939-7288-4f0a-9e4e-19d299285178"
+    },
+    {
+      "story_id": 39,
+      "period_id": "c183263b-8249-4290-ad35-3e45872d7c2f",
+      "parent_period_id": "2bba6939-7288-4f0a-9e4e-19d299285178"
+    },
+    {
+      "story_id": 39,
+      "period_id": "b3d2ed51-4b40-4d8a-93b4-dcd31449e087",
+      "parent_period_id": "2bba6939-7288-4f0a-9e4e-19d299285178"
+    },
+    {
+      "story_id": 39,
+      "period_id": "3ddd9c5d-4308-44b4-9b40-73a3324c317a",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 39,
+      "period_id": "1a1d7da1-1af1-4a35-845e-d34ecb0676bd",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 39,
+      "period_id": "a778c9aa-7c0a-4ec1-ad3f-ff28d75543a8",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 37,
+      "period_id": "97f23621-1102-44bc-a0b9-fb7ad230dcd5",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 46,
+      "period_id": "c1050f5c-bf19-4ec7-a078-7e7dfe8574b6",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 46,
+      "period_id": "899ca6d8-6ea4-487a-b018-2d040397f368",
+      "parent_period_id": "c1050f5c-bf19-4ec7-a078-7e7dfe8574b6"
+    },
+    {
+      "story_id": 46,
+      "period_id": "03bf6221-40fb-4be6-a6d3-cf4ff511e667",
+      "parent_period_id": "c1050f5c-bf19-4ec7-a078-7e7dfe8574b6"
+    },
+    {
+      "story_id": 46,
+      "period_id": "065caa04-e3e2-4794-b716-1361a118cca6",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 46,
+      "period_id": "e9aeb787-18fe-4e4d-8ac8-b3f9bdbe3238",
+      "parent_period_id": "065caa04-e3e2-4794-b716-1361a118cca6"
+    },
+    {
+      "story_id": 46,
+      "period_id": "5669959e-8483-46a6-a84b-1b17a49bd267",
+      "parent_period_id": "065caa04-e3e2-4794-b716-1361a118cca6"
+    },
+    {
+      "story_id": 46,
+      "period_id": "533e155f-2597-4dcc-868b-9c653cf48914",
+      "parent_period_id": "065caa04-e3e2-4794-b716-1361a118cca6"
+    },
+    {
+      "story_id": 46,
+      "period_id": "927731e9-d958-4b62-bb31-0730c06529fa",
+      "parent_period_id": "065caa04-e3e2-4794-b716-1361a118cca6"
+    },
+    {
+      "story_id": 46,
+      "period_id": "b320259b-6aa2-47db-885d-15ce6c0315aa",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 46,
+      "period_id": "2ac20fe3-d44e-45e6-bb6f-bf0f8e36512e",
+      "parent_period_id": "b320259b-6aa2-47db-885d-15ce6c0315aa"
+    },
+    {
+      "story_id": 46,
+      "period_id": "98da0a59-c0da-483f-acdb-4c2f76af6922",
+      "parent_period_id": "b320259b-6aa2-47db-885d-15ce6c0315aa"
+    },
+    {
+      "story_id": 46,
+      "period_id": "86005fa3-c5f9-4da7-b942-b17556fe80fd",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 46,
+      "period_id": "455b6931-5b91-4a06-b766-67533c991190",
+      "parent_period_id": "86005fa3-c5f9-4da7-b942-b17556fe80fd"
+    },
+    {
+      "story_id": 46,
+      "period_id": "2c5758d0-2791-4858-a285-47836e8cde3e",
+      "parent_period_id": "455b6931-5b91-4a06-b766-67533c991190"
+    },
+    {
+      "story_id": 46,
+      "period_id": "636d8c79-2263-46b8-a814-34324366f59f",
+      "parent_period_id": "86005fa3-c5f9-4da7-b942-b17556fe80fd"
+    },
+    {
+      "story_id": 46,
+      "period_id": "7d9c0d12-4778-4ec1-b88e-2f2122c6f018",
+      "parent_period_id": "86005fa3-c5f9-4da7-b942-b17556fe80fd"
+    },
+    {
+      "story_id": 46,
+      "period_id": "Q38486",
+      "parent_period_id": "899ca6d8-6ea4-487a-b018-2d040397f368"
+    },
+    {
+      "story_id": 46,
+      "period_id": "Q838707",
+      "parent_period_id": "899ca6d8-6ea4-487a-b018-2d040397f368"
+    },
+    {
+      "story_id": 46,
+      "period_id": "Q42767",
+      "parent_period_id": "899ca6d8-6ea4-487a-b018-2d040397f368"
+    },
+    {
+      "story_id": 46,
+      "period_id": "bdfa109a-864c-4ae8-adb9-b7e9aec9443f",
+      "parent_period_id": "03bf6221-40fb-4be6-a6d3-cf4ff511e667"
+    },
+    {
+      "story_id": 46,
+      "period_id": "56b0f980-fc39-44a1-b647-2ecfd4689793",
+      "parent_period_id": "e9aeb787-18fe-4e4d-8ac8-b3f9bdbe3238"
+    },
+    {
+      "story_id": 46,
+      "period_id": "9515f188-b7b8-4992-985d-b733ce70da1b",
+      "parent_period_id": "86005fa3-c5f9-4da7-b942-b17556fe80fd"
+    },
+    {
+      "story_id": 16,
+      "period_id": "3ec737a6-6e50-4c49-b315-1dad1a78c68b",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 15,
+      "period_id": "9ce504df-6728-42dd-9d1e-42dcd2925208",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 15,
+      "period_id": "8754d454-9ef7-459d-9f27-6c165e2c4d4a",
+      "parent_period_id": "a664a308-316b-4b14-9a5f-68dce9e3e249"
+    },
+    {
+      "story_id": 15,
+      "period_id": "51d1c932-38b7-41a4-9c54-083189b5a4f5",
+      "parent_period_id": "9ce504df-6728-42dd-9d1e-42dcd2925208"
+    },
+    {
+      "story_id": 15,
+      "period_id": "ae39ec73-e00b-419a-8d4d-2b5d61b7a54f",
+      "parent_period_id": "9ce504df-6728-42dd-9d1e-42dcd2925208"
+    },
+    {
+      "story_id": 39,
+      "period_id": "d61016f4-77e3-403a-9bfe-d0a7b187c155",
+      "parent_period_id": "b3d2ed51-4b40-4d8a-93b4-dcd31449e087"
+    },
+    {
+      "story_id": 39,
+      "period_id": "d1577212-5440-4d3a-8b17-1323f722bf6d",
+      "parent_period_id": "b3d2ed51-4b40-4d8a-93b4-dcd31449e087"
+    },
+    {
+      "story_id": 39,
+      "period_id": "adc12d25-e99a-4eec-a100-09de9c6c6bd1",
+      "parent_period_id": "b3d2ed51-4b40-4d8a-93b4-dcd31449e087"
+    },
+    {
+      "story_id": 39,
+      "period_id": "97f62c2c-d294-4ac0-9655-3d45a7b22aed",
+      "parent_period_id": "b3d2ed51-4b40-4d8a-93b4-dcd31449e087"
+    },
+    {
+      "story_id": 20,
+      "period_id": "ff73f748-c795-46a8-a664-78f865e98be2",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 20,
+      "period_id": "99e17911-b0c2-4adf-b2c0-e6363790b5ed",
+      "parent_period_id": null
+    }
+  ],
+  "story_events": [
+    {
+      "story_id": 16,
+      "event_id": "EVT_FR_REV",
+      "importance": "major"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_HURON_GLAC",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_STURT_GLAC",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_QUAT_GLAC",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_LAST_GLAC",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_EARTH_FORM",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_MOON_FORM",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_FIRST_MIN",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_FIRST_LIFE",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_EUKAR",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_CYANOBACT",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_COLUMBIA",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_EDIACARA",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_CAMBRIAN",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_FIRST_FISH",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_INSECTS",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_LAND_PLANTS",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_AMPHIBIANS",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_PANGAEA",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_DINOSAURS",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "Q141118",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_MAMMALS",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "Q55811",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_PRIMATES",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_HOMINIDS",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_HOMO",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_OCEAN_FORM",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_GOE",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "EVT_HIMALAYA",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "Q44382",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "EVT_ROME_FALL",
+      "importance": "major"
+    },
+    {
+      "story_id": 15,
+      "event_id": "EVT_HEGIRA",
+      "importance": "major"
+    },
+    {
+      "story_id": 15,
+      "event_id": "Q42005",
+      "importance": "major"
+    },
+    {
+      "story_id": 20,
+      "event_id": "c713f53b-7eee-4c0c-8a93-568d74c3c7e8",
+      "importance": "major"
+    },
+    {
+      "story_id": 20,
+      "event_id": "bfc9f4c8-fa95-46ea-a82b-d788e830709e",
+      "importance": "major"
+    },
+    {
+      "story_id": 20,
+      "event_id": "654a6113-9b3f-493a-aa8d-1336a0ba5aef",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "13284b00-e7bd-4420-b101-1165444ba677",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "61451103-4d72-44dd-a182-8b5e9166214f",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "a56f6c00-1efc-4f0f-ab76-651736d07f3c",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "90b086bb-00b0-44a1-bc91-99f11fe36d6a",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "a11edba9-ae49-4d94-98bf-5efa553cc2f9",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "Q183149",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "EVT_AGRICULTURE",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "30956f82-7de2-4183-bd18-0c44dc6e4337",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "43ec5c5e-2e41-4761-8f72-17825c98003e",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "abe3e9b7-1d46-40b8-a82d-1a4537338eff",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "2acad374-01eb-44d9-9eca-6e6fd46e4fae",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "fc68983d-1c47-4887-bb92-33d6649187a7",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "eee1074e-4022-42a5-835b-1ab864c0b705",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "c0a4d0eb-a68a-47c0-85e0-46da99b0afcc",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "3a36bedd-a0dc-4f58-8165-e1f3ad1ac4ee",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "22b24db2-5451-406e-b4ed-77d51e8baa5e",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "da2ac15a-c5b2-4dfd-b656-624b643236d0",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "6111336b-a062-4e8b-9f43-107f6562024c",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "EVT_GOE",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "EVT_HURON_GLAC",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "EVT_STURT_GLAC",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "EVT_QUAT_GLAC",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "EVT_LAST_GLAC",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "32c29273-5825-4dc1-a28c-d4f80d3477fb",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "e49e73e6-6d66-4bb8-9e76-62fda686afb3",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "26b566f5-4015-46b8-bc6c-65ac693020ca",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "44304010-2fca-4793-a22d-a4e415b3eefc",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "56d6f6f1-f6dc-43db-ab52-035dd36b1e35",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "9902e2c0-5dd7-44f1-9fdf-dc270acefd2f",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "9e49816c-b2ba-4739-bcc9-8bfc7d41c424",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "6ac57809-d171-49d4-b435-80267bf1e262",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "f43808ae-d937-4572-9224-9c658d8b39f1",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "EVT_IND_REV",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "3a36bedd-a0dc-4f58-8165-e1f3ad1ac4ee",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "22b24db2-5451-406e-b4ed-77d51e8baa5e",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "da2ac15a-c5b2-4dfd-b656-624b643236d0",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "6111336b-a062-4e8b-9f43-107f6562024c",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "2c7ccade-0218-4988-b956-48aa560d958b",
+      "importance": "major"
+    },
+    {
+      "story_id": 25,
+      "event_id": "76bdb818-be2d-45e1-960b-9ca2e44d3841",
+      "importance": "major"
+    },
+    {
+      "story_id": 22,
+      "event_id": "2360ae6d-a41b-4c49-b2e0-e023a8e91daa",
+      "importance": "major"
+    },
+    {
+      "story_id": 22,
+      "event_id": "7144612b-d26b-464d-8cae-3b027103f113",
+      "importance": "major"
+    },
+    {
+      "story_id": 22,
+      "event_id": "f1d0dbe8-88cf-421e-9c4a-89f971d7c3b4",
+      "importance": "major"
+    },
+    {
+      "story_id": 22,
+      "event_id": "Q141118",
+      "importance": "major"
+    },
+    {
+      "story_id": 22,
+      "event_id": "Q55811",
+      "importance": "major"
+    },
+    {
+      "story_id": 22,
+      "event_id": "Q796140",
+      "importance": "major"
+    },
+    {
+      "story_id": 15,
+      "event_id": "Q827869",
+      "importance": "major"
+    },
+    {
+      "story_id": 15,
+      "event_id": "Q12568",
+      "importance": "major"
+    },
+    {
+      "story_id": 15,
+      "event_id": "EVT_AMERICA",
+      "importance": "major"
+    },
+    {
+      "story_id": 16,
+      "event_id": "EVT_AMERICA",
+      "importance": "major"
+    },
+    {
+      "story_id": 16,
+      "event_id": "EVT_IND_REV",
+      "importance": "major"
+    },
+    {
+      "story_id": 29,
+      "event_id": "bf6a0280-8e5c-44a2-9ffa-b47faf83aa85",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "6f371106-2ba4-435f-a0dc-ef2e83d53205",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "f793a644-41fe-42a9-8d6f-920d18f03d7e",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "6c0a7eaf-4291-4cb0-bacb-725a7603f17f",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "e69c4aba-0b49-495c-9e9b-22960cb80049",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "f3a5e595-ac06-4771-b8d2-0c08f5b6357e",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "813b7467-e937-4bab-bed9-6d361e8cbd7c",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "df84d2b0-e59d-4254-8349-efd8325b0158",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "4c5bb755-4d2c-441f-8f52-effb0bc26889",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "15c204e0-5704-4235-ad22-85c42b9fabb6",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "933347e0-1b23-4ced-9b79-721ceeed81c7",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "05c80735-15f0-49d3-8fac-eeb1877f1d75",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "98df8875-3e35-47bc-8e49-1dda6bae77b9",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "d239c9f1-4581-461d-8963-2ecb167fd7ca",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "Q141118",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "EVT_MAMMALS",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "2360ae6d-a41b-4c49-b2e0-e023a8e91daa",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "469d4e69-dba2-45c4-88a4-369589b89701",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "Q55811",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "3568164d-eef9-41e1-bd5c-65b37ed000fe",
+      "importance": "normal"
+    },
+    {
+      "story_id": 29,
+      "event_id": "b3a00018-db06-45e9-ae56-d21916ccf2b1",
+      "importance": "major"
+    },
+    {
+      "story_id": 29,
+      "event_id": "42b64390-a35a-4722-afd2-ded467dea392",
+      "importance": "major"
+    },
+    {
+      "story_id": 22,
+      "event_id": "469d4e69-dba2-45c4-88a4-369589b89701",
+      "importance": "major"
+    },
+    {
+      "story_id": 39,
+      "event_id": "af4dd889-e934-496a-b620-8f022fc25717",
+      "importance": "major"
+    },
+    {
+      "story_id": 39,
+      "event_id": "EVT_FIRE_USE",
+      "importance": "major"
+    },
+    {
+      "story_id": 39,
+      "event_id": "c8917968-b1ef-4c4e-bf8e-5edf504f4496",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "EVT_AGRICULTURE",
+      "importance": "major"
+    },
+    {
+      "story_id": 39,
+      "event_id": "a371aab7-c885-4e33-bd7a-f0695e5733f9",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "a11edba9-ae49-4d94-98bf-5efa553cc2f9",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "EVT_WRITING",
+      "importance": "major"
+    },
+    {
+      "story_id": 39,
+      "event_id": "1f51a69a-0c7c-4bde-adc6-1b499d3d9141",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "c3147d2e-8a24-43d9-af91-f36b192633fa",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "a0c5f6de-5c9d-472e-b430-d8191f23dbae",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "eb27d046-df12-44e4-a592-4b510eda4da5",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "Q827869",
+      "importance": "major"
+    },
+    {
+      "story_id": 39,
+      "event_id": "32c29273-5825-4dc1-a28c-d4f80d3477fb",
+      "importance": "major"
+    },
+    {
+      "story_id": 39,
+      "event_id": "e31b904f-70c4-4f90-8994-431bd3b60eb3",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "8d7b027f-0073-4968-87cd-948c6029154e",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "c5eeb104-c101-4dd2-bbe2-666181192492",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "44304010-2fca-4793-a22d-a4e415b3eefc",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "fcfce991-1856-4435-969a-fe972a1a7281",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "6ac57809-d171-49d4-b435-80267bf1e262",
+      "importance": "major"
+    },
+    {
+      "story_id": 39,
+      "event_id": "fe3d8e8f-397f-48ad-825a-147fd5a6f473",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "485d1854-fd27-448e-9e8b-07b08c68a745",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "bc20215c-2044-4a81-9cf6-5b8c1e81d803",
+      "importance": "major"
+    },
+    {
+      "story_id": 37,
+      "event_id": "88539724-ee4b-4c8a-bf8d-f0a9f8f26498",
+      "importance": "major"
+    },
+    {
+      "story_id": 39,
+      "event_id": "289db306-7157-4563-bc8f-f2d952bd26a2",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "d9731b9b-3c25-42ae-b4b2-91339e231887",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "90ab7bd2-5831-4b28-b1cb-2fead0532eaf",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "698c5742-14cf-41f3-a702-91376c003fe4",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "0f1e8bb1-1882-49e1-aa3b-f5f75df4422a",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "1e5686ea-89c0-4895-b5fa-bfb03798d66d",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "36a78d32-7142-4a81-a183-49c098e3e06a",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "42f7e177-d333-4746-803d-f61be911a85c",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "88936004-e14d-4cea-bac8-d28a867a8994",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "b3a00018-db06-45e9-ae56-d21916ccf2b1",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "bc607aed-30d0-4d26-91e6-6410addd2011",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "bc8e79c9-ca2a-45e2-9a36-cf702151b12f",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "d4b971a3-c72b-4090-899f-7319742c723f",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "ebbc05e8-1c24-4829-9c21-88e04fa28e98",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "edaea2eb-dd10-478b-9572-698ec9039d13",
+      "importance": "normal"
+    },
+    {
+      "story_id": 22,
+      "event_id": "fabfa8b3-08b2-4e31-9ff5-4b1ea20250f8",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "bc607aed-30d0-4d26-91e6-6410addd2011",
+      "importance": "major"
+    },
+    {
+      "story_id": 46,
+      "event_id": "8badd516-c091-4e37-849e-efe94e2f0af0",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "dc13695d-22ef-4c18-bce1-714f4f286122",
+      "importance": "major"
+    },
+    {
+      "story_id": 46,
+      "event_id": "24eb4d95-8788-4bc1-b300-a21eeec57f01",
+      "importance": "major"
+    },
+    {
+      "story_id": 46,
+      "event_id": "Q1069958",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "fdbc9fb3-9a9c-4f17-9d9d-55a5a92fbe2e",
+      "importance": "major"
+    },
+    {
+      "story_id": 46,
+      "event_id": "EVT_AMERICA",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "90ab7bd2-5831-4b28-b1cb-2fead0532eaf",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "a64c1045-84ca-477e-a6b4-ef39f969887a",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "8a84b4d3-790f-48a4-8bb2-d1c4c76805c9",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "c77d4e65-161d-4c89-ad15-88bc057ba01a",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "34a139ed-35fc-4d63-a465-7d660ba537fe",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "96850f41-a52e-4cb1-bdcc-5906e141a349",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "593e301c-e09c-4a04-9e56-8261fc285795",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "a4b0033b-ac97-4674-81c4-a235c7a2e806",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "250cb410-b648-43fc-8069-ad6234780811",
+      "importance": "major"
+    },
+    {
+      "story_id": 46,
+      "event_id": "d0f084bb-a623-4ad5-923a-34d858882331",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "0402bac6-c9ca-4df2-a91b-d8990af5c1a6",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "f1b7f155-7150-44ef-adea-d33317cd9f96",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "234d1207-35e7-4937-8c8b-7cecd729a353",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "97101fdd-0432-4bf0-8eb5-44cab60a98ea",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "eb103168-a514-4717-b22c-7b624c941364",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "17d467c1-0198-4699-98f2-a007c4738290",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "610b90d7-9e05-499d-82f7-c79b2ec11d46",
+      "importance": "major"
+    },
+    {
+      "story_id": 15,
+      "event_id": "1a3f67f8-88fd-4bb8-a338-05eba1fe8d96",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "698c5742-14cf-41f3-a702-91376c003fe4",
+      "importance": "major"
+    },
+    {
+      "story_id": 11,
+      "event_id": "043296fd-7dce-43db-895d-f55dae3b987d",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "55feea6a-b89e-4434-b85c-8f461fc24ded",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "Q164800",
+      "importance": "major"
+    },
+    {
+      "story_id": 11,
+      "event_id": "f03b3c83-4f18-479d-8bfa-dddc1e76bdfd",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "f0335ce9-66b3-48dd-b30c-3c4c1494ad26",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "75f26427-ad7b-43ff-9d44-08659e073351",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "0bae7a06-eed3-4249-98e1-f9c1ab266c65",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "ddf64823-e233-48fc-b652-e31d6c6526af",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "ddda5b3a-ac1d-4110-8ebb-0786ddacbd77",
+      "importance": "major"
+    },
+    {
+      "story_id": 11,
+      "event_id": "18c4c56e-9504-419d-a735-dff82ce6af6f",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "eee1074e-4022-42a5-835b-1ab864c0b705",
+      "importance": "major"
+    },
+    {
+      "story_id": 11,
+      "event_id": "a0c6c755-13cf-4ceb-8eb2-4ff535b09e58",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "9b936fa0-145a-44af-a519-24e068b7cf38",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "e20c06d8-f5ce-4176-81cf-7b94479080ca",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "51bcd8df-3047-4ba1-a2bd-b5071eb0e0ef",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "0c321af2-c709-4573-9b01-d3f48d675af7",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "eb295914-f02f-4a2c-bcde-737577fd7cc8",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "2aa15441-fe4e-46c4-9009-7f0bfbb81184",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "77593b9e-1bd6-44ba-948b-cd192e43332f",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "65ee0b14-c12b-40f6-9af9-369c96c6d3cf",
+      "importance": "major"
+    },
+    {
+      "story_id": 11,
+      "event_id": "900a8ff7-7cbe-4652-9f2e-ad6c4d0d6d07",
+      "importance": "normal"
+    },
+    {
+      "story_id": 11,
+      "event_id": "71b1751f-cee8-4ed9-8cdb-fcc466caee3c",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "a220c749-fe5e-46d6-a32a-9303db634181",
+      "importance": "major"
+    },
+    {
+      "story_id": 15,
+      "event_id": "04dedf45-5923-4529-b304-decc86eb545b",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "eb27d046-df12-44e4-a592-4b510eda4da5",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "df80a3b4-1a42-4400-9cc6-1d21205ee4dd",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "95a907f3-668b-4ff3-914a-9ba67f43f3f7",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "efb29d1e-0889-40ed-8899-5f621183ec67",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "EVT_WW1",
+      "importance": "major"
+    },
+    {
+      "story_id": 37,
+      "event_id": "EVT_WW2",
+      "importance": "major"
+    },
+    {
+      "story_id": 37,
+      "event_id": "c5d4d481-82bc-47d8-9137-65abc2bece3a",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "204f14bc-1edc-4bf3-a8fa-ed456397ef57",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "Q69163529",
+      "importance": "major"
+    },
+    {
+      "story_id": 37,
+      "event_id": "485d1854-fd27-448e-9e8b-07b08c68a745",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "d4cb79d2-599f-4a6f-a455-eb871e3e1842",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "6111336b-a062-4e8b-9f43-107f6562024c",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "e49e73e6-6d66-4bb8-9e76-62fda686afb3",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "7492923f-3451-4742-a578-1d7b5c69eea9",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "aa5470e6-d3aa-4b56-99b8-9310f2162a91",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "9e49816c-b2ba-4739-bcc9-8bfc7d41c424",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "56d6f6f1-f6dc-43db-ab52-035dd36b1e35",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "f2d73098-93c1-4a02-a38b-75eb61e8742a",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "21d187a3-20b3-40d4-a5f0-511565427abb",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "ba64ef2e-be2c-4247-a98d-7d607657cb17",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "719290a2-ecef-4921-9de4-2c517b16aab2",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "1cb62449-82e1-4366-9f2f-9a3da68ce9f6",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "2a93f127-f5b5-4191-8672-4984df7455a9",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "a5b2bd35-64cf-468a-a72e-1c30f674a0d3",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "3646cfbc-d96a-41cb-b226-6b4ae541c5f4",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "d1a23789-e770-4f4d-8afd-151cdf3cd048",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "d5dbb1b6-7ec0-4b27-adce-1f85eb0eb663",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "19290c46-a97d-46d6-b8ed-067a49ca28e7",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "210bc318-d200-4d42-9f0d-f8fccc8d1684",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "b2210bad-ecd6-4fce-935b-9e4e4078dfa5",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "02fc3160-07b7-4285-a9eb-59606a271008",
+      "importance": "major"
+    },
+    {
+      "story_id": 25,
+      "event_id": "f15597c7-5adb-4656-b8c2-0d1d76c75283",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "f15597c7-5adb-4656-b8c2-0d1d76c75283",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "265424f6-8a50-47ef-a92e-27851124e239",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "e11b1dfe-e580-4528-8231-13bd419eda31",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "656b31dd-652d-41d0-ba1e-be4fb0627182",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "d95a0cd9-6ad9-467b-9373-dd3d873a0cae",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "8a862297-7f93-44d0-99b5-c6bae88f8675",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "75b8cf82-42ff-4923-9f2f-15a40df308f3",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "3e3b8bc4-24eb-45f9-8ccd-f51cb2bf9879",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "d5a77b3b-64ba-4cb5-8cce-3b9120c523e3",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "d5a77b3b-64ba-4cb5-8cce-3b9120c523e3",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "40d20e46-098c-43e2-8c9b-620a48e70598",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "aa525aa3-0875-492c-b938-2082d9ee1e5e",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "eab811a1-b1ce-449e-aab6-38e1e0fbf015",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "6f5de9f3-79d9-4ed5-8be1-8ee948dbc5b9",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "b5d95941-2360-4c31-ba13-1752aa0022a6",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "0ab17a20-fef3-4046-9f0f-1ab84f90ce00",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "9816bfe6-de58-425a-966b-8a9ccdcc900f",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "fd9c5d83-1f26-4604-b2b3-3614eda98be0",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "f99c5865-3ff4-4590-8544-44e36557bba4",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "f05de3d2-3dfe-4c74-b067-e24badb4e0fd",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "f05de3d2-3dfe-4c74-b067-e24badb4e0fd",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "3bdbb6b1-cdfb-4e4d-8b98-2af3296d7aa7",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "0c30dc09-8133-43c8-983a-c1c863d20582",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "afe83601-ce90-404a-8522-acfacace23ce",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "43773663-7063-4cd4-b230-5b7183d92e90",
+      "importance": "major"
+    },
+    {
+      "story_id": 16,
+      "event_id": "55c2e93c-09aa-493c-a42e-574775b6197f",
+      "importance": "major"
+    },
+    {
+      "story_id": 16,
+      "event_id": "52a8d492-4737-459c-940b-98035e14d34b",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "207304ce-0556-414b-9f4c-16e7c2859bd4",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "02ebb7c2-40bb-4ede-9e04-f2f4ea5c7e5f",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "69409e09-5864-42fa-88f9-86aa117b0b5b",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "dcb180f7-a06d-4379-906b-795a9833c74c",
+      "importance": "major"
+    },
+    {
+      "story_id": 16,
+      "event_id": "77163526-7f65-4989-af0d-0e43f8ebff53",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "4ff17472-fb92-4a4b-8296-7f10b5bfc404",
+      "importance": "major"
+    },
+    {
+      "story_id": 16,
+      "event_id": "09378592-3530-47fd-b3ee-a03922640138",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "c96eb8ff-9073-4c61-978b-75deb3ee62bd",
+      "importance": "normal"
+    },
+    {
+      "story_id": 16,
+      "event_id": "cb37c16c-dca5-4a32-a8fc-8a214c3a90f7",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "c1fc053f-a3c5-40a4-8b25-4a5b7dd469d3",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "12ea9f9e-f047-4bbc-a0fb-c2e2bc266777",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "0c779fc9-d1a9-4def-be82-723557e58fb9",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "f966144c-b925-4765-b854-c61490dd78a8",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "0bf0c13c-ff71-4813-a2c0-4a83dfffa226",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "d9c3e32c-49ea-4c24-8aa3-a8c275c5730c",
+      "importance": "major"
+    },
+    {
+      "story_id": 11,
+      "event_id": "04cf458b-ef8e-4998-af07-25cbf16cee6e",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "04cf458b-ef8e-4998-af07-25cbf16cee6e",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "be09bd0b-b493-47ca-9019-6eae9b0f18ae",
+      "importance": "major"
+    },
+    {
+      "story_id": 37,
+      "event_id": "15f3aa89-e78f-402e-b4c4-f8b636df31c9",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "28685c5c-ec07-4020-89cd-bf051ee75fef",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "ead88023-8cd7-4174-88c5-6cc68acfa8c5",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "ead88023-8cd7-4174-88c5-6cc68acfa8c5",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "8024bb6e-4fac-43f8-9304-59c8c99c6280",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "581c2b51-62b4-46b3-95a9-4c9e47fa0c52",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "adfddbcb-c105-4dea-8370-ef73a44b44e0",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "e529b235-1cbe-436d-a956-daae9c7467f8",
+      "importance": "normal"
+    },
+    {
+      "story_id": 25,
+      "event_id": "e529b235-1cbe-436d-a956-daae9c7467f8",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "0cb398d0-8b53-4582-8838-52a5495152b1",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "fbd28529-66a5-4584-8ebd-1de8f758ae54",
+      "importance": "normal"
+    },
+    {
+      "story_id": 37,
+      "event_id": "e7d5628f-4b79-4e7a-afe0-758ac8b19884",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "93f980ff-9922-4b99-ac30-0941802b3db1",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "5a356706-845f-46aa-8c88-a5bf93f41f33",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "b7b4a9d6-a0e2-45bd-bd6e-a0abcaeb7865",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "4da2758f-fd44-4418-b22d-813b6ddb5af2",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "0ad7b641-3702-4565-ae1a-e3a386b36e68",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "c5c2df11-bbb3-4264-9b0e-9fd465f35435",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "e669aa94-e05d-46fe-b61a-b40564b145db",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "a6e417ab-e015-4c2c-b87b-57ada2426973",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "89d8d281-32cc-4f07-8074-aaf47e873631",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "f8e2435a-41f7-49a5-b16d-ae77c11e5453",
+      "importance": "normal"
+    },
+    {
+      "story_id": 46,
+      "event_id": "7a2d03c2-f45d-4a85-81b9-b16a7bcc3d00",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "cda3cb5f-7da9-47ff-a41e-c8adf691014e",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "82d66f10-b4d7-4929-8042-e6945fd61d51",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "77041ac8-4123-4b54-8558-4d0ded957e99",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "e41c3844-c39a-4a2d-9242-c70589ee07a2",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "252c80d9-b55f-485f-8a3e-c58975e6fb55",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "5d9311f5-93d4-48af-84c5-e21c1160ae69",
+      "importance": "normal"
+    },
+    {
+      "story_id": 15,
+      "event_id": "43e81378-4768-4d49-b95c-8d123486925d",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "4f6f0f8d-1f01-4d76-ba58-6fe27d6cb3f3",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "53206576-c5ef-465b-a9e0-ae10822f3fee",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "5e3d82c5-c756-4937-9f1a-15859af58104",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "59e2c9ce-8ea2-4a0a-a91d-fb9ff3868ecb",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "543759b3-ff97-4887-8187-26e4a706ea7e",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "093c6cd0-d31b-4d33-929a-930418ac89af",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "d7ec147d-c21f-48a2-8340-9904d4bd5f1a",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "774e9515-2dc0-4d04-9088-a2017a5ddfb5",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "ac6b461e-00e9-468a-a4e3-3eb756f38633",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "166c3475-0853-440d-8616-1dc967f2add4",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "fadfb281-36f4-4575-ad56-a2a10ee348dc",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "fadfb281-36f4-4575-ad56-a2a10ee348dc",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "ebeaefb7-1ae4-44b3-aa48-2b4e65bb7731",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "ad6713fb-3929-4793-add6-cabef4da18ce",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "1f817934-3b71-4c32-baca-778ed217cff5",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "b3d9864e-babf-45a0-911f-6f4c64948b03",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "b3d9864e-babf-45a0-911f-6f4c64948b03",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "7c5c243f-b9fc-473c-9937-a028b83d25f0",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "aef58964-261a-4322-83af-289cdfd591d9",
+      "importance": "major"
+    },
+    {
+      "story_id": 20,
+      "event_id": "3b877e0c-912e-4a82-8245-5eac1c73c2cc",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "3b877e0c-912e-4a82-8245-5eac1c73c2cc",
+      "importance": "normal"
+    },
+    {
+      "story_id": 20,
+      "event_id": "8e0e2790-a12c-43aa-b78f-9ca2567b3b66",
+      "importance": "normal"
+    },
+    {
+      "story_id": 39,
+      "event_id": "aef6b584-d557-4929-8e13-c28c6eecafc5",
+      "importance": "normal"
+    }
+  ],
+  "story_entry_points": [
+    {
+      "id": 1,
+      "source_story_id": 23,
+      "target_story_id": 25,
+      "period_id": "6fa87489-6d36-423a-a5a9-7eda1ab9badd",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "id": 62,
+      "source_story_id": 1,
+      "target_story_id": 23,
+      "period_id": "PER_MILKYWAY",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "id": 83,
+      "source_story_id": 11,
+      "target_story_id": 23,
+      "period_id": null,
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "id": 148,
+      "source_story_id": 11,
+      "target_story_id": 23,
+      "period_id": null,
+      "event_id": "eee1074e-4022-42a5-835b-1ab864c0b705",
+      "display_as_period": false
+    },
+    {
+      "id": 256,
+      "source_story_id": 19,
+      "target_story_id": 23,
+      "period_id": "9729cb6c-f444-4281-846c-ec78c5b3c573",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "id": 257,
+      "source_story_id": 23,
+      "target_story_id": 19,
+      "period_id": "9729cb6c-f444-4281-846c-ec78c5b3c573",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "id": 258,
+      "source_story_id": 23,
+      "target_story_id": 46,
+      "period_id": "bdfa109a-864c-4ae8-adb9-b7e9aec9443f",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "id": 259,
+      "source_story_id": 46,
+      "target_story_id": 23,
+      "period_id": "bdfa109a-864c-4ae8-adb9-b7e9aec9443f",
+      "event_id": null,
+      "display_as_period": false
+    }
+  ],
+  "story_tags": [
+    {
+      "story_id": 23,
+      "tag_id": "terre",
+      "position": 1
+    }
+  ]
+}
