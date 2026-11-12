@@ -404,10 +404,9 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
     else if(target.returnPath===undefined) {
       const visited=visitedStories.value.findIndex(entry=>entry.storyId===id);
       if(visited>=0)target={...target,returnPath:visitedStories.value[visited].returnPath??cloneReturnPath().slice(0,visited)};
-      else if(visitedStories.value.length&&id!==currentStoryId.value) {
-        const {entry:_entry,returnPath:_path,...source}=positionTarget(currentPeriod.value?.id);
-        target={...target,returnPath:[...cloneReturnPath(),source].slice(-32)};
-      }
+      // Recherche ou lien direct vers une autre frise : nouvelle intention, le fil repart de l'Univers
+      // au lieu d'empiler les destinations successives. Appliqué seulement une fois la frise chargée.
+      else if(visitedStories.value.length&&id!==currentStoryId.value) target={...target,returnPath:[]};
     }
     requestedTarget = target;
     if (id === currentStoryId.value && currentStoryPeriods.value.length) await loadInitialData(undefined, true, true);

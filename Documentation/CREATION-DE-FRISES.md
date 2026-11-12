@@ -179,7 +179,7 @@ Les frises **affichées comme périodes** participent à ce même rang avec les 
 
 Une période sans vue dédiée s’ouvre dans sa frise de référence. Plusieurs vues dédiées d’une période donnent lieu à un choix ; plusieurs contextes permettent de choisir un parcours. Si une même frise présente plusieurs périodes, l’entrée doit identifier la référence voulue plutôt que supposer un niveau unique.
 
-Le retour retrouve la position quittée, même après une transition vers une autre frise du parcours. Un rechargement dans le même onglet conserve ce chemin. Un lien direct ne transmet pas les visites de son auteur : il retrouve sa référence explicite sans inventer cet historique. L’entrée depuis le catalogue peut utiliser un chemin reconstruit depuis Univers ; ce repère d’entrée ne définit pas une hiérarchie universelle des sujets.
+Le retour retrouve la position quittée, même après une transition vers une autre frise du parcours. Un rechargement dans le même onglet conserve ce chemin. Un lien direct ne transmet pas les visites de son auteur : il retrouve sa référence explicite sans inventer cet historique. De même, ouvrir une autre frise depuis la recherche ou un lien direct est une nouvelle intention : le fil repart de l’Univers au lieu d’empiler les frises ouvertes successivement ; seuls les passages par une frise associée s’y ajoutent. L’entrée depuis le catalogue peut utiliser un chemin reconstruit depuis Univers ; ce repère d’entrée ne définit pas une hiérarchie universelle des sujets.
 
 Le fil des frises reste sur une ligne : trois étapes récentes au maximum, moins si la largeur manque, avec les étapes précédentes dans « … ». La frise courante reste visible. Le fil des périodes décrit séparément la position locale.
 

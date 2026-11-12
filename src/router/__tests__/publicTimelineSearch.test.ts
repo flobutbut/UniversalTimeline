@@ -13,6 +13,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { installAccessGuard } from '@/router/access';
 import type { ListEvent, Period } from '@/types/database';
 import { storyFixture } from '@/testFixtures/story';
+import { timelineLocation } from '@/router/storyTarget';
 import { apiClient } from '@/services/ApiClient';
 
 vi.mock('@/services/FeedbackApiService', () => ({ feedbackApi: { settings: vi.fn().mockResolvedValue({ enabled: false }) } }));
@@ -259,8 +260,10 @@ it('restores the story associated with browser history', async () => {
 
 it('separates visited frises from local periods and restores a visited position without duplicates', async () => {
   await start('/timeline?story=7&period=leaf-7');
-  await router.push('/timeline?story=8&period=leaf-8'); await flushPromises();
-  await router.push('/timeline?story=2'); await flushPromises();
+  // Passages par des frises associées : chaque étape transporte le chemin déjà parcouru, comme un clic dans l'exploration.
+  const from7 = { storyId: '7', periodId: 'leaf-7' }, from8 = { storyId: '8', periodId: 'leaf-8' };
+  await router.push(timelineLocation({ ...from8, returnPath: [from7] })); await flushPromises();
+  await router.push(timelineLocation({ storyId: '2', returnPath: [from7, from8] })); await flushPromises();
   const visited = () => view.get('nav[aria-label="Fil d’Ariane des frises"]');
   // Quatre étapes pour trois places : l'Univers passe dans le menu du fil compacté.
   expect(visited().findAll('li').map(item => item.text())).toEqual(['', '/Frise : Frise 7', '/Frise : Frise 8', '/Frise : Frise 2']);
@@ -304,8 +307,9 @@ it('starts a catalogue selection on its Universe path instead of appending the p
 
 it('resets a catalogue entry to the Universe and the selected frise when no Universe path exists, including the same frise', async () => {
   await start('/timeline?story=7');
+  // Un lien direct vers une autre frise repart de l'Univers : la frise 7 ne reste pas dans le fil.
   await router.push('/timeline?story=8'); await flushPromises();
-  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').findAll('li')).toHaveLength(3);
+  expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').text()).toBe('Frise : Frise 1/Frise : Frise 8');
   await router.push('/timeline?story=8&entry=universe'); await flushPromises();
   expect(view.getComponent(PeriodGrid).props('currentStoryId')).toBe('8');
   expect(view.get('nav[aria-label="Fil d’Ariane des frises"]').text()).toBe('Frise : Frise 1/Frise : Frise 8');
