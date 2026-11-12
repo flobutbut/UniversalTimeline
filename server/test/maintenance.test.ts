@@ -38,6 +38,7 @@ it('exposes only the reviewed Supabase migrations and explicit ownership operati
     '20261109223738_feedback_delete.sql',
     '20261109230646_feedback_feature_switch.sql',
     '20261110103843_performance_read_policies.sql',
+    '20261112090000_catalogue_write_guard.sql',
   ]);
   expect(readdirSync(root + 'database/operations').sort()).toEqual(['assign_admin_role.sql', 'assign_legacy_stories.sql']);
   expect(readdirSync(root + 'database').filter(name => /\.(sh|sql)$/.test(name))).toEqual([]);

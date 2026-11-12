@@ -309,6 +309,9 @@
         "CREATE INDEX idx_events_date_years_bp ON public.events USING btree (date_years_bp DESC NULLS LAST)"
       ],
       "triggers": [
+        "CREATE TRIGGER guard_event_write BEFORE DELETE OR UPDATE ON events FOR EACH ROW EXECUTE FUNCTION catalogue_private.guard_record_write('event')",
+        "CREATE TRIGGER track_event_creator AFTER INSERT OR DELETE ON events FOR EACH ROW EXECUTE FUNCTION catalogue_private.track_record_creator('event')",
+        "CREATE TRIGGER track_event_creator_id AFTER UPDATE OF id ON events FOR EACH ROW WHEN (old.id::text IS DISTINCT FROM new.id::text) EXECUTE FUNCTION catalogue_private.track_record_creator('event')",
         "CREATE TRIGGER trg_events_updated_at BEFORE UPDATE ON events FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
       ],
       "rls": true
@@ -580,6 +583,9 @@
         "CREATE UNIQUE INDEX periods_source_key_unique ON public.periods USING btree (source_key) WHERE (source_key IS NOT NULL)"
       ],
       "triggers": [
+        "CREATE TRIGGER guard_period_write BEFORE DELETE OR UPDATE ON periods FOR EACH ROW EXECUTE FUNCTION catalogue_private.guard_record_write('period')",
+        "CREATE TRIGGER track_period_creator AFTER INSERT OR DELETE ON periods FOR EACH ROW EXECUTE FUNCTION catalogue_private.track_record_creator('period')",
+        "CREATE TRIGGER track_period_creator_id AFTER UPDATE OF id ON periods FOR EACH ROW WHEN (old.id::text IS DISTINCT FROM new.id::text) EXECUTE FUNCTION catalogue_private.track_record_creator('period')",
         "CREATE TRIGGER trg_periods_updated_at BEFORE UPDATE ON periods FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
       ],
       "rls": true
@@ -1379,8 +1385,8 @@
         "authenticated"
       ],
       "command": "UPDATE",
-      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
-      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+      "using": "catalogue_private.can_edit_record('event'::text, (event_id)::text)",
+      "check": "catalogue_private.can_edit_record('event'::text, (event_id)::text)"
     },
     {
       "table": "event_categories",
@@ -1390,7 +1396,7 @@
         "authenticated"
       ],
       "command": "DELETE",
-      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "using": "catalogue_private.can_edit_record('event'::text, (event_id)::text)",
       "check": null
     },
     {
@@ -1402,7 +1408,7 @@
       ],
       "command": "INSERT",
       "using": null,
-      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+      "check": "catalogue_private.can_edit_record('event'::text, (event_id)::text)"
     },
     {
       "table": "event_tags",
@@ -1424,8 +1430,8 @@
         "authenticated"
       ],
       "command": "UPDATE",
-      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))",
-      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))"
+      "using": "catalogue_private.can_edit_record('event'::text, (event_id)::text)",
+      "check": "catalogue_private.can_edit_record('event'::text, (event_id)::text)"
     },
     {
       "table": "event_tags",
@@ -1435,7 +1441,7 @@
         "authenticated"
       ],
       "command": "DELETE",
-      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))",
+      "using": "catalogue_private.can_edit_record('event'::text, (event_id)::text)",
       "check": null
     },
     {
@@ -1447,7 +1453,7 @@
       ],
       "command": "INSERT",
       "using": null,
-      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))"
+      "check": "catalogue_private.can_edit_record('event'::text, (event_id)::text)"
     },
     {
       "table": "events",
@@ -1514,8 +1520,8 @@
         "authenticated"
       ],
       "command": "UPDATE",
-      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
-      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+      "using": "catalogue_private.can_edit_record('period'::text, (period_id)::text)",
+      "check": "catalogue_private.can_edit_record('period'::text, (period_id)::text)"
     },
     {
       "table": "period_categories",
@@ -1525,7 +1531,7 @@
         "authenticated"
       ],
       "command": "DELETE",
-      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))",
+      "using": "catalogue_private.can_edit_record('period'::text, (period_id)::text)",
       "check": null
     },
     {
@@ -1537,7 +1543,7 @@
       ],
       "command": "INSERT",
       "using": null,
-      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT (auth.jwt() ->> 'is_anonymous'::text)) IS DISTINCT FROM 'true'::text))"
+      "check": "catalogue_private.can_edit_record('period'::text, (period_id)::text)"
     },
     {
       "table": "period_tags",
@@ -1559,8 +1565,8 @@
         "authenticated"
       ],
       "command": "UPDATE",
-      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))",
-      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))"
+      "using": "catalogue_private.can_edit_record('period'::text, (period_id)::text)",
+      "check": "catalogue_private.can_edit_record('period'::text, (period_id)::text)"
     },
     {
       "table": "period_tags",
@@ -1570,7 +1576,7 @@
         "authenticated"
       ],
       "command": "DELETE",
-      "using": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))",
+      "using": "catalogue_private.can_edit_record('period'::text, (period_id)::text)",
       "check": null
     },
     {
@@ -1582,7 +1588,7 @@
       ],
       "command": "INSERT",
       "using": null,
-      "check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT auth.jwt() AS jwt) ->> 'is_anonymous'::text) IS DISTINCT FROM 'true'::text))"
+      "check": "catalogue_private.can_edit_record('period'::text, (period_id)::text)"
     },
     {
       "table": "periods",

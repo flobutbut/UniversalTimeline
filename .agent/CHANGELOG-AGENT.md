@@ -381,3 +381,8 @@ Les trois lignes d'exemples de la section « Vos frises » (`LandingView.vue`) a
 ## 2026-11-09 — Recherche tolérante et événements
 
 La recherche globale compare désormais mot à mot (accents, ordre, pluriels, petits mots, fautes en dernier recours) et liste les événements des frises accessibles via `/api/search/story-events`. Un résultat ouvre `/timeline?story=<id>&event=<id>` sur la bonne période, bulle ouverte. Événement `search_completed` : `outcome: event`, `event_results`.
+
+## 2026-11-12 — Garde d’écriture du catalogue partagé
+
+Audit de sécurité du 10 novembre (S1) : tout compte pouvait modifier ou supprimer n’importe quelle fiche. Migration `20261112090000_catalogue_write_guard.sql` (reprise dans la baseline) : triggers de garde sur `periods`/`events`, règles des liens catégories/tags alignées, créateur suivi dans `catalogue_private.record_creators`. Côté API : contrôle avant conversion (`canEditRecord`), message 403 dédié. Nouvelle suite `catalogueWriteGuard.postgres.mjs` ; suites conversion, baseline, tags et titres Wikipédia adaptées. CLAUDE.md règle 36.
+

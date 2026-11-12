@@ -49,6 +49,10 @@ beforeEach(async () => {
     UPDATE stories SET parent_story_id=1 WHERE id=2;
     INSERT INTO story_anchors(story_id,anchor_type,anchor_id) VALUES(2,'event','terror');
     INSERT INTO story_entry_points(source_story_id,target_story_id,event_id) VALUES(1,2,'terror');`);
+  // Alice created the records of this catalogue: only a creator (or an editor) may convert one.
+  await pool.query(`TRUNCATE catalogue_private.record_creators;
+    INSERT INTO catalogue_private.record_creators(kind,entity_id,user_id)
+      SELECT 'period', id, '${alice}'::uuid FROM periods UNION ALL SELECT 'event', id, '${alice}'::uuid FROM events`);
 });
 after(() => pool.end());
 

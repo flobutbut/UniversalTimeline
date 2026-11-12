@@ -64,6 +64,9 @@ before(async () => {
   Object.assign(state, { before: await snapshot(), beforePolicies: await policies('%') });
   await pool.query(migration);
   Object.assign(state, { after: await snapshot(), afterPolicies: await policies('%') });
+  // Later migrations the compiled API relies on: split write policies, then the shared catalogue guard.
+  await pool.query(await read('../../database/migrations/20261110103843_performance_read_policies.sql'));
+  await pool.query(await read('../../database/migrations/20261112090000_catalogue_write_guard.sql'));
 });
 after(() => pool.end());
 
@@ -128,9 +131,12 @@ test('keeps the grid closed to API accounts', async () => {
   await assert.rejects(as('authenticated', claims(alice), client => client.query("UPDATE tags SET label_fr='Modifié' WHERE id='sport'")), /permission denied/);
 });
 
-test('follows catalogue write rules: signed-in accounts yes, anonymous accounts no', async () => {
+test('follows catalogue write rules: the record creator yes, other and anonymous accounts no', async () => {
   const insert = client => client.query("INSERT INTO period_tags(period_id,tag_id,position) VALUES('period-a','conflits',1) RETURNING tag_id");
+  await assert.rejects(as('authenticated', claims(bob), insert), /row-level security/);
+  await pool.query("INSERT INTO catalogue_private.record_creators(kind,entity_id,user_id) VALUES('period','period-a',$1)", [alice]);
   assert.equal((await as('authenticated', claims(alice), insert)).rowCount, 1);
+  assert.equal((await as('authenticated', claims(bob), client => client.query("DELETE FROM period_tags WHERE period_id='period-a'"))).rowCount, 0);
   await assert.rejects(as('authenticated', claims(alice, { is_anonymous: true }), insert), /row-level security/);
 });
 
@@ -330,6 +336,7 @@ test('keeps a period either thematic or non-thematic', async () => {
 
 test('carries tags and categories through a conversion when the form omits them', async () => {
   await pool.query("INSERT INTO periods(id,label_fr,label_en,start_date,end_date) VALUES('to-convert','Source','Source','1800','1900'); INSERT INTO period_categories(period_id,category_id) VALUES('to-convert','CAT_HIST'); INSERT INTO period_tags(period_id,tag_id,position) VALUES('to-convert','terre',1),('to-convert','vivant',2)");
+  await pool.query("INSERT INTO catalogue_private.record_creators(kind,entity_id,user_id) VALUES('period','to-convert',$1)", [alice]);
   const converted = await call('post', '/periods/:id/convert-to-event', { params: { id: 'to-convert' }, body: eventBody('converted') });
   assert.equal(converted.statusCode, 201);
   assert.deepEqual(ids(converted.payload), ['terre', 'vivant']);

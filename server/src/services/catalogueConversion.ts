@@ -10,6 +10,7 @@ import { replaceEntityCategories } from '../repositories/categoryRepository.js';
 import { readEntityCategories } from './entityCategories.js';
 import { readEntityTags } from '../repositories/tagRepository.js';
 import { saveEntityTags, savePeriodTagging } from './entityTags.js';
+import { principalContext } from '../auth/context.js';
 
 /** The old record is deleted with its links: what the form did not send is carried over before that. */
 async function carriedClassification(client: TransactionClient, kind: conversion.CatalogueKind, id: string, data: { categories?: string[]; tags?: string[] }) {
@@ -35,6 +36,10 @@ async function prepare(client: TransactionClient, kind: conversion.CatalogueKind
   }
   if (blockers.presentations > 0) {
     throw new CatalogueConversionError(409, 'Conversion impossible : cette période fait partie d’un parcours chronologique. Retirez-la du parcours avant de la convertir.');
+  }
+  // After the explicit blockers, refuse before any write: the database guard would only stop the final deletion.
+  if (principalContext.getStore()?.userId && !await conversion.canEditRecord(client, kind, id)) {
+    throw new CatalogueConversionError(403, 'Conversion impossible : cette fiche appartient au catalogue partagé. Seuls son auteur, tant qu’aucune autre frise ne l’utilise, ou un éditeur peuvent la modifier.');
   }
   return conversion.countMemberships(client, kind, id);
 }

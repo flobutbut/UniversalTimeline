@@ -4,7 +4,7 @@ import { NotFoundError, PeriodHierarchyError, PeriodDeletionError, StoryAssociat
 import { InputValidationError } from './inputValidation.js';
 import { FeedbackError } from '../domain/errors.js';
 
-interface ErrorMessages { conflict?: string; busy?: string; foreignKey?: string }
+interface ErrorMessages { conflict?: string; busy?: string; foreignKey?: string; forbidden?: string }
 const record = (error: unknown): Record<string, unknown> => error !== null && typeof error === 'object' ? error as Record<string, unknown> : {};
 export function databaseFailureReason(error: unknown): string | undefined {
   const fields = record(error);
@@ -36,7 +36,7 @@ export function publicApiError(error: unknown, fallback: string, messages: Error
   if (fields.type === 'entity.too.large') return { status: 413, message: 'Le contenu de la requête est trop volumineux.' };
   switch (fields.code) {
     case 'UT503': return { status: 503, message: 'Les retours utilisateurs sont désactivés.' };
-    case '42501': return { status: 403, message: 'Vous n’avez pas accès à cette opération.' };
+    case '42501': return { status: 403, message: messages.forbidden ?? 'Vous n’avez pas accès à cette opération.' };
     case '23505': return { status: 409, message: messages.conflict ?? 'Cet identifiant est déjà utilisé.' };
     case '23514': return { status: 409, message: 'Ce classement est invalide ou créerait un cycle dans la frise.' };
     case '23503': return { status: 409, message: messages.foreignKey ?? 'Cet élément est encore lié à d’autres données ou référence un élément absent.' };

@@ -48,6 +48,9 @@ before(async () => {
   await pool.query(migration);
   Object.assign(migrated, { afterRows: await snapshot(), afterPolicies: await policies() });
   await pool.query(tagMigration);
+  // Later migrations the compiled API relies on: split write policies, then the shared catalogue guard.
+  await pool.query(await read('../../database/migrations/20261110103843_performance_read_policies.sql'));
+  await pool.query(await read('../../database/migrations/20261112090000_catalogue_write_guard.sql'));
 });
 after(() => pool.end());
 
@@ -109,6 +112,7 @@ test('reads titles in the catalogue, the record detail and the frise detail', as
 test('a conversion keeps the titles of the record unless the form submits its own', async () => {
   await pool.query("INSERT INTO periods(id,wikidata_id,label_fr,label_en,start_date,end_date,wikipedia_title_fr,wikipedia_title_en) VALUES('bastille','Q10','Bastille','Bastille','1789-07-14','1789-07-15','Prise de la Bastille','Storming of the Bastille')");
   await pool.query("INSERT INTO story_periods(story_id,period_id) VALUES(1,'bastille')");
+  await pool.query("INSERT INTO catalogue_private.record_creators(kind,entity_id,user_id) VALUES('period','bastille',$1)", [alice]);
   const event = await call('post', '/periods/:id/convert-to-event', { id: 'bastille' }, { ...eventBody, id: 'ev', wikidata_id: 'Q10' });
   assert.equal(event.statusCode, 201);
   assert.deepEqual(await titlesOf('events', 'ev'), { fr: 'Prise de la Bastille', en: 'Storming of the Bastille' });

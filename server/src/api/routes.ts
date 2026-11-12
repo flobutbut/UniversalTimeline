@@ -24,6 +24,8 @@ import { parseGeneratedStory, parseGeneratedStoryLookup } from './wikidataGenera
 import { createGeneratedStory, findExistingGeneratedStories } from '../services/wikidataGeneration.js';
 
 const router = express.Router();
+// Raised by the database guard of the shared catalogue (catalogue_private.guard_record_write).
+const sharedRecord = 'Cette fiche appartient au catalogue partagé. Seuls son auteur, tant qu’aucune autre frise ne l’utilise, ou un éditeur peuvent la modifier ou la supprimer.';
 // A rotating keyed fingerprint limits bursts without retaining the visitor’s IP address.
 const feedbackSalt = randomBytes(32);
 router.get('/feedback/settings', endpoint('Lecture des paramètres impossible.', async (_req, res) => {
@@ -195,17 +197,17 @@ router.put('/events/:id', endpoint("Erreur lors de la mise à jour de l'événem
   const id = parseEntityId(req.params.id);
   const data = parseWriteCategories(parseEventWrite(req.body, false));
   res.json(await catalogue.updateEvent(id, data));
-}, { conflict: 'Ce Q-id ou cet identifiant d’événement est déjà utilisé.' }));
+}, { conflict: 'Ce Q-id ou cet identifiant d’événement est déjà utilisé.', forbidden: sharedRecord }));
 router.put('/periods/:id', endpoint('Erreur lors de la mise à jour de la période', async (req, res) => {
   const id = parseEntityId(req.params.id);
   const data = parseWriteCategories(parsePeriodWrite(req.body, false));
   res.json(await catalogue.updatePeriod(id, data));
-}, { conflict: 'Ce Q-id ou cet identifiant de période est déjà utilisé.' }));
+}, { conflict: 'Ce Q-id ou cet identifiant de période est déjà utilisé.', forbidden: sharedRecord }));
 router.delete('/periods/:id', endpoint('Erreur lors de la suppression de la période', async (req, res) => {
   res.json(await catalogue.deletePeriod(parseEntityId(req.params.id)));
 }, {
   foreignKey: 'Cette période est encore utilisée. Retirez ses liens avant de la supprimer.',
-  busy: 'La période est occupée. Réessayez la suppression.',
+  busy: 'La période est occupée. Réessayez la suppression.', forbidden: sharedRecord,
 }));
 // The body describes the new record; its ID must differ from every record of the target type.
 router.post('/periods/:id/convert-to-event', endpoint('Impossible de convertir la période en événement.', async (req, res) => {
@@ -221,7 +223,7 @@ router.post('/events/:id/convert-to-period', endpoint('Impossible de convertir l
 router.delete('/events/:id', endpoint("Erreur lors de la suppression de l'événement", async (req, res) => {
   await catalogue.deleteEvent(parseEntityId(req.params.id));
   res.status(204).send();
-}));
+}, { forbidden: sharedRecord }));
 router.put('/stories/:storyId/root-period', endpoint('Impossible de changer la racine de la frise.', async (req, res) => {
   const id = parseStoryId(req.params.storyId, 'storyId');
   const periodId = parseEntityId(inputObject(req.body).periodId, 'periodId');
