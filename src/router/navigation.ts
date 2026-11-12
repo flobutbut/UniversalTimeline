@@ -1,10 +1,11 @@
 import type { Tab } from '@/types/global';
 
-export type NavigationView = 'timeline' | 'database' | 'graph' | 'events' | 'admin';
+export type NavigationView = 'timeline' | 'catalogue' | 'database' | 'graph' | 'events' | 'admin';
 
 export const navigationTabs: Tab<NavigationView>[] = [
   { label: 'Exploration', value: 'timeline', icon: 'mdi:timeline' },
-  { label: 'Frises', value: 'database', icon: 'mdi:book-open-page-variant' },
+  { label: 'Catalogue', value: 'catalogue', icon: 'mdi:view-grid-outline' },
+  { label: 'Mes frises', value: 'database', icon: 'mdi:book-open-page-variant' },
   { label: 'Administration', value: 'admin', icon: 'mdi:shield-account-outline' },
 ];
 
@@ -13,8 +14,10 @@ const ADMIN_VIEWS: ReadonlySet<NavigationView> = new Set(['graph', 'events', 'ad
 /** Pages without a tab of their own, shown under the tab they belong to. */
 const PARENT_VIEWS: Partial<Record<string, NavigationView>> = { graph: 'admin', events: 'admin', 'design-system': 'admin', 'wikidata-generation': 'database', 'navigation-prototype': 'timeline' };
 
-export function navigationTabsFor(isAdmin: boolean): Tab<NavigationView>[] {
-  return navigationTabs.filter(tab => isAdmin || !ADMIN_VIEWS.has(tab.value));
+export function navigationTabsFor(isAdmin: boolean, signedIn = true): Tab<NavigationView>[] {
+  return navigationTabs.filter(tab => signedIn
+    ? isAdmin || !ADMIN_VIEWS.has(tab.value)
+    : tab.value === 'timeline' || tab.value === 'catalogue');
 }
 
 export function navigationViewForRoute(name: unknown): NavigationView | '' {

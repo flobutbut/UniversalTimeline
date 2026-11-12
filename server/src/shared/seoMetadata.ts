@@ -7,6 +7,7 @@ export interface PublicStoryMetadata { id: string; title: string; description: s
 const pages: Record<string, { title: string; description: string; index?: boolean }> = {
   '/': { title: 'Frises chronologiques interactives', description: 'Explorez des frises chronologiques, du Big Bang à l’histoire humaine. Comparez les durées et créez vos propres frises avec Universal Timeline.', index: true },
   '/timeline': { title: 'Explorer les frises chronologiques', description: 'Parcourez les périodes et les événements des frises chronologiques publiques d’Universal Timeline.' },
+  '/catalogue': { title: 'Catalogue des frises chronologiques', description: 'Découvrez les frises chronologiques publiques par thème et par époque, puis explorez leurs périodes et événements.' },
   '/voyage': { title: 'Du cosmos à l’instant', description: 'Un voyage visuel dans les échelles du temps, de l’Univers à une seconde.' },
   '/search': { title: 'Rechercher une frise', description: 'Recherchez une frise chronologique ou un sujet Wikidata dans Universal Timeline.' },
   '/generate': { title: 'Préparer une frise depuis Wikidata', description: 'Préparez et vérifiez les éléments d’une frise chronologique à partir de Wikidata.' },

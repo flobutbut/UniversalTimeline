@@ -9,7 +9,7 @@
       "framework": "vite",
       "routes": [
         {
-          "src": "^/(voyage|timeline|search|generate|database|periods|graph|events|admin|profile|design-system|contact|legal|login|reset-password|forbidden)/?$",
+          "src": "^/(voyage|timeline|catalogue|search|generate|database|periods|graph|events|admin|profile|design-system|contact|legal|login|reset-password|forbidden)/?$",
           "dest": "/__seo__/$1.html"
         },
         {

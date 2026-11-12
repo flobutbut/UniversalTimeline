@@ -89,7 +89,7 @@ it('provides native navigation links with a current page and a skip link to the 
   const nav = view.get('nav[aria-label="Navigation principale"]');
   expect(nav.get('a[aria-current="page"]').text()).toBe('Administration');
   expect(nav.findAll('a').every(link => !!link.attributes('href'))).toBe(true);
-  expect(nav.findAll('a').map(link => link.text())).toEqual(['Exploration', 'Frises', 'Administration']);
+  expect(nav.findAll('a').map(link => link.text())).toEqual(['Exploration', 'Catalogue', 'Mes frises', 'Administration']);
   const skip = view.get('.skip-link'); expect(skip.attributes('href')).toBe('#main-content');
   expect(view.get('main').attributes('tabindex')).toBe('-1');
 });
@@ -105,7 +105,7 @@ it.each([['/periods', 'Périodes'], ['/graph', 'Périodes'], ['/events', 'Évén
 });
 
 it('preserves native modified-link behavior without starting an in-app navigation', async () => {
-  await start('/events'); const link = view.findAll('header a').find(node => node.text() === 'Frises')!;
+  await start('/events'); const link = view.findAll('header a').find(node => node.text() === 'Mes frises')!;
   let nativeNavigation = false;
   // Observe the component's decision, then stop jsdom's unsupported real navigation.
   link.element.addEventListener('click', event => { nativeNavigation = !event.defaultPrevented; event.preventDefault(); }, { once: true });
@@ -170,7 +170,7 @@ it('keeps the current page after a loading failure and retries the failed route'
   expect(load).toHaveBeenCalledTimes(2); expect(view.find('[role="alert"]').exists()).toBe(false); expect(activeTab()).toBe('Administration');
 });
 
-it.each([['/graph', 'Administration'], ['/design-system', 'Administration'], ['/database', 'Frises']])('renders a direct %s route and the matching header', async (path, label) => {
+it.each([['/graph', 'Administration'], ['/design-system', 'Administration'], ['/database', 'Mes frises']])('renders a direct %s route and the matching header', async (path, label) => {
   await start(path); expect(activeTab()).toBe(label);
   expect(view.find('[data-page="timeline"]').exists()).toBe(false);
   expect(StoryApiService.getInstance().getStory).not.toHaveBeenCalled();
@@ -220,10 +220,10 @@ it('ignores a late load failure from an abandoned navigation', async () => {
   const pending = deferred<Component>();
   await start('/timeline', withEventsLoader(() => pending.promise));
   void router.push('/events').catch(() => {}); await flushPromises();
-  await button('Frises').trigger('click'); await flushPromises();
-  expect(activeTab()).toBe('Frises');
+  await button('Mes frises').trigger('click'); await flushPromises();
+  expect(activeTab()).toBe('Mes frises');
   pending.reject(new Error('Ancien téléchargement interrompu')); await flushPromises();
-  expect(view.find('[role="alert"]').exists()).toBe(false); expect(activeTab()).toBe('Frises');
+  expect(view.find('[role="alert"]').exists()).toBe(false); expect(activeTab()).toBe('Mes frises');
   expect(view.find('[role="status"]').exists()).toBe(false);
 });
 
