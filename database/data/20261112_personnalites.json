@@ -1,0 +1,1795 @@
+{
+  "reference_time": "2026-11-12T12:00:00Z",
+  "stories": [
+    {
+      "key": "jesus",
+      "parent_story_id": 45,
+      "title_fr": "Jésus de Nazareth",
+      "title_en": "Jesus of Nazareth",
+      "description_fr": "De la naissance en Judée à la crucifixion à Jérusalem, puis aux premières communautés qui diffusent son message : les repères de la vie de Jésus, d’après les évangiles et les historiens.",
+      "description_en": "From his birth in Judaea to the crucifixion in Jerusalem, then the first communities that spread his message: the milestones of the life of Jesus, according to the gospels and historians.",
+      "tags": [
+        "religions-spiritualites"
+      ],
+      "periods": [
+        {
+          "period_id": "171fd59a-b152-4da6-8422-e51fb8ca15b2",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "3fb2964d-de48-4f2a-875b-8769a91cbba9",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "47391fb9-b687-47cf-b7c6-007cfe2de813",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "EVT_JESUS",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "bc9373a8-b30a-4046-87fb-45a1d696a652",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "673f120d-828a-4220-9384-3fcc96f97591",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "5e05893b-ae79-460c-8796-b6021ef10f27",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "e1402c65-7c5a-4f58-8d5a-a013153e48eb",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "303494f0-1027-42d9-a46e-66eb66f0db98",
+          "importance": "normal",
+          "reused": true
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 45,
+          "event_id": "EVT_JESUS"
+        },
+        {
+          "source_story_id": 10,
+          "event_id": "EVT_JESUS"
+        }
+      ]
+    },
+    {
+      "key": "bouddha",
+      "parent_story_id": 55,
+      "title_fr": "Bouddha (Siddhartha Gautama)",
+      "title_en": "The Buddha (Siddhartha Gautama)",
+      "description_fr": "Du prince de Kapilavastu au maître qui enseigne dans la plaine du Gange : la vie du Bouddha selon la chronologie traditionnelle, dont les dates restent discutées par les historiens.",
+      "description_en": "From the prince of Kapilavastu to the teacher of the Ganges plain: the life of the Buddha according to the traditional chronology, whose dates are still debated by historians.",
+      "tags": [
+        "religions-spiritualites",
+        "philosophie-ideologies"
+      ],
+      "periods": [
+        {
+          "period_id": "2f14683f-3616-425a-92f3-81bdfa5c1cc6",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "b3232f0c-fd2c-41a7-b742-5c3a96d870ee",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "6b383777-95a7-4b40-ab09-7f91a4a300a0",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "66a3b06d-2a7f-4837-a6b5-7cc5a2812787",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "b6f3c08e-4b39-47df-8969-77925fc370ff",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "a57d84a6-0af1-44ff-b185-80ac404f2783",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "66417f66-794d-49d4-8205-02bb66191a78",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "5c1efb55-a211-4f3c-b517-037cca032bad",
+          "importance": "major",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 55,
+          "event_id": "EVT_BUDDHA"
+        }
+      ]
+    },
+    {
+      "key": "newton",
+      "parent_story_id": 53,
+      "title_fr": "Isaac Newton",
+      "title_en": "Isaac Newton",
+      "description_fr": "De Woolsthorpe à Londres : les années de découvertes, la chaire de Cambridge, les Principia et l’Optique, puis la direction de la Monnaie et de la Royal Society.",
+      "description_en": "From Woolsthorpe to London: the years of discovery, the Cambridge chair, the Principia and the Opticks, then the Royal Mint and the Royal Society.",
+      "tags": [
+        "sciences-savoirs"
+      ],
+      "periods": [
+        {
+          "period_id": "00d6a23a-41c6-4d42-b88d-3311ac81ce66",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "41cb45f7-0a7f-42e4-a92b-af1662795887",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "a15bd693-4457-4e5e-a5d7-cc8a213a4cef",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "3ec572b0-79f0-44bc-a7f3-46f20748d8a7",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "057ea60b-e225-4952-b855-00870439e1d3",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "ba492c9e-e1dd-432f-9a5f-60da4fd6df65",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "7cfa79a0-84cb-422b-8bb3-2612f8dcd0b0",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "abd02931-6438-4f2c-a6f4-a1485fe0e8bf",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "02fc3160-07b7-4285-a9eb-59606a271008",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "5f40645d-9fa8-4ade-baa3-2e01e71f57da",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "8391c918-8f76-4b1d-9bcf-2ff4ef105989",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "3b5a7e82-e754-4bbb-a2dd-4863ca246f72",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "f8a5d01a-99f4-475a-9e8c-fe5c2a3b07d3",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 53,
+          "event_id": "02fc3160-07b7-4285-a9eb-59606a271008"
+        },
+        {
+          "source_story_id": 16,
+          "event_id": "02fc3160-07b7-4285-a9eb-59606a271008"
+        }
+      ]
+    },
+    {
+      "key": "einstein",
+      "parent_story_id": 37,
+      "title_fr": "Albert Einstein",
+      "title_en": "Albert Einstein",
+      "description_fr": "D’Ulm à Princeton : l’office des brevets de Berne, les deux théories de la relativité, la célébrité mondiale puis l’exil devant le nazisme.",
+      "description_en": "From Ulm to Princeton: the Bern patent office, the two theories of relativity, worldwide fame and then exile from Nazism.",
+      "tags": [
+        "sciences-savoirs"
+      ],
+      "periods": [
+        {
+          "period_id": "44c9100b-6148-411f-823a-69cd088ce8c4",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "b4174d5c-c48e-4b23-9c2c-58424aa9332e",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "e3220e30-6214-4c45-a32a-5b7b831b86ff",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "b330a053-ee57-4ef8-94f9-19c7b117f471",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "cdcbd73e-409c-41c6-83b6-f48c2fbfb64d",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "d9c3e32c-49ea-4c24-8aa3-a8c275c5730c",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "be09bd0b-b493-47ca-9019-6eae9b0f18ae",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "b451457d-2d65-4445-a45e-8bafb68cfc89",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "1ad9f168-95ec-41f8-9d75-cf6525587848",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "2381297d-a64f-4171-9341-e6a566103bc9",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "d9d60af7-f6dd-4a9e-84f3-a87e502103f9",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "483de104-ab36-4193-aef4-606788e8309d",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 37,
+          "event_id": "d9c3e32c-49ea-4c24-8aa3-a8c275c5730c"
+        }
+      ]
+    },
+    {
+      "key": "hitler",
+      "parent_story_id": 9,
+      "title_fr": "Adolf Hitler",
+      "title_en": "Adolf Hitler",
+      "description_fr": "De la jeunesse en Autriche à la prise du pouvoir, puis à la dictature, à la guerre et au génocide : les étapes du parcours d’Adolf Hitler jusqu’à sa mort dans Berlin assiégé.",
+      "description_en": "From his youth in Austria to the seizure of power, then dictatorship, war and genocide: the stages of Adolf Hitler’s path to his death in besieged Berlin.",
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ],
+      "periods": [
+        {
+          "period_id": "dce67b6a-c990-489f-a99f-979032a6da18",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "004b49a1-6649-40f6-8cf3-b405d749e6a2",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "5cca0848-630e-43f5-be47-e0e83f4a3800",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "1840fe8f-edd3-4aa0-aeb5-84dc47da8072",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "82796f9c-af44-4233-be6b-1117e3d52eb9",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "8c6d574e-5b97-478c-8bae-1b27b8b47698",
+          "parent_period_id": null,
+          "reused": true
+        }
+      ],
+      "events": [
+        {
+          "event_id": "ddfc25db-f6f5-4f57-9f1c-70cec6470476",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "69db05e1-e4eb-4d3b-8081-708cd064b2a8",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "2640d87c-71c0-4826-b884-cfb5b7dd4a97",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "5ad6b98c-7d2c-49a9-82bb-b2ffa4a7b772",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "ac1b4e1a-286a-455e-a42f-a45678b2ebd9",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "481e81dd-685f-4c51-97c0-dee32afb91f1",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "2bb11259-6abe-401c-86cb-cb1737cbb0b0",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "c1936e91-c0ff-4f7e-9060-155ad9038b42",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "a69bda4a-c41e-4821-bf76-58d4c3dd5208",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "cf84b98c-9c2e-434e-b945-ad7600b515c3",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "7034313e-af3d-43ac-aa76-d11b2673835d",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "Q127518",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "3f5271ca-8a22-4a10-bbd2-4eebeab392d8",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "97da4dad-7dc6-41d9-98d3-225e0387e34b",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "c20bf479-538a-4750-996d-8fba2fcfb707",
+          "importance": "major",
+          "reused": true
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 9,
+          "event_id": "5ad6b98c-7d2c-49a9-82bb-b2ffa4a7b772"
+        }
+      ]
+    },
+    {
+      "key": "truman",
+      "parent_story_id": 50,
+      "title_fr": "Harry S. Truman",
+      "title_en": "Harry S. Truman",
+      "description_fr": "Du Missouri à la Maison-Blanche : le sénateur devenu président à la mort de Roosevelt, qui décide de l’emploi de la bombe atomique et engage les États-Unis dans la guerre froide.",
+      "description_en": "From Missouri to the White House: the senator who became president on Roosevelt’s death, decided to use the atomic bomb and committed the United States to the Cold War.",
+      "tags": [
+        "pouvoir-institutions"
+      ],
+      "periods": [
+        {
+          "period_id": "6dc9a1f3-1f1f-4b6a-afdf-5da98b79aa0d",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "f2322aa0-5e9d-403b-9b99-94a6fb24226f",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "b5a4e08d-62af-4a77-8501-579ee41f96b9",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "a0f7f685-62ef-45e5-b1d6-0b3103fbc90d",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "2b1532ee-b0a1-4028-b6e8-b4fa19f7d738",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "d83a0bfc-45d5-4054-a30b-4b5efe3787c7",
+          "parent_period_id": null,
+          "reused": true
+        }
+      ],
+      "events": [
+        {
+          "event_id": "0277b0da-5735-4e4c-9e30-f219a6dbb22e",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "7b578525-5bf0-45e7-965e-9f3ec6562936",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "9706a7b0-b18c-4f36-a6c8-02e0c615dd47",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "Q127478",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "77f4599c-c54f-4f60-b40e-958a9ff79770",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "8993258a-a1d4-496d-a6df-3567ea5092aa",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "2d3422d6-f000-4413-8e62-13b4ffeed792",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "d76ec111-4fef-4511-991e-1206be1f8c92",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "8ef016f8-5bd8-4f5d-8da2-61d9887f873b",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "611fc887-ef46-474b-a1c6-43fa897fcc1f",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "c0851630-8774-4728-a7d0-340c81c7c220",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "14a15b09-e1ab-497b-b58e-200179577d70",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 12,
+          "event_id": "77f4599c-c54f-4f60-b40e-958a9ff79770"
+        },
+        {
+          "source_story_id": 50,
+          "event_id": "Q127478"
+        }
+      ]
+    }
+  ],
+  "reusedPeriods": {
+    "8c6d574e-5b97-478c-8bae-1b27b8b47698": {
+      "start": "1941-06-22",
+      "end": "1945-05-08",
+      "q": "Q2763"
+    },
+    "d83a0bfc-45d5-4054-a30b-4b5efe3787c7": {
+      "start": "1950-06-25",
+      "end": "1953-07-27",
+      "q": "Q8663"
+    }
+  },
+  "reusedEvents": {
+    "EVT_JESUS": {
+      "date": "4 BCE",
+      "q": "Q302"
+    },
+    "673f120d-828a-4220-9384-3fcc96f97591": {
+      "date": "0030",
+      "q": "Q51636"
+    },
+    "303494f0-1027-42d9-a46e-66eb66f0db98": {
+      "date": "0070",
+      "q": null
+    },
+    "EVT_BUDDHA": {
+      "date": "500 BCE",
+      "q": "Q9441"
+    },
+    "02fc3160-07b7-4285-a9eb-59606a271008": {
+      "date": "1687-07-05",
+      "q": "Q205921"
+    },
+    "d9c3e32c-49ea-4c24-8aa3-a8c275c5730c": {
+      "date": "1905-06-30",
+      "q": "Q3020388"
+    },
+    "be09bd0b-b493-47ca-9019-6eae9b0f18ae": {
+      "date": "1915-11-25",
+      "q": "Q11452"
+    },
+    "5ad6b98c-7d2c-49a9-82bb-b2ffa4a7b772": {
+      "date": "1933-01-30",
+      "q": "Q4684105"
+    },
+    "a69bda4a-c41e-4821-bf76-58d4c3dd5208": {
+      "date": "1938-03-12",
+      "q": "Q154681"
+    },
+    "7034313e-af3d-43ac-aa76-d11b2673835d": {
+      "date": "1939-09-01",
+      "q": "Q150812"
+    },
+    "Q127518": {
+      "date": "1941-06-22",
+      "q": "Q83055"
+    },
+    "3f5271ca-8a22-4a10-bbd2-4eebeab392d8": {
+      "date": "1942-01-20",
+      "q": "Q152120"
+    },
+    "c20bf479-538a-4750-996d-8fba2fcfb707": {
+      "date": "1945-04-30",
+      "q": "Q1993476"
+    },
+    "Q127478": {
+      "date": "1945-08-06",
+      "q": "Q488"
+    },
+    "77f4599c-c54f-4f60-b40e-958a9ff79770": {
+      "date": "1947-03-12",
+      "q": null
+    },
+    "8993258a-a1d4-496d-a6df-3567ea5092aa": {
+      "date": "1948-04-03",
+      "q": "Q4576"
+    },
+    "611fc887-ef46-474b-a1c6-43fa897fcc1f": {
+      "date": "1949-04-04",
+      "q": "Q877399"
+    }
+  },
+  "newPeriods": [
+    {
+      "row": {
+        "id": "171fd59a-b152-4da6-8422-e51fb8ca15b2",
+        "label_fr": "Jeunesse à Nazareth",
+        "label_en": "Early years in Nazareth",
+        "description_fr": "Les évangiles disent peu de choses de ces années passées en Galilée, où Jésus aurait exercé un métier d’artisan.",
+        "description_en": "The gospels say little about these years spent in Galilee, where Jesus is said to have worked as a craftsman.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "4 BCE",
+        "end_date": "0028",
+        "start_years_bp": 2029.82203969884,
+        "end_years_bp": 1998.82409308693,
+        "non_thematic": false
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "3fb2964d-de48-4f2a-875b-8769a91cbba9",
+        "label_fr": "Ministère de Jésus",
+        "label_en": "Ministry of Jesus",
+        "description_fr": "Jésus prêche en Galilée puis en Judée, entouré de disciples ; la durée de cette prédication, d’un à trois ans, varie selon les évangiles.",
+        "description_en": "Jesus preaches in Galilee and then Judaea, surrounded by disciples; the gospels give this preaching a length of one to three years.",
+        "wikidata_id": "Q749771",
+        "wikipedia_title_fr": "Ministère de Jésus",
+        "wikipedia_title_en": "Ministry of Jesus",
+        "start_date": "0028",
+        "end_date": "0030",
+        "start_years_bp": 1998.82409308693,
+        "end_years_bp": 1996.82272416153,
+        "non_thematic": false
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "47391fb9-b687-47cf-b7c6-007cfe2de813",
+        "label_fr": "Premières communautés chrétiennes",
+        "label_en": "First Christian communities",
+        "description_fr": "Les disciples, puis Paul de Tarse, diffusent le message de Jésus autour de la Méditerranée ; les évangiles sont mis par écrit.",
+        "description_en": "The disciples, then Paul of Tarsus, spread the message of Jesus around the Mediterranean; the gospels are written down.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "0030",
+        "end_date": "0100",
+        "start_years_bp": 1996.82272416153,
+        "end_years_bp": 1926.82409308693,
+        "non_thematic": false
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "2f14683f-3616-425a-92f3-81bdfa5c1cc6",
+        "label_fr": "Jeunesse princière à Kapilavastu",
+        "label_en": "Princely youth in Kapilavastu",
+        "description_fr": "Selon la tradition, Siddhartha grandit dans le clan des Shakya, à l’abri du spectacle de la souffrance.",
+        "description_en": "According to tradition, Siddhartha grows up in the Shakya clan, sheltered from the sight of suffering.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "563 BCE",
+        "end_date": "534 BCE",
+        "start_years_bp": 2588.81177275838,
+        "end_years_bp": 2559.81245722108,
+        "non_thematic": false
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "b3232f0c-fd2c-41a7-b742-5c3a96d870ee",
+        "label_fr": "Ascèse et quête de l’Éveil",
+        "label_en": "Asceticism and the quest for awakening",
+        "description_fr": "Devenu ascète errant, Siddhartha suit plusieurs maîtres et pratique des privations extrêmes avant de choisir une voie moyenne.",
+        "description_en": "As a wandering ascetic, Siddhartha follows several teachers and practises extreme austerities before choosing a middle way.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "534 BCE",
+        "end_date": "528 BCE",
+        "start_years_bp": 2559.81245722108,
+        "end_years_bp": 2553.81108829569,
+        "non_thematic": false
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "6b383777-95a7-4b40-ab09-7f91a4a300a0",
+        "label_fr": "Enseignement dans la plaine du Gange",
+        "label_en": "Teaching in the Ganges plain",
+        "description_fr": "Le Bouddha parcourt les royaumes de Magadha et de Kosala, enseigne et fonde une communauté de moines et de moniales.",
+        "description_en": "The Buddha travels through the kingdoms of Magadha and Kosala, teaching and founding a community of monks and nuns.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "528 BCE",
+        "end_date": "483 BCE",
+        "start_years_bp": 2553.81108829569,
+        "end_years_bp": 2508.81451060917,
+        "non_thematic": false
+      },
+      "tags": [
+        "religions-spiritualites",
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "00d6a23a-41c6-4d42-b88d-3311ac81ce66",
+        "label_fr": "Enfance et études de Newton",
+        "label_en": "Newton’s childhood and studies",
+        "description_fr": "Élevé par sa grand-mère dans le Lincolnshire, Newton entre au Trinity College de Cambridge en 1661.",
+        "description_en": "Raised by his grandmother in Lincolnshire, Newton enters Trinity College, Cambridge, in 1661.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1643-01-04",
+        "end_date": "1665",
+        "start_years_bp": 383.848049281314,
+        "end_years_bp": 361.854893908282,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "41cb45f7-0a7f-42e4-a92b-af1662795887",
+        "label_fr": "Années de découvertes à Woolsthorpe",
+        "label_en": "Years of discovery at Woolsthorpe",
+        "description_fr": "Pendant la fermeture de Cambridge due à la peste, Newton pose les bases du calcul infinitésimal, de sa théorie des couleurs et de la gravitation.",
+        "description_en": "While Cambridge is closed by the plague, Newton lays the foundations of calculus, of his theory of colours and of gravitation.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1665",
+        "end_date": "1667",
+        "start_years_bp": 361.854893908282,
+        "end_years_bp": 359.856262833676,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "a15bd693-4457-4e5e-a5d7-cc8a213a4cef",
+        "label_fr": "Newton professeur à Cambridge",
+        "label_en": "Newton as professor at Cambridge",
+        "description_fr": "Newton enseigne les mathématiques, mène ses travaux d’optique et de mécanique et rédige les Principia.",
+        "description_en": "Newton teaches mathematics, pursues his work on optics and mechanics and writes the Principia.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1667",
+        "end_date": "1696",
+        "start_years_bp": 359.856262833676,
+        "end_years_bp": 330.856947296372,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "3ec572b0-79f0-44bc-a7f3-46f20748d8a7",
+        "label_fr": "Newton à la Monnaie de Londres",
+        "label_en": "Newton at the Royal Mint",
+        "description_fr": "Gardien puis maître de la Monnaie, Newton conduit la refonte des pièces anglaises tout en présidant la Royal Society.",
+        "description_en": "As warden and then master of the Mint, Newton oversees the English recoinage while presiding over the Royal Society.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1696",
+        "end_date": "1727-03-31",
+        "start_years_bp": 330.856947296372,
+        "end_years_bp": 299.615331964408,
+        "non_thematic": false
+      },
+      "tags": [
+        "economie-echanges",
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "44c9100b-6148-411f-823a-69cd088ce8c4",
+        "label_fr": "Jeunesse et études d’Einstein",
+        "label_en": "Einstein’s youth and studies",
+        "description_fr": "Einstein grandit à Munich, quitte l’Allemagne à quinze ans et obtient son diplôme à l’École polytechnique de Zurich en 1900.",
+        "description_en": "Einstein grows up in Munich, leaves Germany at fifteen and graduates from the Zurich Polytechnic in 1900.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1879-03-14",
+        "end_date": "1902",
+        "start_years_bp": 147.664613278576,
+        "end_years_bp": 124.86379192334,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "b4174d5c-c48e-4b23-9c2c-58424aa9332e",
+        "label_fr": "Einstein à l’office des brevets de Berne",
+        "label_en": "Einstein at the Bern patent office",
+        "description_fr": "Employé comme expert technique, Einstein publie en 1905 ses articles sur les quanta de lumière, le mouvement brownien et la relativité restreinte.",
+        "description_en": "Working as a technical examiner, Einstein publishes in 1905 his papers on light quanta, Brownian motion and special relativity.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1902",
+        "end_date": "1909",
+        "start_years_bp": 124.86379192334,
+        "end_years_bp": 117.863107460643,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "e3220e30-6214-4c45-a32a-5b7b831b86ff",
+        "label_fr": "Carrière universitaire d’Einstein en Europe",
+        "label_en": "Einstein’s academic career in Europe",
+        "description_fr": "Professeur à Zurich, Prague puis Berlin, Einstein achève la relativité générale et devient mondialement célèbre.",
+        "description_en": "A professor in Zurich, Prague and then Berlin, Einstein completes general relativity and becomes world famous.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1909",
+        "end_date": "1933",
+        "start_years_bp": 117.863107460643,
+        "end_years_bp": 93.8631074606434,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "b330a053-ee57-4ef8-94f9-19c7b117f471",
+        "label_fr": "Einstein en exil à Princeton",
+        "label_en": "Einstein in exile at Princeton",
+        "description_fr": "Chassé par l’arrivée des nazis au pouvoir, Einstein s’installe aux États-Unis, cherche une théorie unifiée et s’engage pour la paix.",
+        "description_en": "Driven out when the Nazis take power, Einstein settles in the United States, seeks a unified theory and campaigns for peace.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1933",
+        "end_date": "1955-04-18",
+        "start_years_bp": 93.8631074606434,
+        "end_years_bp": 71.5715263518138,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs",
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "dce67b6a-c990-489f-a99f-979032a6da18",
+        "label_fr": "Jeunesse de Hitler en Autriche",
+        "label_en": "Hitler’s youth in Austria",
+        "description_fr": "Fils d’un douanier, Hitler échoue deux fois au concours des Beaux-Arts de Vienne, où il vit ensuite sans emploi stable.",
+        "description_en": "The son of a customs official, Hitler twice fails the entrance examination of the Vienna Academy of Fine Arts, then lives there without steady work.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1889-04-20",
+        "end_date": "1913-05",
+        "start_years_bp": 137.561943874059,
+        "end_years_bp": 113.534565366188,
+        "non_thematic": false
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "004b49a1-6649-40f6-8cf3-b405d749e6a2",
+        "label_fr": "Hitler à Munich et dans la Grande Guerre",
+        "label_en": "Hitler in Munich and the Great War",
+        "description_fr": "Installé à Munich, Hitler s’engage dans l’armée bavaroise en 1914 et sert comme estafette sur le front de l’Ouest.",
+        "description_en": "Having moved to Munich, Hitler enlists in the Bavarian army in 1914 and serves as a dispatch runner on the Western Front.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1913-05",
+        "end_date": "1919-09",
+        "start_years_bp": 113.534565366188,
+        "end_years_bp": 107.199178644764,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "5cca0848-630e-43f5-be47-e0e83f4a3800",
+        "label_fr": "Hitler à la tête du parti nazi",
+        "label_en": "Hitler at the head of the Nazi Party",
+        "description_fr": "Hitler rejoint un petit parti nationaliste munichois, en prend la direction et en fait, après la crise de 1929, la première force électorale d’Allemagne.",
+        "description_en": "Hitler joins a small nationalist party in Munich, takes it over and, after the 1929 crisis, makes it the largest electoral force in Germany.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1919-09",
+        "end_date": "1933-01-30",
+        "start_years_bp": 107.199178644764,
+        "end_years_bp": 93.7837097878166,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "1840fe8f-edd3-4aa0-aeb5-84dc47da8072",
+        "label_fr": "Dictature de Hitler avant la guerre",
+        "label_en": "Hitler’s dictatorship before the war",
+        "description_fr": "En quelques mois, Hitler supprime les libertés et les partis ; le régime persécute les Juifs, réarme et annexe l’Autriche puis les Sudètes.",
+        "description_en": "Within months Hitler abolishes civil liberties and parties; the regime persecutes Jews, rearms and annexes Austria and then the Sudetenland.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1933-01-30",
+        "end_date": "1939-09-01",
+        "start_years_bp": 93.7837097878166,
+        "end_years_bp": 87.1991786447639,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "82796f9c-af44-4233-be6b-1117e3d52eb9",
+        "label_fr": "Hitler chef de guerre",
+        "label_en": "Hitler as war leader",
+        "description_fr": "Hitler déclenche la guerre en Europe, dirige personnellement les opérations et ordonne l’extermination des Juifs d’Europe.",
+        "description_en": "Hitler starts the war in Europe, directs operations in person and orders the extermination of the Jews of Europe.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1939-09-01",
+        "end_date": "1945-04-30",
+        "start_years_bp": 87.1991786447639,
+        "end_years_bp": 81.5373032169747,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "6dc9a1f3-1f1f-4b6a-afdf-5da98b79aa0d",
+        "label_fr": "Jeunesse de Truman dans le Missouri",
+        "label_en": "Truman’s youth in Missouri",
+        "description_fr": "Truman grandit à Independence, travaille dans une banque puis exploite pendant dix ans la ferme familiale.",
+        "description_en": "Truman grows up in Independence, works in a bank and then runs the family farm for ten years.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1884-05-08",
+        "end_date": "1917",
+        "start_years_bp": 142.511978097194,
+        "end_years_bp": 109.863107460643,
+        "non_thematic": false
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "f2322aa0-5e9d-403b-9b99-94a6fb24226f",
+        "label_fr": "Truman, de la Grande Guerre à la politique locale",
+        "label_en": "Truman from the Great War to local politics",
+        "description_fr": "Capitaine d’artillerie en France, Truman ouvre ensuite une mercerie qui fait faillite, puis est élu juge administratif du comté de Jackson.",
+        "description_en": "An artillery captain in France, Truman then opens a haberdashery that fails, and is elected a county judge of Jackson County.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1917",
+        "end_date": "1935-01-03",
+        "start_years_bp": 109.863107460643,
+        "end_years_bp": 91.8590006844627,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "b5a4e08d-62af-4a77-8501-579ee41f96b9",
+        "label_fr": "Truman sénateur du Missouri",
+        "label_en": "Truman as senator from Missouri",
+        "description_fr": "Soutien du New Deal, Truman se fait connaître en présidant la commission qui contrôle les dépenses de guerre.",
+        "description_en": "A supporter of the New Deal, Truman makes his name chairing the committee that scrutinises war spending.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1935-01-03",
+        "end_date": "1945-01-17",
+        "start_years_bp": 91.8590006844627,
+        "end_years_bp": 81.8193018480493,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "a0f7f685-62ef-45e5-b1d6-0b3103fbc90d",
+        "label_fr": "Présidence de Harry S. Truman",
+        "label_en": "Presidency of Harry S. Truman",
+        "description_fr": "Truman termine la guerre, lance la politique d’endiguement et le plan Marshall, puis engage le pays en Corée.",
+        "description_en": "Truman ends the war, launches containment and the Marshall Plan, then commits the country in Korea.",
+        "wikidata_id": "Q2824575",
+        "wikipedia_title_fr": "Présidence de Harry S. Truman",
+        "wikipedia_title_en": "Presidency of Harry S. Truman",
+        "start_date": "1945-04-12",
+        "end_date": "1953-01-20",
+        "start_years_bp": 81.586584531143,
+        "end_years_bp": 73.8110882956879,
+        "non_thematic": true
+      },
+      "tags": []
+    },
+    {
+      "row": {
+        "id": "2b1532ee-b0a1-4028-b6e8-b4fa19f7d738",
+        "label_fr": "Retraite de Truman à Independence",
+        "label_en": "Truman’s retirement in Independence",
+        "description_fr": "Truman rédige ses mémoires et fonde sa bibliothèque présidentielle.",
+        "description_en": "Truman writes his memoirs and founds his presidential library.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1953-01-20",
+        "end_date": "1972-12-26",
+        "start_years_bp": 73.8110882956879,
+        "end_years_bp": 53.8795345653662,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    }
+  ],
+  "newEvents": [
+    {
+      "row": {
+        "id": "bc9373a8-b30a-4046-87fb-45a1d696a652",
+        "label_fr": "Baptême de Jésus",
+        "label_en": "Baptism of Jesus",
+        "description_fr": "Selon les évangiles, Jésus est baptisé dans le Jourdain par Jean le Baptiste, ce qui ouvre sa vie publique.",
+        "description_en": "According to the gospels, Jesus is baptised in the Jordan by John the Baptist, which opens his public life.",
+        "wikidata_id": "Q217048",
+        "wikipedia_title_fr": "Baptême du Christ",
+        "wikipedia_title_en": "Baptism of Jesus",
+        "date": "0028",
+        "date_years_bp": 1998.82409308693
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "5e05893b-ae79-460c-8796-b6021ef10f27",
+        "label_fr": "Conversion de Paul",
+        "label_en": "Conversion of Paul",
+        "description_fr": "Persécuteur des premiers disciples, Paul de Tarse rallie le mouvement et devient son principal missionnaire auprès des non-Juifs ; la date est approximative.",
+        "description_en": "A persecutor of the first disciples, Paul of Tarsus joins the movement and becomes its leading missionary to non-Jews; the date is approximate.",
+        "wikidata_id": "Q901397",
+        "wikipedia_title_fr": "Conversion de Paul",
+        "wikipedia_title_en": "Conversion of Paul the Apostle",
+        "date": "0034",
+        "date_years_bp": 1992.82272416153
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "e1402c65-7c5a-4f58-8d5a-a013153e48eb",
+        "label_fr": "Concile de Jérusalem",
+        "label_en": "Council of Jerusalem",
+        "description_fr": "Les responsables du mouvement décident que les convertis non juifs ne sont pas tenus à la circoncision.",
+        "description_en": "The leaders of the movement decide that non-Jewish converts are not required to be circumcised.",
+        "wikidata_id": "Q619950",
+        "wikipedia_title_fr": "Concile de Jérusalem",
+        "wikipedia_title_en": "Council of Jerusalem",
+        "date": "0049",
+        "date_years_bp": 1977.82203969884
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "66a3b06d-2a7f-4837-a6b5-7cc5a2812787",
+        "label_fr": "Naissance de Siddhartha à Lumbini",
+        "label_en": "Birth of Siddhartha at Lumbini",
+        "description_fr": "La tradition situe la naissance du futur Bouddha à Lumbini, dans l’actuel Népal ; des historiens la placent environ quatre-vingts ans plus tard.",
+        "description_en": "Tradition places the birth of the future Buddha at Lumbini, in present-day Nepal; some historians date it about eighty years later.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "563 BCE",
+        "date_years_bp": 2588.81177275838
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "b6f3c08e-4b39-47df-8969-77925fc370ff",
+        "label_fr": "Le Grand Départ",
+        "label_en": "The Great Renunciation",
+        "description_fr": "Siddhartha quitte son palais, sa femme et son fils pour mener une vie d’ascète.",
+        "description_en": "Siddhartha leaves his palace, his wife and his son to live as an ascetic.",
+        "wikidata_id": "Q73413583",
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": "Great Renunciation",
+        "date": "534 BCE",
+        "date_years_bp": 2559.81245722108
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "a57d84a6-0af1-44ff-b185-80ac404f2783",
+        "label_fr": "Éveil à Bodh-Gaya",
+        "label_en": "Awakening at Bodh Gaya",
+        "description_fr": "Après une nuit de méditation sous un figuier, Siddhartha atteint l’Éveil et devient le Bouddha.",
+        "description_en": "After a night of meditation under a fig tree, Siddhartha attains awakening and becomes the Buddha.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "528 BCE",
+        "date_years_bp": 2553.81108829569
+      },
+      "tags": [
+        "religions-spiritualites",
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "66417f66-794d-49d4-8205-02bb66191a78",
+        "label_fr": "Premier sermon à Sarnath",
+        "label_en": "First sermon at Sarnath",
+        "description_fr": "Près de Bénarès, le Bouddha expose les quatre nobles vérités à ses cinq premiers disciples.",
+        "description_en": "Near Benares, the Buddha sets out the four noble truths to his first five disciples.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "528 BCE",
+        "date_years_bp": 2553.81108829569
+      },
+      "tags": [
+        "religions-spiritualites",
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "5c1efb55-a211-4f3c-b517-037cca032bad",
+        "label_fr": "Mort du Bouddha à Kushinagar",
+        "label_en": "Death of the Buddha at Kushinagar",
+        "description_fr": "Le Bouddha meurt à environ quatre-vingts ans ; ses disciples parlent de parinirvana, l’extinction complète.",
+        "description_en": "The Buddha dies aged about eighty; his disciples speak of parinirvana, complete extinction.",
+        "wikidata_id": "Q111723540",
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "483 BCE",
+        "date_years_bp": 2508.81451060917
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "057ea60b-e225-4952-b855-00870439e1d3",
+        "label_fr": "Naissance d’Isaac Newton",
+        "label_en": "Birth of Isaac Newton",
+        "description_fr": "Newton naît à Woolsthorpe, dans le Lincolnshire, le 25 décembre 1642 du calendrier julien alors en usage en Angleterre.",
+        "description_en": "Newton is born at Woolsthorpe, Lincolnshire, on 25 December 1642 in the Julian calendar then used in England.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1643-01-04",
+        "date_years_bp": 383.848049281314
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "ba492c9e-e1dd-432f-9a5f-60da4fd6df65",
+        "label_fr": "Télescope à réflexion de Newton",
+        "label_en": "Newton’s reflecting telescope",
+        "description_fr": "Newton construit le premier télescope à miroir utilisable, qui évite les irisations des lunettes à lentilles.",
+        "description_en": "Newton builds the first working mirror telescope, which avoids the colour fringes of lens telescopes.",
+        "wikidata_id": "Q7020022",
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": "Newton's reflector",
+        "date": "1668",
+        "date_years_bp": 358.856947296372
+      },
+      "tags": [
+        "techniques-inventions",
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "7cfa79a0-84cb-422b-8bb3-2612f8dcd0b0",
+        "label_fr": "Newton titulaire de la chaire lucasienne",
+        "label_en": "Newton appointed Lucasian Professor",
+        "description_fr": "À vingt-six ans, Newton succède à Isaac Barrow à la chaire de mathématiques de Cambridge.",
+        "description_en": "Aged twenty-six, Newton succeeds Isaac Barrow in the Cambridge chair of mathematics.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1669",
+        "date_years_bp": 357.854893908282
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "abd02931-6438-4f2c-a6f4-a1485fe0e8bf",
+        "label_fr": "Newton élu à la Royal Society",
+        "label_en": "Newton elected to the Royal Society",
+        "description_fr": "Son télescope lui vaut d’être élu ; il présente la même année sa théorie de la lumière et des couleurs.",
+        "description_en": "His telescope earns him election; the same year he presents his theory of light and colours.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1672",
+        "date_years_bp": 354.856947296372
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "5f40645d-9fa8-4ade-baa3-2e01e71f57da",
+        "label_fr": "Newton président de la Royal Society",
+        "label_en": "Newton president of the Royal Society",
+        "description_fr": "Newton est élu à la présidence de la société savante, qu’il conserve jusqu’à sa mort.",
+        "description_en": "Newton is elected president of the learned society, a post he holds until his death.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1703",
+        "date_years_bp": 323.859000684463
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "8391c918-8f76-4b1d-9bcf-2ff4ef105989",
+        "label_fr": "Opticks de Newton",
+        "label_en": "Newton’s Opticks",
+        "description_fr": "Newton publie en anglais ses expériences sur la décomposition de la lumière blanche et la nature des couleurs.",
+        "description_en": "Newton publishes in English his experiments on the decomposition of white light and the nature of colours.",
+        "wikidata_id": "Q74263",
+        "wikipedia_title_fr": "Opticks",
+        "wikipedia_title_en": "Opticks",
+        "date": "1704",
+        "date_years_bp": 322.859685147159
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "3b5a7e82-e754-4bbb-a2dd-4863ca246f72",
+        "label_fr": "Newton anobli par la reine Anne",
+        "label_en": "Newton knighted by Queen Anne",
+        "description_fr": "La reine Anne fait Newton chevalier lors d’une visite à Cambridge.",
+        "description_en": "Queen Anne knights Newton during a visit to Cambridge.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1705-04-16",
+        "date_years_bp": 321.57015742642
+      },
+      "tags": [
+        "sciences-savoirs",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "f8a5d01a-99f4-475a-9e8c-fe5c2a3b07d3",
+        "label_fr": "Mort d’Isaac Newton",
+        "label_en": "Death of Isaac Newton",
+        "description_fr": "Newton meurt à Kensington et est inhumé à l’abbaye de Westminster.",
+        "description_en": "Newton dies at Kensington and is buried in Westminster Abbey.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1727-03-31",
+        "date_years_bp": 299.615331964408
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "cdcbd73e-409c-41c6-83b6-f48c2fbfb64d",
+        "label_fr": "Naissance d’Albert Einstein",
+        "label_en": "Birth of Albert Einstein",
+        "description_fr": "Einstein naît à Ulm, dans le royaume de Wurtemberg, dans une famille juive non pratiquante.",
+        "description_en": "Einstein is born in Ulm, in the Kingdom of Württemberg, into a non-observant Jewish family.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1879-03-14",
+        "date_years_bp": 147.664613278576
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "b451457d-2d65-4445-a45e-8bafb68cfc89",
+        "label_fr": "L’éclipse de 1919 confirme la relativité générale",
+        "label_en": "The 1919 eclipse confirms general relativity",
+        "description_fr": "Les expéditions d’Arthur Eddington mesurent la déviation de la lumière des étoiles par le Soleil, comme le prévoit la théorie.",
+        "description_en": "Arthur Eddington’s expeditions measure the bending of starlight by the Sun, as the theory predicts.",
+        "wikidata_id": "Q65041294",
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": "Eddington experiment",
+        "date": "1919-05-29",
+        "date_years_bp": 107.459274469541
+      },
+      "tags": [
+        "sciences-savoirs",
+        "cosmos"
+      ]
+    },
+    {
+      "row": {
+        "id": "1ad9f168-95ec-41f8-9d75-cf6525587848",
+        "label_fr": "Prix Nobel de physique d’Einstein",
+        "label_en": "Einstein’s Nobel Prize in Physics",
+        "description_fr": "Le prix de l’année 1921 lui est attribué pour son explication de l’effet photoélectrique, et non pour la relativité.",
+        "description_en": "The prize for 1921 is awarded to him for his explanation of the photoelectric effect, not for relativity.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1922-11-09",
+        "date_years_bp": 104.009582477755
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "2381297d-a64f-4171-9341-e6a566103bc9",
+        "label_fr": "Lettre d’Einstein à Roosevelt",
+        "label_en": "Einstein’s letter to Roosevelt",
+        "description_fr": "Rédigée avec Leó Szilárd, la lettre avertit le président américain qu’une bombe à uranium est possible et que l’Allemagne pourrait la construire.",
+        "description_en": "Drafted with Leó Szilárd, the letter warns the US president that a uranium bomb is possible and that Germany might build one.",
+        "wikidata_id": "Q714081",
+        "wikipedia_title_fr": "Lettre Einstein-Szilárd",
+        "wikipedia_title_en": "Einstein–Szilard letter",
+        "date": "1939-08-02",
+        "date_years_bp": 87.2813141683778
+      },
+      "tags": [
+        "sciences-savoirs",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "d9d60af7-f6dd-4a9e-84f3-a87e502103f9",
+        "label_fr": "Einstein devient citoyen américain",
+        "label_en": "Einstein becomes a US citizen",
+        "description_fr": "Einstein prête serment à Trenton, tout en conservant sa nationalité suisse.",
+        "description_en": "Einstein takes the oath in Trenton while keeping his Swiss citizenship.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1940-10-01",
+        "date_years_bp": 86.1149897330595
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "483de104-ab36-4193-aef4-606788e8309d",
+        "label_fr": "Mort d’Albert Einstein",
+        "label_en": "Death of Albert Einstein",
+        "description_fr": "Einstein meurt à Princeton quelques jours après avoir signé un manifeste contre les armes nucléaires.",
+        "description_en": "Einstein dies in Princeton a few days after signing a manifesto against nuclear weapons.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1955-04-18",
+        "date_years_bp": 71.5715263518138
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "ddfc25db-f6f5-4f57-9f1c-70cec6470476",
+        "label_fr": "Naissance d’Adolf Hitler",
+        "label_en": "Birth of Adolf Hitler",
+        "description_fr": "Hitler naît à Braunau am Inn, ville autrichienne à la frontière de la Bavière.",
+        "description_en": "Hitler is born in Braunau am Inn, an Austrian town on the Bavarian border.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1889-04-20",
+        "date_years_bp": 137.561943874059
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "69db05e1-e4eb-4d3b-8081-708cd064b2a8",
+        "label_fr": "Putsch de la Brasserie",
+        "label_en": "Beer Hall Putsch",
+        "description_fr": "Hitler tente de prendre le pouvoir à Munich ; le coup de force échoue le lendemain et lui vaut la prison.",
+        "description_en": "Hitler attempts to seize power in Munich; the coup fails the next day and lands him in prison.",
+        "wikidata_id": "Q36749",
+        "wikipedia_title_fr": "Putsch de la Brasserie",
+        "wikipedia_title_en": "Beer Hall Putsch",
+        "date": "1923-11-08",
+        "date_years_bp": 103.013004791239
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "2640d87c-71c0-4826-b884-cfb5b7dd4a97",
+        "label_fr": "Publication de Mein Kampf",
+        "label_en": "Publication of Mein Kampf",
+        "description_fr": "Rédigé en prison, le premier volume expose l’antisémitisme de Hitler et son projet d’expansion vers l’Est.",
+        "description_en": "Written in prison, the first volume sets out Hitler’s antisemitism and his plan for expansion to the East.",
+        "wikidata_id": "Q48244",
+        "wikipedia_title_fr": "Mein Kampf",
+        "wikipedia_title_en": "Mein Kampf",
+        "date": "1925-07-18",
+        "date_years_bp": 101.321013004791
+      },
+      "tags": [
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "ac1b4e1a-286a-455e-a42f-a45678b2ebd9",
+        "label_fr": "Incendie du Reichstag",
+        "label_en": "Reichstag fire",
+        "description_fr": "L’incendie du Parlement sert de prétexte à un décret qui suspend les libertés et permet l’arrestation des opposants.",
+        "description_en": "The burning of the parliament building serves as the pretext for a decree suspending civil liberties and allowing the arrest of opponents.",
+        "wikidata_id": "Q153992",
+        "wikipedia_title_fr": "Incendie du Reichstag",
+        "wikipedia_title_en": "Reichstag fire",
+        "date": "1933-02-27",
+        "date_years_bp": 93.7070499657769
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "481e81dd-685f-4c51-97c0-dee32afb91f1",
+        "label_fr": "Nuit des longs couteaux",
+        "label_en": "Night of the Long Knives",
+        "description_fr": "Hitler fait assassiner les chefs de la SA et plusieurs adversaires conservateurs, s’assurant le soutien de l’armée.",
+        "description_en": "Hitler has the SA leaders and several conservative opponents murdered, securing the support of the army.",
+        "wikidata_id": "Q130783",
+        "wikipedia_title_fr": "Nuit des longs couteaux",
+        "wikipedia_title_en": "Night of the Long Knives",
+        "date": "1934-06-30",
+        "date_years_bp": 92.3709787816564
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "2bb11259-6abe-401c-86cb-cb1737cbb0b0",
+        "label_fr": "Hitler devient Führer",
+        "label_en": "Hitler becomes Führer",
+        "description_fr": "À la mort du président Hindenburg, Hitler cumule les fonctions de chancelier et de chef de l’État.",
+        "description_en": "On the death of President Hindenburg, Hitler combines the offices of chancellor and head of state.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1934-08-02",
+        "date_years_bp": 92.280629705681
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "c1936e91-c0ff-4f7e-9060-155ad9038b42",
+        "label_fr": "Lois de Nuremberg",
+        "label_en": "Nuremberg Laws",
+        "description_fr": "Les Juifs allemands sont privés de leur citoyenneté ; les mariages entre Juifs et non-Juifs sont interdits.",
+        "description_en": "German Jews are stripped of their citizenship; marriages between Jews and non-Jews are banned.",
+        "wikidata_id": "Q27906",
+        "wikipedia_title_fr": "Lois de Nuremberg",
+        "wikipedia_title_en": "Nuremberg Laws",
+        "date": "1935-09-15",
+        "date_years_bp": 91.160848733744
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "cf84b98c-9c2e-434e-b945-ad7600b515c3",
+        "label_fr": "Nuit de Cristal",
+        "label_en": "Kristallnacht",
+        "description_fr": "Dans toute l’Allemagne, synagogues et commerces juifs sont détruits ; près de trente mille Juifs sont envoyés en camp de concentration.",
+        "description_en": "Across Germany, synagogues and Jewish shops are destroyed; nearly thirty thousand Jews are sent to concentration camps.",
+        "wikidata_id": "Q36756",
+        "wikipedia_title_fr": "Nuit de Cristal",
+        "wikipedia_title_en": "Kristallnacht",
+        "date": "1938-11-09",
+        "date_years_bp": 88.009582477755
+      },
+      "tags": [
+        "peuplement-societe",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "97da4dad-7dc6-41d9-98d3-225e0387e34b",
+        "label_fr": "Attentat du 20 juillet 1944",
+        "label_en": "20 July plot",
+        "description_fr": "Une bombe posée par le colonel von Stauffenberg blesse légèrement Hitler ; la répression fait des milliers de victimes.",
+        "description_en": "A bomb planted by Colonel von Stauffenberg slightly wounds Hitler; thousands are killed in the reprisals.",
+        "wikidata_id": "Q105570",
+        "wikipedia_title_fr": "Complot du 20 juillet 1944",
+        "wikipedia_title_en": "20 July plot",
+        "date": "1944-07-20",
+        "date_years_bp": 82.3148528405202
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "0277b0da-5735-4e4c-9e30-f219a6dbb22e",
+        "label_fr": "Naissance de Harry S. Truman",
+        "label_en": "Birth of Harry S. Truman",
+        "description_fr": "Truman naît à Lamar, dans le Missouri, dans une famille de fermiers.",
+        "description_en": "Truman is born in Lamar, Missouri, into a farming family.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1884-05-08",
+        "date_years_bp": 142.511978097194
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "7b578525-5bf0-45e7-965e-9f3ec6562936",
+        "label_fr": "Truman devient président",
+        "label_en": "Truman becomes president",
+        "description_fr": "Vice-président depuis moins de trois mois, Truman prête serment quelques heures après la mort de Franklin Roosevelt.",
+        "description_en": "Vice president for less than three months, Truman is sworn in a few hours after the death of Franklin Roosevelt.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1945-04-12",
+        "date_years_bp": 81.586584531143
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "9706a7b0-b18c-4f36-a6c8-02e0c615dd47",
+        "label_fr": "Conférence de Potsdam",
+        "label_en": "Potsdam Conference",
+        "description_fr": "Truman, Staline et Churchill, remplacé par Attlee, fixent le sort de l’Allemagne vaincue et somment le Japon de capituler.",
+        "description_en": "Truman, Stalin and Churchill, replaced by Attlee, settle the fate of defeated Germany and call on Japan to surrender.",
+        "wikidata_id": "Q151187",
+        "wikipedia_title_fr": "Conférence de Potsdam",
+        "wikipedia_title_en": "Potsdam Conference",
+        "date": "1945-07-17",
+        "date_years_bp": 81.3237508555784
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "2d3422d6-f000-4413-8e62-13b4ffeed792",
+        "label_fr": "Truman reconnaît l’État d’Israël",
+        "label_en": "Truman recognises the State of Israel",
+        "description_fr": "Les États-Unis reconnaissent le nouvel État quelques minutes après sa proclamation.",
+        "description_en": "The United States recognises the new state minutes after its proclamation.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1948-05-14",
+        "date_years_bp": 78.498288843258
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "d76ec111-4fef-4511-991e-1206be1f8c92",
+        "label_fr": "Déségrégation des forces armées américaines",
+        "label_en": "Desegregation of the US armed forces",
+        "description_fr": "Par décret, Truman impose l’égalité de traitement dans l’armée, sans distinction de race.",
+        "description_en": "By executive order, Truman requires equal treatment in the military regardless of race.",
+        "wikidata_id": "Q5419908",
+        "wikipedia_title_fr": "Executive Order 9981",
+        "wikipedia_title_en": "Executive Order 9981",
+        "date": "1948-07-26",
+        "date_years_bp": 78.2984257357974
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "8ef016f8-5bd8-4f5d-8da2-61d9887f873b",
+        "label_fr": "Réélection de Truman",
+        "label_en": "Truman’s re-election",
+        "description_fr": "Donné battu par les sondages et la presse, Truman l’emporte sur le républicain Thomas Dewey.",
+        "description_en": "Written off by the polls and the press, Truman defeats the Republican Thomas Dewey.",
+        "wikidata_id": "Q568973",
+        "wikipedia_title_fr": "Élection présidentielle américaine de 1948",
+        "wikipedia_title_en": "1948 United States presidential election",
+        "date": "1948-11-02",
+        "date_years_bp": 78.0273785078713
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "c0851630-8774-4728-a7d0-340c81c7c220",
+        "label_fr": "Truman renvoie le général MacArthur",
+        "label_en": "Truman dismisses General MacArthur",
+        "description_fr": "Le commandant en Corée, qui réclamait publiquement d’étendre la guerre à la Chine, est relevé de ses fonctions.",
+        "description_en": "The commander in Korea, who publicly called for extending the war to China, is relieved of his command.",
+        "wikidata_id": "Q1344952",
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": "Relief of Douglas MacArthur",
+        "date": "1951-04-11",
+        "date_years_bp": 75.5906913073238
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "14a15b09-e1ab-497b-b58e-200179577d70",
+        "label_fr": "Mort de Harry S. Truman",
+        "label_en": "Death of Harry S. Truman",
+        "description_fr": "Truman meurt à Kansas City à quatre-vingt-huit ans.",
+        "description_en": "Truman dies in Kansas City aged eighty-eight.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1972-12-26",
+        "date_years_bp": 53.8795345653662
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    }
+  ]
+}
