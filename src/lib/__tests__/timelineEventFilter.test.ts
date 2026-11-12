@@ -31,10 +31,13 @@ it('breaks a tie with the grid order', () => {
   expect(defaultEventTagIds({ events: [...many(10, arts), ...many(10, conflits), ...many(10, pouvoir)] })).toEqual(['pouvoir', 'conflits']);
 });
 
-it('filters on the primary tag only, keeps major and unclassified events', () => {
+it('keeps an event when any of its tags is active, plus major and unclassified events', () => {
   const secondary = event([pouvoir, conflits]);
   expect(isEventShown(event([conflits]), ['conflits'])).toBe(true);
-  expect(isEventShown(secondary, ['conflits'])).toBe(false);
+  expect(isEventShown(secondary, ['conflits'])).toBe(true);
+  expect(isEventShown(secondary, ['arts'])).toBe(false);
+  // Le tag de la frise compte même s'il n'est le sujet principal d'aucun événement.
+  expect(defaultEventTagIds({ tags: [conflits], events: Array.from({ length: 16 }, () => secondary) })).toEqual(['conflits']);
   expect(isEventShown(event([arts], 'major'), ['conflits'])).toBe(true);
   expect(isEventShown(event([]), ['conflits'])).toBe(true);
   expect(isEventShown(event([arts]), null)).toBe(true);
