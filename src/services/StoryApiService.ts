@@ -1,13 +1,22 @@
 import { apiClient } from './ApiClient';
-import type { EventImportance, Story, StorySummary, StorySuggestion, StoryAnchor } from '../types/database';
+import type { EventImportance, Story, StorySummary, StorySuggestion, StoryAnchor, TagRef } from '../types/database';
 
 import type { StoryDto, PeriodDto, StoryFormPayload, StoryLinkDto } from '@/types/api';
-import { mapToListStory, mapToStory, mapToStorySuggestion } from './entityMappers';
+import { mapToListStory, mapToStory, mapToStorySuggestion, mapToTag } from './entityMappers';
 import type { WikidataTimelineItem, ExistingWikidataStory } from '@/types/wikidataGeneration';
 import { effectiveWikidataParent } from '@/lib/wikidataHierarchy';
 import type { StoryNavigationSnapshot } from '../../server/src/shared/storyNavigation';
+import { CATALOGUE_PAGE_SIZE, type StoryCatalogueQuery } from '../../server/src/shared/storyCatalogue';
 export { mapToListStory } from './entityMappers';
 export interface StoryFromPeriodResult { id: string; periodCount: number; eventCount: number; movedPeriodCount: number; linkedStoryCount: number }
+export interface PublicStoryCataloguePage {
+  items: StorySummary[];
+  nextCursor: string | null;
+  total: number | null;
+  publicTotal: number;
+  tags: TagRef[];
+}
+export type { StoryCatalogueQuery };
 
 // Le serveur signe la frise avec le compte connecté ; un auteur vide n'est pas transmis.
 const storyPayload = (data: StoryFormPayload): StoryFormPayload => ({
@@ -30,6 +39,27 @@ export class StoryApiService {
   async getListStories(options?: { compact?: boolean; signal?: AbortSignal }): Promise<StorySummary[]> {
     const data = await apiClient.get<StoryDto[]>(options?.compact ? '/stories?view=summary' : '/stories', { signal: options?.signal });
     return data.map(mapToListStory);
+  }
+  async getPublicCatalogue(query: StoryCatalogueQuery, options: { cursor?: string | null; signal?: AbortSignal } = {}): Promise<PublicStoryCataloguePage> {
+    const params = new URLSearchParams({ limit: String(CATALOGUE_PAGE_SIZE) });
+    if (query.search) params.set('q', query.search);
+    if (query.tagIds.length) params.set('tags', query.tagIds.join(','));
+    if (options.cursor) params.set('cursor', options.cursor);
+    for (const [prefix, range] of [['time', query.timeRange], ['period', query.periodRange]] as const) {
+      if (range) { params.set(`${prefix}Old`, String(range.oldBP)); params.set(`${prefix}Recent`, String(range.recentBP)); }
+    }
+    const data = await apiClient.get<Omit<PublicStoryCataloguePage, 'items'> & { items: StoryDto[] }>(`/stories/catalogue?${params}`, { signal: options.signal });
+    const invalid = () => new Error('Réponse invalide lors du chargement du catalogue.');
+    if (!data || !Array.isArray(data.items) || data.items.length > CATALOGUE_PAGE_SIZE || !Array.isArray(data.tags)
+      || (data.nextCursor !== null && (typeof data.nextCursor !== 'string' || !/^[1-9]\d*$/.test(data.nextCursor)))
+      || (data.total !== null && (!Number.isSafeInteger(data.total) || data.total < 0))
+      || !Number.isSafeInteger(data.publicTotal) || data.publicTotal < 0) throw invalid();
+    const items = data.items.map(mapToListStory);
+    if (items.some((story, index) => !story.isPublic || !/^[1-9]\d{0,9}$/.test(story.id) || Number(story.id) > 2147483647
+      || (index > 0 && Number(items[index - 1].id) <= Number(story.id))
+      || (options.cursor != null && Number(story.id) >= Number(options.cursor)))
+      || (data.nextCursor !== null && data.nextCursor !== items[items.length - 1]?.id)) throw invalid();
+    return { ...data, items, tags: data.tags.map(mapToTag) };
   }
   async getNavigationStories(signal?: AbortSignal): Promise<StoryNavigationSnapshot[]> {
     const rows = await apiClient.get<StoryNavigationSnapshot[]>('/stories/navigation', { signal });

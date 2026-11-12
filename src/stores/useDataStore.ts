@@ -7,12 +7,20 @@ import { createRequestCache, type RequestStatus } from '@/lib/requestCache';
 import { PeriodApiService } from '@/services/PeriodApiService';
 import { EventApiService } from '@/services/EventApiService';
 import { StoryApiService } from '@/services/StoryApiService';
+import type { PublicStoryCataloguePage } from '@/services/StoryApiService';
 import type { StoryNavigationSnapshot } from '../../server/src/shared/storyNavigation';
 
 export const useDataStore = defineStore('data', () => {
   const periods = ref<ListPeriod[]>([]);
   const events = ref<ListEvent[]>([]);
   const stories = ref<StorySummary[]>([]);
+  /** Discovery pages never stand in for the workspace's complete story list. */
+  const publicCatalogue = ref<(PublicStoryCataloguePage & { key: string }) | null>(null);
+  function savePublicCataloguePage(key: string, page: PublicStoryCataloguePage, append = false) {
+    if (append && publicCatalogue.value?.key !== key) return;
+    const items = append ? [...(publicCatalogue.value?.items ?? []), ...page.items] : page.items;
+    publicCatalogue.value = { ...page, items: [...new Map(items.map(story => [story.id, story])).values()], key };
+  }
   const requests = reactive<Record<string, RequestStatus>>({});
   const reads = createRequestCache((key, status) => { requests[key] = status; });
   const loading = computed(() => requests.roots?.loading ?? false);
@@ -145,6 +153,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function invalidateStories() {
+    publicCatalogue.value = null;
     storyPreviewsLoaded = false;
     reads.invalidate('navigation-graph'); navigationStories.clear();
     reads.invalidateMatching(key => key.startsWith('story-'));
@@ -215,6 +224,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function upsertSavedStory(story: StorySummary) {
+    publicCatalogue.value = null;
     const previous = storyById(story.id);
     stories.value = upsertById(stories.value, { ...previous, ...story });
     invalidateStory(story.id);
@@ -227,6 +237,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function resetData() {
+    publicCatalogue.value = null;
     storyPreviewsLoaded = false;
     reads.clear();
     for (const key of Object.keys(requests)) delete requests[key];
@@ -241,7 +252,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   return {
-    periods, events, stories, loading, error, requests,
+    periods, events, stories, publicCatalogue, savePublicCataloguePage, loading, error, requests,
     rootPeriods, periodById, eventById, storyById, childrenOf,
     ensureRootsLoaded, ensureChildrenLoaded, ensureStoryPeriodsLoaded, ensureStoryEventsLoaded, ensureStoryLoaded,
     ensureEventsLoaded, ensureStoriesLoaded, ensureNavigationStoryLoaded, invalidateCatalogue,

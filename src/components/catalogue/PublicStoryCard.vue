@@ -13,13 +13,7 @@
         <p class="public-story-card__span">{{ formatStorySpan(story) }}</p>
       </div>
       <p v-if="description" class="public-story-card__description">{{ description }}</p>
-      <div class="public-story-card__bottom">
-        <div v-if="story.tags?.length" class="public-story-card__tags"><ThematicTags :tags="story.tags" /></div>
-        <div class="public-story-card__footer">
-          <span class="public-story-card__explore" aria-hidden="true">Explorer la frise <Icon icon="mdi:arrow-right" width="16" height="16" /></span>
-          <Button v-if="editable" class="public-story-card__edit" variant="tertiary" size="sm" :to="{ name: 'database', query: { story: story.id } }" :aria-label="`Éditer ${title}`">Éditer</Button>
-        </div>
-      </div>
+      <div v-if="story.tags?.length" class="public-story-card__tags"><ThematicTags :tags="story.tags" /></div>
     </div>
   </li>
 </template>
@@ -28,14 +22,13 @@
 import { computed, onMounted, onScopeDispose, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { Icon } from '@iconify/vue';
-import Button from '@/components/base/Button.vue';
 import StoryTimeline from '@/components/StoryTimeline.vue';
 import WikipediaImage from '@/components/WikipediaImage.vue';
 import ThematicTags from '@/components/ThematicTags.vue';
 import { formatStorySpan } from '@/lib/storyListDates';
 import type { StorySummary } from '@/types/database';
 
-const props = defineProps<{ story: StorySummary; editable: boolean }>();
+const props = defineProps<{ story: StorySummary }>();
 const title = computed(() => props.story.title.fr || props.story.title.en || 'Sans titre');
 const description = computed(() => props.story.description?.fr || props.story.description?.en || '');
 const element = ref<HTMLElement>();
@@ -63,15 +56,11 @@ onScopeDispose(() => observer?.disconnect());
 .public-story-card__cover :deep(.wikipedia-image:not(.is-loaded)) { visibility: hidden; }
 .public-story-card__content { display: flex; flex: 1; flex-direction: column; gap: var(--spacing-sm); padding: var(--spacing-lg); }
 .public-story-card__heading { display: flex; flex-direction: column; }
-.public-story-card__bottom { display: flex; flex-direction: column; gap: var(--spacing-sm); margin-top: auto; padding-top: var(--spacing-sm); }
-.public-story-card__tags { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
+.public-story-card__tags { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); margin-top: auto; padding-top: var(--spacing-sm); }
 .public-story-card__title { margin: 0; font-size: var(--font-size-lg); line-height: var(--line-height-control); font-weight: var(--font-weight-semibold); }
 .public-story-card__open { color: var(--color-text-primary); text-decoration: none; }
 .public-story-card__open::after { content: ''; position: absolute; inset: 0; }
 .public-story-card__open:focus-visible { outline: none; }
 .public-story-card__description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; margin: 0; color: var(--color-text-secondary); font: var(--type-body); }
 .public-story-card__span { margin: 0; font-size: var(--font-size-sm); line-height: var(--line-height-small); color: var(--color-text-secondary); }
-.public-story-card__footer { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); min-height: var(--field-height-sm); }
-.public-story-card__explore { display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--color-text-link); font-size: var(--font-size-sm); }
-.public-story-card__edit { position: relative; z-index: 1; }
 </style>
