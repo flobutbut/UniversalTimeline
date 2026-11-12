@@ -51,6 +51,7 @@ async function start(path: string) {
   vi.spyOn(auth, 'initialize').mockResolvedValue();
   vi.spyOn(auth, 'refreshAccount').mockResolvedValue();
   router = createRouter({ history: createMemoryHistory(), routes: [
+    { path: '/catalogue', name: 'catalogue', meta: { public: true }, component: { template: '<div>Catalogue</div>' } },
     { path: '/timeline', name: 'timeline', component: HomeView, meta: { public: true } },
     { path: '/generate', name: 'wikidata-generation', component: { template: '<div />' }, meta: { public: true } },
     ...['database', 'graph', 'events', 'design-system'].map(name => ({ path: '/' + name, name, component: { template: '<div />' } })),

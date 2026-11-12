@@ -57,6 +57,7 @@ const questions = [
       <div class="landing-container header-inner">
         <RouterLink to="/" class="landing-brand" aria-label="Universal Timeline — accueil">Universal Timeline</RouterLink>
         <nav class="landing-nav" aria-label="Navigation principale">
+          <RouterLink to="/catalogue">Catalogue</RouterLink>
           <a href="#experience">L’expérience</a>
           <a href="#creer">Vos frises</a>
           <a href="#questions">Questions</a>

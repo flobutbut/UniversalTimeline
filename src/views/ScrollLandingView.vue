@@ -50,6 +50,7 @@ onBeforeUnmount(() => { alive = false; });
       <nav aria-label="Navigation du concept">
         <RouterLink to="/">Version précédente</RouterLink>
         <a href="#lecture" @click="transcriptOpen = true">Lecture directe</a>
+        <RouterLink to="/catalogue">Catalogue</RouterLink>
         <ThemeToggle />
       </nav>
     </header>

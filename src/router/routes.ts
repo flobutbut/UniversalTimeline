@@ -7,6 +7,7 @@ export const appRoutes: RouteRecordRaw[] = [
   { path: '/', name: 'landing', meta: { public: true, landing: true }, component: () => import('@/views/LandingView.vue') },
   { path: '/voyage', name: 'landing-scroll', meta: { public: true, landing: true }, component: () => import('@/views/ScrollLandingView.vue') },
   { path: '/timeline', name: 'timeline', meta: { public: true }, component: () => import('@/views/HomeView.vue') },
+  { path: '/catalogue', name: 'catalogue', meta: { public: true }, component: () => import('@/views/CatalogueView.vue') },
   { path: '/search', name: 'search', meta: { public: true }, component: () => import('@/views/SearchView.vue') },
   { path: '/generate', name: 'wikidata-generation', meta: { public: true }, component: () => import('@/views/WikidataGenerationView.vue') },
   { path: '/database', name: 'database', component: () => import('@/views/DatabaseView/DatabaseView.vue') },

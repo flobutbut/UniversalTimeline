@@ -37,9 +37,9 @@ it.each([
   { enabled: false, ready: true },
   { enabled: null, ready: false },
   { enabled: true, ready: false, account: { id: 'unverified', isAdmin: true } },
-])('shows search and the two account actions without a redundant navigation tab before a verified session: %j', async options => {
+])('shows public navigation, search and account actions before a verified session: %j', async options => {
   await start(options);
-  expect(view.find('.header-nav').exists()).toBe(false);
+  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Exploration', 'Catalogue']);
   expect(view.find('input[aria-label="Recherche globale"]').exists()).toBe(true);
   expect(view.get('.header-account-actions').findAll('a').map(a => [a.text(), a.attributes('href')])).toEqual([
     ['Se connecter', '/login'], ['Créer un compte', '/login?mode=signup'],
@@ -50,7 +50,7 @@ it.each(['/database', '/periods', '/graph', '/events', '/design-system'])('redir
   await start({ path });
   expect(router.currentRoute.value.name).toBe('login');
   expect(router.currentRoute.value.query.redirect).toBe(path);
-  expect(view.find('.header-nav').exists()).toBe(false);
+  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Exploration', 'Catalogue']);
 });
 it('opens signup from the header and preserves the original destination when switching back to login', async () => {
   await start({ path: '/events?event=example' });
@@ -65,7 +65,7 @@ it('opens signup from the header and preserves the original destination when swi
 });
 it.each([false, true])('restores the appropriate workspace navigation for a verified account (admin: %s)', async isAdmin => {
   const auth = await start({ account: { id: 'alice', isAdmin } });
-  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Exploration', 'Frises', ...(isAdmin ? ['Administration'] : [])]);
+  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Exploration', 'Catalogue', 'Mes frises', ...(isAdmin ? ['Administration'] : [])]);
   expect(view.find('.header-account-actions').exists()).toBe(false);
   const trigger = view.get('button[aria-haspopup="menu"]');
   expect(trigger.attributes('aria-label')).toBe('Compte : Mon compte'); expect(view.text()).not.toContain('Se déconnecter');
@@ -76,7 +76,7 @@ it.each([false, true])('restores the appropriate workspace navigation for a veri
   await view.get('[role="menu"]').trigger('keydown', { key: 'Escape' }); await flushPromises();
   expect(view.find('[role="menu"]').exists()).toBe(false);
   auth.account = null; await flushPromises();
-  expect(view.find('.header-nav').exists()).toBe(false);
+  expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Exploration', 'Catalogue']);
   expect(view.find('.header-account-actions').exists()).toBe(true);
 });
 
@@ -102,12 +102,12 @@ it('collapses navigation when space runs out, keeps navigation usable and expand
   const header = view.getComponent(Header);
   expect(view.find('.header-nav-select').exists()).toBe(false);
 
-  availableWidth = 1120; resize(); await flushPromises();
+  availableWidth = 1360; resize(); await flushPromises();
   expect(view.find('.header-nav-select').exists()).toBe(false);
   expect(view.get('.header-content').attributes('style')).toContain('--header-search-width: 248px');
 
   // Les trois groupes tiendraient côte à côte, mais décentreraient la recherche.
-  availableWidth = 1000; resize(); await flushPromises();
+  availableWidth = 1240; resize(); await flushPromises();
   expect(view.find('.header-nav-select').exists()).toBe(true);
 
   availableWidth = 604; resize(); await flushPromises();
@@ -118,7 +118,7 @@ it('collapses navigation when space runs out, keeps navigation usable and expand
   expect(view.find('.header-search-wrap').exists()).toBe(false);
   expect(view.get('.header-search-open').attributes('href')).toBe('/search?from=/timeline');
 
-  availableWidth = 1000; resize(); await flushPromises();
+  availableWidth = 1240; resize(); await flushPromises();
   expect(view.find('.header-search-open').exists()).toBe(false);
   expect(view.get('.header-nav-wrap').attributes('inert')).toBeDefined();
   expect(view.get('.header-nav-wrap').attributes('aria-hidden')).toBe('true');
@@ -128,7 +128,7 @@ it('collapses navigation when space runs out, keeps navigation usable and expand
   await view.get('[role="combobox"]').trigger('keydown', { key: 'ArrowDown' });
   await view.get('[role="combobox"]').trigger('keydown', { key: 'ArrowDown' });
   await view.get('[role="combobox"]').trigger('keydown', { key: 'Enter' });
-  expect(header.emitted('change-view')).toEqual([['database']]);
+  expect(header.emitted('change-view')).toEqual([['catalogue']]);
 
   // Frises conserve exactement la même recherche et le même repli.
   await view.setProps({ currentView: 'database' });
@@ -154,7 +154,7 @@ it('collapses navigation when space runs out, keeps navigation usable and expand
   expect(disconnect).toHaveBeenCalledOnce();
 });
 
-it.each(['timeline', 'database'] as const)('opens dedicated search on mobile from %s even when a field could still fit', async currentView => {
+it.each(['timeline', 'catalogue', 'database'] as const)('opens dedicated search on mobile from %s even when a field could still fit', async currentView => {
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} });
   vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(550);
   vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (this: HTMLElement) {
@@ -163,7 +163,7 @@ it.each(['timeline', 'database'] as const)('opens dedicated search on mobile fro
     if (this.classList.contains('header-controls')) return 40;
     return 0;
   });
-  const path = currentView === 'timeline' ? '/timeline?story=9&entry=universe' : '/database?story=9';
+  const path = currentView === 'timeline' ? '/timeline?story=9&entry=universe' : currentView === 'catalogue' ? '/catalogue' : '/database?story=9';
   await start({ account: { id: 'alice', isAdmin: true }, path });
   await view.setProps({ currentView });
   expect(view.find('.header-search-wrap').exists()).toBe(false);

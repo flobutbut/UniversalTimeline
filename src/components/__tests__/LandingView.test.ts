@@ -18,7 +18,7 @@ async function start(signedIn: boolean) {
   router = createRouter({ history: createMemoryHistory(), routes: [
     { path: '/', name: 'landing', component: page }, { path: '/timeline', name: 'timeline', component: page },
     { path: '/login', name: 'login', component: page }, { path: '/database', name: 'database', component: page },
-    { path: '/legal/:page', name: 'legal', component: page }, { path: '/contact', name: 'contact', component: page },
+    { path: '/legal/:page', name: 'legal', component: page }, { path: '/contact', name: 'contact', component: page }, { path: '/catalogue', name: 'catalogue', component: page },
   ] });
   await router.push('/'); await router.isReady();
   view = mount(LandingView, { global: { plugins: [pinia, router] } });

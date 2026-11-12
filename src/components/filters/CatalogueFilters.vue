@@ -35,6 +35,8 @@ import { formatYearsBP, rangeFromPeriod, type StoryTimeRange } from '@/lib/story
 import type { ActiveFilter, FilterType, PeriodFilter } from './filterTypes';
 const props = withDefaults(defineProps<{
   context?: 'stories' | 'periods' | 'events';
+  /** A public catalogue has no private/public visibility choice. */
+  hideVisibility?: boolean;
   tagOptions?: { value: string; label: string; group?: string }[];
   storyOptions?: { value: string; label: string }[];
   storiesLoading?: boolean;
@@ -54,7 +56,9 @@ let requestedPeriodId = '';
 const timeAdded = ref(false);
 const visibilityOptions = [{ value: 'all', label: 'Toutes les frises' }, { value: 'public', label: 'Frises publiques' }, { value: 'private', label: 'Frises privées' }];
 const types = computed<FilterType[]>(() => [
-  props.context === 'stories' ? { key: 'visibility', label: 'Visibilité', icon: 'mdi:eye-outline' } : { key: 'stories', label: 'Frise', icon: 'mdi:chart-timeline-variant' },
+  ...(props.context === 'stories'
+    ? props.hideVisibility ? [] : [{ key: 'visibility', label: 'Visibilité', icon: 'mdi:eye-outline' }]
+    : [{ key: 'stories', label: 'Frise', icon: 'mdi:chart-timeline-variant' }]),
   { key: 'tags', label: 'Tag', icon: 'mdi:tag-outline' },
   { key: 'time', label: 'Dates', icon: 'mdi:calendar-range-outline', trigger: true },
   { key: 'period', label: 'Période', icon: 'mdi:timeline-clock-outline', disabled: props.context === 'periods' },
@@ -77,7 +81,7 @@ async function choosePeriod(id: string) {
   } finally { if (isCurrent()) periodPending.value = false; }
 }
 const activeFilters = computed<ActiveFilter[]>(() => [
-  ...(props.context === 'stories' && visibility.value !== 'all' ? [{ key: 'visibility', type: 'visibility', label: visibility.value === 'public' ? 'Frises publiques' : 'Frises privées' }] : []),
+  ...(props.context === 'stories' && !props.hideVisibility && visibility.value !== 'all' ? [{ key: 'visibility', type: 'visibility', label: visibility.value === 'public' ? 'Frises publiques' : 'Frises privées' }] : []),
   ...tags.value.map(id => ({ key: `tag:${id}`, type: 'tags', label: props.tagOptions.find(option => option.value === id)?.label ?? id })),
   ...storyIds.value.map(id => ({ key: `story:${id}`, type: 'stories', label: `Frise : ${props.storyOptions.find(option => option.value === id)?.label ?? id}` })),
   ...(period.value && props.context !== 'periods' ? [{ key: 'period', type: 'period', label: `Période : ${period.value.label}` }] : []),

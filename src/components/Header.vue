@@ -57,7 +57,7 @@ import { canUseWorkspace, safeReturnPath } from '@/router/access';
 import type { GlobalSearchResult } from '@/services/SearchApiService';
 
 const auth = useAuthStore(); const route = useRoute();
-const tabs = computed(() => canUseWorkspace(auth) ? navigationTabsFor(auth.isAdmin) : []);
+const tabs = computed(() => navigationTabsFor(auth.isAdmin, canUseWorkspace(auth)));
 function accountLocation(signup: boolean) {
   return { name: 'login', query: { ...(signup ? { mode: 'signup' } : {}), ...(route.query.redirect ? { redirect: safeReturnPath(route.query.redirect) } : {}) } };
 }
@@ -70,7 +70,7 @@ const navRef = ref<HTMLElement | null>(null);
 const controlsRef = ref<HTMLElement | null>(null);
 const rightRef = ref<HTMLElement | null>(null);
 const navCollapsed = ref(false);
-const hasSearch = computed(() => props.currentView === 'timeline' || props.currentView === 'database');
+const hasSearch = computed(() => ['timeline', 'catalogue', 'database'].includes(props.currentView));
 const searchWidth = ref(320);
 const searchMinified = ref(false);
 let resizeObserver: ResizeObserver | undefined;
@@ -225,7 +225,7 @@ function changeView(event: MouseEvent, view: NavigationView) {
   .header-content { --header-gap: var(--spacing-sm); padding-inline: var(--spacing-md); }
   .header-title-full { display: none; }
   .header-title-short { display: inline; }
-  .header-nav-select { width: 110px; }
+  .header-nav-select { width: 128px; }
   .header-account-label { display: none; }
   .header-account-icon { display: block; }
   .header-account-actions :deep(.base-button) { width: var(--field-height-md); padding: 0; }
