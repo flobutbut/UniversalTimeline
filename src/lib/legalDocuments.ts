@@ -30,6 +30,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
       ] },
       { title: 'Propriété intellectuelle', paragraphs: [
         'Les données du catalogue issues de Wikidata sont publiées sous licence Creative Commons CC0.',
+        'Les images affichées dans les infobulles proviennent de Wikipédia et de Wikimedia Commons ; elles restent soumises à la licence indiquée sur la page de l’article lié (« Voir sur Wikipédia »).',
         'Le code, la conception et les textes éditoriaux du site appartiennent à l’éditeur : leur reproduction demande son accord.',
         'Les frises publiques sont diffusées par leurs auteurs sous licence Creative Commons Attribution 4.0 (CC BY 4.0) : chacun peut les réutiliser, y compris en les modifiant, à condition de citer l’auteur (son nom d’utilisateur) et Universal Timeline.',
       ] },
@@ -81,6 +82,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Vercel Inc. : hébergement de l’application et de l’API, et comptage des visites sans cookie (États-Unis). Vercel est certifiée au cadre de protection des données UE–États-Unis (Data Privacy Framework), et son accord de traitement des données prévoit aussi les clauses contractuelles types de la Commission européenne.',
         'Hostinger International Ltd. : messagerie (envoi des e-mails du compte, réception des messages adressés au contact), société établie dans l’Union européenne (Chypre).',
         'PostHog Inc. : mesure d’audience (anonyme sans cookie, ou avec cookies selon votre accord), hébergée dans l’Union européenne (PostHog Cloud EU), dans le cadre d’un accord de traitement des données (DPA) signé avec PostHog le 3 novembre 2026.',
+        'Wikimedia Foundation Inc. (États-Unis) : les images affichées dans les infobulles des périodes et des événements sont chargées directement depuis les serveurs de Wikipédia et de Wikimedia Commons. Votre navigateur leur transmet alors votre adresse IP et son type, sans cookie de notre part ni indication de la page consultée ; nous ne leur envoyons aucune autre donnée.',
       ] },
       { title: 'Vos droits', paragraphs: [
         'Vous disposez des droits d’accès, de rectification, d’effacement, de limitation, d’opposition et de portabilité, ainsi que du droit de définir des directives sur le sort de vos données après votre décès.',

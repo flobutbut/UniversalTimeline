@@ -23,6 +23,7 @@
 
     <!-- Bulle d'info décalée selon l'alignement -->
     <div class="event-info-box" :class="{ 'event-info-box--bounded': frameWidth && !undated }" :style="tooltipBounds" @click.stop="$emit('click', $event)">
+      <WikipediaImage v-if="!undated || isSelected" :titles="event.wikipedia" :active="hovered || focused || isSelected" class="event-image" />
       <button type="button" class="event-label" :aria-label="`${isSelected ? 'Libérer' : 'Figer'} l’infobulle de ${displayLabel}`" :aria-pressed="isSelected">{{ displayLabel }}</button>
       <div class="event-date">{{ displayDate }}</div>
       <div v-if="otherStoryCount" class="event-meta event-story-count">{{ otherStoryCount }} {{ otherStoryCount > 1 ? 'autres frises associées' : 'autre frise associée' }}</div>
@@ -53,6 +54,7 @@
 
 <script setup lang="ts">
 import Button from '@/components/base/Button.vue';
+import WikipediaImage from '@/components/WikipediaImage.vue';
 import WikipediaLink from '@/components/WikipediaLink.vue';
 import { Icon } from '@iconify/vue';
 import type { StoryComparisonControl } from '@/lib/timelineComparison';
@@ -141,6 +143,8 @@ const displayDate = computed(() => {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+/* Image de l'article en tête de bulle, sous la marge haute réduite de la bulle. */
+.event-image { margin-top: var(--spacing-xs); }
 /* Sous la description, dans la même taille que le reste de la bulle. */
 .event-wikipedia.wikipedia-link { margin-top: var(--spacing-sm); font-size: var(--font-size-sm); }
 .event-description--clamped {
@@ -350,7 +354,7 @@ const displayDate = computed(() => {
 .event-card.is-default-open:not(:hover, :focus-within, .is-selected) .event-info-box::before {
   opacity: 1;
 }
-.event-card.is-default-open:not(:hover, :focus-within, .is-selected) :is(.event-description, .event-wikipedia, .event-meta:not(.event-story-count)) {
+.event-card.is-default-open:not(:hover, :focus-within, .is-selected) :is(.event-image, .event-description, .event-wikipedia, .event-meta:not(.event-story-count)) {
   display: none;
 }
 /* Mêmes tailles qu'à l'état complet : seul le nombre de lignes change. */

@@ -103,6 +103,7 @@
           class="period-grid__tooltip"
           :style="tooltipStyle"
         >
+          <WikipediaImage :key="tooltipPeriod.id" :titles="tooltipPeriod.wikipedia" />
           <strong>{{ tooltipPeriod.label.fr || tooltipPeriod.label.en }}</strong>
           <span v-if="tooltipDateRange">{{ tooltipDateRange }}</span>
           <p v-if="tooltipDescription" class="period-grid__tooltip-description">{{ tooltipDescription }}</p>
@@ -168,6 +169,8 @@ import {
   unwrapTemplateRefToHTMLElement,
 } from '@/lib/timelinePeriodGridHelpers';
 import PeriodCard from './PeriodCard.vue';
+import WikipediaImage from '@/components/WikipediaImage.vue';
+import { fetchWikipediaThumbnail } from '@/services/wikipediaImages';
 import EventCard from './EventCard.vue';
 import AssociatedStoriesBadge from './AssociatedStoriesBadge.vue';
 import { useTimelineAssociatedStories } from '@/composables/useTimelineAssociatedStories';
@@ -287,6 +290,12 @@ const periodDetails = useTimelinePeriodTooltip(
   () => props.periodTooltips && active.value && !props.loading,
 );
 const { period: tooltipPeriod, tooltipId, tooltipElement, tooltipStyle } = periodDetails;
+// Dès le survol, avant le délai d'affichage : l'image est en cache quand l'infobulle apparaît.
+watch(periodDetails.activeId, id => {
+  if (!id || !props.periodTooltips) return;
+  const hovered = id === props.currentPeriod?.id ? props.currentPeriod : renderedPeriods.value.find(item => item.id === id);
+  if (hovered?.wikipedia) void fetchWikipediaThumbnail(hovered.wikipedia).catch(() => undefined);
+});
 const associationPeriodId = ref<string | null>(null);
 function setPeriodAssociationsOpen(id: string, open: boolean) {
   if(open) { associationPeriodId.value=id; periodDetails.dismiss(); }
