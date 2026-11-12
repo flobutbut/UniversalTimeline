@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="cardElement"
     class="event-card"
     :class="{
       'is-selected': isSelected,
@@ -22,7 +23,7 @@
     <div v-show="!minimized" class="event-vertical-line"></div>
 
     <!-- Bulle d'info décalée selon l'alignement -->
-    <div class="event-info-box" :class="{ 'event-info-box--bounded': frameWidth && !undated }" :style="tooltipBounds" @click.stop="$emit('click', $event)">
+    <div ref="boxElement" class="event-info-box" :class="{ 'event-info-box--bounded': frameWidth && !undated }" :style="[tooltipBounds, liftStyle]" @click.stop="$emit('click', $event)">
       <WikipediaImage v-if="!undated || isSelected" :titles="event.wikipedia" :active="hovered || focused || isSelected" class="event-image" />
       <button type="button" class="event-label" :aria-label="`${isSelected ? 'Libérer' : 'Figer'} l’infobulle de ${displayLabel}`" :aria-pressed="isSelected">{{ displayLabel }}</button>
       <div class="event-date">{{ displayDate }}</div>
@@ -58,7 +59,7 @@ import WikipediaImage from '@/components/WikipediaImage.vue';
 import WikipediaLink from '@/components/WikipediaLink.vue';
 import { Icon } from '@iconify/vue';
 import type { StoryComparisonControl } from '@/lib/timelineComparison';
-import { computed, ref } from 'vue';
+import { computed, nextTick, onScopeDispose, ref, watch } from 'vue';
 import type { ListEvent, StorySuggestion } from '@/types/database';
 import { DateService } from '@/services/DateService';
 
@@ -101,6 +102,43 @@ const hovered = ref(false);
 const focused = ref(false);
 function setHovered(value: boolean) { hovered.value = value; emit('active-change', hovered.value || focused.value); }
 function setFocused(value: boolean) { focused.value = value; emit('active-change', hovered.value || focused.value); }
+
+// Une bulle ouverte qui dépasserait le bas de la fenêtre remonte d'autant (au plus jusqu'en
+// haut du contenu) : elle recouvre alors son point, mais reste lisible en entier. La mesure
+// part de la position naturelle, sans la translation en cours.
+const cardElement = ref<HTMLElement | null>(null);
+const boxElement = ref<HTMLElement | null>(null);
+const lift = ref(0);
+const TOOLTIP_VIEWPORT_MARGIN = 8;
+const tooltipOpen = computed(() => !props.undated && (hovered.value || focused.value || props.isSelected));
+const liftStyle = computed(() => lift.value ? { '--event-tooltip-lift': `${lift.value}px` } : undefined);
+let liftFrame: number | undefined;
+function measureLift() {
+  const card = cardElement.value;
+  const box = boxElement.value;
+  if (!tooltipOpen.value || !card || !box || !box.offsetHeight) { lift.value = 0; return; }
+  const top = card.getBoundingClientRect().top + box.offsetTop;
+  const ceiling = Math.max(0, card.closest('main')?.getBoundingClientRect().top ?? 0) + TOOLTIP_VIEWPORT_MARGIN;
+  const overflow = top + box.offsetHeight - (window.innerHeight - TOOLTIP_VIEWPORT_MARGIN);
+  lift.value = Math.round(Math.max(0, Math.min(overflow, top - ceiling)));
+}
+// Suivi image par image tant que la bulle est ouverte : image chargée, texte déplié, scroll,
+// recentrage de l'axe ou redimensionnement déplacent la bulle sans événement commun.
+function trackLift() {
+  measureLift();
+  liftFrame = tooltipOpen.value ? requestAnimationFrame(trackLift) : undefined;
+}
+function stopLift() {
+  if (liftFrame !== undefined) cancelAnimationFrame(liftFrame);
+  liftFrame = undefined;
+}
+watch(tooltipOpen, async open => {
+  stopLift();
+  if (!open) { lift.value = 0; return; }
+  await nextTick();
+  if (tooltipOpen.value && liftFrame === undefined) trackLift();
+}, { immediate: true, flush: 'post' });
+onScopeDispose(stopLift);
 
 // Les limites sont relatives au point : la carte reste dans son composant et son
 // pont de survol suit le même ancrage, même lorsque son texte s’élargit.
@@ -293,6 +331,10 @@ const displayDate = computed(() => {
   opacity: 1;
   visibility: visible;
   translate: 0 0;
+}
+/* Bulle remontée pour rester dans la fenêtre (voir measureLift). */
+.event-card:is(:hover, :focus-within, .is-selected) .event-info-box {
+  translate: 0 calc(var(--event-tooltip-lift, 0px) * -1);
 }
 
 .event-card:hover .event-info-box,
