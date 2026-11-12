@@ -1,0 +1,2687 @@
+{
+  "reference_time": "2026-11-12T12:00:00Z",
+  "stories": [
+    {
+      "key": "alexandre",
+      "parent_story_id": 44,
+      "title_fr": "Alexandre le Grand",
+      "title_en": "Alexander the Great",
+      "description_fr": "De Pella à Babylone : l’éducation du prince macédonien, son avènement, puis onze années de campagnes qui portent ses armées de l’Égypte à l’Indus.",
+      "description_en": "From Pella to Babylon: the education of the Macedonian prince, his accession, then eleven years of campaigns that take his armies from Egypt to the Indus.",
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ],
+      "periods": [
+        {
+          "period_id": "bf06f8aa-ef1e-4975-ad28-0841890548a4",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "1d742c54-7b18-45f0-a8b5-913b3b3d40e7",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "61058db9-645c-4aad-a13e-ca2ac4644930",
+          "parent_period_id": null,
+          "reused": true
+        }
+      ],
+      "events": [
+        {
+          "event_id": "ce26cf92-d7d9-4853-ad5c-43061d4358c3",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "02a41e0f-1cd0-4f61-b2cc-3bf29dafdf20",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "892ca3e7-3535-45ef-9767-efc054b52772",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "2cdcfd58-4d86-4260-9a47-3266259849d9",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "c997904d-21da-41fc-b98f-a2413baeba5f",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "406cbb1b-3444-4157-9151-3fed63e107b6",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "c28e31cc-5d60-4d3b-831b-55b20d726fec",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "266992e1-4fd5-4ffd-b23e-3a8f1d00fb93",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "530c654d-2b55-4747-a2d8-81c23e64fee3",
+          "importance": "major",
+          "reused": true
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 44,
+          "event_id": "530c654d-2b55-4747-a2d8-81c23e64fee3"
+        }
+      ]
+    },
+    {
+      "key": "cesar",
+      "parent_story_id": 45,
+      "title_fr": "Jules César",
+      "title_en": "Julius Caesar",
+      "description_fr": "De la carrière des honneurs à la dictature : l’alliance avec Pompée et Crassus, la conquête des Gaules, la guerre civile et l’assassinat aux ides de mars.",
+      "description_en": "From the ladder of offices to dictatorship: the alliance with Pompey and Crassus, the conquest of Gaul, the civil war and the assassination on the Ides of March.",
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ],
+      "periods": [
+        {
+          "period_id": "3cd34e6b-d287-4747-bad3-5060cd4e4ef7",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "e1e7b161-06dc-482b-9dbf-95d5cad3758a",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "06454d26-49e3-4e67-9c5d-43f71efdb07b",
+          "parent_period_id": null,
+          "reused": true
+        },
+        {
+          "period_id": "c3c5e09e-cda6-4273-b3a0-3ccc05cb93c1",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "b694a20b-d1ae-42b9-8b1c-d0ea5da694c7",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "f065e0f3-74d3-4e15-a0a9-1b57bf52cf14",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "fa8df1c2-a84b-4b48-80a9-ed09bd9d3bde",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "105fcb3e-040c-4257-bf8e-aa3d111c0dc7",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "bf2684a2-7df4-4f13-a062-36b3e38a5045",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "5edcbee5-2d38-4ac8-9bb7-2d25cebc63d7",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "eeee572b-87cc-4f3f-9e66-01308ca66389",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "3c2a804b-7b6a-4414-b603-976235137e9e",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "Q39671",
+          "importance": "major",
+          "reused": true
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 45,
+          "event_id": "5edcbee5-2d38-4ac8-9bb7-2d25cebc63d7"
+        },
+        {
+          "source_story_id": 51,
+          "event_id": "bf2684a2-7df4-4f13-a062-36b3e38a5045"
+        }
+      ]
+    },
+    {
+      "key": "confucius",
+      "parent_story_id": 52,
+      "title_fr": "Confucius",
+      "title_en": "Confucius",
+      "description_fr": "Du petit fonctionnaire du pays de Lu au maître entouré de disciples : la vie de Confucius selon la tradition, dont les dates et les épisodes reposent sur des sources tardives.",
+      "description_en": "From minor official in the state of Lu to a teacher surrounded by disciples: the life of Confucius according to tradition, whose dates and episodes rest on late sources.",
+      "tags": [
+        "philosophie-ideologies"
+      ],
+      "periods": [
+        {
+          "period_id": "446f0a39-10c2-4757-be9c-7f8ac5613a26",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "4a7d7193-fe12-41d2-a1c3-6942b160f444",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "542ff4d4-52b1-4677-9f38-f625d36e4129",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "750d1cf1-6f00-4d71-ba42-e0d16cfbb5d7",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "c4167487-aa94-4672-88e3-ba1774357db1",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "eef6cede-fa7f-4d49-b034-a3e08e1df1a9",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "82e0454a-8a74-4888-ae09-2621da7a6487",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "eb483fc5-e0c1-4a3a-8ec2-f1f1da4a4e6b",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "363f316d-8f8b-4c41-a8ec-9725d635ff86",
+          "importance": "major",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 52,
+          "event_id": "c4167487-aa94-4672-88e3-ba1774357db1"
+        }
+      ]
+    },
+    {
+      "key": "mahomet",
+      "parent_story_id": 54,
+      "title_fr": "Mahomet",
+      "title_en": "Muhammad",
+      "description_fr": "De La Mecque à Médine : la jeunesse du marchand, la prédication, l’exil de 622 et la formation d’une communauté qui unit l’Arabie, d’après la tradition musulmane et les historiens.",
+      "description_en": "From Mecca to Medina: the merchant’s youth, the preaching, the exile of 622 and the forming of a community that unites Arabia, according to Muslim tradition and historians.",
+      "tags": [
+        "religions-spiritualites",
+        "pouvoir-institutions"
+      ],
+      "periods": [
+        {
+          "period_id": "8785d056-1351-4edc-bdd0-3170995630c7",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "97c15f30-604a-480d-9914-ce2f3bd1ca75",
+          "parent_period_id": null,
+          "reused": true
+        }
+      ],
+      "events": [
+        {
+          "event_id": "2f85eb17-5f81-4645-851b-2205926c27e7",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "7049251c-68b4-411f-8b39-a6c03ff2f580",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "EVT_HEGIRA",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "aced2c39-f010-4262-a44b-d624bfe9db1c",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "5d7a3881-6d60-4ff7-b635-41ea1add0804",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "8abc0292-24dd-40ae-98cd-0d2e472a1813",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "49d12f48-bc4e-4a3a-b8f7-55490cb91367",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "a49dca40-b0cc-4e86-b811-9437657ecb0f",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "d8c6f4f0-50cd-4723-90d0-2e2ce456c1d5",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "2809063c-b477-47dd-a55a-39b0724b3345",
+          "importance": "major",
+          "reused": true
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 54,
+          "event_id": "EVT_HEGIRA"
+        },
+        {
+          "source_story_id": 15,
+          "event_id": "EVT_HEGIRA"
+        }
+      ]
+    },
+    {
+      "key": "charlemagne",
+      "parent_story_id": 51,
+      "title_fr": "Charlemagne",
+      "title_en": "Charlemagne",
+      "description_fr": "Du partage du royaume franc au couronnement impérial : les conquêtes en Italie, en Saxe et en Espagne, et la réforme de l’Église et de l’école voulue par Charlemagne.",
+      "description_en": "From the division of the Frankish kingdom to the imperial coronation: the conquests in Italy, Saxony and Spain, and the reform of the Church and of schooling that Charlemagne sought.",
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ],
+      "periods": [
+        {
+          "period_id": "fb37ab83-f1bb-4dd6-9d08-6c50bd1e721c",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "65b6c4d2-4d09-4669-a227-f0af90473208",
+          "parent_period_id": null,
+          "reused": true
+        },
+        {
+          "period_id": "11196d7c-a4e6-4db3-adb9-6eee0a83605a",
+          "parent_period_id": "65b6c4d2-4d09-4669-a227-f0af90473208",
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "3ee323c7-3683-4349-811b-846b444d116e",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "9bb6169d-6f2e-46d4-8824-4af2daa95793",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "a63f20e8-6d40-4788-b98a-d3b0d21eae54",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "90451aea-1bd4-4a35-bc26-bebbe281b357",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "01ab4d0e-30c9-4a78-bcf2-35df173a3253",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "a220c749-fe5e-46d6-a32a-9303db634181",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "c871f398-6196-432f-a8ca-5b5beb7c50bb",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 51,
+          "event_id": "a220c749-fe5e-46d6-a32a-9303db634181"
+        },
+        {
+          "source_story_id": 15,
+          "event_id": "a220c749-fe5e-46d6-a32a-9303db634181"
+        }
+      ]
+    },
+    {
+      "key": "galilee",
+      "parent_story_id": 16,
+      "title_fr": "Galilée",
+      "title_en": "Galileo Galilei",
+      "description_fr": "De Pise à Arcetri : les lois du mouvement, les découvertes faites à la lunette, la défense du système de Copernic et le procès devant l’Inquisition.",
+      "description_en": "From Pisa to Arcetri: the laws of motion, the discoveries made with the telescope, the defence of the Copernican system and the trial before the Inquisition.",
+      "tags": [
+        "sciences-savoirs"
+      ],
+      "periods": [
+        {
+          "period_id": "5cf38e79-0481-4774-902f-a663824ed783",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "da9770ff-46d3-42df-a555-f2e0469fe45b",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "34bd5b30-ef55-44e7-87e3-b143904426e5",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "66c753c6-2737-41e4-ac4b-49ea25a113c3",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "8eb79843-a712-456a-a7bf-ad96afebc72f",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "c8ad0d10-c102-4ce4-87bc-ea9cbb5d050a",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "dcb180f7-a06d-4379-906b-795a9833c74c",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "b7489b83-d872-4b9c-ba24-4558f14e6917",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "10eaa7d0-4257-4377-9a65-953357e62938",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "77163526-7f65-4989-af0d-0e43f8ebff53",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "f40feb95-9c43-4279-a6ce-fbfe7f24811f",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "d7cad7ba-9723-4e26-9ace-a96d00048da3",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 16,
+          "event_id": "dcb180f7-a06d-4379-906b-795a9833c74c"
+        }
+      ]
+    },
+    {
+      "key": "louis14",
+      "parent_story_id": 51,
+      "title_fr": "Louis XIV",
+      "title_en": "Louis XIV",
+      "description_fr": "Soixante-douze ans de règne : la régence et la Fronde, le gouvernement personnel, Versailles, les guerres contre l’Europe et la fin difficile du règne.",
+      "description_en": "Seventy-two years on the throne: the regency and the Fronde, personal rule, Versailles, the wars against Europe and the difficult end of the reign.",
+      "tags": [
+        "pouvoir-institutions"
+      ],
+      "periods": [
+        {
+          "period_id": "86303d8d-ff51-4fbc-8642-5242f46cffee",
+          "parent_period_id": null,
+          "reused": true
+        },
+        {
+          "period_id": "9e8a4d1d-04e0-44b8-8e33-67ab118eb247",
+          "parent_period_id": "86303d8d-ff51-4fbc-8642-5242f46cffee",
+          "reused": false
+        },
+        {
+          "period_id": "cdff3f25-0f67-4df2-aad0-43dad55e171b",
+          "parent_period_id": "9e8a4d1d-04e0-44b8-8e33-67ab118eb247",
+          "reused": false
+        },
+        {
+          "period_id": "f503a31f-b85e-421e-9c18-67b1d8e42529",
+          "parent_period_id": "86303d8d-ff51-4fbc-8642-5242f46cffee",
+          "reused": false
+        },
+        {
+          "period_id": "b76f41d5-4f2c-4d80-921b-e79963cf63eb",
+          "parent_period_id": "f503a31f-b85e-421e-9c18-67b1d8e42529",
+          "reused": true
+        }
+      ],
+      "events": [
+        {
+          "event_id": "fc657fe1-1298-4a45-90f0-d9c5edb7a0bd",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "fae2945b-5b43-4612-8d14-5a806c162c5e",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "a013a190-9654-4cf0-8e49-1901112aad15",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "9c4172a6-ae3b-4c9c-99ee-66857abf9b14",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "3861edff-ac39-4a97-92a3-981b4739e52a",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "4b33793f-5ab8-4080-b46e-b6cdb0ecea42",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "866b3f08-fe73-4da9-9794-f3c4b3cc4fce",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "10bc933c-0020-4a3b-8c86-ff27f0a8740d",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 51,
+          "event_id": "3861edff-ac39-4a97-92a3-981b4739e52a"
+        }
+      ]
+    },
+    {
+      "key": "gandhi",
+      "parent_story_id": 55,
+      "title_fr": "Gandhi",
+      "title_en": "Gandhi",
+      "description_fr": "Du jeune avocat formé à Londres au chef du mouvement national indien : l’Afrique du Sud, la désobéissance civile non violente, l’indépendance et la partition.",
+      "description_en": "From the young London-trained lawyer to the leader of the Indian national movement: South Africa, non-violent civil disobedience, independence and partition.",
+      "tags": [
+        "pouvoir-institutions",
+        "philosophie-ideologies"
+      ],
+      "periods": [
+        {
+          "period_id": "e2bda529-0ba2-4323-9816-5a0b0f0acd62",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "8b87d105-ef8c-4db7-ac09-2940bb6d171e",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "39f64c1b-fff9-4bbf-be84-daee6a7d0951",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "3621b4d1-a523-4edb-b52a-59a6ead4bc27",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "0e7c0dfa-86e0-4c18-b6a0-774d153d3684",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "a774ba1a-81ae-4cc5-ab7b-e6cf1ca1f0f3",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "d2bc6c9f-5898-4173-bcf7-09a10f4dec5c",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "d4ac5dd6-cd74-4ad3-b6f9-4f8cff664ba1",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "250cb410-b648-43fc-8069-ad6234780811",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "263cc481-748d-42ce-8ff6-ea2605d4e6c2",
+          "importance": "major",
+          "reused": true
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 55,
+          "event_id": "263cc481-748d-42ce-8ff6-ea2605d4e6c2"
+        }
+      ]
+    },
+    {
+      "key": "churchill",
+      "parent_story_id": 53,
+      "title_fr": "Winston Churchill",
+      "title_en": "Winston Churchill",
+      "description_fr": "De l’officier de cavalerie au Premier ministre de guerre : soixante ans de vie politique, les années d’isolement, la résistance à Hitler et le retour au pouvoir.",
+      "description_en": "From cavalry officer to wartime prime minister: sixty years in politics, the wilderness years, resistance to Hitler and the return to power.",
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ],
+      "periods": [
+        {
+          "period_id": "fc10d303-11ae-46d5-87c2-5da0271c9090",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "0bce18db-0ab1-4e31-8afe-dfc5278ad192",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "9eac3cfa-00d4-4ad3-8747-af424d9a1e59",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "c8c928c6-3647-49af-a13d-03ac0993feef",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "32644975-1bdf-4b19-95fc-93ef2a36ee1b",
+          "parent_period_id": "c8c928c6-3647-49af-a13d-03ac0993feef",
+          "reused": true
+        },
+        {
+          "period_id": "465adc83-a058-4bf2-bf39-2457a35d2ce7",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "83cebaa1-9267-4aad-96af-d77d1cfba619",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "14b1da22-758a-48a9-8bb4-4797f6b339f5",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "0bf1f70f-18e8-4461-b030-1286f99086ab",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "28d3dfd1-516f-4585-a1ae-197198a5c711",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "72e19322-22bd-4af1-b9ef-9e48a5b3c003",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "5e315854-2f49-42d5-94c0-3aab0f0c71c3",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "c073cbcb-24bb-49d0-af4d-48e7fd077a06",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "88a39956-7ced-4121-be86-6254e91f02b9",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "0c065471-cca3-47d3-9e96-42eb05aa4730",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "86257cfe-4286-4067-aa36-94858d5c68a7",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 53,
+          "event_id": "28d3dfd1-516f-4585-a1ae-197198a5c711"
+        },
+        {
+          "source_story_id": 9,
+          "event_id": "28d3dfd1-516f-4585-a1ae-197198a5c711"
+        }
+      ]
+    },
+    {
+      "key": "degaulle",
+      "parent_story_id": 35,
+      "title_fr": "Charles de Gaulle",
+      "title_en": "Charles de Gaulle",
+      "description_fr": "De l’officier de 1914 au fondateur de la Ve République : l’appel du 18 juin, la France libre, le retrait de 1946, le retour de 1958 et dix années de présidence.",
+      "description_en": "From the officer of 1914 to the founder of the Fifth Republic: the appeal of 18 June, Free France, the withdrawal of 1946, the return of 1958 and ten years as president.",
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ],
+      "periods": [
+        {
+          "period_id": "9b4d6e6e-9433-4100-a7df-c8d486290758",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "92c71cc9-d37c-49b2-9435-d2fdaf4d5209",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "80222909-e639-449f-9235-4ca1a7d9ac97",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "46d7de51-56d5-4adb-bb84-1e276d506f43",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "92031400-2502-4910-9b6f-e29c0d390334",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "560438e5-4846-42b7-ae96-c26e5885ef86",
+          "parent_period_id": null,
+          "reused": true
+        },
+        {
+          "period_id": "22e02b81-2a60-409b-90bc-1a253ed21bd6",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "84a953b7-edc0-46a0-8a0a-92ff0395506f",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "18d8f602-d2c3-47fa-90e5-1ef40be2dec1",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "3b1f5a1e-5f4f-466d-a94b-3a848d1d137f",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "e434a54e-7e0e-4868-90c4-74cc67c83b29",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "9f5ba9a4-2540-453e-a07f-3615cbaefc70",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "4ee3ccd5-7047-4aac-911b-c70993c60ea8",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "bdea3b79-ecac-4cbb-80f1-03fa97d11d7d",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "5861898b-db3f-4e91-ab25-69c5d24d7016",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "96aff07b-4677-4917-aa7a-37355cc9e411",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "2d7e0797-30ae-4e98-be72-e7feb7032303",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "3987c600-b643-4d73-93f7-47d2b9f59ac1",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "9550b523-9d48-443d-841c-73a54ea1b671",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 35,
+          "event_id": "18d8f602-d2c3-47fa-90e5-1ef40be2dec1"
+        },
+        {
+          "source_story_id": 51,
+          "event_id": "18d8f602-d2c3-47fa-90e5-1ef40be2dec1"
+        }
+      ]
+    }
+  ],
+  "reusedPeriods": {
+    "61058db9-645c-4aad-a13e-ca2ac4644930": {
+      "start": "334 BCE",
+      "end": "323 BCE",
+      "q": "Q551888"
+    },
+    "06454d26-49e3-4e67-9c5d-43f71efdb07b": {
+      "start": "58 BCE",
+      "end": "51 BCE",
+      "q": "Q202161"
+    },
+    "97c15f30-604a-480d-9914-ce2f3bd1ca75": {
+      "start": "0610",
+      "end": "0632-06-08",
+      "q": null
+    },
+    "65b6c4d2-4d09-4669-a227-f0af90473208": {
+      "start": "0768-10-09",
+      "end": "0814-01-28",
+      "q": null
+    },
+    "86303d8d-ff51-4fbc-8642-5242f46cffee": {
+      "start": "1643-05-14",
+      "end": "1715-09-01",
+      "q": null
+    },
+    "b76f41d5-4f2c-4d80-921b-e79963cf63eb": {
+      "start": "1701-03",
+      "end": "1714-09-07",
+      "q": "Q150701"
+    },
+    "32644975-1bdf-4b19-95fc-93ef2a36ee1b": {
+      "start": "1940-07-10",
+      "end": "1940-10-31",
+      "q": "Q154720"
+    },
+    "560438e5-4846-42b7-ae96-c26e5885ef86": {
+      "start": "1959-01-08",
+      "end": "1969-04-28",
+      "q": null
+    }
+  },
+  "reusedEvents": {
+    "406cbb1b-3444-4157-9151-3fed63e107b6": {
+      "date": "331 BCE",
+      "q": null
+    },
+    "c28e31cc-5d60-4d3b-831b-55b20d726fec": {
+      "date": "331 BCE",
+      "q": "Q179670"
+    },
+    "266992e1-4fd5-4ffd-b23e-3a8f1d00fb93": {
+      "date": "326 BCE",
+      "q": "Q213074"
+    },
+    "530c654d-2b55-4747-a2d8-81c23e64fee3": {
+      "date": "323 BCE",
+      "q": "Q5247391"
+    },
+    "bf2684a2-7df4-4f13-a062-36b3e38a5045": {
+      "date": "52 BCE",
+      "q": "Q131386"
+    },
+    "5edcbee5-2d38-4ac8-9bb7-2d25cebc63d7": {
+      "date": "49 BCE",
+      "q": "Q25238182"
+    },
+    "Q39671": {
+      "date": "-0043-03-15",
+      "q": "Q1025466"
+    },
+    "c4167487-aa94-4672-88e3-ba1774357db1": {
+      "date": "551 BCE",
+      "q": null
+    },
+    "EVT_HEGIRA": {
+      "date": "0622-07-16",
+      "q": "Q131482"
+    },
+    "a49dca40-b0cc-4e86-b811-9437657ecb0f": {
+      "date": "0630",
+      "q": "Q2092033"
+    },
+    "2809063c-b477-47dd-a55a-39b0724b3345": {
+      "date": "0632-06-08",
+      "q": "Q48772508"
+    },
+    "a220c749-fe5e-46d6-a32a-9303db634181": {
+      "date": "0800-12-25",
+      "q": "Q65534609"
+    },
+    "dcb180f7-a06d-4379-906b-795a9833c74c": {
+      "date": "1610-03-13",
+      "q": "Q1457297"
+    },
+    "77163526-7f65-4989-af0d-0e43f8ebff53": {
+      "date": "1633-06-22",
+      "q": "Q2517983"
+    },
+    "3861edff-ac39-4a97-92a3-981b4739e52a": {
+      "date": "1682-05-06",
+      "q": "Q2946"
+    },
+    "4b33793f-5ab8-4080-b46e-b6cdb0ecea42": {
+      "date": "1685-10-18",
+      "q": "Q512443"
+    },
+    "866b3f08-fe73-4da9-9794-f3c4b3cc4fce": {
+      "date": "1713-04-11",
+      "q": "Q154674"
+    },
+    "0e7c0dfa-86e0-4c18-b6a0-774d153d3684": {
+      "date": "1919-04-13",
+      "q": "Q208855"
+    },
+    "d2bc6c9f-5898-4173-bcf7-09a10f4dec5c": {
+      "date": "1930-03-12",
+      "q": "Q239344"
+    },
+    "250cb410-b648-43fc-8069-ad6234780811": {
+      "date": "1947-08-15",
+      "q": "Q129053"
+    },
+    "263cc481-748d-42ce-8ff6-ea2605d4e6c2": {
+      "date": "1948-01-30",
+      "q": "Q3350154"
+    },
+    "28d3dfd1-516f-4585-a1ae-197198a5c711": {
+      "date": "1940-05-10",
+      "q": "Q8016"
+    },
+    "72e19322-22bd-4af1-b9ef-9e48a5b3c003": {
+      "date": "1945-02-04",
+      "q": "Q161227"
+    },
+    "18d8f602-d2c3-47fa-90e5-1ef40be2dec1": {
+      "date": "1940-06-18",
+      "q": "Q2078515"
+    },
+    "3b1f5a1e-5f4f-466d-a94b-3a848d1d137f": {
+      "date": "1944-08-25",
+      "q": "Q696835"
+    },
+    "4ee3ccd5-7047-4aac-911b-c70993c60ea8": {
+      "date": "1962-03-18",
+      "q": "Q1471139"
+    },
+    "5861898b-db3f-4e91-ab25-69c5d24d7016": {
+      "date": "1962-10-28",
+      "q": "Q2327816"
+    },
+    "2d7e0797-30ae-4e98-be72-e7feb7032303": {
+      "date": "1968-05",
+      "q": "Q6743"
+    }
+  },
+  "newPeriods": [
+    {
+      "row": {
+        "id": "bf06f8aa-ef1e-4975-ad28-0841890548a4",
+        "label_fr": "Jeunesse d’Alexandre en Macédoine",
+        "label_en": "Alexander’s youth in Macedon",
+        "description_fr": "Fils de Philippe II, Alexandre a pour précepteur Aristote et commande la cavalerie macédonienne dès dix-huit ans.",
+        "description_en": "The son of Philip II, Alexander is tutored by Aristotle and commands the Macedonian cavalry at eighteen.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "356 BCE",
+        "end_date": "336 BCE",
+        "start_years_bp": 2381.81382614648,
+        "end_years_bp": 2361.81382614648,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "1d742c54-7b18-45f0-a8b5-913b3b3d40e7",
+        "label_fr": "Alexandre s’impose en Grèce",
+        "label_en": "Alexander secures Greece",
+        "description_fr": "Devenu roi, Alexandre élimine ses rivaux, soumet les peuples du nord et rase Thèbes révoltée.",
+        "description_en": "Once king, Alexander eliminates his rivals, subdues the northern peoples and razes rebellious Thebes.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "336 BCE",
+        "end_date": "334 BCE",
+        "start_years_bp": 2361.81382614648,
+        "end_years_bp": 2359.81519507187,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "3cd34e6b-d287-4747-bad3-5060cd4e4ef7",
+        "label_fr": "Jeunesse et débuts politiques de César",
+        "label_en": "Caesar’s youth and early career",
+        "description_fr": "Issu d’une vieille famille patricienne, César gravit les magistratures et devient grand pontife en 63 av. J.-C.",
+        "description_en": "Born into an old patrician family, Caesar climbs the magistracies and becomes pontifex maximus in 63 BC.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "100 BCE",
+        "end_date": "60 BCE",
+        "start_years_bp": 2125.82203969884,
+        "end_years_bp": 2085.82203969884,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "e1e7b161-06dc-482b-9dbf-95d5cad3758a",
+        "label_fr": "César, du triumvirat au consulat",
+        "label_en": "Caesar from the triumvirate to the consulship",
+        "description_fr": "Allié à Pompée et à Crassus, César obtient le consulat puis le gouvernement des Gaules pour cinq ans.",
+        "description_en": "Allied with Pompey and Crassus, Caesar gains the consulship and then the governorship of Gaul for five years.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "60 BCE",
+        "end_date": "58 BCE",
+        "start_years_bp": 2085.82203969884,
+        "end_years_bp": 2083.82340862423,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "c3c5e09e-cda6-4273-b3a0-3ccc05cb93c1",
+        "label_fr": "Guerre civile de César",
+        "label_en": "Caesar’s civil war",
+        "description_fr": "César affronte Pompée puis ses partisans en Grèce, en Égypte, en Afrique et en Espagne.",
+        "description_en": "Caesar fights Pompey and then his supporters in Greece, Egypt, Africa and Spain.",
+        "wikidata_id": "Q1238338",
+        "wikipedia_title_fr": "Guerre civile de César",
+        "wikipedia_title_en": "Caesar's civil war",
+        "start_date": "49 BCE",
+        "end_date": "45 BCE",
+        "start_years_bp": 2074.82409308693,
+        "end_years_bp": 2070.82409308693,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "b694a20b-d1ae-42b9-8b1c-d0ea5da694c7",
+        "label_fr": "Dictature de César",
+        "label_en": "Caesar’s dictatorship",
+        "description_fr": "Seul maître de Rome, César réforme le calendrier, agrandit le Sénat et fonde des colonies pour ses vétérans.",
+        "description_en": "Sole master of Rome, Caesar reforms the calendar, enlarges the Senate and founds colonies for his veterans.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "45 BCE",
+        "end_date": "-0043-03-15",
+        "start_years_bp": 2070.82409308693,
+        "end_years_bp": 2069.62217659138,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "446f0a39-10c2-4757-be9c-7f8ac5613a26",
+        "label_fr": "Jeunesse et premiers emplois de Confucius",
+        "label_en": "Confucius’s youth and first posts",
+        "description_fr": "Orphelin de père, Confucius étudie les rites et tient de modestes emplois d’intendant dans le pays de Lu.",
+        "description_en": "Having lost his father, Confucius studies the rites and holds minor stewardship posts in the state of Lu.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "551 BCE",
+        "end_date": "522 BCE",
+        "start_years_bp": 2576.81177275838,
+        "end_years_bp": 2547.81245722108,
+        "non_thematic": false
+      },
+      "tags": [
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "4a7d7193-fe12-41d2-a1c3-6942b160f444",
+        "label_fr": "Confucius maître et fonctionnaire à Lu",
+        "label_en": "Confucius as teacher and official in Lu",
+        "description_fr": "Confucius enseigne à des élèves de toutes origines et exerce, vers cinquante ans, des charges à la cour de Lu.",
+        "description_en": "Confucius teaches pupils of all backgrounds and, at about fifty, holds office at the court of Lu.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "522 BCE",
+        "end_date": "497 BCE",
+        "start_years_bp": 2547.81245722108,
+        "end_years_bp": 2522.81587953457,
+        "non_thematic": false
+      },
+      "tags": [
+        "philosophie-ideologies",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "542ff4d4-52b1-4677-9f38-f625d36e4129",
+        "label_fr": "Années d’errance de Confucius",
+        "label_en": "Confucius’s years of wandering",
+        "description_fr": "Avec ses disciples, Confucius va de principauté en principauté sans trouver de souverain qui applique ses conseils.",
+        "description_en": "With his disciples, Confucius travels from state to state without finding a ruler willing to apply his advice.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "497 BCE",
+        "end_date": "484 BCE",
+        "start_years_bp": 2522.81587953457,
+        "end_years_bp": 2509.81382614648,
+        "non_thematic": false
+      },
+      "tags": [
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "750d1cf1-6f00-4d71-ba42-e0d16cfbb5d7",
+        "label_fr": "Dernières années de Confucius à Lu",
+        "label_en": "Confucius’s last years in Lu",
+        "description_fr": "De retour à Lu, Confucius se consacre à l’enseignement et, selon la tradition, à la mise en ordre des textes classiques.",
+        "description_en": "Back in Lu, Confucius devotes himself to teaching and, according to tradition, to editing the classic texts.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "484 BCE",
+        "end_date": "479 BCE",
+        "start_years_bp": 2509.81382614648,
+        "end_years_bp": 2504.81451060917,
+        "non_thematic": false
+      },
+      "tags": [
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "8785d056-1351-4edc-bdd0-3170995630c7",
+        "label_fr": "Jeunesse de Mahomet à La Mecque",
+        "label_en": "Muhammad’s youth in Mecca",
+        "description_fr": "Orphelin élevé par son grand-père puis son oncle, Mahomet devient caravanier au service de Khadija, qu’il épouse.",
+        "description_en": "An orphan raised by his grandfather and then his uncle, Muhammad becomes a caravan trader in the service of Khadija, whom he marries.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "0570",
+        "end_date": "0610",
+        "start_years_bp": 1456.83367556468,
+        "end_years_bp": 1416.83641341547,
+        "non_thematic": false
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "fb37ab83-f1bb-4dd6-9d08-6c50bd1e721c",
+        "label_fr": "Jeunesse de Charlemagne",
+        "label_en": "Charlemagne’s youth",
+        "description_fr": "Fils aîné de Pépin le Bref, Charles est sacré avec son père et son frère par le pape en 754 ; son année de naissance reste discutée.",
+        "description_en": "The eldest son of Pepin the Short, Charles is anointed with his father and brother by the pope in 754; his year of birth is still debated.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "0748",
+        "end_date": "0768-10-09",
+        "start_years_bp": 1278.84052019165,
+        "end_years_bp": 1258.06844626968,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "11196d7c-a4e6-4db3-adb9-6eee0a83605a",
+        "label_fr": "Guerres de Saxe",
+        "label_en": "Saxon Wars",
+        "description_fr": "Trente ans de campagnes, de révoltes et de conversions forcées intègrent la Saxe au royaume franc.",
+        "description_en": "Thirty years of campaigns, revolts and forced conversions bring Saxony into the Frankish kingdom.",
+        "wikidata_id": "Q499909",
+        "wikipedia_title_fr": "Guerre des Saxons",
+        "wikipedia_title_en": "Saxon Wars",
+        "start_date": "0772",
+        "end_date": "0804",
+        "start_years_bp": 1254.84052019165,
+        "end_years_bp": 1222.84052019165,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits",
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "5cf38e79-0481-4774-902f-a663824ed783",
+        "label_fr": "Jeunesse et débuts de Galilée à Pise",
+        "label_en": "Galileo’s youth and beginnings in Pisa",
+        "description_fr": "Galilée abandonne la médecine pour les mathématiques et obtient une chaire à l’université de Pise en 1589.",
+        "description_en": "Galileo gives up medicine for mathematics and gains a chair at the University of Pisa in 1589.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1564-02-15",
+        "end_date": "1592",
+        "start_years_bp": 462.733744010951,
+        "end_years_bp": 434.856947296372,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "da9770ff-46d3-42df-a555-f2e0469fe45b",
+        "label_fr": "Galilée professeur à Padoue",
+        "label_en": "Galileo as professor at Padua",
+        "description_fr": "Pendant dix-huit ans, Galilée enseigne à Padoue, étudie la chute des corps et perfectionne la lunette.",
+        "description_en": "For eighteen years Galileo teaches at Padua, studies falling bodies and improves the telescope.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1592",
+        "end_date": "1610",
+        "start_years_bp": 434.856947296372,
+        "end_years_bp": 416.855578370979,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "34bd5b30-ef55-44e7-87e3-b143904426e5",
+        "label_fr": "Galilée à la cour des Médicis",
+        "label_en": "Galileo at the Medici court",
+        "description_fr": "Mathématicien du grand-duc de Toscane, Galilée défend publiquement le mouvement de la Terre.",
+        "description_en": "Mathematician to the Grand Duke of Tuscany, Galileo publicly defends the motion of the Earth.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1610",
+        "end_date": "1633",
+        "start_years_bp": 416.855578370979,
+        "end_years_bp": 393.854893908282,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "66c753c6-2737-41e4-ac4b-49ea25a113c3",
+        "label_fr": "Galilée assigné à résidence à Arcetri",
+        "label_en": "Galileo under house arrest at Arcetri",
+        "description_fr": "Condamné, Galilée termine sa vie près de Florence, où il achève son traité de mécanique malgré la cécité.",
+        "description_en": "After his sentence, Galileo ends his life near Florence, completing his treatise on mechanics despite going blind.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1633",
+        "end_date": "1642-01-08",
+        "start_years_bp": 393.854893908282,
+        "end_years_bp": 384.836413415469,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "9e8a4d1d-04e0-44b8-8e33-67ab118eb247",
+        "label_fr": "Minorité de Louis XIV et ministère de Mazarin",
+        "label_en": "Minority of Louis XIV and Mazarin’s ministry",
+        "description_fr": "Anne d’Autriche exerce la régence et le cardinal Mazarin gouverne jusqu’à sa mort.",
+        "description_en": "Anne of Austria acts as regent and Cardinal Mazarin governs until his death.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1643-05-14",
+        "end_date": "1661-03-09",
+        "start_years_bp": 383.492128678987,
+        "end_years_bp": 365.671457905544,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "cdff3f25-0f67-4df2-aad0-43dad55e171b",
+        "label_fr": "La Fronde",
+        "label_en": "The Fronde",
+        "description_fr": "Parlementaires puis grands seigneurs se soulèvent contre Mazarin ; le jeune roi doit fuir Paris.",
+        "description_en": "Magistrates and then great nobles rise against Mazarin; the young king has to flee Paris.",
+        "wikidata_id": "Q656186",
+        "wikipedia_title_fr": "Fronde (histoire)",
+        "wikipedia_title_en": "The Fronde",
+        "start_date": "1648",
+        "end_date": "1653",
+        "start_years_bp": 378.856947296372,
+        "end_years_bp": 373.854893908282,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "f503a31f-b85e-421e-9c18-67b1d8e42529",
+        "label_fr": "Règne personnel de Louis XIV",
+        "label_en": "Personal rule of Louis XIV",
+        "description_fr": "Louis XIV gouverne sans premier ministre, avec Colbert puis Louvois, et impose son autorité à la noblesse.",
+        "description_en": "Louis XIV governs without a chief minister, with Colbert and then Louvois, and imposes his authority on the nobility.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1661-03-09",
+        "end_date": "1715-09-01",
+        "start_years_bp": 365.671457905544,
+        "end_years_bp": 311.19370294319,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "e2bda529-0ba2-4323-9816-5a0b0f0acd62",
+        "label_fr": "Jeunesse et études de Gandhi",
+        "label_en": "Gandhi’s youth and studies",
+        "description_fr": "Né dans une famille de notables du Gujarat, Gandhi étudie le droit à Londres et devient avocat.",
+        "description_en": "Born into a family of notables in Gujarat, Gandhi studies law in London and becomes a barrister.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1869-10-02",
+        "end_date": "1893",
+        "start_years_bp": 157.110198494182,
+        "end_years_bp": 133.860369609856,
+        "non_thematic": false
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "8b87d105-ef8c-4db7-ac09-2940bb6d171e",
+        "label_fr": "Gandhi en Afrique du Sud",
+        "label_en": "Gandhi in South Africa",
+        "description_fr": "En défendant les droits des Indiens du Natal et du Transvaal, Gandhi met au point la résistance non violente, le satyagraha.",
+        "description_en": "Defending the rights of Indians in Natal and the Transvaal, Gandhi develops non-violent resistance, satyagraha.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1893",
+        "end_date": "1915-01-09",
+        "start_years_bp": 133.860369609856,
+        "end_years_bp": 111.84257357974,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "39f64c1b-fff9-4bbf-be84-daee6a7d0951",
+        "label_fr": "Gandhi à la tête du mouvement national",
+        "label_en": "Gandhi at the head of the national movement",
+        "description_fr": "Rentré en Inde, Gandhi fait du parti du Congrès un mouvement de masse et mène plusieurs campagnes de désobéissance civile.",
+        "description_en": "Back in India, Gandhi turns the Congress party into a mass movement and leads several campaigns of civil disobedience.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1915-01-09",
+        "end_date": "1948-01-30",
+        "start_years_bp": 111.84257357974,
+        "end_years_bp": 78.7857631759069,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "fc10d303-11ae-46d5-87c2-5da0271c9090",
+        "label_fr": "Jeunesse et carrière militaire de Churchill",
+        "label_en": "Churchill’s youth and military career",
+        "description_fr": "Officier et correspondant de guerre à Cuba, en Inde, au Soudan et en Afrique du Sud, Churchill se fait connaître par ses récits.",
+        "description_en": "An officer and war correspondent in Cuba, India, Sudan and South Africa, Churchill makes his name through his writing.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1874-11-30",
+        "end_date": "1900-10",
+        "start_years_bp": 151.949349760438,
+        "end_years_bp": 126.11498973306,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "0bce18db-0ab1-4e31-8afe-dfc5278ad192",
+        "label_fr": "Churchill député et ministre",
+        "label_en": "Churchill as MP and minister",
+        "description_fr": "Conservateur passé aux libéraux puis revenu aux conservateurs, Churchill occupe presque tous les grands ministères.",
+        "description_en": "A Conservative who joins the Liberals and then returns to the Conservatives, Churchill holds almost every major ministry.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1900-10",
+        "end_date": "1929-06",
+        "start_years_bp": 126.11498973306,
+        "end_years_bp": 97.4496919917865,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "9eac3cfa-00d4-4ad3-8747-af424d9a1e59",
+        "label_fr": "Traversée du désert de Churchill",
+        "label_en": "Churchill’s wilderness years",
+        "description_fr": "Écarté du gouvernement, Churchill écrit et dénonce le réarmement allemand et la politique d’apaisement.",
+        "description_en": "Out of office, Churchill writes and denounces German rearmament and the policy of appeasement.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1929-06",
+        "end_date": "1939-09-03",
+        "start_years_bp": 97.4496919917865,
+        "end_years_bp": 87.1937029431896,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "c8c928c6-3647-49af-a13d-03ac0993feef",
+        "label_fr": "Churchill dans la Seconde Guerre mondiale",
+        "label_en": "Churchill in the Second World War",
+        "description_fr": "Rappelé à l’Amirauté puis nommé Premier ministre, Churchill dirige l’effort de guerre britannique et l’alliance avec Roosevelt et Staline.",
+        "description_en": "Recalled to the Admiralty and then appointed prime minister, Churchill leads the British war effort and the alliance with Roosevelt and Stalin.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1939-09-03",
+        "end_date": "1945-07-26",
+        "start_years_bp": 87.1937029431896,
+        "end_years_bp": 81.2991101984942,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "465adc83-a058-4bf2-bf39-2457a35d2ce7",
+        "label_fr": "Churchill après la guerre",
+        "label_en": "Churchill after the war",
+        "description_fr": "Chef de l’opposition, de nouveau Premier ministre de 1951 à 1955, Churchill se retire ensuite de la vie publique.",
+        "description_en": "Leader of the opposition, prime minister again from 1951 to 1955, Churchill then withdraws from public life.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1945-07-26",
+        "end_date": "1965-01-24",
+        "start_years_bp": 81.2991101984942,
+        "end_years_bp": 61.8001368925394,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "9b4d6e6e-9433-4100-a7df-c8d486290758",
+        "label_fr": "Jeunesse et carrière militaire de De Gaulle",
+        "label_en": "De Gaulle’s youth and military career",
+        "description_fr": "Saint-cyrien, blessé et prisonnier pendant la Grande Guerre, de Gaulle plaide ensuite pour une armée de blindés.",
+        "description_en": "A Saint-Cyr graduate, wounded and taken prisoner in the Great War, de Gaulle later argues for an armoured army.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1890-11-22",
+        "end_date": "1940-06-18",
+        "start_years_bp": 135.971252566735,
+        "end_years_bp": 86.4024640657084,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "92c71cc9-d37c-49b2-9435-d2fdaf4d5209",
+        "label_fr": "De Gaulle chef de la France libre",
+        "label_en": "De Gaulle leader of Free France",
+        "description_fr": "Depuis Londres puis Alger, de Gaulle rassemble les forces qui continuent le combat et unifie la Résistance.",
+        "description_en": "From London and then Algiers, de Gaulle gathers the forces that fight on and unifies the Resistance.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1940-06-18",
+        "end_date": "1944-08-25",
+        "start_years_bp": 86.4024640657084,
+        "end_years_bp": 82.2162902121834,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "80222909-e639-449f-9235-4ca1a7d9ac97",
+        "label_fr": "De Gaulle à la tête du Gouvernement provisoire",
+        "label_en": "De Gaulle at the head of the Provisional Government",
+        "description_fr": "De Gaulle rétablit l’État, accorde le droit de vote aux femmes et lance les nationalisations et la Sécurité sociale.",
+        "description_en": "De Gaulle restores the state, gives women the vote and launches nationalisations and social security.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1944-08-25",
+        "end_date": "1946-01-20",
+        "start_years_bp": 82.2162902121834,
+        "end_years_bp": 80.8117727583847,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "46d7de51-56d5-4adb-bb84-1e276d506f43",
+        "label_fr": "Traversée du désert de De Gaulle",
+        "label_en": "De Gaulle’s years out of power",
+        "description_fr": "Opposé au régime des partis, de Gaulle fonde le RPF puis se retire à Colombey pour écrire ses Mémoires de guerre.",
+        "description_en": "Opposed to party government, de Gaulle founds the RPF and then withdraws to Colombey to write his War Memoirs.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1946-01-20",
+        "end_date": "1958-06-01",
+        "start_years_bp": 80.8117727583847,
+        "end_years_bp": 68.4503764544832,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "92031400-2502-4910-9b6f-e29c0d390334",
+        "label_fr": "Retour de De Gaulle et fondation de la Ve République",
+        "label_en": "De Gaulle’s return and the founding of the Fifth Republic",
+        "description_fr": "Rappelé pendant la crise algérienne, de Gaulle fait adopter une nouvelle Constitution par référendum.",
+        "description_en": "Recalled during the Algerian crisis, de Gaulle has a new constitution adopted by referendum.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1958-06-01",
+        "end_date": "1959-01-08",
+        "start_years_bp": 68.4503764544832,
+        "end_years_bp": 67.845311430527,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "22e02b81-2a60-409b-90bc-1a253ed21bd6",
+        "label_fr": "Retraite de De Gaulle à Colombey",
+        "label_en": "De Gaulle’s retirement at Colombey",
+        "description_fr": "De Gaulle se retire à la Boisserie et rédige ses Mémoires d’espoir, restés inachevés.",
+        "description_en": "De Gaulle withdraws to La Boisserie and writes his Memoirs of Hope, left unfinished.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1969-04-28",
+        "end_date": "1970-11-09",
+        "start_years_bp": 57.5427789185489,
+        "end_years_bp": 56.009582477755,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    }
+  ],
+  "newEvents": [
+    {
+      "row": {
+        "id": "ce26cf92-d7d9-4853-ad5c-43061d4358c3",
+        "label_fr": "Naissance d’Alexandre",
+        "label_en": "Birth of Alexander",
+        "description_fr": "Alexandre naît à Pella, capitale du royaume de Macédoine.",
+        "description_en": "Alexander is born at Pella, capital of the kingdom of Macedon.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "356 BCE",
+        "date_years_bp": 2381.81382614648
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "02a41e0f-1cd0-4f61-b2cc-3bf29dafdf20",
+        "label_fr": "Bataille de Chéronée",
+        "label_en": "Battle of Chaeronea",
+        "description_fr": "Philippe II bat Athènes et Thèbes ; Alexandre, qui mène l’aile gauche, y gagne sa première grande victoire.",
+        "description_en": "Philip II defeats Athens and Thebes; Alexander, leading the left wing, wins his first great victory.",
+        "wikidata_id": "Q200716",
+        "wikipedia_title_fr": "Bataille de Chéronée (338 av. J.-C.)",
+        "wikipedia_title_en": "Battle of Chaeronea (338 BC)",
+        "date": "338 BCE",
+        "date_years_bp": 2363.81519507187
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "892ca3e7-3535-45ef-9767-efc054b52772",
+        "label_fr": "Alexandre devient roi de Macédoine",
+        "label_en": "Alexander becomes king of Macedon",
+        "description_fr": "Philippe II est assassiné lors d’une fête à Aigai ; l’armée acclame son fils, âgé de vingt ans.",
+        "description_en": "Philip II is assassinated during a celebration at Aegae; the army acclaims his twenty-year-old son.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "336 BCE",
+        "date_years_bp": 2361.81382614648
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "2cdcfd58-4d86-4260-9a47-3266259849d9",
+        "label_fr": "Bataille du Granique",
+        "label_en": "Battle of the Granicus",
+        "description_fr": "Première victoire sur les satrapes perses, qui ouvre à Alexandre l’Asie Mineure.",
+        "description_en": "The first victory over the Persian satraps, opening Asia Minor to Alexander.",
+        "wikidata_id": "Q192938",
+        "wikipedia_title_fr": "Bataille du Granique",
+        "wikipedia_title_en": "Battle of the Granicus",
+        "date": "334 BCE",
+        "date_years_bp": 2359.81519507187
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "c997904d-21da-41fc-b98f-a2413baeba5f",
+        "label_fr": "Bataille d’Issos",
+        "label_en": "Battle of Issus",
+        "description_fr": "Alexandre met en fuite le roi perse Darius III et capture sa famille.",
+        "description_en": "Alexander puts the Persian king Darius III to flight and captures his family.",
+        "wikidata_id": "Q201526",
+        "wikipedia_title_fr": "Bataille d'Issos",
+        "wikipedia_title_en": "Battle of Issus",
+        "date": "333 BCE",
+        "date_years_bp": 2358.81587953457
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "f065e0f3-74d3-4e15-a0a9-1b57bf52cf14",
+        "label_fr": "Naissance de Jules César",
+        "label_en": "Birth of Julius Caesar",
+        "description_fr": "César naît à Rome dans la gens Julia, qui prétend descendre de Vénus.",
+        "description_en": "Caesar is born in Rome into the gens Julia, which claims descent from Venus.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "100 BCE",
+        "date_years_bp": 2125.82203969884
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "fa8df1c2-a84b-4b48-80a9-ed09bd9d3bde",
+        "label_fr": "Premier triumvirat",
+        "label_en": "First Triumvirate",
+        "description_fr": "César, Pompée et Crassus s’entendent en secret pour se partager le pouvoir.",
+        "description_en": "Caesar, Pompey and Crassus secretly agree to share power.",
+        "wikidata_id": "Q715380",
+        "wikipedia_title_fr": "Premier triumvirat",
+        "wikipedia_title_en": "First Triumvirate",
+        "date": "60 BCE",
+        "date_years_bp": 2085.82203969884
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "105fcb3e-040c-4257-bf8e-aa3d111c0dc7",
+        "label_fr": "Consulat de César",
+        "label_en": "Caesar’s consulship",
+        "description_fr": "Consul, César fait voter une loi agraire en faveur des vétérans de Pompée malgré l’opposition du Sénat.",
+        "description_en": "As consul, Caesar pushes through a land law for Pompey’s veterans despite the opposition of the Senate.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "59 BCE",
+        "date_years_bp": 2084.82272416153
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "eeee572b-87cc-4f3f-9e66-01308ca66389",
+        "label_fr": "Bataille de Pharsale",
+        "label_en": "Battle of Pharsalus",
+        "description_fr": "En Thessalie, César écrase l’armée de Pompée, qui s’enfuit en Égypte où il est assassiné.",
+        "description_en": "In Thessaly, Caesar crushes the army of Pompey, who flees to Egypt, where he is murdered.",
+        "wikidata_id": "Q203681",
+        "wikipedia_title_fr": "Bataille de Pharsale",
+        "wikipedia_title_en": "Battle of Pharsalus",
+        "date": "48 BCE",
+        "date_years_bp": 2073.82203969884
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "3c2a804b-7b6a-4414-b603-976235137e9e",
+        "label_fr": "César dictateur à vie",
+        "label_en": "Caesar dictator for life",
+        "description_fr": "Le Sénat lui confère la dictature perpétuelle, ce qui précipite la conjuration.",
+        "description_en": "The Senate grants him the dictatorship in perpetuity, which precipitates the conspiracy.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "44 BCE",
+        "date_years_bp": 2069.82203969884
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "eef6cede-fa7f-4d49-b034-a3e08e1df1a9",
+        "label_fr": "Confucius commence à enseigner",
+        "label_en": "Confucius begins teaching",
+        "description_fr": "Vers trente ans, Confucius réunit ses premiers disciples ; la date est traditionnelle.",
+        "description_en": "At about thirty, Confucius gathers his first disciples; the date is traditional.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "522 BCE",
+        "date_years_bp": 2547.81245722108
+      },
+      "tags": [
+        "philosophie-ideologies",
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "82e0454a-8a74-4888-ae09-2621da7a6487",
+        "label_fr": "Confucius ministre de la Justice de Lu",
+        "label_en": "Confucius minister of justice of Lu",
+        "description_fr": "La tradition lui attribue cette charge à la cour du duc Ding ; les historiens discutent son importance réelle.",
+        "description_en": "Tradition credits him with this office at the court of Duke Ding; historians debate how important it really was.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "500 BCE",
+        "date_years_bp": 2525.81382614648
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "eb483fc5-e0c1-4a3a-8ec2-f1f1da4a4e6b",
+        "label_fr": "Confucius quitte le pays de Lu",
+        "label_en": "Confucius leaves the state of Lu",
+        "description_fr": "Déçu par le duc de Lu, Confucius part chercher ailleurs un prince à conseiller.",
+        "description_en": "Disappointed by the duke of Lu, Confucius leaves to seek a prince to advise elsewhere.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "497 BCE",
+        "date_years_bp": 2522.81587953457
+      },
+      "tags": [
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "363f316d-8f8b-4c41-a8ec-9725d635ff86",
+        "label_fr": "Mort de Confucius",
+        "label_en": "Death of Confucius",
+        "description_fr": "Confucius meurt à Qufu ; ses disciples rassembleront ses propos dans les Entretiens.",
+        "description_en": "Confucius dies at Qufu; his disciples will gather his sayings in the Analects.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "479 BCE",
+        "date_years_bp": 2504.81451060917
+      },
+      "tags": [
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "2f85eb17-5f81-4645-851b-2205926c27e7",
+        "label_fr": "Naissance de Mahomet",
+        "label_en": "Birth of Muhammad",
+        "description_fr": "La tradition place sa naissance à La Mecque vers 570, dans le clan des Banu Hachim.",
+        "description_en": "Tradition places his birth in Mecca around 570, in the clan of Banu Hashim.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "0570",
+        "date_years_bp": 1456.83367556468
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "7049251c-68b4-411f-8b39-a6c03ff2f580",
+        "label_fr": "Première révélation",
+        "label_en": "First revelation",
+        "description_fr": "Selon la tradition, Mahomet reçoit dans la grotte de Hira les premiers versets du Coran.",
+        "description_en": "According to tradition, Muhammad receives the first verses of the Quran in the cave of Hira.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "0610",
+        "date_years_bp": 1416.83641341547
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "aced2c39-f010-4262-a44b-d624bfe9db1c",
+        "label_fr": "Bataille de Badr",
+        "label_en": "Battle of Badr",
+        "description_fr": "Les musulmans de Médine remportent leur première victoire sur les Mecquois.",
+        "description_en": "The Muslims of Medina win their first victory over the Meccans.",
+        "wikidata_id": "Q486124",
+        "wikipedia_title_fr": "Bataille de Badr",
+        "wikipedia_title_en": "Battle of Badr",
+        "date": "0624",
+        "date_years_bp": 1402.83778234086
+      },
+      "tags": [
+        "conflits",
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "5d7a3881-6d60-4ff7-b635-41ea1add0804",
+        "label_fr": "Bataille de Uhud",
+        "label_en": "Battle of Uhud",
+        "description_fr": "Les Mecquois prennent leur revanche près de Médine ; Mahomet est blessé.",
+        "description_en": "The Meccans take their revenge near Medina; Muhammad is wounded.",
+        "wikidata_id": "Q488278",
+        "wikipedia_title_fr": "Bataille de Uhud",
+        "wikipedia_title_en": "Battle of Uhud",
+        "date": "0625",
+        "date_years_bp": 1401.83572895277
+      },
+      "tags": [
+        "conflits",
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "8abc0292-24dd-40ae-98cd-0d2e472a1813",
+        "label_fr": "Bataille du Fossé",
+        "label_en": "Battle of the Trench",
+        "description_fr": "Un fossé creusé autour de Médine fait échouer le siège mené par les Mecquois et leurs alliés.",
+        "description_en": "A trench dug around Medina defeats the siege led by the Meccans and their allies.",
+        "wikidata_id": "Q826083",
+        "wikipedia_title_fr": "Bataille de la Tranchée",
+        "wikipedia_title_en": "Battle of the Trench",
+        "date": "0627",
+        "date_years_bp": 1399.83709787817
+      },
+      "tags": [
+        "conflits",
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "49d12f48-bc4e-4a3a-b8f7-55490cb91367",
+        "label_fr": "Traité d’Houdaybiya",
+        "label_en": "Treaty of Hudaybiyyah",
+        "description_fr": "Une trêve de dix ans avec La Mecque autorise les musulmans à y venir en pèlerinage.",
+        "description_en": "A ten-year truce with Mecca allows the Muslims to come there on pilgrimage.",
+        "wikidata_id": "Q1647162",
+        "wikipedia_title_fr": "Traité d'Houdaybiya",
+        "wikipedia_title_en": "Treaty of al-Hudaybiya",
+        "date": "0628",
+        "date_years_bp": 1398.83778234086
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "d8c6f4f0-50cd-4723-90d0-2e2ce456c1d5",
+        "label_fr": "Pèlerinage d’adieu",
+        "label_en": "Farewell Pilgrimage",
+        "description_fr": "Mahomet accomplit son seul pèlerinage à La Mecque et y prononce un dernier sermon.",
+        "description_en": "Muhammad makes his only pilgrimage to Mecca and delivers a last sermon there.",
+        "wikidata_id": "Q3352027",
+        "wikipedia_title_fr": "Pèlerinage d'adieu",
+        "wikipedia_title_en": "Farewell Pilgrimage",
+        "date": "0632",
+        "date_years_bp": 1394.83778234086
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "3ee323c7-3683-4349-811b-846b444d116e",
+        "label_fr": "Naissance de Charlemagne",
+        "label_en": "Birth of Charlemagne",
+        "description_fr": "La date la plus souvent retenue aujourd’hui est 748 ; le lieu de naissance n’est pas connu.",
+        "description_en": "The date most often accepted today is 748; the place of birth is unknown.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "0748",
+        "date_years_bp": 1278.84052019165
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "9bb6169d-6f2e-46d4-8824-4af2daa95793",
+        "label_fr": "Charlemagne seul roi des Francs",
+        "label_en": "Charlemagne sole king of the Franks",
+        "description_fr": "La mort de son frère Carloman lui permet de réunir tout le royaume.",
+        "description_en": "The death of his brother Carloman allows him to reunite the whole kingdom.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "0771-12",
+        "date_years_bp": 1254.92539356605
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "a63f20e8-6d40-4788-b98a-d3b0d21eae54",
+        "label_fr": "Prise de Pavie",
+        "label_en": "Capture of Pavia",
+        "description_fr": "Après un long siège, Charlemagne prend la capitale lombarde et se proclame roi des Lombards.",
+        "description_en": "After a long siege, Charlemagne takes the Lombard capital and proclaims himself king of the Lombards.",
+        "wikidata_id": "Q114717",
+        "wikipedia_title_fr": "Siège de Pavie (773-774)",
+        "wikipedia_title_en": "Siege of Pavia (773–774)",
+        "date": "0774-06",
+        "date_years_bp": 1252.4257357974
+      },
+      "tags": [
+        "conflits",
+        "territoires-exploration"
+      ]
+    },
+    {
+      "row": {
+        "id": "90451aea-1bd4-4a35-bc26-bebbe281b357",
+        "label_fr": "Bataille de Roncevaux",
+        "label_en": "Battle of Roncevaux Pass",
+        "description_fr": "Au retour d’Espagne, l’arrière-garde franque est anéantie dans les Pyrénées par des Vascons ; l’épisode inspire la Chanson de Roland.",
+        "description_en": "On the way back from Spain, the Frankish rearguard is wiped out in the Pyrenees by Basques; the episode inspires the Song of Roland.",
+        "wikidata_id": "Q1233475",
+        "wikipedia_title_fr": "Bataille de Roncevaux (778)",
+        "wikipedia_title_en": "Battle of Roncevaux Pass",
+        "date": "0778-08-15",
+        "date_years_bp": 1248.22039698836
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "01ab4d0e-30c9-4a78-bcf2-35df173a3253",
+        "label_fr": "Admonitio generalis",
+        "label_en": "Admonitio generalis",
+        "description_fr": "Ce capitulaire règle la discipline du clergé et demande l’ouverture d’écoles dans les évêchés et les monastères.",
+        "description_en": "This capitulary regulates clerical discipline and calls for schools in bishoprics and monasteries.",
+        "wikidata_id": "Q359314",
+        "wikipedia_title_fr": "Admonitio generalis",
+        "wikipedia_title_en": "Admonitio generalis",
+        "date": "0789",
+        "date_years_bp": 1237.83846680356
+      },
+      "tags": [
+        "religions-spiritualites",
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "c871f398-6196-432f-a8ca-5b5beb7c50bb",
+        "label_fr": "Mort de Charlemagne",
+        "label_en": "Death of Charlemagne",
+        "description_fr": "Charlemagne meurt à Aix-la-Chapelle, où il est inhumé dans la chapelle palatine.",
+        "description_en": "Charlemagne dies at Aachen, where he is buried in the palace chapel.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "0814-01-28",
+        "date_years_bp": 1212.765229295
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "8eb79843-a712-456a-a7bf-ad96afebc72f",
+        "label_fr": "Naissance de Galilée",
+        "label_en": "Birth of Galileo",
+        "description_fr": "Galilée naît à Pise ; son père, Vincenzo Galilei, est musicien et théoricien de la musique.",
+        "description_en": "Galileo is born in Pisa; his father, Vincenzo Galilei, is a musician and music theorist.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1564-02-15",
+        "date_years_bp": 462.733744010951
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "c8ad0d10-c102-4ce4-87bc-ea9cbb5d050a",
+        "label_fr": "Galilée tourne sa lunette vers le ciel",
+        "label_en": "Galileo turns his telescope to the sky",
+        "description_fr": "Avec une lunette qu’il a perfectionnée, Galilée observe les reliefs de la Lune puis les satellites de Jupiter.",
+        "description_en": "With a telescope he has improved, Galileo observes the mountains of the Moon and then the moons of Jupiter.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1609",
+        "date_years_bp": 417.854893908282
+      },
+      "tags": [
+        "sciences-savoirs",
+        "techniques-inventions",
+        "cosmos"
+      ]
+    },
+    {
+      "row": {
+        "id": "b7489b83-d872-4b9c-ba24-4558f14e6917",
+        "label_fr": "L’Église condamne les thèses de Copernic",
+        "label_en": "The Church condemns Copernican theory",
+        "description_fr": "Le livre de Copernic est mis à l’Index ; Galilée a été averti quelques jours plus tôt de ne plus défendre le mouvement de la Terre.",
+        "description_en": "Copernicus’s book is placed on the Index; a few days earlier Galileo was warned no longer to defend the motion of the Earth.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1616-03-05",
+        "date_years_bp": 410.681724845996
+      },
+      "tags": [
+        "religions-spiritualites",
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "10eaa7d0-4257-4377-9a65-953357e62938",
+        "label_fr": "Dialogue sur les deux grands systèmes du monde",
+        "label_en": "Dialogue Concerning the Two Chief World Systems",
+        "description_fr": "Sous la forme d’une conversation, Galilée compare les systèmes de Ptolémée et de Copernic, à l’avantage du second.",
+        "description_en": "In the form of a conversation, Galileo compares the systems of Ptolemy and Copernicus, to the advantage of the latter.",
+        "wikidata_id": "Q1768303",
+        "wikipedia_title_fr": "Dialogue sur les deux grands systèmes du monde",
+        "wikipedia_title_en": "Dialogue Concerning the Two Chief World Systems",
+        "date": "1632",
+        "date_years_bp": 394.856947296372
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "f40feb95-9c43-4279-a6ce-fbfe7f24811f",
+        "label_fr": "Discours concernant deux sciences nouvelles",
+        "label_en": "Two New Sciences",
+        "description_fr": "Publié à Leyde, l’ouvrage expose la résistance des matériaux et les lois du mouvement accéléré.",
+        "description_en": "Published in Leiden, the work sets out the strength of materials and the laws of accelerated motion.",
+        "wikidata_id": "Q575461",
+        "wikipedia_title_fr": "Discours concernant deux sciences nouvelles",
+        "wikipedia_title_en": "Two New Sciences",
+        "date": "1638",
+        "date_years_bp": 388.855578370979
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "d7cad7ba-9723-4e26-9ace-a96d00048da3",
+        "label_fr": "Mort de Galilée",
+        "label_en": "Death of Galileo",
+        "description_fr": "Galilée meurt à Arcetri ; l’Église lui refuse d’abord un tombeau monumental.",
+        "description_en": "Galileo dies at Arcetri; the Church at first refuses him a monumental tomb.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1642-01-08",
+        "date_years_bp": 384.836413415469
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "fc657fe1-1298-4a45-90f0-d9c5edb7a0bd",
+        "label_fr": "Naissance de Louis XIV",
+        "label_en": "Birth of Louis XIV",
+        "description_fr": "Le futur roi naît à Saint-Germain-en-Laye après vingt-trois ans de mariage de ses parents.",
+        "description_en": "The future king is born at Saint-Germain-en-Laye after his parents’ twenty-three years of marriage.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1638-09-05",
+        "date_years_bp": 388.179329226557
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "fae2945b-5b43-4612-8d14-5a806c162c5e",
+        "label_fr": "Sacre de Louis XIV",
+        "label_en": "Coronation of Louis XIV",
+        "description_fr": "Louis XIV est sacré à Reims, une fois la Fronde terminée.",
+        "description_en": "Louis XIV is crowned at Reims once the Fronde is over.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1654-06-07",
+        "date_years_bp": 372.425735797399
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "a013a190-9654-4cf0-8e49-1901112aad15",
+        "label_fr": "Mariage de Louis XIV et de Marie-Thérèse d’Autriche",
+        "label_en": "Marriage of Louis XIV and Maria Theresa of Spain",
+        "description_fr": "Célébré à Saint-Jean-de-Luz, le mariage scelle la paix des Pyrénées avec l’Espagne.",
+        "description_en": "Celebrated at Saint-Jean-de-Luz, the marriage seals the Peace of the Pyrenees with Spain.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1660-06-09",
+        "date_years_bp": 366.418891170431
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "9c4172a6-ae3b-4c9c-99ee-66857abf9b14",
+        "label_fr": "Arrestation de Nicolas Fouquet",
+        "label_en": "Arrest of Nicolas Fouquet",
+        "description_fr": "Le surintendant des finances est arrêté à Nantes par d’Artagnan ; le roi marque ainsi qu’il gouverne seul.",
+        "description_en": "The superintendent of finances is arrested in Nantes by d’Artagnan; the king thereby shows that he rules alone.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1661-09-05",
+        "date_years_bp": 365.17864476386
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "10bc933c-0020-4a3b-8c86-ff27f0a8740d",
+        "label_fr": "Mort de Louis XIV",
+        "label_en": "Death of Louis XIV",
+        "description_fr": "Louis XIV meurt à Versailles ; son arrière-petit-fils, âgé de cinq ans, lui succède.",
+        "description_en": "Louis XIV dies at Versailles; his five-year-old great-grandson succeeds him.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1715-09-01",
+        "date_years_bp": 311.19370294319
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "3621b4d1-a523-4edb-b52a-59a6ead4bc27",
+        "label_fr": "Naissance de Gandhi",
+        "label_en": "Birth of Gandhi",
+        "description_fr": "Mohandas Karamchand Gandhi naît à Porbandar, port du Gujarat.",
+        "description_en": "Mohandas Karamchand Gandhi is born in Porbandar, a port in Gujarat.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1869-10-02",
+        "date_years_bp": 157.110198494182
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "a774ba1a-81ae-4cc5-ab7b-e6cf1ca1f0f3",
+        "label_fr": "Mouvement de non-coopération",
+        "label_en": "Non-cooperation movement",
+        "description_fr": "Gandhi appelle à boycotter les écoles, les tribunaux et les tissus britanniques ; il suspend la campagne en 1922 après des violences.",
+        "description_en": "Gandhi calls for a boycott of British schools, courts and cloth; he suspends the campaign in 1922 after violence breaks out.",
+        "wikidata_id": "Q1479381",
+        "wikipedia_title_fr": "Mouvement de non-coopération",
+        "wikipedia_title_en": "Non-cooperation movement (1919–1922)",
+        "date": "1920-08-01",
+        "date_years_bp": 106.281998631075
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "d4ac5dd6-cd74-4ad3-b6f9-4f8cff664ba1",
+        "label_fr": "Quit India",
+        "label_en": "Quit India Movement",
+        "description_fr": "Le Congrès exige le départ immédiat des Britanniques ; Gandhi et ses dirigeants sont arrêtés le lendemain.",
+        "description_en": "Congress demands the immediate departure of the British; Gandhi and its leaders are arrested the next day.",
+        "wikidata_id": "Q1992677",
+        "wikipedia_title_fr": "Quit India",
+        "wikipedia_title_en": "Quit India Movement",
+        "date": "1942-08-08",
+        "date_years_bp": 84.2642026009582
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "83cebaa1-9267-4aad-96af-d77d1cfba619",
+        "label_fr": "Naissance de Winston Churchill",
+        "label_en": "Birth of Winston Churchill",
+        "description_fr": "Churchill naît au palais de Blenheim, résidence des ducs de Marlborough, ses ancêtres.",
+        "description_en": "Churchill is born at Blenheim Palace, seat of his ancestors the dukes of Marlborough.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1874-11-30",
+        "date_years_bp": 151.949349760438
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "14b1da22-758a-48a9-8bb4-4797f6b339f5",
+        "label_fr": "Churchill élu député",
+        "label_en": "Churchill elected to Parliament",
+        "description_fr": "Auréolé de son évasion pendant la guerre des Boers, Churchill est élu député conservateur d’Oldham.",
+        "description_en": "Fresh from his escape during the Boer War, Churchill is elected Conservative MP for Oldham.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1900-10",
+        "date_years_bp": 126.11498973306
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "0bf1f70f-18e8-4461-b030-1286f99086ab",
+        "label_fr": "Churchill chancelier de l’Échiquier",
+        "label_en": "Churchill Chancellor of the Exchequer",
+        "description_fr": "Ministre des Finances, Churchill rétablit en 1925 la convertibilité de la livre en or.",
+        "description_en": "As finance minister, Churchill restores the gold standard for the pound in 1925.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1924-11-06",
+        "date_years_bp": 102.016427104723
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "economie-echanges"
+      ]
+    },
+    {
+      "row": {
+        "id": "5e315854-2f49-42d5-94c0-3aab0f0c71c3",
+        "label_fr": "Défaite électorale de Churchill",
+        "label_en": "Churchill’s election defeat",
+        "description_fr": "Les travaillistes de Clement Attlee l’emportent largement ; Churchill quitte le pouvoir avant la fin de la guerre contre le Japon.",
+        "description_en": "Clement Attlee’s Labour Party wins by a landslide; Churchill leaves office before the end of the war against Japan.",
+        "wikidata_id": "Q918397",
+        "wikipedia_title_fr": "Élections générales britanniques de 1945",
+        "wikipedia_title_en": "1945 United Kingdom general election",
+        "date": "1945-07-26",
+        "date_years_bp": 81.2991101984942
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "c073cbcb-24bb-49d0-af4d-48e7fd077a06",
+        "label_fr": "Discours de Fulton",
+        "label_en": "Fulton speech",
+        "description_fr": "Dans le Missouri, Churchill déclare qu’un « rideau de fer » est tombé sur l’Europe.",
+        "description_en": "In Missouri, Churchill declares that an “iron curtain” has descended across Europe.",
+        "wikidata_id": "Q2102143",
+        "wikipedia_title_fr": "Discours de Fulton",
+        "wikipedia_title_en": "Fulton Speech",
+        "date": "1946-03-05",
+        "date_years_bp": 80.6913073237509
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "88a39956-7ced-4121-be86-6254e91f02b9",
+        "label_fr": "Churchill de nouveau Premier ministre",
+        "label_en": "Churchill prime minister again",
+        "description_fr": "À soixante-seize ans, Churchill retrouve le pouvoir après la victoire des conservateurs.",
+        "description_en": "At seventy-six, Churchill returns to power after the Conservative victory.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1951-10-26",
+        "date_years_bp": 75.0485968514716
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "0c065471-cca3-47d3-9e96-42eb05aa4730",
+        "label_fr": "Prix Nobel de littérature de Churchill",
+        "label_en": "Churchill’s Nobel Prize in Literature",
+        "description_fr": "Le prix récompense ses ouvrages historiques et biographiques et son art oratoire.",
+        "description_en": "The prize rewards his historical and biographical works and his oratory.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1953-12-10",
+        "date_years_bp": 72.9240246406571
+      },
+      "tags": [
+        "arts-culture-loisirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "86257cfe-4286-4067-aa36-94858d5c68a7",
+        "label_fr": "Mort de Winston Churchill",
+        "label_en": "Death of Winston Churchill",
+        "description_fr": "Churchill meurt à Londres à quatre-vingt-dix ans et reçoit des funérailles nationales.",
+        "description_en": "Churchill dies in London aged ninety and is given a state funeral.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1965-01-24",
+        "date_years_bp": 61.8001368925394
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "84a953b7-edc0-46a0-8a0a-92ff0395506f",
+        "label_fr": "Naissance de Charles de Gaulle",
+        "label_en": "Birth of Charles de Gaulle",
+        "description_fr": "De Gaulle naît à Lille dans une famille catholique et lettrée.",
+        "description_en": "De Gaulle is born in Lille into a Catholic, well-read family.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1890-11-22",
+        "date_years_bp": 135.971252566735
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "e434a54e-7e0e-4868-90c4-74cc67c83b29",
+        "label_fr": "Discours de Bayeux",
+        "label_en": "Bayeux speech",
+        "description_fr": "De Gaulle y expose les institutions qu’il souhaite : un chef de l’État fort, au-dessus des partis.",
+        "description_en": "De Gaulle sets out the institutions he wants: a strong head of state, above the parties.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1946-06-16",
+        "date_years_bp": 80.4093086926762
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "9f5ba9a4-2540-453e-a07f-3615cbaefc70",
+        "label_fr": "De Gaulle investi président du Conseil",
+        "label_en": "De Gaulle invested as prime minister",
+        "description_fr": "Après le soulèvement d’Alger du 13 mai, l’Assemblée nationale lui confie le gouvernement et les pleins pouvoirs pour six mois.",
+        "description_en": "After the Algiers uprising of 13 May, the National Assembly entrusts him with the government and full powers for six months.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1958-06-01",
+        "date_years_bp": 68.4503764544832
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "bdea3b79-ecac-4cbb-80f1-03fa97d11d7d",
+        "label_fr": "Attentat du Petit-Clamart",
+        "label_en": "Petit-Clamart attack",
+        "description_fr": "Un commando de l’OAS mitraille la voiture du général, qui en sort indemne.",
+        "description_en": "An OAS commando machine-guns the general’s car; he emerges unharmed.",
+        "wikidata_id": "Q757982",
+        "wikipedia_title_fr": "Attentat du Petit-Clamart",
+        "wikipedia_title_en": "Petit-Clamart attack",
+        "date": "1962-08-22",
+        "date_years_bp": 64.2258726899384
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "96aff07b-4677-4917-aa7a-37355cc9e411",
+        "label_fr": "De Gaulle réélu au suffrage universel",
+        "label_en": "De Gaulle re-elected by universal suffrage",
+        "description_fr": "Mis en ballottage, de Gaulle l’emporte au second tour sur François Mitterrand.",
+        "description_en": "Forced into a run-off, de Gaulle wins the second round against François Mitterrand.",
+        "wikidata_id": "Q1450635",
+        "wikipedia_title_fr": "Élection présidentielle française de 1965",
+        "wikipedia_title_en": "1965 French presidential election",
+        "date": "1965-12-19",
+        "date_years_bp": 60.8993839835729
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "3987c600-b643-4d73-93f7-47d2b9f59ac1",
+        "label_fr": "Démission de De Gaulle",
+        "label_en": "De Gaulle’s resignation",
+        "description_fr": "Désavoué par le référendum sur le Sénat et les régions, de Gaulle quitte ses fonctions le lendemain du vote.",
+        "description_en": "Defeated in the referendum on the Senate and the regions, de Gaulle leaves office the day after the vote.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1969-04-28",
+        "date_years_bp": 57.5427789185489
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "9550b523-9d48-443d-841c-73a54ea1b671",
+        "label_fr": "Mort de Charles de Gaulle",
+        "label_en": "Death of Charles de Gaulle",
+        "description_fr": "De Gaulle meurt à Colombey-les-Deux-Églises, où il est inhumé sans cérémonie officielle.",
+        "description_en": "De Gaulle dies at Colombey-les-Deux-Églises, where he is buried without official ceremony.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1970-11-09",
+        "date_years_bp": 56.009582477755
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3017 @@
+{
+  "reference_time": "2026-11-12T12:00:00Z",
+  "stories": [
+    {
+      "key": "gengis",
+      "parent_story_id": 15,
+      "title_fr": "Gengis Khan",
+      "title_en": "Genghis Khan",
+      "description_fr": "De l’enfant proscrit de la steppe au fondateur du plus vaste empire continu de l’histoire : l’unification des tribus mongoles, puis les conquêtes en Chine et en Asie centrale.",
+      "description_en": "From the outcast child of the steppe to the founder of the largest contiguous empire in history: the unification of the Mongol tribes, then the conquests in China and Central Asia.",
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ],
+      "periods": [
+        {
+          "period_id": "d82d14ec-f97a-4529-b4d6-4a88f81d9e75",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "66de0781-bece-4459-9d9d-bc86bee07052",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "dfed6378-a6ef-4768-87e0-f37be0211966",
+          "parent_period_id": "66de0781-bece-4459-9d9d-bc86bee07052",
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "4b45314f-104c-41b8-94df-884cd1c19e2b",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "1a3f67f8-88fd-4bb8-a338-05eba1fe8d96",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "cd178b0c-91db-4172-83b1-d0572f00cc07",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "1521509b-6ac9-4aca-b212-0882fca936ba",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "740c164f-c0e0-4f30-809b-b47bce203fa4",
+          "importance": "major",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 15,
+          "event_id": "1a3f67f8-88fd-4bb8-a338-05eba1fe8d96"
+        },
+        {
+          "source_story_id": 52,
+          "event_id": "1a3f67f8-88fd-4bb8-a338-05eba1fe8d96"
+        },
+        {
+          "source_story_id": 54,
+          "event_id": "1a3f67f8-88fd-4bb8-a338-05eba1fe8d96"
+        }
+      ]
+    },
+    {
+      "key": "jeanne",
+      "parent_story_id": 33,
+      "title_fr": "Jeanne d’Arc",
+      "title_en": "Joan of Arc",
+      "description_fr": "De Domrémy au bûcher de Rouen : deux années pendant lesquelles une jeune paysanne lorraine fait lever le siège d’Orléans et conduit Charles VII au sacre.",
+      "description_en": "From Domrémy to the stake at Rouen: two years in which a young peasant from Lorraine raises the siege of Orléans and leads Charles VII to his coronation.",
+      "tags": [
+        "conflits",
+        "religions-spiritualites"
+      ],
+      "periods": [
+        {
+          "period_id": "25c20b40-0ddb-47e6-98b8-0a18469332c9",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "8a4ac7de-e57a-4008-b7ae-43006633354a",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "e4e4c811-091c-45fe-8df2-9da274b1e53f",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "4d57a530-3d9a-4e85-b014-9437d0912e71",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "40ec62f6-0696-4130-bbed-60c8000a233e",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "5fdf5165-ce00-4ea9-8b3a-2fe66a747c66",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "da8b70fe-5870-4e97-b32c-f52f49a0dfb7",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "b58ab39a-5b0a-4352-ab8a-b88ea80f9b78",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "981580d2-2b0f-4253-8b9c-117497f08efd",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "d90f2c0f-61a3-4617-b901-a7625b2325d9",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "577fce79-7c8a-40a7-a970-28f149815fce",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "f32a9997-f8de-4840-8e49-c642dcb5b9b2",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 33,
+          "event_id": "577fce79-7c8a-40a7-a970-28f149815fce"
+        },
+        {
+          "source_story_id": 51,
+          "event_id": "577fce79-7c8a-40a7-a970-28f149815fce"
+        }
+      ]
+    },
+    {
+      "key": "luther",
+      "parent_story_id": 16,
+      "title_fr": "Martin Luther",
+      "title_en": "Martin Luther",
+      "description_fr": "Du moine augustin au réformateur : les 95 thèses, la rupture avec Rome, la traduction de la Bible en allemand et l’organisation des Églises luthériennes.",
+      "description_en": "From Augustinian friar to reformer: the 95 theses, the break with Rome, the translation of the Bible into German and the organisation of the Lutheran churches.",
+      "tags": [
+        "religions-spiritualites"
+      ],
+      "periods": [
+        {
+          "period_id": "32c60c70-6d06-4520-872c-1d21f1323780",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "8dfbd53b-95d8-4fa6-ac7c-59d89eccc5ff",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "6d8b0cdc-e291-4b28-b81b-0dd5f50a039f",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "8bf78c33-6ba1-4b18-98ca-7764e2c29753",
+          "parent_period_id": "6d8b0cdc-e291-4b28-b81b-0dd5f50a039f",
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "f7864a07-295b-4993-b32d-df1c3a2daedc",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "43773663-7063-4cd4-b230-5b7183d92e90",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "86a07a5c-9e00-4681-a12a-be260fb3e3b7",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "23c1c4ff-2bc4-418d-9710-61037977ae5d",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "ccc6b9d5-ab5b-49a1-bfb0-38b591c138a5",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "a23d322b-e19d-405a-a05a-659c6b1486e6",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "bfccb09c-d368-40e9-9f99-60e4b423c0f3",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "4f089db1-167e-49e6-9fb8-55cefb105177",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 16,
+          "event_id": "43773663-7063-4cd4-b230-5b7183d92e90"
+        },
+        {
+          "source_story_id": 17,
+          "event_id": "43773663-7063-4cd4-b230-5b7183d92e90"
+        }
+      ]
+    },
+    {
+      "key": "colomb",
+      "parent_story_id": 34,
+      "title_fr": "Christophe Colomb",
+      "title_en": "Christopher Columbus",
+      "description_fr": "Du marin génois à l’amiral de la mer Océane : la longue recherche d’un soutien, les quatre voyages vers les Antilles et la disgrâce.",
+      "description_en": "From Genoese sailor to Admiral of the Ocean Sea: the long search for backing, the four voyages to the Caribbean and the fall from favour.",
+      "tags": [
+        "territoires-exploration"
+      ],
+      "periods": [
+        {
+          "period_id": "5216e34b-cfcc-4dd8-b744-95ccc1f23fb9",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "5698e277-26f5-4695-9dfb-545b77c305e2",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "5584e793-cb45-472b-ae6b-ea8b308e11fc",
+          "parent_period_id": null,
+          "reused": true
+        },
+        {
+          "period_id": "8dfb6864-3a71-4f46-bf72-e76dd7866808",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "1aa62042-af41-4077-90b9-612e1f3a85d7",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "3eb9f317-0f59-49e6-91b8-4ba0dcf10790",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "EVT_AMERICA",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "b34d306c-e2eb-4855-9292-b6c7bc09099e",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "035ce521-73f6-447b-958f-772b973e36cd",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "92849ab3-d7cc-4165-8153-a4d7d23c9dd0",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "255c4236-5ed5-441b-b97c-28d455a10770",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 34,
+          "event_id": "EVT_AMERICA"
+        },
+        {
+          "source_story_id": 16,
+          "event_id": "EVT_AMERICA"
+        }
+      ]
+    },
+    {
+      "key": "lincoln",
+      "parent_story_id": 50,
+      "title_fr": "Abraham Lincoln",
+      "title_en": "Abraham Lincoln",
+      "description_fr": "De la cabane du Kentucky à la Maison-Blanche : l’avocat de l’Illinois élu président, la guerre de Sécession, l’émancipation des esclaves et l’assassinat.",
+      "description_en": "From the Kentucky log cabin to the White House: the Illinois lawyer elected president, the Civil War, the emancipation of the slaves and the assassination.",
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ],
+      "periods": [
+        {
+          "period_id": "69302fb0-41ac-4137-8782-e9c166913de2",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "13f3a388-2e69-4a55-89df-b9dd33d89a62",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "8ef1e803-03bc-4771-8f2e-e5c614d44de2",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "1f82c15a-d8dc-4b37-96de-891784474d69",
+          "parent_period_id": "8ef1e803-03bc-4771-8f2e-e5c614d44de2",
+          "reused": true
+        }
+      ],
+      "events": [
+        {
+          "event_id": "523907c2-8d18-42ae-8253-36e487c39ad1",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "b58c84a3-fd64-4b69-ab5c-786f664cccce",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "70809365-87a9-469f-9edb-c2b58303f153",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "7a661c41-f7c9-4fe8-b5a4-03a39168f643",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "0f5bdc93-5e59-4e98-a438-3cdf6c3d4173",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "86344162-d418-478c-87d1-d6c6a1ac1a26",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "0db81758-6fd2-416c-9587-26d502f81ac1",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "7467dae4-5e53-49c0-af9f-b76e9417e0d3",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "442c25a9-d5a5-459e-94ad-efe93e50f5e8",
+          "importance": "normal",
+          "reused": true
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 50,
+          "event_id": "7467dae4-5e53-49c0-af9f-b76e9417e0d3"
+        }
+      ]
+    },
+    {
+      "key": "mao",
+      "parent_story_id": 52,
+      "title_fr": "Mao Zedong",
+      "title_en": "Mao Zedong",
+      "description_fr": "Du fils de paysan du Hunan au dirigeant de la Chine populaire : la guérilla, la Longue Marche, la victoire de 1949, puis le Grand Bond en avant et la Révolution culturelle.",
+      "description_en": "From the peasant’s son of Hunan to the leader of the People’s Republic: guerrilla war, the Long March, the victory of 1949, then the Great Leap Forward and the Cultural Revolution.",
+      "tags": [
+        "pouvoir-institutions",
+        "philosophie-ideologies"
+      ],
+      "periods": [
+        {
+          "period_id": "d33e183c-d2c0-459a-9af7-ba393e5dc1fc",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "5691a7e9-f3cb-4822-96ec-889cece0d766",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "2efd4312-b789-4084-8ef6-3a450d7a4590",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "0b824941-1f6a-41fc-a460-4d7087663b2d",
+          "parent_period_id": null,
+          "reused": true
+        },
+        {
+          "period_id": "7f4a0b94-47af-48a9-8707-000166a9c776",
+          "parent_period_id": "0b824941-1f6a-41fc-a460-4d7087663b2d",
+          "reused": true
+        },
+        {
+          "period_id": "c73c524d-80f0-4cf9-9bf4-9af679274210",
+          "parent_period_id": "0b824941-1f6a-41fc-a460-4d7087663b2d",
+          "reused": true
+        }
+      ],
+      "events": [
+        {
+          "event_id": "50e2cb31-3dd6-452e-80d3-bef798e72d61",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "281efa9b-6d52-47c6-8338-f6de11e63aab",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "a5f1a522-8208-46f6-b31d-456621f87a34",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "e22017ad-5c40-4c79-9982-5cb86e4c4d25",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "a8428ec8-8d13-438f-b98f-9ed8260686c8",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "0de46990-44e4-4851-b9c6-e2320f9684a6",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "b5348782-15a1-4a97-a7b6-5d0c7c633c7c",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "45c83c4a-3365-408c-84af-502a130ce75b",
+          "importance": "major",
+          "reused": true
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 52,
+          "event_id": "45c83c4a-3365-408c-84af-502a130ce75b"
+        }
+      ]
+    },
+    {
+      "key": "darwin",
+      "parent_story_id": 53,
+      "title_fr": "Charles Darwin",
+      "title_en": "Charles Darwin",
+      "description_fr": "Du voyage du Beagle à la théorie de l’évolution : vingt ans de travail discret, la publication de L’Origine des espèces et les débats qu’elle déclenche.",
+      "description_en": "From the voyage of the Beagle to the theory of evolution: twenty years of quiet work, the publication of On the Origin of Species and the debates it sets off.",
+      "tags": [
+        "sciences-savoirs",
+        "vivant"
+      ],
+      "periods": [
+        {
+          "period_id": "1c4ac958-cdec-4d8c-8f0c-6a9a8cda206d",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "7bf446ea-bd4a-43da-8d32-536c62aa8cb3",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "da4bfb10-4521-4068-9aaa-9d8bd8503196",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "eb8b7c18-6bb4-43bd-bf1a-f7909372fc72",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "03e01717-e3af-4893-81cb-47084cb74341",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "3a85a8ce-5e7e-49e8-a8c4-988f1acc54b4",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "e6070b70-d6e7-4515-a8a9-678de4c7dd96",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "d4cb79d2-599f-4a6f-a455-eb871e3e1842",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "1fb4eb02-8661-4c5b-93d3-e17cf1907671",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "cf458d1b-d1a2-427e-b312-41b33a23eda1",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "088647a2-4d24-4a70-aac0-37a2997adebc",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 53,
+          "event_id": "d4cb79d2-599f-4a6f-a455-eb871e3e1842"
+        },
+        {
+          "source_story_id": 37,
+          "event_id": "d4cb79d2-599f-4a6f-a455-eb871e3e1842"
+        }
+      ]
+    },
+    {
+      "key": "curie",
+      "parent_story_id": 51,
+      "title_fr": "Marie Curie",
+      "title_en": "Marie Curie",
+      "description_fr": "De Varsovie à Paris : la découverte du polonium et du radium avec Pierre Curie, deux prix Nobel, et la fondation de l’Institut du radium.",
+      "description_en": "From Warsaw to Paris: the discovery of polonium and radium with Pierre Curie, two Nobel Prizes, and the founding of the Radium Institute.",
+      "tags": [
+        "sciences-savoirs"
+      ],
+      "periods": [
+        {
+          "period_id": "c76b0f0e-5a56-4806-95d2-c18689a87b83",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "5d476a61-f468-46be-bd57-b5bff33c7171",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "f26f855b-0c05-4cd3-b84a-955191bd15fe",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "e8d4a8a8-a970-4be4-a6d6-e5c04e69d664",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "4bef8209-7f70-4271-b1f6-9dde47bd727d",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "9263007e-be9c-4396-b17d-d8bda1c04279",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "308995e9-da6d-4a3e-8858-685ba22f2881",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "3646cfbc-d96a-41cb-b226-6b4ae541c5f4",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "b3a37e7c-74e2-459c-9bb0-d2405a28216c",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "45f7949c-3f68-46bd-977b-3800e06c6d5c",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "1789ef56-72a9-4435-9402-174049e5baa2",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "f6a39d5c-698e-4ef4-99f3-c595f3cc8678",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "428cd37a-8ca2-4456-bc5e-8b118f8072f1",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 51,
+          "event_id": "3646cfbc-d96a-41cb-b226-6b4ae541c5f4"
+        },
+        {
+          "source_story_id": 37,
+          "event_id": "3646cfbc-d96a-41cb-b226-6b4ae541c5f4"
+        }
+      ]
+    },
+    {
+      "key": "staline",
+      "parent_story_id": 37,
+      "title_fr": "Joseph Staline",
+      "title_en": "Joseph Stalin",
+      "description_fr": "Du séminariste géorgien au maître de l’URSS : la conquête de l’appareil du Parti, la collectivisation et la terreur, la guerre contre l’Allemagne nazie et les débuts de la guerre froide.",
+      "description_en": "From Georgian seminarian to master of the USSR: the capture of the Party machine, collectivisation and terror, the war against Nazi Germany and the beginnings of the Cold War.",
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ],
+      "periods": [
+        {
+          "period_id": "efbef722-35a6-4473-8d6a-b4d6d8d3a4f5",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "59541109-d50f-4df4-aeed-24913029c7c9",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "20f89e9d-8a97-4681-8dcc-3db20995c533",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "a92d8fa3-d200-4428-83d4-4df161d9df99",
+          "parent_period_id": "20f89e9d-8a97-4681-8dcc-3db20995c533",
+          "reused": false
+        },
+        {
+          "period_id": "037c838b-c8f0-4813-a9a0-f6a18f421197",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "e146cb93-0618-4983-ac54-aea9e9159dbf",
+          "parent_period_id": "037c838b-c8f0-4813-a9a0-f6a18f421197",
+          "reused": true
+        },
+        {
+          "period_id": "e51f73c2-1ff6-42b5-aa84-58c80878c933",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "e03e7663-e1d7-4ee7-8be9-e9765be269f2",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "Q160151",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "613e6795-853e-416c-9bc8-6aa40f73d5ad",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "497802e7-6f22-4b7b-b984-0052f4401fe9",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "06abc967-3b61-45da-88aa-460e0b881fb4",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "88af82b6-d3e8-4016-bb53-7004f80fdd05",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "ca20945e-c6bc-4052-8ad1-2315a4b1db61",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "Q127518",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "72e19322-22bd-4af1-b9ef-9e48a5b3c003",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "9706a7b0-b18c-4f36-a6c8-02e0c615dd47",
+          "importance": "normal",
+          "reused": true
+        },
+        {
+          "event_id": "ae788302-2216-4892-bd65-f4d1d4298123",
+          "importance": "major",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 9,
+          "event_id": "ca20945e-c6bc-4052-8ad1-2315a4b1db61"
+        },
+        {
+          "source_story_id": 37,
+          "event_id": "Q160151"
+        }
+      ]
+    },
+    {
+      "key": "leonard",
+      "parent_story_id": 17,
+      "title_fr": "Léonard de Vinci",
+      "title_en": "Leonardo da Vinci",
+      "description_fr": "De l’atelier de Verrocchio au manoir du Clos Lucé : le peintre, l’ingénieur et le savant au service des Médicis, des Sforza puis de François Ier.",
+      "description_en": "From Verrocchio’s workshop to the manor of Clos Lucé: the painter, engineer and scholar in the service of the Medici, the Sforza and then Francis I.",
+      "tags": [
+        "arts-culture-loisirs",
+        "sciences-savoirs"
+      ],
+      "periods": [
+        {
+          "period_id": "ecf1e1e5-b079-4396-8384-468adc693b1e",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "156fc40a-8584-49c4-bb2a-b8f8138ae0ff",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "0d776749-7d1c-47d8-bc2a-fc67f618c8a3",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "d082cf6d-bdf0-4196-9075-c5b4206933a7",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "e70ffc6c-8ba2-4a11-a09e-a0cfee9eabbd",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "b9ce49c9-ebf6-4edd-82b1-5e94c16b2e21",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "10c5eedc-02e5-46d9-bf97-6117e5b9a51e",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "d3a08e73-141e-418c-8b76-a266d9746429",
+          "importance": "major",
+          "reused": true
+        },
+        {
+          "event_id": "8bf2a85b-8e03-4b4c-a36d-9b065c0a3540",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 17,
+          "event_id": "d3a08e73-141e-418c-8b76-a266d9746429"
+        },
+        {
+          "source_story_id": 40,
+          "event_id": "d3a08e73-141e-418c-8b76-a266d9746429"
+        }
+      ]
+    },
+    {
+      "key": "mandela",
+      "parent_story_id": 37,
+      "title_fr": "Nelson Mandela",
+      "title_en": "Nelson Mandela",
+      "description_fr": "Du jeune avocat de Johannesburg au premier président noir d’Afrique du Sud : la lutte contre l’apartheid, vingt-sept ans de prison et la transition négociée vers la démocratie.",
+      "description_en": "From the young Johannesburg lawyer to South Africa’s first black president: the struggle against apartheid, twenty-seven years in prison and the negotiated transition to democracy.",
+      "tags": [
+        "pouvoir-institutions",
+        "peuplement-societe"
+      ],
+      "periods": [
+        {
+          "period_id": "3ddc5cc3-d128-4f44-9336-4ca02ff08083",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "5391cb5b-01be-497e-8851-5ae0f316263e",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "2521b043-dd39-4ade-8f2b-54879145590b",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "e586fa24-8216-4746-8927-e92155b0fc74",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "75b0d6ef-5a9d-4cf0-bacc-1dc4acf53749",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "97a96018-fe67-4989-a425-5ae48c5936d2",
+          "parent_period_id": null,
+          "reused": false
+        },
+        {
+          "period_id": "cfa16e29-b327-44f8-a72f-4b71d053206f",
+          "parent_period_id": null,
+          "reused": false
+        }
+      ],
+      "events": [
+        {
+          "event_id": "985573f7-5627-4ce0-a490-fcca17140a40",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "8f7ac21c-7075-4bfe-aadf-4a53e1bc1bea",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "2ac633b0-4b9a-4538-93b9-faa79c35123a",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "03d0912c-1128-4fd7-8bc4-82a6f7d5267e",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "7f4ad293-aa2a-4737-bd67-8e7da7826283",
+          "importance": "normal",
+          "reused": false
+        },
+        {
+          "event_id": "9e4fe65e-f696-48cd-969f-9f955d4b7e6b",
+          "importance": "major",
+          "reused": false
+        },
+        {
+          "event_id": "c79911f5-f88f-432a-93ab-1f6ac25b9737",
+          "importance": "normal",
+          "reused": false
+        }
+      ],
+      "entries": [
+        {
+          "source_story_id": 37,
+          "event_id": null
+        }
+      ]
+    }
+  ],
+  "reusedPeriods": {
+    "5584e793-cb45-472b-ae6b-ea8b308e11fc": {
+      "start": "1492-08-03",
+      "end": "1504-11-07",
+      "q": "Q18578423"
+    },
+    "1f82c15a-d8dc-4b37-96de-891784474d69": {
+      "start": "1861-04-12",
+      "end": "1865-04-09",
+      "q": "Q8676"
+    },
+    "0b824941-1f6a-41fc-a460-4d7087663b2d": {
+      "start": "1949-10-01",
+      "end": "1976-10-06",
+      "q": null
+    },
+    "7f4a0b94-47af-48a9-8707-000166a9c776": {
+      "start": "1958-02",
+      "end": "1962",
+      "q": "Q58715"
+    },
+    "c73c524d-80f0-4cf9-9bf4-9af679274210": {
+      "start": "1966-05-16",
+      "end": "1976-10-06",
+      "q": "Q8690"
+    },
+    "e146cb93-0618-4983-ac54-aea9e9159dbf": {
+      "start": "1942-08-23",
+      "end": "1943-02-02",
+      "q": "Q38789"
+    }
+  },
+  "reusedEvents": {
+    "1a3f67f8-88fd-4bb8-a338-05eba1fe8d96": {
+      "date": "1206",
+      "q": "Q12557"
+    },
+    "cd178b0c-91db-4172-83b1-d0572f00cc07": {
+      "date": "1215",
+      "q": null
+    },
+    "5fdf5165-ce00-4ea9-8b3a-2fe66a747c66": {
+      "date": "1429-05-08",
+      "q": "Q392213"
+    },
+    "b58ab39a-5b0a-4352-ab8a-b88ea80f9b78": {
+      "date": "1429-07-17",
+      "q": null
+    },
+    "577fce79-7c8a-40a7-a970-28f149815fce": {
+      "date": "1431-05-30",
+      "q": "Q4201115"
+    },
+    "43773663-7063-4cd4-b230-5b7183d92e90": {
+      "date": "1517-10-31",
+      "q": "Q157506"
+    },
+    "EVT_AMERICA": {
+      "date": "1492-10-12",
+      "q": "Q221474"
+    },
+    "035ce521-73f6-447b-958f-772b973e36cd": {
+      "date": "1494-06-07",
+      "q": "Q180897"
+    },
+    "7a661c41-f7c9-4fe8-b5a4-03a39168f643": {
+      "date": "1863-01-01",
+      "q": "Q391358"
+    },
+    "0f5bdc93-5e59-4e98-a438-3cdf6c3d4173": {
+      "date": "1863-07-01",
+      "q": "Q33132"
+    },
+    "7467dae4-5e53-49c0-af9f-b76e9417e0d3": {
+      "date": "1865-04-14",
+      "q": "Q1025404"
+    },
+    "442c25a9-d5a5-459e-94ad-efe93e50f5e8": {
+      "date": "1865-12-06",
+      "q": "Q175613"
+    },
+    "281efa9b-6d52-47c6-8338-f6de11e63aab": {
+      "date": "1921-07-23",
+      "q": "Q2268189"
+    },
+    "a5f1a522-8208-46f6-b31d-456621f87a34": {
+      "date": "1934-10-16",
+      "q": "Q46333"
+    },
+    "a8428ec8-8d13-438f-b98f-9ed8260686c8": {
+      "date": "1949-10-01",
+      "q": "Q10872057"
+    },
+    "b5348782-15a1-4a97-a7b6-5d0c7c633c7c": {
+      "date": "1972-02-21",
+      "q": null
+    },
+    "45c83c4a-3365-408c-84af-502a130ce75b": {
+      "date": "1976-09-09",
+      "q": "Q11127665"
+    },
+    "d4cb79d2-599f-4a6f-a455-eb871e3e1842": {
+      "date": "1859-11-24",
+      "q": "Q20124"
+    },
+    "9263007e-be9c-4396-b17d-d8bda1c04279": {
+      "date": "1896-03-01",
+      "q": null
+    },
+    "3646cfbc-d96a-41cb-b226-6b4ae541c5f4": {
+      "date": "1898-12-26",
+      "q": "Q1128"
+    },
+    "Q160151": {
+      "date": "1917-11-07",
+      "q": "Q42976"
+    },
+    "ca20945e-c6bc-4052-8ad1-2315a4b1db61": {
+      "date": "1939-08-23",
+      "q": "Q130796"
+    },
+    "Q127518": {
+      "date": "1941-06-22",
+      "q": "Q83055"
+    },
+    "72e19322-22bd-4af1-b9ef-9e48a5b3c003": {
+      "date": "1945-02-04",
+      "q": "Q161227"
+    },
+    "9706a7b0-b18c-4f36-a6c8-02e0c615dd47": {
+      "date": "1945-07-17",
+      "q": "Q151187"
+    },
+    "d3a08e73-141e-418c-8b76-a266d9746429": {
+      "date": "1503",
+      "q": "Q12418"
+    }
+  },
+  "newPeriods": [
+    {
+      "row": {
+        "id": "d82d14ec-f97a-4529-b4d6-4a88f81d9e75",
+        "label_fr": "Jeunesse de Temüdjin et unification des tribus",
+        "label_en": "Temüjin’s youth and the unification of the tribes",
+        "description_fr": "Orphelin d’un chef empoisonné, Temüdjin rassemble des fidèles et soumet une à une les tribus de la steppe ; son année de naissance est incertaine.",
+        "description_en": "The orphan of a poisoned chief, Temüjin gathers followers and subdues the steppe tribes one by one; his year of birth is uncertain.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1162",
+        "end_date": "1206",
+        "start_years_bp": 864.847364818617,
+        "end_years_bp": 820.847364818617,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "66de0781-bece-4459-9d9d-bc86bee07052",
+        "label_fr": "Conquêtes de Gengis Khan",
+        "label_en": "Conquests of Genghis Khan",
+        "description_fr": "Les armées mongoles attaquent les Xia occidentaux, la Chine des Jin puis l’Asie centrale et l’Iran.",
+        "description_en": "The Mongol armies attack the Western Xia, Jin China and then Central Asia and Iran.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1206",
+        "end_date": "1227",
+        "start_years_bp": 820.847364818617,
+        "end_years_bp": 799.848049281314,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits",
+        "territoires-exploration"
+      ]
+    },
+    {
+      "row": {
+        "id": "dfed6378-a6ef-4768-87e0-f37be0211966",
+        "label_fr": "Conquête du Khwarezm",
+        "label_en": "Conquest of Khwarazm",
+        "description_fr": "Après le massacre d’une caravane mongole, Gengis Khan détruit l’empire du Khwarezm et ses grandes villes.",
+        "description_en": "After the massacre of a Mongol caravan, Genghis Khan destroys the Khwarazmian Empire and its great cities.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1219",
+        "end_date": "1221",
+        "start_years_bp": 807.848049281314,
+        "end_years_bp": 805.846680355921,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "25c20b40-0ddb-47e6-98b8-0a18469332c9",
+        "label_fr": "Enfance de Jeanne à Domrémy",
+        "label_en": "Joan’s childhood at Domrémy",
+        "description_fr": "Fille de laboureurs aisés, Jeanne dit entendre des voix dès treize ans ; son année de naissance est approximative.",
+        "description_en": "The daughter of well-off farmers, Joan says she hears voices from the age of thirteen; her year of birth is approximate.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1412",
+        "end_date": "1429-02",
+        "start_years_bp": 614.854209445585,
+        "end_years_bp": 597.767282683094,
+        "non_thematic": false
+      },
+      "tags": [
+        "peuplement-societe",
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "8a4ac7de-e57a-4008-b7ae-43006633354a",
+        "label_fr": "Campagnes de Jeanne d’Arc",
+        "label_en": "Joan of Arc’s campaigns",
+        "description_fr": "Reçue par le dauphin à Chinon, Jeanne accompagne l’armée à Orléans, sur la Loire puis à Reims, avant d’échouer devant Paris.",
+        "description_en": "Received by the dauphin at Chinon, Joan goes with the army to Orléans, the Loire and then Reims, before failing outside Paris.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1429-02",
+        "end_date": "1430-05-23",
+        "start_years_bp": 597.767282683094,
+        "end_years_bp": 596.464065708419,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "e4e4c811-091c-45fe-8df2-9da274b1e53f",
+        "label_fr": "Captivité et procès de Jeanne d’Arc",
+        "label_en": "Joan of Arc’s captivity and trial",
+        "description_fr": "Vendue aux Anglais par les Bourguignons, Jeanne est jugée pour hérésie à Rouen par un tribunal d’Église.",
+        "description_en": "Sold to the English by the Burgundians, Joan is tried for heresy at Rouen by a Church court.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1430-05-23",
+        "end_date": "1431-05-30",
+        "start_years_bp": 596.464065708419,
+        "end_years_bp": 595.445585215606,
+        "non_thematic": false
+      },
+      "tags": [
+        "religions-spiritualites",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "32c60c70-6d06-4520-872c-1d21f1323780",
+        "label_fr": "Jeunesse et vie monastique de Luther",
+        "label_en": "Luther’s youth and monastic life",
+        "description_fr": "Fils d’un exploitant de mines, Luther entre au couvent en 1505 et enseigne la Bible à l’université de Wittenberg à partir de 1512.",
+        "description_en": "The son of a mine operator, Luther enters the friary in 1505 and teaches the Bible at the University of Wittenberg from 1512.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1483-11-10",
+        "end_date": "1517-10-31",
+        "start_years_bp": 542.996577686516,
+        "end_years_bp": 509.025325119781,
+        "non_thematic": false
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "8dfbd53b-95d8-4fa6-ac7c-59d89eccc5ff",
+        "label_fr": "Rupture de Luther avec Rome",
+        "label_en": "Luther’s break with Rome",
+        "description_fr": "Sa critique des indulgences devient une contestation de l’autorité du pape ; excommunié et mis au ban de l’Empire, Luther se cache à la Wartbourg.",
+        "description_en": "His criticism of indulgences becomes a challenge to papal authority; excommunicated and outlawed in the Empire, Luther hides at the Wartburg.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1517-10-31",
+        "end_date": "1522-03",
+        "start_years_bp": 509.025325119781,
+        "end_years_bp": 504.694045174538,
+        "non_thematic": false
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "6d8b0cdc-e291-4b28-b81b-0dd5f50a039f",
+        "label_fr": "Luther organise la Réforme",
+        "label_en": "Luther organises the Reformation",
+        "description_fr": "Revenu à Wittenberg, Luther fixe le culte, le catéchisme et le chant des nouvelles Églises, avec l’appui des princes.",
+        "description_en": "Back in Wittenberg, Luther shapes the worship, catechism and hymns of the new churches, with the support of the princes.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1522-03",
+        "end_date": "1546-02-18",
+        "start_years_bp": 504.694045174538,
+        "end_years_bp": 480.724161533196,
+        "non_thematic": false
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "8bf78c33-6ba1-4b18-98ca-7764e2c29753",
+        "label_fr": "Guerre des Paysans allemands",
+        "label_en": "German Peasants’ War",
+        "description_fr": "Des soulèvements paysans se réclament de la Réforme ; Luther les condamne et soutient la répression des princes.",
+        "description_en": "Peasant uprisings invoke the Reformation; Luther condemns them and backs the princes’ repression.",
+        "wikidata_id": "Q154031",
+        "wikipedia_title_fr": "Guerre des Paysans allemands",
+        "wikipedia_title_en": "German Peasants' War",
+        "start_date": "1524",
+        "end_date": "1525",
+        "start_years_bp": 502.856947296372,
+        "end_years_bp": 501.854893908282,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits",
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "5216e34b-cfcc-4dd8-b744-95ccc1f23fb9",
+        "label_fr": "Jeunesse et navigations de Colomb",
+        "label_en": "Columbus’s youth and early voyages",
+        "description_fr": "Fils d’un tisserand génois, Colomb navigue en Méditerranée et dans l’Atlantique puis s’établit au Portugal.",
+        "description_en": "The son of a Genoese weaver, Columbus sails the Mediterranean and the Atlantic and then settles in Portugal.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1451",
+        "end_date": "1485",
+        "start_years_bp": 575.853524982888,
+        "end_years_bp": 541.852156057495,
+        "non_thematic": false
+      },
+      "tags": [
+        "territoires-exploration",
+        "economie-echanges"
+      ]
+    },
+    {
+      "row": {
+        "id": "5698e277-26f5-4695-9dfb-545b77c305e2",
+        "label_fr": "Colomb à la recherche d’un soutien",
+        "label_en": "Columbus in search of backing",
+        "description_fr": "Éconduit par le roi du Portugal, Colomb défend pendant sept ans son projet de route occidentale vers l’Asie devant les Rois catholiques.",
+        "description_en": "Turned down by the king of Portugal, Columbus argues for seven years before the Catholic Monarchs for a western route to Asia.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1485",
+        "end_date": "1492-08-03",
+        "start_years_bp": 541.852156057495,
+        "end_years_bp": 534.265571526352,
+        "non_thematic": false
+      },
+      "tags": [
+        "territoires-exploration",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "8dfb6864-3a71-4f46-bf72-e76dd7866808",
+        "label_fr": "Dernières années de Colomb",
+        "label_en": "Columbus’s last years",
+        "description_fr": "Malade, Colomb réclame en vain à la Couronne les titres et les revenus promis.",
+        "description_en": "In poor health, Columbus vainly claims from the Crown the titles and revenues he was promised.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1504-11-07",
+        "end_date": "1506-05-20",
+        "start_years_bp": 522.005475701574,
+        "end_years_bp": 520.475017111567,
+        "non_thematic": false
+      },
+      "tags": [
+        "territoires-exploration"
+      ]
+    },
+    {
+      "row": {
+        "id": "69302fb0-41ac-4137-8782-e9c166913de2",
+        "label_fr": "Jeunesse de Lincoln sur la Frontière",
+        "label_en": "Lincoln’s youth on the frontier",
+        "description_fr": "Né dans une famille de pionniers pauvres, Lincoln grandit dans l’Indiana, se forme seul et s’installe dans l’Illinois.",
+        "description_en": "Born into a family of poor pioneers, Lincoln grows up in Indiana, educates himself and settles in Illinois.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1809-02-12",
+        "end_date": "1834",
+        "start_years_bp": 217.745379876797,
+        "end_years_bp": 192.861054072553,
+        "non_thematic": false
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "13f3a388-2e69-4a55-89df-b9dd33d89a62",
+        "label_fr": "Lincoln avocat et élu de l’Illinois",
+        "label_en": "Lincoln as Illinois lawyer and politician",
+        "description_fr": "Député de l’Illinois puis représentant au Congrès, Lincoln rejoint le Parti républicain et combat l’extension de l’esclavage.",
+        "description_en": "A state legislator and then a congressman, Lincoln joins the Republican Party and fights the extension of slavery.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1834",
+        "end_date": "1861-03-04",
+        "start_years_bp": 192.861054072553,
+        "end_years_bp": 165.690622861054,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "8ef1e803-03bc-4771-8f2e-e5c614d44de2",
+        "label_fr": "Présidence d’Abraham Lincoln",
+        "label_en": "Presidency of Abraham Lincoln",
+        "description_fr": "Lincoln mène l’Union pendant toute la guerre de Sécession et fait de l’abolition de l’esclavage un but de guerre.",
+        "description_en": "Lincoln leads the Union throughout the Civil War and makes the abolition of slavery a war aim.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1861-03-04",
+        "end_date": "1865-04-15",
+        "start_years_bp": 165.690622861054,
+        "end_years_bp": 161.575633127995,
+        "non_thematic": true
+      },
+      "tags": []
+    },
+    {
+      "row": {
+        "id": "d33e183c-d2c0-459a-9af7-ba393e5dc1fc",
+        "label_fr": "Jeunesse de Mao dans le Hunan",
+        "label_en": "Mao’s youth in Hunan",
+        "description_fr": "Fils d’un paysan aisé, Mao devient instituteur à Changsha et découvre le marxisme à Pékin.",
+        "description_en": "The son of a prosperous peasant, Mao becomes a schoolteacher in Changsha and discovers Marxism in Beijing.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1893-12-26",
+        "end_date": "1921-07-23",
+        "start_years_bp": 132.877481177276,
+        "end_years_bp": 105.307323750856,
+        "non_thematic": false
+      },
+      "tags": [
+        "peuplement-societe",
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "5691a7e9-f3cb-4822-96ec-889cece0d766",
+        "label_fr": "Mao révolutionnaire et chef de guérilla",
+        "label_en": "Mao as revolutionary and guerrilla leader",
+        "description_fr": "Après la rupture avec le Guomindang, Mao organise des bases rurales et une armée de paysans dans le Jiangxi.",
+        "description_en": "After the break with the Kuomintang, Mao organises rural bases and a peasant army in Jiangxi.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1921-07-23",
+        "end_date": "1935-01",
+        "start_years_bp": 105.307323750856,
+        "end_years_bp": 91.864476386037,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "2efd4312-b789-4084-8ef6-3a450d7a4590",
+        "label_fr": "Mao à la tête du Parti communiste",
+        "label_en": "Mao at the head of the Communist Party",
+        "description_fr": "Depuis Yan’an, Mao impose sa ligne au Parti, combat le Japon puis l’emporte sur les nationalistes dans la guerre civile.",
+        "description_en": "From Yan’an, Mao imposes his line on the Party, fights Japan and then defeats the Nationalists in the civil war.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1935-01",
+        "end_date": "1949-10-01",
+        "start_years_bp": 91.864476386037,
+        "end_years_bp": 77.1156741957563,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "1c4ac958-cdec-4d8c-8f0c-6a9a8cda206d",
+        "label_fr": "Jeunesse et études de Darwin",
+        "label_en": "Darwin’s youth and studies",
+        "description_fr": "Darwin abandonne la médecine à Édimbourg, puis prépare à Cambridge une carrière de pasteur tout en se passionnant pour l’histoire naturelle.",
+        "description_en": "Darwin gives up medicine at Edinburgh, then prepares at Cambridge for a career in the Church while developing a passion for natural history.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1809-02-12",
+        "end_date": "1831-12-27",
+        "start_years_bp": 217.745379876797,
+        "end_years_bp": 194.876112251882,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "7bf446ea-bd4a-43da-8d32-536c62aa8cb3",
+        "label_fr": "Voyage du Beagle",
+        "label_en": "Voyage of the Beagle",
+        "description_fr": "Naturaliste à bord, Darwin fait le tour du monde et rassemble fossiles, roches et spécimens, surtout en Amérique du Sud.",
+        "description_en": "As ship’s naturalist, Darwin sails round the world collecting fossils, rocks and specimens, above all in South America.",
+        "wikidata_id": "Q1564366",
+        "wikipedia_title_fr": "Second voyage du HMS Beagle",
+        "wikipedia_title_en": "Second voyage of HMS Beagle",
+        "start_date": "1831-12-27",
+        "end_date": "1836-10-02",
+        "start_years_bp": 194.876112251882,
+        "end_years_bp": 190.109514031485,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs",
+        "territoires-exploration",
+        "vivant"
+      ]
+    },
+    {
+      "row": {
+        "id": "da4bfb10-4521-4068-9aaa-9d8bd8503196",
+        "label_fr": "Darwin élabore sa théorie",
+        "label_en": "Darwin develops his theory",
+        "description_fr": "Installé à Down House, Darwin conçoit la sélection naturelle dès 1838 mais accumule les preuves pendant vingt ans avant de publier.",
+        "description_en": "Settled at Down House, Darwin conceives natural selection as early as 1838 but gathers evidence for twenty years before publishing.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1836-10-02",
+        "end_date": "1859-11-24",
+        "start_years_bp": 190.109514031485,
+        "end_years_bp": 166.966461327858,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs",
+        "vivant"
+      ]
+    },
+    {
+      "row": {
+        "id": "eb8b7c18-6bb4-43bd-bf1a-f7909372fc72",
+        "label_fr": "Darwin après L’Origine des espèces",
+        "label_en": "Darwin after the Origin of Species",
+        "description_fr": "Darwin étend sa théorie à l’être humain, aux émotions et aux plantes, laissant à ses partisans les controverses publiques.",
+        "description_en": "Darwin extends his theory to human beings, the emotions and plants, leaving public controversy to his supporters.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1859-11-24",
+        "end_date": "1882-04-19",
+        "start_years_bp": 166.966461327858,
+        "end_years_bp": 144.565366187543,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs",
+        "vivant"
+      ]
+    },
+    {
+      "row": {
+        "id": "c76b0f0e-5a56-4806-95d2-c18689a87b83",
+        "label_fr": "Jeunesse de Marie Skłodowska en Pologne",
+        "label_en": "Maria Skłodowska’s youth in Poland",
+        "description_fr": "Dans la Pologne sous domination russe, où l’université est fermée aux femmes, Maria travaille comme gouvernante pour financer ses études.",
+        "description_en": "In Russian-ruled Poland, where the university is closed to women, Maria works as a governess to pay for her studies.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1867-11-07",
+        "end_date": "1891-11",
+        "start_years_bp": 159.013004791239,
+        "end_years_bp": 135.029431895962,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs",
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "5d476a61-f468-46be-bd57-b5bff33c7171",
+        "label_fr": "Études et recherches de Marie Curie avec Pierre",
+        "label_en": "Marie Curie’s studies and research with Pierre",
+        "description_fr": "Licenciée en physique et en mathématiques à la Sorbonne, Marie consacre sa thèse aux rayons de l’uranium et travaille avec son mari.",
+        "description_en": "With degrees in physics and mathematics from the Sorbonne, Marie devotes her thesis to uranium rays and works with her husband.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1891-11",
+        "end_date": "1906-04-19",
+        "start_years_bp": 135.029431895962,
+        "end_years_bp": 120.56810403833,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "f26f855b-0c05-4cd3-b84a-955191bd15fe",
+        "label_fr": "Marie Curie à la tête de son laboratoire",
+        "label_en": "Marie Curie at the head of her laboratory",
+        "description_fr": "Après la mort de Pierre, Marie reprend sa chaire, isole le radium métallique et développe les usages médicaux de la radioactivité.",
+        "description_en": "After Pierre’s death, Marie takes over his chair, isolates metallic radium and develops the medical uses of radioactivity.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1906-04-19",
+        "end_date": "1934-07-04",
+        "start_years_bp": 120.56810403833,
+        "end_years_bp": 92.3600273785079,
+        "non_thematic": false
+      },
+      "tags": [
+        "sciences-savoirs",
+        "sante-corps"
+      ]
+    },
+    {
+      "row": {
+        "id": "efbef722-35a6-4473-8d6a-b4d6d8d3a4f5",
+        "label_fr": "Jeunesse et militantisme clandestin de Staline",
+        "label_en": "Stalin’s youth and underground activism",
+        "description_fr": "Renvoyé du séminaire de Tiflis, Iossif Djougachvili devient révolutionnaire professionnel et connaît plusieurs exils en Sibérie.",
+        "description_en": "Expelled from the Tiflis seminary, Ioseb Jughashvili becomes a professional revolutionary and is exiled to Siberia several times.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1878-12-18",
+        "end_date": "1917-11-07",
+        "start_years_bp": 147.90006844627,
+        "end_years_bp": 109.014373716632,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "59541109-d50f-4df4-aeed-24913029c7c9",
+        "label_fr": "Staline dans l’appareil bolchevique",
+        "label_en": "Stalin in the Bolshevik apparatus",
+        "description_fr": "Commissaire aux Nationalités puis secrétaire général, Staline écarte un à un ses rivaux après la mort de Lénine.",
+        "description_en": "People’s commissar for nationalities and then general secretary, Stalin removes his rivals one by one after Lenin’s death.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1917-11-07",
+        "end_date": "1929",
+        "start_years_bp": 109.014373716632,
+        "end_years_bp": 97.8631074606434,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "20f89e9d-8a97-4681-8dcc-3db20995c533",
+        "label_fr": "Staline maître de l’URSS",
+        "label_en": "Stalin as master of the USSR",
+        "description_fr": "Staline impose l’industrialisation à marche forcée et la collectivisation des terres, au prix de famines et d’une répression de masse.",
+        "description_en": "Stalin imposes forced industrialisation and the collectivisation of land, at the cost of famines and mass repression.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1929",
+        "end_date": "1941-06-22",
+        "start_years_bp": 97.8631074606434,
+        "end_years_bp": 85.3921971252567,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "economie-echanges"
+      ]
+    },
+    {
+      "row": {
+        "id": "a92d8fa3-d200-4428-83d4-4df161d9df99",
+        "label_fr": "Grandes Purges",
+        "label_en": "Great Purge",
+        "description_fr": "Procès publics, arrestations et exécutions frappent les cadres du Parti, l’armée et des centaines de milliers de citoyens.",
+        "description_en": "Show trials, arrests and executions strike Party officials, the army and hundreds of thousands of citizens.",
+        "wikidata_id": "Q187650",
+        "wikipedia_title_fr": "Grandes Purges",
+        "wikipedia_title_en": "Great Purge",
+        "start_date": "1936-08",
+        "end_date": "1938-11",
+        "start_years_bp": 90.2819986310746,
+        "end_years_bp": 88.031485284052,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "037c838b-c8f0-4813-a9a0-f6a18f421197",
+        "label_fr": "Staline chef de guerre",
+        "label_en": "Stalin as war leader",
+        "description_fr": "Surpris par l’invasion allemande, Staline dirige l’effort de guerre soviétique jusqu’à la prise de Berlin.",
+        "description_en": "Caught off guard by the German invasion, Stalin directs the Soviet war effort until the capture of Berlin.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1941-06-22",
+        "end_date": "1945-05-09",
+        "start_years_bp": 85.3921971252567,
+        "end_years_bp": 81.5126625598905,
+        "non_thematic": false
+      },
+      "tags": [
+        "conflits",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "e51f73c2-1ff6-42b5-aa84-58c80878c933",
+        "label_fr": "Dernières années de Staline",
+        "label_en": "Stalin’s last years",
+        "description_fr": "Staline étend le modèle soviétique à l’Europe de l’Est et relance la répression à l’intérieur.",
+        "description_en": "Stalin extends the Soviet model to Eastern Europe and renews repression at home.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1945-05-09",
+        "end_date": "1953-03-05",
+        "start_years_bp": 81.5126625598905,
+        "end_years_bp": 73.6906228610541,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "ecf1e1e5-b079-4396-8384-468adc693b1e",
+        "label_fr": "Jeunesse et formation de Léonard à Florence",
+        "label_en": "Leonardo’s youth and training in Florence",
+        "description_fr": "Fils naturel d’un notaire, Léonard apprend la peinture et la sculpture dans l’atelier d’Andrea del Verrocchio.",
+        "description_en": "The illegitimate son of a notary, Leonardo learns painting and sculpture in the workshop of Andrea del Verrocchio.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1452-04-15",
+        "end_date": "1482",
+        "start_years_bp": 574.566735112936,
+        "end_years_bp": 544.852840520192,
+        "non_thematic": false
+      },
+      "tags": [
+        "arts-culture-loisirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "156fc40a-8584-49c4-bb2a-b8f8138ae0ff",
+        "label_fr": "Léonard à la cour de Milan",
+        "label_en": "Leonardo at the court of Milan",
+        "description_fr": "Au service de Ludovic Sforza, Léonard peint, organise des fêtes, étudie l’anatomie et dessine des machines.",
+        "description_en": "In the service of Ludovico Sforza, Leonardo paints, stages festivities, studies anatomy and draws machines.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1482",
+        "end_date": "1499",
+        "start_years_bp": 544.852840520192,
+        "end_years_bp": 527.853524982888,
+        "non_thematic": false
+      },
+      "tags": [
+        "arts-culture-loisirs",
+        "techniques-inventions"
+      ]
+    },
+    {
+      "row": {
+        "id": "0d776749-7d1c-47d8-bc2a-fc67f618c8a3",
+        "label_fr": "Années d’itinérance de Léonard",
+        "label_en": "Leonardo’s years of travel",
+        "description_fr": "Chassé de Milan par l’invasion française, Léonard travaille à Venise, Florence, Milan de nouveau puis Rome.",
+        "description_en": "Driven from Milan by the French invasion, Leonardo works in Venice, Florence, Milan again and then Rome.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1499",
+        "end_date": "1516",
+        "start_years_bp": 527.853524982888,
+        "end_years_bp": 510.856947296372,
+        "non_thematic": false
+      },
+      "tags": [
+        "arts-culture-loisirs",
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "d082cf6d-bdf0-4196-9075-c5b4206933a7",
+        "label_fr": "Léonard en France",
+        "label_en": "Leonardo in France",
+        "description_fr": "Invité par François Ier, Léonard s’installe au Clos Lucé, près d’Amboise, avec ses carnets et la Joconde.",
+        "description_en": "Invited by Francis I, Leonardo settles at Clos Lucé, near Amboise, with his notebooks and the Mona Lisa.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1516",
+        "end_date": "1519-05-02",
+        "start_years_bp": 510.856947296372,
+        "end_years_bp": 507.524982888433,
+        "non_thematic": false
+      },
+      "tags": [
+        "arts-culture-loisirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "3ddc5cc3-d128-4f44-9336-4ca02ff08083",
+        "label_fr": "Jeunesse et formation de Mandela",
+        "label_en": "Mandela’s youth and education",
+        "description_fr": "Issu de la famille royale thembu, Mandela étudie le droit et s’installe à Johannesburg.",
+        "description_en": "Born into the Thembu royal family, Mandela studies law and settles in Johannesburg.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1918-07-18",
+        "end_date": "1944",
+        "start_years_bp": 108.321697467488,
+        "end_years_bp": 82.8651608487337,
+        "non_thematic": false
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "5391cb5b-01be-497e-8851-5ae0f316263e",
+        "label_fr": "Mandela militant de l’ANC",
+        "label_en": "Mandela as ANC activist",
+        "description_fr": "Mandela anime la Ligue de jeunesse de l’ANC, organise la désobéissance civile puis, après Sharpeville, la lutte armée.",
+        "description_en": "Mandela leads the ANC Youth League, organises civil disobedience and then, after Sharpeville, the armed struggle.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1944",
+        "end_date": "1962-08-05",
+        "start_years_bp": 82.8651608487337,
+        "end_years_bp": 64.2724161533196,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "2521b043-dd39-4ade-8f2b-54879145590b",
+        "label_fr": "Captivité de Mandela",
+        "label_en": "Mandela’s imprisonment",
+        "description_fr": "Condamné à la prison à vie, Mandela passe dix-huit ans à Robben Island et devient le symbole mondial de la lutte contre l’apartheid.",
+        "description_en": "Sentenced to life imprisonment, Mandela spends eighteen years on Robben Island and becomes the worldwide symbol of the struggle against apartheid.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1962-08-05",
+        "end_date": "1990-02-11",
+        "start_years_bp": 64.2724161533196,
+        "end_years_bp": 36.7515400410678,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "e586fa24-8216-4746-8927-e92155b0fc74",
+        "label_fr": "Mandela négocie la fin de l’apartheid",
+        "label_en": "Mandela negotiates the end of apartheid",
+        "description_fr": "Libéré, Mandela négocie avec le président Frederik de Klerk une nouvelle Constitution et des élections ouvertes à tous.",
+        "description_en": "Once freed, Mandela negotiates with President F. W. de Klerk a new constitution and elections open to all.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1990-02-11",
+        "end_date": "1994-05-10",
+        "start_years_bp": 36.7515400410678,
+        "end_years_bp": 32.5106091718001,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "75b0d6ef-5a9d-4cf0-bacc-1dc4acf53749",
+        "label_fr": "Présidence de Nelson Mandela",
+        "label_en": "Presidency of Nelson Mandela",
+        "description_fr": "Mandela dirige un gouvernement d’union nationale et met en place la Commission de la vérité et de la réconciliation.",
+        "description_en": "Mandela leads a government of national unity and sets up the Truth and Reconciliation Commission.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1994-05-10",
+        "end_date": "1999-06-14",
+        "start_years_bp": 32.5106091718001,
+        "end_years_bp": 27.4154688569473,
+        "non_thematic": true
+      },
+      "tags": []
+    },
+    {
+      "row": {
+        "id": "97a96018-fe67-4989-a425-5ae48c5936d2",
+        "label_fr": "Retraite de Mandela",
+        "label_en": "Mandela’s retirement",
+        "description_fr": "Mandela se consacre à sa fondation, à la lutte contre le sida et à des médiations en Afrique.",
+        "description_en": "Mandela devotes himself to his foundation, the fight against AIDS and mediation in Africa.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "start_date": "1999-06-14",
+        "end_date": "2013-12-05",
+        "start_years_bp": 27.4154688569473,
+        "end_years_bp": 12.9377138945927,
+        "non_thematic": false
+      },
+      "tags": [
+        "peuplement-societe",
+        "sante-corps"
+      ]
+    },
+    {
+      "row": {
+        "id": "cfa16e29-b327-44f8-a72f-4b71d053206f",
+        "label_fr": "Apartheid",
+        "label_en": "Apartheid",
+        "description_fr": "Le régime sud-africain classe la population par race et réserve à la minorité blanche le pouvoir, les terres et les meilleurs emplois.",
+        "description_en": "The South African regime classifies the population by race and reserves power, land and the best jobs for the white minority.",
+        "wikidata_id": "Q11409",
+        "wikipedia_title_fr": "Apartheid",
+        "wikipedia_title_en": "Apartheid",
+        "start_date": "1948",
+        "end_date": "1994-04-27",
+        "start_years_bp": 78.8651608487337,
+        "end_years_bp": 32.5462012320329,
+        "non_thematic": false
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "peuplement-societe"
+      ]
+    }
+  ],
+  "newEvents": [
+    {
+      "row": {
+        "id": "4b45314f-104c-41b8-94df-884cd1c19e2b",
+        "label_fr": "Naissance de Temüdjin",
+        "label_en": "Birth of Temüjin",
+        "description_fr": "Le futur Gengis Khan naît près du fleuve Onon ; les sources hésitent entre 1155, 1162 et 1167.",
+        "description_en": "The future Genghis Khan is born near the Onon river; the sources hesitate between 1155, 1162 and 1167.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1162",
+        "date_years_bp": 864.847364818617
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "1521509b-6ac9-4aca-b212-0882fca936ba",
+        "label_fr": "Prise de Samarcande",
+        "label_en": "Fall of Samarkand",
+        "description_fr": "La capitale du Khwarezm se rend après quelques jours de siège ; sa garnison est massacrée.",
+        "description_en": "The Khwarazmian capital surrenders after a few days of siege; its garrison is massacred.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1220",
+        "date_years_bp": 806.848733744011
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "740c164f-c0e0-4f30-809b-b47bce203fa4",
+        "label_fr": "Mort de Gengis Khan",
+        "label_en": "Death of Genghis Khan",
+        "description_fr": "Gengis Khan meurt pendant la campagne contre les Xia occidentaux ; son fils Ögödei lui succède.",
+        "description_en": "Genghis Khan dies during the campaign against the Western Xia; his son Ögedei succeeds him.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1227",
+        "date_years_bp": 799.848049281314
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "4d57a530-3d9a-4e85-b014-9437d0912e71",
+        "label_fr": "Naissance de Jeanne d’Arc",
+        "label_en": "Birth of Joan of Arc",
+        "description_fr": "Jeanne naît à Domrémy, village de la vallée de la Meuse resté fidèle au dauphin.",
+        "description_en": "Joan is born at Domrémy, a village in the Meuse valley that remained loyal to the dauphin.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1412",
+        "date_years_bp": 614.854209445585
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "40ec62f6-0696-4130-bbed-60c8000a233e",
+        "label_fr": "Jeanne d’Arc rencontre le dauphin à Chinon",
+        "label_en": "Joan of Arc meets the dauphin at Chinon",
+        "description_fr": "Le futur Charles VII la fait examiner par des théologiens à Poitiers avant de lui confier un convoi pour Orléans.",
+        "description_en": "The future Charles VII has her examined by theologians at Poitiers before entrusting her with a convoy for Orléans.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1429-03",
+        "date_years_bp": 597.690622861054
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "da8b70fe-5870-4e97-b32c-f52f49a0dfb7",
+        "label_fr": "Bataille de Patay",
+        "label_en": "Battle of Patay",
+        "description_fr": "La cavalerie française surprend et détruit l’armée anglaise de la Loire.",
+        "description_en": "The French cavalry surprises and destroys the English army of the Loire.",
+        "wikidata_id": "Q648535",
+        "wikipedia_title_fr": "Bataille de Patay",
+        "wikipedia_title_en": "Battle of Patay",
+        "date": "1429-06-18",
+        "date_years_bp": 597.392197125257
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "981580d2-2b0f-4253-8b9c-117497f08efd",
+        "label_fr": "Échec de Jeanne d’Arc devant Paris",
+        "label_en": "Joan of Arc’s failure before Paris",
+        "description_fr": "Blessée à la porte Saint-Honoré, Jeanne doit renoncer à prendre la ville tenue par les Bourguignons.",
+        "description_en": "Wounded at the Saint-Honoré gate, Joan has to give up taking the city held by the Burgundians.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1429-09-08",
+        "date_years_bp": 597.167693360712
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "d90f2c0f-61a3-4617-b901-a7625b2325d9",
+        "label_fr": "Capture de Jeanne d’Arc à Compiègne",
+        "label_en": "Capture of Joan of Arc at Compiègne",
+        "description_fr": "Lors d’une sortie, Jeanne est faite prisonnière par les hommes de Jean de Luxembourg.",
+        "description_en": "During a sortie, Joan is taken prisoner by the men of John of Luxembourg.",
+        "wikidata_id": "Q668577",
+        "wikipedia_title_fr": "Siège de Compiègne",
+        "wikipedia_title_en": "Siege of Compiègne",
+        "date": "1430-05-23",
+        "date_years_bp": 596.464065708419
+      },
+      "tags": [
+        "conflits"
+      ]
+    },
+    {
+      "row": {
+        "id": "f32a9997-f8de-4840-8e49-c642dcb5b9b2",
+        "label_fr": "Réhabilitation de Jeanne d’Arc",
+        "label_en": "Rehabilitation of Joan of Arc",
+        "description_fr": "Un second procès, voulu par Charles VII, annule la condamnation de 1431.",
+        "description_en": "A second trial, sought by Charles VII, annuls the sentence of 1431.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1456-07-07",
+        "date_years_bp": 570.339493497604
+      },
+      "tags": [
+        "religions-spiritualites",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "f7864a07-295b-4993-b32d-df1c3a2daedc",
+        "label_fr": "Naissance de Martin Luther",
+        "label_en": "Birth of Martin Luther",
+        "description_fr": "Luther naît à Eisleben, en Saxe, et est baptisé le lendemain, jour de la Saint-Martin.",
+        "description_en": "Luther is born at Eisleben in Saxony and baptised the next day, the feast of St Martin.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1483-11-10",
+        "date_years_bp": 542.996577686516
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "86a07a5c-9e00-4681-a12a-be260fb3e3b7",
+        "label_fr": "Excommunication de Luther",
+        "label_en": "Excommunication of Luther",
+        "description_fr": "Le pape Léon X l’excommunie après que Luther a brûlé publiquement la bulle qui le menaçait.",
+        "description_en": "Pope Leo X excommunicates him after Luther publicly burned the bull that threatened him.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1521-01-03",
+        "date_years_bp": 505.849418206708
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "23c1c4ff-2bc4-418d-9710-61037977ae5d",
+        "label_fr": "Luther devant la diète de Worms",
+        "label_en": "Luther before the Diet of Worms",
+        "description_fr": "Devant Charles Quint, Luther refuse de se rétracter ; l’empereur le met au ban de l’Empire.",
+        "description_en": "Before Charles V, Luther refuses to recant; the emperor places him under the imperial ban.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1521-04-18",
+        "date_years_bp": 505.561943874059
+      },
+      "tags": [
+        "religions-spiritualites",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "ccc6b9d5-ab5b-49a1-bfb0-38b591c138a5",
+        "label_fr": "Mariage de Luther et de Katharina von Bora",
+        "label_en": "Marriage of Luther and Katharina von Bora",
+        "description_fr": "L’ancien moine épouse une ancienne religieuse, donnant l’exemple du mariage des pasteurs.",
+        "description_en": "The former friar marries a former nun, setting the example of married clergy.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1525-06-13",
+        "date_years_bp": 501.408624229979
+      },
+      "tags": [
+        "religions-spiritualites",
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "a23d322b-e19d-405a-a05a-659c6b1486e6",
+        "label_fr": "Confession d’Augsbourg",
+        "label_en": "Augsburg Confession",
+        "description_fr": "Rédigée par Melanchthon, la profession de foi des luthériens est présentée à Charles Quint.",
+        "description_en": "Drafted by Melanchthon, the Lutheran confession of faith is presented to Charles V.",
+        "wikidata_id": "Q154483",
+        "wikipedia_title_fr": "Confession d'Augsbourg",
+        "wikipedia_title_en": "Augsburg Confession",
+        "date": "1530-06-25",
+        "date_years_bp": 496.376454483231
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "bfccb09c-d368-40e9-9f99-60e4b423c0f3",
+        "label_fr": "Bible de Luther",
+        "label_en": "Luther Bible",
+        "description_fr": "Douze ans après le Nouveau Testament, Luther publie la Bible entière en allemand ; sa langue marque durablement l’allemand écrit.",
+        "description_en": "Twelve years after the New Testament, Luther publishes the whole Bible in German; its language leaves a lasting mark on written German.",
+        "wikidata_id": "Q1571095",
+        "wikipedia_title_fr": "Bible de Luther",
+        "wikipedia_title_en": "Luther Bible",
+        "date": "1534",
+        "date_years_bp": 492.855578370979
+      },
+      "tags": [
+        "religions-spiritualites",
+        "arts-culture-loisirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "4f089db1-167e-49e6-9fb8-55cefb105177",
+        "label_fr": "Mort de Martin Luther",
+        "label_en": "Death of Martin Luther",
+        "description_fr": "Luther meurt à Eisleben, sa ville natale, et est inhumé dans l’église du château de Wittenberg.",
+        "description_en": "Luther dies at Eisleben, his birthplace, and is buried in the castle church at Wittenberg.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1546-02-18",
+        "date_years_bp": 480.724161533196
+      },
+      "tags": [
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "1aa62042-af41-4077-90b9-612e1f3a85d7",
+        "label_fr": "Naissance de Christophe Colomb",
+        "label_en": "Birth of Christopher Columbus",
+        "description_fr": "Colomb naît à Gênes ; la date exacte n’est pas connue.",
+        "description_en": "Columbus is born in Genoa; the exact date is unknown.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1451",
+        "date_years_bp": 575.853524982888
+      },
+      "tags": [
+        "territoires-exploration"
+      ]
+    },
+    {
+      "row": {
+        "id": "3eb9f317-0f59-49e6-91b8-4ba0dcf10790",
+        "label_fr": "Capitulations de Santa Fe",
+        "label_en": "Capitulations of Santa Fe",
+        "description_fr": "Les Rois catholiques lui promettent les titres d’amiral et de vice-roi et un dixième des richesses à découvrir.",
+        "description_en": "The Catholic Monarchs promise him the titles of admiral and viceroy and a tenth of the riches to be found.",
+        "wikidata_id": "Q1728627",
+        "wikipedia_title_fr": "Capitulations de Santa Fe",
+        "wikipedia_title_en": "Capitulations of Santa Fe",
+        "date": "1492-04-17",
+        "date_years_bp": 534.561259411362
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "territoires-exploration"
+      ]
+    },
+    {
+      "row": {
+        "id": "b34d306c-e2eb-4855-9292-b6c7bc09099e",
+        "label_fr": "Retour de Colomb en Espagne",
+        "label_en": "Columbus returns to Spain",
+        "description_fr": "Colomb rentre à Palos et annonce avoir atteint les Indes par l’ouest.",
+        "description_en": "Columbus returns to Palos and announces that he has reached the Indies by sailing west.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1493-03-15",
+        "date_years_bp": 533.652292950034
+      },
+      "tags": [
+        "territoires-exploration"
+      ]
+    },
+    {
+      "row": {
+        "id": "92849ab3-d7cc-4165-8153-a4d7d23c9dd0",
+        "label_fr": "Colomb arrêté à Hispaniola",
+        "label_en": "Columbus arrested on Hispaniola",
+        "description_fr": "Accusé de mauvais gouvernement, Colomb est renvoyé enchaîné en Espagne par l’enquêteur Francisco de Bobadilla.",
+        "description_en": "Accused of misrule, Columbus is sent back to Spain in chains by the investigator Francisco de Bobadilla.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1500-08",
+        "date_years_bp": 526.273785078713
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "255c4236-5ed5-441b-b97c-28d455a10770",
+        "label_fr": "Mort de Christophe Colomb",
+        "label_en": "Death of Christopher Columbus",
+        "description_fr": "Colomb meurt à Valladolid, convaincu d’avoir atteint les abords de l’Asie.",
+        "description_en": "Columbus dies at Valladolid, convinced that he reached the approaches to Asia.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1506-05-20",
+        "date_years_bp": 520.475017111567
+      },
+      "tags": [
+        "territoires-exploration"
+      ]
+    },
+    {
+      "row": {
+        "id": "523907c2-8d18-42ae-8253-36e487c39ad1",
+        "label_fr": "Naissance d’Abraham Lincoln",
+        "label_en": "Birth of Abraham Lincoln",
+        "description_fr": "Lincoln naît dans une cabane en rondins près de Hodgenville, dans le Kentucky.",
+        "description_en": "Lincoln is born in a log cabin near Hodgenville, Kentucky.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1809-02-12",
+        "date_years_bp": 217.745379876797
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "b58c84a3-fd64-4b69-ab5c-786f664cccce",
+        "label_fr": "Débats Lincoln-Douglas",
+        "label_en": "Lincoln–Douglas debates",
+        "description_fr": "Candidat au Sénat, Lincoln affronte Stephen Douglas sur l’esclavage dans sept débats qui le font connaître du pays.",
+        "description_en": "Running for the Senate, Lincoln confronts Stephen Douglas over slavery in seven debates that make him known nationwide.",
+        "wikidata_id": "Q622354",
+        "wikipedia_title_fr": "Débats Lincoln-Douglas",
+        "wikipedia_title_en": "Lincoln–Douglas debates",
+        "date": "1858-08-21",
+        "date_years_bp": 168.225872689938
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "70809365-87a9-469f-9edb-c2b58303f153",
+        "label_fr": "Élection d’Abraham Lincoln",
+        "label_en": "Election of Abraham Lincoln",
+        "description_fr": "La victoire du candidat républicain entraîne la sécession de sept États du Sud avant même son investiture.",
+        "description_en": "The Republican candidate’s victory leads seven Southern states to secede even before his inauguration.",
+        "wikidata_id": "Q698842",
+        "wikipedia_title_fr": "Élection présidentielle américaine de 1860",
+        "wikipedia_title_en": "1860 United States presidential election",
+        "date": "1860-11-06",
+        "date_years_bp": 166.013689253936
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "86344162-d418-478c-87d1-d6c6a1ac1a26",
+        "label_fr": "Discours de Gettysburg",
+        "label_en": "Gettysburg Address",
+        "description_fr": "En deux minutes, Lincoln définit la guerre comme un combat pour l’égalité et le gouvernement du peuple.",
+        "description_en": "In two minutes, Lincoln defines the war as a struggle for equality and government of the people.",
+        "wikidata_id": "Q214524",
+        "wikipedia_title_fr": "Discours de Gettysburg",
+        "wikipedia_title_en": "Gettysburg Address",
+        "date": "1863-11-19",
+        "date_years_bp": 162.980150581793
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "0db81758-6fd2-416c-9587-26d502f81ac1",
+        "label_fr": "Réélection d’Abraham Lincoln",
+        "label_en": "Re-election of Abraham Lincoln",
+        "description_fr": "Lincoln bat le général McClellan, partisan d’une paix négociée avec le Sud.",
+        "description_en": "Lincoln defeats General McClellan, who favoured a negotiated peace with the South.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1864-11-08",
+        "date_years_bp": 162.008213552361
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "50e2cb31-3dd6-452e-80d3-bef798e72d61",
+        "label_fr": "Naissance de Mao Zedong",
+        "label_en": "Birth of Mao Zedong",
+        "description_fr": "Mao naît à Shaoshan, village du Hunan.",
+        "description_en": "Mao is born in Shaoshan, a village in Hunan.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1893-12-26",
+        "date_years_bp": 132.877481177276
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "e22017ad-5c40-4c79-9982-5cb86e4c4d25",
+        "label_fr": "Conférence de Zunyi",
+        "label_en": "Zunyi Conference",
+        "description_fr": "Pendant la Longue Marche, la direction du Parti est remaniée et Mao entre dans le groupe qui commande l’armée.",
+        "description_en": "During the Long March, the Party leadership is reshuffled and Mao joins the group commanding the army.",
+        "wikidata_id": "Q30341",
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": "Zunyi Conference",
+        "date": "1935-01",
+        "date_years_bp": 91.864476386037
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "0de46990-44e4-4851-b9c6-e2320f9684a6",
+        "label_fr": "Campagne des Cent Fleurs",
+        "label_en": "Hundred Flowers Campaign",
+        "description_fr": "Mao invite les intellectuels à critiquer le régime ; l’année suivante, une campagne « antidroitiers » frappe ceux qui ont parlé.",
+        "description_en": "Mao invites intellectuals to criticise the regime; the following year an “anti-rightist” campaign strikes those who spoke out.",
+        "wikidata_id": "Q517371",
+        "wikipedia_title_fr": "Campagne des Cent Fleurs",
+        "wikipedia_title_en": "Hundred Flowers Campaign",
+        "date": "1956-05",
+        "date_years_bp": 70.5338809034908
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "philosophie-ideologies"
+      ]
+    },
+    {
+      "row": {
+        "id": "03e01717-e3af-4893-81cb-47084cb74341",
+        "label_fr": "Naissance de Charles Darwin",
+        "label_en": "Birth of Charles Darwin",
+        "description_fr": "Darwin naît à Shrewsbury dans une famille de médecins et d’industriels.",
+        "description_en": "Darwin is born in Shrewsbury into a family of physicians and industrialists.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1809-02-12",
+        "date_years_bp": 217.745379876797
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "3a85a8ce-5e7e-49e8-a8c4-988f1acc54b4",
+        "label_fr": "Darwin aux îles Galápagos",
+        "label_en": "Darwin in the Galápagos Islands",
+        "description_fr": "Pendant cinq semaines, Darwin observe des espèces qui diffèrent d’une île à l’autre.",
+        "description_en": "For five weeks Darwin observes species that differ from one island to the next.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1835-09",
+        "date_years_bp": 191.196440793977
+      },
+      "tags": [
+        "sciences-savoirs",
+        "vivant"
+      ]
+    },
+    {
+      "row": {
+        "id": "e6070b70-d6e7-4515-a8a9-678de4c7dd96",
+        "label_fr": "Darwin et Wallace présentés à la Société linnéenne",
+        "label_en": "Darwin and Wallace read at the Linnean Society",
+        "description_fr": "Alfred Russel Wallace étant parvenu à la même idée, leurs textes sur la sélection naturelle sont lus ensemble à Londres.",
+        "description_en": "Alfred Russel Wallace having reached the same idea, their papers on natural selection are read together in London.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1858-07-01",
+        "date_years_bp": 168.365503080082
+      },
+      "tags": [
+        "sciences-savoirs",
+        "vivant"
+      ]
+    },
+    {
+      "row": {
+        "id": "1fb4eb02-8661-4c5b-93d3-e17cf1907671",
+        "label_fr": "Débat d’Oxford sur l’évolution",
+        "label_en": "Oxford evolution debate",
+        "description_fr": "Thomas Huxley défend la théorie de Darwin face à l’évêque Samuel Wilberforce.",
+        "description_en": "Thomas Huxley defends Darwin’s theory against Bishop Samuel Wilberforce.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1860-06-30",
+        "date_years_bp": 166.366872005476
+      },
+      "tags": [
+        "sciences-savoirs",
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "cf458d1b-d1a2-427e-b312-41b33a23eda1",
+        "label_fr": "La Filiation de l’homme",
+        "label_en": "The Descent of Man",
+        "description_fr": "Darwin applique l’évolution à l’espèce humaine et expose la sélection sexuelle.",
+        "description_en": "Darwin applies evolution to the human species and sets out sexual selection.",
+        "wikidata_id": "Q1165434",
+        "wikipedia_title_fr": "La Filiation de l'homme et la sélection liée au sexe",
+        "wikipedia_title_en": "The Descent of Man, and Selection in Relation to Sex",
+        "date": "1871-02-24",
+        "date_years_bp": 155.713894592745
+      },
+      "tags": [
+        "sciences-savoirs",
+        "vivant"
+      ]
+    },
+    {
+      "row": {
+        "id": "088647a2-4d24-4a70-aac0-37a2997adebc",
+        "label_fr": "Mort de Charles Darwin",
+        "label_en": "Death of Charles Darwin",
+        "description_fr": "Darwin meurt à Down House et est inhumé à l’abbaye de Westminster, près de Newton.",
+        "description_en": "Darwin dies at Down House and is buried in Westminster Abbey, near Newton.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1882-04-19",
+        "date_years_bp": 144.565366187543
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "e8d4a8a8-a970-4be4-a6d6-e5c04e69d664",
+        "label_fr": "Naissance de Marie Skłodowska",
+        "label_en": "Birth of Maria Skłodowska",
+        "description_fr": "Maria Skłodowska naît à Varsovie dans une famille d’enseignants.",
+        "description_en": "Maria Skłodowska is born in Warsaw into a family of teachers.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1867-11-07",
+        "date_years_bp": 159.013004791239
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "4bef8209-7f70-4271-b1f6-9dde47bd727d",
+        "label_fr": "Mariage de Marie et Pierre Curie",
+        "label_en": "Marriage of Marie and Pierre Curie",
+        "description_fr": "Marie épouse à Sceaux le physicien Pierre Curie, spécialiste du magnétisme et des cristaux.",
+        "description_en": "At Sceaux, Marie marries the physicist Pierre Curie, a specialist in magnetism and crystals.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1895-07-26",
+        "date_years_bp": 131.297741273101
+      },
+      "tags": [
+        "peuplement-societe",
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "308995e9-da6d-4a3e-8858-685ba22f2881",
+        "label_fr": "Découverte du polonium",
+        "label_en": "Discovery of polonium",
+        "description_fr": "Les Curie annoncent un nouvel élément, nommé d’après la Pologne, et emploient pour la première fois le mot « radioactif ».",
+        "description_en": "The Curies announce a new element, named after Poland, and use the word “radioactive” for the first time.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1898-07",
+        "date_years_bp": 128.365503080082
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "b3a37e7c-74e2-459c-9bb0-d2405a28216c",
+        "label_fr": "Prix Nobel de physique des Curie et de Becquerel",
+        "label_en": "Nobel Prize in Physics for the Curies and Becquerel",
+        "description_fr": "Marie Curie est la première femme à recevoir un prix Nobel, partagé avec Pierre Curie et Henri Becquerel.",
+        "description_en": "Marie Curie is the first woman to receive a Nobel Prize, shared with Pierre Curie and Henri Becquerel.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1903-12-10",
+        "date_years_bp": 122.925393566051
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "45f7949c-3f68-46bd-977b-3800e06c6d5c",
+        "label_fr": "Marie Curie première professeure à la Sorbonne",
+        "label_en": "Marie Curie first woman professor at the Sorbonne",
+        "description_fr": "Marie Curie donne son premier cours dans la chaire de son mari, mort quelques mois plus tôt dans un accident.",
+        "description_en": "Marie Curie gives her first lecture in the chair of her husband, killed in an accident a few months earlier.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1906-11-05",
+        "date_years_bp": 120.020533880903
+      },
+      "tags": [
+        "sciences-savoirs",
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "1789ef56-72a9-4435-9402-174049e5baa2",
+        "label_fr": "Prix Nobel de chimie de Marie Curie",
+        "label_en": "Marie Curie’s Nobel Prize in Chemistry",
+        "description_fr": "Récompensée pour le polonium et le radium, Marie Curie devient la première personne à recevoir deux prix Nobel.",
+        "description_en": "Honoured for polonium and radium, Marie Curie becomes the first person to receive two Nobel Prizes.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1911-12-10",
+        "date_years_bp": 114.925393566051
+      },
+      "tags": [
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "f6a39d5c-698e-4ef4-99f3-c595f3cc8678",
+        "label_fr": "Marie Curie équipe des voitures radiologiques",
+        "label_en": "Marie Curie equips mobile X-ray units",
+        "description_fr": "Pendant la Grande Guerre, Marie Curie organise des voitures de radiologie, les « petites Curies », pour examiner les blessés près du front.",
+        "description_en": "During the Great War, Marie Curie organises X-ray cars, the “petites Curies”, to examine the wounded near the front.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1914",
+        "date_years_bp": 112.86379192334
+      },
+      "tags": [
+        "sante-corps",
+        "techniques-inventions"
+      ]
+    },
+    {
+      "row": {
+        "id": "428cd37a-8ca2-4456-bc5e-8b118f8072f1",
+        "label_fr": "Mort de Marie Curie",
+        "label_en": "Death of Marie Curie",
+        "description_fr": "Marie Curie meurt d’une anémie due à son exposition prolongée aux rayonnements.",
+        "description_en": "Marie Curie dies of an anaemia caused by her long exposure to radiation.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1934-07-04",
+        "date_years_bp": 92.3600273785079
+      },
+      "tags": [
+        "sciences-savoirs",
+        "sante-corps"
+      ]
+    },
+    {
+      "row": {
+        "id": "e03e7663-e1d7-4ee7-8be9-e9765be269f2",
+        "label_fr": "Naissance de Staline",
+        "label_en": "Birth of Stalin",
+        "description_fr": "Staline naît à Gori, en Géorgie, fils d’un cordonnier ; il donnera plus tard 1879 comme année de naissance.",
+        "description_en": "Stalin is born in Gori, Georgia, the son of a cobbler; he will later give 1879 as his year of birth.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1878-12-18",
+        "date_years_bp": 147.90006844627
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "613e6795-853e-416c-9bc8-6aa40f73d5ad",
+        "label_fr": "Staline secrétaire général du Parti",
+        "label_en": "Stalin becomes general secretary of the Party",
+        "description_fr": "Ce poste d’organisation, jugé secondaire, lui donne la main sur les nominations dans tout l’appareil.",
+        "description_en": "This organisational post, thought minor, gives him control over appointments throughout the apparatus.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1922-04-03",
+        "date_years_bp": 104.611909650924
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "497802e7-6f22-4b7b-b984-0052f4401fe9",
+        "label_fr": "Testament de Lénine",
+        "label_en": "Lenin’s Testament",
+        "description_fr": "Malade, Lénine dicte des notes qui jugent Staline trop brutal et proposent de l’écarter du secrétariat général.",
+        "description_en": "Ailing, Lenin dictates notes that judge Stalin too rough and propose removing him as general secretary.",
+        "wikidata_id": "Q2375101",
+        "wikipedia_title_fr": "Testament de Lénine",
+        "wikipedia_title_en": "Lenin's Testament",
+        "date": "1922-12",
+        "date_years_bp": 103.949349760438
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "06abc967-3b61-45da-88aa-460e0b881fb4",
+        "label_fr": "Premier plan quinquennal",
+        "label_en": "First five-year plan",
+        "description_fr": "Le plan fixe des objectifs très élevés à l’industrie lourde et met fin à la Nouvelle politique économique.",
+        "description_en": "The plan sets very high targets for heavy industry and ends the New Economic Policy.",
+        "wikidata_id": "Q1661958",
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": "First five-year plan (Soviet Union)",
+        "date": "1928-10-01",
+        "date_years_bp": 98.1149897330595
+      },
+      "tags": [
+        "economie-echanges",
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "88af82b6-d3e8-4016-bb53-7004f80fdd05",
+        "label_fr": "Collectivisation des terres en URSS",
+        "label_en": "Collectivisation of land in the USSR",
+        "description_fr": "Les paysans sont contraints d’entrer dans des fermes collectives ; les récalcitrants, dits koulaks, sont déportés.",
+        "description_en": "Peasants are forced into collective farms; those who resist, labelled kulaks, are deported.",
+        "wikidata_id": "Q821122",
+        "wikipedia_title_fr": "Collectivisation en Union soviétique",
+        "wikipedia_title_en": "Collectivization in the Soviet Union",
+        "date": "1929",
+        "date_years_bp": 97.8631074606434
+      },
+      "tags": [
+        "economie-echanges",
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "ae788302-2216-4892-bd65-f4d1d4298123",
+        "label_fr": "Mort de Staline",
+        "label_en": "Death of Stalin",
+        "description_fr": "Staline meurt dans sa datcha de Kountsevo, quatre jours après une attaque cérébrale.",
+        "description_en": "Stalin dies at his Kuntsevo dacha, four days after a stroke.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1953-03-05",
+        "date_years_bp": 73.6906228610541
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "e70ffc6c-8ba2-4a11-a09e-a0cfee9eabbd",
+        "label_fr": "Naissance de Léonard de Vinci",
+        "label_en": "Birth of Leonardo da Vinci",
+        "description_fr": "Léonard naît à Vinci, bourg toscan proche de Florence.",
+        "description_en": "Leonardo is born at Vinci, a Tuscan village near Florence.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1452-04-15",
+        "date_years_bp": 574.566735112936
+      },
+      "tags": [
+        "arts-culture-loisirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "b9ce49c9-ebf6-4edd-82b1-5e94c16b2e21",
+        "label_fr": "L’Homme de Vitruve",
+        "label_en": "Vitruvian Man",
+        "description_fr": "Léonard dessine les proportions du corps humain inscrit dans un cercle et un carré, d’après l’architecte romain Vitruve.",
+        "description_en": "Leonardo draws the proportions of the human body set in a circle and a square, after the Roman architect Vitruvius.",
+        "wikidata_id": "Q215486",
+        "wikipedia_title_fr": "Homme de Vitruve",
+        "wikipedia_title_en": "Vitruvian Man",
+        "date": "1490",
+        "date_years_bp": 536.852840520192
+      },
+      "tags": [
+        "arts-culture-loisirs",
+        "sciences-savoirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "10c5eedc-02e5-46d9-bf97-6117e5b9a51e",
+        "label_fr": "La Cène de Léonard de Vinci",
+        "label_en": "Leonardo’s Last Supper",
+        "description_fr": "Léonard achève la peinture murale du réfectoire de Santa Maria delle Grazie, à Milan.",
+        "description_en": "Leonardo completes the mural in the refectory of Santa Maria delle Grazie in Milan.",
+        "wikidata_id": "Q128910",
+        "wikipedia_title_fr": "La Cène (Léonard de Vinci)",
+        "wikipedia_title_en": "The Last Supper (Leonardo)",
+        "date": "1498",
+        "date_years_bp": 528.852840520192
+      },
+      "tags": [
+        "arts-culture-loisirs",
+        "religions-spiritualites"
+      ]
+    },
+    {
+      "row": {
+        "id": "8bf2a85b-8e03-4b4c-a36d-9b065c0a3540",
+        "label_fr": "Mort de Léonard de Vinci",
+        "label_en": "Death of Leonardo da Vinci",
+        "description_fr": "Léonard meurt au Clos Lucé et lègue ses manuscrits à son élève Francesco Melzi.",
+        "description_en": "Leonardo dies at Clos Lucé and leaves his manuscripts to his pupil Francesco Melzi.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1519-05-02",
+        "date_years_bp": 507.524982888433
+      },
+      "tags": [
+        "arts-culture-loisirs"
+      ]
+    },
+    {
+      "row": {
+        "id": "985573f7-5627-4ce0-a490-fcca17140a40",
+        "label_fr": "Naissance de Nelson Mandela",
+        "label_en": "Birth of Nelson Mandela",
+        "description_fr": "Rolihlahla Mandela naît à Mvezo, dans le Transkei.",
+        "description_en": "Rolihlahla Mandela is born at Mvezo, in the Transkei.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1918-07-18",
+        "date_years_bp": 108.321697467488
+      },
+      "tags": [
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "8f7ac21c-7075-4bfe-aadf-4a53e1bc1bea",
+        "label_fr": "Massacre de Sharpeville",
+        "label_en": "Sharpeville massacre",
+        "description_fr": "La police tire sur une manifestation contre les laissez-passer et tue soixante-neuf personnes ; l’ANC est interdit peu après.",
+        "description_en": "Police fire on a demonstration against the pass laws, killing sixty-nine people; the ANC is banned soon afterwards.",
+        "wikidata_id": "Q518753",
+        "wikipedia_title_fr": "Massacre de Sharpeville",
+        "wikipedia_title_en": "Sharpeville massacre",
+        "date": "1960-03-21",
+        "date_years_bp": 66.6461327857632
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "2ac633b0-4b9a-4538-93b9-faa79c35123a",
+        "label_fr": "Verdict du procès de Rivonia",
+        "label_en": "Verdict of the Rivonia Trial",
+        "description_fr": "Mandela et sept coaccusés sont condamnés à la prison à vie pour sabotage.",
+        "description_en": "Mandela and seven co-defendants are sentenced to life imprisonment for sabotage.",
+        "wikidata_id": "Q1639868",
+        "wikipedia_title_fr": "Procès de Rivonia",
+        "wikipedia_title_en": "Rivonia Trial",
+        "date": "1964-06-12",
+        "date_years_bp": 62.4188911704312
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "03d0912c-1128-4fd7-8bc4-82a6f7d5267e",
+        "label_fr": "Libération de Nelson Mandela",
+        "label_en": "Release of Nelson Mandela",
+        "description_fr": "Après vingt-sept ans de détention, Mandela sort libre de la prison Victor Verster.",
+        "description_en": "After twenty-seven years in detention, Mandela walks free from Victor Verster Prison.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1990-02-11",
+        "date_years_bp": 36.7515400410678
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "7f4ad293-aa2a-4737-bd67-8e7da7826283",
+        "label_fr": "Prix Nobel de la paix de Mandela et de Klerk",
+        "label_en": "Nobel Peace Prize for Mandela and de Klerk",
+        "description_fr": "Le prix récompense leur travail commun pour mettre fin pacifiquement à l’apartheid.",
+        "description_en": "The prize rewards their joint work to end apartheid peacefully.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "1993-12-10",
+        "date_years_bp": 32.9240246406571
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    },
+    {
+      "row": {
+        "id": "9e4fe65e-f696-48cd-969f-9f955d4b7e6b",
+        "label_fr": "Premières élections multiraciales en Afrique du Sud",
+        "label_en": "First multiracial elections in South Africa",
+        "description_fr": "L’ANC l’emporte largement ; le Parlement élit Mandela président.",
+        "description_en": "The ANC wins by a wide margin; Parliament elects Mandela president.",
+        "wikidata_id": "Q957012",
+        "wikipedia_title_fr": "Élections générales sud-africaines de 1994",
+        "wikipedia_title_en": "1994 South African general election",
+        "date": "1994-04-27",
+        "date_years_bp": 32.5462012320329
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "peuplement-societe"
+      ]
+    },
+    {
+      "row": {
+        "id": "c79911f5-f88f-432a-93ab-1f6ac25b9737",
+        "label_fr": "Mort de Nelson Mandela",
+        "label_en": "Death of Nelson Mandela",
+        "description_fr": "Mandela meurt à Johannesburg à quatre-vingt-quinze ans.",
+        "description_en": "Mandela dies in Johannesburg aged ninety-five.",
+        "wikidata_id": null,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null,
+        "date": "2013-12-05",
+        "date_years_bp": 12.9377138945927
+      },
+      "tags": [
+        "pouvoir-institutions"
+      ]
+    }
+  ]
+}
