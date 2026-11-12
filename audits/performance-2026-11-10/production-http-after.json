@@ -1,0 +1,268 @@
+{
+  "measuredAt": "2026-11-10T11:06:14.039Z",
+  "commit": "ec361b18cc2ac8146d85cf20746604efd8aaa8cf",
+  "summaries": [
+    {
+      "path": "/api/stories/1",
+      "count": 10,
+      "failures": 0,
+      "medianMs": 73.5,
+      "maxMs": 669,
+      "bytes": 24072,
+      "allNewVersion": true
+    },
+    {
+      "path": "/api/stories/51",
+      "count": 10,
+      "failures": 0,
+      "medianMs": 99.5,
+      "maxMs": 225,
+      "bytes": 170086,
+      "allNewVersion": true
+    },
+    {
+      "path": "/api/stories?view=summary",
+      "count": 10,
+      "failures": 0,
+      "medianMs": 114,
+      "maxMs": 424,
+      "bytes": 48677,
+      "allNewVersion": true
+    }
+  ],
+  "graph": {
+    "status": 200,
+    "count": 50,
+    "graphIsolated": true
+  },
+  "controls": [
+    {
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "path": "/api/account",
+      "status": 401
+    },
+    {
+      "path": "/api/stories/2147483647",
+      "status": 404
+    },
+    {
+      "path": "/timeline?story=51&entry=universe",
+      "status": 200
+    }
+  ],
+  "results": [
+    {
+      "path": "/api/stories/1",
+      "status": 200,
+      "totalMs": 669,
+      "bytes": 24072,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/51",
+      "status": 200,
+      "totalMs": 120,
+      "bytes": 170086,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories?view=summary",
+      "status": 200,
+      "totalMs": 424,
+      "bytes": 48677,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/1",
+      "status": 200,
+      "totalMs": 307,
+      "bytes": 24072,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/51",
+      "status": 200,
+      "totalMs": 101,
+      "bytes": 170086,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories?view=summary",
+      "status": 200,
+      "totalMs": 113,
+      "bytes": 48677,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/1",
+      "status": 200,
+      "totalMs": 201,
+      "bytes": 24072,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/51",
+      "status": 200,
+      "totalMs": 225,
+      "bytes": 170086,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories?view=summary",
+      "status": 200,
+      "totalMs": 113,
+      "bytes": 48677,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/1",
+      "status": 200,
+      "totalMs": 77,
+      "bytes": 24072,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/51",
+      "status": 200,
+      "totalMs": 111,
+      "bytes": 170086,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories?view=summary",
+      "status": 200,
+      "totalMs": 229,
+      "bytes": 48677,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/1",
+      "status": 200,
+      "totalMs": 66,
+      "bytes": 24072,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/51",
+      "status": 200,
+      "totalMs": 98,
+      "bytes": 170086,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories?view=summary",
+      "status": 200,
+      "totalMs": 119,
+      "bytes": 48677,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/1",
+      "status": 200,
+      "totalMs": 76,
+      "bytes": 24072,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/51",
+      "status": 200,
+      "totalMs": 97,
+      "bytes": 170086,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories?view=summary",
+      "status": 200,
+      "totalMs": 102,
+      "bytes": 48677,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/1",
+      "status": 200,
+      "totalMs": 71,
+      "bytes": 24072,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/51",
+      "status": 200,
+      "totalMs": 89,
+      "bytes": 170086,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories?view=summary",
+      "status": 200,
+      "totalMs": 115,
+      "bytes": 48677,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/1",
+      "status": 200,
+      "totalMs": 71,
+      "bytes": 24072,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/51",
+      "status": 200,
+      "totalMs": 91,
+      "bytes": 170086,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories?view=summary",
+      "status": 200,
+      "totalMs": 125,
+      "bytes": 48677,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/1",
+      "status": 200,
+      "totalMs": 66,
+      "bytes": 24072,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/51",
+      "status": 200,
+      "totalMs": 101,
+      "bytes": 170086,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories?view=summary",
+      "status": 200,
+      "totalMs": 96,
+      "bytes": 48677,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/1",
+      "status": 200,
+      "totalMs": 70,
+      "bytes": 24072,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories/51",
+      "status": 200,
+      "totalMs": 91,
+      "bytes": 170086,
+      "requestIdPresent": true
+    },
+    {
+      "path": "/api/stories?view=summary",
+      "status": 200,
+      "totalMs": 103,
+      "bytes": 48677,
+      "requestIdPresent": true
+    }
+  ]
+}

@@ -1,0 +1,501 @@
+{
+  "stories": [
+    {
+      "id": 12,
+      "author": "flobutbut",
+      "title_en": "Cold war",
+      "title_fr": "Guerre froide",
+      "is_public": true,
+      "created_at": "2026-04-13T09:01:12.165118+00:00",
+      "updated_at": "2026-11-02T20:08:02.904502+00:00",
+      "description_en": "Indirect confrontation between the United States and the USSR, from the end of World War II to the dissolution of the Soviet Union.",
+      "description_fr": "Affrontement indirect entre les États-Unis et l'URSS, de la fin de la Seconde Guerre mondiale à la dislocation de l'Union soviétique.",
+      "parent_story_id": 4
+    },
+    {
+      "id": 4,
+      "title_fr": "Guerres modernes"
+    },
+    {
+      "id": 9,
+      "title_fr": "Seconde Guerre mondiale"
+    },
+    {
+      "id": 14,
+      "title_fr": "Conquête spatiale"
+    },
+    {
+      "id": 37,
+      "title_fr": "Époque contemporaine"
+    },
+    {
+      "id": 50,
+      "title_fr": "Histoire des États-Unis"
+    },
+    {
+      "id": 52,
+      "title_fr": "Histoire de la Chine"
+    },
+    {
+      "id": 56,
+      "title_fr": "Décolonisation"
+    }
+  ],
+  "periods": [
+    {
+      "id": "d83a0bfc-45d5-4054-a30b-4b5efe3787c7",
+      "color": null,
+      "end_date": "1953-07-27",
+      "label_en": "Korean War",
+      "label_fr": "Guerre de Corée",
+      "image_url": null,
+      "created_at": "2026-11-06T07:27:54.611019+00:00",
+      "source_key": null,
+      "start_date": "1950-06-25",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q8663",
+      "end_years_bp": 73.279,
+      "non_thematic": false,
+      "description_en": "Under a UN mandate, the United States defends South Korea against the North, backed by China and the USSR.",
+      "description_fr": "Sous mandat de l’ONU, les États-Unis défendent la Corée du Sud contre le Nord, soutenu par la Chine et l’URSS.",
+      "start_years_bp": 76.368,
+      "wikidata_source": null,
+      "wikipedia_title_en": "Korean War",
+      "wikipedia_title_fr": "Guerre de Corée"
+    },
+    {
+      "id": "23289f28-7cf0-4dd7-b729-c5595998b49c",
+      "color": null,
+      "end_date": "1975-04-30",
+      "label_en": "Vietnam War",
+      "label_fr": "Guerre du Vietnam",
+      "image_url": null,
+      "created_at": "2026-11-06T07:27:54.611019+00:00",
+      "source_key": null,
+      "start_date": "1955-11-01",
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q8740",
+      "end_years_bp": 51.522,
+      "non_thematic": false,
+      "description_en": "US support for South Vietnam peaks at over 500,000 troops and deeply divides the country.",
+      "description_fr": "L’engagement américain au côté du Sud-Vietnam culmine à plus de 500 000 soldats et divise profondément le pays.",
+      "start_years_bp": 71.015,
+      "wikidata_source": null,
+      "wikipedia_title_en": "Vietnam War",
+      "wikipedia_title_fr": "Guerre du Vietnam"
+    }
+  ],
+  "events": [
+    {
+      "id": "72e19322-22bd-4af1-b9ef-9e48a5b3c003",
+      "date": "1945-02-04",
+      "label_en": "Yalta Conference",
+      "label_fr": "Conférence de Yalta",
+      "created_at": "2026-11-03T14:28:56.834037+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q161227",
+      "date_years_bp": 81.746,
+      "description_en": "Roosevelt, Churchill and Stalin plan the post-war order and the division of Germany.",
+      "description_fr": "Roosevelt, Churchill et Staline organisent l’après-guerre et le partage de l’Allemagne.",
+      "wikidata_source": null,
+      "wikipedia_title_en": "Yalta Conference",
+      "wikipedia_title_fr": "Conférence de Yalta"
+    },
+    {
+      "id": "2bf8b54a-22fe-43fc-8fcf-39eada08d71d",
+      "date": "1947-09-22",
+      "label_en": "Zhdanov Doctrine",
+      "label_fr": "Doctrine Jdanov",
+      "created_at": "2026-10-28T22:15:28.800203+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q1899501",
+      "date_years_bp": 79.110069,
+      "description_en": "In 1947, Andrei Zhdanov presented the world as divided into opposing camps led by the United States and the Soviet Union. The doctrine accompanied the creation of the Cominform and the Soviet response to the Truman Doctrine.",
+      "description_fr": "En 1947, Andreï Jdanov présente le monde comme divisé en deux camps antagonistes, l’un dirigé par les États-Unis et l’autre par l’URSS. Cette doctrine accompagne la création du Kominform et affirme la réponse soviétique à la doctrine Truman.",
+      "wikidata_source": null,
+      "wikipedia_title_en": "Zhdanov Doctrine",
+      "wikipedia_title_fr": "Doctrine Jdanov"
+    },
+    {
+      "id": "8993258a-a1d4-496d-a6df-3567ea5092aa",
+      "date": "1948-04-03",
+      "label_en": "Marshall Plan",
+      "label_fr": "Plan Marshall",
+      "created_at": "2026-10-28T22:15:05.160103+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q4576",
+      "date_years_bp": 78.587,
+      "description_en": "American initiative for foreign aid to Western Europe following World War II",
+      "description_fr": "plan américain pour aider la reconstruction de l'Europe après la Seconde Guerre mondiale",
+      "wikidata_source": null,
+      "wikipedia_title_en": "Marshall Plan",
+      "wikipedia_title_fr": "Plan Marshall"
+    },
+    {
+      "id": "a8428ec8-8d13-438f-b98f-9ed8260686c8",
+      "date": "1949-10-01",
+      "label_en": "Proclamation of the People’s Republic of China",
+      "label_fr": "Proclamation de la République populaire",
+      "created_at": "2026-11-07T14:14:06.9489+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-07T14:14:06.9489+00:00",
+      "wikidata_id": "Q10872057",
+      "date_years_bp": 77.102,
+      "description_en": "Mao Zedong proclaims the People’s Republic of China in Tiananmen Square.",
+      "description_fr": "Mao Zedong proclame la République populaire de Chine place Tian’anmen.",
+      "wikidata_source": null,
+      "wikipedia_title_en": null,
+      "wikipedia_title_fr": null
+    },
+    {
+      "id": "b05b6b0e-9a71-4ba4-9786-0256c908a0c4",
+      "date": "1954-07-21",
+      "label_en": "Geneva Accords",
+      "label_fr": "Accords de Genève",
+      "created_at": "2026-11-08T00:40:13.997391+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-08T00:40:13.997391+00:00",
+      "wikidata_id": null,
+      "date_years_bp": 72.301,
+      "description_en": "France leaves Indochina; Vietnam is split in two at the 17th parallel.",
+      "description_fr": "La France quitte l’Indochine ; le Viêt Nam est coupé en deux au 17e parallèle.",
+      "wikidata_source": null,
+      "wikipedia_title_en": null,
+      "wikipedia_title_fr": null
+    },
+    {
+      "id": "6da1e30e-3a78-4138-81a1-ff828951819e",
+      "date": "1955-04-18",
+      "label_en": "Bandung Conference",
+      "label_fr": "Conférence de Bandung",
+      "created_at": "2026-11-08T00:40:13.997391+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-08T00:40:13.997391+00:00",
+      "wikidata_id": "Q208191",
+      "date_years_bp": 71.559,
+      "description_en": "Twenty-nine Asian and African countries condemn colonialism: the Third World asserts itself.",
+      "description_fr": "Vingt-neuf pays d’Asie et d’Afrique condamnent le colonialisme : le tiers-monde s’affirme.",
+      "wikidata_source": null,
+      "wikipedia_title_en": null,
+      "wikipedia_title_fr": null
+    },
+    {
+      "id": "8c3522a0-8c46-4135-8395-2219b81e7eb7",
+      "date": "1956-10-29",
+      "label_en": "Suez Crisis",
+      "label_fr": "Crise de Suez",
+      "created_at": "2026-11-08T00:40:13.997391+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-08T00:40:13.997391+00:00",
+      "wikidata_id": "Q49101",
+      "date_years_bp": 70.026,
+      "description_en": "Britain and France have to give up retaking the canal nationalised by Nasser.",
+      "description_fr": "Britanniques et Français doivent renoncer à reprendre le canal nationalisé par Nasser.",
+      "wikidata_source": null,
+      "wikipedia_title_en": null,
+      "wikipedia_title_fr": null
+    },
+    {
+      "id": "a39bb21a-ca41-44f7-b255-04fd45e017d9",
+      "date": "1957-10-04",
+      "label_en": "Sputnik 1",
+      "label_fr": "Spoutnik 1",
+      "created_at": "2026-10-31T22:40:53.881876+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q80811",
+      "date_years_bp": 69.07582496393502,
+      "description_en": "First artificial satellite, launched by the USSR.",
+      "description_fr": "Premier satellite artificiel, lancé par l'URSS.",
+      "wikidata_source": null,
+      "wikipedia_title_en": "Sputnik 1",
+      "wikipedia_title_fr": "Spoutnik 1"
+    },
+    {
+      "id": "9c6c046f-0282-45ec-b99a-974a57ebeb57",
+      "date": "1961-01-17",
+      "label_en": "Assassination of Patrice Lumumba",
+      "label_fr": "Assassinat de Patrice Lumumba",
+      "created_at": "2026-11-08T00:40:13.997391+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-08T00:40:13.997391+00:00",
+      "wikidata_id": "Q2529018",
+      "date_years_bp": 65.807,
+      "description_en": "The first head of government of independent Congo is executed in Katanga.",
+      "description_fr": "Le premier chef de gouvernement du Congo indépendant est exécuté au Katanga.",
+      "wikidata_source": null,
+      "wikipedia_title_en": null,
+      "wikipedia_title_fr": null
+    },
+    {
+      "id": "35642ae2-f4b8-42a3-a841-97c586601899",
+      "date": "1961-04-12",
+      "label_en": "Vostok 1: Yuri Gagarin",
+      "label_fr": "Vostok 1 : Youri Gagarine",
+      "created_at": "2026-10-31T22:40:53.881876+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q182524",
+      "date_years_bp": 65.55494885168315,
+      "description_en": "First crewed orbital flight around the Earth.",
+      "description_fr": "Premier vol habité en orbite autour de la Terre.",
+      "wikidata_source": null,
+      "wikipedia_title_en": "Vostok 1",
+      "wikipedia_title_fr": "Vostok 1"
+    },
+    {
+      "id": "6ea72d76-5e42-47e5-8fd0-17152c3a1250",
+      "date": "1961-09-01",
+      "label_en": "Belgrade Conference",
+      "label_fr": "Conférence de Belgrade",
+      "created_at": "2026-11-08T00:40:13.997391+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-08T00:40:13.997391+00:00",
+      "wikidata_id": null,
+      "date_years_bp": 65.186,
+      "description_en": "Birth of the Non-Aligned Movement, between the two Cold War blocs.",
+      "description_fr": "Naissance du mouvement des non-alignés, entre les deux blocs de la guerre froide.",
+      "wikidata_source": null,
+      "wikipedia_title_en": null,
+      "wikipedia_title_fr": null
+    },
+    {
+      "id": "f333fba5-79ba-4089-be07-9b880ebf524d",
+      "date": "1962-10-16",
+      "label_en": "Cuban Missile Crisis",
+      "label_fr": "Crise des missiles de Cuba",
+      "created_at": "2026-10-28T22:12:19.118151+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q128160",
+      "date_years_bp": 64.043676,
+      "description_en": "October 1962 confrontation between the Soviet Union, Cuba and the United States",
+      "description_fr": "confrontation entre les USA et l'URSS en 1962",
+      "wikidata_source": null,
+      "wikipedia_title_en": "Cuban Missile Crisis",
+      "wikipedia_title_fr": "Crise des missiles de Cuba"
+    },
+    {
+      "id": "EVT_MOON_LAND",
+      "date": "1969-07-16T13:32:00Z",
+      "label_en": "Apollo 11",
+      "label_fr": "Apollo 11",
+      "created_at": "2025-06-13T12:42:13.952374+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q43653",
+      "date_years_bp": 57.293275776453214,
+      "description_en": "first Moon landing and fifth crewed flight of the United States Apollo program",
+      "description_fr": "11e mission du programme spatial américain Apollo (premiers pas de l'homme sur la Lune)",
+      "wikidata_source": null,
+      "wikipedia_title_en": "Apollo 11",
+      "wikipedia_title_fr": "Apollo 11"
+    },
+    {
+      "id": "b5348782-15a1-4a97-a7b6-5d0c7c633c7c",
+      "date": "1972-02-21",
+      "label_en": "Nixon’s visit to China",
+      "label_fr": "Nixon en Chine",
+      "created_at": "2026-11-09T09:05:53.657597+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-09T09:05:53.657597+00:00",
+      "wikidata_id": null,
+      "date_years_bp": 54.717,
+      "description_en": "Richard Nixon meets Mao in Beijing: the United States and China re-establish contact.",
+      "description_fr": "Richard Nixon rencontre Mao à Pékin : les États-Unis et la Chine renouent.",
+      "wikidata_source": null,
+      "wikipedia_title_en": "1972 visit by Richard Nixon to China",
+      "wikipedia_title_fr": "Visite de Richard Nixon en Chine en 1972"
+    },
+    {
+      "id": "f1dd389e-64f9-44e7-beac-7aad17591503",
+      "date": "1975-07-17",
+      "label_en": "Apollo–Soyuz docking",
+      "label_fr": "Amarrage Apollo-Soyouz",
+      "created_at": "2026-10-31T22:40:53.881876+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q208759",
+      "date_years_bp": 51.29348410151203,
+      "description_en": "First docking between US and Soviet spacecraft, symbolic end of the space race.",
+      "description_fr": "Premier amarrage entre vaisseaux américain et soviétique, fin symbolique de la course à l'espace.",
+      "wikidata_source": null,
+      "wikipedia_title_en": "Apollo–Soyuz",
+      "wikipedia_title_fr": "Apollo-Soyouz"
+    },
+    {
+      "id": "3e4be33b-eb5d-413f-9258-6c4aece720c0",
+      "date": "1975-08-01",
+      "label_en": "Helsinki Accords",
+      "label_fr": "Accords d'Helsinki",
+      "created_at": "2026-10-28T23:49:36.999845+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q318161",
+      "date_years_bp": 51.26,
+      "description_en": "1975 non-binding European and North American political agreement",
+      "description_fr": "traité",
+      "wikidata_source": null,
+      "wikipedia_title_en": "Helsinki Accords",
+      "wikipedia_title_fr": null
+    },
+    {
+      "id": "5fb5c213-512a-4ff5-910e-4b92a4ff744e",
+      "date": "1975-11-11",
+      "label_en": "Independence of Angola",
+      "label_fr": "Indépendance de l’Angola",
+      "created_at": "2026-11-08T00:40:13.997391+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-08T00:40:13.997391+00:00",
+      "wikidata_id": null,
+      "date_years_bp": 50.993,
+      "description_en": "The last large Portuguese colony becomes independent and immediately plunges into civil war.",
+      "description_fr": "Dernière grande colonie portugaise indépendante, aussitôt plongée dans la guerre civile.",
+      "wikidata_source": null,
+      "wikipedia_title_en": null,
+      "wikipedia_title_fr": null
+    },
+    {
+      "id": "Q69163529",
+      "date": "1989-11-09",
+      "label_en": "Fall of the Berlin Wall",
+      "label_fr": "Chute du mur de Berlin",
+      "created_at": "2025-06-13T20:00:56.095994+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q69163529",
+      "date_years_bp": 36.985,
+      "description_en": "historical event in November 1989 where the Berlin Wall was opened and demolished",
+      "description_fr": "événement historique en novembre 1989 où le mur de Berlin a été démoli",
+      "wikidata_source": null,
+      "wikipedia_title_en": "Fall of the Berlin Wall",
+      "wikipedia_title_fr": "Chute du mur de Berlin"
+    },
+    {
+      "id": "e717e829-22dc-4943-a92d-0128294c094e",
+      "date": "1991-12-26",
+      "label_en": "Dissolution of the Soviet Union",
+      "label_fr": "Dislocation de l'URSS",
+      "created_at": "2026-10-28T22:24:08.910028+00:00",
+      "source_key": null,
+      "updated_at": "2026-11-06T11:21:48.798258+00:00",
+      "wikidata_id": "Q5167679",
+      "date_years_bp": 34.858,
+      "description_en": "process leading to the late-1991 breakup of the USSR",
+      "description_fr": "processus politique ayant conduit au démembrement de l'URSS",
+      "wikidata_source": null,
+      "wikipedia_title_en": "Dissolution of the Soviet Union",
+      "wikipedia_title_fr": "Dislocation de l'URSS"
+    }
+  ],
+  "story_periods": [],
+  "story_events": [
+    {
+      "story_id": 12,
+      "event_id": "2bf8b54a-22fe-43fc-8fcf-39eada08d71d",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "8993258a-a1d4-496d-a6df-3567ea5092aa",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "a39bb21a-ca41-44f7-b255-04fd45e017d9",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "f333fba5-79ba-4089-be07-9b880ebf524d",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "EVT_MOON_LAND",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "b5348782-15a1-4a97-a7b6-5d0c7c633c7c",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "3e4be33b-eb5d-413f-9258-6c4aece720c0",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "Q69163529",
+      "importance": "normal"
+    },
+    {
+      "story_id": 12,
+      "event_id": "e717e829-22dc-4943-a92d-0128294c094e",
+      "importance": "normal"
+    }
+  ],
+  "story_entry_points": [
+    {
+      "id": 102,
+      "event_id": null,
+      "period_id": "40a4fed6-2637-408f-a95d-3837e38467ae",
+      "source_story_id": 50,
+      "target_story_id": 12,
+      "display_as_period": true
+    },
+    {
+      "id": 127,
+      "event_id": null,
+      "period_id": "0b824941-1f6a-41fc-a460-4d7087663b2d",
+      "source_story_id": 52,
+      "target_story_id": 12,
+      "display_as_period": false
+    },
+    {
+      "id": 170,
+      "event_id": null,
+      "period_id": null,
+      "source_story_id": 12,
+      "target_story_id": 56,
+      "display_as_period": false
+    },
+    {
+      "id": 177,
+      "event_id": "6da1e30e-3a78-4138-81a1-ff828951819e",
+      "period_id": null,
+      "source_story_id": 56,
+      "target_story_id": 12,
+      "display_as_period": false
+    },
+    {
+      "id": 302,
+      "event_id": null,
+      "period_id": "77ac92f0-9470-4de7-a93d-9c2e0a463c61",
+      "source_story_id": 37,
+      "target_story_id": 12,
+      "display_as_period": true
+    }
+  ],
+  "story_tags": [
+    {
+      "tag_id": "pouvoir-institutions",
+      "position": 1,
+      "story_id": 12
+    },
+    {
+      "tag_id": "conflits",
+      "position": 2,
+      "story_id": 12
+    }
+  ],
+  "spaceAnchor": {
+    "id": "fa5c357a-0750-43f4-9351-10a255374c62",
+    "label_fr": "Course à l'espace",
+    "story_id": 14
+  }
+}

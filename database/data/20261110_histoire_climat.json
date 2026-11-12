@@ -1,0 +1,624 @@
+{
+  "reference_time": "2026-11-10T12:00:00.000Z",
+  "sources": {
+    "miocene": "https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2025GL118302",
+    "pliocene": "https://www.ipcc.ch/report/ar6/wg1/chapter/chapter-2/",
+    "bolling": "https://archive.ipcc.ch/pdf/assessment-report/ar5/wg1/WG1AR5_Chapter05_FINAL.pdf",
+    "event82": "https://cp.copernicus.org/articles/10/1887/2014/cp-10-1887-2014.html",
+    "maunder": "https://science.nasa.gov/earth/climate-change/there-is-no-impending-mini-ice-age/",
+    "fourier": "https://archive.ipcc.ch/publications_and_data/ar4/wg1/en/ch1s1-4.html",
+    "foote": "https://www.aps.org/apsnews/2023/07/carbon-dioxide-atmosphere-eunice-foote",
+    "callendar": "https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.49706427503",
+    "milankovitch": "https://www.egu.eu/egs/milankovic.htm",
+    "manabe": "https://www.gfdl.noaa.gov/bibliography/related_files/sm6701.pdf",
+    "orbital": "https://news.climate.columbia.edu/2021/07/09/lamont-doherty-earth-observatory-milestones-in-climate-studies/",
+    "ipcc": "https://www.ipcc.ch/about/history/",
+    "unfccc": "https://unfccc.int/process-and-meetings/united-nations-framework-convention-on-climate-change",
+    "ar6": "https://climate.copernicus.eu/support-ipcc-wg1-6th-assessment-report",
+    "record": "https://climate.copernicus.eu/global-climate-highlights-2024",
+    "volcanism": "https://www.usgs.gov/programs/VHP/volcanoes-can-affect-climate",
+    "carnian": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7494334/"
+  },
+  "newPeriods": [
+    {
+      "row": {
+        "id": "13f5f86e-79f2-4a09-9a68-6553ecfb4971",
+        "wikidata_id": "Q124205596",
+        "label_fr": "Optimum climatique du Miocène moyen",
+        "label_en": "Middle Miocene Climatic Optimum",
+        "description_fr": "Un intervalle chaud interrompt le refroidissement du Cénozoïque, avant une nouvelle expansion de la calotte antarctique.",
+        "description_en": "A warm interval interrupts Cenozoic cooling before renewed expansion of the Antarctic ice sheet.",
+        "start_date": "M17",
+        "end_date": "M14.7",
+        "start_years_bp": 17000000,
+        "end_years_bp": 14700000,
+        "non_thematic": false,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": "Middle Miocene Climatic Optimum"
+      },
+      "parent": null,
+      "tags": [
+        "terre"
+      ],
+      "sources": [
+        "https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2025GL118302"
+      ]
+    },
+    {
+      "row": {
+        "id": "b543ef73-f7f4-4d92-b60c-3f9ce3e5dec3",
+        "wikidata_id": "Q7205011",
+        "label_fr": "Période chaude du Pliocène moyen",
+        "label_en": "Mid-Piacenzian Warm Period",
+        "description_fr": "Un climat plus chaud que le climat préindustriel, avec des calottes réduites et un niveau marin plus élevé, sert de référence pour étudier la réponse à long terme du système climatique.",
+        "description_en": "A climate warmer than pre-industrial conditions, with reduced ice sheets and higher sea levels, provides a reference for studying the long-term response of the climate system.",
+        "start_date": "M3.3",
+        "end_date": "M3",
+        "start_years_bp": 3300000,
+        "end_years_bp": 3000000,
+        "non_thematic": false,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": "Mid-Piacenzian Warm Period"
+      },
+      "parent": null,
+      "tags": [
+        "terre"
+      ],
+      "sources": [
+        "https://www.ipcc.ch/report/ar6/wg1/chapter/chapter-2/"
+      ]
+    },
+    {
+      "row": {
+        "id": "c2ad4965-c02c-4553-a712-0a66154adc52",
+        "wikidata_id": null,
+        "label_fr": "Interstade de Bølling-Allerød",
+        "label_en": "Bølling–Allerød Interstadial",
+        "description_fr": "Un réchauffement rapide de l’Atlantique Nord interrompt la dernière déglaciation, avant le retour au froid du Dryas récent.",
+        "description_en": "Rapid North Atlantic warming interrupts the last deglaciation before the return to cold conditions during the Younger Dryas.",
+        "start_date": "K14.7",
+        "end_date": "10900 BCE",
+        "start_years_bp": 14700,
+        "end_years_bp": 12925.5947980835,
+        "non_thematic": false,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": "Bølling–Allerød Interstadial"
+      },
+      "parent": "3f664826-3a21-419f-a040-55b62803bca4",
+      "tags": [
+        "terre"
+      ],
+      "sources": [
+        "https://archive.ipcc.ch/pdf/assessment-report/ar5/wg1/WG1AR5_Chapter05_FINAL.pdf"
+      ]
+    },
+    {
+      "row": {
+        "id": "7590b9ca-3819-4821-aab8-418bdaa4cdaa",
+        "wikidata_id": "Q1785837",
+        "label_fr": "Refroidissement de 8200 ans avant le présent",
+        "label_en": "8.2-kiloyear cooling event",
+        "description_fr": "Un afflux d’eau douce dans l’Atlantique Nord perturbe la circulation océanique et provoque un refroidissement particulièrement marqué autour du Groenland.",
+        "description_en": "A freshwater influx into the North Atlantic disrupts ocean circulation and causes cooling particularly pronounced around Greenland.",
+        "start_date": "6300 BCE",
+        "end_date": "6140 BCE",
+        "start_years_bp": 8325.68788501027,
+        "end_years_bp": 8165.69062286105,
+        "non_thematic": false,
+        "wikipedia_title_fr": "Événement climatique de 8200 AP",
+        "wikipedia_title_en": "8.2-kiloyear event"
+      },
+      "parent": "f0caaebf-b94d-4fb4-bc4c-4a1c14c0f2e3",
+      "tags": [
+        "terre"
+      ],
+      "sources": [
+        "https://cp.copernicus.org/articles/10/1887/2014/cp-10-1887-2014.html"
+      ]
+    },
+    {
+      "row": {
+        "id": "a71055d1-4f19-42d1-bc61-870b9bee0a4e",
+        "wikidata_id": "Q827568",
+        "label_fr": "Minimum de Maunder",
+        "label_en": "Maunder Minimum",
+        "description_fr": "La raréfaction des taches solaires coïncide avec une partie du Petit Âge glaciaire, dont le refroidissement a aussi des causes volcaniques et océaniques.",
+        "description_en": "Scarce sunspots coincide with part of the Little Ice Age, whose cooling also has volcanic and oceanic causes.",
+        "start_date": "1645",
+        "end_date": "1715",
+        "start_years_bp": 381.849418206708,
+        "end_years_bp": 311.853524982888,
+        "non_thematic": false,
+        "wikipedia_title_fr": "Minimum de Maunder",
+        "wikipedia_title_en": "Maunder Minimum"
+      },
+      "parent": "2418eb78-4792-48b6-a1e0-9f458f010655",
+      "tags": [
+        "terre"
+      ],
+      "sources": [
+        "https://science.nasa.gov/earth/climate-change/there-is-no-impending-mini-ice-age/"
+      ]
+    }
+  ],
+  "newEvents": [
+    {
+      "row": {
+        "id": "bc849061-ceca-405c-aa50-ace9260a55a3",
+        "wikidata_id": null,
+        "label_fr": "Fourier décrit le rôle thermique de l’atmosphère",
+        "label_en": "Fourier describes the atmosphere’s thermal role",
+        "description_fr": "Joseph Fourier explique que l’atmosphère retient une partie de la chaleur terrestre, posant les bases de la compréhension de l’effet de serre.",
+        "description_en": "Joseph Fourier explains that the atmosphere retains some of Earth’s heat, laying foundations for understanding the greenhouse effect.",
+        "date": "1824",
+        "date_years_bp": 202.856947296372,
+        "wikipedia_title_fr": "Joseph Fourier",
+        "wikipedia_title_en": "Joseph Fourier"
+      },
+      "tags": [
+        "sciences-savoirs",
+        "terre"
+      ],
+      "sources": [
+        "https://archive.ipcc.ch/publications_and_data/ar4/wg1/en/ch1s1-4.html"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "32edc091-3869-481e-a6b1-5e147ab4a109",
+        "wikidata_id": null,
+        "label_fr": "Eunice Foote expérimente l’échauffement du CO₂",
+        "label_en": "Eunice Foote experiments with CO₂ warming",
+        "description_fr": "Eunice Newton Foote observe qu’un récipient rempli de CO₂ chauffe davantage au soleil et suggère qu’une atmosphère enrichie en ce gaz serait plus chaude.",
+        "description_en": "Eunice Newton Foote observes that a container filled with CO₂ warms more in sunlight and suggests that an atmosphere richer in this gas would be warmer.",
+        "date": "1856",
+        "date_years_bp": 170.856947296372,
+        "wikipedia_title_fr": "Eunice Newton Foote",
+        "wikipedia_title_en": "Eunice Newton Foote"
+      },
+      "tags": [
+        "sciences-savoirs",
+        "terre"
+      ],
+      "sources": [
+        "https://www.aps.org/apsnews/2023/07/carbon-dioxide-atmosphere-eunice-foote"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "24c4b458-f03d-45c1-8558-499a0f7bd8ac",
+        "wikidata_id": null,
+        "label_fr": "Tyndall mesure l’absorption de la chaleur par les gaz",
+        "label_en": "Tyndall measures heat absorption by gases",
+        "description_fr": "John Tyndall montre en laboratoire que la vapeur d’eau et le CO₂ absorbent le rayonnement thermique, établissant un mécanisme physique de l’effet de serre.",
+        "description_en": "John Tyndall shows in the laboratory that water vapour and CO₂ absorb thermal radiation, establishing a physical mechanism of the greenhouse effect.",
+        "date": "1859",
+        "date_years_bp": 167.856262833676,
+        "wikipedia_title_fr": "John Tyndall (physicien)",
+        "wikipedia_title_en": "John Tyndall"
+      },
+      "tags": [
+        "sciences-savoirs",
+        "terre"
+      ],
+      "sources": [
+        "https://archive.ipcc.ch/publications_and_data/ar4/wg1/en/ch1s1-4.html"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "94b1b316-e300-433b-8b26-a3a9a0fef5e8",
+        "wikidata_id": null,
+        "label_fr": "Callendar relie les émissions de CO₂ au réchauffement observé",
+        "label_en": "Callendar links CO₂ emissions to observed warming",
+        "description_fr": "Guy Stewart Callendar rassemble des mesures de température et de CO₂ et propose que la combustion des énergies fossiles contribue au réchauffement mesuré.",
+        "description_en": "Guy Stewart Callendar combines temperature and CO₂ measurements and proposes that fossil fuel combustion contributes to observed warming.",
+        "date": "1938-04",
+        "date_years_bp": 88.611909650924,
+        "wikipedia_title_fr": "Guy Stewart Callendar",
+        "wikipedia_title_en": "Guy Stewart Callendar"
+      },
+      "tags": [
+        "sciences-savoirs",
+        "terre"
+      ],
+      "sources": [
+        "https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.49706427503"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "80184abf-ef0d-40b7-bb80-ac9d0370d5b8",
+        "wikidata_id": null,
+        "label_fr": "Milanković publie sa synthèse sur les cycles orbitaux",
+        "label_en": "Milanković publishes his synthesis on orbital cycles",
+        "description_fr": "Milutin Milanković rassemble ses calculs reliant les variations de l’orbite et de l’axe terrestres à la répartition de l’ensoleillement et aux glaciations.",
+        "description_en": "Milutin Milanković brings together calculations linking variations in Earth’s orbit and axis to the distribution of sunlight and glaciations.",
+        "date": "1941",
+        "date_years_bp": 85.8576317590691,
+        "wikipedia_title_fr": "Milutin Milanković",
+        "wikipedia_title_en": "Milutin Milanković"
+      },
+      "tags": [
+        "sciences-savoirs",
+        "terre"
+      ],
+      "sources": [
+        "https://www.egu.eu/egs/milankovic.htm"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "ab5379ac-818c-4528-8cb5-3193f07e7a75",
+        "wikidata_id": "Q56874477",
+        "label_fr": "Manabe et Wetherald modélisent le réchauffement par le CO₂",
+        "label_en": "Manabe and Wetherald model CO₂-driven warming",
+        "description_fr": "Un modèle radiatif-convectif de l’atmosphère quantifie le réchauffement dû au doublement du CO₂ et le rôle amplificateur de la vapeur d’eau.",
+        "description_en": "A radiative-convective atmospheric model quantifies warming from doubled CO₂ and the amplifying role of water vapour.",
+        "date": "1967-05",
+        "date_years_bp": 59.5304585900068,
+        "wikipedia_title_fr": "Thermal Equilibrium of the Atmosphere with a Given Distribution of Relative Humidity",
+        "wikipedia_title_en": "Thermal Equilibrium of the Atmosphere with a Given Distribution of Relative Humidity"
+      },
+      "tags": [
+        "sciences-savoirs",
+        "terre"
+      ],
+      "sources": [
+        "https://www.gfdl.noaa.gov/bibliography/related_files/sm6701.pdf"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "92f8ff4b-3c89-4c7a-a26c-75a9a01b3628",
+        "wikidata_id": null,
+        "label_fr": "Les sédiments marins étayent la théorie orbitale des glaciations",
+        "label_en": "Marine sediments support the orbital theory of ice ages",
+        "description_fr": "James Hays, John Imbrie et Nicholas Shackleton montrent que les archives océaniques portent les rythmes orbitaux attendus par la théorie de Milanković.",
+        "description_en": "James Hays, John Imbrie and Nicholas Shackleton show that ocean records contain the orbital rhythms expected from Milanković’s theory.",
+        "date": "1976",
+        "date_years_bp": 50.8596851471595,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null
+      },
+      "tags": [
+        "sciences-savoirs",
+        "terre"
+      ],
+      "sources": [
+        "https://news.climate.columbia.edu/2021/07/09/lamont-doherty-earth-observatory-milestones-in-climate-studies/"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "f5962488-db30-4571-973f-22e531eca832",
+        "wikidata_id": "Q5972980",
+        "label_fr": "Premier rapport d’évaluation du GIEC",
+        "label_en": "First IPCC Assessment Report",
+        "description_fr": "Le GIEC rassemble les connaissances sur le changement climatique et souligne la nécessité d’une coopération internationale face aux émissions de gaz à effet de serre.",
+        "description_en": "The IPCC brings together knowledge on climate change and highlights the need for international cooperation on greenhouse gas emissions.",
+        "date": "1990",
+        "date_years_bp": 36.8583162217659,
+        "wikipedia_title_fr": "Premier rapport d'évaluation du GIEC",
+        "wikipedia_title_en": "IPCC First Assessment Report"
+      },
+      "tags": [
+        "sciences-savoirs",
+        "terre"
+      ],
+      "sources": [
+        "https://www.ipcc.ch/about/history/"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "a065e7e5-8cb3-4d5e-a579-c0dee83c6d5d",
+        "wikidata_id": "Q208645",
+        "label_fr": "Adoption de la Convention-cadre sur le climat",
+        "label_en": "Adoption of the UN Framework Convention on Climate Change",
+        "description_fr": "Les Nations unies adoptent le cadre de coopération internationale visant à stabiliser les concentrations de gaz à effet de serre.",
+        "description_en": "The United Nations adopts a framework for international cooperation to stabilise greenhouse gas concentrations.",
+        "date": "1992-05-09",
+        "date_years_bp": 34.5065023956194,
+        "wikipedia_title_fr": "Convention-cadre des Nations unies sur les changements climatiques",
+        "wikipedia_title_en": "United Nations Framework Convention on Climate Change"
+      },
+      "tags": [
+        "pouvoir-institutions",
+        "terre"
+      ],
+      "sources": [
+        "https://unfccc.int/process-and-meetings/united-nations-framework-convention-on-climate-change"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "0d54559d-5c03-4f2c-9e8f-31ace60b89d5",
+        "wikidata_id": null,
+        "label_fr": "Le GIEC établit sans équivoque l’origine humaine du réchauffement",
+        "label_en": "IPCC establishes unequivocal human influence on warming",
+        "description_fr": "Le volet physique du sixième rapport d’évaluation conclut que l’influence humaine a réchauffé l’atmosphère, les océans et les terres.",
+        "description_en": "The physical science contribution to the Sixth Assessment Report concludes that human influence has warmed the atmosphere, ocean and land.",
+        "date": "2021-08-09",
+        "date_years_bp": 5.25530458590007,
+        "wikipedia_title_fr": "Sixième rapport d'évaluation du GIEC",
+        "wikipedia_title_en": "IPCC Sixth Assessment Report"
+      },
+      "tags": [
+        "sciences-savoirs",
+        "terre"
+      ],
+      "sources": [
+        "https://climate.copernicus.eu/support-ipcc-wg1-6th-assessment-report"
+      ],
+      "importance": "major"
+    },
+    {
+      "row": {
+        "id": "a3c466d2-7d87-4bfb-a8bf-aa7de6ade069",
+        "wikidata_id": null,
+        "label_fr": "Première année civile au-dessus de +1,5 °C selon Copernicus",
+        "label_en": "First calendar year above +1.5°C according to Copernicus",
+        "description_fr": "La température moyenne mondiale de l’année dépasse de plus de 1,5 °C la référence préindustrielle selon Copernicus ; ce constat annuel ne vaut pas franchissement du seuil de Paris sur le long terme.",
+        "description_en": "The year’s global mean temperature exceeds the pre-industrial baseline by more than 1.5°C according to Copernicus; this annual observation does not mean the long-term Paris threshold has been crossed.",
+        "date": "2024",
+        "date_years_bp": 2.85968514715948,
+        "wikipedia_title_fr": null,
+        "wikipedia_title_en": null
+      },
+      "tags": [
+        "terre"
+      ],
+      "sources": [
+        "https://climate.copernicus.eu/global-climate-highlights-2024"
+      ],
+      "importance": "major"
+    }
+  ],
+  "reusedPeriods": [
+    {
+      "story_id": 23,
+      "period_id": "0560995c-c751-4707-a5cd-5a09c848aae6",
+      "parent_period_id": null
+    },
+    {
+      "story_id": 23,
+      "period_id": "ec055b57-d7d5-40da-91dd-2f82b4154371",
+      "parent_period_id": "6fa87489-6d36-423a-a5a9-7eda1ab9badd"
+    }
+  ],
+  "reusedEvents": [
+    {
+      "story_id": 23,
+      "event_id": "76bdb818-be2d-45e1-960b-9ca2e44d3841",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "75f26427-ad7b-43ff-9d44-08659e073351",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "0bae7a06-eed3-4249-98e1-f9c1ab266c65",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "18c4c56e-9504-419d-a735-dff82ce6af6f",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "77593b9e-1bd6-44ba-948b-cd192e43332f",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "469d4e69-dba2-45c4-88a4-369589b89701",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "Q141118",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "7144612b-d26b-464d-8cae-3b027103f113",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "88936004-e14d-4cea-bac8-d28a867a8994",
+      "importance": "normal"
+    }
+  ],
+  "existingImportance": [
+    {
+      "story_id": 23,
+      "event_id": "fc68983d-1c47-4887-bb92-33d6649187a7",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "eee1074e-4022-42a5-835b-1ab864c0b705",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "c0a4d0eb-a68a-47c0-85e0-46da99b0afcc",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "3a36bedd-a0dc-4f58-8165-e1f3ad1ac4ee",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "22b24db2-5451-406e-b4ed-77d51e8baa5e",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "da2ac15a-c5b2-4dfd-b656-624b643236d0",
+      "importance": "normal"
+    },
+    {
+      "story_id": 23,
+      "event_id": "6111336b-a062-4e8b-9f43-107f6562024c",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "EVT_GOE",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "EVT_HURON_GLAC",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "EVT_STURT_GLAC",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "EVT_QUAT_GLAC",
+      "importance": "major"
+    },
+    {
+      "story_id": 23,
+      "event_id": "EVT_LAST_GLAC",
+      "importance": "major"
+    }
+  ],
+  "addedEntries": [
+    {
+      "source_story_id": 23,
+      "target_story_id": 22,
+      "period_id": "4cae203f-2aea-43af-8419-23fd4fe6b4fa",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 22,
+      "target_story_id": 23,
+      "period_id": "4cae203f-2aea-43af-8419-23fd4fe6b4fa",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 23,
+      "target_story_id": 22,
+      "period_id": null,
+      "event_id": "Q141118",
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 22,
+      "target_story_id": 23,
+      "period_id": null,
+      "event_id": "Q141118",
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 23,
+      "target_story_id": 29,
+      "period_id": "0560995c-c751-4707-a5cd-5a09c848aae6",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 23,
+      "target_story_id": 11,
+      "period_id": null,
+      "event_id": "77593b9e-1bd6-44ba-948b-cd192e43332f",
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 25,
+      "target_story_id": 23,
+      "period_id": "6fa87489-6d36-423a-a5a9-7eda1ab9badd",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 23,
+      "target_story_id": 25,
+      "period_id": "ec055b57-d7d5-40da-91dd-2f82b4154371",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 23,
+      "target_story_id": 15,
+      "period_id": "cf42e843-25b9-4750-a520-b33fb66e759e",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 23,
+      "target_story_id": 16,
+      "period_id": "2418eb78-4792-48b6-a1e0-9f458f010655",
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 15,
+      "target_story_id": 23,
+      "period_id": null,
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 16,
+      "target_story_id": 23,
+      "period_id": null,
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 37,
+      "target_story_id": 23,
+      "period_id": null,
+      "event_id": null,
+      "display_as_period": false
+    },
+    {
+      "source_story_id": 25,
+      "target_story_id": 23,
+      "period_id": null,
+      "event_id": "76bdb818-be2d-45e1-960b-9ca2e44d3841",
+      "display_as_period": false
+    }
+  ],
+  "periodUpdates": [
+    {
+      "id": "6bd93f0b-228e-443e-bbbe-ee0d3eb9b05e",
+      "description_fr": "Le dernier interglaciaire était plus chaud que la référence préindustrielle et son niveau marin plus élevé de plusieurs mètres.",
+      "description_en": "The last interglacial was warmer than the pre-industrial baseline and had sea levels several metres higher."
+    },
+    {
+      "id": "430dd9d5-3756-458c-80b6-0ad34c2e844f",
+      "description_fr": "Une phase relativement chaude dans de nombreuses régions de l’hémisphère Nord, liée aux variations orbitales et contemporaine d’une partie du Sahara vert, sans maximum thermique mondial synchrone.",
+      "description_en": "A relatively warm phase in many Northern Hemisphere regions, linked to orbital variations and overlapping part of the Green Sahara, without a synchronous global temperature maximum."
+    }
+  ],
+  "storyUpdate": {
+    "description_fr": "Des premières grandes glaciations au réchauffement d’origine humaine : phases chaudes et froides, rôle du carbone, des volcans et des cycles orbitaux, puis découvertes scientifiques et coopération internationale sur le climat.",
+    "description_en": "From the earliest great glaciations to human-caused warming: warm and cold phases, the roles of carbon, volcanoes and orbital cycles, followed by scientific discoveries and international climate cooperation."
+  }
+}

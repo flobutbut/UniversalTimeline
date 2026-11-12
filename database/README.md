@@ -49,6 +49,12 @@ Le lot `data/20261109_tags_lot4_frises.sql` pose 54 liens de tags sur 35 frises 
 
 ## Corrections du catalogue
 
+Le lot [Guerre froide](data/20261110_guerre_froide.sql), appliqué le 10 novembre 2026 à la frise 12, porte son contenu à sept périodes et 32 événements. [État initial et contrôles](../audits/2026-11-10-guerre-froide.md) ; [retour arrière ciblé](data/20261110_guerre_froide_rollback.sql) testé sur PostgreSQL 17 local.
+
+Le lot `data/20261110_epoque_contemporaine.sql`, appliqué le 10 novembre 2026 après signalement d’une frise presque vide, structure la frise 37 en cinq phases (six périodes avec la Révolution française), réutilise 21 événements pour un total de 53, ajoute dix accès et en déplace cinq. Les huit destinations initiales restent accessibles. [Compte rendu](../audits/2026-11-10-epoque-contemporaine.md), données JSON et retour arrière SQL du même nom ; validations PostgreSQL 17 locales et lectures distantes effectuées. Lot propre à l’état audité, à ne pas rejouer sur la base active ou sur une installation vide.
+
+Le lot `data/20261110_histoire_climat.sql`, appliqué le 10 novembre 2026 à la demande d’enrichissement de la frise 23, porte celle-ci à 25 périodes et 32 événements : cinq périodes et onze événements nouveaux, deux périodes et neuf événements réutilisés, quatorze nouveaux points d’entrée. Les sources et valeurs sont dans le JSON du même nom ; [le compte rendu](../audits/2026-11-10-histoire-climat.md) détaille les contrôles locaux et distants. Le retour arrière `data/20261110_histoire_climat_rollback.sql` a été validé uniquement sur PostgreSQL 17 local jetable. Ce lot dépend de l’état audité et ne doit être rejoué ni sur la base active ni sur une installation vide.
+
 Les fichiers `data/20261102_catalogue_*` contiennent les textes sourcés et le lot transactionnel de correction de l’audit du 2 novembre 2026, déjà appliqué au projet actif. Le [compte rendu](../Documentation/PERFORMANCE-ET-CATALOGUE.md) décrit les décisions et la validation. Ces corrections ciblent les anciennes fiches recensées et ne doivent pas être exécutées sur une nouvelle base vide. Le retour arrière refuse les contenus ou relations modifiés depuis l’application.
 
 ## Retours utilisateurs — 9 novembre 2026

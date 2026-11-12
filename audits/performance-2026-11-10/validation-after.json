@@ -117,5 +117,17 @@
     }
   ],
   "serverDependencyVulnerabilities": 0,
-  "schemaMigrationAppliedToProduction": false
+  "schemaMigrationAppliedToProduction": true,
+  "migrationVersion": "20261110110221",
+  "legacyPolicyCount": 21,
+  "allOperationPolicyCount": 0,
+  "contentFingerprintsUnchanged": true,
+  "deployedCommit": "ec361b18cc2ac8146d85cf20746604efd8aaa8cf",
+  "vercelState": "READY",
+  "productionSmokeFailures": 0,
+  "productionSmokeReads": 30,
+  "githubActions": {
+    "runId": 42804164717,
+    "conclusion": "success"
+  }
 }
