@@ -11,7 +11,7 @@ afterEach(() => { view?.unmount(); router?.options.history.destroy(); vi.restore
 async function start() {
   router = createRouter({ history: createMemoryHistory(), routes: ['timeline', 'database'].map(name => ({ path: `/${name}`, name, component: { template: '<div />' } })) });
   await router.push('/timeline');
-  view = mount(PublicStoryCard, { props: { story: { id: '1', title: { fr: 'Marie Curie', en: 'Marie Curie' }, categories: [], author: 'Alice', isPublic: true }, editable: false }, global: { plugins: [router] } });
+  view = mount(PublicStoryCard, { props: { story: { id: '1', title: { fr: 'Marie Curie', en: 'Marie Curie' }, categories: [], author: 'Alice', isPublic: true } }, global: { plugins: [router] } });
 }
 it('requests the existing Wikipedia thumbnail only near the viewport and keeps the fallback on failure', async () => {
   let intersect!: IntersectionObserverCallback;

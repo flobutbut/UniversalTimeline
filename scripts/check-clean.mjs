@@ -102,7 +102,7 @@ try {
     ['catalogue_guard', 'catalogueWriteGuard.postgres.mjs'],
     ['wikipedia_titles', 'wikipediaTitles.postgres.mjs'],
     ['taxonomy_tags', 'taxonomyTags.postgres.mjs'],
-    ['story_structure', 'storyStructure.postgres.mjs'],
+    ['story_structure', 'storyStructure.postgres.mjs'], ['story_catalogue', 'storyCatalogue.postgres.mjs'],
     ['navigation_wrappers', 'navigationWrappers.postgres.mjs'],
   ]) await postgresSuite(name, file, restore);
   console.log('\nInstallation vierge, tests, audits, builds et restauration de test réussis.');

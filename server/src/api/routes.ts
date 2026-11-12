@@ -15,6 +15,8 @@ import type { Response } from 'express';
 import * as catalogue from '../services/catalogueService.js';
 import { convertEventToPeriod, convertPeriodToEvent } from '../services/catalogueConversion.js';
 import * as stories from '../services/storyService.js';
+import { listPublicStoryCatalogue } from '../services/storyCatalogueService.js';
+import { parseStoryCatalogueInput } from './storyCatalogueInput.js';
 import { search, searchStoryTimelines, searchTimelineEvents, searchGeneratedCatalogue } from '../services/searchService.js';
 import { semanticSearch } from '../services/semanticSearch.js';
 import { loadStoryTemporalBounds } from '../services/storyTemporalBounds.js';
@@ -117,6 +119,9 @@ router.get('/stories', endpoint('Erreur lors de la récupération des frises', a
   res.json(await stories.listStories(req.query.view === 'summary'));
 }));
 // Static paths must precede /stories/:id.
+router.get('/stories/catalogue', endpoint('Impossible de charger le catalogue des frises.', async (req, res) => {
+  res.json(await listPublicStoryCatalogue(parseStoryCatalogueInput(req.query)));
+}));
 router.get('/stories/navigation', endpoint('Impossible de charger les parcours des frises.', async (_req, res) => {
   res.json(await stories.listNavigationStories());
 }));
