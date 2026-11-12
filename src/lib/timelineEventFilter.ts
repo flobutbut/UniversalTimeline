@@ -23,16 +23,19 @@ function primaryCounts(events: readonly ListEvent[]) {
 export function defaultEventTagIds(story: FilterableStory): string[] | null {
   if (story.events.length < TIMELINE_FILTER_MIN_EVENTS) return null;
   const counts = primaryCounts(story.events);
-  const own = story.tags?.map(tag => tag.id).filter(id => counts.some(({ tag }) => tag.id === id)) ?? [];
+  const own = story.tags?.map(tag => tag.id).filter(id => story.events.some(event => matchesTags(event, [id]))) ?? [];
   if (own.length) return own;
   return counts.length ? counts.slice(0, UNTAGGED_STORY_SUBJECTS).map(({ tag }) => tag.id) : null;
 }
 
-/** Un événement majeur reste visible, et une fiche pas encore classée n'est jamais masquée pour autant. */
+/**
+ * « L'essentiel » : un événement reste visible dès qu'un de ses sujets (principal ou non) est actif,
+ * pour ne pas écarter un fait à cheval sur deux domaines. Un événement majeur reste visible, et une
+ * fiche pas encore classée n'est jamais masquée pour autant.
+ */
 export function isEventShown(event: ListEvent, active: readonly string[] | null): boolean {
   if (!active || event.importance === 'major') return true;
-  const primary = primaryTag(event);
-  return !primary || matchesTags({ tags: [primary] }, active);
+  return !event.tags?.length || matchesTags(event, active);
 }
 
 /** Un sujet choisi explicitement montre ce sujet seul, y compris ses sous-domaines. */
