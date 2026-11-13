@@ -7,18 +7,20 @@
     :hreflang="article.language"
     target="_blank"
     rel="noopener noreferrer"
-    :title="display === 'logo' ? 'Voir sur Wikipédia' : undefined"
+    :title="uiText(display === 'logo' ? label : undefined)"
     @click.stop
     @keydown.enter.stop
     @keydown.space.stop
   >
     <Icon v-if="display === 'logo'" icon="mdi:wikipedia" class="wikipedia-link__icon" aria-hidden="true" />
-    <span v-else>{{ label }}</span>
-    <span class="sr-only">{{ display === 'logo' ? label : '' }} : {{ subject }}{{ article.language === 'en' ? ', article en anglais' : '' }} (nouvel onglet)</span>
+    <span v-else>{{ uiText(label) }}</span>
+    <span class="sr-only">{{ uiText(display === 'logo' ? label : '') }} : {{ subject }}{{ uiText(article.language === 'en' ? ', article en anglais' : '') }} {{ uiText("(nouvel onglet)") }}</span>
   </a>
 </template>
 
 <script setup lang="ts">
+import { language, uiText } from '@/i18n';
+
 import { computed } from 'vue';
 import { Icon } from '@iconify/vue';
 import { preferredWikipediaArticle } from '@/lib/wikipedia';
@@ -35,8 +37,10 @@ const props = withDefaults(defineProps<{
   display?: 'logo' | 'text';
 }>(), { titles: null, compact: false, display: 'logo' });
 
-const article = computed(() => preferredWikipediaArticle(props.titles));
-const label = computed(() => article.value?.language === 'en' ? 'Voir sur Wikipédia (en)' : 'Voir sur Wikipédia');
+const article = computed(() => preferredWikipediaArticle(props.titles, language.value));
+const label = computed(() => language.value === 'en'
+  ? (article.value?.language === 'fr' ? 'View on Wikipedia (FR)' : 'View on Wikipedia')
+  : (article.value?.language === 'en' ? 'Voir sur Wikipédia (en)' : 'Voir sur Wikipédia'));
 </script>
 
 <style scoped>

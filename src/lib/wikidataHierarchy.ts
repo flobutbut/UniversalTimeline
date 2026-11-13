@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 import { MS_PER_YEAR, parseTemporal } from '@temporal';
 import { wikidataItemKey, type WikidataTimelineItem } from '@/types/wikidataGeneration';
 
@@ -51,10 +52,10 @@ export function wikidataDateWarnings(item: WikidataTimelineItem, parent: Wikidat
     else if (start.oldest > parentStart.newest) uncertain = true;
   }
   if (end && parentEnd && item.endDate !== parent.endDate) {
-    if (end.oldest < parentEnd.newest) warnings.push(`Se termine après « ${parent.title} » (${parent.endDate}).`);
+    if (end.oldest < parentEnd.newest) warnings.push(uiFormat`Se termine après « ${parent.title} » (${parent.endDate}).`);
     else if (end.newest < parentEnd.oldest) uncertain = true;
   }
-  if (approximate) warnings.push(`Les dates approximatives ne permettent pas de confirmer l’inclusion dans « ${parent.title} ».`);
-  else if (uncertain) warnings.push(`Les dates au mois ou à l’année ne permettent pas de confirmer l’inclusion dans « ${parent.title} ».`);
+  if (approximate) warnings.push(uiFormat`Les dates approximatives ne permettent pas de confirmer l’inclusion dans « ${parent.title} ».`);
+  else if (uncertain) warnings.push(uiFormat`Les dates au mois ou à l’année ne permettent pas de confirmer l’inclusion dans « ${parent.title} ».`);
   return warnings;
 }

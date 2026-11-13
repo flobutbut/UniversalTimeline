@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, ref } from 'vue';
 import { Icon } from '@iconify/vue';
 import { RouterLink } from 'vue-router';
@@ -46,40 +47,40 @@ async function saveEmail() {
 <template>
   <PopoverSurface :ref="setSurface" class="feedback-form" role="dialog" aria-modal="true" :aria-labelledby="`${dialogId}-title`" :aria-busy="busy" tabindex="-1">
     <header class="feedback-form__header">
-      <div><h2 :id="`${dialogId}-title`">Votre avis compte</h2><p>Aidez-nous à améliorer Universal Timeline.</p></div>
-      <Button variant="ghost" icon-only :disabled="busy" aria-label="Fermer le formulaire" @click="emit('close')"><template #icon><Icon icon="mdi:close" width="20" aria-hidden="true" /></template></Button>
+      <div><h2 :id="`${dialogId}-title`">{{ uiText("Votre avis compte") }}</h2><p>{{ uiText("Aidez-nous à améliorer Universal Timeline.") }}</p></div>
+      <Button variant="ghost" icon-only :disabled="busy" :aria-label="uiText('Fermer le formulaire')" @click="emit('close')"><template #icon><Icon icon="mdi:close" width="20" aria-hidden="true" /></template></Button>
     </header>
     <form v-if="step === 'form'" class="feedback-form__body" @submit.prevent="submit">
       <fieldset class="feedback-form__rating" :disabled="busy || !!submission">
-        <legend>Comment trouvez-vous l’expérience ?</legend>
+        <legend>{{ uiText("Comment trouvez-vous l’expérience ?") }}</legend>
         <div class="feedback-form__stars">
           <label v-for="star in 5" :key="star" :class="{ 'feedback-form__star--selected': rating !== null && star <= rating }">
-            <input v-model="rating" type="radio" :name="`${dialogId}-rating`" :value="star" :aria-label="`${star} étoile${star > 1 ? 's' : ''}`" />
+            <input v-model="rating" type="radio" :name="`${dialogId}-rating`" :value="star" :aria-label="uiText(uiFormat`${star} étoile${star > 1 ? 's' : ''}`)" />
             <DesignIcon :name="rating !== null && star <= rating ? 'star-filled' : 'star'" />
           </label>
-          <Button v-if="rating" variant="ghost" size="xs" aria-label="Retirer la note" @click="rating = null">Effacer</Button>
+          <Button v-if="rating" variant="ghost" size="xs" :aria-label="uiText('Retirer la note')" @click="rating = null">{{ uiText("Effacer") }}</Button>
         </div>
       </fieldset>
-      <Select v-model="subject" label="Objet" :options="[...feedbackSubjects]" :searchable="false" required :disabled="busy || !!submission" placeholder="Choisir un objet" />
-      <Input v-model="message" label="Votre message" type="textarea" :placeholder="placeholder" required maxlength="5000" :disabled="busy || !!submission" />
-      <FeedbackState v-if="error" kind="error" layout="inline" :message="error" />
-      <Button type="submit" :disabled="busy || !subject || !message.trim()">{{ busy ? 'Envoi en cours…' : submission ? 'Réessayer l’envoi' : 'Envoyer mon retour' }}</Button>
+      <Select v-model="subject" :label="uiText('Objet')" :options="[...feedbackSubjects]" :searchable="false" required :disabled="busy || !!submission" :placeholder="uiText('Choisir un objet')" />
+      <Input v-model="message" :label="uiText('Votre message')" type="textarea" :placeholder="uiText(placeholder)" required maxlength="5000" :disabled="busy || !!submission" />
+      <FeedbackState v-if="error" kind="error" layout="inline" :message="uiText(error)" />
+      <Button type="submit" :disabled="busy || !subject || !message.trim()">{{ uiText(busy ? 'Envoi en cours…' : submission ? 'Réessayer l’envoi' : 'Envoyer mon retour') }}</Button>
     </form>
     <form v-else-if="step === 'email'" class="feedback-form__body" @submit.prevent="saveEmail">
-      <FeedbackState kind="success" message="Merci ! Votre retour est enregistré."><template #icon><Icon icon="mdi:check-circle-outline" width="24" /></template></FeedbackState>
-      <p>Souhaitez-vous être informé de sa prise en compte ?</p>
-      <Input v-model="email" label="Votre adresse e-mail" type="email" autocomplete="email" placeholder="vous@exemple.fr" required maxlength="254" :disabled="busy" />
-      <p class="feedback-form__hint">Votre adresse servira uniquement au suivi de ce retour.</p>
-      <FeedbackState v-if="error" kind="error" layout="inline" :message="error" />
-      <Button type="submit" :disabled="busy || !email.trim()">{{ busy ? 'Enregistrement…' : 'Me tenir informé' }}</Button>
-      <Button variant="ghost" :disabled="busy" @click="emit('close')">Non merci</Button>
+      <FeedbackState kind="success" :message="uiText('Merci ! Votre retour est enregistré.')"><template #icon><Icon icon="mdi:check-circle-outline" width="24" /></template></FeedbackState>
+      <p>{{ uiText("Souhaitez-vous être informé de sa prise en compte ?") }}</p>
+      <Input v-model="email" :label="uiText('Votre adresse e-mail')" type="email" autocomplete="email" :placeholder="uiText('vous@exemple.fr')" required maxlength="254" :disabled="busy" />
+      <p class="feedback-form__hint">{{ uiText("Votre adresse servira uniquement au suivi de ce retour.") }}</p>
+      <FeedbackState v-if="error" kind="error" layout="inline" :message="uiText(error)" />
+      <Button type="submit" :disabled="busy || !email.trim()">{{ uiText(busy ? 'Enregistrement…' : 'Me tenir informé') }}</Button>
+      <Button variant="ghost" :disabled="busy" @click="emit('close')">{{ uiText("Non merci") }}</Button>
     </form>
     <div v-else class="feedback-form__body">
-      <FeedbackState kind="success" message="Votre adresse a bien été ajoutée."><template #icon><Icon icon="mdi:check-circle-outline" width="24" /></template></FeedbackState>
-      <p>Nous pourrons vous informer de la prise en compte de votre retour.</p>
-      <Button @click="emit('close')">Fermer</Button>
+      <FeedbackState kind="success" :message="uiText('Votre adresse a bien été ajoutée.')"><template #icon><Icon icon="mdi:check-circle-outline" width="24" /></template></FeedbackState>
+      <p>{{ uiText("Nous pourrons vous informer de la prise en compte de votre retour.") }}</p>
+      <Button @click="emit('close')">{{ uiText("Fermer") }}</Button>
     </div>
-    <footer class="feedback-form__privacy"><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }" @click="emit('close')">Confidentialité de vos données</RouterLink></footer>
+    <footer class="feedback-form__privacy"><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }" @click="emit('close')">{{ uiText("Confidentialité de vos données") }}</RouterLink></footer>
   </PopoverSurface>
 </template>
 

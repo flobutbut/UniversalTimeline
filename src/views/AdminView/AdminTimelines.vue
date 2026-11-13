@@ -3,24 +3,24 @@
     <ExpandedMapFocus v-if="expanded" />
     <header v-show="!expanded" class="admin-timelines__header">
       <div>
-        <h2 id="admin-timelines-title">Carte des frises</h2>
+        <h2 id="admin-timelines-title">{{ uiText("Carte des frises") }}</h2>
       </div>
-      <Button variant="tertiary" size="sm" :disabled="loading" @click="refresh"><template #icon><Icon icon="mdi:refresh" width="18" height="18" aria-hidden="true" /></template>Actualiser</Button>
+      <Button variant="tertiary" size="sm" :disabled="loading" @click="refresh"><template #icon><Icon icon="mdi:refresh" width="18" height="18" aria-hidden="true" /></template>{{ uiText("Actualiser") }}</Button>
     </header>
-    <FeedbackState v-if="loading" kind="loading" layout="inline" :message="network?`Chargement des aperçus : ${completed} / ${network.stories.length} frises…`:'Chargement des frises…'" />
-    <FeedbackState v-else-if="error" kind="error" layout="inline" :message="error" retryable @retry="refresh" />
+    <FeedbackState v-if="loading" kind="loading" layout="inline" :message="uiText(network?uiFormat`Chargement des aperçus : ${completed} / ${network.stories.length} frises…`:'Chargement des frises…')" />
+    <FeedbackState v-else-if="error" kind="error" layout="inline" :message="uiText(error)" retryable @retry="refresh" />
     <template v-else-if="network">
-      <FeedbackState v-if="failures.size" kind="error" layout="inline" :message="`${failures.size} aperçu(s) indisponible(s). La carte est incomplète.`" retryable @retry="refresh" />
+      <FeedbackState v-if="failures.size" kind="error" layout="inline" :message="uiText(uiFormat`${failures.size} aperçu(s) indisponible(s). La carte est incomplète.`)" retryable @retry="refresh" />
       <TimelineMapCanvas ref="canvas" :expanded="expanded" temporal @toggle-expand="setExpanded(!expanded)" @view-change="viewport=$event">
         <template #tools>
-          <Switch v-model="showEvents" variant="sm" label="Événements" />
-          <Button variant="ghost" size="sm" :disabled="!layout.parents.size" @click="setBranches(false)">Tout déplier</Button>
-          <Button variant="ghost" size="sm" :disabled="!layout.parents.size" @click="setBranches(true)">Tout replier</Button>
+          <Switch v-model="showEvents" variant="sm" :label="uiText('Événements')" />
+          <Button variant="ghost" size="sm" :disabled="!layout.parents.size" @click="setBranches(false)">{{ uiText("Tout déplier") }}</Button>
+          <Button variant="ghost" size="sm" :disabled="!layout.parents.size" @click="setBranches(true)">{{ uiText("Tout replier") }}</Button>
         </template>
         <template #search><RelationGraphSearch :nodes="graph.nodes" @select="locateObject" /></template>
-        <span class="sr-only" role="status">{{ selectionStatus }}</span>
+        <span class="sr-only" role="status">{{ uiText(selectionStatus) }}</span>
         <div class="admin-timelines__map" :style="{'--map-width':layout.width+'px','--map-height':layout.height+'px'}">
-          <span v-if="layout.undatedTop!==null" class="admin-timelines__undated" :style="{top:layout.undatedTop+'px'}">Dates non déterminées</span>
+          <span v-if="layout.undatedTop!==null" class="admin-timelines__undated" :style="{top:layout.undatedTop+'px'}">{{ uiText("Dates non déterminées") }}</span>
           <div v-for="row in projectedRows" :key="row.story.id" class="admin-timelines__position" :data-temporal-story="row.story.id"
             :data-start="row.bounds?.start" :data-end="row.bounds?.end" :data-dated="!!row.bounds"
             :style="{'--row-left':row.left+'px','--row-width':row.width+'px','--row-top':row.top+'px',left:row.projected.left+'px',width:row.projected.width+'px',visibility:row.projected.visible?'visible':'hidden',top:row.top+'px'}">
@@ -29,13 +29,14 @@
               @select="selectedId=$event" @toggle="toggleBranch" @resize="setCardHeight(row.story.id,$event)" />
           </div>
         </div>
-        <FeedbackState v-if="!network.stories.length" kind="empty" message="Aucune frise à afficher." />
+        <FeedbackState v-if="!network.stories.length" kind="empty" :message="uiText('Aucune frise à afficher.')" />
       </TimelineMapCanvas>
     </template>
   </section>
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, defineComponent, nextTick, onMounted, ref, shallowRef, watch, type ComponentPublicInstance } from 'vue';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';

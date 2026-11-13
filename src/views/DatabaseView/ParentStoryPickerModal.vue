@@ -1,26 +1,27 @@
 <template>
-  <ModalShell :title="mode === 'parent' ? 'Choisir la frise parente' : 'Ajouter un point d’entrée'" height="auto" :busy="busy" @close="$emit('close')">
-    <p class="parent-picker__hint">{{ mode === 'parent'
+  <ModalShell :title="uiText(mode === 'parent' ? 'Choisir la frise parente' : 'Ajouter un point d’entrée')" height="auto" :busy="busy" @close="$emit('close')">
+    <p class="parent-picker__hint">{{ uiText(mode === 'parent'
       ? 'Choisissez la frise parente et un emplacement : période ou racine de la frise.'
-      : 'Choisissez une frise et la période ou la racine depuis laquelle celle-ci sera accessible.' }}</p>
-    <p v-if="error" role="alert" class="parent-picker__error">{{ error }}</p>
-    <BaseSelect v-model="parentId" :label="mode === 'parent' ? 'Frise parente' : 'Frise source'" placeholder="Rechercher une frise…"
+      : 'Choisissez une frise et la période ou la racine depuis laquelle celle-ci sera accessible.') }}</p>
+    <p v-if="error" role="alert" class="parent-picker__error">{{ uiText(error) }}</p>
+    <BaseSelect v-model="parentId" :label="uiText(mode === 'parent' ? 'Frise parente' : 'Frise source')" :placeholder="uiText('Rechercher une frise…')"
       :options="options" searchable no-results-text="Aucune autre frise disponible" :disabled="busy" />
-    <p v-if="loading" role="status" class="parent-picker__hint">Chargement des périodes…</p>
+    <p v-if="loading" role="status" class="parent-picker__hint">{{ uiText("Chargement des périodes…") }}</p>
     <p v-else-if="loadError" role="alert" class="parent-picker__error">
-      {{ loadError }} <Button variant="tertiary" size="sm" type="button" @click="loadParent">Réessayer</Button>
+      {{ uiText(loadError) }} <Button variant="tertiary" size="sm" type="button" @click="loadParent">{{ uiText("Réessayer") }}</Button>
     </p>
-    <BaseSelect v-if="parentId" v-model="periodId" :label="mode === 'parent' ? 'Ancre' : 'Période de rattachement'"
-      placeholder="Choisir une période…" :options="periodOptions" searchable
+    <BaseSelect v-if="parentId" v-model="periodId" :label="uiText(mode === 'parent' ? 'Ancre' : 'Période de rattachement')"
+      :placeholder="uiText('Choisir une période…')" :options="periodOptions" searchable
       :no-results-text="parent?.periods.length ? 'Toutes les périodes sont déjà liées à cette frise' : 'Cette frise ne contient aucune période'" :disabled="busy || loading || !!loadError"
-      :hint="suggestedLabel ? `Proposée : « ${suggestedLabel} », qui contient les dates de cette frise.` : undefined" />
+      :hint="suggestedLabel ? uiFormat`Proposée : « ${suggestedLabel} », qui contient les dates de cette frise.` : undefined" />
     <template #footer-right>
-      <Button :disabled="busy || loading || !!loadError || !parentId || !periodId" @click="submit">{{ mode === 'parent' ? 'Rattacher' : 'Ajouter' }}</Button>
+      <Button :disabled="busy || loading || !!loadError || !parentId || !periodId" @click="submit">{{ uiText(mode === 'parent' ? 'Rattacher' : 'Ajouter') }}</Button>
     </template>
   </ModalShell>
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import { computed, ref, watch } from 'vue';
 import ModalShell from '@/components/base/ModalShell.vue';
 import BaseSelect from '@/components/base/Select.vue';
@@ -38,14 +39,14 @@ const emit = defineEmits<{ close: []; confirm: [parentId: string, periodId: stri
 const parentId = ref<string | null>(null);
 const periodId = ref<string | null>(null);
 const { parent, loading, error: loadError, load: loadParent } = useParentStoryDetail(parentId);
-const options = computed(() => props.candidates.map(story => ({ value: story.id, label: story.title.fr || story.title.en })));
+const options = computed(() => props.candidates.map(story => ({ value: story.id, label: localizedText(story.title) })));
 const suggestedId = computed(() => parent.value ? suggestAnchorPeriod(parent.value.periods, props.subject, Date.now()) : null);
 const periodOptions = computed(() => {
   if(!parent.value || parent.value.id!==parentId.value || loading.value)return [];
   const linked = new Set(props.mode === 'entry' ? props.existingParents?.find(story => story.id === parentId.value)?.anchors.filter(anchor => anchor.type === 'period').map(anchor => anchor.id) : []);
   const rootLinked=props.mode==='entry'&&props.existingParents?.find(story=>story.id===parentId.value)?.atRoot;
   return [...(!rootLinked?[{value:'__story_root__',label:'Racine de la frise'}]:[]),...(parent.value?.periods ?? []).filter(period => !linked.has(period.id))
-    .map(period => ({ value: period.id, label: `${period.label.fr || period.label.en}${period.id === suggestedId.value ? ' (proposée)' : ''}` }))];
+    .map(period => ({ value: period.id, label: `${localizedText(period.label)}${period.id === suggestedId.value ? ' (proposée)' : ''}` }))];
 });
 const suggestedLabel = computed(() => periodOptions.value.find(option => option.value === suggestedId.value)?.label.replace(/ \(proposée\)$/, ''));
 watch(suggestedId, id => { if (id && !periodId.value && periodOptions.value.some(option => option.value === id)) periodId.value = id; });

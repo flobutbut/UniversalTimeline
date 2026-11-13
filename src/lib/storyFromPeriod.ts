@@ -1,3 +1,4 @@
+import { localizedText } from '@/i18n';
 import type { Event, Period, Story } from '@/types/database';
 import { collectStoryPeriodSubtreeIds } from '@/lib/storyPeriodFinderColumns';
 import { comparableYearsBeforePresent } from '@temporal';
@@ -46,7 +47,7 @@ export function previewStoryFromPeriod(periods: Period[], events: Event[], perio
   const subtree = collectStoryPeriodSubtreeIds(periods, periodId);
   const moved = subtree.filter(id => id !== periodId);
   return {
-    periodId, label: period.label.fr || period.label.en || periodId, rangeLabel: formatPeriodDateRange(period),
+    periodId, label: localizedText(period.label) || periodId, rangeLabel: formatPeriodDateRange(period),
     periodCount: subtree.length, movedPeriodCount: moved.length, linkedStoryCount: story ? linkedStoryIds(story, moved).length : 0, eventCount, datesKnown,
   };
 }

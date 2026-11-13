@@ -10,7 +10,7 @@ export function apiId(value: ApiId): string {
 }
 function text(value: ApiText | null | undefined, fr?: string | null, en?: string | null): MultilingualText {
   const french = fr ?? value?.fr ?? '';
-  return { fr: french, en: en ?? value?.en ?? french };
+  return { fr: french, en: en ?? value?.en ?? '' };
 }
 function description(value: { description?: ApiText | null; description_fr?: string | null; description_en?: string | null }): MultilingualText | undefined {
   return value.description || value.description_fr != null || value.description_en != null

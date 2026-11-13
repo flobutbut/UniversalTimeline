@@ -1,19 +1,20 @@
 <template>
-  <section v-if="count || message || failures.length || uncertain" class="catalogue-bulk" aria-label="Actions groupées">
+  <section v-if="count || message || failures.length || uncertain" class="catalogue-bulk" :aria-label="uiText('Actions groupées')">
     <div class="catalogue-bulk__controls">
-      <strong role="status">{{ count }} sélectionné(s)</strong>
-      <Select v-if="hasAssociations" v-model="storyId" :options="stories ?? []" placeholder="Choisir une frise" :searchable="(stories?.length ?? 0) > 8" compact :disabled="busy || uncertain || !count" />
+      <strong role="status">{{ count }} {{ uiText("sélectionné(s)") }}</strong>
+      <Select v-if="hasAssociations" v-model="storyId" :options="stories ?? []" :placeholder="uiText('Choisir une frise')" :searchable="(stories?.length ?? 0) > 8" compact :disabled="busy || uncertain || !count" />
       <Button v-for="action in actions" :key="action.value" :variant="action.value === 'delete' ? 'danger' : 'tertiary'" size="sm"
         :disabled="busy || uncertain || !count || ((action.value === 'add-story' || action.value === 'remove-story') && !hasSelectedStory)"
-        @click="emit('apply', action.value, action.value === 'add-story' || action.value === 'remove-story' ? storyId : undefined)">{{ actionLabels[action.value] }}</Button>
-      <Button variant="ghost" size="sm" icon-only aria-label="Désélectionner" title="Désélectionner" :disabled="busy || !count" @click="emit('clear')"><template #icon><Icon icon="mdi:close" aria-hidden="true" /></template></Button>
+        @click="emit('apply', action.value, action.value === 'add-story' || action.value === 'remove-story' ? storyId : undefined)">{{ uiText(actionLabels[action.value]) }}</Button>
+      <Button variant="ghost" size="sm" icon-only :aria-label="uiText('Désélectionner')" :title="uiText('Désélectionner')" :disabled="busy || !count" @click="emit('clear')"><template #icon><Icon icon="mdi:close" aria-hidden="true" /></template></Button>
     </div>
-    <p v-if="message" role="status">{{ message }}</p>
-    <p v-if="uncertain" role="alert">Une réponse n’a pas pu être confirmée. Rechargez les données avant toute nouvelle action. <Button variant="tertiary" size="xs" :disabled="busy" @click="emit('reload')">Recharger les données</Button></p>
-    <ul v-if="failures.length" class="catalogue-bulk__failures" role="alert"><li v-for="failure in failures" :key="failure.id"><strong>{{ failure.label }}</strong> : {{ failure.message }}</li></ul>
+    <p v-if="message" role="status">{{ uiText(message) }}</p>
+    <p v-if="uncertain" role="alert">{{ uiText("Une réponse n’a pas pu être confirmée. Rechargez les données avant toute nouvelle action.") }} <Button variant="tertiary" size="xs" :disabled="busy" @click="emit('reload')">{{ uiText("Recharger les données") }}</Button></p>
+    <ul v-if="failures.length" class="catalogue-bulk__failures" role="alert"><li v-for="failure in failures" :key="failure.id"><strong>{{ uiText(failure.label) }}</strong> : {{ uiText(failure.message) }}</li></ul>
   </section>
 </template>
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { computed, ref } from 'vue';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';

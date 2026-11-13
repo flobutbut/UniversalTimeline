@@ -18,8 +18,8 @@ export function createGeneratedStory(input: GeneratedStoryInput) {
   return withTransaction(async client => {
     await setRelationLockTimeout(client);
     // Serialize equal subjects/titles across requests, then read a fresh RLS snapshot.
-    await lockGeneratedStoryTopic(client, input.qid, input.story.title.fr);
-    const matches = await findGeneratedStoryMatches(client, input.qid, input.story.title.fr);
+    await lockGeneratedStoryTopic(client, input.qid, input.story.title.fr || input.story.title.en);
+    const matches = await findGeneratedStoryMatches(client, input.qid, input.story.title.fr || input.story.title.en);
     if (matches.some(story => !input.acknowledgedStoryIds.includes(story.id))) throw new WikidataGenerationConflictError(matches);
     const story = await insertStory(client, { ...input.story, isPublic: input.story.isPublic ?? false, author: await creatorAuthor(client) });
     const periods = new Map<string, string>(); const events: string[] = [];

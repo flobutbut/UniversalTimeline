@@ -1,73 +1,74 @@
 <template>
   <section class="admin-user" aria-labelledby="admin-user-title">
-    <RouterLink class="admin-user__back" :to="{ name: 'admin', query: { section: 'users' } }">← Tous les utilisateurs</RouterLink>
+    <RouterLink class="admin-user__back" :to="{ name: 'admin', query: { section: 'users' } }">{{ uiText("← Tous les utilisateurs") }}</RouterLink>
     <FeedbackState v-if="loading && !user" kind="loading" layout="inline" />
-    <FeedbackState v-else-if="error && !user" kind="error" layout="inline" :message="error" retryable @retry="load" />
+    <FeedbackState v-else-if="error && !user" kind="error" layout="inline" :message="uiText(error)" retryable @retry="load" />
     <template v-else-if="user">
       <header class="admin-user__header">
         <UserAvatar :username="user.username" :color="user.avatarColor ?? undefined" :icon="user.avatarIcon ?? undefined" size="lg" />
         <div>
-          <h2 id="admin-user-title" ref="titleRef" tabindex="-1">{{ user.username ?? 'Sans nom d’utilisateur' }}</h2>
-          <p class="admin-user__muted">{{ user.email ?? '—' }}</p>
-          <span class="admin-user__tags"><Tag v-for="status in statuses" :key="status" :label="status" :variant="status === 'Admin' ? 'accent' : 'neutral'" /></span>
+          <h2 id="admin-user-title" ref="titleRef" tabindex="-1">{{ uiText(user.username ?? 'Sans nom d’utilisateur') }}</h2>
+          <p class="admin-user__muted">{{ uiText(user.email ?? '—') }}</p>
+          <span class="admin-user__tags"><Tag v-for="status in statuses" :key="status" :label="uiText(status)" :variant="status === 'Admin' ? 'accent' : 'neutral'" /></span>
         </div>
       </header>
 
       <dl class="admin-user__card admin-user__facts">
-        <dt>Inscription</dt><dd>{{ formatAdminDate(user.createdAt, true) }}</dd>
-        <dt>Dernière connexion</dt><dd>{{ formatAdminDate(user.lastSignInAt, true) }}</dd>
-        <dt>Adresse e-mail</dt><dd>{{ user.confirmed ? 'Confirmée' : 'Non confirmée' }}</dd>
-        <dt>Conditions</dt><dd>{{ user.termsVersion ? `Version du ${user.termsVersion}, acceptée le ${formatAdminDate(user.termsAcceptedAt)}` : 'Non acceptées' }}</dd>
-        <dt>Rôle</dt><dd>{{ user.isAdmin ? 'Administrateur' : user.isEditor ? 'Éditeur' : 'Compte personnel' }}</dd>
-        <dt>Identifiant</dt><dd class="admin-user__id">{{ user.id }}</dd>
+        <dt>{{ uiText("Inscription") }}</dt><dd>{{ formatAdminDate(user.createdAt, true) }}</dd>
+        <dt>{{ uiText("Dernière connexion") }}</dt><dd>{{ formatAdminDate(user.lastSignInAt, true) }}</dd>
+        <dt>{{ uiText("Adresse e-mail") }}</dt><dd>{{ uiText(user.confirmed ? 'Confirmée' : 'Non confirmée') }}</dd>
+        <dt>{{ uiText("Conditions") }}</dt><dd>{{ uiText(user.termsVersion ? uiFormat`Version du ${user.termsVersion}, acceptée le ${formatAdminDate(user.termsAcceptedAt)}` : 'Non acceptées') }}</dd>
+        <dt>{{ uiText("Rôle") }}</dt><dd>{{ uiText(user.isAdmin ? 'Administrateur' : user.isEditor ? 'Éditeur' : 'Compte personnel') }}</dd>
+        <dt>{{ uiText("Identifiant") }}</dt><dd class="admin-user__id">{{ user.id }}</dd>
       </dl>
 
       <section class="admin-user__card" aria-labelledby="admin-user-actions">
-        <h3 id="admin-user-actions">Actions</h3>
-        <p v-if="isSelf" class="admin-user__muted">C’est votre compte : modifiez-le depuis votre profil. Les actions d’administration ne s’appliquent pas à soi-même.</p>
-        <p v-else-if="user.isAdmin" class="admin-user__muted">Retirez le rôle administrateur avant de suspendre ou de supprimer ce compte.</p>
-        <p v-if="actionError" class="admin-user__error" role="alert">{{ actionError }}</p>
+        <h3 id="admin-user-actions">{{ uiText("Actions") }}</h3>
+        <p v-if="isSelf" class="admin-user__muted">{{ uiText("C’est votre compte : modifiez-le depuis votre profil. Les actions d’administration ne s’appliquent pas à soi-même.") }}</p>
+        <p v-else-if="user.isAdmin" class="admin-user__muted">{{ uiText("Retirez le rôle administrateur avant de suspendre ou de supprimer ce compte.") }}</p>
+        <p v-if="actionError" class="admin-user__error" role="alert">{{ uiText(actionError) }}</p>
         <div class="admin-user__actions">
-          <Button variant="secondary" size="sm" :disabled="busy || !user.email || !user.confirmed" @click="sendReset">Envoyer un lien de réinitialisation du mot de passe</Button>
+          <Button variant="secondary" size="sm" :disabled="busy || !user.email || !user.confirmed" @click="sendReset">{{ uiText("Envoyer un lien de réinitialisation du mot de passe") }}</Button>
           <Button variant="secondary" size="sm" :disabled="busy || isSelf || (!user.isAdmin && (!user.confirmed || user.suspended))" @click="toggleAdmin">
-            {{ user.isAdmin ? 'Retirer le rôle administrateur' : 'Nommer administrateur' }}</Button>
+            {{ uiText(user.isAdmin ? 'Retirer le rôle administrateur' : 'Nommer administrateur') }}</Button>
           <Button v-if="!user.isAdmin" variant="secondary" size="sm" :disabled="busy || isSelf || (!user.isEditor && (!user.confirmed || user.suspended))" @click="toggleEditor">
-            {{ user.isEditor ? 'Retirer le rôle éditeur' : 'Nommer éditeur' }}</Button>
-          <Button variant="secondary" size="sm" :disabled="busy || isSelf || user.isAdmin" @click="toggleSuspension">{{ user.suspended ? 'Réactiver le compte' : 'Suspendre le compte' }}</Button>
-          <Button variant="danger" size="sm" :disabled="busy || isSelf || user.isAdmin" @click="remove">Supprimer le compte et ses frises</Button>
+            {{ uiText(user.isEditor ? 'Retirer le rôle éditeur' : 'Nommer éditeur') }}</Button>
+          <Button variant="secondary" size="sm" :disabled="busy || isSelf || user.isAdmin" @click="toggleSuspension">{{ uiText(user.suspended ? 'Réactiver le compte' : 'Suspendre le compte') }}</Button>
+          <Button variant="danger" size="sm" :disabled="busy || isSelf || user.isAdmin" @click="remove">{{ uiText("Supprimer le compte et ses frises") }}</Button>
         </div>
       </section>
 
       <section class="admin-user__card" aria-labelledby="admin-user-stories">
-        <h3 id="admin-user-stories">Frises ({{ user.storyList.length }})</h3>
+        <h3 id="admin-user-stories">{{ uiText("Frises (") }}{{ user.storyList.length }})</h3>
         <ul v-if="user.storyList.length" class="admin-user__list">
           <li v-for="story in user.storyList" :key="story.id">
             <span class="admin-user__story-title">
               <RouterLink v-if="story.isPublic" :to="storyTimelineLocation(String(story.id))">{{ story.title }}</RouterLink>
               <span v-else>{{ story.title }}</span>
-              <Tag :label="story.isPublic ? 'Publique' : 'Privée'" />
+              <Tag :label="uiText(story.isPublic ? 'Publique' : 'Privée')" />
             </span>
-            <span class="admin-user__muted">{{ story.periods }} périodes · {{ story.events }} événements · modifiée le {{ formatAdminDate(story.updatedAt) }}</span>
+            <span class="admin-user__muted">{{ story.periods }} {{ uiText("périodes ·") }} {{ story.events }} {{ uiText("événements · modifiée le") }} {{ formatAdminDate(story.updatedAt) }}</span>
           </li>
         </ul>
-        <p v-else class="admin-user__muted">Aucune frise.</p>
+        <p v-else class="admin-user__muted">{{ uiText("Aucune frise.") }}</p>
       </section>
 
       <section class="admin-user__card" aria-labelledby="admin-user-history">
-        <h3 id="admin-user-history">Historique d’administration</h3>
+        <h3 id="admin-user-history">{{ uiText("Historique d’administration") }}</h3>
         <ul v-if="user.history.length" class="admin-user__list">
           <li v-for="entry in user.history" :key="`${entry.createdAt}-${entry.action}`">
             <span>{{ adminActionLabels[entry.action] }}</span>
-            <span class="admin-user__muted">{{ formatAdminDate(entry.createdAt, true) }}{{ entry.actorUsername ? ` · par ${entry.actorUsername}` : '' }}</span>
+            <span class="admin-user__muted">{{ formatAdminDate(entry.createdAt, true) }}{{ uiText(entry.actorUsername ? ` · par ${entry.actorUsername}` : '') }}</span>
           </li>
         </ul>
-        <p v-else class="admin-user__muted">Aucune action d’administration sur ce compte.</p>
+        <p v-else class="admin-user__muted">{{ uiText("Aucune action d’administration sur ce compte.") }}</p>
       </section>
     </template>
   </section>
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import Button from '@/components/base/Button.vue';
@@ -122,24 +123,24 @@ const label = () => user.value?.username ?? user.value?.email ?? 'ce compte';
 const toggleAdmin = () => {
   const granting = !user.value!.isAdmin;
   return act(granting ? 'Nommer administrateur ?' : 'Retirer le rôle administrateur ?',
-    granting ? `${label()} aura accès à cet espace, au catalogue et aux actions sur tous les comptes.` : `${label()} redeviendra un compte personnel.`,
+    granting ? uiFormat`${label()} aura accès à cet espace, au catalogue et aux actions sur tous les comptes.` : uiFormat`${label()} redeviendra un compte personnel.`,
     () => adminApi.setAdmin(props.userId, granting), granting ? 'Rôle administrateur accordé.' : 'Rôle administrateur retiré.');
 };
 const toggleSuspension = () => {
   const suspending = !user.value!.suspended;
   return act(suspending ? 'Suspendre ce compte ?' : 'Réactiver ce compte ?',
-    suspending ? `${label()} sera déconnecté et ne pourra plus se connecter. Ses frises restent en place et visibles selon leur réglage.` : `${label()} pourra de nouveau se connecter.`,
+    suspending ? uiFormat`${label()} sera déconnecté et ne pourra plus se connecter. Ses frises restent en place et visibles selon leur réglage.` : uiFormat`${label()} pourra de nouveau se connecter.`,
     () => adminApi.setSuspended(props.userId, suspending), suspending ? 'Compte suspendu.' : 'Compte réactivé.');
 };
 const toggleEditor = () => {
   const granting = !user.value!.isEditor;
   return act(granting ? 'Nommer éditeur ?' : 'Retirer le rôle éditeur ?',
-    granting ? `${label()} pourra modifier le contenu et l’organisation de toutes les frises publiques. Leur suppression et leur visibilité restent réservées à leur propriétaire.` : `${label()} pourra seulement modifier ses propres frises.`,
+    granting ? uiFormat`${label()} pourra modifier le contenu et l’organisation de toutes les frises publiques. Leur suppression et leur visibilité restent réservées à leur propriétaire.` : uiFormat`${label()} pourra seulement modifier ses propres frises.`,
     () => adminApi.setEditor(props.userId, granting), granting ? 'Rôle éditeur accordé.' : 'Rôle éditeur retiré.');
 };
 async function remove() {
   if (busy.value || !await confirm('Supprimer définitivement ce compte ?',
-    `Le compte ${label()} et ses ${user.value!.stories} frise(s) seront supprimés. Les périodes et événements du catalogue partagé sont conservés. Cette action est irréversible.`)) return;
+    uiFormat`Le compte ${label()} et ses ${user.value!.stories} frise(s) seront supprimés. Les périodes et événements du catalogue partagé sont conservés. Cette action est irréversible.`)) return;
   busy.value = true; actionError.value = '';
   try {
     await adminApi.deleteUser(props.userId);
@@ -151,11 +152,11 @@ async function remove() {
 /** Same e-mail as « Mot de passe oublié » : the link opens /reset-password in any browser. */
 function sendReset() {
   const email = user.value!.email!;
-  return act('Envoyer un lien de réinitialisation ?', `Un e-mail sera envoyé à ${email} pour choisir un nouveau mot de passe. Le mot de passe actuel reste valable tant qu’il n’est pas changé.`,
+  return act('Envoyer un lien de réinitialisation ?', uiFormat`Un e-mail sera envoyé à ${email} pour choisir un nouveau mot de passe. Le mot de passe actuel reste valable tant qu’il n’est pas changé.`,
     async () => {
       const result = await authService.getClient()!.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
       if (result.error) throw new Error(rateLimitError(result.error) ?? 'Envoi impossible. Réessayez plus tard.');
-    }, `Lien envoyé à ${email}.`);
+    }, uiFormat`Lien envoyé à ${email}.`);
 }
 </script>
 

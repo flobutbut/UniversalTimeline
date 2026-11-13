@@ -2,7 +2,7 @@
   <SelectShell
     v-bind="$attrs"
     v-model:open="isOpen"
-    :label="label"
+    :label="uiText(label)"
     :error="error"
     :hint="hint"
     :required="required"
@@ -25,16 +25,16 @@
       >
         <div class="base-select__value" :class="{ 'base-select__value--editable': searchable, 'base-select__value--multiple': multiple }">
           <template v-if="multiple">
-            <Tag v-for="item in selectedItems" :key="item.value" class="base-select__selected-item" :label="item.label" variant="accent" removable :disabled="disabled" @remove="removeItem(item)" />
+            <Tag v-for="item in selectedItems" :key="item.value" class="base-select__selected-item" :label="uiText(item.label)" variant="accent" removable :disabled="disabled" @remove="removeItem(item)" />
           </template>
           <input v-if="searchable" ref="searchInputRef" v-bind="comboboxAttrs" type="text" class="base-select__input"
             :value="isOpen ? searchQuery : (selectedItem?.label ?? '')"
-            :placeholder="isOpen ? searchPlaceholder : (selectedItem?.label || placeholder)"
+            :placeholder="uiText(isOpen ? searchPlaceholder : (selectedItem?.label || placeholder))"
             :disabled="disabled" autocomplete="off" :spellcheck="false"
             @focus="onInputFocus" @input="onSearchInput" @keydown="handleSearchKeydown" />
           <template v-else>
-            <span v-if="selectedItem" class="base-select__selected-text">{{ selectedItem.label }}</span>
-            <span v-else-if="!multiple || !selectedItems.length" class="base-select__placeholder">{{ placeholder }}</span>
+            <span v-if="selectedItem" class="base-select__selected-text">{{ uiText(selectedItem.label) }}</span>
+            <span v-else-if="!multiple || !selectedItems.length" class="base-select__placeholder">{{ uiText(placeholder) }}</span>
           </template>
         </div>
         <div class="base-select__indicators">
@@ -45,8 +45,8 @@
     </template>
 
     <template #dropdown>
-      <div v-if="filteredOptions.length === 0" class="base-select__no-results" role="status">{{ noResultsText }}</div>
-      <div class="base-select__options" :id="`${id}-options`" role="listbox" :aria-label="label || placeholder" :aria-multiselectable="multiple">
+      <div v-if="filteredOptions.length === 0" class="base-select__no-results" role="status">{{ uiText(noResultsText) }}</div>
+      <div class="base-select__options" :id="`${id}-options`" role="listbox" :aria-label="uiText(label || placeholder)" :aria-multiselectable="multiple">
         <div
           v-for="(option, index) in filteredOptions"
           :id="`${id}-option-${index}`"
@@ -64,7 +64,7 @@
           :aria-selected="isOptionSelected(option)"
           :aria-disabled="!!option.disabled"
         >
-          <span class="base-select__option-text">{{ option.label }}</span>
+          <span class="base-select__option-text">{{ uiText(option.label) }}</span>
           <i class="base-select__option-check" :class="{ 'base-select__option-check--hidden': !isOptionSelected(option) }" aria-hidden="true">✓</i>
         </div>
       </div>
@@ -73,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 defineOptions({ inheritAttrs: false });
 import { ref, computed, watch, nextTick } from 'vue';
 import { Icon } from '@iconify/vue';

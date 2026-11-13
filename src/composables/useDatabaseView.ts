@@ -1,3 +1,4 @@
+import { localizedText, uiFormat } from '@/i18n';
 import { ref, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useDataStore } from '@/stores/useDataStore';
@@ -84,7 +85,7 @@ export function useDatabaseView() {
     return transformed
       .filter(p => !p.hasParent)
       .filter(p => {
-        const label = p.label?.fr;
+        const label = localizedText(p.label);
         return typeof label === 'string' ? label.toLowerCase().includes(searchLower) : false;
       });
   });
@@ -92,7 +93,7 @@ export function useDatabaseView() {
   const filteredEvents = computed(() => {
     const searchLower = searchState.value.eventSearch.toLowerCase();
     return events.value.filter(e => {
-      const label = e.label?.fr;
+      const label = localizedText(e.label);
       return typeof label === 'string' ? label.toLowerCase().includes(searchLower) : false;
     });
   });
@@ -230,7 +231,7 @@ export function useDatabaseView() {
         refreshSelectedStory(storyId),
       ]);
       const total = new Set(ids).size;
-      toast.show(moving ? (total === 1 ? 'Période déplacée' : `${total} périodes déplacées`)
+      toast.show(moving ? (total === 1 ? 'Période déplacée' : uiFormat`${total} périodes déplacées`)
         : `${total} association(s) ${remove ? 'retirée(s)' : 'ajoutée(s)'}`, 'success');
     } catch (cause) {
       dataStore.invalidateStory(storyId);
@@ -285,7 +286,7 @@ export function useDatabaseView() {
       dataStore.invalidateStory(pending.storyId);
       const plural = (count: number, word: string, verb: string) => `${count} ${word}${count > 1 ? 's' : ''} ${verb}${count > 1 ? 's' : ''}`;
       const details = [created.movedPeriodCount ? plural(created.movedPeriodCount, 'sous-période', 'déplacée') : '', created.eventCount ? plural(created.eventCount, 'événement', 'copié') : ''].filter(Boolean);
-      toast.show(`Frise « ${title} » créée${details.length ? ` : ${details.join(', ')}` : ''}.`, 'success');
+      toast.show(uiFormat`Frise « ${title} » créée${details.length ? ` : ${details.join(', ')}` : ''}.`, 'success');
       await Promise.all([dataStore.ensureStoriesLoaded(true), refreshSelectedStory(pending.storyId)]);
     } catch (cause) {
       if (created) toast.show('Frise créée ; impossible de recharger les données. Réessayez le chargement.', 'error');
@@ -347,7 +348,7 @@ export function useDatabaseView() {
     const ids = [...new Set(childIds)];
     const service = StoryApiService.getInstance();
     await service.changeEntryPoints(parentId, ids, anchor);
-    return `${ids.length} frise(s) rattachée(s)`;
+    return uiFormat`${ids.length} frise(s) rattachée(s)`;
   });
   const moveChildStoryToColumn = (childId: string, from: StoryAnchor | null, to: StoryAnchor | null) => mutateRelatedStories(async sourceId => {
     await StoryApiService.getInstance().moveEntryPoint(sourceId, childId, from, to);

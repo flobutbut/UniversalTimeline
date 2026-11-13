@@ -1,6 +1,13 @@
 import type { WikidataSource } from '../../server/src/shared/wikidataGeneration';
 import type { Profile, Status, WikidataGenerationSettings } from '@/lib/wikidataGenerationModel';
+export interface GeneratedTexts {
+  language: 'fr' | 'en';
+  titles: { fr: string; en: string };
+  descriptions: { fr: string; en: string };
+}
+
 export interface WikidataTimelineItem {
+  texts?: GeneratedTexts;
   id?: string;
   /** Titres lus juste avant l'enregistrement ; absents si la lecture a échoué. */
   wikipedia?: import('../../server/src/shared/wikipedia').WikipediaTitles;
@@ -24,6 +31,7 @@ export interface WikidataTimelineItem {
 }
 
 export interface WikidataTimelineDraft {
+  texts?: GeneratedTexts;
   qid: string;
   title: string;
   description: string;

@@ -7,31 +7,34 @@
       :style="{ '--header-search-width': `${searchWidth}px` }"
     >
       <div ref="brandRef" class="header-brand">
-        <RouterLink to="/" class="header-title header-title--wordmark" aria-label="Universal Timeline — accueil"><span class="header-title-full">Universal Timeline</span><span class="header-title-short" aria-hidden="true">UT</span></RouterLink>
+        <RouterLink to="/" class="header-title header-title--wordmark" :aria-label="uiText('Universal Timeline — accueil')"><span class="header-title-full">{{ uiText("Universal Timeline") }}</span><span class="header-title-short" aria-hidden="true">{{ uiText("UT") }}</span></RouterLink>
       </div>
       <div v-if="hasSearch && !searchMinified" class="header-search-wrap">
         <GlobalSearch :key="auth.identityVersion" @select="emit('select-search', $event)" />
       </div>
       <div ref="rightRef" class="header-right">
-        <Button v-if="hasSearch && searchMinified" class="header-search-open" :to="{ name: 'search', query: { from: route.fullPath } }" variant="tertiary" size="sm" icon-only aria-label="Rechercher une frise, un événement ou un sujet Wikidata" title="Rechercher">
+        <Button v-if="hasSearch && searchMinified" class="header-search-open" :to="{ name: 'search', query: { from: route.fullPath } }" variant="tertiary" size="sm" icon-only :aria-label="uiText('Rechercher une frise, un événement ou un sujet Wikidata')" :title="uiText('Rechercher')">
           <template #icon><DesignIcon name="search" /></template>
         </Button>
         <div v-if="tabs.length" class="header-nav-wrap" :class="{ 'header-nav-wrap--collapsed': navCollapsed }" :inert="navCollapsed ? true : undefined" :aria-hidden="navCollapsed || undefined">
-          <nav ref="navRef" class="header-nav" aria-label="Navigation principale">
+          <nav ref="navRef" class="header-nav" :aria-label="uiText('Navigation principale')">
             <RouterLink v-for="tab in tabs" :key="tab.value" :to="tab.value === 'timeline' && timelineDestination ? timelineDestination : { name: tab.value }" custom v-slot="{ href }">
               <a :href="href" class="header-nav-link" :class="{ 'tab-button--active': currentView === tab.value }" :aria-current="currentView === tab.value ? 'page' : undefined" @click="changeView($event, tab.value)">
-                <DesignIcon v-if="tab.value === 'timeline' || tab.value === 'database'" :name="tab.value === 'database' ? 'frises' : 'timeline'" /><Icon v-else-if="tab.icon" :icon="tab.icon" aria-hidden="true" />{{ tab.label }}
+                <DesignIcon v-if="tab.value === 'timeline' || tab.value === 'database'" :name="tab.value === 'database' ? 'frises' : 'timeline'" /><Icon v-else-if="tab.icon" :icon="tab.icon" aria-hidden="true" />{{ uiText(tab.label) }}
               </a>
             </RouterLink>
           </nav>
         </div>
-        <Select v-if="tabs.length && navCollapsed" class="header-nav-select" :model-value="currentView" :options="tabs" placeholder="Navigation principale" :searchable="false" compact @update:model-value="selectView" />
+        <Select v-if="tabs.length && navCollapsed" class="header-nav-select" :model-value="currentView" :options="tabs" :placeholder="uiText('Navigation principale')" :searchable="false" compact @update:model-value="selectView" />
         <div ref="controlsRef" class="header-controls">
-          <div v-if="!canUseWorkspace(auth)" class="header-account-actions">
-            <Button :to="accountLocation(false)" variant="secondary" size="sm" aria-label="Se connecter" title="Se connecter"><span class="header-account-label">Se connecter</span><Icon class="header-account-icon" icon="mdi:login" width="18" height="18" aria-hidden="true" /></Button>
-            <Button :to="accountLocation(true)" size="sm" aria-label="Créer un compte" title="Créer un compte"><span class="header-account-label">Créer un compte</span><Icon class="header-account-icon" icon="mdi:account-plus-outline" width="18" height="18" aria-hidden="true" /></Button>
-          </div>
-          <UserMenu v-else />
+          <UserMenu v-if="canUseWorkspace(auth)" />
+          <template v-else>
+            <div class="header-account-actions">
+              <Button :to="accountLocation(false)" variant="secondary" size="sm" :aria-label="uiText('Se connecter')" :title="uiText('Se connecter')"><span class="header-account-label">{{ uiText("Se connecter") }}</span><Icon class="header-account-icon" icon="mdi:login" width="18" height="18" aria-hidden="true" /></Button>
+              <Button :to="accountLocation(true)" size="sm" :aria-label="uiText('Créer un compte')" :title="uiText('Créer un compte')"><span class="header-account-label">{{ uiText("Créer un compte") }}</span><Icon class="header-account-icon" icon="mdi:account-plus-outline" width="18" height="18" aria-hidden="true" /></Button>
+            </div>
+            <LanguageSelect />
+          </template>
           <ThemeToggle variant="ghost" />
         </div>
       </div>
@@ -40,7 +43,9 @@
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import GlobalSearch from './GlobalSearch.vue';
+import LanguageSelect from '@/components/LanguageSelect.vue';
 import ThemeToggle from './ThemeToggle.vue';
 import UserMenu from './UserMenu.vue';
 import { Icon } from '@iconify/vue';

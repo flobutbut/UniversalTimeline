@@ -1,3 +1,4 @@
+import { language, localizedText } from '@/i18n';
 import { computed, ref, watch, onScopeDispose } from 'vue';
 import { SearchApiService } from '@/services/SearchApiService';
 import { PeriodApiService } from '@/services/PeriodApiService';
@@ -25,8 +26,8 @@ export function usePeriodSelect(selectedId: () => string | null, options: { remo
   const currentParent = computed(() => store.periodById(currentParentId.value ?? ''));
   const periods = computed(() => {
     const rows = remoteActive.value ? remoteRows.value : store.periods.filter(p => !p.id.startsWith('wikidata:'));
-    const query = search.value.trim().toLocaleLowerCase('fr');
-    return sortListPeriodsByLabel(rows).filter(period => period.id !== options.excludeId?.() && (remoteActive.value || !query || period.label.fr.toLocaleLowerCase('fr').includes(query)));
+    const query = search.value.trim().toLocaleLowerCase(language.value);
+    return sortListPeriodsByLabel(rows).filter(period => period.id !== options.excludeId?.() && (remoteActive.value || !query || localizedText(period.label).toLocaleLowerCase(language.value).includes(query)));
   });
   const hasChildren = (_period: ListPeriod) => false;
   let retry: () => Promise<boolean> = async () => false;

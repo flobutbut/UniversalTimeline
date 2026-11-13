@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 import { ref, watch } from 'vue';
 import type { Story, Event } from '@/types/database';
 import type { EditInitialData, EditFormSubmission } from '@/types/editForm';
@@ -66,7 +67,7 @@ export function useStoryEventCreation(story: () => Story | null | undefined, onA
       await associate(saved.id, storyId, isCurrent);
     } catch (cause) {
       if (isCurrent()) error.value = saved
-        ? `L’événement est enregistré, mais son ajout à la frise a échoué. ${mutationErrorMessage(cause, 'Réessayez.')}`
+        ? uiFormat`L’événement est enregistré, mais son ajout à la frise a échoué. ${mutationErrorMessage(cause, 'Réessayez.')}`
         : mutationErrorMessage(cause, 'Impossible d’enregistrer cet événement.');
     } finally { if (isCurrent()) busy.value = false; }
   }

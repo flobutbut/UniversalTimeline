@@ -23,7 +23,7 @@ const story = {
 };
 const category = { category_id: 'old-category', category_label_fr: 'Catégorie', category_label_en: null };
 const noCategory = { category_id: null, category_label_fr: null, category_label_en: null };
-const categories = [{ id: 'old-category', label: { fr: 'Catégorie', en: 'Catégorie' } }];
+const categories = [{ id: 'old-category', label: { fr: 'Catégorie', en: '' } }];
 function rows(...results: unknown[][]) { for (const result of results) db.mockResolvedValueOnce({ rows: result } as never); }
 async function get(path: string, params = {}, query = {}) {
   const route = router.stack.find((layer: any) => layer.route?.path === path && layer.route.methods.get).route;
@@ -50,17 +50,17 @@ it('keeps a period without category and does not create a phantom category', asy
 it.each(['/periods/:id', '/periods/wikidata/:wikidataId'])('returns the same localized detail for ID and Q-id: %s', async path => {
   rows([period], [{ id: 'old-category', label_fr: 'Catégorie', label_en: null, description_fr: 'Texte', description_en: null }]);
   expect(await get(path, { id: 'legacy-period', wikidataId: 'q123' })).toEqual({ status: 200, body: {
-    id: 'legacy-period', wikidata_id: 'Q123', label: { fr: 'Période', en: 'Période' },
-    description: { fr: 'Description', en: 'Description' }, startDate: 'M65', endDate: 'NOW',
+    id: 'legacy-period', wikidata_id: 'Q123', label: { fr: 'Période', en: '' },
+    description: { fr: 'Description', en: '' }, startDate: 'M65', endDate: 'NOW',
     parentId: null, hasChildren: true, startYearsBP: 65000000, endYearsBP: 0,
-    categories: [{ ...categories[0], description: { fr: 'Texte', en: 'Texte' } }], createdAt: timestamp, updatedAt: timestamp,
+    categories: [{ ...categories[0], description: { fr: 'Texte', en: '' } }], createdAt: timestamp, updatedAt: timestamp,
   } });
   expect(db.mock.calls[1][1]).toEqual(['legacy-period']);
 });
 it('preserves event list field names, nullable descriptions and stored numerical text', async () => {
   rows([{ ...event, ...category }]);
   expect((await get('/events')).body).toEqual([{
-    id: 'legacy-event', wikidata_id: null, label: { fr: 'Événement', en: 'Événement' },
+    id: 'legacy-event', wikidata_id: null, label: { fr: 'Événement', en: '' },
     description: undefined, date: 'M54', date_years_bp: '54000000', categories,
     createdAt: timestamp, updatedAt: timestamp,
   }]);
@@ -116,16 +116,16 @@ it('keeps the detail contract for stories, periods, events, child IDs and anchor
     { id: 9, title_fr: 'Autre', title_en: 'Other', anchors: null },
   ], related_stories: [] }]);
   expect((await get('/stories/:id', { id: '7' })).body).toEqual({
-    id: 7, title: { fr: 'Histoire', en: 'Histoire' }, description: { fr: 'Résumé', en: 'Résumé' },
+    id: 7, title: { fr: 'Histoire', en: '' }, description: { fr: 'Résumé', en: '' },
     author: 'Auteur', isPublic: true, ownerUserId: 'owner', created_at: timestamp, parent_story_id: null, categories: [],
     periods: [{
-      id: 'legacy-period', wikidata_id: 'Q123', storyParentId: 'frise-parent', label: { fr: 'Période', en: 'Période' }, description: { fr: 'Description', en: 'Description' },
+      id: 'legacy-period', wikidata_id: 'Q123', storyParentId: 'frise-parent', label: { fr: 'Période', en: '' }, description: { fr: 'Description', en: '' },
       startDate: 'M65', endDate: 'NOW', parentId: null, hasChildren: true, startYearsBP: 65000000, endYearsBP: 0,
       categories, createdAt: timestamp, updatedAt: timestamp,
     }],
-    events: [{ id: 'legacy-event', wikidata_id: null, label: { fr: 'Événement', en: 'Événement' }, description: undefined, date: 'M54', dateYearsBP: 54000000, categories: [], createdAt: timestamp, updatedAt: timestamp }],
+    events: [{ id: 'legacy-event', wikidata_id: null, label: { fr: 'Événement', en: '' }, description: undefined, date: 'M54', dateYearsBP: 54000000, categories: [], createdAt: timestamp, updatedAt: timestamp }],
     childStories: [
-      { id: '8', title: { fr: 'Enfant', en: 'Enfant' }, anchors: [{ type: 'period', id: 'legacy-period' }],atRoot:false },
+      { id: '8', title: { fr: 'Enfant', en: '' }, anchors: [{ type: 'period', id: 'legacy-period' }],atRoot:false },
       { id: '9', title: { fr: 'Autre', en: 'Other' }, anchors: [],atRoot:false },
     ], parentStories: [], relatedStories: [], navigationContexts: [], createdAt: timestamp, updatedAt: timestamp,
   });

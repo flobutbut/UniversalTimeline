@@ -2,31 +2,32 @@
   <section ref="workspace" class="admin-relations" :class="{'admin-relations--expanded':expanded}" :role="expanded?'dialog':undefined" :aria-modal="expanded?'true':undefined" aria-labelledby="admin-relations-title" tabindex="-1" @keydown.esc="dismissFromKeyboard">
     <ExpandedGraphFocus v-if="expanded" />
     <header v-show="!expanded" class="admin-relations__header">
-      <div><h2 id="admin-relations-title">Réseau des relations</h2>
-        <p v-if="overview" class="admin-relations__muted" role="status">{{ visibleCounts.story }} frises · {{ visibleCounts.period }} périodes · {{ visibleCounts.event }} événements · {{ graph.edges.length }} liens affichés<template v-if="filtersActive"> · sur {{ overview.stories.length+overview.periods.length+overview.events.length }} objets au total</template> · {{ formatAdminDate(overview.generatedAt,true) }} · privées comprises</p>
+      <div><h2 id="admin-relations-title">{{ uiText("Réseau des relations") }}</h2>
+        <p v-if="overview" class="admin-relations__muted" role="status">{{ visibleCounts.story }} {{ uiText("frises ·") }} {{ visibleCounts.period }} {{ uiText("périodes ·") }} {{ visibleCounts.event }} {{ uiText("événements ·") }} {{ graph.edges.length }} {{ uiText("liens affichés") }}<template v-if="filtersActive"> {{ uiText("· sur") }} {{ overview.stories.length+overview.periods.length+overview.events.length }} {{ uiText("objets au total") }}</template> · {{ formatAdminDate(overview.generatedAt,true) }} {{ uiText("· privées comprises") }}</p>
       </div>
-      <Button variant="tertiary" size="sm" :disabled="overviewLoading" @click="refresh"><template #icon><Icon icon="mdi:refresh" width="18" height="18" aria-hidden="true" /></template>Actualiser</Button>
+      <Button variant="tertiary" size="sm" :disabled="overviewLoading" @click="refresh"><template #icon><Icon icon="mdi:refresh" width="18" height="18" aria-hidden="true" /></template>{{ uiText("Actualiser") }}</Button>
     </header>
     <FeedbackState v-if="overviewLoading" kind="loading" layout="inline" />
-    <FeedbackState v-else-if="overviewError" kind="error" layout="inline" :message="overviewError" retryable @retry="refresh" />
+    <FeedbackState v-else-if="overviewError" kind="error" layout="inline" :message="uiText(overviewError)" retryable @retry="refresh" />
     <template v-else-if="overview">
-      <div class="admin-relations__filters" role="group" aria-label="Filtres du réseau">
-        <Switch v-model="showStories" variant="sm" label="Frises" /><Switch v-model="showPeriods" variant="sm" label="Périodes" /><Switch v-model="showEvents" variant="sm" label="Événements" />
-        <Switch v-model="leafStoriesOnly" variant="sm" label="Frises sans enfants" />
-        <Switch v-model="sharedOnly" variant="sm" label="Contenus partagés seulement" />
-        <Switch v-model="allLabels" variant="sm" label="Tous les libellés" />
+      <div class="admin-relations__filters" role="group" :aria-label="uiText('Filtres du réseau')">
+        <Switch v-model="showStories" variant="sm" :label="uiText('Frises')" /><Switch v-model="showPeriods" variant="sm" :label="uiText('Périodes')" /><Switch v-model="showEvents" variant="sm" :label="uiText('Événements')" />
+        <Switch v-model="leafStoriesOnly" variant="sm" :label="uiText('Frises sans enfants')" />
+        <Switch v-model="sharedOnly" variant="sm" :label="uiText('Contenus partagés seulement')" />
+        <Switch v-model="allLabels" variant="sm" :label="uiText('Tous les libellés')" />
       </div>
-      <p v-if="filtersActive && !expanded" class="admin-relations__muted">{{ filteredNetwork.stories.length }} frises retenues. Les partages sont comptés entre ces frises uniquement.<template v-if="leafStoriesOnly"> Seuls les liens parent–enfant définissent les enfants ; les passerelles sont conservées.</template><template v-if="sharedOnly && !filteredNetwork.periods.length && !filteredNetwork.events.length"> Aucun contenu partagé entre les frises retenues.</template></p>
+      <p v-if="filtersActive && !expanded" class="admin-relations__muted">{{ filteredNetwork.stories.length }} {{ uiText("frises retenues. Les partages sont comptés entre ces frises uniquement.") }}<template v-if="leafStoriesOnly"> {{ uiText("Seuls les liens parent–enfant définissent les enfants ; les passerelles sont conservées.") }}</template><template v-if="sharedOnly && !filteredNetwork.periods.length && !filteredNetwork.events.length"> {{ uiText("Aucun contenu partagé entre les frises retenues.") }}</template></p>
       <RelationGraphCanvas v-model:all-labels="allLabels" :graph="graph" :selected="selectedId" :expanded="expanded" @toggle-expand="setExpanded(!expanded)" @select-node="selectNode" @select-edge="selectEdge" @deselect="deselect">
         <template #search><RelationGraphSearch :nodes="graph.nodes" @select="selectNode" /></template>
         <template #selection="{close}"><RelationGraphSelection :node="selectedNode" :edge="selectedEdge" :network="filteredNetwork" :graph="graph" @close="close" /></template>
-        <template #empty><FeedbackState kind="empty" layout="inline" :message="filtersActive?'Aucun objet ne correspond aux filtres et types activés.':'Activez un type d’objet pour l’afficher dans le réseau.'" /></template>
+        <template #empty><FeedbackState kind="empty" layout="inline" :message="uiText(filtersActive?'Aucun objet ne correspond aux filtres et types activés.':'Activez un type d’objet pour l’afficher dans le réseau.')" /></template>
       </RelationGraphCanvas>
     </template>
   </section>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import {computed,defineComponent,nextTick,onMounted,ref,watch} from 'vue';
 import {Icon} from '@iconify/vue';
 import Button from '@/components/base/Button.vue';

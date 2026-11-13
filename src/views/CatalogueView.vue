@@ -1,32 +1,32 @@
 <template>
   <section ref="scrollArea" class="catalogue-page" aria-labelledby="catalogue-title" @scroll.passive="rememberScroll">
     <div ref="intro" class="catalogue-page__content catalogue-page__intro">
-      <h1 id="catalogue-title">Découvrez les frises</h1>
-      <p>Une époque, une découverte, un parcours : choisissez une frise et explorez son histoire.</p>
+      <h1 id="catalogue-title">{{ uiText("Découvrez les frises") }}</h1>
+      <p>{{ uiText("Une époque, une découverte, un parcours : choisissez une frise et explorez son histoire.") }}</p>
     </div>
     <div class="catalogue-page__filters" :class="{ 'is-pinned': filtersPinned }">
       <div class="catalogue-page__content">
-        <CatalogueToolbar v-model:search="browse.search" placeholder="Rechercher une frise…">
+        <CatalogueToolbar v-model:search="browse.search" :placeholder="uiText('Rechercher une frise…')">
           <template #filters><CatalogueFilters v-model:tags="browse.tagIds" v-model:time-range="browse.timeRange" v-model:period="browse.period" hide-visibility :tag-options="tagOptions" /></template>
         </CatalogueToolbar>
       </div>
     </div>
     <div class="catalogue-page__content">
-      <FeedbackState v-if="loading" kind="loading" message="Chargement des frises…" />
-      <FeedbackState v-else-if="error" kind="error" :message="error" retryable @retry="loadFirst(true)" />
+      <FeedbackState v-if="loading" kind="loading" :message="uiText('Chargement des frises…')" />
+      <FeedbackState v-else-if="error" kind="error" :message="uiText(error)" retryable @retry="loadFirst(true)" />
       <template v-else>
-        <p class="catalogue-page__count" role="status">{{ countLabel }}</p>
-        <ul v-if="visibleStories.length" class="catalogue-page__grid" aria-label="Frises publiques">
+        <p class="catalogue-page__count" role="status">{{ uiText(countLabel) }}</p>
+        <ul v-if="visibleStories.length" class="catalogue-page__grid" :aria-label="uiText('Frises publiques')">
           <PublicStoryCard v-for="story in visibleStories" :key="story.id" :story="story" />
         </ul>
-        <FeedbackState v-else :title="catalogue?.publicTotal || hasFilters ? 'Aucune frise ne correspond à votre recherche' : 'Les frises arrivent bientôt'" :message="catalogue?.publicTotal || hasFilters ? 'Essayez un autre sujet ou élargissez vos filtres.' : 'Revenez prochainement découvrir les premières frises publiques.'">
-          <template v-if="hasFilters" #actions><Button variant="secondary" size="sm" @click="browse.reset">Effacer les filtres</Button></template>
+        <FeedbackState v-else :title="uiText(catalogue?.publicTotal || hasFilters ? 'Aucune frise ne correspond à votre recherche' : 'Les frises arrivent bientôt')" :message="uiText(catalogue?.publicTotal || hasFilters ? 'Essayez un autre sujet ou élargissez vos filtres.' : 'Revenez prochainement découvrir les premières frises publiques.')">
+          <template v-if="hasFilters" #actions><Button variant="secondary" size="sm" @click="browse.reset">{{ uiText("Effacer les filtres") }}</Button></template>
         </FeedbackState>
         <div v-if="visibleStories.length" ref="pageEnd" class="catalogue-page__more">
-          <FeedbackState v-if="loadingMore" kind="loading" layout="inline" message="Chargement des frises suivantes…" />
-          <FeedbackState v-else-if="moreError" kind="error" layout="inline" :message="moreError" retryable @retry="loadMore" />
-          <Button v-else-if="catalogue?.nextCursor" variant="secondary" size="sm" @click="loadMore">Charger plus de frises</Button>
-          <p v-else class="catalogue-page__end">Vous avez parcouru toutes les frises{{ hasFilters ? ' correspondant à ces filtres' : '' }}.</p>
+          <FeedbackState v-if="loadingMore" kind="loading" layout="inline" :message="uiText('Chargement des frises suivantes…')" />
+          <FeedbackState v-else-if="moreError" kind="error" layout="inline" :message="uiText(moreError)" retryable @retry="loadMore" />
+          <Button v-else-if="catalogue?.nextCursor" variant="secondary" size="sm" @click="loadMore">{{ uiText("Charger plus de frises") }}</Button>
+          <p v-else class="catalogue-page__end">{{ uiText("Vous avez parcouru toutes les frises") }}{{ uiText(hasFilters ? ' correspondant à ces filtres' : '') }}.</p>
         </div>
       </template>
     </div>
@@ -34,6 +34,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import Button from '@/components/base/Button.vue';
 import FeedbackState from '@/components/base/FeedbackState.vue';
@@ -76,7 +77,7 @@ const countLabel = computed(() => {
   const count = visibleStories.value.length;
   if (!catalogue.value?.nextCursor) return `${count} ${count === 1 ? 'frise à explorer' : 'frises à explorer'}`;
   const displayed = count === 1 ? 'frise affichée' : 'frises affichées';
-  if (catalogue.value?.total != null && catalogue.value.total > count) return `${count} ${displayed} sur ${catalogue.value.total}`;
+  if (catalogue.value?.total != null && catalogue.value.total > count) return uiFormat`${count} ${displayed} sur ${catalogue.value.total}`;
   return `${count} ${displayed}`;
 });
 const hasFilters = computed(() => !!(browse.search || browse.tagIds.length || browse.timeRange || browse.period));

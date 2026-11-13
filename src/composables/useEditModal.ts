@@ -65,8 +65,8 @@ export function useEditModal(type: EditFormType | (() => EditFormType), mode: Ed
   };
   const prepareSubmitData = (): EditFormSubmission => ({
     ...(form.sourceKey ? { sourceKey: form.sourceKey } : {}),
-    qid:form.qid.trim().toUpperCase(), title:{fr:form.title.fr.trim(),en:form.title.en.trim() || form.title.fr.trim()},
-    description:{fr:form.description.fr || null,en:form.description.en || form.description.fr || null},
+    qid:form.qid.trim().toUpperCase(), title:{fr:form.title.fr.trim(),en:form.title.en.trim()},
+    description:{fr:form.description.fr || null,en:form.description.en || null},
     startDate:form.startDate.trim(), endDate:form.endDate.trim() || 'NOW', date:form.date.trim(),
     location:form.location || null, author:form.author.trim(), isPublic:form.isPublic, parentId:form.parentId,
     ...submittedTagging(),

@@ -18,7 +18,7 @@
           <slot name="footer-left" />
         </div>
         <div class="footer-right">
-          <Button variant="secondary" type="button" :disabled="busy" @click="$emit('close')">Annuler</Button>
+          <Button variant="secondary" type="button" :disabled="busy" @click="$emit('close')">{{ uiText("Annuler") }}</Button>
           <slot name="footer-right" />
         </div>
       </div>
@@ -27,6 +27,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { computed, ref } from 'vue';
 import { isModalOverlayDirectClick } from '@/lib/modalOverlayDismiss';
 import { useDialog } from '@/composables/useDialog';

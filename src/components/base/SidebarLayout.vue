@@ -1,9 +1,9 @@
 <template>
   <div class="sidebar-layout">
-    <nav class="sidebar-layout__menu" :aria-label="menuLabel">
+    <nav class="sidebar-layout__menu" :aria-label="uiText(menuLabel)">
       <RouterLink v-for="item in items" :key="item.key" :to="item.to" class="sidebar-layout__link"
         :class="{ 'sidebar-layout__link--active': item.key === active }" :aria-current="item.key === active ? 'page' : undefined">
-        <Icon v-if="item.icon" :icon="item.icon" width="18" height="18" aria-hidden="true" />{{ item.label }}
+        <Icon v-if="item.icon" :icon="item.icon" width="18" height="18" aria-hidden="true" />{{ uiText(item.label) }}
       </RouterLink>
       <slot name="menu-footer" />
     </nav>
@@ -12,6 +12,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { RouterLink, type RouteLocationRaw } from 'vue-router';
 import { Icon } from '@iconify/vue';
 

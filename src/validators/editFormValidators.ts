@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 import { MAX_TAGS } from '@/lib/tags';
 import { parseTemporal, periodDateErrors } from '@temporal';
 import type { EditFormType } from '@/types/editForm';
@@ -24,13 +25,13 @@ export class EditFormValidator {
     const fields: Record<string, string> = {};
     const text = (value: unknown, key: string, name: string, max: number, required = false) => {
       if (value == null && !required) return;
-      if (typeof value !== 'string' || value.includes('\0')) { fields[key] = `${name} doit être un texte.`; return; }
+      if (typeof value !== 'string' || value.includes('\0')) { fields[key] = uiFormat`${name} doit être un texte.`; return; }
       if (required && !value.trim()) fields[key] = `${name} est obligatoire.`;
-      else if (value.length > max) fields[key] = `${name} ne peut pas dépasser ${max} caractères.`;
+      else if (value.length > max) fields[key] = uiFormat`${name} ne peut pas dépasser ${max} caractères.`;
     };
     const title = record(data.title);
     const description = data.description == null ? {} : record(data.description);
-    text(title?.fr, 'title.fr', 'Le titre en français', 255, true);
+    text(title?.fr, 'title.fr', 'Le titre en français', 255, !title?.en);
     text(title?.en, 'title.en', 'Le titre en anglais', 255);
     if (!description) fields.description = 'La description doit contenir des textes par langue.';
     else {

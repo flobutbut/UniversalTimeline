@@ -1,3 +1,4 @@
+import { language, localizedText } from '@/i18n';
 import { hasStoryRootLocation } from './storyRelationLocations';
 import type { Story, StoryAnchor, StorySuggestion, ChildStorySummary } from '@/types/database';
 import type { StoryNavigationSnapshot } from '../../server/src/shared/storyNavigation';
@@ -14,7 +15,7 @@ export function storyNavigationLinks(story: StoryNavigationSnapshot): Navigation
     links.set(child.id, { id: child.id, title: child.title, parentStoryId: story.id, anchors, atRoot: hasStoryRootLocation(child),
       ...(child.rootDisplayAsPeriod ? { rootDisplayAsPeriod: true } : {}) });
   }
-  const related = [...(story.relatedStories ?? [])].sort((a, b) => (a.title.fr || a.title.en).localeCompare(b.title.fr || b.title.en, 'fr'));
+  const related = [...(story.relatedStories ?? [])].sort((a, b) => (localizedText(a.title)).localeCompare(localizedText(b.title), language.value));
   for (const other of related) {
     if (String(other.id).trim() === String(story.id).trim()) continue;
     const link = links.get(other.id) ?? { id: other.id, title: other.title, parentStoryId: null, anchors: [] };

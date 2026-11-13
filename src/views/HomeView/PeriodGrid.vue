@@ -1,30 +1,28 @@
 <template>
   <div ref="gridRoot" class="period-grid" :class="{ 'period-grid--compact': compact || minimized, 'period-grid--minimized': minimized, 'period-grid--axis-centered': !!axisViewport, 'period-grid--natural-height': naturalHeight || minimized || !!axisViewport }" :style="axisCenterStyle" :aria-busy="loading || undefined">
     <!-- Garder le niveau courant affiché pendant une navigation ou une recherche de stories. -->
-    <FeedbackState v-if="loading && !currentPeriod && periods.length === 0 && events.length === 0" kind="loading" message="Chargement de la timeline…" />
-    <FeedbackState v-else-if="error" kind="error" :message="error" />
-    <FeedbackState v-else-if="!loading && !currentPeriod && !overviewNavigation && periods.length === 0 && events.length === 0" :message="outsideFrame ? 'Hors de la période affichée' : 'Aucune période à afficher'" />
+    <FeedbackState v-if="loading && !currentPeriod && periods.length === 0 && events.length === 0" kind="loading" :message="uiText('Chargement de la timeline…')" />
+    <FeedbackState v-else-if="error" kind="error" :message="uiText(error)" />
+    <FeedbackState v-else-if="!loading && !currentPeriod && !overviewNavigation && periods.length === 0 && events.length === 0" :message="uiText(outsideFrame ? 'Hors de la période affichée' : 'Aucune période à afficher')" />
     <div v-else class="timeline-container">
       <div class="periods-container">
-        <nav v-if="!minimized && !loading && (viewEndLabel || (showsNeighbors && (previousPeriod || nextPeriod)))" class="period-grid__navigation" aria-label="Périodes de même niveau">
+        <nav v-if="!minimized && !loading && (viewEndLabel || (showsNeighbors && (previousPeriod || nextPeriod)))" class="period-grid__navigation" :aria-label="uiText('Périodes de même niveau')">
           <Button v-if="showsNeighbors && previousPeriod" variant="ghost" size="sm" data-period-direction="previous"
-            :title="`Période précédente : ${previousPeriod.label.fr || previousPeriod.label.en}`"
+            :title="uiFormat`Période précédente : ${localizedText(previousPeriod.label)}`"
             @click="navigatePeriod('previous')">
-            <template #icon><Icon icon="mdi:arrow-left" aria-hidden="true" /></template>
-            Période précédente<span> - {{ previousPeriod.label.fr || previousPeriod.label.en }}</span>
+            <template #icon><Icon icon="mdi:arrow-left" aria-hidden="true" /></template> {{ uiText("Période précédente") }}<span> - {{ localizedText(previousPeriod.label) }}</span>
           </Button>
           <Button v-if="showsNeighbors && nextPeriod" class="period-grid__next-control" variant="ghost" size="sm" data-period-direction="next"
-            :title="`Période suivante : ${nextPeriod.label.fr || nextPeriod.label.en}`"
-            @click="navigatePeriod('next')">
-            Période suivante<span> - {{ nextPeriod.label.fr || nextPeriod.label.en }}</span>
+            :title="uiFormat`Période suivante : ${localizedText(nextPeriod.label)}`"
+            @click="navigatePeriod('next')"> {{ uiText("Période suivante") }}<span> - {{ localizedText(nextPeriod.label) }}</span>
             <Icon icon="mdi:arrow-right" class="period-grid__next-icon" aria-hidden="true" />
           </Button>
           <!-- Sans période suivante, la vue s'arrête au présent ou à la fin de la frise : annoncer cette borne. -->
-          <span v-else-if="viewEndLabel" class="period-grid__end-label">{{ viewEndLabel }}</span>
+          <span v-else-if="viewEndLabel" class="period-grid__end-label">{{ uiText(viewEndLabel) }}</span>
         </nav>
         <div ref="periodSurfaceRef" class="period-grid__surface">
           <slot v-if="!minimized && !props.currentPeriod && (!overviewPeriod || overviewPeriodStyle)" name="overview-context" :style="overviewPeriodStyle" :continuation="overviewContinuation" />
-          <FeedbackState v-if="!loading && !currentPeriod && overviewNavigation && periods.length === 0 && events.length === 0" :message="outsideFrame ? 'Hors de la période affichée' : 'Aucune période à afficher'" />
+          <FeedbackState v-if="!loading && !currentPeriod && overviewNavigation && periods.length === 0 && events.length === 0" :message="uiText(outsideFrame ? 'Hors de la période affichée' : 'Aucune période à afficher')" />
           <PeriodCard
             v-if="props.currentPeriod && (!minimized || renderedPeriods.length === 0)"
             ref="parentBarRef"
@@ -42,10 +40,10 @@
             @mouseleave="periodDetails.leave(props.currentPeriod.id)"
             @focusin="periodDetails.focus(props.currentPeriod.id)"
             @focusout="periodDetails.blur(props.currentPeriod.id)"
-            @keydown.esc.stop="periodDetails.reset()"
+            @keydown.esc="periodDetails.collapseFromKeyboard($event)"
           >
             <template #title-actions>
-              <AssociatedStoriesBadge v-if="props.currentPeriod" :story-id="currentStoryId" :period-id="props.currentPeriod.id" :period-label="props.currentPeriod.label.fr || props.currentPeriod.label.en"
+              <AssociatedStoriesBadge v-if="props.currentPeriod" :story-id="currentStoryId" :period-id="props.currentPeriod.id" :period-label="localizedText(props.currentPeriod.label)"
                 :stories="currentPeriodStories" :loading="associationsLoading" :error="associationsError" :disabled="loading" :comparison="comparison" @compare="emit('story-compare', $event)"
                 @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: props.currentPeriod.id })" />
             </template>
@@ -72,10 +70,10 @@
               @mouseleave="periodDetails.leave(period.id)"
               @focusin="periodDetails.focus(period.id)"
               @focusout="periodDetails.blur(period.id)"
-              @keydown.esc.stop="periodDetails.reset()"
+              @keydown.esc="periodDetails.collapseFromKeyboard($event)"
             >
               <template #title-actions>
-                <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
+                <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="localizedText(period.label)"
                   :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading" :comparison="comparison" @compare="emit('story-compare', $event)"
                   @open-change="value => setPeriodAssociationsOpen(period.id, value)"
                   @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: period.id })" />
@@ -86,10 +84,10 @@
       </div>
       <div ref="timelineLineRef" class="timeline-line"></div>
       <div v-if="undatedPeriods.length" ref="undatedPeriodsRef" class="period-grid__undated">
-        <span>Dates non déterminées</span>
+        <span>{{ uiText("Dates non déterminées") }}</span>
         <span v-for="period in undatedPeriods" :key="`p:${period.id}`" class="period-grid__undated-item">
-          <Button variant="tertiary" size="xs" type="button" :disabled="loading" @click="selectPeriod(period)">{{ period.label.fr }}</Button>
-          <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="period.label.fr || period.label.en"
+          <Button variant="tertiary" size="xs" type="button" :disabled="loading" @click="selectPeriod(period)">{{ localizedText(period.label) }}</Button>
+          <AssociatedStoriesBadge :story-id="currentStoryId" :period-id="period.id" :period-label="localizedText(period.label)"
             :stories="associatedByPeriod.get(period.id) ?? []" :loading="associationsLoading" :error="associationsError" :disabled="loading" :comparison="comparison" @compare="emit('story-compare', $event)"
             @retry="retryAssociations" @select="emit('story-select', $event, { type: 'period', id: period.id })" />
         </span>
@@ -104,15 +102,15 @@
           :style="tooltipStyle"
         >
           <WikipediaImage :key="tooltipPeriod.id" :titles="tooltipPeriod.wikipedia" />
-          <strong>{{ tooltipPeriod.label.fr || tooltipPeriod.label.en }}</strong>
+          <strong>{{ localizedText(tooltipPeriod.label) }}</strong>
           <span v-if="tooltipDateRange">{{ tooltipDateRange }}</span>
           <p v-if="tooltipDescription" class="period-grid__tooltip-description">{{ tooltipDescription }}</p>
           <small v-if="tooltipHint" class="period-grid__tooltip-hint">{{ tooltipHint }}</small>
         </div>
       </Teleport>
       <div ref="eventsSurfaceRef" class="events-container" @click="selectedEvent = null">
-        <p v-if="currentPeriod && !loading && renderedPeriods.length === 0 && events.length === 0" class="period-grid__empty-detail">Aucune sous-période ni événement dans cette frise pour cette période.</p>
-        <span v-if="undatedEvents.length" class="period-grid__undated-label">Événements sans date déterminée</span>
+        <p v-if="currentPeriod && !loading && renderedPeriods.length === 0 && events.length === 0" class="period-grid__empty-detail">{{ uiText("Aucune sous-période ni événement dans cette frise pour cette période.") }}</p>
+        <span v-if="undatedEvents.length" class="period-grid__undated-label">{{ uiText("Événements sans date déterminée") }}</span>
         <EventCard
           v-for="event in events"
           :key="event.id"
@@ -143,6 +141,7 @@
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import { primaryTag } from '@/lib/tags';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import Button from '@/components/base/Button.vue';
@@ -327,7 +326,7 @@ const viewEndLabel = computed(() => {
   return label === "aujourd'hui" ? "Aujourd'hui" : `Fin : ${label}`;
 });
 const tooltipDateRange = computed(() => tooltipPeriod.value ? formatPeriodDateRange(tooltipPeriod.value) : '');
-const tooltipDescription = computed(() => (tooltipPeriod.value?.description?.fr || tooltipPeriod.value?.description?.en || '').trim());
+const tooltipDescription = computed(() => (localizedText(tooltipPeriod.value?.description) || '').trim());
 const tooltipHint = computed(() => {
   if (!tooltipPeriod.value) return '';
   if (tooltipPeriod.value.id === props.currentPeriod?.id) return 'Cliquer pour remonter';
@@ -338,6 +337,7 @@ const periodFlip = usePeriodFlip(
   () => props.currentPeriod?.id,
   () => props.loading,
   () => unwrapTemplateRefToHTMLElement(parentBarRef.value),
+  periodDetails.dismiss,
 );
 
 // ─── Tri et lanes ─────────────────────────────────────────────────────────────
@@ -357,7 +357,7 @@ const periodRows = computed(() => {
   return [...rows,...links];
 });
 const childParentLabels = computed(() => {
-  const parents = new Map([...props.periods, ...props.childPeriods].map(p => [p.id, p.label.fr || p.label.en || 'Période sans nom']));
+  const parents = new Map([...props.periods, ...props.childPeriods].map(p => [p.id, localizedText(p.label) || 'Période sans nom']));
   return new Map(inlineChildren.value.map(p => [p.id, parents.get(getStoryPeriodParentId(p) ?? '')]));
 });
 const childRows = computed(() => {
@@ -511,7 +511,7 @@ const eventSlots = computed(() => props.events.filter(event => listEventYearsBP(
   const leftPct = projectPosition(getEventRawLeft(event));
   // Liens inconnus pendant le chargement ou après une erreur : seuls les signaux de dates comptent.
   const links = associationsLoading.value || associationsError.value ? [] : associatedByEvent.value.get(event.id) ?? [];
-  const hasDescription = !!(event.description?.fr || event.description?.en || '').trim();
+  const hasDescription = !!(localizedText(event.description) || '').trim();
   return { id: event.id, leftPct, align: timelineEventCardAlign(leftPct),
     signals: eventPrioritySignals(leftPct, boundariesPct.value, links, props.currentStoryId, hasDescription, event.importance) };
 }));
@@ -564,7 +564,7 @@ const selectEvent = (event: ListEvent) => {
   }
 };
 
-watch([() => props.currentStoryId, () => props.currentPeriod?.id], () => { selectedEvent.value = null; resetActiveEvent(); }, { flush: 'sync' });
+watch([() => props.currentStoryId, () => props.currentPeriod?.id], () => { selectedEvent.value = null; resetActiveEvent(); periodDetails.reset(); associationPeriodId.value = null; }, { flush: 'sync' });
 watch(() => props.minimized, () => { selectedEvent.value = null; resetActiveEvent(); periodDetails.reset(); });
 watch(() => props.events, events => {
   if (selectedEvent.value && !events.some(event => event.id === selectedEvent.value!.id)) selectedEvent.value = null;

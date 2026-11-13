@@ -2,12 +2,13 @@
   <Teleport to="body"><Transition name="toast">
     <div v-if="notification" :key="notification.id" class="toast" :class="notification.type"
       :role="notification.type === 'error' ? 'alert' : 'status'" aria-atomic="true" data-ui-feedback>
-      {{ notification.message }}
+      {{ uiText(notification.message) }}
     </div>
   </Transition></Teleport>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import type { Notification } from '@/stores/useUiStore';
 defineProps<{ notification: Notification | null }>();
 </script>

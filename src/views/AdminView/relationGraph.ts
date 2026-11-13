@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 import type { RelationLinkKind,RelationsNetwork } from '@/types/adminRelations';
 import { relationLinkLabels } from '@/types/adminRelations';
 
@@ -43,9 +44,9 @@ export function buildRelationGraph(network:RelationsNetwork,visibleKinds:GraphKi
   }
   const nodes:GraphNode[]=[
     ...network.stories.map(story=>({id:graphKey('story',story.id),kind:'story' as const,entityId:story.id,title:story.title,
-      subtitle:`${story.isPublic?'Publique':'Privée'} · ${story.periods} périodes · ${story.events} événements`})),
+      subtitle:uiFormat`${story.isPublic?'Publique':'Privée'} · ${story.periods} périodes · ${story.events} événements`})),
     ...(['period','event'] as const).flatMap(kind=>(kind==='period'?network.periods:network.events).map(entity=>({
-      id:graphKey(kind,entity.id),kind,entityId:entity.id,title:entity.title,subtitle:`Dans ${uses.get(graphKey(kind,entity.id))?.size??0} frise(s)`,
+      id:graphKey(kind,entity.id),kind,entityId:entity.id,title:entity.title,subtitle:uiFormat`Dans ${uses.get(graphKey(kind,entity.id))?.size??0} frise(s)`,
     }))),
   ].filter(node=>visibleKinds.includes(node.kind));
   const ids=new Set(nodes.map(node=>node.id));const edges:GraphEdge[]=[];const groups=new Map<string,GraphEdge>();

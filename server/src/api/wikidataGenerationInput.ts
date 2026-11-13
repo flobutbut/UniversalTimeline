@@ -16,10 +16,21 @@ export function parseGeneratedStoryLookup(value: unknown) {
   return { qid: parseQid(input.qid, true)!, title: parseStoryWrite({ title: { fr: input.title } }).title.fr };
 }
 
+function generatedText(record: Record<string, unknown>, field: 'title' | 'description', value: unknown) {
+  if (record.texts === undefined) return { fr: value };
+  const texts = inputObject(record.texts, 'texts');
+  const lang = texts.language;
+  if (lang !== 'en' && lang !== 'fr') throw new InputValidationError('texts.language', 'Langue invalide.');
+  const originals = inputObject(texts[field === 'title' ? 'titles' : 'descriptions']);
+  const other = lang === 'en' ? 'fr' : 'en';
+  const missingTitle = field === 'title' && value === record.qid && !originals[lang] && originals[other];
+  return { [lang]: missingTitle ? '' : value, [other]: originals[other] };
+}
+
 export function parseGeneratedStory(value: unknown): GeneratedStoryInput {
   const body = inputObject(value);
   const qid = parseQid(body.qid, true)!;
-  const story = parseWriteCategories(parseStoryWrite({ title: { fr: body.title }, description: { fr: body.description === undefined ? `Source : https://www.wikidata.org/wiki/${qid}` : body.description }, isPublic: body.isPublic === undefined ? false : body.isPublic }));
+  const story = parseWriteCategories(parseStoryWrite({ title: generatedText(body, 'title', body.title), description: generatedText(body, 'description', body.description === undefined ? `Source : https://www.wikidata.org/wiki/${qid}` : body.description), isPublic: body.isPublic === undefined ? false : body.isPublic }));
   const acknowledged = body.acknowledgedStoryIds === undefined ? [] : body.acknowledgedStoryIds;
   if (!Array.isArray(acknowledged) || acknowledged.length > 20) throw new InputValidationError('acknowledgedStoryIds', 'La confirmation des frises existantes est invalide.');
   const acknowledgedStoryIds = [...new Set(acknowledged.map(id => parseStoryId(id, 'acknowledgedStoryIds')))];
@@ -33,7 +44,7 @@ export function parseGeneratedStory(value: unknown): GeneratedStoryInput {
     seen.add(identity.sourceKey);
     const parentQid = item.parentQid == null || item.parentQid === '' ? null : typeof item.parentQid === 'string' && item.parentQid.length <= 200 ? item.parentQid : (() => { throw new InputValidationError('parentQid', 'Le parent est invalide.'); })();
     if (typeof item.startDate !== 'string' || parseTemporal(item.startDate).kind === 'unknown') throw new InputValidationError('startDate', 'Chaque élément doit avoir une date valide.');
-    const core = { id: randomUUID(), wikidata_id: qid, label: { fr: item.title }, description: { fr: item.description }, wikipedia: item.wikipedia };
+    const core = { id: randomUUID(), wikidata_id: qid, label: generatedText(item, 'title', item.title), description: generatedText(item, 'description', item.description), wikipedia: item.wikipedia };
     const metadata = { key: identity.key, sourceKey: identity.sourceKey, source: identity.source };
     if (item.type === 'event') {
       if (parentQid) throw new InputValidationError('parentQid', 'Seule une période peut avoir un parent.');

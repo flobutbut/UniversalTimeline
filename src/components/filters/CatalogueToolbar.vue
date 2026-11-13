@@ -1,13 +1,14 @@
 <template>
   <div class="catalogue-toolbar">
     <div class="catalogue-toolbar__filters">
-      <div class="catalogue-toolbar__search"><SearchInput v-model="search" :placeholder="placeholder" /></div>
+      <div class="catalogue-toolbar__search"><SearchInput v-model="search" :placeholder="uiText(placeholder)" /></div>
       <slot name="filters" />
     </div>
     <div class="catalogue-toolbar__actions"><slot name="actions" /></div>
   </div>
 </template>
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import SearchInput from '@/components/base/SearchInput.vue';
 defineProps<{ placeholder: string }>();
 const search = defineModel<string>('search', { required: true });

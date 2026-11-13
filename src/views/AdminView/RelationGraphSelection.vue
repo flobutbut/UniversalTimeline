@@ -1,17 +1,17 @@
 <template>
-  <PopoverSurface padded class="relation-selection" role="region" :aria-label="node?'Objet sélectionné':'Lien sélectionné'">
+  <PopoverSurface padded class="relation-selection" role="region" :aria-label="uiText(node?'Objet sélectionné':'Lien sélectionné')">
     <div class="relation-selection__heading">
-      <h3>{{ node?.title ?? edge?.label }}</h3>
-      <Button variant="ghost" size="xs" icon-only aria-label="Fermer la sélection" @click="$emit('close')"><template #icon><Icon icon="mdi:close" width="16" height="16" aria-hidden="true" /></template></Button>
+      <h3>{{ uiText(node?.title ?? edge?.label) }}</h3>
+      <Button variant="ghost" size="xs" icon-only :aria-label="uiText('Fermer la sélection')" @click="$emit('close')"><template #icon><Icon icon="mdi:close" width="16" height="16" aria-hidden="true" /></template></Button>
     </div>
     <div class="relation-selection__actions">
-      <Tag :label="node?kindLabels[node.kind]:'Relation'" />
-      <Button v-if="node" variant="tertiary" size="sm" :disabled="orphan" :aria-describedby="orphan?orphanId:undefined" :to="databaseRecordLocation(node.kind,node.entityId)">Ouvrir</Button>
+      <Tag :label="uiText(node?kindLabels[node.kind]:'Relation')" />
+      <Button v-if="node" variant="tertiary" size="sm" :disabled="orphan" :aria-describedby="orphan?orphanId:undefined" :to="databaseRecordLocation(node.kind,node.entityId)">{{ uiText("Ouvrir") }}</Button>
     </div>
     <p v-if="edge" class="relation-selection__caption">{{ nodeTitle(edge.source) }} → {{ nodeTitle(edge.target) }}</p>
-    <p v-if="orphan" :id="orphanId" class="relation-selection__caption">Objet orphelin · aucune frise parente</p>
+    <p v-if="orphan" :id="orphanId" class="relation-selection__caption">{{ uiText("Objet orphelin · aucune frise parente") }}</p>
     <template v-if="parents.length">
-      <p class="relation-selection__caption">{{ node?'Frise'+(parents.length>1?'s parentes':' parente'):'Frises concernées' }}</p>
+      <p class="relation-selection__caption">{{ uiText(node?'Frise'+(parents.length>1?'s parentes':' parente'):'Frises concernées') }}</p>
       <ul class="relation-selection__parents">
         <li v-for="parent in parents" :key="parent.id">
           <Button variant="ghost" size="sm" wrap :to="databaseRecordLocation('story',parent.id)">{{ parent.title }}</Button>
@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import {computed,useId} from 'vue';
 import {Icon} from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
@@ -46,7 +47,7 @@ const parents=computed(()=>{
   return props.network.stories.filter(story=>ids.has(story.id)).map(story=>{
     const parentIds=new Set(memberships.value.filter(m=>m.storyId===story.id&&m.parentId).map(m=>m.parentId));
     const titles=props.network.periods.filter(period=>parentIds.has(period.id)).map(period=>period.title);
-    return {...story,context:titles.length?`Sous ${titles.join(', ')}`:''};
+    return {...story,context:titles.length?uiFormat`Sous ${titles.join(', ')}`:''};
   });
 });
 </script>

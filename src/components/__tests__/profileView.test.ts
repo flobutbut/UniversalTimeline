@@ -3,6 +3,7 @@ import { createPinia, disposePinia, type Pinia } from 'pinia';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 import { mount, flushPromises } from '@vue/test-utils';
 import { CURRENT_TERMS_VERSION } from '@account-rules';
+import { setLanguage } from '@/i18n';
 import ProfileView from '@/views/ProfileView.vue';
 import { appRoutes } from '@/router/routes';
 import { authService } from '@/services/AuthService';
@@ -36,10 +37,33 @@ afterEach(() => { view?.unmount(); router?.options.history.destroy(); disposePin
 it('lays out a left menu beside one main column, without a duplicate list of frises', async () => {
   await start();
   expect(view.get('nav').findAll('a').map(link => [link.text(), link.attributes('aria-current')])).toEqual([
-    ['Profil', 'page'], ['Données et confidentialité', undefined], ['Session', undefined],
+    ['Profil', 'page'], ['Langue', undefined], ['Données et confidentialité', undefined], ['Session', undefined],
   ]);
   expect(view.text()).not.toContain('Mes frises');
   expect(view.text()).toContain('alice@example.test'); expect(view.text()).toContain('Administrateur');
+});
+
+it('opens the dedicated language section and switches the interface to English', async () => {
+  await start('/profile?section=privacy');
+  const nav = view.get('nav');
+  expect(view.find('[role="combobox"]').exists()).toBe(false);
+  await nav.get('a[href="/profile?section=language"]').trigger('click');
+  await flushPromises();
+  const panel = view.get('section[aria-labelledby="language-title"]');
+  expect(panel.get('h2').text()).toBe('Langue');
+  const select = panel.get('[role="combobox"]');
+  try {
+    await select.trigger('click');
+    await panel.get('[role="option"]:last-child').trigger('click');
+    expect(select.text()).toBe('EN');
+    expect(panel.get('h2').text()).toBe('Language');
+    expect(panel.get('label').text()).toBe('Interface language');
+    expect(nav.get('[aria-current="page"]').text()).toBe(view.get('h2').text());
+    expect(router.currentRoute.value.query.section).toBe('language');
+  } finally {
+    setLanguage('fr');
+    localStorage.removeItem('universal-timeline.language');
+  }
 });
 
 it('edits the avatar colour and motif and saves them with the username', async () => {

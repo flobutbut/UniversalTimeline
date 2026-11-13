@@ -12,7 +12,7 @@
         <SearchInput
           ref="searchInputRef"
           v-model="search"
-          :placeholder="searchPlaceholderResolved"
+          :placeholder="uiText(searchPlaceholderResolved)"
           size="sm"
           autocomplete="off"
           role="combobox"
@@ -30,19 +30,19 @@
             :style="dropdownStyle"
             :id="panelId"
             role="dialog"
-            :aria-label="'Résultats de recherche'"
+            :aria-label="uiText('Résultats de recherche')"
             :aria-busy="searchLoading"
             @keydown.esc="closeSearchPanel"
             @keydown="onResultsKeydown"
             @focusout="onSearchFocusOut"
           >
-            <div v-if="searchLoading" class="filter-bar-dd__empty" role="status">Recherche en cours…</div>
+            <div v-if="searchLoading" class="filter-bar-dd__empty" role="status">{{ uiText("Recherche en cours…") }}</div>
             <div v-else-if="searchError" class="filter-bar-dd__empty" role="alert">
-              {{ searchError }}
-              <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="$emit('retrySearch')">Réessayer</Button>
+              {{ uiText(searchError) }}
+              <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="$emit('retrySearch')">{{ uiText("Réessayer") }}</Button>
             </div>
             <template v-else-if="mode === 'periods'">
-              <div v-if="!suggestions.length" class="filter-bar-dd__empty" role="status">Aucun résultat</div>
+              <div v-if="!suggestions.length" class="filter-bar-dd__empty" role="status">{{ uiText("Aucun résultat") }}</div>
               <template v-else>
                 <div
                   v-for="p in suggestions"
@@ -50,8 +50,8 @@
                   class="filter-bar-dd__item"
                 >
                   <button type="button" class="filter-bar-dd__choose" @mousedown.prevent @click="onPickPeriod(p)">
-                  <span class="filter-bar-dd__label">{{ p.label.fr }}</span>
-                  <span v-if="p.id.startsWith('wikidata:')" class="filter-bar-dd__meta">Wikidata</span>
+                  <span class="filter-bar-dd__label">{{ localizedText(p.label) }}</span>
+                  <span v-if="p.id.startsWith('wikidata:')" class="filter-bar-dd__meta">{{ uiText("Wikidata") }}</span>
                   <span v-else class="filter-bar-dd__meta">{{ formatPeriodLine(p) }}</span>
                   </button>
                   <button
@@ -60,15 +60,13 @@
                     class="filter-bar-dd__action"
                     @mousedown.stop.prevent
                     @click.stop.prevent="onWikidataAdd(p.id)"
-                    :aria-label="`Créer ${p.label.fr}`"
-                  >
-                    Créer
-                  </button>
+                    :aria-label="uiFormat`Créer ${localizedText(p.label)}`"
+                  > {{ uiText("Créer") }} </button>
                 </div>
               </template>
             </template>
             <template v-else>
-              <div v-if="!eventSuggestions.length" class="filter-bar-dd__empty" role="status">Aucun résultat</div>
+              <div v-if="!eventSuggestions.length" class="filter-bar-dd__empty" role="status">{{ uiText("Aucun résultat") }}</div>
               <template v-else>
                 <div
                   v-for="ev in eventSuggestions"
@@ -76,7 +74,7 @@
                   class="filter-bar-dd__item"
                 >
                   <button type="button" class="filter-bar-dd__choose" @mousedown.prevent @click="onPickEvent(ev)">
-                  <span class="filter-bar-dd__label">{{ ev.label.fr }}</span>
+                  <span class="filter-bar-dd__label">{{ localizedText(ev.label) }}</span>
                   <span class="filter-bar-dd__meta">{{ formatEventLine(ev) }}</span>
                   </button>
                 </div>
@@ -89,7 +87,7 @@
         <Select
           v-model="tagId"
           :options="tagOptions"
-          placeholder="Tous les tags"
+          :placeholder="uiText('Tous les tags')"
           :searchable="tagOptions.length > 10"
           size="sm"
         />
@@ -105,6 +103,7 @@
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import { elementRef } from '@/utils/elementRef';
 import PopoverSurface from '@/components/base/PopoverSurface.vue';
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';

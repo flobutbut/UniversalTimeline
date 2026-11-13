@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 import { DateService } from '@/services/DateService';
 
 /** Borne pour sous-titre finder : vide → null ; NOW/TODAY → « aujourd'hui ». */
@@ -13,7 +14,7 @@ export function formatFinderItemDateRangeSubtitle(start?: string, end?: string):
   const s = formatFinderItemBoundLabel(start);
   const e = formatFinderItemBoundLabel(end);
   if (!s && !e) return '—';
-  if (s && e) return `de ${s} à ${e}`;
-  if (s) return `à partir de ${s}`;
-  return `jusqu'à ${e}`;
+  if (s && e) return uiFormat`de ${s} à ${e}`;
+  if (s) return uiFormat`à partir de ${s}`;
+  return uiFormat`jusqu'à ${e}`;
 }

@@ -10,13 +10,13 @@
     <AdminDashboard v-else />
     <template #menu-footer>
       <RouterLink class="admin-view__extra" :to="{ name: 'design-system' }">
-        <Icon icon="mdi:palette-swatch-outline" width="18" height="18" aria-hidden="true" />Design system
-      </RouterLink>
+        <Icon icon="mdi:palette-swatch-outline" width="18" height="18" aria-hidden="true" />{{ uiText("Design system") }} </RouterLink>
     </template>
   </SidebarLayout>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { computed, defineAsyncComponent } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { Icon } from '@iconify/vue';

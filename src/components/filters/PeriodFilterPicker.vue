@@ -1,12 +1,13 @@
 <template>
   <div>
-    <p v-if="selectionError" role="alert" class="period-filter-error">{{ selectionError }} <Button variant="tertiary" size="sm" type="button" @click="$emit('retry')">Réessayer</Button></p>
-    <FilterValueList :model-value="modelValue ? [modelValue] : ['']" :options="options" label="Périodes" searchable :filter-locally="false"
-    v-model:search="search" search-placeholder="Rechercher une période…" :loading="loading || pending" :error="error"
+    <p v-if="selectionError" role="alert" class="period-filter-error">{{ uiText(selectionError) }} <Button variant="tertiary" size="sm" type="button" @click="$emit('retry')">{{ uiText("Réessayer") }}</Button></p>
+    <FilterValueList :model-value="modelValue ? [modelValue] : ['']" :options="options" :label="uiText('Périodes')" searchable :filter-locally="false"
+    v-model:search="search" :search-placeholder="uiText('Rechercher une période…')" :loading="loading || pending" :error="error"
     @retry="retry" @update:model-value="values => choose(values[0] ?? '')" />
   </div>
 </template>
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import Button from '@/components/base/Button.vue';
 import { computed, onMounted } from 'vue';
 import FilterValueList from './FilterValueList.vue';

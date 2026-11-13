@@ -3,10 +3,10 @@
     <DesignIcon name="search" class="search-input-wrap__icon" />
     <input
       type="search"
-      :aria-label="placeholder || 'Rechercher'"
+      :aria-label="uiText(placeholder || 'Rechercher')"
       :value="modelValue"
       class="search-input-wrap__field"
-      :placeholder="placeholder"
+      :placeholder="uiText(placeholder)"
       :disabled="disabled"
       v-bind="$attrs"
       ref="fieldRef"
@@ -16,7 +16,7 @@
       v-if="modelValue"
       class="search-input-wrap__clear"
       type="button"
-      aria-label="Effacer la recherche"
+      :aria-label="uiText('Effacer la recherche')"
       :disabled="disabled"
       @click="clear"
     >
@@ -26,6 +26,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { ref } from 'vue';
 import DesignIcon from './DesignIcon.vue';
 

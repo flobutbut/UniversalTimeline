@@ -1,3 +1,4 @@
+import { localizedText, uiFormat } from '@/i18n';
 import { comparableYearsBeforePresent } from '@temporal';
 import { getStoryPeriodParentId } from '@/lib/storyPeriodParent';
 import type { ListEvent, ListPeriod, Story } from '@/types/database';
@@ -17,7 +18,7 @@ type DatedEvent = Pick<ListEvent, 'id' | 'date' | 'dateYearsBP'>;
 type StoryTreeNode = { id: string; parentStoryId?: string | null; title?: { fr: string; en: string } };
 
 const label = (item: { id: string; label?: { fr: string; en: string }; title?: { fr: string; en: string } }) =>
-  item.label?.fr || item.label?.en || item.title?.fr || item.title?.en || item.id;
+  localizedText(item.label) || localizedText(item.title) || item.id;
 /** Mélanger une date calendaire et une date géologique crée un petit écart : tolérer 1e-5 de l’âge. */
 const tolerance = (range: YearsRange) => Math.max(Math.abs(range.start) * 1e-5, 1e-6);
 
@@ -135,15 +136,15 @@ export function storyStructureWarnings(story: WarningStory, stories: readonly St
     if (ids.length <= MAX_LEVEL_SIZE) continue;
     const parent = parentId ? byId.get(parentId) : undefined;
     warnings.push({ kind: 'crowded-level', ...(parentId ? { periodId: parentId } : {}), message: parent
-      ? `« ${label(parent)} » regroupe ${ids.length} sous-périodes : regroupez les phases successives sous une période englobante, ou faites-en une sous-frise.`
-      : `Le premier niveau compte ${ids.length} périodes : regroupez les phases successives sous des périodes englobantes, ou découpez la frise.` });
+      ? uiFormat`« ${label(parent)} » regroupe ${ids.length} sous-périodes : regroupez les phases successives sous une période englobante, ou faites-en une sous-frise.`
+      : uiFormat`Le premier niveau compte ${ids.length} périodes : regroupez les phases successives sous des périodes englobantes, ou découpez la frise.` });
   }
   for (const period of periods) {
     const parentId = tree.parent.get(period.id);
     const parent = parentId ? byId.get(parentId) : undefined;
     const inner = periodRange(period, now), outer = parent && periodRange(parent, now);
     if (parent && inner && outer && !contains(outer, inner)) warnings.push({ kind: 'overflow', periodId: period.id,
-      message: `« ${label(period)} » déborde des dates de « ${label(parent)} » : remontez-la d’un niveau ou élargissez le parent.` });
+      message: uiFormat`« ${label(period)} » déborde des dates de « ${label(parent)} » : remontez-la d’un niveau ou élargissez le parent.` });
   }
   const parents = parentMap(stories);
   const subStories = (story.childStories ?? []).filter(child => !parents.size || parents.get(child.id) === story.id);
@@ -153,7 +154,7 @@ export function storyStructureWarnings(story: WarningStory, stories: readonly St
       const period = anchor.type === 'period' ? byId.get(anchor.id) : undefined;
       const duplicated = period ? tree.descendants(period.id).filter(id => shared.has(id)) : [];
       if (period && duplicated.length) warnings.push({ kind: 'duplicated-structure', periodId: period.id, storyId: child.id,
-        message: `${duplicated.length} sous-période${duplicated.length > 1 ? 's' : ''} de « ${label(period)} » existe${duplicated.length > 1 ? 'nt' : ''} aussi dans la sous-frise « ${label(child)} » : retirez-les d’ici, la période reste l’ancre.` });
+        message: uiFormat`${duplicated.length} sous-période${duplicated.length > 1 ? 's' : ''} de « ${label(period)} » existe${duplicated.length > 1 ? 'nt' : ''} aussi dans la sous-frise « ${label(child)} » : retirez-les d’ici, la période reste l’ancre.` });
     }
   }
   const titles = new Map(stories.map(item => [item.id, item]));
@@ -165,11 +166,11 @@ export function storyStructureWarnings(story: WarningStory, stories: readonly St
   };
   for (const child of story.childStories ?? []) {
     if (parents.get(child.id) !== story.id && skips(story.id, child.id)) warnings.push({ kind: 'skipping-entry', storyId: child.id,
-      message: `Le point d’entrée vers « ${label(child)} » saute des niveaux de l’arbre${via(story.id, child.id)}.` });
+      message: uiFormat`Le point d’entrée vers « ${label(child)} » saute des niveaux de l’arbre${via(story.id, child.id)}.` });
   }
   for (const source of story.parentStories ?? []) {
     if (source.id !== (story.parentStoryId ?? parents.get(story.id)) && skips(source.id, story.id)) warnings.push({ kind: 'skipping-entry', storyId: source.id,
-      message: `Le point d’entrée depuis « ${label(source)} » saute des niveaux de l’arbre${via(source.id, story.id)}.` });
+      message: uiFormat`Le point d’entrée depuis « ${label(source)} » saute des niveaux de l’arbre${via(source.id, story.id)}.` });
   }
   if (story.isPublic && !(story.parentStoryId ?? parents.get(story.id)) && !isTreeRoot(story.id, stories)) warnings.push({ kind: 'public-draft',
     message: 'Cette frise publique n’a pas de frise parente : rattachez-la à la frise qui contient son sujet.' });
@@ -190,11 +191,11 @@ export function promotionCandidates(story: Pick<Story, 'periods' | 'events' | 'c
     if (anchored.has(period.id) || (roots.length === 1 && roots[0] === period.id)) continue;
     const reasons: string[] = [];
     const sub = tree.descendants(period.id).length, levels = tree.levelsBelow(period.id);
-    if (sub > PROMOTION_SUB_PERIODS) reasons.push(`${sub} sous-périodes`);
-    if (levels > PROMOTION_LEVELS) reasons.push(`${levels} niveaux de sous-périodes`);
+    if (sub > PROMOTION_SUB_PERIODS) reasons.push(uiFormat`${sub} sous-périodes`);
+    if (levels > PROMOTION_LEVELS) reasons.push(uiFormat`${levels} niveaux de sous-périodes`);
     const range = periodRange(period, now);
     const events = range ? eventYears.filter(bp => bp <= range.start && bp >= range.end).length : 0;
-    if (events >= PROMOTION_EVENTS) reasons.push(`${events} événements dans ses dates`);
+    if (events >= PROMOTION_EVENTS) reasons.push(uiFormat`${events} événements dans ses dates`);
     if (reasons.length) out.push({ periodId: period.id, reasons });
   }
   return out;
@@ -208,13 +209,13 @@ export function deduceStoryRole(story: Pick<Story, 'id' | 'periods' | 'childStor
   const anchored = anchoredPeriodIds(story);
   const openings = (story.periods ?? []).filter(period => anchored.has(period.id)).length;
   const draft = !(story.parentStoryId ?? parentMap(stories).get(story.id)) && !isTreeRoot(story.id, stories);
-  const subFrises = `${openings} période${openings > 1 ? 's' : ''} ouvre${openings > 1 ? 'nt' : ''} sur une autre frise`;
+  const subFrises = uiFormat`${openings} période${openings > 1 ? 's' : ''} ouvre${openings > 1 ? 'nt' : ''} sur une autre frise`;
   if ((story.navigationContexts ?? []).some(context => context.id === story.id && context.presentations.length > 0)) {
     return { role: 'parcours', label: 'Parcours', description: 'Une lecture qui traverse d’autres frises dans l’ordre de ses périodes, sans posséder leur contenu.', openings, draft };
   }
   const anchoredRoots = roots.filter(id => anchored.has(id)).length;
   if (roots.length && anchoredRoots * 2 >= roots.length) {
-    return { role: 'portail', label: 'Portail', description: `Ses grandes périodes ouvrent sur des sous-frises (${subFrises}).`, openings, draft };
+    return { role: 'portail', label: 'Portail', description: uiFormat`Ses grandes périodes ouvrent sur des sous-frises (${subFrises}).`, openings, draft };
   }
   return { role: 'recit', label: 'Récit', description: openings ? `Un sujet raconté en détail ; ${subFrises}.` : 'Un sujet raconté en détail, par ses périodes et ses événements.', openings, draft };
 }

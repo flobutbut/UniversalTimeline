@@ -20,21 +20,21 @@
         <component
           :is="compact && !collapsible ? 'div' : 'button'"
           :type="compact && !collapsible ? undefined : 'button'"
-          :aria-label="`${p.label} · ${p.detail}`"
+          :aria-label="uiText(`${p.label} · ${p.detail}`)"
           :aria-pressed="compact && !collapsible ? undefined : selectedPeriodId === p.id"
           class="story-timeline__period-bar"
           :class="{ 'story-timeline__period-bar--linked-story': !!periodsById.get(p.id)?.linkedStoryId, 'story-timeline__period-bar--root': p.isRoot, 'story-timeline__period-bar--selected': selectedPeriodId === p.id, 'story-timeline__period-bar--has-children': collapsible && parentIds.has(p.id) }"
-          @click="emit('select-period', p.id)"
+          @click="hideTooltip(); emit('select-period', p.id)"
           @mouseenter="showTooltip($event, p.label, p.detail)"
           @mouseleave="hideTooltip"
         >
           <span v-if="collapsible" class="story-timeline__period-content" aria-hidden="true">
-            <span class="story-timeline__period-name">{{ p.label }}</span>
+            <span class="story-timeline__period-name">{{ uiText(p.label) }}</span>
             <span class="story-timeline__period-dates">{{ p.detail }}</span>
           </span>
         </component>
         <button v-if="collapsible && parentIds.has(p.id)" type="button" class="story-timeline__period-toggle"
-          :aria-label="toggleLabel(p.id, p.label)" :title="toggleLabel(p.id, p.label)" :aria-expanded="!collapsedIds.has(p.id)"
+          :aria-label="uiText(toggleLabel(p.id, p.label))" :title="uiText(toggleLabel(p.id, p.label))" :aria-expanded="!collapsedIds.has(p.id)"
           @click.stop="togglePeriod(p.id)" @mouseenter="hideTooltip">
           <Icon :icon="collapsedIds.has(p.id) ? 'mdi:chevron-right' : 'mdi:chevron-down'" aria-hidden="true" />
         </button>
@@ -48,7 +48,7 @@
         :key="e.id"
         :data-event-id="e.id"
         class="story-timeline__event-marker"
-        :aria-label="`${e.label}${e.detail ? ' · ' + e.detail : ''}`"
+        :aria-label="uiText(`${e.label}${e.detail ? ' · ' + e.detail : ''}`)"
         :aria-pressed="compact && !collapsible ? undefined : selectedEventId === e.id"
         :class="{
           'story-timeline__event-marker--selected': selectedEventId === e.id,
@@ -56,7 +56,7 @@
           'story-timeline__event-marker--minor': e.importance === 'minor',
         }"
         :style="{ left: e.left + '%' }"
-        @click="emit('select-event', e.id)"
+        @click="hideTooltip(); emit('select-event', e.id)"
         @mouseenter="showTooltip($event, e.label, e.detail)"
         @mouseleave="hideTooltip"
       />
@@ -64,20 +64,20 @@
 
     <!-- Labels bornes -->
     <div v-if="bounds && !compact" class="story-timeline__foot">
-      <span class="story-timeline__label">{{ startLabel }}</span>
-      <span class="story-timeline__label">{{ endLabel }}</span>
+      <span class="story-timeline__label">{{ uiText(startLabel) }}</span>
+      <span class="story-timeline__label">{{ uiText(endLabel) }}</span>
     </div>
 
     <div v-if="undatedPeriods.length || undatedEvents.length" class="story-timeline__undated">
-      <span>Dates non déterminées</span>
+      <span>{{ uiText("Dates non déterminées") }}</span>
       <span v-for="p in undatedPeriods" :key="`p:${p.id}`" class="story-timeline__undated-group">
-        <Button variant="tertiary" size="xs" type="button" @click="emit('select-period', p.id)">{{ p.label?.fr || p.id }}</Button>
+        <Button variant="tertiary" size="xs" type="button" @click="hideTooltip(); emit('select-period', p.id)">{{ localizedText(p.label) || p.id }}</Button>
         <button v-if="collapsible && parentIds.has(p.id)" type="button" class="story-timeline__period-toggle story-timeline__period-toggle--undated"
-          :aria-label="toggleLabel(p.id, p.label?.fr || p.id)" :title="toggleLabel(p.id, p.label?.fr || p.id)" :aria-expanded="!collapsedIds.has(p.id)" @click.stop="togglePeriod(p.id)">
+          :aria-label="toggleLabel(p.id, localizedText(p.label) || p.id)" :title="toggleLabel(p.id, localizedText(p.label) || p.id)" :aria-expanded="!collapsedIds.has(p.id)" @click.stop="togglePeriod(p.id)">
           <Icon :icon="collapsedIds.has(p.id) ? 'mdi:chevron-right' : 'mdi:chevron-down'" aria-hidden="true" />
         </button>
       </span>
-      <Button variant="tertiary" size="xs" v-for="e in undatedEvents" :key="`e:${e.id}`" type="button" @click="emit('select-event', e.id)">{{ typeof e.label === 'string' ? e.label : e.label?.fr || e.id }}</Button>
+      <Button variant="tertiary" size="xs" v-for="e in undatedEvents" :key="`e:${e.id}`" type="button" @click="hideTooltip(); emit('select-event', e.id)">{{ typeof e.label === 'string' ? e.label : localizedText(e.label) || e.id }}</Button>
     </div>
 
     <!-- Tooltip -->
@@ -89,7 +89,7 @@
         role="tooltip"
         :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px', visibility: tooltip.ready ? 'visible' : 'hidden' }"
       >
-        <span class="story-timeline-tooltip__name">{{ tooltip.label }}</span>
+        <span class="story-timeline-tooltip__name">{{ uiText(tooltip.label) }}</span>
         <span v-if="tooltip.detail" class="story-timeline-tooltip__detail">{{ tooltip.detail }}</span>
       </div>
     </Teleport>
@@ -97,6 +97,7 @@
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import Button from '@/components/base/Button.vue';
 import { Icon } from '@iconify/vue';
 import { computed, nextTick, onMounted, onScopeDispose, ref, watch } from 'vue';
@@ -172,7 +173,7 @@ function togglePeriod(id: string) {
   hideTooltip();
 }
 
-const toggleLabel = (id: string, label: string) => `${collapsedIds.value.has(id) ? 'Déplier' : 'Replier'} les sous-périodes de ${label}`;
+const toggleLabel = (id: string, label: string) => uiFormat`${collapsedIds.value.has(id) ? 'Déplier' : 'Replier'} les sous-périodes de ${label}`;
 
 // ─── Tooltip ─────────────────────────────────────────────────────────────────
 
@@ -276,7 +277,7 @@ const positionedPeriods = computed<PosPeriod[]>(() => {
     const bounded=(value:number)=>Math.max(0,Math.min(100,value));
     return {
       id: p.id,
-      label: p.label?.fr || p.label?.en || p.id,
+      label: localizedText(p.label) || p.id,
       detail: formatStoryTimelinePeriodDetail(p),
       left: props.proportional?bounded(left):left,
       width: props.proportional?bounded(right)-bounded(left):right-left,
@@ -316,7 +317,7 @@ const positionedEvents = computed<PosEvent[]>(() => {
   if (!b) return [];
   return datedEvents.value.filter(e=>!props.proportional || e.dateYbp>=b.min&&e.dateYbp<=b.max).map(e => {
     const ybp = e.dateYbp;
-    const label = typeof e.label === 'string' ? e.label : (e.label?.fr ?? '');
+    const label = typeof e.label === 'string' ? e.label : (localizedText(e.label) ?? '');
     const importance = e.importance ?? 'normal';
     const date = e.date ? formatStoryTimelineBoundLabel(e.date) : '';
     // Le niveau par défaut n'est pas annoncé : seuls les écarts sont utiles.

@@ -2,35 +2,33 @@
   <div class="story-detail-panel" :aria-busy="loading || panelBusy || undefined">
 
     <FeedbackState v-if="loading" kind="loading" />
-    <FeedbackState v-else-if="error && !story" kind="error" :message="error" retryable @retry="$emit('retry')" />
-    <FeedbackState v-else-if="!story" message="Sélectionnez une frise pour voir ses détails" />
+    <FeedbackState v-else-if="error && !story" kind="error" :message="uiText(error)" retryable @retry="$emit('retry')" />
+    <FeedbackState v-else-if="!story" :message="uiText('Sélectionnez une frise pour voir ses détails')" />
     <template v-else>
-      <div v-if="panelBusy" class="sr-only" role="status">Opération en cours…</div>
+      <div v-if="panelBusy" class="sr-only" role="status">{{ uiText("Opération en cours…") }}</div>
       <div v-if="error" class="story-finder-feedback" role="alert">
-        {{ error }} <Button variant="tertiary" size="sm" type="button" :disabled="panelBusy" @click="$emit('retry')">Réessayer</Button>
+        {{ uiText(error) }} <Button variant="tertiary" size="sm" type="button" :disabled="panelBusy" @click="$emit('retry')">{{ uiText("Réessayer") }}</Button>
       </div>
       <!-- En-tête méta -->
       <div class="story-detail-panel__meta">
         <div class="story-detail-panel__meta-text">
-          <h2 class="story-detail-panel__title">{{ story.title.fr }}</h2>
-          <p v-if="story.description?.fr" class="story-detail-panel__desc">{{ story.description.fr }}</p>
+          <h2 class="story-detail-panel__title">{{ localizedText(story.title) }}</h2>
+          <p v-if="localizedText(story.description)" class="story-detail-panel__desc">{{ localizedText(story.description) }}</p>
           <p v-if="story.createdAt || story.author" class="story-detail-panel__byline">
-            <template v-if="story.createdAt">Créée le <time :datetime="story.createdAt.toISOString()">{{ formatRecordDate(story.createdAt) }}</time></template>
+            <template v-if="story.createdAt">{{ uiText("Créée le") }} <time :datetime="story.createdAt.toISOString()">{{ formatRecordDate(story.createdAt) }}</time></template>
             <template v-if="story.createdAt && story.author"> · </template>
-            <template v-if="story.author">par {{ story.author }}</template>
+            <template v-if="story.author">{{ uiText("par") }} {{ story.author }}</template>
           </p>
           <StoryArchitecturePanel :story="story" :stories="dataStore.stories" :editable="auth.canEditStory(story)" :can-promote="auth.ownsStory(story)" :busy="panelBusy"
             @promote="emit('create-story-from-period', $event)" />
         </div>
         <div class="story-detail-panel__meta-actions">
-          <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openEventCreator">Ajouter un événement</Button>
-          <Button variant="primary" size="sm" :to="{ path: '/timeline', query: { story: story.id, entry: 'universe' } }">Voir dans la timeline</Button>
+          <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openEventCreator">{{ uiText("Ajouter un événement") }}</Button>
+          <Button variant="primary" size="sm" :to="{ path: '/timeline', query: { story: story.id, entry: 'universe' } }">{{ uiText("Voir dans la timeline") }}</Button>
         </div>
       </div>
 
-      <FeedbackState v-if="auth.canEditStory(story) && !story.parentStories?.length" layout="inline">
-        Cette frise n’a aucun point d’entrée depuis une autre frise.
-        <template #actions><Button variant="tertiary" size="sm" @click="selectContentTab('overview')">Gérer les points d’entrée</Button></template>
+      <FeedbackState v-if="auth.canEditStory(story) && !story.parentStories?.length" layout="inline"> {{ uiText("Cette frise n’a aucun point d’entrée depuis une autre frise.") }} <template #actions><Button variant="tertiary" size="sm" @click="selectContentTab('overview')">{{ uiText("Gérer les points d’entrée") }}</Button></template>
       </FeedbackState>
 
       <!-- Onglets -->
@@ -94,32 +92,32 @@
                   variant="sm"
                   label-first
                   :model-value="showExternalInFinder"
-                  label="Périodes additionnelles"
+                  :label="uiText('Périodes additionnelles')"
                   @update:model-value="onShowExternalChange"
                 />
                 <span class="story-finder-activity">
-                  <span class="sr-only" role="status">{{ finderLoading ? 'Recherche des sous-périodes…' : '' }}</span>
-                  <button v-if="finderLoading" type="button" class="story-finder-activity__cancel" aria-label="Annuler la recherche des sous-périodes" @click="cancelFinder">
+                  <span class="sr-only" role="status">{{ uiText(finderLoading ? 'Recherche des sous-périodes…' : '') }}</span>
+                  <button v-if="finderLoading" type="button" class="story-finder-activity__cancel" :aria-label="uiText('Annuler la recherche des sous-périodes')" @click="cancelFinder">
                     <LoadingSpinner />
-                    <span class="sr-only">Annuler</span>
+                    <span class="sr-only">{{ uiText("Annuler") }}</span>
                   </button>
                 </span>
-                <div class="story-period-layout-toggle" role="group" aria-label="Affichage des périodes">
-                  <Button variant="ghost" size="sm" :pressed="periodLayout === 'columns'" @click="switchPeriodLayout('columns')">Colonnes</Button>
-                  <Button variant="ghost" size="sm" :pressed="periodLayout === 'tree'" title="Nouvelle présentation à valider" @click="switchPeriodLayout('tree')">Arbre et détail</Button>
+                <div class="story-period-layout-toggle" role="group" :aria-label="uiText('Affichage des périodes')">
+                  <Button variant="ghost" size="sm" :pressed="periodLayout === 'columns'" @click="switchPeriodLayout('columns')">{{ uiText("Colonnes") }}</Button>
+                  <Button variant="ghost" size="sm" :pressed="periodLayout === 'tree'" :title="uiText('Nouvelle présentation à valider')" @click="switchPeriodLayout('tree')">{{ uiText("Arbre et détail") }}</Button>
                 </div>
               </template>
             </FilterBar>
           <div v-if="finderError" class="story-finder-feedback" role="alert">
-            {{ finderError }}
-            <Button variant="tertiary" size="sm" type="button" @click="retryFinder">Réessayer</Button>
-            <Button variant="tertiary" size="sm" type="button" @click="cancelFinder">Annuler</Button>
+            {{ uiText(finderError) }}
+            <Button variant="tertiary" size="sm" type="button" @click="retryFinder">{{ uiText("Réessayer") }}</Button>
+            <Button variant="tertiary" size="sm" type="button" @click="cancelFinder">{{ uiText("Annuler") }}</Button>
           </div>
           <div v-if="periodImportError && !periodImportDraft" class="story-finder-feedback" role="alert">
-            {{ periodImportError }} <Button variant="tertiary" size="sm" type="button" :disabled="periodImportBusy" @click="retryPeriodImport">Réessayer</Button>
+            {{ uiText(periodImportError) }} <Button variant="tertiary" size="sm" type="button" :disabled="periodImportBusy" @click="retryPeriodImport">{{ uiText("Réessayer") }}</Button>
           </div>
-          <FeedbackState v-if="!story.periods?.length && !story.childStories?.length && !showExternalInFinder && !finderLoading && !finderError" title="Ajoutez votre première période" message="Définissez un début et une fin pour structurer votre frise. Vous pouvez créer une période manuellement ou en choisir une existante.">
-            <template v-if="auth.canEditStory(story)" #actions><Button size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">Ajouter une période</Button></template>
+          <FeedbackState v-if="!story.periods?.length && !story.childStories?.length && !showExternalInFinder && !finderLoading && !finderError" :title="uiText('Ajoutez votre première période')" :message="uiText('Définissez un début et une fin pour structurer votre frise. Vous pouvez créer une période manuellement ou en choisir une existante.')">
+            <template v-if="auth.canEditStory(story)" #actions><Button size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">{{ uiText("Ajouter une période") }}</Button></template>
           </FeedbackState>
           <div v-if="treeViewVisited && (story.periods?.length || story.childStories?.length || showExternalInFinder)" v-show="periodLayout === 'tree'" class="story-period-tree-workspace">
             <div class="story-period-tree-workspace__navigation">
@@ -127,12 +125,12 @@
                 :search="periodHeaderSearch" :tag-id="periodFilterTagId" :show-additional="showExternalInFinder" :loaded-branch-ids="loadedBranchIds"
                 @select="onTreePeriodSelect" @expanded-change="onTreeExpandedChange">
                 <template #header-actions>
-                  <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">Ajouter une période</Button>
+                  <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openPeriodCreator(0)">{{ uiText("Ajouter une période") }}</Button>
                 </template>
                 <template #actions="{ period, inStory }">
-                  <StoryItemActionsMenu v-if="inStory" :label="period.label.fr || period.label.en" :disabled="panelBusy" movable :create-story="auth.ownsStory(story)" :promote="promotableIds.has(period.id)" :convert-to="periodConvertTo(period.id)"
+                  <StoryItemActionsMenu v-if="inStory" :label="localizedText(period.label)" :disabled="panelBusy" movable :create-story="auth.ownsStory(story)" :promote="promotableIds.has(period.id)" :convert-to="periodConvertTo(period.id)"
                     @move="movingPeriodId = period.id" @edit="emit('edit-period', period.id)" @remove="emit('remove-period', period.id)" @create-story="emit('create-story-from-period', period.id)" @convert="convertPeriod(period.id)" />
-                  <Button v-else variant="ghost" size="sm" icon-only :disabled="panelBusy || requiresParentImport(period)" :aria-label="`Ajouter ${period.label.fr || period.label.en} à la frise`" @click.stop="onTreePeriodAction(period.id)"><template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template></Button>
+                  <Button v-else variant="ghost" size="sm" icon-only :disabled="panelBusy || requiresParentImport(period)" :aria-label="uiFormat`Ajouter ${localizedText(period.label)} à la frise`" @click.stop="onTreePeriodAction(period.id)"><template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template></Button>
                 </template>
               </StoryPeriodTree>
             </div>
@@ -168,8 +166,8 @@
                       <h2>{{ finderColumnHeader(colIdx) }}</h2>
                     </div>
                     <div class="story-column-header__actions">
-                      <Button variant="tertiary" size="xs" :disabled="panelBusy || (colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? ''))" :title="colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? '') ? 'Ajoutez d’abord cette période à la frise.' : undefined" @click="openChildStoryPicker(colIdx)">Ajouter une frise</Button>
-                      <Button variant="tertiary" size="xs" :disabled="panelBusy || (colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:'))" :title="colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:') ? 'Importez d’abord la période parente.' : undefined" @click="openPeriodCreator(colIdx)">Ajouter une période</Button>
+                      <Button variant="tertiary" size="xs" :disabled="panelBusy || (colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? ''))" :title="uiText(colIdx > 0 && !storyPeriodIds.includes(finderSelectedPath[colIdx - 1] ?? '') ? 'Ajoutez d’abord cette période à la frise.' : undefined)" @click="openChildStoryPicker(colIdx)">{{ uiText("Ajouter une frise") }}</Button>
+                      <Button variant="tertiary" size="xs" :disabled="panelBusy || (colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:'))" :title="uiText(colIdx > 0 && finderSelectedPath[colIdx - 1]?.startsWith('wikidata:') ? 'Importez d’abord la période parente.' : undefined)" @click="openPeriodCreator(colIdx)">{{ uiText("Ajouter une période") }}</Button>
                     </div>
                   </div>
                   <div class="finder-column-content">
@@ -180,13 +178,13 @@
                         :data-child-story-id="cs.id" :draggable="canDragChildStory(cs.id, colIdx)"
                         :class="{ 'story-period-row--dragging': draggedChildStory?.id === cs.id && draggedChildStory.column === colIdx }"
                         @explore="readonlyStory = { id: cs.id, column: colIdx }"
-                        @move="movingStoryLink = { id: cs.id, fromParentId: finderSelectedPath[colIdx - 1] ?? null, label: cs.title.fr || cs.title.en }"
+                        @move="movingStoryLink = { id: cs.id, fromParentId: finderSelectedPath[colIdx - 1] ?? null, label: localizedText(cs.title) }"
                         @display="emit('display-child-story', cs.id, columnAnchor(colIdx), !storyLinkAsPeriod(cs, colIdx))"
                         @remove="emit('remove-child-story', cs.id, colIdx ? columnAnchor(colIdx) : null)" />
                       <FinderItem
                         v-for="row in col"
                         :key="row.item.id"
-                        :label="storyPeriodLabelForFinder(row.item)"
+                        :label="uiText(storyPeriodLabelForFinder(row.item))"
                         :start-date="storyPeriodDateFields(row.item).startDate"
                         :end-date="storyPeriodDateFields(row.item).endDate"
                         :tags="storyPeriodTags(row.item)"
@@ -209,8 +207,8 @@
                             v-else
                             type="button"
                             class="finder-item-add"
-                            :aria-label="row.item.id.startsWith('wikidata:') ? 'Importer depuis Wikidata' : 'Ajouter à la frise'"
-                            :title="requiresParentImport(row.item) ? 'Ajoutez d’abord la période parente à la frise.' : undefined"
+                            :aria-label="uiText(row.item.id.startsWith('wikidata:') ? 'Importer depuis Wikidata' : 'Ajouter à la frise')"
+                            :title="uiText(requiresParentImport(row.item) ? 'Ajoutez d’abord la période parente à la frise.' : undefined)"
                             :disabled="panelBusy || requiresParentImport(row.item)"
                             @click.stop="onPeriodAction(row)"
                           >
@@ -222,8 +220,8 @@
 
                     </template>
                     <div v-else class="finder-empty-column">
-                      <template v-if="colIdx === 0">Aucune racine</template>
-                      <template v-else>Aucune sous-période</template>
+                      <template v-if="colIdx === 0">{{ uiText("Aucune racine") }}</template>
+                      <template v-else>{{ uiText("Aucune sous-période") }}</template>
                     </div>
                   </div>
                 </div>
@@ -259,7 +257,7 @@
                 <FinderItem
                   v-for="event in eventsFilteredForList"
                   :key="event.id"
-                  :label="event.label"
+                  :label="uiText(event.label)"
                   :selected="selectedEventId === event.id"
                   :has-children="false"
                   :item-id="event.id"
@@ -281,41 +279,41 @@
                       <div class="event-detail-overview">
                         <header class="event-detail-header">
                           <div class="event-detail-heading">
-                            <h3 class="event-detail-label">{{ event.label.fr?.trim() || event.label.en?.trim() }}</h3>
+                            <h3 class="event-detail-label">{{ localizedText(event.label) }}</h3>
                             <div class="event-detail-date">{{ eventDetailDate(event) }}</div>
                           </div>
                           <div class="event-detail-actions">
-                            <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="emit('edit-event', event.id)">Modifier l’événement</Button>
-                            <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="convertEvent(event)">Convertir en période</Button>
+                            <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="emit('edit-event', event.id)">{{ uiText("Modifier l’événement") }}</Button>
+                            <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="convertEvent(event)">{{ uiText("Convertir en période") }}</Button>
                           </div>
-                          <p v-if="eventDescription(event)" class="event-detail-description" aria-label="Description de l’événement">{{ eventDescription(event) }}</p>
-                          <p v-else class="event-detail-empty event-detail-description">Aucune description renseignée.</p>
-                          <WikipediaLink :titles="event.wikipedia" :subject="event.label.fr || event.label.en" class="event-detail-wikipedia" />
+                          <p v-if="eventDescription(event)" class="event-detail-description" :lang="contentLanguage(event.description)" :aria-label="uiText('Description de l’événement')">{{ eventDescription(event) }}</p>
+                          <p v-else class="event-detail-empty event-detail-description">{{ uiText("Aucune description renseignée.") }}</p>
+                          <WikipediaLink :titles="event.wikipedia" :subject="localizedText(event.label)" class="event-detail-wikipedia" />
                         </header>
-                        <section class="event-detail-section" aria-label="Catégories de l’événement">
-                          <h4 class="event-detail-section-title">Catégories</h4>
+                        <section class="event-detail-section" :aria-label="uiText('Catégories de l’événement')">
+                          <h4 class="event-detail-section-title">{{ uiText("Catégories") }}</h4>
                           <p v-if="event.tags?.length" class="event-detail-categories"><ThematicTags :tags="event.tags" /></p>
-                          <p v-else class="event-detail-empty">Aucune catégorie renseignée.</p>
+                          <p v-else class="event-detail-empty">{{ uiText("Aucune catégorie renseignée.") }}</p>
                         </section>
 
                         <div class="event-detail-frise">
                           <div class="event-detail-section event-detail-importance">
-                            <h4 :id="`event-importance-${event.id}`" class="event-detail-section-title">Importance dans cette frise</h4>
-                            <p class="event-detail-section-description">Les événements majeurs sont affichés en priorité sur la timeline.</p>
+                            <h4 :id="`event-importance-${event.id}`" class="event-detail-section-title">{{ uiText("Importance dans cette frise") }}</h4>
+                            <p class="event-detail-section-description">{{ uiText("Les événements majeurs sont affichés en priorité sur la timeline.") }}</p>
                             <Tabs :model-value="event.importance ?? 'normal'" :tabs="eventImportanceTabs" role="group" :aria-labelledby="`event-importance-${event.id}`"
                               @update:model-value="value => changeEventImportance(event, value)" />
                           </div>
 
-                          <section class="event-detail-section event-detail-associations" aria-label="Frises associées à cet événement">
+                          <section class="event-detail-section event-detail-associations" :aria-label="uiText('Frises associées à cet événement')">
                             <div class="event-detail-section-header">
                               <div class="event-detail-section-copy">
                                 <div class="event-detail-section-heading">
-                                  <h4 class="event-detail-section-title">Frises associées</h4>
+                                  <h4 class="event-detail-section-title">{{ uiText("Frises associées") }}</h4>
                                   <span class="event-detail-count">{{ storiesAssociatedWithEvent(event.id).length }}</span>
                                 </div>
-                                <p class="event-detail-section-description">Des frises à explorer depuis cet événement dans la timeline.</p>
+                                <p class="event-detail-section-description">{{ uiText("Des frises à explorer depuis cet événement dans la timeline.") }}</p>
                               </div>
-                              <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openChildStoryPicker(undefined, event.id)">Associer une frise</Button>
+                              <Button variant="tertiary" size="sm" :disabled="panelBusy" @click="openChildStoryPicker(undefined, event.id)">{{ uiText("Associer une frise") }}</Button>
                             </div>
                             <AnchoredStoryRow v-for="cs in storiesAssociatedWithEvent(event.id)" :key="cs.id" :story="cs" :summary="childStorySummary(cs.id)" :disabled="panelBusy"
                               :read-only="!hasExplicitEventAnchor(cs.id, event.id)" @remove="emit('remove-event-anchor', cs.id, event.id)" />
@@ -323,36 +321,34 @@
                             <div
                               v-if="storiesAssociatedWithEvent(event.id).length === 0"
                               class="event-detail-empty"
-                            > Aucune frise associée à cet événement. </div>
+                            > {{ uiText("Aucune frise associée à cet événement.") }} </div>
 
                           </section>
-                          <EntityDangerZone description="Cet événement sera retiré de cette frise. Il restera disponible dans le catalogue." :busy="panelBusy" @remove="emit('remove-event', event.id)" />
+                          <EntityDangerZone :description="uiText('Cet événement sera retiré de cette frise. Il restera disponible dans le catalogue.')" :busy="panelBusy" @remove="emit('remove-event', event.id)" />
                         </div>
                       </div>
-                      <aside v-if="hasEventMetadata(event)" class="event-detail-metadata" aria-label="Métadonnées de l’événement">
-                        <section v-if="eventWikidataId(event)" class="event-detail-section event-detail-reference" aria-label="Référence Wikidata">
-                          <h4 class="event-detail-section-title">Référence Wikidata</h4>
-                          <a :href="`https://www.wikidata.org/wiki/${eventWikidataId(event)}`" target="_blank" rel="noopener noreferrer" :aria-label="`Voir ${eventWikidataId(event)} sur Wikidata (nouvel onglet)`">
+                      <aside v-if="hasEventMetadata(event)" class="event-detail-metadata" :aria-label="uiText('Métadonnées de l’événement')">
+                        <section v-if="eventWikidataId(event)" class="event-detail-section event-detail-reference" :aria-label="uiText('Référence Wikidata')">
+                          <h4 class="event-detail-section-title">{{ uiText("Référence Wikidata") }}</h4>
+                          <a :href="`https://www.wikidata.org/wiki/${eventWikidataId(event)}`" target="_blank" rel="noopener noreferrer" :aria-label="uiText(uiFormat`Voir ${eventWikidataId(event)} sur Wikidata (nouvel onglet)`)">
                             <span>{{ eventWikidataId(event) }}</span><Icon icon="mdi:open-in-new" aria-hidden="true" />
                           </a>
                         </section>
 
                         <dl v-if="eventRecordDate(event.createdAt) || eventRecordDate(event.updatedAt)" class="event-detail-record">
-                          <div v-if="eventRecordDate(event.createdAt)"><dt>Créé le</dt><dd>{{ eventRecordDate(event.createdAt) }}</dd></div>
-                          <div v-if="eventRecordDate(event.updatedAt)"><dt>Mis à jour le</dt><dd>{{ eventRecordDate(event.updatedAt) }}</dd></div>
+                          <div v-if="eventRecordDate(event.createdAt)"><dt>{{ uiText("Créé le") }}</dt><dd>{{ eventRecordDate(event.createdAt) }}</dd></div>
+                          <div v-if="eventRecordDate(event.updatedAt)"><dt>{{ uiText("Mis à jour le") }}</dt><dd>{{ eventRecordDate(event.updatedAt) }}</dd></div>
                         </dl>
                       </aside>
                     </div>
                   </template>
                 </template>
-                <div v-else class="event-detail-placeholder">
-                  Sélectionnez un événement
-                </div>
+                <div v-else class="event-detail-placeholder"> {{ uiText("Sélectionnez un événement") }} </div>
               </div>
             </div>
           </template>
-          <FeedbackState v-else title="Ajoutez votre premier événement" message="Placez les moments clés de votre frise à une date précise. Vous pouvez créer un événement manuellement ou en choisir un existant.">
-            <template v-if="auth.canEditStory(story)" #actions><Button size="sm" :disabled="panelBusy" @click="openEventCreator">Ajouter un événement</Button></template>
+          <FeedbackState v-else :title="uiText('Ajoutez votre premier événement')" :message="uiText('Placez les moments clés de votre frise à une date précise. Vous pouvez créer un événement manuellement ou en choisir un existant.')">
+            <template v-if="auth.canEditStory(story)" #actions><Button size="sm" :disabled="panelBusy" @click="openEventCreator">{{ uiText("Ajouter un événement") }}</Button></template>
           </FeedbackState>
           </div>
         </template>
@@ -384,7 +380,7 @@
       @close="closePeriodImport" @submit="submitPeriodImport" @select-period="selectExistingStoryPeriod" />
     <MoveStoryPeriodModal v-if="movingPeriodId && story" :period-id="movingPeriodId" :periods="story.periods" :busy="panelBusy" :error="error"
       @close="movingPeriodId = null" @confirm="movePeriod" />
-    <MoveStoryLinkModal v-if="movingStoryLink && story" :key="`${movingStoryLink.id}:${movingStoryLink.fromParentId}`" :label="movingStoryLink.label"
+    <MoveStoryLinkModal v-if="movingStoryLink && story" :key="`${movingStoryLink.id}:${movingStoryLink.fromParentId}`" :label="uiText(movingStoryLink.label)"
       :from-parent-id="movingStoryLink.fromParentId" :periods="story.periods" :busy="!!panelBusy" :error="error" @close="movingStoryLink = null" @confirm="moveStoryLink" />
     <!-- Modales de sélection -->
     <RootPeriodModal v-if="showRootPicker" :current-root-id="firstStoryRootPeriodId" :current-root-label="story?.periods.find(p => p.id === firstStoryRootPeriodId)?.label.fr" :busy="panelBusy" :error="error" @close="showRootPicker = false" @confirm="onChangeRoot" />
@@ -404,6 +400,7 @@
 </template>
 
 <script setup lang="ts">
+import { contentLanguage, localizedText, uiFormat, uiText } from '@/i18n';
 import EntityDangerZone from './EntityDangerZone.vue';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
@@ -522,7 +519,7 @@ function changeEventImportance(event: ListEvent, importance: EventImportance) {
 }
 
 function eventDescription(event: ListEvent): string {
-  return event.description?.fr?.trim() || event.description?.en?.trim() || '';
+  return localizedText(event.description) || '';
 }
 function eventWikidataId(event: ListEvent): string | null {
   const id = event.wikidata_id?.trim() ?? '';
@@ -859,7 +856,7 @@ function finderColumnHeader(colIdx: number): string {
   const fromStory = (props.story?.periods ?? []).find((x) => x.id === parentId);
   if (fromStory) return storyPeriodLabelForFinder(fromStory).fr || 'Sous-périodes';
   const fromStore = finderPeriods.value.find((p) => p.id === parentId);
-  return fromStore?.label?.fr || 'Sous-périodes';
+  return localizedText(fromStore?.label) || 'Sous-périodes';
 }
 
 function finderRowHasChildren(item: StoryPeriodInput, inStory: boolean): boolean {

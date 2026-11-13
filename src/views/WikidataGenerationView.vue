@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import { computed, nextTick, onScopeDispose, ref, watch, type ComponentPublicInstance } from 'vue';
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router';
 import Button from '@/components/base/Button.vue';
@@ -170,7 +171,7 @@ watch(
 function applyExistingItem(item: WikidataTimelineItem) {
   const local = existing.value.get(`${item.type}:${wikidataItemKey(item)}`);
   if (!local) return;
-  item.title = local.label.fr || local.label.en;
+  item.title = localizedText(local.label);
   item.description = local.description ?? '';
   item.startDate = local.type === 'period' ? local.startDate || '' : local.date || '';
   item.endDate = local.type === 'period' ? local.endDate || '' : '';
@@ -197,6 +198,7 @@ function restoreDraft(result: WikidataTimelineDraft) {
     const cached = JSON.parse(sessionStorage.getItem(draftStorageKey) || 'null');
     if (cached?.qid !== result.qid || !Array.isArray(cached.items)) return;
     const sameRules = cached.profile === result.profile && JSON.stringify(cached.settings) === JSON.stringify(result.settings);
+    if (cached.texts?.language !== result.texts?.language) return;
     if (typeof cached.title === 'string' && cached.title.length <= 255) result.title = cached.title;
     if (typeof cached.description === 'string' && cached.description.length <= 1000) result.description = cached.description;
     for (const item of result.items) {
@@ -275,7 +277,9 @@ async function save() {
     const wikipedia = await WikidataQueryService.getInstance().getWikipediaTitles(entityQids).catch(() => null);
     if (identity !== auth.identityVersion) return;
     const items = wikipedia ? selected.value.map(item => ({ ...item, wikipedia: wikipedia.get(item.qid) })) : selected.value;
-    const result = acknowledged.length
+    const result = subject.texts
+      ? await StoryApiService.getInstance().createFromWikidata(subject.qid, subject.title.trim(), items, false, subject.description, acknowledged, subject.texts)
+      : acknowledged.length
       ? await StoryApiService.getInstance().createFromWikidata(subject.qid, subject.title.trim(), items, false, subject.description, acknowledged)
       : await StoryApiService.getInstance().createFromWikidata(subject.qid, subject.title.trim(), items, false, subject.description);
     if (identity !== auth.identityVersion) return;
@@ -307,127 +311,127 @@ async function save() {
     <header class="generation-heading">
       <div class="generation-heading-main">
         <div class="generation-heading-copy">
-          <h1>Créer une frise depuis Wikidata</h1>
-          <p>Choisissez un sujet, vérifiez les dates et sélectionnez les éléments à conserver.</p>
+          <h1>{{ uiText("Créer une frise depuis Wikidata") }}</h1>
+          <p>{{ uiText("Choisissez un sujet, vérifiez les dates et sélectionnez les éléments à conserver.") }}</p>
         </div>
       </div>
       <div class="generation-heading-actions">
         <!-- Sans frise parente, la frise reste un brouillon privé (règle 1 du guide de création). -->
-        <p class="generation-visibility">Privée jusqu’à son rattachement à une frise parente</p>
-        <Button variant="tertiary" size="sm" :to="{ name: 'timeline' }" :disabled="saving" title="Annuler la création et revenir à l’exploration" @click="cancelDraft">Annuler</Button>
-        <Button v-if="savedId" size="sm" :to="{ name: 'timeline', query: { story: savedId } }">Ouvrir la frise créée</Button>
-        <Button v-else-if="!canUseWorkspace(auth)" size="sm" :disabled="!draft" :to="{ name: 'login', query: { redirect: route.fullPath } }" @click="preserveDraft">Se connecter pour enregistrer</Button>
-        <Button v-else-if="!auth.canCreateStories" size="sm" :disabled="!draft" variant="secondary" :to="{ name: 'profile' }" @click="preserveDraft">Choisir un nom d’utilisateur pour enregistrer</Button>
-        <Button v-else size="sm" :disabled="!canSave" @click="save">{{ saving ? 'Enregistrement…' : 'Enregistrer la frise' }}</Button>
+        <p class="generation-visibility">{{ uiText("Privée jusqu’à son rattachement à une frise parente") }}</p>
+        <Button variant="tertiary" size="sm" :to="{ name: 'timeline' }" :disabled="saving" :title="uiText('Annuler la création et revenir à l’exploration')" @click="cancelDraft">{{ uiText("Annuler") }}</Button>
+        <Button v-if="savedId" size="sm" :to="{ name: 'timeline', query: { story: savedId } }">{{ uiText("Ouvrir la frise créée") }}</Button>
+        <Button v-else-if="!canUseWorkspace(auth)" size="sm" :disabled="!draft" :to="{ name: 'login', query: { redirect: route.fullPath } }" @click="preserveDraft">{{ uiText("Se connecter pour enregistrer") }}</Button>
+        <Button v-else-if="!auth.canCreateStories" size="sm" :disabled="!draft" variant="secondary" :to="{ name: 'profile' }" @click="preserveDraft">{{ uiText("Choisir un nom d’utilisateur pour enregistrer") }}</Button>
+        <Button v-else size="sm" :disabled="!canSave" @click="save">{{ uiText(saving ? 'Enregistrement…' : 'Enregistrer la frise') }}</Button>
       </div>
     </header>
     <div class="generation-workspace">
-      <aside ref="navigationPane" class="generation-navigation" aria-label="Structure de la frise">
+      <aside ref="navigationPane" class="generation-navigation" :aria-label="uiText('Structure de la frise')">
         <template v-if="draft">
-          <section class="generation-rules" aria-label="Règles de génération">
-            <Select :model-value="profile" :options="profiles" label="Famille du sujet" :searchable="false" :disabled="loading || saving || !!savedId" @update:model-value="setProfile" />
-            <Select :model-value="generationSettings.limit" :options="[{value:20,label:'20 propositions'},{value:40,label:'40 propositions'},{value:80,label:'80 propositions'}]" label="Propositions maximum" :searchable="false" :disabled="loading || saving || !!savedId" @update:model-value="setLimit" />
-            <label><input v-model="generationSettings.approximate" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />Conserver les dates approximatives</label>
-            <label><input v-model="generationSettings.withinBounds" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />Vérifier les bornes du sujet</label>
-            <template v-if="profile === 'person'"><label><input v-model="generationSettings.biography" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />Événements de vie</label><label><input v-model="generationSettings.works" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />Œuvres majeures</label></template>
+          <section class="generation-rules" :aria-label="uiText('Règles de génération')">
+            <Select :model-value="profile" :options="profiles" :label="uiText('Famille du sujet')" :searchable="false" :disabled="loading || saving || !!savedId" @update:model-value="setProfile" />
+            <Select :model-value="generationSettings.limit" :options="[{value:20,label:'20 propositions'},{value:40,label:'40 propositions'},{value:80,label:'80 propositions'}]" :label="uiText('Propositions maximum')" :searchable="false" :disabled="loading || saving || !!savedId" @update:model-value="setLimit" />
+            <label><input v-model="generationSettings.approximate" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />{{ uiText("Conserver les dates approximatives") }}</label>
+            <label><input v-model="generationSettings.withinBounds" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />{{ uiText("Vérifier les bornes du sujet") }}</label>
+            <template v-if="profile === 'person'"><label><input v-model="generationSettings.biography" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />{{ uiText("Événements de vie") }}</label><label><input v-model="generationSettings.works" type="checkbox" :disabled="loading || saving || !!savedId" @change="changeRules" />{{ uiText("Œuvres majeures") }}</label></template>
           </section>
           <StoryPeriodTree class="generation-tree" :story-id="draft.qid" :periods="periods" :selected-id="activeItemQid" :scroll-selected-into-view="false" @select="showItem">
             <template #actions="{ period }">
-              <Tag v-if="periodWarnings(period.id).length" variant="warning" label="À vérifier" :title="periodWarnings(period.id).join(' ')" />
+              <Tag v-if="periodWarnings(period.id).length" variant="warning" :label="uiText('À vérifier')" :title="uiText(periodWarnings(period.id).join(' '))" />
             </template>
           </StoryPeriodTree>
-          <section v-if="events.length" class="generation-event-navigation" aria-label="Événements sélectionnés">
-            <h3>Événements <span>{{ events.length }}</span></h3>
+          <section v-if="events.length" class="generation-event-navigation" :aria-label="uiText('Événements sélectionnés')">
+            <h3>{{ uiText("Événements") }} <span>{{ events.length }}</span></h3>
             <ul>
               <li v-for="event in events" :key="event.id">
                 <button type="button" class="generation-event-link" :class="{ 'is-active': activeItemQid === event.id }" :aria-current="activeItemQid === event.id ? 'true' : undefined" @click="showItem(event.id)">
-                  <span>{{ event.label.fr }}</span><small>{{ formatSearchResultDateBound(event.date) }}</small>
+                  <span>{{ localizedText(event.label) }}</span><small>{{ formatSearchResultDateBound(event.date) }}</small>
                 </button>
               </li>
             </ul>
           </section>
         </template>
       </aside>
-      <div ref="detailPane" class="generation-details" role="region" aria-label="Détail des éléments proposés">
-    <section v-if="!route.query.wikidata" class="generation-search" aria-label="Choix du sujet">
-      <SearchInput v-model="query" placeholder="Ex. Révolution française, Apollo…" aria-label="Rechercher un sujet Wikidata" :disabled="saving" />
-      <FeedbackState v-if="subjects.loading.value" kind="loading" message="Recherche Wikidata…" />
-      <FeedbackState v-else-if="subjects.error.value" kind="error" :message="subjects.error.value" retryable @retry="subjects.retry" />
+      <div ref="detailPane" class="generation-details" role="region" :aria-label="uiText('Détail des éléments proposés')">
+    <section v-if="!route.query.wikidata" class="generation-search" :aria-label="uiText('Choix du sujet')">
+      <SearchInput v-model="query" :placeholder="uiText('Ex. Révolution française, Apollo…')" :aria-label="uiText('Rechercher un sujet Wikidata')" :disabled="saving" />
+      <FeedbackState v-if="subjects.loading.value" kind="loading" :message="uiText('Recherche Wikidata…')" />
+      <FeedbackState v-else-if="subjects.error.value" kind="error" :message="uiText(subjects.error.value)" retryable @retry="subjects.retry" />
       <ul v-else-if="subjects.results.value.length" class="generation-subjects">
-        <li v-for="subject in subjects.results.value" :key="subject.id"><Button variant="tertiary" :disabled="saving" @click="choose(subject.id)">{{ subject.label }}<span v-if="subject.description"> — {{ subject.description }}</span></Button></li>
+        <li v-for="subject in subjects.results.value" :key="subject.id"><Button variant="tertiary" :disabled="saving" @click="choose(subject.id)">{{ uiText(subject.label) }}<span v-if="subject.description"> — {{ subject.description }}</span></Button></li>
       </ul>
-      <p v-else-if="query.trim().length >= 2" role="status">Aucun sujet trouvé.</p>
+      <p v-else-if="query.trim().length >= 2" role="status">{{ uiText("Aucun sujet trouvé.") }}</p>
     </section>
-        <FeedbackState v-if="loading" kind="loading" message="Préparation de la frise depuis Wikidata…" />
-        <FeedbackState v-else-if="error" kind="error" :message="error" retryable @retry="load(true)" />
+        <FeedbackState v-if="loading" kind="loading" :message="uiText('Préparation de la frise depuis Wikidata…')" />
+        <FeedbackState v-else-if="error" kind="error" :message="uiText(error)" retryable @retry="load(true)" />
         <template v-else-if="draft">
-          <section class="generation-context" aria-label="Source et validation de la frise">
-            <a class="generation-source-link" :href="sourceUrl(draft.qid)" target="_blank" rel="noopener noreferrer"><Icon icon="mdi:open-in-new" aria-hidden="true" />Voir le sujet sur Wikidata<span class="sr-only"> (nouvel onglet)</span></a>
-            <div v-if="draft.warnings.length" class="generation-warnings" role="status"><p v-for="warning in draft.warnings" :key="warning"><Icon icon="mdi:information-outline" aria-hidden="true" />{{ warning }}</p></div>
-            <span v-if="checkingStories" class="sr-only" role="status">Vérification des frises existantes…</span>
-            <div v-if="storyCheckError || existingStories.length" class="generation-existing-stories" aria-label="Vérification des frises existantes">
-              <p v-if="storyCheckError" role="alert">{{ storyCheckError }} <Button variant="tertiary" size="sm" @click="checkExistingStories">Réessayer</Button></p>
+          <section class="generation-context" :aria-label="uiText('Source et validation de la frise')">
+            <a class="generation-source-link" :href="sourceUrl(draft.qid)" target="_blank" rel="noopener noreferrer"><Icon icon="mdi:open-in-new" aria-hidden="true" />{{ uiText("Voir le sujet sur Wikidata") }}<span class="sr-only"> {{ uiText("(nouvel onglet)") }}</span></a>
+            <div v-if="draft.warnings.length" class="generation-warnings" role="status"><p v-for="warning in draft.warnings" :key="warning"><Icon icon="mdi:information-outline" aria-hidden="true" />{{ uiText(warning) }}</p></div>
+            <span v-if="checkingStories" class="sr-only" role="status">{{ uiText("Vérification des frises existantes…") }}</span>
+            <div v-if="storyCheckError || existingStories.length" class="generation-existing-stories" :aria-label="uiText('Vérification des frises existantes')">
+              <p v-if="storyCheckError" role="alert">{{ uiText(storyCheckError) }} <Button variant="tertiary" size="sm" @click="checkExistingStories">{{ uiText("Réessayer") }}</Button></p>
               <template v-else>
-                <p role="alert"><strong>{{ existingStories.length === 1 ? 'Une frise correspondante existe déjà.' : 'Des frises correspondantes existent déjà.' }}</strong></p>
-                <div class="generation-duplicate-matches"><div v-for="story in existingStories" :key="story.id" class="generation-duplicate-match"><RouterLink :to="{ name: 'database', query: { story: story.id } }">Ouvrir « {{ story.title }} »</RouterLink><Tag variant="error" :label="story.reason === 'subject' ? 'Même source Wikidata' : 'Même titre'" /></div></div>
-                <label class="generation-duplicate-choice"><input v-model="acknowledgeExistingStories" type="checkbox" :disabled="saving || !!savedId || saveUncertain" />Créer tout de même une nouvelle frise</label>
+                <p role="alert"><strong>{{ uiText(existingStories.length === 1 ? 'Une frise correspondante existe déjà.' : 'Des frises correspondantes existent déjà.') }}</strong></p>
+                <div class="generation-duplicate-matches"><div v-for="story in existingStories" :key="story.id" class="generation-duplicate-match"><RouterLink :to="{ name: 'database', query: { story: story.id } }">{{ uiText("Ouvrir «") }} {{ story.title }} »</RouterLink><Tag variant="error" :label="uiText(story.reason === 'subject' ? 'Même source Wikidata' : 'Même titre')" /></div></div>
+                <label class="generation-duplicate-choice"><input v-model="acknowledgeExistingStories" type="checkbox" :disabled="saving || !!savedId || saveUncertain" />{{ uiText("Créer tout de même une nouvelle frise") }}</label>
               </template>
             </div>
-            <p v-if="saveError" class="generation-save-feedback" role="alert">{{ saveError }} <RouterLink :to="{ name: 'database' }">Vérifier mes frises</RouterLink></p>
-            <p v-if="hierarchyError" class="generation-item-error" role="alert">{{ hierarchyError }}</p>
+            <p v-if="saveError" class="generation-save-feedback" role="alert">{{ uiText(saveError) }} <RouterLink :to="{ name: 'database' }">{{ uiText("Vérifier mes frises") }}</RouterLink></p>
+            <p v-if="hierarchyError" class="generation-item-error" role="alert">{{ uiText(hierarchyError) }}</p>
           </section>
           <StoryDraftPreview v-model:title="draft.title" v-model:description="draft.description" class="generation-overview" :disabled="saving || !!savedId" :periods="periods" :events="events" @select-period="showItem" @select-event="showItem" />
-          <section class="generation-items" aria-label="Éléments proposés">
-            <h2>{{ draft.items.length }} éléments proposés · {{ selected.length }} sélectionnés</h2>
-            <div class="generation-status-filters" aria-label="Filtrer les propositions"><Button v-for="entry in statusCounts" :key="entry.value" size="sm" variant="tertiary" :pressed="statusFilter === entry.value" @click="statusFilter=entry.value">{{ entry.label }} {{ entry.count }}</Button><Button size="sm" variant="tertiary" :pressed="statusFilter==='all'" @click="statusFilter='all'">Tous {{ draft.items.length }}</Button></div>
-            <p v-if="selected.length > 81" class="generation-item-error" role="alert">Sélectionnez au maximum 81 faits pour enregistrer la frise.</p>
+          <section class="generation-items" :aria-label="uiText('Éléments proposés')">
+            <h2>{{ draft.items.length }} {{ uiText("éléments proposés ·") }} {{ selected.length }} {{ uiText("sélectionnés") }}</h2>
+            <div class="generation-status-filters" :aria-label="uiText('Filtrer les propositions')"><Button v-for="entry in statusCounts" :key="entry.value" size="sm" variant="tertiary" :pressed="statusFilter === entry.value" @click="statusFilter=entry.value">{{ uiText(entry.label) }} {{ entry.count }}</Button><Button size="sm" variant="tertiary" :pressed="statusFilter==='all'" @click="statusFilter='all'">{{ uiText("Tous") }} {{ draft.items.length }}</Button></div>
+            <p v-if="selected.length > 81" class="generation-item-error" role="alert">{{ uiText("Sélectionnez au maximum 81 faits pour enregistrer la frise.") }}</p>
             <div class="generation-selection-actions">
-              <Button size="sm" variant="secondary" :disabled="saving || !!savedId" @click="draft.items.forEach(item => item.selected = (item.status === undefined || item.status === 'retained') && !wikidataTimelineItemError(item))">Tout sélectionner avec une date valide</Button>
-              <Button size="sm" variant="tertiary" :disabled="saving || !!savedId" @click="draft.items.forEach(item => item.selected = false)">Tout désélectionner</Button>
+              <Button size="sm" variant="secondary" :disabled="saving || !!savedId" @click="draft.items.forEach(item => item.selected = (item.status === undefined || item.status === 'retained') && !wikidataTimelineItemError(item))">{{ uiText("Tout sélectionner avec une date valide") }}</Button>
+              <Button size="sm" variant="tertiary" :disabled="saving || !!savedId" @click="draft.items.forEach(item => item.selected = false)">{{ uiText("Tout désélectionner") }}</Button>
             </div>
-            <p v-if="!draft.items.length">Aucun élément daté n’a été trouvé dans les relations directes de ce sujet. Essayez un sujet plus précis.</p>
-            <p v-else-if="!visibleItems.length" class="generation-note">Aucun élément dans ce filtre. Consultez les autres propositions ou ajustez les règles.</p>
+            <p v-if="!draft.items.length">{{ uiText("Aucun élément daté n’a été trouvé dans les relations directes de ce sujet. Essayez un sujet plus précis.") }}</p>
+            <p v-else-if="!visibleItems.length" class="generation-note">{{ uiText("Aucun élément dans ce filtre. Consultez les autres propositions ou ajustez les règles.") }}</p>
         <article v-for="item in visibleItems" :id="`generation-item-${wikidataItemKey(item)}`" :ref="el => setItemElement(wikidataItemKey(item), el)" :key="wikidataItemKey(item)" class="generation-item" :class="{ 'generation-item--selected': item.selected, 'generation-item--active': activeItemQid === wikidataItemKey(item) }">
           <div class="generation-item-heading">
-            <input class="generation-item-checkbox" :id="`generation-include-${wikidataItemKey(item)}`" v-model="item.selected" type="checkbox" :disabled="saving || !!savedId || item.status === 'excluded' || (!item.selected && !!wikidataTimelineItemError(item))" :aria-label="`Inclure ${item.title}`" />
+            <input class="generation-item-checkbox" :id="`generation-include-${wikidataItemKey(item)}`" v-model="item.selected" type="checkbox" :disabled="saving || !!savedId || item.status === 'excluded' || (!item.selected && !!wikidataTimelineItemError(item))" :aria-label="uiText(`Inclure ${item.title}`)" />
               <div class="generation-item-title-block">
-                <div class="generation-item-title"><label :for="`generation-include-${wikidataItemKey(item)}`">{{ item.title }}</label> <a :href="itemSourceUrl(item)" target="_blank" rel="noopener noreferrer">{{ item.qid }}<span class="sr-only"> sur Wikidata (nouvel onglet)</span></a></div>
-                <p class="generation-item-dates">{{ formatSearchResultDateBound(item.startDate) || 'Date à renseigner' }}<template v-if="item.type === 'period'"> → {{ formatSearchResultDateBound(item.endDate) || 'fin inconnue' }}</template></p>
+                <div class="generation-item-title"><label :for="`generation-include-${wikidataItemKey(item)}`">{{ item.title }}</label> <a :href="itemSourceUrl(item)" target="_blank" rel="noopener noreferrer">{{ item.qid }}<span class="sr-only"> {{ uiText("sur Wikidata (nouvel onglet)") }}</span></a></div>
+                <p class="generation-item-dates">{{ uiText(formatSearchResultDateBound(item.startDate) || 'Date à renseigner') }}<template v-if="item.type === 'period'"> → {{ uiText(formatSearchResultDateBound(item.endDate) || 'fin inconnue') }}</template></p>
               </div>
               <div class="generation-item-status">
-                <Tag v-if="item.status" :variant="item.status==='retained' ? 'success' : item.status==='review' ? 'warning' : 'neutral'" :label="item.status==='retained' ? 'Proposé' : item.status==='review' ? 'À vérifier' : 'Écarté'" />
-                <InfoTooltip v-if="item.source || item.reasons?.length" :label="`Pourquoi ce fait : ${item.title}`">
+                <Tag v-if="item.status" :variant="item.status==='retained' ? 'success' : item.status==='review' ? 'warning' : 'neutral'" :label="uiText(item.status==='retained' ? 'Proposé' : item.status==='review' ? 'À vérifier' : 'Écarté')" />
+                <InfoTooltip v-if="item.source || item.reasons?.length" :label="uiText(`Pourquoi ce fait : ${item.title}`)">
                   <div class="generation-provenance">
-                    <strong>Pourquoi ce fait ?<template v-if="item.category"> · {{ item.category }}</template></strong>
-                    <ul v-if="item.reasons?.length"><li v-for="reason in item.reasons" :key="reason">{{ reason }}</li></ul>
+                    <strong>{{ uiText("Pourquoi ce fait ?") }}<template v-if="item.category"> · {{ item.category }}</template></strong>
+                    <ul v-if="item.reasons?.length"><li v-for="reason in item.reasons" :key="reason">{{ uiText(reason) }}</li></ul>
                     <p v-if="item.source">{{ item.source.qid }} · {{ item.source.property }} · {{ propertyLabels[item.source.property] }}</p>
-                    <p v-if="item.source">{{ item.source.references }} référence{{ item.source.references===1 ? '' : 's' }} dans la déclaration source.</p>
-                    <p v-if="item.origin==='fact'">Fait daté extrait d’une déclaration du sujet.</p>
+                    <p v-if="item.source">{{ item.source.references }} {{ uiText("référence") }}{{ uiText(item.source.references===1 ? '' : 's') }} {{ uiText("dans la déclaration source.") }}</p>
+                    <p v-if="item.origin==='fact'">{{ uiText("Fait daté extrait d’une déclaration du sujet.") }}</p>
                   </div>
                 </InfoTooltip>
               </div>
           </div>
           <details :open="openEditors.has(wikidataItemKey(item)) || !!wikidataTimelineItemError(item)" class="generation-item-editor" @toggle="($event.target as HTMLDetailsElement).open ? openEditors.add(wikidataItemKey(item)) : openEditors.delete(wikidataItemKey(item))">
-            <summary><Icon class="generation-editor-chevron" icon="mdi:chevron-down" aria-hidden="true" /><span>Informations<span class="sr-only"> de {{ item.title }}</span></span></summary>
-            <div class="generation-type-toggle" role="radiogroup" :aria-label="`Type de ${item.title}`">
+            <summary><Icon class="generation-editor-chevron" icon="mdi:chevron-down" aria-hidden="true" /><span>{{ uiText("Informations") }}<span class="sr-only"> {{ uiText("de") }} {{ item.title }}</span></span></summary>
+            <div class="generation-type-toggle" role="radiogroup" :aria-label="uiText(uiFormat`Type de ${item.title}`)">
               <label v-for="option in typeOptions" :key="option.value">
                 <input type="radio" :name="`generation-type-${wikidataItemKey(item)}`" :value="option.value" :checked="item.type === option.value" :disabled="saving || !!savedId || isExistingItem(item)" @change="changeType(item, option.value)" />
-                <span>{{ option.label }}</span>
+                <span>{{ uiText(option.label) }}</span>
               </label>
             </div>
             <div class="generation-item-fields">
-              <Input v-model="item.title" label="Titre" :maxlength="255" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
-              <DateInput v-model="item.startDate" :label="item.type === 'period' ? 'Début' : 'Date'" placeholder="Ex. 1789 ou 1789-07-14" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
-              <DateInput v-if="item.type === 'period'" :id="`generation-end-${wikidataItemKey(item)}`" v-model="item.endDate" label="Fin" placeholder="Date de fin connue" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
+              <Input v-model="item.title" :label="uiText('Titre')" :maxlength="255" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
+              <DateInput v-model="item.startDate" :label="uiText(item.type === 'period' ? 'Début' : 'Date')" :placeholder="uiText('Ex. 1789 ou 1789-07-14')" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
+              <DateInput v-if="item.type === 'period'" :id="`generation-end-${wikidataItemKey(item)}`" v-model="item.endDate" :label="uiText('Fin')" :placeholder="uiText('Date de fin connue')" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
             </div>
-            <Input v-model="item.description" label="Description" type="textarea" :maxlength="1000" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
-            <Select v-if="item.type === 'period'" :id="`generation-parent-${wikidataItemKey(item)}`" :model-value="item.parentQid || ''" :options="parentOptions(item)" label="Période parente" :hint="parentHint(item)" :disabled="saving || !!savedId" @update:model-value="changeParent(item, $event)" />
+            <Input v-model="item.description" :label="uiText('Description')" type="textarea" :maxlength="1000" :readonly="isExistingItem(item)" :disabled="saving || !!savedId" />
+            <Select v-if="item.type === 'period'" :id="`generation-parent-${wikidataItemKey(item)}`" :model-value="item.parentQid || ''" :options="parentOptions(item)" :label="uiText('Période parente')" :hint="parentHint(item)" :disabled="saving || !!savedId" @update:model-value="changeParent(item, $event)" />
           </details>
           <div v-if="isExistingItem(item) || hierarchyWarnings(item).length || item.warning || wikidataTimelineItemError(item)" class="generation-item-feedback">
-            <p v-if="isExistingItem(item)" class="generation-note"><Icon icon="mdi:information-outline" aria-hidden="true" /><span>Déjà dans le catalogue · Informations en lecture seule.</span></p>
-            <div v-if="hierarchyWarnings(item).length" class="generation-hierarchy-warnings"><p v-for="warning in hierarchyWarnings(item)" :key="warning"><Tag label="À vérifier" variant="warning" /><span>{{ warning }}</span></p></div>
+            <p v-if="isExistingItem(item)" class="generation-note"><Icon icon="mdi:information-outline" aria-hidden="true" /><span>{{ uiText("Déjà dans le catalogue · Informations en lecture seule.") }}</span></p>
+            <div v-if="hierarchyWarnings(item).length" class="generation-hierarchy-warnings"><p v-for="warning in hierarchyWarnings(item)" :key="warning"><Tag :label="uiText('À vérifier')" variant="warning" /><span>{{ uiText(warning) }}</span></p></div>
             <p v-if="item.warning" class="generation-note"><Icon icon="mdi:information-outline" aria-hidden="true" /><span>{{ item.warning }}</span></p>
-            <p v-if="wikidataTimelineItemError(item)" class="generation-item-error"><Tag label="Erreur" variant="error" /><span>{{ wikidataTimelineItemError(item) }}</span></p>
+            <p v-if="wikidataTimelineItemError(item)" class="generation-item-error"><Tag :label="uiText('Erreur')" variant="error" /><span>{{ uiText(wikidataTimelineItemError(item)) }}</span></p>
           </div>
         </article>
           </section>

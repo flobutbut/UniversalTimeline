@@ -1,27 +1,28 @@
 <template>
   <fieldset class="temporal-range__time">
-    <legend>Dates</legend>
+    <legend>{{ uiText("Dates") }}</legend>
     <div class="temporal-range__range">
       <input
         class="temporal-range__slider" :class="{ 'temporal-range__slider--front': oldOnTop }" type="range" min="0" :max="STEPS" step="1" :value="oldStep"
-        aria-label="Début de la plage" :aria-valuetext="labels.old" @input="onSlide('old', $event)"
+        :aria-label="uiText('Début de la plage')" :aria-valuetext="labels.old" @input="onSlide('old', $event)"
       />
       <input
         class="temporal-range__slider" type="range" min="0" :max="STEPS" step="1" :value="recentStep"
-        aria-label="Fin de la plage" :aria-valuetext="labels.recent" @input="onSlide('recent', $event)"
+        :aria-label="uiText('Fin de la plage')" :aria-valuetext="labels.recent" @input="onSlide('recent', $event)"
       />
       <div class="temporal-range__track" aria-hidden="true">
         <span class="temporal-range__fill" :style="{ left: `${oldStep / STEPS * 100}%`, right: `${100 - recentStep / STEPS * 100}%` }" />
       </div>
     </div>
     <div class="temporal-range__scale" aria-hidden="true">
-      <span v-for="tick in ticks" :key="tick.label" :style="{ left: `${tick.position * 100}%` }">{{ tick.label }}</span>
+      <span v-for="tick in ticks" :key="tick.label" :style="{ left: `${tick.position * 100}%` }">{{ uiText(tick.label) }}</span>
     </div>
-    <p class="temporal-range__summary" aria-live="polite">{{ modelValue ? `Plage : ${labels.old} → ${labels.recent}` : 'Toutes les époques' }}</p>
-    <Button v-if="modelValue" variant="tertiary" size="xs" @click="clearTime">Toutes les époques</Button>
+    <p class="temporal-range__summary" aria-live="polite">{{ uiText(modelValue ? `Plage : ${labels.old} → ${labels.recent}` : 'Toutes les époques') }}</p>
+    <Button v-if="modelValue" variant="tertiary" size="xs" @click="clearTime">{{ uiText("Toutes les époques") }}</Button>
   </fieldset>
 </template>
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { computed } from 'vue';
 import Button from '@/components/base/Button.vue';
 import { formatYearsBP, positionFromYearsBP, yearsBPFromPosition, type StoryTimeRange } from '@/lib/storyTimeFilter';

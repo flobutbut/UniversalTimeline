@@ -1,24 +1,25 @@
 <template>
   <section class="story-danger-zone" aria-labelledby="story-danger-zone-title">
-    <h4 id="story-danger-zone-title">Actions sensibles</h4>
+    <h4 id="story-danger-zone-title">{{ uiText("Actions sensibles") }}</h4>
     <div class="story-danger-zone__row">
       <div>
-        <p class="story-danger-zone__label">Visibilité : {{ story.isPublic ? 'publique' : 'privée' }}</p>
-        <p class="story-danger-zone__hint">{{ story.isPublic ? 'Une frise privée n’est visible que par vous.' : 'Une frise publique est visible par tous dans la timeline.' }}</p>
+        <p class="story-danger-zone__label">{{ uiText("Visibilité :") }} {{ uiText(story.isPublic ? 'publique' : 'privée') }}</p>
+        <p class="story-danger-zone__hint">{{ uiText(story.isPublic ? 'Une frise privée n’est visible que par vous.' : 'Une frise publique est visible par tous dans la timeline.') }}</p>
       </div>
-      <Button variant="danger" size="sm" type="button" :disabled="busy" @click="emit('toggle-visibility')">{{ story.isPublic ? 'Rendre privée' : 'Rendre publique' }}</Button>
+      <Button variant="danger" size="sm" type="button" :disabled="busy" @click="emit('toggle-visibility')">{{ uiText(story.isPublic ? 'Rendre privée' : 'Rendre publique') }}</Button>
     </div>
     <div class="story-danger-zone__row">
       <div>
-        <p class="story-danger-zone__label">Supprimer la frise</p>
-        <p class="story-danger-zone__hint">La frise est supprimée définitivement ; ses périodes et événements restent dans le catalogue.</p>
+        <p class="story-danger-zone__label">{{ uiText("Supprimer la frise") }}</p>
+        <p class="story-danger-zone__hint">{{ uiText("La frise est supprimée définitivement ; ses périodes et événements restent dans le catalogue.") }}</p>
       </div>
-      <Button variant="danger" size="sm" type="button" :disabled="busy" @click="emit('delete')">Supprimer la frise</Button>
+      <Button variant="danger" size="sm" type="button" :disabled="busy" @click="emit('delete')">{{ uiText("Supprimer la frise") }}</Button>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import Button from '@/components/base/Button.vue';
 import type { Story } from '@/types/database';
 

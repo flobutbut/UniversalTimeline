@@ -51,15 +51,16 @@ function bilingual(value: unknown, field: 'label' | 'title' | 'description') {
   const data = value == null && field === 'description' ? {} : inputObject(value, field);
   const required = field !== 'description';
   const max = required ? 255 : 1000;
-  const fr = text(data.fr, `${field}.fr`, max, required, field !== 'description');
+  const fr = text(data.fr, `${field}.fr`, max, false, field !== 'description');
   const en = text(data.en, `${field}.en`, max, false, field !== 'description');
-  return { fr, en: en || fr };
+  if (required && !fr && !en) throw new InputValidationError(field + '.fr', 'Un titre en français ou en anglais est obligatoire.');
+  return { fr, en };
 }
 
 function label(value: unknown, field: 'label' | 'title') {
   const result = bilingual(value, field);
-  // Required French text has been checked by bilingual().
-  return { fr: result.fr!, en: result.en! };
+  // Missing labels use the empty string in the two non-nullable columns.
+  return { fr: result.fr ?? '', en: result.en ?? '' };
 }
 
 function dateText(value: unknown, field: string, required = false) {

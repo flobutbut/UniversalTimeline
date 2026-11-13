@@ -1,42 +1,40 @@
 <template>
   <span class="story-item-actions" @click.stop @keydown.stop>
     <Button ref="triggerComponent" class="story-item-actions__trigger" variant="ghost" size="sm" icon-only
-      :disabled="disabled" :aria-label="`Actions pour ${label}`" :title="`Actions pour ${label}`"
+      :disabled="disabled" :aria-label="uiText(uiFormat`Actions pour ${label}`)" :title="uiText(uiFormat`Actions pour ${label}`)"
       aria-haspopup="menu" :aria-expanded="open" :aria-controls="open ? menuId : undefined"
       @click="toggle" @keydown="onTriggerKeydown">
       <template #icon><Icon icon="mdi:dots-vertical" width="16" height="16" aria-hidden="true" /></template>
     </Button>
     <Teleport to="body">
       <div v-if="open" ref="menu" :id="menuId" class="story-item-actions__menu" :style="positionStyle"
-        role="menu" :aria-label="`Actions pour ${label}`" @click.stop @keydown="onMenuKeydown" @focusout="onFocusOut">
+        role="menu" :aria-label="uiText(uiFormat`Actions pour ${label}`)" @click.stop @keydown="onMenuKeydown" @focusout="onFocusOut">
         <RouterLink v-if="viewTo" :to="viewTo" role="menuitem" tabindex="-1" @click="close()">
-          <Icon icon="mdi:book-open-outline" width="16" height="16" aria-hidden="true" />Voir la frise
-        </RouterLink>
+          <Icon icon="mdi:book-open-outline" width="16" height="16" aria-hidden="true" />{{ uiText("Voir la frise") }} </RouterLink>
         <button v-else type="button" role="menuitem" tabindex="-1" @click="choose('edit')">
-          <Icon icon="mdi:pencil-outline" width="16" height="16" aria-hidden="true" />Modifier
-        </button>
+          <Icon icon="mdi:pencil-outline" width="16" height="16" aria-hidden="true" />{{ uiText("Modifier") }} </button>
         <button v-if="movable && !readOnly" type="button" role="menuitem" tabindex="-1" @click="choose('move')">
-          <Icon icon="mdi:folder-move-outline" width="16" height="16" aria-hidden="true" />{{ viewTo ? 'Déplacer' : 'Déplacer dans la frise' }}
+          <Icon icon="mdi:folder-move-outline" width="16" height="16" aria-hidden="true" />{{ uiText(viewTo ? 'Déplacer' : 'Déplacer dans la frise') }}
         </button>
         <button v-if="viewTo && !readOnly" type="button" role="menuitem" tabindex="-1" @click="choose('display')">
-          <Icon icon="mdi:timeline-outline" width="16" height="16" aria-hidden="true" />{{ displayAsPeriod ? 'Afficher dans le badge' : 'Afficher comme une période' }}
+          <Icon icon="mdi:timeline-outline" width="16" height="16" aria-hidden="true" />{{ uiText(displayAsPeriod ? 'Afficher dans le badge' : 'Afficher comme une période') }}
         </button>
         <button v-if="createStory" type="button" role="menuitem" tabindex="-1" @click="choose('create-story')">
-          <Icon :icon="promote ? 'mdi:arrow-up-bold-box-outline' : 'mdi:book-plus-outline'" width="16" height="16" aria-hidden="true" />{{ promote ? 'Promouvoir en sous-frise' : 'Créer une frise' }}
+          <Icon :icon="promote ? 'mdi:arrow-up-bold-box-outline' : 'mdi:book-plus-outline'" width="16" height="16" aria-hidden="true" />{{ uiText(promote ? 'Promouvoir en sous-frise' : 'Créer une frise') }}
         </button>
         <button v-if="convertTo" type="button" role="menuitem" tabindex="-1" @click="choose('convert')">
-          <Icon icon="mdi:swap-horizontal" width="16" height="16" aria-hidden="true" />{{ convertTo === 'event' ? 'Convertir en événement' : 'Convertir en période' }}
+          <Icon icon="mdi:swap-horizontal" width="16" height="16" aria-hidden="true" />{{ uiText(convertTo === 'event' ? 'Convertir en événement' : 'Convertir en période') }}
         </button>
         <button v-if="!readOnly" type="button" role="menuitem" tabindex="-1" class="story-item-actions__delete"
-          :title="viewTo ? 'Supprimer uniquement ce lien' : 'Supprimer de cette frise'" @click="choose('remove')">
-          <Icon icon="mdi:trash-can-outline" width="16" height="16" aria-hidden="true" />Supprimer
-        </button>
+          :title="uiText(viewTo ? 'Supprimer uniquement ce lien' : 'Supprimer de cette frise')" @click="choose('remove')">
+          <Icon icon="mdi:trash-can-outline" width="16" height="16" aria-hidden="true" />{{ uiText("Supprimer") }} </button>
       </div>
     </Teleport>
   </span>
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, nextTick, onDeactivated, onScopeDispose, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import { RouterLink, type RouteLocationRaw } from 'vue-router';

@@ -1,5 +1,5 @@
 <template>
-  <div ref="root" class="timeline-map-card" :class="{'timeline-map-card--selected':selectedHere,'timeline-map-card--end-title':alignTitleEnd}" :data-story-id="story.id" :aria-label="`Frise : ${story.title}`">
+  <div ref="root" class="timeline-map-card" :class="{'timeline-map-card--selected':selectedHere,'timeline-map-card--end-title':alignTitleEnd}" :data-story-id="story.id" :aria-label="uiText(uiFormat`Frise : ${story.title}`)">
     <button type="button" class="timeline-map-card__title" :aria-expanded="childCount?!collapsed:undefined"
       @click="childCount?emit('toggle',story.id):emit('select',graphKey('story',story.id))">
       {{ story.title }}
@@ -7,12 +7,13 @@
     <div class="timeline-map-card__preview">
       <StoryTimeline v-if="content && (periods.length || events.length)" compact proportional :time-bounds="bounds??undefined" :layout-bounds="fullBounds??undefined" :reference-time="referenceTime" :periods="periods" :events="events"
         :selected-period-id="selected?.kind==='period'?selected.entityId:null" :selected-event-id="selected?.kind==='event'?selected.entityId:null" />
-      <span v-else class="timeline-map-card__empty" :class="{'timeline-map-card__empty--error':!content}" :role="!content?'status':undefined">{{ content?'Frise vide':'Aperçu indisponible' }}</span>
+      <span v-else class="timeline-map-card__empty" :class="{'timeline-map-card__empty--error':!content}" :role="!content?'status':undefined">{{ uiText(content?'Frise vide':'Aperçu indisponible') }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import StoryTimeline from '@/components/StoryTimeline.vue';
 import type { RelationStory, RelationsContent } from '@/types/adminRelations';

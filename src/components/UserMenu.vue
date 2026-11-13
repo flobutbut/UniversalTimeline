@@ -1,38 +1,36 @@
 <template>
   <div class="user-menu" @keydown="onKeydown" @focusout="onFocusOut">
     <Button ref="triggerComponent" variant="ghost" size="sm" icon-only
-      :aria-label="`Compte : ${name}`" :title="`Compte : ${name}`"
-      aria-haspopup="menu" :aria-expanded="open" :aria-controls="open ? menuId : undefined"
+      :aria-label="uiText(`Compte : ${name}`)" :title="uiText(`Compte : ${name}`)"
+      aria-haspopup="dialog" :aria-expanded="open" :aria-controls="open ? menuId : undefined"
       @click="toggle" @keydown="onTriggerKeydown">
       <template #icon>
         <UserAvatar v-if="auth.profile" :username="auth.profile.username" :color="auth.profile.avatarColor" :icon="auth.profile.avatarIcon" size="sm" />
         <Icon v-else icon="mdi:account-circle-outline" width="20" height="20" aria-hidden="true" />
       </template>
     </Button>
-    <div v-if="open" ref="menu" :id="menuId" class="user-menu__panel" role="menu" :aria-label="`Compte : ${name}`">
+    <div v-if="open" ref="menu" :id="menuId" class="user-menu__panel" role="dialog" :aria-label="uiText(`Compte : ${name}`)">
       <PopoverSurface padded>
-      <div class="user-menu__identity" role="presentation">
-        <UserAvatar :username="auth.profile?.username" :color="auth.profile?.avatarColor" :icon="auth.profile?.avatarIcon" />
-        <span class="user-menu__identity-text">
-          <span class="user-menu__name">{{ name }}</span>
-          <span class="user-menu__role">{{ auth.profile === null ? 'Nom d’utilisateur à choisir' : auth.roleLabel }}</span>
-        </span>
-      </div>
-      <RouterLink :to="{ name: 'profile' }" role="menuitem" tabindex="-1" class="user-menu__item" @click="close()">
-        <Icon icon="mdi:account-outline" width="16" height="16" aria-hidden="true" />Profil
-      </RouterLink>
-      <RouterLink :to="{ name: 'profile', query: { section: 'privacy' } }" role="menuitem" tabindex="-1" class="user-menu__item" @click="close()">
-        <Icon icon="mdi:shield-lock-outline" width="16" height="16" aria-hidden="true" />Données et confidentialité
-      </RouterLink>
-      <button type="button" role="menuitem" tabindex="-1" class="user-menu__item" :disabled="signingOut" @click="signOut">
-        <Icon icon="mdi:logout" width="16" height="16" aria-hidden="true" />Se déconnecter
-      </button>
+        <div class="user-menu__identity">
+          <UserAvatar :username="auth.profile?.username" :color="auth.profile?.avatarColor" :icon="auth.profile?.avatarIcon" />
+          <span class="user-menu__identity-text">
+            <span class="user-menu__name">{{ name }}</span>
+            <span class="user-menu__role">{{ uiText(auth.profile === null ? 'Nom d’utilisateur à choisir' : auth.roleLabel) }}</span>
+          </span>
+        </div>
+        <RouterLink :to="{ name: 'profile' }" class="user-menu__item" @click="close()">
+          <Icon icon="mdi:account-outline" width="16" height="16" aria-hidden="true" />{{ uiText("Profil") }} </RouterLink>
+        <RouterLink :to="{ name: 'profile', query: { section: 'privacy' } }" class="user-menu__item" @click="close()">
+          <Icon icon="mdi:shield-lock-outline" width="16" height="16" aria-hidden="true" />{{ uiText("Données et confidentialité") }} </RouterLink>
+        <button type="button" class="user-menu__item" :disabled="signingOut" @click="signOut">
+          <Icon icon="mdi:logout" width="16" height="16" aria-hidden="true" />{{ uiText("Se déconnecter") }} </button>
       </PopoverSurface>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { computed, nextTick, onMounted, onScopeDispose, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
@@ -50,7 +48,7 @@ const trigger = computed(() => triggerComponent.value?.$el as HTMLButtonElement 
 const menu = ref<HTMLElement | null>(null);
 const menuId = generateDomUid('user-menu');
 const name = computed(() => auth.profile?.username || 'Mon compte');
-const items = () => [...(menu.value?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])];
+const items = () => [...(menu.value?.querySelectorAll<HTMLElement>('.user-menu__item:not(:disabled)') ?? [])];
 
 function close(restoreFocus = false) {
   open.value = false;
@@ -77,7 +75,6 @@ function onKeydown(event: KeyboardEvent) {
   // Le menu consomme Échap avant la fenêtre ou un dialogue.
   if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(true); return; }
   if (!menu.value?.contains(event.target as Node)) return;
-  if (event.key === 'Tab') { close(); return; }
   if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
   event.preventDefault();
   const options = items();
@@ -112,7 +109,7 @@ onScopeDispose(() => document.removeEventListener('pointerdown', outside, true))
   display: flex; align-items: center; gap: var(--spacing-sm);
   padding: var(--spacing-sm); margin-bottom: var(--spacing-xs); border-bottom: 1px solid var(--color-border-default);
 }
-.user-menu__identity-text { display: flex; flex-direction: column; min-width: 0; }
+.user-menu__identity-text { display: flex; flex-direction: column; gap: 0; line-height: 1; min-width: 0; }
 .user-menu__name { font-weight: var(--font-weight-semibold); color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .user-menu__role { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
 .user-menu__item {

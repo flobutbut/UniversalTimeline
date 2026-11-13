@@ -1,3 +1,4 @@
+import { localizedText, uiFormat } from '@/i18n';
 import { storeToRefs } from 'pinia';
 import { useDataStore } from '@/stores/useDataStore';
 import { PeriodApiService } from '@/services/PeriodApiService';
@@ -26,7 +27,7 @@ export function useDatabaseDelete() {
       const policy = type === 'period' ? ' Seules les périodes sans sous-période et sans lien vers une frise peuvent être supprimées.' : '';
       const confirmed = await confirm(
         'Confirmation de suppression',
-        `Êtes-vous sûr de vouloir supprimer "${item.label?.fr || item.title?.fr}" ? Cette action est irréversible.${policy}`
+        uiFormat`Êtes-vous sûr de vouloir supprimer "${localizedText(item.label) || localizedText(item.title)}" ? Cette action est irréversible.${policy}`
       );
       if (!confirmed) return false;
       toast.show('Suppression en cours...', 'info', 0);

@@ -4,15 +4,16 @@
     <div v-else-if="$slots.icon" class="feedback-state__icon" aria-hidden="true"><slot name="icon" /></div>
     <div class="feedback-state__content">
       <h2 v-if="title" class="feedback-state__title">{{ title }}</h2>
-      <div><slot>{{ message || (kind === 'loading' ? 'Chargement…' : 'Aucun résultat') }}</slot></div>
+      <div><slot>{{ uiText(message || (kind === 'loading' ? 'Chargement…' : 'Aucun résultat')) }}</slot></div>
     </div>
     <div v-if="retryable || $slots.actions" class="feedback-state__actions">
-      <Button v-if="retryable" variant="tertiary" size="sm" @click="$emit('retry')">{{ retryLabel }}</Button>
+      <Button v-if="retryable" variant="tertiary" size="sm" @click="$emit('retry')">{{ uiText(retryLabel) }}</Button>
       <slot name="actions" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import Button from './Button.vue';
 import LoadingSpinner from './LoadingSpinner.vue';
 withDefaults(defineProps<{ kind?: 'loading' | 'error' | 'empty' | 'success'; layout?: 'inline' | 'panel'; title?: string; message?: string | null; retryable?: boolean; retryLabel?: string }>(), { kind: 'empty', layout: 'panel', retryLabel: 'Réessayer' });

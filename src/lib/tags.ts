@@ -1,3 +1,4 @@
+import { localizedText } from '@/i18n';
 import type { TagRef } from '@/types/database';
 
 export const MAX_TAGS = 3;
@@ -13,7 +14,7 @@ export interface Tagged { tags?: TagRef[] }
 export interface TagFilterOption { value: string; label: string; group?: string }
 
 const familyLabel = (family: string) => TAG_FAMILIES.find(item => item.id === family)?.label ?? family;
-export const tagLabel = (tag: Pick<TagRef, 'id' | 'label'>) => tag.label.fr || tag.label.en || tag.id;
+export const tagLabel = (tag: Pick<TagRef, 'id' | 'label'>) => localizedText(tag.label) || tag.id;
 
 /** Le tag principal, qui donne la couleur, est le premier de la liste. */
 export const primaryTag = (item: Tagged): TagRef | null => item.tags?.[0] ?? null;

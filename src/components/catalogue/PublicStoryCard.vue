@@ -9,16 +9,17 @@
     </div>
     <div class="public-story-card__content">
       <div class="public-story-card__heading">
-        <h2 class="public-story-card__title"><RouterLink class="public-story-card__open" :to="{ name: 'timeline', query: { story: story.id, entry: 'universe' } }">{{ title }}</RouterLink></h2>
+        <h2 class="public-story-card__title" :lang="contentLanguage(story.title)"><RouterLink class="public-story-card__open" :to="{ name: 'timeline', query: { story: story.id, entry: 'universe' } }">{{ title }}</RouterLink></h2>
         <p class="public-story-card__span">{{ formatStorySpan(story) }}</p>
       </div>
-      <p v-if="description" class="public-story-card__description">{{ description }}</p>
+      <p v-if="description" class="public-story-card__description" :lang="contentLanguage(story.description)">{{ description }}</p>
       <div v-if="story.tags?.length" class="public-story-card__tags"><ThematicTags :tags="story.tags" /></div>
     </div>
   </li>
 </template>
 
 <script setup lang="ts">
+import { contentLanguage, localizedText } from '@/i18n';
 import { computed, onMounted, onScopeDispose, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { Icon } from '@iconify/vue';
@@ -29,8 +30,8 @@ import { formatStorySpan } from '@/lib/storyListDates';
 import type { StorySummary } from '@/types/database';
 
 const props = defineProps<{ story: StorySummary }>();
-const title = computed(() => props.story.title.fr || props.story.title.en || 'Sans titre');
-const description = computed(() => props.story.description?.fr || props.story.description?.en || '');
+const title = computed(() => localizedText(props.story.title) || 'Sans titre');
+const description = computed(() => localizedText(props.story.description) || '');
 const element = ref<HTMLElement>();
 const nearViewport = ref(false);
 let observer: IntersectionObserver | undefined;

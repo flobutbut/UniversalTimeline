@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 import { DateService } from '@/services/DateService';
 
 /** Borne formatée pour la timeline story (parse + formatBound, sans alias NOW/TODAY). */
@@ -10,7 +11,7 @@ export function formatStoryTimelinePeriodDetail(p: { startDate?: string; endDate
   const s = p.startDate ? formatStoryTimelineBoundLabel(p.startDate) : null;
   const e = p.endDate ? formatStoryTimelineBoundLabel(p.endDate) : null;
   if (s && e) return `${s} → ${e}`;
-  if (s) return `à partir de ${s}`;
-  if (e) return `jusqu'à ${e}`;
+  if (s) return uiFormat`à partir de ${s}`;
+  if (e) return uiFormat`jusqu'à ${e}`;
   return '';
 }

@@ -1,5 +1,5 @@
 <template>
-  <Button ref="trigger" variant="ghost" size="xs" :icon-only="!$slots.trigger" :aria-label="label"
+  <Button ref="trigger" variant="ghost" size="xs" :icon-only="!$slots.trigger" :aria-label="uiText(label)"
     :aria-describedby="open ? tooltipId : undefined"
     @mouseenter="enter" @mouseleave="leave" @focus="show" @blur="leave" @click="show">
     <template v-if="!$slots.trigger" #icon><Icon icon="mdi:information-outline" width="18" height="18" aria-hidden="true" /></template>
@@ -14,6 +14,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { nextTick, onScopeDispose, ref, useId, watch, type CSSProperties } from 'vue';
 import { Icon } from '@iconify/vue';
 import Button from './Button.vue';

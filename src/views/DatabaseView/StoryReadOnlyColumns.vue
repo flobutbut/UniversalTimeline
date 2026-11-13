@@ -1,22 +1,23 @@
 <template>
-  <div class="story-readonly-columns" role="group" :aria-label="`Lecture seule : ${story?.title.fr || 'frise associée'}`" @drop.prevent.stop @dragover.prevent.stop @dragstart.prevent.stop>
+  <div class="story-readonly-columns" role="group" :aria-label="`Lecture seule : ${localizedText(story?.title) || 'frise associée'}`" @drop.prevent.stop @dragover.prevent.stop @dragstart.prevent.stop>
     <div v-if="!story" class="finder-column">
-      <div class="finder-column-header"><h2>Frise associée · Lecture seule</h2></div>
-      <FeedbackState v-if="error" kind="error" :message="error" retryable @retry="load" />
+      <div class="finder-column-header"><h2>{{ uiText("Frise associée · Lecture seule") }}</h2></div>
+      <FeedbackState v-if="error" kind="error" :message="uiText(error)" retryable @retry="load" />
       <FeedbackState v-else kind="loading" />
     </div>
     <div v-for="(periods, index) in columns" v-else :key="index" class="finder-column story-readonly-column">
-      <div class="finder-column-header"><h2>{{ index ? label(path[index - 1]) : story.title.fr || story.title.en }}</h2><span class="story-readonly-column__label">Lecture seule</span></div>
+      <div class="finder-column-header"><h2>{{ index ? label(path[index - 1]) : localizedText(story.title) }}</h2><span class="story-readonly-column__label">{{ uiText("Lecture seule") }}</span></div>
       <div class="finder-column-content">
-        <FinderItem v-for="period in periods" :key="period.id" :item-id="period.id" :label="storyPeriodLabelForFinder(period)" :start-date="period.startDate" :end-date="period.endDate"
+        <FinderItem v-for="period in periods" :key="period.id" :item-id="period.id" :label="uiText(storyPeriodLabelForFinder(period))" :start-date="period.startDate" :end-date="period.endDate"
           :tags="storyPeriodTags(period)" :selected="selected === period.id" :has-children="story.periods.some(child => getStoryPeriodParentId(child) === period.id)"
           :draggable="false" hide-row-action is-external-catalog :data-readonly-period-id="period.id" @click="select(period.id)" />
-        <p v-if="!periods.length" class="finder-empty-column">Aucune sous-période</p>
+        <p v-if="!periods.length" class="finder-empty-column">{{ uiText("Aucune sous-période") }}</p>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import { localizedText, uiText } from '@/i18n';
 import { computed, onScopeDispose, ref, watch } from 'vue';
 import FinderItem from '@/views/GraphView/FinderItem.vue';
 import FeedbackState from '@/components/base/FeedbackState.vue';

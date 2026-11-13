@@ -188,3 +188,23 @@ it('also describes the parent bar, and says what a click does', async () => {
   await hover('archean');
   expect(tip()?.querySelector('.period-grid__tooltip-hint')?.textContent).toBe('Cliquer pour explorer');
 });
+
+
+it('keeps the restored navigation focus without reopening the tooltip on the new parent', async () => {
+  card('hadean').get<HTMLButtonElement>('.period-card__title-action').element.focus();
+  await settled();
+  expect(tip()).not.toBeNull();
+  await card('hadean').trigger('click');
+  await view.setProps({ currentPeriod: hadean, periods: [archean] });
+  await settled();
+  expect(document.activeElement).toBe(card('hadean').get('.period-card__title-action').element);
+  await vi.advanceTimersByTimeAsync(PERIOD_TOOLTIP_DELAY_MS);
+  expect(tip()).toBeNull();
+});
+
+it('cancels a pending hover when switching to a story with the same period', async () => {
+  await card('hadean').trigger('mouseenter');
+  await view.setProps({ currentStoryId: '2' });
+  await vi.advanceTimersByTimeAsync(PERIOD_TOOLTIP_DELAY_MS);
+  expect(tip()).toBeNull();
+});

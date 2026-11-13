@@ -9,19 +9,19 @@
         <section v-for="(lane, index) in panels" :key="lane.key" class="home-view__frise"
           :class="{ 'home-view__frise--collapsed': comparing && lane.collapsed.value, 'home-view__frise--active': comparing && lane.key === selectedLaneKey, 'home-view__frise--dragging': draggedLane === lane.key,
             'home-view__frise--drop-before': dropTarget?.key === lane.key && dropTarget.before, 'home-view__frise--drop-after': dropTarget?.key === lane.key && !dropTarget.before }"
-          :data-lane-key="lane.key" :data-story-id="lane.storyId.value" :data-leading="lane.leads.value || undefined" :data-selected="lane.key === selectedLaneKey || undefined" :aria-label="`Frise : ${lane.title.value}`"
+          :data-lane-key="lane.key" :data-story-id="lane.storyId.value" :data-leading="lane.leads.value || undefined" :data-selected="lane.key === selectedLaneKey || undefined" :aria-label="uiText(uiFormat`Frise : ${lane.title.value}`)"
           :tabindex="comparing ? 0 : undefined" :aria-description="comparing ? (lane.key === selectedLaneKey ? 'Frise sélectionnée.' : 'Sélectionner cette frise avec Entrée ou Espace.') : undefined"
           @click="selectPanelBackground($event, lane)" @keydown.enter.self.prevent="selectPanel(lane)" @keydown.space.self.prevent="selectPanel(lane)"
           @dragover="onPanelDragOver($event, lane)" @drop="onPanelDrop($event, lane)">
           <div class="home-view__header">
             <Button v-if="comparing" class="home-view__drag" variant="ghost" size="xs" icon-only draggable="true"
-              :aria-label="`Déplacer ${lane.title.value}`" title="Glisser pour déplacer · Alt + flèches haut/bas" aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"
+              :aria-label="uiText(uiFormat`Déplacer ${lane.title.value}`)" :title="uiText('Glisser pour déplacer · Alt + flèches haut/bas')" aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"
               @dragstart="onPanelDragStart($event, lane)" @dragend="clearDrag"
               @keydown.alt.up.prevent="movePanel(lane, -1)" @keydown.alt.down.prevent="movePanel(lane, 1)">
               <template #icon><Icon icon="mdi:drag-vertical" aria-hidden="true" /></template>
             </Button>
             <div class="home-view__breadcrumbs">
-              <StoryBreadcrumb class="home-view__story-breadcrumb" :items="lane.storyCrumbs.value" :max-visible="3" label="Fil d’Ariane des frises"
+              <StoryBreadcrumb class="home-view__story-breadcrumb" :items="lane.storyCrumbs.value" :max-visible="3" :label="uiText('Fil d’Ariane des frises')"
                 current-navigable :loading="lane.loading.value" @navigate="lane.actions.storyCrumb">
                 <template v-if="lane.leads.value && lane.nav.headerStories.value.length" #current="{ item }">
                   <AssociatedStoriesBadge class="home-view__story-selector" :story-id="lane.nav.currentStoryId.value" period-id="" :period-label="item.title" :trigger-label="item.title"
@@ -34,37 +34,37 @@
             </div>
             <div class="home-view__header-actions">
               <template v-if="!lane.collapsed.value">
-                <Select v-if="!routeError && lane.eventFilter.available.value" class="home-view__subject" compact :searchable="false" placeholder="Sujets des événements"
+                <Select v-if="!routeError && lane.eventFilter.available.value" class="home-view__subject" compact :searchable="false" :placeholder="uiText('Sujets des événements')"
                   :model-value="lane.eventFilter.subject.value" :options="lane.eventFilter.options.value" @update:model-value="lane.eventFilter.select" />
-                <Switch v-if="!comparing" v-model="showPeriodChildren" label="Étendre" label-first variant="sm" :disabled="lane.loading.value" />
+                <Switch v-if="!comparing" v-model="showPeriodChildren" :label="uiText('Étendre')" label-first variant="sm" :disabled="lane.loading.value" />
                 <Button v-if="auth.signedIn && !routeError && !lane.error.value" variant="tertiary" size="sm" :disabled="lane.loading.value"
-                  :to="{ name: 'database', query: { story: lane.storyId.value } }">Détail de la frise</Button>
+                  :to="{ name: 'database', query: { story: lane.storyId.value } }">{{ uiText("Détail de la frise") }}</Button>
               </template>
               <template v-if="comparing">
-                <Button variant="ghost" size="xs" icon-only :disabled="index === 0" :aria-label="`Monter ${lane.title.value}`" title="Monter la frise" @click="movePanel(lane, -1)">
+                <Button variant="ghost" size="xs" icon-only :disabled="index === 0" :aria-label="uiText(`Monter ${lane.title.value}`)" :title="uiText('Monter la frise')" @click="movePanel(lane, -1)">
                   <template #icon><Icon icon="mdi:arrow-up" aria-hidden="true" /></template>
                 </Button>
-                <Button variant="ghost" size="xs" icon-only :disabled="index === panels.length - 1" :aria-label="`Descendre ${lane.title.value}`" title="Descendre la frise" @click="movePanel(lane, 1)">
+                <Button variant="ghost" size="xs" icon-only :disabled="index === panels.length - 1" :aria-label="uiText(`Descendre ${lane.title.value}`)" :title="uiText('Descendre la frise')" @click="movePanel(lane, 1)">
                   <template #icon><Icon icon="mdi:arrow-down" aria-hidden="true" /></template>
                 </Button>
               </template>
               <Button v-if="comparing" variant="ghost" size="xs" icon-only data-panel-toggle :disabled="lane.leads.value && lane.loading.value" :aria-expanded="!lane.collapsed.value" :aria-controls="`timeline-panel-${lane.key}`"
-                :aria-label="`${lane.collapsed.value ? 'Déplier' : 'Replier'} ${lane.title.value}`" :title="lane.collapsed.value ? 'Déplier la frise' : 'Replier la frise'" @click="togglePanel(lane)">
+                :aria-label="uiText(`${lane.collapsed.value ? 'Déplier' : 'Replier'} ${lane.title.value}`)" :title="uiText(lane.collapsed.value ? 'Déplier la frise' : 'Replier la frise')" @click="togglePanel(lane)">
                 <template #icon><Icon :icon="lane.collapsed.value ? 'mdi:chevron-down' : 'mdi:chevron-up'" aria-hidden="true" /></template>
               </Button>
-              <Button v-if="comparing" variant="ghost" size="xs" icon-only :aria-label="`Retirer ${lane.title.value}`" title="Retirer la frise" @click="removeComparedStory(lane)">
+              <Button v-if="comparing" variant="ghost" size="xs" icon-only :aria-label="uiText(uiFormat`Retirer ${lane.title.value}`)" :title="uiText('Retirer la frise')" @click="removeComparedStory(lane)">
                 <template #icon><Icon icon="mdi:close" aria-hidden="true" /></template>
               </Button>
             </div>
           </div>
           <div :id="`timeline-panel-${lane.key}`" class="home-view__panel-content">
             <div v-if="(lane === primaryLane && routeError) || lane.error.value" class="home-view__error" role="alert">
-              {{ lane === primaryLane && routeError || lane.error.value }}
-              <Button v-if="lane !== primaryLane || !routeError" variant="tertiary" size="sm" :disabled="lane.loading.value" @click="lane === primaryLane && lane.leads.value ? retry() : lane.retry()">Réessayer</Button>
-              <RouterLink v-else :to="{ name: 'timeline' }">Revenir à la timeline</RouterLink>
+              {{ uiText(lane === primaryLane && routeError || lane.error.value) }}
+              <Button v-if="lane !== primaryLane || !routeError" variant="tertiary" size="sm" :disabled="lane.loading.value" @click="lane === primaryLane && lane.leads.value ? retry() : lane.retry()">{{ uiText("Réessayer") }}</Button>
+              <RouterLink v-else :to="{ name: 'timeline' }">{{ uiText("Revenir à la timeline") }}</RouterLink>
             </div>
-            <Select v-if="!lane.collapsed.value && lane.leads.value && lane.nav.navigationContexts.value.length > 1" :model-value="lane.nav.contextId.value" label="Parcours chronologique" placeholder="Choisir un parcours"
-              :options="lane.nav.navigationContexts.value.map(context => ({ value: context.id, label: context.title.fr || context.title.en }))"
+            <Select v-if="!lane.collapsed.value && lane.leads.value && lane.nav.navigationContexts.value.length > 1" :model-value="lane.nav.contextId.value" :label="uiText('Parcours chronologique')" :placeholder="uiText('Choisir un parcours')"
+              :options="lane.nav.navigationContexts.value.map(context => ({ value: context.id, label: localizedText(context.title) }))"
               :disabled="lane.loading.value" @update:model-value="value => typeof value === 'string' && selectContext(lane, value)" />
             <PeriodGrid v-if="!(lane === primaryLane && routeError) && !lane.error.value"
               :ref="el => workspace.setGrid(lane.key, el)" :key="lane.grid.value.currentStoryId" class="home-view__timeline" v-bind="lane.grid.value"
@@ -76,8 +76,8 @@
                 <PeriodCard variant="parent" :compact="comparing" :period="lane.nav.contextBar.value" :style="style" :continues-before="continuation.before" :continues-after="continuation.after"
                   :is-selected="false" :loading="lane.loading.value" @back="lane.actions.goBack">
                   <template #title-actions>
-                    <span v-if="!lane.nav.returnPath.value.length" class="home-view__context-label">Période de référence</span>
-                    <AssociatedStoriesBadge :story-id="lane.nav.currentStoryId.value" :period-id="lane.nav.contextBar.value.id" :period-label="lane.nav.contextBar.value.label.fr"
+                    <span v-if="!lane.nav.returnPath.value.length" class="home-view__context-label">{{ uiText("Période de référence") }}</span>
+                    <AssociatedStoriesBadge :story-id="lane.nav.currentStoryId.value" :period-id="lane.nav.contextBar.value.id" :period-label="localizedText(lane.nav.contextBar.value.label)"
                       :stories="lane.nav.contextStories.value" :disabled="lane.loading.value" :comparison="storyComparison" @compare="id => addComparedStory(id, lane)" @select="id => lane.actions.storySelect(id, contextAnchorFor(lane), lane.nav.contextStoryId.value)" />
                   </template>
                 </PeriodCard>
@@ -86,7 +86,7 @@
           </div>
         </section>
         <FeedbackState v-if="!panels.length" :kind="emptyLoading ? 'loading' : emptyError ? 'error' : 'empty'"
-          :message="emptyLoading ? 'Chargement des frises…' : emptyError || 'Aucune frise affichée. Ajoutez une frise pour commencer.'"
+          :message="uiText(emptyLoading ? 'Chargement des frises…' : emptyError || 'Aucune frise affichée. Ajoutez une frise pour commencer.')"
           :retryable="!!emptyError" @retry="loadEmptyCatalogue" />
         <svg v-if="comparing && slidePhase === 'idle'" class="home-view__links" aria-hidden="true">
           <line v-for="link in comparisonLinkLines" :key="link.key" :class="{ 'is-active': link.id === activeComparisonEventId }"
@@ -97,19 +97,18 @@
     <div v-if="!routeError" ref="timelineAdd" class="home-view__add" :class="{ 'home-view__add--picking': pickingStory }">
       <div class="home-view__add-surface">
         <Button v-if="!pickingStory" variant="secondary" size="sm" :disabled="loading || slidePhase !== 'idle' || !comparisonOptions.length" @click="pickingStory = true">
-          <template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template>Ajouter une frise
-        </Button>
+          <template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template>{{ uiText("Ajouter une frise") }} </Button>
         <template v-else>
-          <Select class="home-view__story-picker" compact :disabled="loading || slidePhase !== 'idle'" :model-value="null" placeholder="Choisir la frise à comparer" :options="comparisonOptions"
+          <Select class="home-view__story-picker" compact :disabled="loading || slidePhase !== 'idle'" :model-value="null" :placeholder="uiText('Choisir la frise à comparer')" :options="comparisonOptions"
             dropdown-class="base-select__dropdown--above" @update:model-value="value => typeof value === 'string' && addComparedStory(value)" />
-          <Button variant="ghost" size="sm" @click="pickingStory = false">Annuler</Button>
+          <Button variant="ghost" size="sm" @click="pickingStory = false">{{ uiText("Annuler") }}</Button>
         </template>
       </div>
     </div>
     <span class="sr-only" role="status" aria-live="polite">{{ panelAnnouncement }}</span>
     <Teleport to="body">
-      <ModalShell v-if="leaderNav.navigationChoices.value.length" title="Choisir une frise pour cette période" height="auto" @close="closeNavigationChoices">
-        <p>Plusieurs frises présentent cette période.</p>
+      <ModalShell v-if="leaderNav.navigationChoices.value.length" :title="uiText('Choisir une frise pour cette période')" height="auto" @close="closeNavigationChoices">
+        <p>{{ uiText("Plusieurs frises présentent cette période.") }}</p>
         <div class="home-view__choices">
           <Button v-for="choice in leaderNav.navigationChoices.value" :key="choice.storyId" variant="tertiary" size="sm" @click="chooseLeaderTarget(choice)">{{ choice.title }}</Button>
         </div>
@@ -119,6 +118,7 @@
 </template>
 
 <script setup lang="ts">
+import { language, localizedText, uiFormat, uiText } from '@/i18n';
 import Button from '@/components/base/Button.vue';
 import Select from '@/components/base/Select.vue';
 import Switch from '@/components/base/Switch.vue';
@@ -222,7 +222,7 @@ async function loadEmptyCatalogue() {
 }
 const pickingStory = ref(false);
 const comparisonOptions = computed(() => [...dataStore.stories].filter(story => !panels.value.some(panel => panel.storyId.value === story.id))
-  .sort((a, b) => (a.title.fr || '').localeCompare(b.title.fr || '', 'fr')).map(story => ({ value: story.id, label: story.title.fr || story.title.en })));
+  .sort((a, b) => (localizedText(a.title) || '').localeCompare(localizedText(b.title) || '', language.value)).map(story => ({ value: story.id, label: localizedText(story.title) })));
 const storyComparison = computed(() => ({ ids: new Set(comparisonOptions.value.map(option => option.value)), disabled: loading.value || slidePhase.value !== 'idle' || !!routeError.value }));
 function replaceComparison() {
   if (route.name !== 'timeline') return;
@@ -253,7 +253,7 @@ async function addComparedStory(id: string, source?: ComparisonPanel) {
   pickingStory.value = false;
   replaceComparison();
   if (!panel || !source) return;
-  panelAnnouncement.value = `${option.label} ajoutée sous ${source.title.value}.`;
+  panelAnnouncement.value = uiFormat`${option.label} ajoutée sous ${source.title.value}.`;
   await nextTick();
   focusPanel(panel.key);
 }
@@ -265,7 +265,7 @@ async function removeComparedStory(panel: ComparisonPanel) {
   const wasLeading = panel.leads.value, wasPrimary = panel === primaryLane.value;
   workspace.remove(panel);
   if (!wasLeading || wasPrimary || !panels.value.length) replaceComparison();
-  panelAnnouncement.value = `${title} retirée.`;
+  panelAnnouncement.value = uiFormat`${title} retirée.`;
   await nextTick();
   const next = panels.value[index] ?? panels.value[index - 1];
   if (next) focusPanel(next.key);
@@ -314,7 +314,7 @@ async function movePanel(panel: ComparisonPanel, direction: number) {
   if (!workspace.move(panel.key, index)) return;
   slide.cancel();
   replaceComparison();
-  panelAnnouncement.value = `${panel.title.value} déplacée en position ${index + 1} sur ${panels.value.length}.`;
+  panelAnnouncement.value = uiFormat`${panel.title.value} déplacée en position ${index + 1} sur ${panels.value.length}.`;
   await nextTick();
   focusPanel(panel.key, '.home-view__drag');
 }

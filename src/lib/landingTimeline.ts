@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 /** Rounded, sourced examples, independent of the live catalogue. */
 export const UNIVERSE_AGE = 13_800_000_000;
 export const EARTH_AGE = 4_540_000_000;
@@ -75,7 +76,7 @@ export function createIntroScales(year: number): IntroScale[] {
       explanation: 'Il s’écoule environ 65,7 millions d’années entre la disparition des dinosaures non aviens et l’apparition d’Homo sapiens.',
       nextLabel: 'Agrandir les derniers 300 000 ans' },
     { id: 'humans', label: 'Notre espèce', span: HUMAN_AGE,
-      ticks: [300, 200, 100, 0].map(age => ({ age: age * 1e3, label: age ? `−${age} 000 ans` : 'Aujourd’hui' })),
+      ticks: [300, 200, 100, 0].map(age => ({ age: age * 1e3, label: age ? uiFormat`−${age} 000 ans` : 'Aujourd’hui' })),
       bands: [humans, printing, internet], landmarks: ['humans', 'printing', 'internet'],
       thought: 'Nous remplissons la ligne. Nos inventions, à peine.',
       explanation: 'À l’échelle de notre espèce, l’imprimerie de Gutenberg et Internet se retrouvent presque au même endroit.',

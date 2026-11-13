@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 import { apiClient } from './ApiClient';
 import { buildNewEntityCoreFields } from '@/lib/buildNewEntityCoreFields';
 import { mapToPeriod } from './entityMappers';
@@ -58,7 +59,7 @@ export class PeriodApiService {
 
     if (formData.qid) {
       const existing = await this.getPeriodByWikidataId(formData.qid);
-      if (existing) throw new Error(`Une période avec le Q-id ${formData.qid} existe déjà dans la base de données.`);
+      if (existing) throw new Error(uiFormat`Une période avec le Q-id ${formData.qid} existe déjà dans la base de données.`);
     }
 
     const payload = {
@@ -76,10 +77,10 @@ export class PeriodApiService {
   async updatePeriod(periodId: string, formData: PeriodFormPayload): Promise<Period> {
     const payload = {
       wikidata_id: formData.qid || null,
-      label: { fr: formData.title.fr, en: formData.title.en || formData.title.fr },
+      label: { fr: formData.title.fr, en: formData.title.en || '' },
       description: {
         fr: formData.description?.fr || null,
-        en: formData.description?.en || formData.description?.fr || null,
+        en: formData.description?.en || null,
       },
       start_date: formData.startDate,
       end_date: formData.endDate || null,

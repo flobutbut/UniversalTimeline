@@ -1,3 +1,4 @@
+import { language } from '@/i18n';
 import { onScopeDispose, watch, type Ref } from 'vue';
 import { measurementMode, track, type SearchCompletedProperties } from '@/lib/analytics';
 import { announceTimelineEntry } from '@/lib/explorationAnalytics';
@@ -16,7 +17,7 @@ function identifyingNumber(term: string) {
 
 /** Term of a search that found no frise, or null when it may hold personal data: an address, a link or such a number. */
 export function searchTermForAnalytics(text: string): string | null {
-  const term = text.trim().replace(/\s+/g, ' ').toLocaleLowerCase('fr-FR');
+  const term = text.trim().replace(/\s+/g, ' ').toLocaleLowerCase(language.value);
   if (!term || term.includes('@') || /https?:|www\.|\.(com|fr|net|org|io)\b/.test(term) || identifyingNumber(term)) return null;
   return term.slice(0, 50);
 }

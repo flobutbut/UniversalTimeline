@@ -15,6 +15,7 @@ export const avatarIconNames: Record<Exclude<AvatarIcon, 'initial'>, string> = {
 </script>
 
 <script setup lang="ts">
+import { language } from "@/i18n";
 import { computed } from 'vue';
 import { Icon } from '@iconify/vue';
 import type { AvatarColor } from '@account-rules';
@@ -22,7 +23,7 @@ import type { AvatarColor } from '@account-rules';
 const props = withDefaults(defineProps<{ username?: string | null; color?: AvatarColor; icon?: AvatarIcon; size?: 'sm' | 'md' | 'lg' }>(), {
   username: null, color: 'blue', icon: 'initial', size: 'md',
 });
-const initial = computed(() => (props.username?.trim()[0] ?? '?').toLocaleUpperCase('fr'));
+const initial = computed(() => (props.username?.trim()[0] ?? '?').toLocaleUpperCase(language.value));
 </script>
 
 <style scoped>

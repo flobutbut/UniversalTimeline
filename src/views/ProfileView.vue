@@ -1,102 +1,106 @@
 <template>
   <SidebarLayout menu-label="Sections du profil" :items="menu" :active="section">
-    <FeedbackState v-if="auth.profile === undefined && !auth.profileError" kind="loading" layout="inline" />
-    <FeedbackState v-else-if="auth.profileError" kind="error" layout="inline" :message="auth.profileError" retryable @retry="auth.ensureProfile(true)" />
+    <section v-if="section === 'language'" class="profile-view" aria-labelledby="language-title">
+      <h2 id="language-title">{{ uiText('Langue') }}</h2>
+      <div class="profile-view__card">
+        <LanguageSelect show-label />
+      </div>
+    </section>
+
+    <FeedbackState v-else-if="auth.profile === undefined && !auth.profileError" kind="loading" layout="inline" />
+    <FeedbackState v-else-if="auth.profileError" kind="error" layout="inline" :message="uiText(auth.profileError)" retryable @retry="auth.ensureProfile(true)" />
 
     <section v-else-if="section === 'profile'" class="profile-view" aria-labelledby="profile-title">
-      <h2 id="profile-title">Profil</h2>
-      <p v-if="!auth.profile" class="profile-view__notice" role="status">
-        Choisissez un nom d’utilisateur : il est obligatoire pour créer des frises, qu’il signe automatiquement.
-      </p>
-      <form class="profile-view__card" aria-label="Nom d’utilisateur et avatar" @submit.prevent="saveProfile">
+      <h2 id="profile-title">{{ uiText("Profil") }}</h2>
+      <p v-if="!auth.profile" class="profile-view__notice" role="status"> {{ uiText("Choisissez un nom d’utilisateur : il est obligatoire pour créer des frises, qu’il signe automatiquement.") }} </p>
+      <form class="profile-view__card" :aria-label="uiText('Nom d’utilisateur et avatar')" @submit.prevent="saveProfile">
         <div class="profile-view__identity">
           <UserAvatar :username="draft.username" :color="draft.avatarColor" :icon="draft.avatarIcon" size="lg" />
-          <Input v-model="draft.username" class="profile-view__username" label="Nom d’utilisateur" required autocomplete="username"
+          <Input v-model="draft.username" class="profile-view__username" :label="uiText('Nom d’utilisateur')" required autocomplete="username"
             :maxlength="USERNAME_MAX" :error="usernameFieldError" :hint="availability.hint.value || 'Unique, visible sur vos frises publiques.'" />
         </div>
         <fieldset class="profile-view__choices">
-          <legend>Couleur de l’avatar</legend>
-          <label v-for="color in AVATAR_COLORS" :key="color" class="profile-view__swatch" :title="colorLabels[color]">
+          <legend>{{ uiText("Couleur de l’avatar") }}</legend>
+          <label v-for="color in AVATAR_COLORS" :key="color" class="profile-view__swatch" :title="uiText(colorLabels[color])">
             <input v-model="draft.avatarColor" type="radio" name="avatar-color" :value="color" class="sr-only" />
             <span class="profile-view__swatch-dot" :style="{ background: `var(--color-avatar-${color})` }" aria-hidden="true" />
             <span class="sr-only">{{ colorLabels[color] }}</span>
           </label>
         </fieldset>
         <fieldset class="profile-view__choices">
-          <legend>Motif de l’avatar</legend>
-          <label v-for="icon in AVATAR_ICONS" :key="icon" class="profile-view__icon-choice" :title="iconLabels[icon]">
+          <legend>{{ uiText("Motif de l’avatar") }}</legend>
+          <label v-for="icon in AVATAR_ICONS" :key="icon" class="profile-view__icon-choice" :title="uiText(iconLabels[icon])">
             <input v-model="draft.avatarIcon" type="radio" name="avatar-icon" :value="icon" class="sr-only" />
             <UserAvatar :username="draft.username" :color="draft.avatarColor" :icon="icon" size="md" />
             <span class="sr-only">{{ iconLabels[icon] }}</span>
           </label>
         </fieldset>
-        <p v-if="saveError" class="profile-view__error" role="alert">{{ saveError }}</p>
+        <p v-if="saveError" class="profile-view__error" role="alert">{{ uiText(saveError) }}</p>
         <div class="profile-view__actions">
-          <Button v-if="changed && auth.profile" type="button" variant="secondary" size="sm" :disabled="saving" @click="resetDraft">Annuler</Button>
-          <Button type="submit" size="sm" :disabled="!changed || saving || availability.blocking.value">{{ auth.profile ? 'Enregistrer' : 'Créer mon profil' }}</Button>
+          <Button v-if="changed && auth.profile" type="button" variant="secondary" size="sm" :disabled="saving" @click="resetDraft">{{ uiText("Annuler") }}</Button>
+          <Button type="submit" size="sm" :disabled="!changed || saving || availability.blocking.value">{{ uiText(auth.profile ? 'Enregistrer' : 'Créer mon profil') }}</Button>
         </div>
       </form>
       <EmailChangeCard :email="identity.email" :pending-email="identity.newEmail" @requested="loadIdentity" />
       <dl class="profile-view__card profile-view__facts">
-        <dt>Membre depuis</dt><dd>{{ identity.createdAt ? formatRecordDate(identity.createdAt) : '—' }}</dd>
-        <dt>Rôle</dt><dd>{{ auth.roleLabel }}</dd>
+        <dt>{{ uiText("Membre depuis") }}</dt><dd>{{ uiText(identity.createdAt ? formatRecordDate(identity.createdAt) : '—') }}</dd>
+        <dt>{{ uiText("Rôle") }}</dt><dd>{{ uiText(auth.roleLabel) }}</dd>
       </dl>
     </section>
 
     <section v-else-if="section === 'privacy'" class="profile-view" aria-labelledby="privacy-title">
-      <h2 id="privacy-title">Données et confidentialité</h2>
+      <h2 id="privacy-title">{{ uiText("Données et confidentialité") }}</h2>
       <div class="profile-view__card">
-        <h3>Conditions d’utilisation</h3>
-        <p v-if="termsAccepted">Vous avez accepté la version du {{ auth.profile?.termsVersion }} le {{ formatRecordDate(new Date(auth.profile!.termsAcceptedAt!)) }}.</p>
+        <h3>{{ uiText("Conditions d’utilisation") }}</h3>
+        <p v-if="termsAccepted">{{ uiText("Vous avez accepté la version du") }} {{ auth.profile?.termsVersion }} {{ uiText("le") }} {{ formatRecordDate(new Date(auth.profile!.termsAcceptedAt!)) }}.</p>
         <template v-else>
-          <p>{{ auth.profile?.termsVersion ? 'Les conditions ont été mises à jour.' : 'Vous n’avez pas encore accepté les conditions en vigueur.' }}
-            Lisez les <RouterLink :to="{ name: 'legal', params: { page: 'conditions' } }">conditions d’utilisation</RouterLink> et la
-            <RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">politique de confidentialité</RouterLink>.</p>
+          <p>{{ uiText(auth.profile?.termsVersion ? 'Les conditions ont été mises à jour.' : 'Vous n’avez pas encore accepté les conditions en vigueur.') }} {{ uiText("Lisez les") }} <RouterLink :to="{ name: 'legal', params: { page: 'conditions' } }">{{ uiText("conditions d’utilisation") }}</RouterLink> {{ uiText("et la") }} <RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">{{ uiText("politique de confidentialité") }}</RouterLink>.</p>
           <div class="profile-view__actions">
-            <Button size="sm" :disabled="!auth.profile || accepting" @click="acceptTerms">J’accepte la version du {{ CURRENT_TERMS_VERSION }}</Button>
+            <Button size="sm" :disabled="!auth.profile || accepting" @click="acceptTerms">{{ uiText("J’accepte la version du") }} {{ CURRENT_TERMS_VERSION }}</Button>
           </div>
         </template>
       </div>
       <div class="profile-view__card">
-        <h3>Télécharger mes données</h3>
-        <p>Un fichier JSON avec votre compte, votre profil et toutes vos frises (droit d’accès et de portabilité).</p>
-        <p v-if="exportError" class="profile-view__error" role="alert">{{ exportError }}</p>
-        <div class="profile-view__actions"><Button variant="secondary" size="sm" :disabled="exporting" @click="exportData">Télécharger (JSON)</Button></div>
+        <h3>{{ uiText("Télécharger mes données") }}</h3>
+        <p>{{ uiText("Un fichier JSON avec votre compte, votre profil et toutes vos frises (droit d’accès et de portabilité).") }}</p>
+        <p v-if="exportError" class="profile-view__error" role="alert">{{ uiText(exportError) }}</p>
+        <div class="profile-view__actions"><Button variant="secondary" size="sm" :disabled="exporting" @click="exportData">{{ uiText("Télécharger (JSON)") }}</Button></div>
       </div>
       <div class="profile-view__card">
-        <h3>Cookies</h3>
-        <p>{{ measurementSummary }}</p>
-        <div class="profile-view__actions"><Button variant="secondary" size="sm" @click="consent.openPreferences">Gérer mes préférences</Button></div>
+        <h3>{{ uiText("Cookies") }}</h3>
+        <p>{{ uiText(measurementSummary) }}</p>
+        <div class="profile-view__actions"><Button variant="secondary" size="sm" @click="consent.openPreferences">{{ uiText("Gérer mes préférences") }}</Button></div>
       </div>
-      <nav class="profile-view__card" aria-label="Informations légales">
-        <h3>Informations légales</h3>
+      <nav class="profile-view__card" :aria-label="uiText('Informations légales')">
+        <h3>{{ uiText("Informations légales") }}</h3>
         <ul class="profile-view__links">
           <li v-for="page in LEGAL_PAGES" :key="page"><RouterLink :to="{ name: 'legal', params: { page } }">{{ legalDocuments[page].title }}</RouterLink></li>
-          <li><RouterLink :to="{ name: 'contact' }">Contact</RouterLink></li>
+          <li><RouterLink :to="{ name: 'contact' }">{{ uiText("Contact") }}</RouterLink></li>
         </ul>
       </nav>
       <div class="profile-view__card profile-view__danger">
-        <h3>Supprimer mon compte</h3>
-        <p>Votre compte, votre profil et <strong>toutes vos frises</strong> ({{ ownStoryCount }}) sont supprimés définitivement. Les périodes et événements du catalogue partagé sont conservés. Pensez à télécharger vos données avant.</p>
-        <Input v-model="deleteConfirmation" :label="`Pour confirmer, saisissez « ${confirmationWord} »`" autocomplete="off" />
-        <p v-if="deleteError" class="profile-view__error" role="alert">{{ deleteError }}</p>
+        <h3>{{ uiText("Supprimer mon compte") }}</h3>
+        <p>{{ uiText("Votre compte, votre profil et") }} <strong>{{ uiText("toutes vos frises") }}</strong> ({{ ownStoryCount }}{{ uiText(") sont supprimés définitivement. Les périodes et événements du catalogue partagé sont conservés. Pensez à télécharger vos données avant.") }}</p>
+        <Input v-model="deleteConfirmation" :label="uiText(uiFormat`Pour confirmer, saisissez « ${confirmationWord} »`)" autocomplete="off" />
+        <p v-if="deleteError" class="profile-view__error" role="alert">{{ uiText(deleteError) }}</p>
         <div class="profile-view__actions">
-          <Button variant="danger" size="sm" :disabled="deleteConfirmation.trim() !== confirmationWord || deleting" @click="deleteAccount">Supprimer définitivement</Button>
+          <Button variant="danger" size="sm" :disabled="deleteConfirmation.trim() !== confirmationWord || deleting" @click="deleteAccount">{{ uiText("Supprimer définitivement") }}</Button>
         </div>
       </div>
     </section>
 
     <section v-else class="profile-view" aria-labelledby="session-title">
-      <h2 id="session-title">Session</h2>
+      <h2 id="session-title">{{ uiText("Session") }}</h2>
       <div class="profile-view__card">
-        <p>La déconnexion ferme la session de ce navigateur. Vos frises restent enregistrées.</p>
-        <div class="profile-view__actions"><Button variant="secondary" size="sm" :disabled="signingOut" @click="signOut">Se déconnecter</Button></div>
+        <p>{{ uiText("La déconnexion ferme la session de ce navigateur. Vos frises restent enregistrées.") }}</p>
+        <div class="profile-view__actions"><Button variant="secondary" size="sm" :disabled="signingOut" @click="signOut">{{ uiText("Se déconnecter") }}</Button></div>
       </div>
     </section>
   </SidebarLayout>
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { AVATAR_COLORS, AVATAR_ICONS, CURRENT_TERMS_VERSION, USERNAME_MAX, type AvatarColor, type AvatarIcon } from '@account-rules';
@@ -104,6 +108,7 @@ import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import SidebarLayout, { type SidebarItem } from '@/components/base/SidebarLayout.vue';
+import LanguageSelect from '@/components/LanguageSelect.vue';
 import UserAvatar from '@/components/UserAvatar.vue';
 import EmailChangeCard from '@/components/EmailChangeCard.vue';
 import { authService } from '@/services/AuthService';
@@ -118,9 +123,9 @@ import { track } from '@/lib/analytics';
 import { formatRecordDate } from '@/lib/storyListDates';
 import { LEGAL_PAGES, legalDocuments } from '@/lib/legalDocuments';
 
-type Section = 'profile' | 'privacy' | 'session';
 const menu: SidebarItem[] = [
   { key: 'profile', label: 'Profil', icon: 'mdi:account-outline', to: { name: 'profile' } },
+  { key: 'language', label: 'Langue', icon: 'mdi:translate', to: { name: 'profile', query: { section: 'language' } } },
   { key: 'privacy', label: 'Données et confidentialité', icon: 'mdi:shield-lock-outline', to: { name: 'profile', query: { section: 'privacy' } } },
   { key: 'session', label: 'Session', icon: 'mdi:logout', to: { name: 'profile', query: { section: 'session' } } },
 ];
@@ -134,7 +139,7 @@ const measurementSummary = computed(() => {
   return { consented: 'Mesure d’audience acceptée.', exempt: 'Cookies de mesure refusés ou non choisis : seules des visites anonymes sont comptées, sans cookie.', off: 'Aucune mesure : vous vous êtes opposé à la mesure anonyme.' }[consent.measurementMode];
 });
 const route = useRoute(); const router = useRouter(); const toast = useToast();
-const section = computed<Section>(() => route.query.section === 'privacy' || route.query.section === 'session' ? route.query.section : 'profile');
+const section = computed(() => menu.find(item => item.key === route.query.section)?.key ?? 'profile');
 
 const draft = reactive<{ username: string; avatarColor: AvatarColor; avatarIcon: AvatarIcon }>({ username: '', avatarColor: 'blue', avatarIcon: 'initial' });
 function resetDraft() {

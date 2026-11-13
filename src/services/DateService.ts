@@ -1,3 +1,4 @@
+import { language, uiFormat } from '@/i18n';
 import { parseTemporal, yearsBeforePresent, type NormalizedDate, type DatePrecision } from '@temporal';
 const GA = 1_000_000_000;
 const MA = 1_000_000;
@@ -10,10 +11,10 @@ export class DateService {
   /**
    * Produit une string lisible pour l'affichage.
    */
-  static format(date: NormalizedDate, locale = 'fr-FR'): string {
-    if (date.kind === 'unknown') return date.raw || 'Date inconnue'
+  static format(date: NormalizedDate, locale: string = language.value): string {
+    if (date.kind === 'unknown') return date.raw || (locale.startsWith('en') ? 'Unknown date' : 'Date inconnue')
     if (date.approximate) return date.raw
-    if (date.isCurrent) return "Aujourd'hui"
+    if (date.isCurrent) return locale.startsWith('en') ? 'Today' : "Aujourd'hui"
 
     // Si calendarDate est défini, c'est une date calendaire (CE) — toujours formater comme telle
     if (date.calendarDate) {
@@ -21,37 +22,38 @@ export class DateService {
     }
 
     // Format géologique (pas de calendarDate = date trop ancienne ou purement en years BP)
-    return this.formatGeological(date.yearsBeforePresent)
+    return this.formatGeological(date.yearsBeforePresent, locale)
   }
 
   /**
    * Affichage géologique : "4.6 Ga", "65 Ma", "11.7 ka", "230 ans"
    */
-  static formatGeological(ybp: number): string {
+  static formatGeological(ybp: number, locale: string = language.value): string {
+    if (locale.startsWith('en')) return this.formatGeologicalBound(ybp, locale) + ' ago'
     if (ybp >= GA) return `il y a ${(ybp / GA).toFixed(2)} Ga`
     if (ybp >= MA) return `il y a ${(ybp / MA).toFixed(1)} Ma`
-    return `il y a ${Math.round(ybp).toLocaleString('fr-FR')} ans`
+    return uiFormat`il y a ${Math.round(ybp).toLocaleString('fr-FR')} ans`
   }
 
   /**
    * Comme formatGeological mais sans "il y a" — pour les bornes de périodes
    * utilisées dans un contexte "De X à Y".
    */
-  static formatGeologicalBound(ybp: number): string {
+  static formatGeologicalBound(ybp: number, locale: string = language.value): string {
     if (ybp >= GA) return `${(ybp / GA).toFixed(2)} Ga`
     if (ybp >= MA) return `${(ybp / MA).toFixed(1)} Ma`
-    return `${Math.round(ybp).toLocaleString('fr-FR')} ans`
+    return `${Math.round(ybp).toLocaleString(locale)} ${locale.startsWith('en') ? 'years' : 'ans'}`
   }
 
   /**
    * Format court pour les bornes de périodes : sans "il y a".
    */
-  static formatBound(date: NormalizedDate, locale = 'fr-FR'): string {
-    if (date.kind === 'unknown') return date.raw || 'Date inconnue'
+  static formatBound(date: NormalizedDate, locale: string = language.value): string {
+    if (date.kind === 'unknown') return date.raw || (locale.startsWith('en') ? 'Unknown date' : 'Date inconnue')
     if (date.approximate) return date.raw
-    if (date.isCurrent) return "aujourd'hui"
+    if (date.isCurrent) return locale.startsWith('en') ? 'today' : "aujourd'hui"
     if (date.calendarDate) return this.formatCalendar(date.calendarDate, date.precision, locale)
-    return this.formatGeologicalBound(date.yearsBeforePresent)
+    return this.formatGeologicalBound(date.yearsBeforePresent, locale)
   }
 
   private static formatCalendar(d: Date, precision: DatePrecision, locale: string): string {

@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 import { PeriodApiService } from './PeriodApiService';
 import { EventApiService } from './EventApiService';
 import type { Period, Event } from '@/types/database';
@@ -25,7 +26,7 @@ export class ConflictResolutionService {
       const hasConflict = !!existingItem && existingItem.id !== currentItemId;
       return {
         hasConflict, existingItem, conflictType: type,
-        message: hasConflict ? `${type === 'period' ? 'Une période' : 'Un événement'} avec le Q-id ${qid} existe déjà dans la base de données.` : '',
+        message: hasConflict ? uiFormat`${type === 'period' ? 'Une période' : 'Un événement'} avec le Q-id ${qid} existe déjà dans la base de données.` : '',
       };
     } catch {
       throw new Error('Erreur lors de la vérification des conflits');

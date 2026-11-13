@@ -1,3 +1,4 @@
+import { language } from '@/i18n';
 import { onScopeDispose, ref, shallowRef, watch } from 'vue';
 import { useLatestRequest } from './useLatestRequest';
 
@@ -54,7 +55,7 @@ export function useDebouncedSearch<T>(
     }
   }
 
-  watch([query, () => options.enabled?.() ?? true, () => options.criteria?.()], () => {
+  watch([query, language, () => options.enabled?.() ?? true, () => options.criteria?.()], () => {
     cancel();
     if (!eligible()) return;
     loading.value = true;

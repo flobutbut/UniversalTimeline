@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 // Legal texts. A paragraph starting with « [À compléter : …] » marks content the publisher must supply before going public;
 // facts about the current technical setup are written in full. Keep them in sync with
 // Documentation/RGPD.md (register of processing activities).
@@ -20,7 +21,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
       { title: 'Éditeur du site', paragraphs: [
         'Florian Butour, particulier. Universal Timeline est un projet personnel, gratuit et non commercial, édité à titre non professionnel : ce n’est pas une entreprise, il n’y a ni numéro SIREN ni immatriculation.',
         'Éditeur non professionnel, il ne publie pas son adresse postale (article 6, III, 2 de la loi pour la confiance dans l’économie numérique) ; ses coordonnées complètes sont connues de ses prestataires d’hébergement.',
-        `Contact : ${CONTACT_EMAIL}, ou depuis la page Contact du site.`,
+        uiFormat`Contact : ${CONTACT_EMAIL}, ou depuis la page Contact du site.`,
       ] },
       { title: 'Directeur de la publication', paragraphs: ['Florian Butour.'] },
       { title: 'Hébergement', paragraphs: [
@@ -43,7 +44,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
     sections: [
       { title: 'Responsable du traitement', paragraphs: [
         'Florian Butour, éditeur du site, particulier agissant à titre non professionnel (voir les mentions légales). Aucun délégué à la protection des données n’est désigné : ce n’est pas obligatoire pour un projet de cette taille.',
-        `Contact pour vos données personnelles : ${CONTACT_EMAIL} (objet « Données personnelles »), ou depuis la page Contact du site.`,
+        uiFormat`Contact pour vos données personnelles : ${CONTACT_EMAIL} (objet « Données personnelles »), ou depuis la page Contact du site.`,
       ] },
       { title: 'Données traitées', paragraphs: ['Nous ne collectons que les données nécessaires au service :'], items: [
         'Compte : adresse e-mail et mot de passe (stocké sous forme chiffrée par le service d’authentification), date d’inscription.',
@@ -144,7 +145,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
       { title: 'Contenus publiés', paragraphs: [
         'Une frise publique est visible par tous. Vous restez responsable des textes que vous publiez et vous engagez à respecter la loi et les droits des tiers.',
         'Les périodes et événements du catalogue sont partagés entre les utilisateurs et sont conservés après la suppression d’un compte.',
-        `Pour signaler un contenu qui vous semble illicite ou porter atteinte à vos droits, écrivez à ${CONTACT_EMAIL} (objet « Signalement ») ou passez par la page Contact, en indiquant l’adresse de la frise.`,
+        uiFormat`Pour signaler un contenu qui vous semble illicite ou porter atteinte à vos droits, écrivez à ${CONTACT_EMAIL} (objet « Signalement ») ou passez par la page Contact, en indiquant l’adresse de la frise.`,
         'En publiant une frise, vous la diffusez sous licence CC BY 4.0 (voir les mentions légales) et vous garantissez disposer des droits sur ses textes. Une frise privée n’est ni affichée publiquement ni diffusée sous cette licence.',
         'Chaque signalement est examiné dans les meilleurs délais. L’éditeur peut retirer une frise manifestement illicite ou contraire à ces conditions, et suspendre ou supprimer le compte en cause ; son auteur en est informé par e-mail.',
       ] },
@@ -153,7 +154,7 @@ export const legalDocuments: Record<LegalPage, LegalDocument> = {
         'Les données du catalogue proviennent en partie de Wikidata et des utilisateurs : elles peuvent contenir des erreurs. Dans les limites permises par la loi, l’éditeur ne peut être tenu responsable de leur usage.',
       ] },
       { title: 'Modification des conditions', paragraphs: [
-        `Version en vigueur : ${CURRENT_TERMS_VERSION}. Lorsqu’elles changent, une nouvelle acceptation vous est demandée depuis votre profil.`,
+        uiFormat`Version en vigueur : ${CURRENT_TERMS_VERSION}. Lorsqu’elles changent, une nouvelle acceptation vous est demandée depuis votre profil.`,
       ] },
       { title: 'Droit applicable', paragraphs: [
         'Ces conditions sont soumises au droit français. En cas de désaccord, écrivez d’abord à l’éditeur depuis la page Contact pour chercher une solution amiable.',

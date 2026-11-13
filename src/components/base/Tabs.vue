@@ -24,8 +24,8 @@
     >
       <Icon v-if="tab.icon" :icon="tab.icon" class="tab-button__icon" aria-hidden="true" />
       <ItemSummary class="tab-button__stack">
-        <template #title><span class="tab-button__label">{{ tab.label }}</span></template>
-        <template v-if="tab.sublabel" #details><span class="tab-button__sublabel">{{ tab.sublabel }}</span></template>
+        <template #title><span class="tab-button__label">{{ uiText(tab.label) }}</span></template>
+        <template v-if="tab.sublabel" #details><span class="tab-button__sublabel">{{ uiText(tab.sublabel) }}</span></template>
       </ItemSummary>
       <span v-if="tab.count !== undefined" class="tab-button__count">{{ tab.count }}</span>
     </button>
@@ -33,6 +33,7 @@
 </template>
 
 <script setup lang="ts" generic="T extends string">
+import { uiText } from "@/i18n";
 import { Icon } from '@iconify/vue';
 import { ref, nextTick } from 'vue';
 import type { Tab } from '@/types/global';

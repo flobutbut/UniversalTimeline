@@ -3,10 +3,10 @@
     <div class="modal-overlay" @click.self="$emit('cancel')">
       <div ref="dialog" class="modal-content" role="alertdialog" aria-modal="true" :aria-labelledby="`${id}-title`" :aria-describedby="`${id}-message`" tabindex="-1" @click.stop>
         <h3 :id="`${id}-title`" class="modal-title">{{ title }}</h3>
-        <p :id="`${id}-message`" class="modal-message">{{ message }}</p>
+        <p :id="`${id}-message`" class="modal-message">{{ uiText(message) }}</p>
         <div class="modal-footer">
-          <Button variant="secondary" @click="$emit('cancel')">Annuler</Button>
-          <Button variant="danger" @click="$emit('confirm')">Confirmer</Button>
+          <Button variant="secondary" @click="$emit('cancel')">{{ uiText("Annuler") }}</Button>
+          <Button variant="danger" @click="$emit('confirm')">{{ uiText("Confirmer") }}</Button>
         </div>
       </div>
     </div>
@@ -14,6 +14,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { ref } from 'vue';
 import Button from './Button.vue';
 import { useDialog } from '@/composables/useDialog';

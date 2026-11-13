@@ -239,7 +239,7 @@ test('read services preserve story ownership, private visibility and linked deta
   assert.equal(detail.statusCode,200); assert.equal(detail.payload.isPublic,false); assert.equal(detail.payload.ownerUserId,alice);
   assert.equal(detail.payload.categories[0].id,category); assert.deepEqual(detail.payload.periods.map(row=>row.id),['root']);
   assert.deepEqual(detail.payload.events.map(row=>row.id),['e1']);
-  assert.deepEqual(detail.payload.childStories,[{id:'2',title:{fr:'Alice enfant',en:'Alice enfant'},anchors:[{type:'period',id:'root'}],atRoot:false}]);
+  assert.deepEqual(detail.payload.childStories,[{id:'2',title:{fr:'Alice enfant',en:''},anchors:[{type:'period',id:'root'}],atRoot:false}]);
   assert.equal((await call('get','/stories/:id',{}, {id:'1'},bob)).statusCode,404);
   assert.equal((await call('get','/stories/:id',{}, {id:'3'},null)).statusCode,200);
   assert.deepEqual((await call('get','/stories',{}, {},null)).payload.map(row=>row.id),[3]);

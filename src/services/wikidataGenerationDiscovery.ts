@@ -6,7 +6,7 @@ export async function loadGenerationEntities(list: string[], options: WikidataRe
   const entities: Record<string, Entity> = {};
   const unique = [...new Set(list)];
   for (let i = 0; i < unique.length; i += 50) {
-    const params = new URLSearchParams({ action: 'wbgetentities', ids: unique.slice(i, i + 50).join('|'), props: 'labels|descriptions|claims', languages: 'fr|en', languagefallback: '1', origin: '*', format: 'json' });
+    const params = new URLSearchParams({ action: 'wbgetentities', ids: unique.slice(i, i + 50).join('|'), props: 'labels|descriptions|claims', languages: 'fr|en', origin: '*', format: 'json' });
     const data = await mediaWiki(`${WIKIDATA_MEDIAWIKI_API_URL}?${params}`, options);
     Object.assign(entities, data.entities);
   }

@@ -6,13 +6,13 @@
       'switch--sm': variant === 'sm',
     }"
   >
-    <label v-if="label && labelFirst" class="switch__label" :for="switchId">{{ label }}</label>
+    <label v-if="label && labelFirst" class="switch__label" :for="switchId">{{ uiText(label) }}</label>
     <button
       :id="switchId"
       type="button"
       role="switch"
       :aria-checked="modelValue"
-      :aria-label="ariaLabel"
+      :aria-label="uiText(ariaLabel)"
       :disabled="disabled"
       class="switch__button"
       @click="$emit('update:modelValue', !modelValue)"
@@ -20,11 +20,12 @@
       <span class="switch__track"></span>
       <span class="switch__thumb"></span>
     </button>
-    <label v-if="label && !labelFirst" class="switch__label" :for="switchId">{{ label }}</label>
+    <label v-if="label && !labelFirst" class="switch__label" :for="switchId">{{ uiText(label) }}</label>
   </div>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { useId } from 'vue';
 
 withDefaults(

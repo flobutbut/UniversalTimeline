@@ -1,34 +1,33 @@
 <template>
   <div ref="root" class="filter-builder">
-    <Tag v-for="filter in activeFilters" :key="filter.key" :label="filter.label" variant="accent" size="md" removable :remove-label="`Retirer le filtre ${filter.label}`" @remove="emit('remove', filter.key)" class="filter-chip" :class="{ 'filter-chip--dates': filter.type === 'time' }">
+    <Tag v-for="filter in activeFilters" :key="filter.key" :label="uiText(filter.label)" variant="accent" size="md" removable :remove-label="uiFormat`Retirer le filtre ${filter.label}`" @remove="emit('remove', filter.key)" class="filter-chip" :class="{ 'filter-chip--dates': filter.type === 'time' }">
       <template #label><slot :name="`chip-${filter.type}`" :filter="filter" :expanded="open && !adding && selectedType === filter.type"
         :open="(event: MouseEvent, focus?: string) => showEditor(filter.type, event, focus)">
-        <button type="button" class="filter-chip__edit" :aria-label="`Modifier le filtre ${filter.label}`"
+        <button type="button" class="filter-chip__edit" :aria-label="uiText(uiFormat`Modifier le filtre ${filter.label}`)"
           :data-filter-type="filter.type" aria-haspopup="dialog" :aria-expanded="open && !adding && selectedType === filter.type" @click="showEditor(filter.type, $event)">
-          <Icon v-if="filter.type === 'time'" icon="mdi:calendar-range-outline" width="15" /><span>{{ filter.label }}</span><Icon icon="mdi:chevron-down" width="14" />
+          <Icon v-if="filter.type === 'time'" icon="mdi:calendar-range-outline" width="15" /><span>{{ uiText(filter.label) }}</span><Icon icon="mdi:chevron-down" width="14" />
         </button>
       </slot></template>
     </Tag>
     <Button ref="trigger" variant="ghost" size="sm" :aria-expanded="open && adding" aria-haspopup="menu"
       :aria-controls="open ? `${id}-panel` : undefined" @click="toggleMenu">
-      <template #icon><Icon icon="mdi:plus" width="16" /></template>Ajouter un filtre
-    </Button>
+      <template #icon><Icon icon="mdi:plus" width="16" /></template>{{ uiText("Ajouter un filtre") }} </Button>
     <Teleport to="body">
       <PopoverSurface padded v-if="open" :ref="panelElement" :id="`${id}-panel`" class="filter-builder__panel" :class="{ 'filter-builder__panel--cascade': adding && selectedType }" :style="panelStyle"
-        :role="selectedType ? 'dialog' : 'menu'" :aria-label="selectedType ? selectedLabel : 'Types de filtres'"
+        :role="selectedType ? 'dialog' : 'menu'" :aria-label="uiText(selectedType ? selectedLabel : 'Types de filtres')"
         @keydown.esc="onEscape" @keydown="onMenuKeydown">
-        <div v-if="adding" class="filter-builder__types" :role="selectedType ? 'menu' : undefined" aria-label="Types de filtres">
+        <div v-if="adding" class="filter-builder__types" :role="selectedType ? 'menu' : undefined" :aria-label="uiText('Types de filtres')">
           <button v-for="type in addableTypes" :key="type.key" type="button" role="menuitem" class="filter-builder__type"
             :class="{ 'filter-builder__type--active': selectedType === type.key }" :data-filter-key="type.key" :disabled="type.disabled" :aria-disabled="type.disabled || undefined"
             @mouseenter="previewType(type.key)" @click="selectType(type.key)">
-            <Icon :icon="type.icon" width="17" /><span>{{ type.label }}</span><Icon :icon="type.trigger ? 'mdi:plus' : 'mdi:chevron-right'" width="16" />
+            <Icon :icon="type.icon" width="17" /><span>{{ uiText(type.label) }}</span><Icon :icon="type.trigger ? 'mdi:plus' : 'mdi:chevron-right'" width="16" />
           </button>
         </div>
         <div v-if="selectedType" class="filter-builder__values">
           <div class="filter-builder__heading">
-            <button v-if="adding" type="button" class="filter-builder__back" aria-label="Choisir un autre type de filtre" @click="showTypes"><Icon icon="mdi:chevron-left" width="18" /></button>
-            <span>{{ selectedLabel }}</span>
-            <button type="button" class="filter-builder__close" aria-label="Fermer le filtre" @click="close(true)"><Icon icon="mdi:close" width="16" /></button>
+            <button v-if="adding" type="button" class="filter-builder__back" :aria-label="uiText('Choisir un autre type de filtre')" @click="showTypes"><Icon icon="mdi:chevron-left" width="18" /></button>
+            <span>{{ uiText(selectedLabel) }}</span>
+            <button type="button" class="filter-builder__close" :aria-label="uiText('Fermer le filtre')" @click="close(true)"><Icon icon="mdi:close" width="16" /></button>
           </div>
           <div class="filter-builder__editor"><slot :type="selectedType" :close="() => close(true)" /></div>
         </div>
@@ -37,6 +36,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { elementRef } from '@/utils/elementRef';
 import PopoverSurface from '@/components/base/PopoverSurface.vue';
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';

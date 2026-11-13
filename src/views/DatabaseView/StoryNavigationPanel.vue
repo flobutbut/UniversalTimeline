@@ -1,32 +1,33 @@
 <template>
   <section class="story-navigation" aria-labelledby="story-navigation-title">
-    <h3 id="story-navigation-title">Parcours chronologique</h3>
-    <p>Choisissez la période du parcours présentée par cette frise pour continuer dans le temps. Cette période n’a pas besoin d’être ajoutée au récit.</p>
+    <h3 id="story-navigation-title">{{ uiText("Parcours chronologique") }}</h3>
+    <p>{{ uiText("Choisissez la période du parcours présentée par cette frise pour continuer dans le temps. Cette période n’a pas besoin d’être ajoutée au récit.") }}</p>
     <ul v-if="memberships.length" class="story-navigation__list">
       <li v-for="item in memberships" :key="`${item.context.id}:${item.periodId}`">
-        <span>{{ item.context.title.fr || item.context.title.en }} · {{ periodLabel(item.periodId) }}</span>
-        <Button variant="ghost" size="xs" :to="{ name: 'timeline', query: { story: story.id, reference: item.periodId, view:'overview', context: item.context.id, entry: 'universe' } }">Voir le parcours</Button>
-        <Button v-if="editable && canEditContext(item.context.id)" variant="ghost" size="xs" :disabled="busy || saving" @click="save(item.context.id, item.periodId, true)">Dissocier cette frise</Button>
+        <span>{{ localizedText(item.context.title) }} · {{ uiText(periodLabel(item.periodId)) }}</span>
+        <Button variant="ghost" size="xs" :to="{ name: 'timeline', query: { story: story.id, reference: item.periodId, view:'overview', context: item.context.id, entry: 'universe' } }">{{ uiText("Voir le parcours") }}</Button>
+        <Button v-if="editable && canEditContext(item.context.id)" variant="ghost" size="xs" :disabled="busy || saving" @click="save(item.context.id, item.periodId, true)">{{ uiText("Dissocier cette frise") }}</Button>
       </li>
     </ul>
-    <p v-else>Cette frise n’est rattachée à aucun parcours.</p>
+    <p v-else>{{ uiText("Cette frise n’est rattachée à aucun parcours.") }}</p>
     <template v-if="editable">
-      <Button v-if="!adding" variant="tertiary" size="sm" :disabled="busy || saving" @click="open">Ajouter à un parcours</Button>
+      <Button v-if="!adding" variant="tertiary" size="sm" :disabled="busy || saving" @click="open">{{ uiText("Ajouter à un parcours") }}</Button>
       <form v-else class="story-navigation__form" @submit.prevent="save(contextId, periodId, false)">
-        <Select v-model="contextId" label="Frise de référence" placeholder="Choisir le parcours" :options="candidates" searchable :disabled="saving" />
-        <Select v-model="periodId" label="Période présentée par cette frise" placeholder="Choisir la période" :options="periodOptions" searchable :disabled="saving || contextLoading" />
-        <p v-if="contextError" role="alert">{{ contextError }}</p>
+        <Select v-model="contextId" :label="uiText('Frise de référence')" :placeholder="uiText('Choisir le parcours')" :options="candidates" searchable :disabled="saving" />
+        <Select v-model="periodId" :label="uiText('Période présentée par cette frise')" :placeholder="uiText('Choisir la période')" :options="periodOptions" searchable :disabled="saving || contextLoading" />
+        <p v-if="contextError" role="alert">{{ uiText(contextError) }}</p>
         <div class="story-navigation__actions">
-          <Button type="submit" size="sm" :disabled="!contextId || !periodId || saving || contextLoading || !!contextError">Ajouter au parcours</Button>
-          <Button variant="ghost" size="sm" :disabled="saving" @click="adding = false">Annuler</Button>
+          <Button type="submit" size="sm" :disabled="!contextId || !periodId || saving || contextLoading || !!contextError">{{ uiText("Ajouter au parcours") }}</Button>
+          <Button variant="ghost" size="sm" :disabled="saving" @click="adding = false">{{ uiText("Annuler") }}</Button>
         </div>
       </form>
     </template>
-    <p v-if="error" role="alert">{{ error }}</p>
+    <p v-if="error" role="alert">{{ uiText(error) }}</p>
   </section>
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiText } from '@/i18n';
 import { computed, ref, watch } from 'vue';
 import Button from '@/components/base/Button.vue';
 import Select from '@/components/base/Select.vue';
@@ -42,12 +43,12 @@ const editable = computed(() => auth.canEditStory(props.story));
 const adding = ref(false), saving = ref(false), error = ref('');
 const contextId = ref<string | null>(null), periodId = ref<string | null>(null);
 const {parent:contextStory,loading:contextLoading,error:contextError}=useParentStoryDetail(contextId);
-const periodOptions=computed(()=>[...new Map([...(contextStory.value?.periods??[]),...props.story.periods].map(p=>[p.id,{value:p.id,label:p.label.fr||p.label.en}])).values()]);
+const periodOptions=computed(()=>[...new Map([...(contextStory.value?.periods??[]),...props.story.periods].map(p=>[p.id,{value:p.id,label:localizedText(p.label)||p.label.en}])).values()]);
 watch(contextId,()=>{periodId.value=null;});
 const memberships = computed(() => (props.story.navigationContexts ?? []).flatMap(context => context.presentations
   .filter(view => view.storyId === props.story.id).map(view => ({ context, periodId: view.periodId }))));
 const candidates = computed(() => store.stories.filter(s => s.id !== props.story.id && auth.canEditStory(s))
-  .map(s => ({ value: s.id, label: s.title.fr || s.title.en })));
+  .map(s => ({ value: s.id, label: localizedText(s.title) })));
 const periodLabel = (id: string) => props.story.periods.find(p => p.id === id)?.label.fr || props.story.navigationContexts?.flatMap(c=>c.periods).find(p=>p.id===id)?.label.fr || id;
 const canEditContext = (id: string) => !!store.stories.find(s => s.id === id && auth.canEditStory(s));
 async function open() {

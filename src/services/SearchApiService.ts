@@ -1,3 +1,4 @@
+import { language } from '@/i18n';
 import { mediaWiki, type WikidataReadOptions, type WikidataEntity, type WikidataStatement } from './wikidataTransport';
 import { apiClient } from './ApiClient';
 import { formatSearchResultDateBound } from '@/lib/formatTemporalBoundLabel';
@@ -363,8 +364,8 @@ export class SearchApiService {
     const params = new URLSearchParams({
       action: 'wbsearchentities',
       search: t,
-      language: 'fr',
-      uselang: 'fr',
+      language: language.value,
+      uselang: language.value,
       format: 'json',
       origin: '*',
       limit: opts?.restrictToEventConcepts ? '32' : '18',
@@ -428,8 +429,8 @@ export class SearchApiService {
       keep = dated.filter(id => wikidataSearchHitIsLikelyEvent(entities.get(id), graph));
     }
     return keep.flatMap(id => {
-      const entity = entities.get(id)!; const label = entity.labels?.fr?.value || entity.labels?.en?.value;
-      return label ? [{ id, label, description: entity.descriptions?.fr?.value || entity.descriptions?.en?.value, searchOrigin: 'semantic' as const, ...wikidataTimeBounds(entity) }] : [];
+      const entity = entities.get(id)!; const label = entity.labels?.[language.value]?.value || entity.labels?.fr?.value || entity.labels?.en?.value;
+      return label ? [{ id, label, description: entity.descriptions?.[language.value]?.value || entity.descriptions?.fr?.value || entity.descriptions?.en?.value, searchOrigin: 'semantic' as const, ...wikidataTimeBounds(entity) }] : [];
     });
   }
 
@@ -437,8 +438,8 @@ export class SearchApiService {
     q = q.trim();
     if (q.length < 2) return [];
     const params = new URLSearchParams({
-      action: 'wbsearchentities', search: q, language: 'fr',
-      uselang: 'fr', format: 'json', origin: '*', limit: '20', type: 'item',
+      action: 'wbsearchentities', search: q, language: language.value,
+      uselang: language.value, format: 'json', origin: '*', limit: '20', type: 'item',
     });
 
     const data = await mediaWiki(`${WIKIDATA_MEDIAWIKI_API_URL}?${params}`, opts);

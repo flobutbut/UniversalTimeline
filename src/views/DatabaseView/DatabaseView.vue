@@ -1,10 +1,10 @@
 <template>
   <div class="database-view">
-    <FeedbackState v-if="state.loading" kind="loading" message="Chargement des données…" />
-    <FeedbackState v-else-if="state.error" kind="error" :message="state.error" retryable @retry="loadInitialData" />
+    <FeedbackState v-if="state.loading" kind="loading" :message="uiText('Chargement des données…')" />
+    <FeedbackState v-else-if="state.error" kind="error" :message="uiText(state.error)" retryable @retry="loadInitialData" />
     <template v-else>
-      <FeedbackState v-if="targetLoading" kind="loading" layout="inline" message="Ouverture de la fiche…" />
-      <FeedbackState v-else-if="targetError" kind="error" layout="inline" :message="targetError" retryable @retry="retryTarget" />
+      <FeedbackState v-if="targetLoading" kind="loading" layout="inline" :message="uiText('Ouverture de la fiche…')" />
+      <FeedbackState v-else-if="targetError" kind="error" layout="inline" :message="uiText(targetError)" retryable @retry="retryTarget" />
       <StoryTabsBar :tabs="openTabs" :active-id="selectedStoryId" @select="onTabSelect" @close="onTabClose" @reorder="storyTabs.reorder" />
       <StoryGallery v-if="!selectedStoryId" v-model:search="storySearch" v-model:visibility="storyVisibility" v-model:time-range="storyTimeRange" v-model:period="storyPeriodFilter" v-model:tags="storyTagIds" :stories="visibleStories" :total-stories="filteredStories.length" :tag-options="storyTagOptions" :error="state.storyError" :can-create="auth.canCreateStories" class="database-view__content" @open="openStory" @create="handleAddStory" />
       <div v-else class="database-story-detail-wrap database-view__content">
@@ -51,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import { language, localizedText, uiFormat, uiText } from '@/i18n';
 import { matchesTags, tagFilterOptions } from '@/lib/tags';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import type { EditFormSubmission } from '@/types/editForm';
@@ -136,9 +137,9 @@ const storyPeriodFilter = ref<PeriodFilter | null>(null);
 const storyTagIds = ref<string[]>([]);
 const storyTagOptions = computed(() => tagFilterOptions(filteredStories.value));
 const visibleStories = computed(() => {
-  const query = storySearch.value.trim().toLocaleLowerCase('fr');
+  const query = storySearch.value.trim().toLocaleLowerCase(language.value);
   const now = Date.now();
-  return filteredStories.value.filter(story => (!query || `${story.title.fr} ${story.title.en}`.toLocaleLowerCase('fr').includes(query)) && (storyVisibility.value === 'all' || story.isPublic === (storyVisibility.value === 'public'))
+  return filteredStories.value.filter(story => (!query || `${story.title.fr} ${story.title.en}`.toLocaleLowerCase(language.value).includes(query)) && (storyVisibility.value === 'all' || story.isPublic === (storyVisibility.value === 'public'))
     && (!storyTimeRange.value || storyOverlapsRange(story, storyTimeRange.value, now))
     && (!storyPeriodFilter.value || storyOverlapsRange(story, storyPeriodFilter.value.range, now))
     && matchesTags(story, storyTagIds.value));
@@ -146,7 +147,7 @@ const visibleStories = computed(() => {
 const storyTabs = useStoryTabs();
 const openTabs = computed(() => storyTabs.openIds.value.flatMap(id => {
   const story = findById(filteredStories.value, id);
-  return story ? [{ id, label: story.title.fr || story.title.en || 'Sans titre' }] : [];
+  return story ? [{ id, label: localizedText(story.title) || 'Sans titre' }] : [];
 }));
 // Only a loaded list can tell which open tabs are no longer accessible.
 watch(filteredStories, stories => { if (!state.value.loading && !state.value.error) storyTabs.retain(new Set(stories.map(story => story.id))); });
@@ -187,7 +188,7 @@ onMounted(() => { void auth.ensureProfile(); });
 const usernameRequired = 'Choisissez un nom d’utilisateur dans votre profil avant de créer une frise.';
 /** Frises modifiables par le compte : seules elles peuvent recevoir une sous-frise. */
 const storyParentCandidates = computed(() => useDataStore().stories.filter(story => auth.canEditStory(story))
-  .sort((a, b) => a.title.fr.localeCompare(b.title.fr, 'fr')));
+  .sort((a, b) => localizedText(a.title).localeCompare(localizedText(b.title), language.value)));
 function handleAddStory() {
   if (!auth.canCreateStories) { toast.show(usernameRequired, 'error'); return; }
   saveError.value = null;
@@ -261,9 +262,9 @@ async function toggleStoryVisibility() {
   const story = selectedStory.value;
   if (!story || relationsBusy.value || visibilityBusy.value || saveLoading.value || deleteLoading.value) return;
   const next = story.isPublic ? 'privée' : 'publique';
-  const accepted = await confirm(`Rendre la frise ${next}`, story.isPublic
-    ? `« ${story.title.fr} » ne sera plus visible que par vous.`
-    : `« ${story.title.fr} » sera visible par tous dans la timeline.`);
+  const accepted = await confirm(uiFormat`Rendre la frise ${next}`, story.isPublic
+    ? `« ${localizedText(story.title)} » ne sera plus visible que par vous.`
+    : uiFormat`« ${localizedText(story.title)} » sera visible par tous dans la timeline.`);
   if (!accepted || selectedStoryId.value !== story.id) return;
   visibilityBusy.value = true;
   storySettingsError.value = null;

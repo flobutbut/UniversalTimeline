@@ -2,24 +2,25 @@
   <SidebarLayout menu-label="Informations légales" :items="legalMenu" :active="page">
     <article class="legal-view" :aria-labelledby="`legal-${page}-title`">
       <header>
-        <h2 :id="`legal-${page}-title`">{{ document.title }}</h2>
-        <p class="legal-view__meta">{{ document.summary }} Version du {{ document.updated }}.</p>
+        <h2 :id="`legal-${page}-title`">{{ uiText(document.title) }}</h2>
+        <p class="legal-view__meta">{{ uiText(document.summary) }} {{ uiText("Version du") }} {{ document.updated }}.</p>
       </header>
       <section v-for="section in document.sections" :key="section.title" class="legal-view__section">
-        <h3>{{ section.title }}</h3>
-        <p v-for="paragraph in section.paragraphs" :key="paragraph" :class="{ 'legal-view__todo': paragraph.startsWith('[À compléter') }">{{ paragraph }}</p>
+        <h3>{{ uiText(section.title) }}</h3>
+        <p v-for="paragraph in section.paragraphs" :key="paragraph" :class="{ 'legal-view__todo': paragraph.startsWith('[À compléter') }">{{ uiText(paragraph) }}</p>
         <ul v-if="section.items?.length">
-          <li v-for="item in section.items" :key="item">{{ item }}</li>
+          <li v-for="item in section.items" :key="item">{{ uiText(item) }}</li>
         </ul>
       </section>
       <div v-if="page === 'cookies'" class="legal-view__actions">
-        <Button variant="secondary" size="sm" @click="consent.openPreferences">Gérer mes préférences</Button>
+        <Button variant="secondary" size="sm" @click="consent.openPreferences">{{ uiText("Gérer mes préférences") }}</Button>
       </div>
     </article>
   </SidebarLayout>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import Button from '@/components/base/Button.vue';

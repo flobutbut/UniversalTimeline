@@ -1,13 +1,14 @@
 <template>
-  <section class="entity-danger-zone" aria-label="Zone de danger">
+  <section class="entity-danger-zone" :aria-label="uiText('Zone de danger')">
     <div class="entity-danger-zone__heading">
-      <h4 class="entity-danger-zone__title">Zone de danger</h4>
+      <h4 class="entity-danger-zone__title">{{ uiText("Zone de danger") }}</h4>
       <p class="entity-danger-zone__description">{{ description }}</p>
     </div>
-    <Button variant="danger" size="sm" :disabled="busy" @click="emit('remove')">Supprimer de cette frise</Button>
+    <Button variant="danger" size="sm" :disabled="busy" @click="emit('remove')">{{ uiText("Supprimer de cette frise") }}</Button>
   </section>
 </template>
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import Button from '@/components/base/Button.vue';
 defineProps<{ description: string; busy?: boolean }>();
 const emit = defineEmits<{ remove: [] }>();

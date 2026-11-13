@@ -1,24 +1,25 @@
 <template>
-  <ModalShell title="Associer des frises" height="auto" @close="$emit('close')">
+  <ModalShell :title="uiText('Associer des frises')" height="auto" @close="$emit('close')">
     <div class="story-picker">
-      <p class="story-picker__description">Choisissez une ou plusieurs frises à associer.</p>
-      <BaseSelect v-if="periods" v-model="periodId" label="Période de rattachement" placeholder="Choisir une période…"
-        :options="periods.map(period => ({ value: period.id, label: period.label.fr || period.label.en }))" searchable />
-      <FeedbackState v-if="loadError" kind="error" :message="loadError" retryable @retry="loadStories" />
-      <BaseSelect v-else v-model="selectedIds" label="Frises" placeholder="Rechercher des frises…" multiple searchable
+      <p class="story-picker__description">{{ uiText("Choisissez une ou plusieurs frises à associer.") }}</p>
+      <BaseSelect v-if="periods" v-model="periodId" :label="uiText('Période de rattachement')" :placeholder="uiText('Choisir une période…')"
+        :options="periods.map(period => ({ value: period.id, label: localizedText(period.label) }))" searchable />
+      <FeedbackState v-if="loadError" kind="error" :message="uiText(loadError)" retryable @retry="loadStories" />
+      <BaseSelect v-else v-model="selectedIds" :label="uiText('Frises')" :placeholder="uiText('Rechercher des frises…')" multiple searchable
         :options="options" :loading="loading" :disabled="loading"
         no-results-text="Aucune frise disponible" />
     </div>
     <template #footer-left>
-      <span class="story-picker__count" role="status">{{ validIds.length }} {{ validIds.length === 1 ? 'frise sélectionnée' : 'frises sélectionnées' }}</span>
+      <span class="story-picker__count" role="status">{{ validIds.length }} {{ uiText(validIds.length === 1 ? 'frise sélectionnée' : 'frises sélectionnées') }}</span>
     </template>
     <template #footer-right>
-      <Button :disabled="loading || !!loadError || validIds.length === 0 || (!!periods && !periodId)" @click="confirm">Associer</Button>
+      <Button :disabled="loading || !!loadError || validIds.length === 0 || (!!periods && !periodId)" @click="confirm">{{ uiText("Associer") }}</Button>
     </template>
   </ModalShell>
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiText } from '@/i18n';
 import { ref, computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useDataStore } from '@/stores/useDataStore';
@@ -49,7 +50,7 @@ const loadError = ref<string | null>(null);
 const options = computed(() => {
   const excluded = new Set(props.excludeStoryIds);
   return stories.value.filter(story => auth.canEditStory(story) && !excluded.has(story.id))
-    .map(story => ({ value: story.id, label: story.title.fr || story.title.en }));
+    .map(story => ({ value: story.id, label: localizedText(story.title) }));
 });
 const validIds = computed(() => {
   const allowed = new Set(options.value.map(option => option.value));
