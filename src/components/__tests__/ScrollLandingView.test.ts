@@ -38,6 +38,7 @@ it('links the initial chapter to an existing public story and preserves access t
   await start();
   expect(view.get('.chapter-action a').attributes('href')).toBe('/timeline?story=3');
   expect(view.get('.journey-header nav a').attributes('href')).toBe('/');
+  expect(view.get('header').find('[role="combobox"]').exists()).toBe(false);
   await view.get('.stage-controls button:last-child').trigger('click');
   expect(view.get('.journey-stage').attributes('data-chapter')).toBe('galaxy');
   expect(view.get('.chapter-action a').attributes('href')).toBe('/timeline?story=3');
