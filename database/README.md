@@ -49,6 +49,8 @@ Le lot `data/20261109_tags_lot4_frises.sql` pose 54 liens de tags sur 35 frises 
 
 ## Corrections du catalogue
 
+Le lot `data/20261113_guerre_secession.sql`, appliqué le 13 novembre 2026, crée la frise Guerre de Sécession (86) : 7 périodes et 26 événements nouveaux, 1 période et 8 événements réutilisés, 5 accès. [Compte rendu](../audits/2026-11-13-guerre-secession.md) ; contenu et générateur dans `data/20261113_guerre_secession_source/` ; retour arrière validé uniquement sur PostgreSQL 17 local jetable. Lot propre à l’état audité, à ne pas rejouer.
+
 Le lot `data/20261113_orphelins.sql`, appliqué le 13 novembre 2026, supprime 24 périodes et 41 événements présents sur aucune frise et référencés nulle part : anciennes périodes chapeau remplacées par des frises, doublons, et 39 escarmouches de la guerre d’Indépendance issues d’un ancien import Wikidata. Les lignes, tags et catégories sont conservés dans `data/20261113_orphelins_sauvegarde.json`. Lot propre à cet état de la base, à ne pas rejouer.
 
 Le lot [Guerre froide](data/20261110_guerre_froide.sql), appliqué le 10 novembre 2026 à la frise 12, porte son contenu à sept périodes et 32 événements. [État initial et contrôles](../audits/2026-11-10-guerre-froide.md) ; [retour arrière ciblé](data/20261110_guerre_froide_rollback.sql) testé sur PostgreSQL 17 local.
