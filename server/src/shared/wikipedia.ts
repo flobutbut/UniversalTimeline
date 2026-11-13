@@ -31,9 +31,9 @@ export function wikipediaArticleUrl(language: WikipediaLanguage, title: string):
   return `https://${language}.wikipedia.org/wiki/${path}`;
 }
 
-/** French article first: the site is in French. The English one is the fallback. */
-export function preferredWikipediaArticle(titles: Partial<WikipediaTitles> | null | undefined): { language: WikipediaLanguage; title: string; url: string } | null {
-  for (const language of ['fr', 'en'] as const) {
+/** Prefer the requested edition, then use the other available article. */
+export function preferredWikipediaArticle(titles: Partial<WikipediaTitles> | null | undefined, preferred: WikipediaLanguage = 'fr'): { language: WikipediaLanguage; title: string; url: string } | null {
+  for (const language of [preferred, preferred === 'fr' ? 'en' : 'fr'] as const) {
     const title = titles?.[language];
     if (title) return { language, title, url: wikipediaArticleUrl(language, title) };
   }

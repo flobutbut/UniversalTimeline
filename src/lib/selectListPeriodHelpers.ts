@@ -1,8 +1,9 @@
+import { language, localizedText, uiFormat } from '@/i18n';
 import { DateService } from '@/services/DateService';
 import type { ListPeriod } from '@/types/database';
 
 export function sortListPeriodsByLabel(list: ListPeriod[]): ListPeriod[] {
-  return [...list].sort((a, b) => a.label.fr.localeCompare(b.label.fr, 'fr'));
+  return [...list].sort((a, b) => localizedText(a.label).localeCompare(localizedText(b.label), language.value));
 }
 
 export function formatSelectListPeriodDateBound(raw: string): string {
@@ -13,7 +14,7 @@ export function formatSelectListPeriodDateBound(raw: string): string {
 export function formatSelectListPeriodLine(p: ListPeriod): string {
   const start = formatSelectListPeriodDateBound(p.startDate ?? '');
   const end = formatSelectListPeriodDateBound(p.endDate ?? '');
-  return `${p.label.fr} (de ${start} à ${end})`;
+  return uiFormat`${localizedText(p.label)} (de ${start} à ${end})`;
 }
 
 /** Chaîne d'ids racine → feuille pour une période sélectionnée. */

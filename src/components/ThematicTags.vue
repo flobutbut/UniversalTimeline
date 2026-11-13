@@ -1,9 +1,10 @@
 <template>
   <span class="thematic-tags">
-    <Tag v-for="(tag, index) in tags" :key="tag.id" :label="tagLabel(tag)" :class="{ 'thematic-tags__primary': index === 0 }" :style="index === 0 ? { '--tag-color': `var(--tag-${tag.id})` } : undefined" />
+    <Tag v-for="(tag, index) in tags" :key="tag.id" :label="uiText(tagLabel(tag))" :class="{ 'thematic-tags__primary': index === 0 }" :style="index === 0 ? { '--tag-color': `var(--tag-${tag.id})` } : undefined" />
   </span>
 </template>
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import Tag from '@/components/base/Tag.vue';
 import { tagLabel } from '@/lib/tags';
 import type { TagRef } from '@/types/database';

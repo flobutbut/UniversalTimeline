@@ -1,3 +1,4 @@
+import { localizedText, uiText, language } from '@/i18n';
 import { watchEffect } from 'vue';
 import type { Router } from 'vue-router';
 import type { useDataStore } from '@/stores/useDataStore';
@@ -14,9 +15,14 @@ export function installSeo(router: Router, data: ReturnType<typeof useDataStore>
     // Preserve the initial HTML head while the first catalogue read is pending.
     if (route.name === 'timeline' && !story && (!data.requests.stories || data.requests.stories.loading)) return;
     const publicStory = story?.isPublic === true ? {
-      id: story.id, title: story.title.fr || story.title.en,
-      description: story.description?.fr || story.description?.en || '',
+      id: story.id, title: localizedText(story.title),
+      description: localizedText(story.description),
     } : null;
-    applyMetadata(pageMetadata(url, publicStory, allowIndexing));
+    const metadata = pageMetadata(url, publicStory, allowIndexing);
+    if (language.value === 'en') {
+      metadata.title = metadata.title.split(' — ').map(part => publicStory && part === publicStory.title ? part : uiText(part)).join(' — ');
+      if (!publicStory?.description) metadata.description = uiText(metadata.description);
+    }
+    applyMetadata(metadata);
   });
 }

@@ -1,20 +1,20 @@
 <template>
   <div class="story-placement">
-    <BaseSelect :model-value="modelValue.parentStoryId ?? ''" label="Frise parente" placeholder="Rechercher une frise…"
+    <BaseSelect :model-value="modelValue.parentStoryId ?? ''" :label="uiText('Frise parente')" :placeholder="uiText('Rechercher une frise…')"
       :options="parentOptions" searchable no-results-text="Aucune frise modifiable" :disabled="disabled"
       :hint="modelValue.parentStoryId ? undefined : 'Facultatif : rattachez cette frise à une frise existante pour créer un point d’entrée.'"
       @update:model-value="selectParent" />
     <template v-if="modelValue.parentStoryId">
       <div class="story-placement__dates">
-        <Input v-model="subjectStart" label="Début du sujet" placeholder="Ex. 1789, 3000 BCE, M66" size="sm" :disabled="disabled" />
-        <Input v-model="subjectEnd" label="Fin du sujet" placeholder="Ex. 1815, TODAY" size="sm" :disabled="disabled" />
+        <Input v-model="subjectStart" :label="uiText('Début du sujet')" :placeholder="uiText('Ex. 1789, 3000 BCE, M66')" size="sm" :disabled="disabled" />
+        <Input v-model="subjectEnd" :label="uiText('Fin du sujet')" :placeholder="uiText('Ex. 1815, TODAY')" size="sm" :disabled="disabled" />
       </div>
-      <p class="story-placement__hint">Facultatif, non enregistré : ces dates servent à proposer l’ancre.</p>
-      <p v-if="loading" role="status" class="story-placement__hint">Chargement des périodes…</p>
+      <p class="story-placement__hint">{{ uiText("Facultatif, non enregistré : ces dates servent à proposer l’ancre.") }}</p>
+      <p v-if="loading" role="status" class="story-placement__hint">{{ uiText("Chargement des périodes…") }}</p>
       <p v-else-if="loadError" role="alert" class="story-placement__error">
-        {{ loadError }} <Button variant="tertiary" size="sm" type="button" @click="loadParent">Réessayer</Button>
+        {{ uiText(loadError) }} <Button variant="tertiary" size="sm" type="button" @click="loadParent">{{ uiText("Réessayer") }}</Button>
       </p>
-      <BaseSelect v-else :model-value="modelValue.anchorPeriodId" label="Ancre" placeholder="Choisir une période…"
+      <BaseSelect v-else :model-value="modelValue.anchorPeriodId" :label="uiText('Ancre')" :placeholder="uiText('Choisir une période…')"
         :options="anchorOptions" searchable :required="anchorOptions.length > 0" :disabled="disabled"
         no-results-text="Cette frise ne contient aucune période"
         :hint="anchorHint" @update:model-value="selectAnchor" />
@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import { computed, ref, watch } from 'vue';
 import BaseSelect from '@/components/base/Select.vue';
 import Button from '@/components/base/Button.vue';
@@ -42,13 +43,13 @@ const subjectEnd = ref('');
 /** Un choix manuel n’est jamais remplacé par la proposition. */
 const anchorChosen = ref(false);
 const parentOptions = computed(() => [{ value: '', label: 'Aucune' },
-  ...props.candidates.map(story => ({ value: story.id, label: story.title.fr || story.title.en }))]);
+  ...props.candidates.map(story => ({ value: story.id, label: localizedText(story.title) }))]);
 const suggestedId = computed(() => parent.value ? suggestAnchorPeriod(parent.value.periods, subjectRange(subjectStart.value, subjectEnd.value, Date.now()), Date.now()) : null);
 const anchorOptions = computed(() => (parent.value?.periods ?? [])
-  .map(period => ({ value: period.id, label: `${period.label.fr || period.label.en}${period.id === suggestedId.value ? ' (proposée)' : ''}` })));
+  .map(period => ({ value: period.id, label: `${localizedText(period.label)}${period.id === suggestedId.value ? ' (proposée)' : ''}` })));
 const anchorHint = computed(() => {
   const suggested = parent.value?.periods.find(period => period.id === suggestedId.value);
-  if (suggested) return `Proposée : « ${suggested.label.fr || suggested.label.en} », la période la plus précise qui contient les dates du sujet.`;
+  if (suggested) return uiFormat`Proposée : « ${localizedText(suggested.label)} », la période la plus précise qui contient les dates du sujet.`;
   if (subjectRange(subjectStart.value, subjectEnd.value, Date.now())) return 'Aucune période de la frise parente ne contient ces dates : choisissez la plus proche du sujet.';
   return 'La période de la frise parente sur laquelle cette frise sera proposée.';
 });

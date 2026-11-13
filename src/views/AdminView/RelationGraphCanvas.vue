@@ -1,15 +1,15 @@
 <template>
   <div class="relation-canvas" :class="{'relation-canvas--expanded':expanded}">
     <div class="relation-canvas__tools">
-      <Button variant="tertiary" size="sm" aria-label="Zoom avant" icon-only @click="scale(1.3)"><template #icon><Icon icon="mdi:plus" width="18" height="18" aria-hidden="true" /></template></Button>
-      <Button variant="tertiary" size="sm" aria-label="Zoom arrière" icon-only @click="scale(1/1.3)"><template #icon><Icon icon="mdi:minus" width="18" height="18" aria-hidden="true" /></template></Button>
-      <Button variant="tertiary" size="sm" @click="fit">Tout cadrer</Button>
-      <Button variant="tertiary" size="sm" :pressed="paused" @click="toggleAnimation">{{ paused?'Reprendre':'Pause' }}</Button>
-      <Button variant="ghost" size="sm" @click="restart">Relancer les forces</Button>
-      <Button class="relation-canvas__expand" data-relation-expand variant="tertiary" size="sm" icon-only :pressed="!!expanded" :aria-label="expanded?'Réduire le graphe':'Agrandir le graphe'" :title="expanded?'Réduire le graphe (Échap)':'Agrandir le graphe'" @click="$emit('toggleExpand')"><template #icon><Icon :icon="expanded?'mdi:arrow-collapse':'mdi:arrow-expand'" width="18" height="18" aria-hidden="true" /></template></Button>
+      <Button variant="tertiary" size="sm" :aria-label="uiText('Zoom avant')" icon-only @click="scale(1.3)"><template #icon><Icon icon="mdi:plus" width="18" height="18" aria-hidden="true" /></template></Button>
+      <Button variant="tertiary" size="sm" :aria-label="uiText('Zoom arrière')" icon-only @click="scale(1/1.3)"><template #icon><Icon icon="mdi:minus" width="18" height="18" aria-hidden="true" /></template></Button>
+      <Button variant="tertiary" size="sm" @click="fit">{{ uiText("Tout cadrer") }}</Button>
+      <Button variant="tertiary" size="sm" :pressed="paused" @click="toggleAnimation">{{ uiText(paused?'Reprendre':'Pause') }}</Button>
+      <Button variant="ghost" size="sm" @click="restart">{{ uiText("Relancer les forces") }}</Button>
+      <Button class="relation-canvas__expand" data-relation-expand variant="tertiary" size="sm" icon-only :pressed="!!expanded" :aria-label="uiText(expanded?'Réduire le graphe':'Agrandir le graphe')" :title="uiText(expanded?'Réduire le graphe (Échap)':'Agrandir le graphe')" @click="$emit('toggleExpand')"><template #icon><Icon :icon="expanded?'mdi:arrow-collapse':'mdi:arrow-expand'" width="18" height="18" aria-hidden="true" /></template></Button>
     </div>
     <div ref="host" class="relation-canvas__plot">
-      <svg v-show="graph.nodes.length" ref="svg" tabindex="0" role="img" :aria-label="`Réseau D3 : ${graph.nodes.length} objets, ${graph.edges.length} liens. Déplacez les cercles ; clic dans le vide pour désélectionner. ${expanded&&!selected?'Échap pour réduire le graphe.':'Échap pour désélectionner.'}`" @keydown.esc.prevent="handleEscape">
+      <svg v-show="graph.nodes.length" ref="svg" tabindex="0" role="img" :aria-label="uiText(`Réseau D3 : ${graph.nodes.length} objets, ${graph.edges.length} liens. Déplacez les cercles ; clic dans le vide pour désélectionner. ${expanded&&!selected?'Échap pour réduire le graphe.':'Échap pour désélectionner.'}`)" @keydown.esc.prevent="handleEscape">
         <defs><marker :id="markerId" viewBox="0 -5 10 10" refX="13" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,-5L10,0L0,5" fill="var(--color-border-strong)" /></marker></defs>
         <g ref="scene"><g ref="linkLayer" /><g ref="nodeLayer" /></g>
       </svg>
@@ -18,13 +18,14 @@
       <div v-if="selected && $slots.selection" ref="selectionPopover" class="relation-canvas__selection" @keydown.esc.stop.prevent="dismissSelection"><slot name="selection" :close="dismissSelection" /></div>
     </div>
     <div class="relation-canvas__legend">
-      <span><i class="relation-canvas__mark--story" />Frises</span><span><i class="relation-canvas__mark--period" />Périodes</span><span><i class="relation-canvas__mark--event" />Événements</span>
-      <span>Survol pour le titre · glisser pour déplacer · clic dans le vide pour désélectionner</span>
+      <span><i class="relation-canvas__mark--story" />{{ uiText("Frises") }}</span><span><i class="relation-canvas__mark--period" />{{ uiText("Périodes") }}</span><span><i class="relation-canvas__mark--event" />{{ uiText("Événements") }}</span>
+      <span>{{ uiText("Survol pour le titre · glisser pour déplacer · clic dans le vide pour désélectionner") }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { onMounted,onBeforeUnmount,ref,useId,watch } from 'vue';
 import { select,forceSimulation,forceLink,forceManyBody,forceCenter,forceCollide,forceX,forceY,zoom,zoomIdentity,drag,
   zoomTransform,type Simulation,type SimulationNodeDatum,type SimulationLinkDatum,type Selection,type ZoomBehavior } from 'd3';

@@ -1,12 +1,13 @@
 <template>
-  <ModalShell title="Déplacer la période" height="auto" :busy="busy" @close="$emit('close')">
-    <p>Choisissez sa place dans cette frise.</p>
-    <Select v-model="parentId" label="Période parente" :options="options" :disabled="busy" searchable />
-    <p v-if="error" role="alert">{{ error }}</p>
-    <template #footer-right><Button :disabled="busy || parentId === initialParent" @click="$emit('confirm', parentId || null)">Déplacer</Button></template>
+  <ModalShell :title="uiText('Déplacer la période')" height="auto" :busy="busy" @close="$emit('close')">
+    <p>{{ uiText("Choisissez sa place dans cette frise.") }}</p>
+    <Select v-model="parentId" :label="uiText('Période parente')" :options="options" :disabled="busy" searchable />
+    <p v-if="error" role="alert">{{ uiText(error) }}</p>
+    <template #footer-right><Button :disabled="busy || parentId === initialParent" @click="$emit('confirm', parentId || null)">{{ uiText("Déplacer") }}</Button></template>
   </ModalShell>
 </template>
 <script setup lang="ts">
+import { language, localizedText, uiText } from '@/i18n';
 import { computed, ref } from 'vue';
 import ModalShell from '@/components/base/ModalShell.vue';
 import Button from '@/components/base/Button.vue';
@@ -21,7 +22,7 @@ const parentId = ref(initialParent);
 const options = computed(() => {
   const excluded = new Set(collectStoryPeriodSubtreeIds(props.periods, props.periodId));
   return [{ value: '', label: 'Racine de la frise' }, ...props.periods.filter(p => !excluded.has(p.id))
-    .sort((a,b) => a.label.fr.localeCompare(b.label.fr, 'fr'))
-    .map(p => ({ value: p.id, label: p.label.fr || p.label.en }))];
+    .sort((a,b) => localizedText(a.label).localeCompare(localizedText(b.label), language.value))
+    .map(p => ({ value: p.id, label: localizedText(p.label) }))];
 });
 </script>

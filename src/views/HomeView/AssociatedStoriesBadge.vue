@@ -1,30 +1,30 @@
 <template>
   <span v-if="otherStories.length || error || open" class="associated-stories" @click.stop @keydown.stop>
     <button ref="trigger" type="button" class="associated-stories__badge" :class="{ 'associated-stories__badge--title': triggerLabel }" :disabled="disabled"
-      :aria-label="badgeLabel" :title="badgeLabel" aria-haspopup="dialog" :aria-expanded="open"
+      :aria-label="uiText(badgeLabel)" :title="uiText(badgeLabel)" aria-haspopup="dialog" :aria-expanded="open"
       :aria-controls="open ? panelId : undefined" @click="toggle">
-      <span class="associated-stories__label">{{ triggerLabel || (loading ? 'Frises…' : error ? 'Frises indisponibles' : `${otherStories.length} ${otherStories.length === 1 ? 'frise associée' : 'frises associées'}`) }}</span>
+      <span class="associated-stories__label">{{ uiText(triggerLabel || (loading ? 'Frises…' : error ? 'Frises indisponibles' : `${otherStories.length} ${otherStories.length === 1 ? 'frise associée' : 'frises associées'}`)) }}</span>
       <DesignIcon name="down" class="associated-stories__arrow" :class="{ 'associated-stories__arrow--open': open }" />
     </button>
     <Teleport to="body">
       <template v-if="open">
         <div class="associated-stories__backdrop" aria-hidden="true" @mousedown.prevent @click.stop="close()" />
         <PopoverSurface padded :ref="panelElement" :id="panelId" class="associated-stories__panel" :style="panelStyle" role="dialog"
-          :aria-label="`Frises associées à ${periodLabel}`" tabindex="-1" @click.stop @focusout="onFocusOut" @keydown="onPanelKeydown">
-          <p v-if="loading" class="associated-stories__status" role="status">Chargement des frises…</p>
+          :aria-label="uiText(uiFormat`Frises associées à ${periodLabel}`)" tabindex="-1" @click.stop @focusout="onFocusOut" @keydown="onPanelKeydown">
+          <p v-if="loading" class="associated-stories__status" role="status">{{ uiText("Chargement des frises…") }}</p>
           <div v-else-if="error" class="associated-stories__status" role="alert">
-            {{ error }} <Button variant="tertiary" size="sm" type="button" @click="retry">Réessayer</Button>
+            {{ uiText(error) }} <Button variant="tertiary" size="sm" type="button" @click="retry">{{ uiText("Réessayer") }}</Button>
           </div>
-          <p v-else-if="!otherStories.length" class="associated-stories__status">Aucune frise associée à cette période.</p>
+          <p v-else-if="!otherStories.length" class="associated-stories__status">{{ uiText("Aucune frise associée à cette période.") }}</p>
           <template v-else>
-            <button v-if="overviewLabel" type="button" class="associated-stories__item" @click="chooseOverview"><span><strong>{{ overviewLabel }}</strong></span></button>
+            <button v-if="overviewLabel" type="button" class="associated-stories__item" @click="chooseOverview"><span><strong>{{ uiText(overviewLabel) }}</strong></span></button>
             <div v-for="story in otherStories" :key="story.id" class="associated-stories__row">
               <button type="button" class="associated-stories__item" @click="select(story.id)">
-                <span><strong>{{ story.title.fr || story.title.en }}</strong><small v-if="story.description?.fr || story.description?.en">{{ story.description.fr || story.description.en }}</small></span>
+                <span><strong>{{ localizedText(story.title) }}</strong><small v-if="localizedText(story.description)">{{ localizedText(story.description) }}</small></span>
                 <span aria-hidden="true">→</span>
               </button>
               <Button v-if="comparison?.ids.has(story.id)" variant="ghost" size="xs" icon-only type="button" :disabled="comparison.disabled"
-                :aria-label="`Ajouter ${story.title.fr || story.title.en} sous cette frise`" title="Ajouter sous cette frise" @click="compare(story.id)">
+                :aria-label="uiFormat`Ajouter ${localizedText(story.title)} sous cette frise`" :title="uiText('Ajouter sous cette frise')" @click="compare(story.id)">
                 <template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template>
               </Button>
             </div>
@@ -36,6 +36,7 @@
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import Button from '@/components/base/Button.vue';
 import DesignIcon from '@/components/base/DesignIcon.vue';
 import { Icon } from '@iconify/vue';
@@ -56,9 +57,9 @@ const panel = ref<HTMLElement | null>(null);
 const panelElement = elementRef(panel);
 const panelId = generateDomUid('associated-stories');
 const panelStyle = ref<{ top: string; left: string; width: string }>({ top: '0px', left: '0px', width: '360px' });
-const badgeLabel = computed(() => props.triggerLabel ? `Frises liées à ${props.triggerLabel}` : props.loading ? 'Chargement des frises associées'
+const badgeLabel = computed(() => props.triggerLabel ? uiFormat`Frises liées à ${props.triggerLabel}` : props.loading ? 'Chargement des frises associées'
   : props.error ? 'Afficher l’erreur de chargement des frises associées'
-  : `${otherStories.value.length} frise${otherStories.value.length === 1 ? '' : 's'} associée${otherStories.value.length === 1 ? '' : 's'} à ${props.periodLabel}`);
+  : uiFormat`${otherStories.value.length} frise${otherStories.value.length === 1 ? '' : 's'} associée${otherStories.value.length === 1 ? '' : 's'} à ${props.periodLabel}`);
 
 function position() {
   if (!open.value || !trigger.value) return;

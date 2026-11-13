@@ -12,7 +12,7 @@ export async function lockGeneratedStoryTopic(client: TransactionClient, qid: st
 export async function findGeneratedStoryMatches(client: TransactionClient, qid: string, title: string) {
   const rows = (await client.query<{ id: number; title_fr: string; reason: 'subject' | 'title' }>(`
     WITH candidates AS (
-      SELECT s.id, s.title_fr,
+      SELECT s.id, COALESCE(NULLIF(s.title_fr, ''), s.title_en) AS title_fr,
         (concat_ws(' ', s.description_fr, s.description_en) ~* ('https?://(www\\.)?wikidata\\.org/(wiki/|entity/)' || $1 || '([^0-9]|$)')) AS subject_match,
         (lower(extensions.unaccent(btrim(s.title_fr))) = lower(extensions.unaccent(btrim($2::text)))
          OR lower(extensions.unaccent(btrim(s.title_en))) = lower(extensions.unaccent(btrim($2::text)))) AS title_match

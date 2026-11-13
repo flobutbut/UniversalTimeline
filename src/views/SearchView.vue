@@ -1,16 +1,17 @@
 <template>
   <section class="search-page" aria-labelledby="search-page-title">
     <div class="search-page__content">
-      <Button :to="returnPath" variant="tertiary" size="sm"><template #icon><Icon icon="mdi:arrow-left" aria-hidden="true" /></template>Retour</Button>
-      <h1 id="search-page-title">Rechercher</h1>
-      <p class="search-page__description">Trouvez une frise, un événement ou un sujet Wikidata.</p>
-      <p v-if="error" role="alert">{{ error }}</p>
+      <Button :to="returnPath" variant="tertiary" size="sm"><template #icon><Icon icon="mdi:arrow-left" aria-hidden="true" /></template>{{ uiText("Retour") }}</Button>
+      <h1 id="search-page-title">{{ uiText("Rechercher") }}</h1>
+      <p class="search-page__description">{{ uiText("Trouvez une frise, un événement ou un sujet Wikidata.") }}</p>
+      <p v-if="error" role="alert">{{ uiText(error) }}</p>
       <GlobalSearch :key="auth.identityVersion" page autofocus @select="selectResult" />
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';

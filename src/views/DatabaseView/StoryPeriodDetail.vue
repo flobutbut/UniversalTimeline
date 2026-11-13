@@ -4,60 +4,61 @@
       <div class="story-period-detail__main">
         <header class="story-period-detail__header">
           <div class="story-period-detail__heading">
-            <h3>{{ label(period) }}</h3>
+            <h3>{{ uiText(label(period)) }}</h3>
             <p class="story-period-detail__dates">{{ dateRange }}</p>
           </div>
           <div class="story-period-detail__actions">
             <template v-if="inStory">
-              <Button variant="tertiary" size="sm" :disabled="busy" @click="emit('edit', period.id)">Modifier la période</Button>
-              <Button v-if="canCreateStory" variant="tertiary" size="sm" :disabled="busy" @click="emit('create-story', period.id)">{{ promote ? 'Promouvoir en sous-frise' : 'Créer une frise' }}</Button>
-              <Button variant="tertiary" size="sm" :disabled="busy || children.length > 0" :title="children.length > 0 ? 'Déplacez d’abord ses sous-périodes.' : undefined" @click="emit('convert', period.id)">Convertir en événement</Button>
+              <Button variant="tertiary" size="sm" :disabled="busy" @click="emit('edit', period.id)">{{ uiText("Modifier la période") }}</Button>
+              <Button v-if="canCreateStory" variant="tertiary" size="sm" :disabled="busy" @click="emit('create-story', period.id)">{{ uiText(promote ? 'Promouvoir en sous-frise' : 'Créer une frise') }}</Button>
+              <Button variant="tertiary" size="sm" :disabled="busy || children.length > 0" :title="uiText(children.length > 0 ? 'Déplacez d’abord ses sous-périodes.' : undefined)" @click="emit('convert', period.id)">{{ uiText("Convertir en événement") }}</Button>
             </template>
-            <Button v-else variant="secondary" size="sm" :disabled="busy || !canAdd" :title="!canAdd ? 'Ajoutez d’abord la période parente à la frise.' : undefined" @click="emit('add', period.id)">{{ period.id.startsWith('wikidata:') ? 'Importer cette période' : 'Ajouter à la frise' }}</Button>
+            <Button v-else variant="secondary" size="sm" :disabled="busy || !canAdd" :title="uiText(!canAdd ? 'Ajoutez d’abord la période parente à la frise.' : undefined)" @click="emit('add', period.id)">{{ period.id.startsWith('wikidata:') ? 'Importer cette période' : 'Ajouter à la frise' }}</Button>
           </div>
-          <p v-if="description" class="story-period-detail__description" aria-label="Description de la période">{{ description }}</p>
-          <p v-else class="story-period-detail__empty story-period-detail__description">Aucune description renseignée.</p>
-          <WikipediaLink :titles="period.wikipedia" :subject="period.label.fr || period.label.en" class="story-period-detail__wikipedia" />
+          <p v-if="description" class="story-period-detail__description" :aria-label="uiText('Description de la période')">{{ description }}</p>
+          <p v-else class="story-period-detail__empty story-period-detail__description">{{ uiText("Aucune description renseignée.") }}</p>
+          <WikipediaLink :titles="period.wikipedia" :subject="localizedText(period.label)" class="story-period-detail__wikipedia" />
         </header>
-        <section aria-label="Tags de la période">
-          <h4>Tags</h4>
+        <section :aria-label="uiText('Tags de la période')">
+          <h4>{{ uiText("Tags") }}</h4>
           <p v-if="period.tags?.length" class="story-period-detail__categories"><ThematicTags :tags="period.tags" /></p>
-          <p v-else class="story-period-detail__empty">Aucun tag renseigné.</p>
+          <p v-else class="story-period-detail__empty">{{ uiText("Aucun tag renseigné.") }}</p>
         </section>
-        <div v-if="inStory" class="story-period-detail__context" aria-label="Organisation dans cette frise">
+        <div v-if="inStory" class="story-period-detail__context" :aria-label="uiText('Organisation dans cette frise')">
           <section>
-            <h4>Sous-périodes <span>{{ children.length }}</span></h4>
-            <ul v-if="children.length" class="story-period-detail__children"><li v-for="child in children" :key="child.id"><button type="button" @click="emit('select', child.id)"><span>{{ label(child) }}</span><Icon icon="mdi:arrow-right" aria-hidden="true" /></button></li></ul>
-            <p v-else class="story-period-detail__empty">Aucune sous-période dans cette frise.</p>
-            <Button variant="tertiary" size="sm" :disabled="busy" @click="emit('add-child', period.id)">Ajouter une sous-période</Button>
+            <h4>{{ uiText("Sous-périodes") }} <span>{{ children.length }}</span></h4>
+            <ul v-if="children.length" class="story-period-detail__children"><li v-for="child in children" :key="child.id"><button type="button" @click="emit('select', child.id)"><span>{{ uiText(label(child)) }}</span><Icon icon="mdi:arrow-right" aria-hidden="true" /></button></li></ul>
+            <p v-else class="story-period-detail__empty">{{ uiText("Aucune sous-période dans cette frise.") }}</p>
+            <Button variant="tertiary" size="sm" :disabled="busy" @click="emit('add-child', period.id)">{{ uiText("Ajouter une sous-période") }}</Button>
           </section>
-          <section class="story-period-detail__stories" aria-label="Frises associées à cette période">
-            <h4>Frises associées <span>{{ stories.length }}</span></h4>
-            <p class="story-period-detail__hint">Des frises à explorer depuis cette période dans la timeline.</p>
+          <section class="story-period-detail__stories" :aria-label="uiText('Frises associées à cette période')">
+            <h4>{{ uiText("Frises associées") }} <span>{{ stories.length }}</span></h4>
+            <p class="story-period-detail__hint">{{ uiText("Des frises à explorer depuis cette période dans la timeline.") }}</p>
             <AnchoredStoryRow v-for="childStory in stories" :key="childStory.id" :story="childStory" :summary="summaries.find(summary => summary.id === childStory.id)" :disabled="busy" @remove="emit('remove-story', childStory.id, period.id)" />
-            <p v-if="!stories.length" class="story-period-detail__empty">Aucune frise associée à cette période.</p>
-            <Button variant="tertiary" size="sm" :disabled="busy" @click="emit('associate-story', period.id)">Associer une frise</Button>
+            <p v-if="!stories.length" class="story-period-detail__empty">{{ uiText("Aucune frise associée à cette période.") }}</p>
+            <Button variant="tertiary" size="sm" :disabled="busy" @click="emit('associate-story', period.id)">{{ uiText("Associer une frise") }}</Button>
           </section>
         </div>
-        <div v-else class="story-period-detail__context"><p class="story-period-detail__empty">Cette période n’appartient pas encore à la frise. Ajoutez-la pour y organiser des sous-périodes et associer des frises.</p></div>
-        <EntityDangerZone v-if="inStory" class="story-period-detail__danger" description="Cette période sera retirée de cette frise. Elle restera disponible dans le catalogue." :busy="busy" @remove="emit('remove', period.id)" />
+        <div v-else class="story-period-detail__context"><p class="story-period-detail__empty">{{ uiText("Cette période n’appartient pas encore à la frise. Ajoutez-la pour y organiser des sous-périodes et associer des frises.") }}</p></div>
+        <EntityDangerZone v-if="inStory" class="story-period-detail__danger" :description="uiText('Cette période sera retirée de cette frise. Elle restera disponible dans le catalogue.')" :busy="busy" @remove="emit('remove', period.id)" />
       </div>
-      <aside v-if="hasMetadata" class="story-period-detail__metadata" aria-label="Métadonnées de la période">
-        <section v-if="wikidataId" aria-label="Référence Wikidata">
-          <h4>Référence Wikidata</h4>
-          <a :href="`https://www.wikidata.org/wiki/${wikidataId}`" target="_blank" rel="noopener noreferrer" :aria-label="`Voir ${wikidataId} sur Wikidata (nouvel onglet)`" class="story-period-detail__reference">{{ wikidataId }}<Icon icon="mdi:open-in-new" aria-hidden="true" /></a>
+      <aside v-if="hasMetadata" class="story-period-detail__metadata" :aria-label="uiText('Métadonnées de la période')">
+        <section v-if="wikidataId" :aria-label="uiText('Référence Wikidata')">
+          <h4>{{ uiText("Référence Wikidata") }}</h4>
+          <a :href="`https://www.wikidata.org/wiki/${wikidataId}`" target="_blank" rel="noopener noreferrer" :aria-label="uiText(uiFormat`Voir ${wikidataId} sur Wikidata (nouvel onglet)`)" class="story-period-detail__reference">{{ wikidataId }}<Icon icon="mdi:open-in-new" aria-hidden="true" /></a>
         </section>
         <dl v-if="recordDate(period.createdAt) || recordDate(period.updatedAt)" class="story-period-detail__record">
-          <div v-if="recordDate(period.createdAt)"><dt>Créée le</dt><dd>{{ recordDate(period.createdAt) }}</dd></div>
-          <div v-if="recordDate(period.updatedAt)"><dt>Mise à jour le</dt><dd>{{ recordDate(period.updatedAt) }}</dd></div>
+          <div v-if="recordDate(period.createdAt)"><dt>{{ uiText("Créée le") }}</dt><dd>{{ recordDate(period.createdAt) }}</dd></div>
+          <div v-if="recordDate(period.updatedAt)"><dt>{{ uiText("Mise à jour le") }}</dt><dd>{{ recordDate(period.updatedAt) }}</dd></div>
         </dl>
       </aside>
     </div>
   </div>
-  <div v-else class="story-period-detail__placeholder"><Icon icon="mdi:file-document-outline" aria-hidden="true" /><p>Sélectionnez une période pour consulter ses détails.</p><span>Les chevrons permettent de parcourir les sous-périodes.</span></div>
+  <div v-else class="story-period-detail__placeholder"><Icon icon="mdi:file-document-outline" aria-hidden="true" /><p>{{ uiText("Sélectionnez une période pour consulter ses détails.") }}</p><span>{{ uiText("Les chevrons permettent de parcourir les sous-périodes.") }}</span></div>
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import EntityDangerZone from './EntityDangerZone.vue';
 import WikipediaLink from '@/components/WikipediaLink.vue';
 import { computed } from 'vue';
@@ -78,8 +79,8 @@ const emit = defineEmits<{
   select: [id: string]; edit: [id: string]; move: [id: string]; remove: [id: string]; 'create-story': [id: string]; convert: [id: string];
   add: [id: string]; 'add-child': [id: string]; 'associate-story': [id: string]; 'remove-story': [storyId: string, periodId: string];
 }>();
-const label = (period: ListPeriod) => period.label.fr?.trim() || period.label.en?.trim() || 'Période sans titre';
-const description = computed(() => props.period?.description?.fr?.trim() || props.period?.description?.en?.trim() || '');
+const label = (period: ListPeriod) => localizedText(period.label) || 'Période sans titre';
+const description = computed(() => localizedText(props.period?.description) || '');
 const wikidataId = computed(() => /^Q[1-9]\d*$/.test(props.period?.wikidata_id ?? '') ? props.period!.wikidata_id : null);
 const dateRange = computed(() => {
   const period = props.period;
@@ -87,7 +88,7 @@ const dateRange = computed(() => {
   const display = (raw: string, years?: number) => raw?.trim() ? DateService.formatBound(DateService.parse(raw))
     : Number.isFinite(years) ? DateService.formatGeologicalBound(years!) : null;
   const from = display(period.startDate, period.startYearsBP), to = display(period.endDate, period.endYearsBP);
-  return from && to ? `de ${from} à ${to}` : from ? `à partir de ${from}` : to ? `jusqu’à ${to}` : 'Dates non déterminées';
+  return from && to ? uiFormat`de ${from} à ${to}` : from ? uiFormat`à partir de ${from}` : to ? uiFormat`jusqu’à ${to}` : 'Dates non déterminées';
 });
 const recordDate = (date?: Date) => date && Number.isFinite(date.getTime()) ? formatRecordDate(date) : '';
 const hasMetadata = computed(() => !!(wikidataId.value || recordDate(props.period?.createdAt) || recordDate(props.period?.updatedAt)));

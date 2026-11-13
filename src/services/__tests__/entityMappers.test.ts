@@ -59,8 +59,8 @@ describe('API entity boundaries', () => {
     expect(mapToStory({ id: 7, periods: [], events: [] })).toMatchObject({ periods: [], events: [] });
   });
   it('maps category strings and multilingual labels consistently', () => {
-    expect(mapToCategory({ id: 4, label: 'Sciences' })).toEqual({ id: '4', label: { fr: 'Sciences', en: 'Sciences' } });
-    expect(mapToCategory({ id: '4', label: { fr: 'Sciences', en: 'Science' }, description_fr: 'Description' })).toMatchObject({ label: { fr: 'Sciences', en: 'Science' }, description: { fr: 'Description', en: 'Description' } });
+    expect(mapToCategory({ id: 4, label: 'Sciences' })).toEqual({ id: '4', label: { fr: 'Sciences', en: '' } });
+    expect(mapToCategory({ id: '4', label: { fr: 'Sciences', en: 'Science' }, description_fr: 'Description' })).toMatchObject({ label: { fr: 'Sciences', en: 'Science' }, description: { fr: 'Description', en: '' } });
   });
   it('normalizes the suggested story and its parent without an unsafe Story cast', () => {
     expect(mapToStorySuggestion({ id: 2, parent_story_id: 1, title_fr: 'Suite' })).toMatchObject({ id: '2', parentStoryId: '1', title: { fr: 'Suite' } });

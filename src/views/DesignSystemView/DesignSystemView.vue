@@ -1,16 +1,14 @@
 <template>
   <div class="design-system">
-    <aside class="design-system__aside" aria-label="Navigation design system">
+    <aside class="design-system__aside" :aria-label="uiText('Navigation design system')">
       <div class="design-system__aside-inner">
         <div class="design-system__back">
           <Button variant="ghost" size="sm" to="/admin">
-            <template #icon><Icon icon="mdi:arrow-left" width="18" height="18" aria-hidden="true" /></template>
-            Administration
-          </Button>
+            <template #icon><Icon icon="mdi:arrow-left" width="18" height="18" aria-hidden="true" /></template> {{ uiText("Administration") }} </Button>
         </div>
         <div class="finder-column finder-column--fill design-system__nav-column">
           <div class="finder-column-header">
-            <h2>Tokens</h2>
+            <h2>{{ uiText("Tokens") }}</h2>
           </div>
           <div class="finder-column-content">
             <Tabs v-model="selected" :tabs="tokenNavTabs" vertical />
@@ -21,7 +19,7 @@
           class="finder-column finder-column--fill design-system__nav-column design-system__nav-column--stacked"
         >
           <div class="finder-column-header">
-            <h2>Composants</h2>
+            <h2>{{ uiText("Composants") }}</h2>
           </div>
           <div class="finder-column-content">
             <Tabs v-model="selected" :tabs="componentNavTabs" vertical />
@@ -34,11 +32,7 @@
       <section v-if="currentTokenSection" class="design-system__section">
         <header class="design-system__header">
           <h1 class="design-system__h1">{{ currentTokenSection.sectionTitle }}</h1>
-          <p class="design-system__lead">
-            Les rôles de <code class="design-system__code-inline">variables.css</code> s’adaptent au thème.
-            Les primitives sont immuables. Les styles <code class="design-system__code-inline">--type-*</code>
-            associent famille, taille, interligne et graisse. Cette liste est générée depuis les définitions du code.
-          </p>
+          <p class="design-system__lead"> {{ uiText("Les rôles de") }} <code class="design-system__code-inline">{{ uiText("variables.css") }}</code> {{ uiText("s’adaptent au thème. Les primitives sont immuables. Les styles") }} <code class="design-system__code-inline">{{ uiText("--type-*") }}</code> {{ uiText("associent famille, taille, interligne et graisse. Cette liste est générée depuis les définitions du code.") }} </p>
         </header>
 
         <div
@@ -58,7 +52,7 @@
                 v-if="row.kind === 'color'"
                 class="design-system__swatch"
                 :style="{ background: `var(${row.name})` }"
-                :title="row.name"
+                :title="uiText(row.name)"
               />
               <span v-else class="design-system__token-placeholder" aria-hidden="true" />
               <code class="design-system__token-value">{{ tokenComputed(row.name) }}</code>
@@ -71,217 +65,204 @@
       <CatalogueDemo v-else-if="selected === 'catalogues'" />
       <section v-else-if="selected === 'button'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">Button</h1>
-          <p class="design-system__lead">
-            Déclenche une action. Props :
-            <code class="design-system__code-inline">variant</code>,
-            <code class="design-system__code-inline">size</code>,
-            <code class="design-system__code-inline">iconOnly</code>,
-            <code class="design-system__code-inline">disabled</code>.
+          <h1 class="design-system__h1">{{ uiText("Button") }}</h1>
+          <p class="design-system__lead"> {{ uiText("Déclenche une action. Props :") }} <code class="design-system__code-inline">{{ uiText("variant") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("size") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("iconOnly") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("disabled") }}</code>.
           </p>
         </header>
 
         <!-- Variantes -->
-        <h2 class="design-system__h2">Variantes</h2>
+        <h2 class="design-system__h2">{{ uiText("Variantes") }}</h2>
         <div class="design-system__variant-grid">
           <div class="design-system__variant-row">
-            <div class="design-system__variant-demo"><Button variant="primary">Label</Button></div>
-            <code class="design-system__code-inline design-system__variant-name">primary</code>
-            <span class="design-system__variant-desc">Fond couleur — action principale d'une page ou d'une modale. À utiliser avec parcimonie.</span>
+            <div class="design-system__variant-demo"><Button variant="primary">{{ uiText("Label") }}</Button></div>
+            <code class="design-system__code-inline design-system__variant-name">{{ uiText("primary") }}</code>
+            <span class="design-system__variant-desc">{{ uiText("Fond couleur — action principale d'une page ou d'une modale. À utiliser avec parcimonie.") }}</span>
           </div>
           <div class="design-system__variant-row">
-            <div class="design-system__variant-demo"><Button variant="secondary">Label</Button></div>
-            <code class="design-system__code-inline design-system__variant-name">secondary</code>
-            <span class="design-system__variant-desc">Border couleur — action secondaire à mettre en avant, souvent en binôme avec primary.</span>
+            <div class="design-system__variant-demo"><Button variant="secondary">{{ uiText("Label") }}</Button></div>
+            <code class="design-system__code-inline design-system__variant-name">{{ uiText("secondary") }}</code>
+            <span class="design-system__variant-desc">{{ uiText("Border couleur — action secondaire à mettre en avant, souvent en binôme avec primary.") }}</span>
           </div>
           <div class="design-system__variant-row">
-            <div class="design-system__variant-demo"><Button variant="tertiary">Label</Button></div>
-            <code class="design-system__code-inline design-system__variant-name">tertiary</code>
-            <span class="design-system__variant-desc">Border neutre — action inline discrète dans une barre ou un header de colonne.</span>
+            <div class="design-system__variant-demo"><Button variant="tertiary">{{ uiText("Label") }}</Button></div>
+            <code class="design-system__code-inline design-system__variant-name">{{ uiText("tertiary") }}</code>
+            <span class="design-system__variant-desc">{{ uiText("Border neutre — action inline discrète dans une barre ou un header de colonne.") }}</span>
           </div>
           <div class="design-system__variant-row">
-            <div class="design-system__variant-demo"><Button variant="ghost">Label</Button></div>
-            <code class="design-system__code-inline design-system__variant-name">ghost</code>
-            <span class="design-system__variant-desc">Sans fond ni border — action contextuelle légère, typiquement icône seule.</span>
+            <div class="design-system__variant-demo"><Button variant="ghost">{{ uiText("Label") }}</Button></div>
+            <code class="design-system__code-inline design-system__variant-name">{{ uiText("ghost") }}</code>
+            <span class="design-system__variant-desc">{{ uiText("Sans fond ni border — action contextuelle légère, typiquement icône seule.") }}</span>
           </div>
         </div>
 
         <!-- Tailles -->
-        <h2 class="design-system__h2">Tailles</h2>
+        <h2 class="design-system__h2">{{ uiText("Tailles") }}</h2>
         <div class="design-system__demo-row">
           <div class="design-system__size-block">
-            <Button size="md">Label</Button>
-            <span class="design-system__size-label">md · 44 px</span>
+            <Button size="md">{{ uiText("Label") }}</Button>
+            <span class="design-system__size-label">{{ uiText("md · 44 px") }}</span>
           </div>
           <div class="design-system__size-block">
-            <Button size="sm">Label</Button>
-            <span class="design-system__size-label">sm · 36 px</span>
+            <Button size="sm">{{ uiText("Label") }}</Button>
+            <span class="design-system__size-label">{{ uiText("sm · 36 px") }}</span>
           </div>
           <div class="design-system__size-block">
-            <Button size="xs">Label</Button>
-            <span class="design-system__size-label">xs · 28 px</span>
+            <Button size="xs">{{ uiText("Label") }}</Button>
+            <span class="design-system__size-label">{{ uiText("xs · 28 px") }}</span>
           </div>
         </div>
 
         <!-- Avec icône -->
-        <h2 class="design-system__h2">Avec icône</h2>
-        <p class="design-system__lead design-system__lead--tight">
-          Slot <code class="design-system__code-inline">#icon</code> — passer un composant Iconify (<code class="design-system__code-inline">&lt;Icon icon="mdi:..." /&gt;</code>).
+        <h2 class="design-system__h2">{{ uiText("Avec icône") }}</h2>
+        <p class="design-system__lead design-system__lead--tight"> {{ uiText("Slot") }} <code class="design-system__code-inline">{{ uiText("#icon") }}</code> {{ uiText("— passer un composant Iconify (") }}<code class="design-system__code-inline">{{ uiText("<Icon icon=\"mdi:...\" />") }}</code>).
         </p>
         <div class="design-system__demo-row">
-          <Button variant="primary"><template #icon><Icon icon="mdi:plus" /></template>Ajouter</Button>
-          <Button variant="secondary"><template #icon><Icon icon="mdi:download-outline" /></template>Exporter</Button>
-          <Button variant="tertiary"><template #icon><Icon icon="mdi:pencil-outline" /></template>Modifier</Button>
-          <Button variant="ghost"><template #icon><Icon icon="mdi:database" /></template>Base</Button>
+          <Button variant="primary"><template #icon><Icon icon="mdi:plus" /></template>{{ uiText("Ajouter") }}</Button>
+          <Button variant="secondary"><template #icon><Icon icon="mdi:download-outline" /></template>{{ uiText("Exporter") }}</Button>
+          <Button variant="tertiary"><template #icon><Icon icon="mdi:pencil-outline" /></template>{{ uiText("Modifier") }}</Button>
+          <Button variant="ghost"><template #icon><Icon icon="mdi:database" /></template>{{ uiText("Base") }}</Button>
         </div>
 
         <!-- Icône seule -->
-        <h2 class="design-system__h2">Icône seule</h2>
-        <p class="design-system__lead design-system__lead--tight">
-          Prop <code class="design-system__code-inline">iconOnly</code> — supprime le texte et carré le padding. Toujours fournir <code class="design-system__code-inline">aria-label</code>.
+        <h2 class="design-system__h2">{{ uiText("Icône seule") }}</h2>
+        <p class="design-system__lead design-system__lead--tight"> {{ uiText("Prop") }} <code class="design-system__code-inline">{{ uiText("iconOnly") }}</code> {{ uiText("— supprime le texte et carré le padding. Toujours fournir") }} <code class="design-system__code-inline">{{ uiText("aria-label") }}</code>.
         </p>
         <div class="design-system__icon-only-grid">
-          <span class="design-system__icon-only-size-label">md</span>
-          <Button iconOnly aria-label="Ajouter"><template #icon><Icon icon="mdi:plus" /></template></Button>
-          <Button variant="secondary" iconOnly aria-label="Ajouter"><template #icon><Icon icon="mdi:plus" /></template></Button>
-          <Button variant="tertiary" iconOnly aria-label="Ajouter"><template #icon><Icon icon="mdi:plus" /></template></Button>
-          <Button variant="ghost" iconOnly aria-label="Plus d'options"><template #icon><Icon icon="mdi:dots-vertical" /></template></Button>
+          <span class="design-system__icon-only-size-label">{{ uiText("md") }}</span>
+          <Button iconOnly :aria-label="uiText('Ajouter')"><template #icon><Icon icon="mdi:plus" /></template></Button>
+          <Button variant="secondary" iconOnly :aria-label="uiText('Ajouter')"><template #icon><Icon icon="mdi:plus" /></template></Button>
+          <Button variant="tertiary" iconOnly :aria-label="uiText('Ajouter')"><template #icon><Icon icon="mdi:plus" /></template></Button>
+          <Button variant="ghost" iconOnly :aria-label="uiText('Plus d\'options')"><template #icon><Icon icon="mdi:dots-vertical" /></template></Button>
 
-          <span class="design-system__icon-only-size-label">sm</span>
-          <Button size="sm" iconOnly aria-label="Ajouter"><template #icon><Icon icon="mdi:plus" /></template></Button>
-          <Button variant="secondary" size="sm" iconOnly aria-label="Ajouter"><template #icon><Icon icon="mdi:plus" /></template></Button>
-          <Button variant="tertiary" size="sm" iconOnly aria-label="Ajouter"><template #icon><Icon icon="mdi:plus" /></template></Button>
-          <Button variant="ghost" size="sm" iconOnly aria-label="Plus d'options"><template #icon><Icon icon="mdi:dots-vertical" /></template></Button>
+          <span class="design-system__icon-only-size-label">{{ uiText("sm") }}</span>
+          <Button size="sm" iconOnly :aria-label="uiText('Ajouter')"><template #icon><Icon icon="mdi:plus" /></template></Button>
+          <Button variant="secondary" size="sm" iconOnly :aria-label="uiText('Ajouter')"><template #icon><Icon icon="mdi:plus" /></template></Button>
+          <Button variant="tertiary" size="sm" iconOnly :aria-label="uiText('Ajouter')"><template #icon><Icon icon="mdi:plus" /></template></Button>
+          <Button variant="ghost" size="sm" iconOnly :aria-label="uiText('Plus d\'options')"><template #icon><Icon icon="mdi:dots-vertical" /></template></Button>
 
-          <span class="design-system__icon-only-size-label">xs</span>
-          <Button size="xs" iconOnly aria-label="Ajouter"><template #icon><Icon icon="mdi:plus" /></template></Button>
-          <Button variant="secondary" size="xs" iconOnly aria-label="Ajouter"><template #icon><Icon icon="mdi:plus" /></template></Button>
-          <Button variant="tertiary" size="xs" iconOnly aria-label="Ajouter"><template #icon><Icon icon="mdi:plus" /></template></Button>
-          <Button variant="ghost" size="xs" iconOnly aria-label="Plus d'options"><template #icon><Icon icon="mdi:dots-vertical" /></template></Button>
+          <span class="design-system__icon-only-size-label">{{ uiText("xs") }}</span>
+          <Button size="xs" iconOnly :aria-label="uiText('Ajouter')"><template #icon><Icon icon="mdi:plus" /></template></Button>
+          <Button variant="secondary" size="xs" iconOnly :aria-label="uiText('Ajouter')"><template #icon><Icon icon="mdi:plus" /></template></Button>
+          <Button variant="tertiary" size="xs" iconOnly :aria-label="uiText('Ajouter')"><template #icon><Icon icon="mdi:plus" /></template></Button>
+          <Button variant="ghost" size="xs" iconOnly :aria-label="uiText('Plus d\'options')"><template #icon><Icon icon="mdi:dots-vertical" /></template></Button>
         </div>
 
         <!-- Danger -->
-        <h2 class="design-system__h2">Sémantique — Danger</h2>
-        <p class="design-system__lead design-system__lead--tight">
-          À réserver aux actions destructives irréversibles (suppression). Disponible dans toutes les tailles.
-        </p>
+        <h2 class="design-system__h2">{{ uiText("Sémantique — Danger") }}</h2>
+        <p class="design-system__lead design-system__lead--tight"> {{ uiText("À réserver aux actions destructives irréversibles (suppression). Disponible dans toutes les tailles.") }} </p>
         <div class="design-system__demo-row">
-          <Button variant="danger">Supprimer</Button>
-          <Button variant="danger" size="sm">Supprimer</Button>
-          <Button variant="danger" size="xs">Supprimer</Button>
-          <Button variant="danger" iconOnly aria-label="Supprimer"><template #icon><Icon icon="mdi:delete-outline" /></template></Button>
-          <Button variant="danger" size="sm" iconOnly aria-label="Supprimer"><template #icon><Icon icon="mdi:delete-outline" /></template></Button>
-          <Button variant="danger" size="xs" iconOnly aria-label="Supprimer"><template #icon><Icon icon="mdi:delete-outline" /></template></Button>
+          <Button variant="danger">{{ uiText("Supprimer") }}</Button>
+          <Button variant="danger" size="sm">{{ uiText("Supprimer") }}</Button>
+          <Button variant="danger" size="xs">{{ uiText("Supprimer") }}</Button>
+          <Button variant="danger" iconOnly :aria-label="uiText('Supprimer')"><template #icon><Icon icon="mdi:delete-outline" /></template></Button>
+          <Button variant="danger" size="sm" iconOnly :aria-label="uiText('Supprimer')"><template #icon><Icon icon="mdi:delete-outline" /></template></Button>
+          <Button variant="danger" size="xs" iconOnly :aria-label="uiText('Supprimer')"><template #icon><Icon icon="mdi:delete-outline" /></template></Button>
         </div>
 
-        <h2 class="design-system__h2">Activé · Toggled</h2>
-        <p class="design-system__lead">État persistant, distinct du survol et du focus. Cliquez pour activer ou désactiver chaque bouton.</p>
+        <h2 class="design-system__h2">{{ uiText("Activé · Toggled") }}</h2>
+        <p class="design-system__lead">{{ uiText("État persistant, distinct du survol et du focus. Cliquez pour activer ou désactiver chaque bouton.") }}</p>
         <div class="design-system__demo-row">
           <Button v-for="variant in buttonVariants" :key="variant" :variant="variant" size="sm" :pressed="toggledButtons.has(variant)" @click="toggleButton(variant)"><template #icon><Icon icon="mdi:plus" width="18" height="18" /></template>{{ variant }}</Button>
         </div>
         <!-- Désactivé -->
-        <h2 class="design-system__h2">Désactivé</h2>
+        <h2 class="design-system__h2">{{ uiText("Désactivé") }}</h2>
         <div class="design-system__demo-row">
-          <Button disabled>Label</Button>
-          <Button variant="secondary" disabled>Label</Button>
-          <Button variant="tertiary" disabled>Label</Button>
-          <Button variant="ghost" disabled iconOnly aria-label="Désactivé"><template #icon><Icon icon="mdi:dots-vertical" /></template></Button>
-          <Button variant="danger" disabled>Label</Button>
+          <Button disabled>{{ uiText("Label") }}</Button>
+          <Button variant="secondary" disabled>{{ uiText("Label") }}</Button>
+          <Button variant="tertiary" disabled>{{ uiText("Label") }}</Button>
+          <Button variant="ghost" disabled iconOnly :aria-label="uiText('Désactivé')"><template #icon><Icon icon="mdi:dots-vertical" /></template></Button>
+          <Button variant="danger" disabled>{{ uiText("Label") }}</Button>
         </div>
       </section>
 
       <section v-else-if="selected === 'input'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">Input</h1>
+          <h1 class="design-system__h1">{{ uiText("Input") }}</h1>
           <p class="design-system__lead">
-            <code class="design-system__code-inline">src/components/base/Input.vue</code> — champ texte et textarea. Props :
-            <code class="design-system__code-inline">label</code>, <code class="design-system__code-inline">placeholder</code>,
-            <code class="design-system__code-inline">error</code>, <code class="design-system__code-inline">hint</code>,
-            <code class="design-system__code-inline">size</code>, <code class="design-system__code-inline">type</code>,
-            <code class="design-system__code-inline">disabled</code>.
+            <code class="design-system__code-inline">{{ uiText("src/components/base/Input.vue") }}</code> {{ uiText("— champ texte et textarea. Props :") }} <code class="design-system__code-inline">{{ uiText("label") }}</code>, <code class="design-system__code-inline">{{ uiText("placeholder") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("error") }}</code>, <code class="design-system__code-inline">{{ uiText("hint") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("size") }}</code>, <code class="design-system__code-inline">{{ uiText("type") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("disabled") }}</code>.
           </p>
         </header>
 
         <!-- Tailles -->
-        <h2 class="design-system__h2">Tailles</h2>
+        <h2 class="design-system__h2">{{ uiText("Tailles") }}</h2>
         <p class="design-system__lead design-system__lead--tight">
-          <code class="design-system__code-inline">size="md"</code> (défaut) — formulaires standard, 44px (<code class="design-system__code-inline">--field-height-lg</code>).<br>
-          <code class="design-system__code-inline">size="sm"</code> — barres de filtres et toolbars, 36px (<code class="design-system__code-inline">--field-height-md</code>).
+          <code class="design-system__code-inline">{{ uiText("size=\"md\"") }}</code> {{ uiText("(défaut) — formulaires standard, 44px (") }}<code class="design-system__code-inline">{{ uiText("--field-height-lg") }}</code>).<br>
+          <code class="design-system__code-inline">{{ uiText("size=\"sm\"") }}</code> {{ uiText("— barres de filtres et toolbars, 36px (") }}<code class="design-system__code-inline">{{ uiText("--field-height-md") }}</code>).
         </p>
         <div class="design-system__demo-row">
           <div class="design-system__size-block">
-            <Input v-model="demoText" placeholder="md — formulaire" style="width: 200px" />
-            <span class="design-system__size-label">md (44px)</span>
+            <Input v-model="demoText" :placeholder="uiText('md — formulaire')" style="width: 200px" />
+            <span class="design-system__size-label">{{ uiText("md (44px)") }}</span>
           </div>
           <div class="design-system__size-block">
-            <Input v-model="demoText" size="sm" placeholder="sm — toolbar" style="width: 200px" />
-            <span class="design-system__size-label">sm (36px)</span>
+            <Input v-model="demoText" size="sm" :placeholder="uiText('sm — toolbar')" style="width: 200px" />
+            <span class="design-system__size-label">{{ uiText("sm (36px)") }}</span>
           </div>
         </div>
 
         <!-- États -->
-        <h2 class="design-system__h2">États</h2>
+        <h2 class="design-system__h2">{{ uiText("États") }}</h2>
         <div class="design-system__demo-stack">
-          <Input v-model="demoText" label="Label + hint" placeholder="Placeholder" hint="Texte d'aide sous le champ" />
-          <Input v-model="demoText" label="Erreur" error="Message d'erreur" />
-          <Input v-model="demoText" label="Désactivé" placeholder="Désactivé" disabled />
-          <Input v-model="demoText" type="textarea" label="Textarea" placeholder="Plusieurs lignes…" />
+          <Input v-model="demoText" :label="uiText('Label + hint')" :placeholder="uiText('Placeholder')" hint="Texte d'aide sous le champ" />
+          <Input v-model="demoText" :label="uiText('Erreur')" error="Message d'erreur" />
+          <Input v-model="demoText" :label="uiText('Désactivé')" :placeholder="uiText('Désactivé')" disabled />
+          <Input v-model="demoText" type="textarea" :label="uiText('Textarea')" :placeholder="uiText('Plusieurs lignes…')" />
         </div>
 
         <!-- Alignement inter-composants -->
-        <h2 class="design-system__h2">Alignement sm — Input, Select, SearchInput, Button</h2>
-        <p class="design-system__lead design-system__lead--tight">
-          Tous les composants de formulaire en <code class="design-system__code-inline">size="sm"</code> partagent le token
-          <code class="design-system__code-inline">--field-height-md</code> (36px) — ils s'alignent dans une même toolbar.
-        </p>
+        <h2 class="design-system__h2">{{ uiText("Alignement sm — Input, Select, SearchInput, Button") }}</h2>
+        <p class="design-system__lead design-system__lead--tight"> {{ uiText("Tous les composants de formulaire en") }} <code class="design-system__code-inline">{{ uiText("size=\"sm\"") }}</code> {{ uiText("partagent le token") }} <code class="design-system__code-inline">{{ uiText("--field-height-md") }}</code> {{ uiText("(36px) — ils s'alignent dans une même toolbar.") }} </p>
         <div class="design-system__demo-row design-system__demo-row--align">
-          <SearchInput v-model="searchDemo" placeholder="SearchInput sm" style="width: 160px" />
-          <Input v-model="demoText" size="sm" placeholder="Input sm" style="width: 160px" />
-          <Select v-model="selectSingle" :options="selectOptions" size="sm" placeholder="Select sm" style="width: 160px" />
-          <Button size="sm">Button sm</Button>
+          <SearchInput v-model="searchDemo" :placeholder="uiText('SearchInput sm')" style="width: 160px" />
+          <Input v-model="demoText" size="sm" :placeholder="uiText('Input sm')" style="width: 160px" />
+          <Select v-model="selectSingle" :options="selectOptions" size="sm" :placeholder="uiText('Select sm')" style="width: 160px" />
+          <Button size="sm">{{ uiText("Button sm") }}</Button>
         </div>
       </section>
 
       <section v-else-if="selected === 'select'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">Select</h1>
-          <p class="design-system__lead">
-            Listes simples ou multiples, recherche et format compact. Le sélecteur de périodes
-            permet de parcourir les niveaux et de revenir à toutes les périodes.
-          </p>
+          <h1 class="design-system__h1">{{ uiText("Select") }}</h1>
+          <p class="design-system__lead"> {{ uiText("Listes simples ou multiples, recherche et format compact. Le sélecteur de périodes permet de parcourir les niveaux et de revenir à toutes les périodes.") }} </p>
         </header>
 
-        <h2 class="design-system__h2">Listes</h2>
+        <h2 class="design-system__h2">{{ uiText("Listes") }}</h2>
         <div class="design-system__demo-stack design-system__demo-stack--narrow">
           <Select
             v-model="selectSingle"
-            label="Simple"
+            :label="uiText('Simple')"
             :options="selectOptions"
-            placeholder="Choisir…"
+            :placeholder="uiText('Choisir…')"
           />
           <Select
             v-model="selectMulti"
-            label="Multiple"
+            :label="uiText('Multiple')"
             :options="selectOptions"
             multiple
-            placeholder="Plusieurs…"
+            :placeholder="uiText('Plusieurs…')"
           />
           <Select
             v-model="selectSingle"
-            label="Compact"
+            :label="uiText('Compact')"
             :options="selectOptions"
             compact
-            placeholder="Compact"
+            :placeholder="uiText('Compact')"
           />
           <Select
             v-model="selectSingle"
-            label="Erreur"
+            :label="uiText('Erreur')"
             :options="selectOptions"
             error="Sélection invalide"
           />
         </div>
 
-        <h2 class="design-system__h2">Périodes</h2>
+        <h2 class="design-system__h2">{{ uiText("Périodes") }}</h2>
         <div class="design-system__demo-stack design-system__demo-stack--narrow">
           <PeriodSelect v-model="periodId" />
           <PeriodSelect v-model="periodId" compact />
@@ -290,50 +271,41 @@
 
       <section v-else-if="selected === 'tabs'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">Tabs</h1>
+          <h1 class="design-system__h1">{{ uiText("Tabs") }}</h1>
           <p class="design-system__lead">
-            <code class="design-system__code-inline">src/components/base/Tabs.vue</code> — trois variantes :
-            <code class="design-system__code-inline">pill</code> (défaut, fond actif),
-            <code class="design-system__code-inline">underline</code> (bordure basse, header de section),
-            <code class="design-system__code-inline">vertical</code> (colonne Finder).
-            Chaque entrée accepte <code class="design-system__code-inline">sublabel</code> et <code class="design-system__code-inline">count</code>.
-            Badge de compteur : <code class="design-system__code-inline">border-radius: var(--radius-pill)</code> ; onglet vertical actif : couple <code class="design-system__code-inline">--color-interaction-selected</code> / <code class="design-system__code-inline">--color-text-on-selected</code>.
+            <code class="design-system__code-inline">{{ uiText("src/components/base/Tabs.vue") }}</code> {{ uiText("— trois variantes :") }} <code class="design-system__code-inline">{{ uiText("pill") }}</code> {{ uiText("(défaut, fond actif),") }} <code class="design-system__code-inline">{{ uiText("underline") }}</code> {{ uiText("(bordure basse, header de section),") }} <code class="design-system__code-inline">{{ uiText("vertical") }}</code> {{ uiText("(colonne Finder). Chaque entrée accepte") }} <code class="design-system__code-inline">{{ uiText("sublabel") }}</code> {{ uiText("et") }} <code class="design-system__code-inline">{{ uiText("count") }}</code>{{ uiText(". Badge de compteur :") }} <code class="design-system__code-inline">{{ uiText("border-radius: var(--radius-pill)") }}</code> {{ uiText("; onglet vertical actif : couple") }} <code class="design-system__code-inline">{{ uiText("--color-interaction-selected") }}</code> / <code class="design-system__code-inline">{{ uiText("--color-text-on-selected") }}</code>.
           </p>
         </header>
 
-        <h2 class="design-system__h2">Pill (défaut)</h2>
+        <h2 class="design-system__h2">{{ uiText("Pill (défaut)") }}</h2>
         <Tabs v-model="tabsDemo" :tabs="tabsItems" />
 
-        <h2 class="design-system__h2">Pill avec sous-texte</h2>
+        <h2 class="design-system__h2">{{ uiText("Pill avec sous-texte") }}</h2>
         <Tabs v-model="tabsDemoSublabel" :tabs="tabsItemsWithSublabel" />
 
-        <h2 class="design-system__h2">Underline</h2>
-        <p class="design-system__lead design-system__lead--tight"> Utilisé dans les headers de panneaux de détail (ex. Frises). Prop <code class="design-system__code-inline">variant="underline"</code>.
-          Supporte <code class="design-system__code-inline">count</code> pour un badge numérique.
-        </p>
+        <h2 class="design-system__h2">{{ uiText("Underline") }}</h2>
+        <p class="design-system__lead design-system__lead--tight"> {{ uiText("Utilisé dans les headers de panneaux de détail (ex. Frises). Prop") }} <code class="design-system__code-inline">{{ uiText("variant=\"underline\"") }}</code>{{ uiText(". Supporte") }} <code class="design-system__code-inline">{{ uiText("count") }}</code> {{ uiText("pour un badge numérique.") }} </p>
         <div class="design-system__underline-demo">
           <Tabs v-model="tabsUnderline" :tabs="tabsItemsUnderline" variant="underline" />
         </div>
         <div class="design-system__underline-demo design-system__underline-demo--panel">
           <div class="design-system__fake-panel-header">
             <Tabs v-model="tabsUnderline" :tabs="tabsItemsUnderline" variant="underline" />
-            <Button variant="tertiary" size="xs">Ajouter</Button>
+            <Button variant="tertiary" size="xs">{{ uiText("Ajouter") }}</Button>
           </div>
           <div class="design-system__fake-panel-body">
-            <span v-if="tabsUnderline === 'periods'">Liste des périodes…</span>
-            <span v-else>Liste des événements…</span>
+            <span v-if="tabsUnderline === 'periods'">{{ uiText("Liste des périodes…") }}</span>
+            <span v-else>{{ uiText("Liste des événements…") }}</span>
           </div>
         </div>
 
-        <h2 class="design-system__h2">Vertical (style colonne Finder)</h2>
-        <p class="design-system__lead design-system__lead--tight"> Même gabarit que les listes Périodes / Frises : en-tête <code class="design-system__code-inline">finder-column-header</code>
-          + onglets comme des lignes
-          <code class="design-system__code-inline">FinderItem</code>.
+        <h2 class="design-system__h2">{{ uiText("Vertical (style colonne Finder)") }}</h2>
+        <p class="design-system__lead design-system__lead--tight"> {{ uiText("Même gabarit que les listes Périodes / Frises : en-tête") }} <code class="design-system__code-inline">{{ uiText("finder-column-header") }}</code> {{ uiText("+ onglets comme des lignes") }} <code class="design-system__code-inline">{{ uiText("FinderItem") }}</code>.
         </p>
         <div class="finder-columns finder-columns--demo design-system__tabs-finder-demo">
           <div class="finder-column finder-column--fill">
             <div class="finder-column-header">
-              <h2>Onglets</h2>
+              <h2>{{ uiText("Onglets") }}</h2>
             </div>
             <div class="finder-column-content">
               <Tabs v-model="tabsDemo" :tabs="tabsItems" vertical />
@@ -341,11 +313,11 @@
           </div>
         </div>
 
-        <h2 class="design-system__h2">Vertical avec sous-texte</h2>
+        <h2 class="design-system__h2">{{ uiText("Vertical avec sous-texte") }}</h2>
         <div class="finder-columns finder-columns--demo design-system__tabs-finder-demo">
           <div class="finder-column finder-column--fill">
             <div class="finder-column-header">
-              <h2>Navigation</h2>
+              <h2>{{ uiText("Navigation") }}</h2>
             </div>
             <div class="finder-column-content">
               <Tabs v-model="tabsDemoSublabel" :tabs="tabsItemsWithSublabel" vertical />
@@ -356,150 +328,119 @@
 
       <section v-else-if="selected === 'switch'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">Switch</h1>
+          <h1 class="design-system__h1">{{ uiText("Switch") }}</h1>
           <p class="design-system__lead">
-            <code class="design-system__code-inline">src/components/base/Switch.vue</code> — interrupteur booléen,
-            <code class="design-system__code-inline">v-model</code> sur un <code class="design-system__code-inline">boolean</code>.
-            Piste et curseur dimensionnés avec les tokens <code class="design-system__code-inline">--spacing-*</code> et
-            <code class="design-system__code-inline">--radius-*</code>.
+            <code class="design-system__code-inline">{{ uiText("src/components/base/Switch.vue") }}</code> {{ uiText("— interrupteur booléen,") }} <code class="design-system__code-inline">{{ uiText("v-model") }}</code> {{ uiText("sur un") }} <code class="design-system__code-inline">{{ uiText("boolean") }}</code>{{ uiText(". Piste et curseur dimensionnés avec les tokens") }} <code class="design-system__code-inline">{{ uiText("--spacing-*") }}</code> {{ uiText("et") }} <code class="design-system__code-inline">{{ uiText("--radius-*") }}</code>.
           </p>
         </header>
 
-        <h2 class="design-system__h2">Taille normale</h2>
+        <h2 class="design-system__h2">{{ uiText("Taille normale") }}</h2>
         <div class="design-system__demo-row">
-          <Switch v-model="switchOn" label="Activé" />
-          <Switch v-model="switchOff" label="Désactivé" />
-          <Switch v-model="switchOn" aria-label="Option de démonstration sans texte visible" />
+          <Switch v-model="switchOn" :label="uiText('Activé')" />
+          <Switch v-model="switchOff" :label="uiText('Désactivé')" />
+          <Switch v-model="switchOn" :aria-label="uiText('Option de démonstration sans texte visible')" />
         </div>
 
-        <h2 class="design-system__h2">Variante <code class="design-system__code-inline">sm</code></h2>
-        <p class="design-system__lead design-system__lead--tight">
-          Prop <code class="design-system__code-inline">variant="sm"</code> pour les contextes compacts.
-          Prop <code class="design-system__code-inline">label-first</code> place le libellé avant l'interrupteur.
-        </p>
+        <h2 class="design-system__h2">{{ uiText("Variante") }} <code class="design-system__code-inline">{{ uiText("sm") }}</code></h2>
+        <p class="design-system__lead design-system__lead--tight"> {{ uiText("Prop") }} <code class="design-system__code-inline">{{ uiText("variant=\"sm\"") }}</code> {{ uiText("pour les contextes compacts. Prop") }} <code class="design-system__code-inline">{{ uiText("label-first") }}</code> {{ uiText("place le libellé avant l'interrupteur.") }} </p>
         <div class="design-system__demo-row">
-          <Switch v-model="switchSmDemo" variant="sm" label="Option" />
-          <Switch v-model="switchSmDemo" variant="sm" label-first label="Label avant" />
+          <Switch v-model="switchSmDemo" variant="sm" :label="uiText('Option')" />
+          <Switch v-model="switchSmDemo" variant="sm" label-first :label="uiText('Label avant')" />
         </div>
       </section>
 
       <section v-else-if="selected === 'modal-shell'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">ModalShell</h1>
+          <h1 class="design-system__h1">{{ uiText("ModalShell") }}</h1>
           <p class="design-system__lead">
-            <code class="design-system__code-inline">src/components/base/ModalShell.vue</code> — fenêtre modale avec titre, corps et pied de page.
-            Fond voile <code class="design-system__code-inline">var(--overlay-scrim)</code>, empilement
-            <code class="design-system__code-inline">var(--z-index-modal)</code>, largeur modale en
-            <code class="design-system__code-inline">calc</code> depuis <code class="design-system__code-inline">--spacing-xs</code>.
+            <code class="design-system__code-inline">{{ uiText("src/components/base/ModalShell.vue") }}</code> {{ uiText("— fenêtre modale avec titre, corps et pied de page. Fond voile") }} <code class="design-system__code-inline">{{ uiText("var(--overlay-scrim)") }}</code>{{ uiText(", empilement") }} <code class="design-system__code-inline">{{ uiText("var(--z-index-modal)") }}</code>{{ uiText(", largeur modale en") }} <code class="design-system__code-inline">{{ uiText("calc") }}</code> {{ uiText("depuis") }} <code class="design-system__code-inline">{{ uiText("--spacing-xs") }}</code>.
           </p>
         </header>
 
-        <Button type="button" @click="modalOpen = true">Ouvrir la modale</Button>
+        <Button type="button" @click="modalOpen = true">{{ uiText("Ouvrir la modale") }}</Button>
         <ModalShell
           v-if="modalOpen"
-          title="Exemple ModalShell"
+          :title="uiText('Exemple ModalShell')"
           height="auto"
           @close="modalOpen = false"
         >
-          <p class="design-system__modal-body-text">
-            Contenu du corps. Clic sur le fond ou Échap pour fermer.
-          </p>
+          <p class="design-system__modal-body-text"> {{ uiText("Contenu du corps. Clic sur le fond ou Échap pour fermer.") }} </p>
           <template #footer-right>
-            <Button type="button" @click="modalOpen = false">Valider</Button>
+            <Button type="button" @click="modalOpen = false">{{ uiText("Valider") }}</Button>
           </template>
         </ModalShell>
 
-        <h2 class="design-system__h2">Slot <code class="design-system__code-inline">header-right</code></h2>
-        <p class="design-system__lead design-system__lead--tight">
-          Même usage que la création période / événement dans
-          <code class="design-system__code-inline">EditModal</code> (recherche Wikidata dans l'en-tête).
-        </p>
-        <Button type="button" variant="secondary" @click="modalSearchOpen = true">Ouvrir avec champ à droite</Button>
+        <h2 class="design-system__h2">{{ uiText("Slot") }} <code class="design-system__code-inline">{{ uiText("header-right") }}</code></h2>
+        <p class="design-system__lead design-system__lead--tight"> {{ uiText("Même usage que la création période / événement dans") }} <code class="design-system__code-inline">{{ uiText("EditModal") }}</code> {{ uiText("(recherche Wikidata dans l'en-tête).") }} </p>
+        <Button type="button" variant="secondary" @click="modalSearchOpen = true">{{ uiText("Ouvrir avec champ à droite") }}</Button>
         <ModalShell
           v-if="modalSearchOpen"
-          title="Modale + header-right"
+          :title="uiText('Modale + header-right')"
           height="auto"
           @close="modalSearchOpen = false; modalHeaderSearch = ''"
         >
           <template #header-right>
-            <SearchInput v-model="modalHeaderSearch" placeholder="Recherche…" />
+            <SearchInput v-model="modalHeaderSearch" :placeholder="uiText('Recherche…')" />
           </template>
-          <p class="design-system__modal-body-text">
-            Le slot <code class="design-system__code-inline">header-right</code> reçoit typiquement un
-            <code class="design-system__code-inline">SearchInput</code> ; le shell évite de rogner les listes déroulantes.
-          </p>
+          <p class="design-system__modal-body-text"> {{ uiText("Le slot") }} <code class="design-system__code-inline">{{ uiText("header-right") }}</code> {{ uiText("reçoit typiquement un") }} <code class="design-system__code-inline">{{ uiText("SearchInput") }}</code> {{ uiText("; le shell évite de rogner les listes déroulantes.") }} </p>
           <template #footer-right>
-            <Button type="button" @click="modalSearchOpen = false">Fermer</Button>
+            <Button type="button" @click="modalSearchOpen = false">{{ uiText("Fermer") }}</Button>
           </template>
         </ModalShell>
       </section>
 
       <section v-else-if="selected === 'search-input'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">SearchInput</h1>
+          <h1 class="design-system__h1">{{ uiText("SearchInput") }}</h1>
           <p class="design-system__lead">
-            <code class="design-system__code-inline">src/components/base/SearchInput.vue</code> — champ de recherche avec icône loupe et bouton effacement.
-            Props : <code class="design-system__code-inline">size="sm"</code> (défaut, 36px — barres de filtres)
-            ou <code class="design-system__code-inline">size="xs"</code> (32px — espaces contraints).
-            Border-radius <code class="design-system__code-inline">--radius-md</code>, aligné avec Input et Select.
-          </p>
+            <code class="design-system__code-inline">{{ uiText("src/components/base/SearchInput.vue") }}</code> {{ uiText("— champ de recherche avec icône loupe et bouton effacement. Props :") }} <code class="design-system__code-inline">{{ uiText("size=\"sm\"") }}</code> {{ uiText("(défaut, 36px — barres de filtres) ou") }} <code class="design-system__code-inline">{{ uiText("size=\"xs\"") }}</code> {{ uiText("(32px — espaces contraints). Border-radius") }} <code class="design-system__code-inline">{{ uiText("--radius-md") }}</code>{{ uiText(", aligné avec Input et Select.") }} </p>
         </header>
 
         <!-- Tailles -->
-        <h2 class="design-system__h2">Tailles</h2>
+        <h2 class="design-system__h2">{{ uiText("Tailles") }}</h2>
         <p class="design-system__lead design-system__lead--tight">
-          <code class="design-system__code-inline">size="sm"</code> (défaut) — barres de filtres, 36px (<code class="design-system__code-inline">--field-height-md</code>).<br>
-          <code class="design-system__code-inline">size="xs"</code> — espaces contraints, 32px (<code class="design-system__code-inline">--field-height-sm</code>).
+          <code class="design-system__code-inline">{{ uiText("size=\"sm\"") }}</code> {{ uiText("(défaut) — barres de filtres, 36px (") }}<code class="design-system__code-inline">{{ uiText("--field-height-md") }}</code>).<br>
+          <code class="design-system__code-inline">{{ uiText("size=\"xs\"") }}</code> {{ uiText("— espaces contraints, 32px (") }}<code class="design-system__code-inline">{{ uiText("--field-height-sm") }}</code>).
         </p>
         <div class="design-system__demo-row">
           <div class="design-system__size-block">
-            <SearchInput v-model="searchDemo" placeholder="Rechercher…" style="width: 200px" />
-            <span class="design-system__size-label">sm (36px)</span>
+            <SearchInput v-model="searchDemo" :placeholder="uiText('Rechercher…')" style="width: 200px" />
+            <span class="design-system__size-label">{{ uiText("sm (36px)") }}</span>
           </div>
           <div class="design-system__size-block">
-            <SearchInput v-model="searchDemo" size="xs" placeholder="Rechercher…" style="width: 200px" />
-            <span class="design-system__size-label">xs (32px)</span>
+            <SearchInput v-model="searchDemo" size="xs" :placeholder="uiText('Rechercher…')" style="width: 200px" />
+            <span class="design-system__size-label">{{ uiText("xs (32px)") }}</span>
           </div>
         </div>
 
         <!-- Avec valeur -->
-        <h2 class="design-system__h2">Avec valeur et bouton effacement</h2>
+        <h2 class="design-system__h2">{{ uiText("Avec valeur et bouton effacement") }}</h2>
         <div class="design-system__row design-system__row--search-input-demo">
-          <SearchInput v-model="searchDemoFilled" placeholder="Rechercher…" />
+          <SearchInput v-model="searchDemoFilled" :placeholder="uiText('Rechercher…')" />
         </div>
 
         <!-- Alignement inter-composants -->
-        <h2 class="design-system__h2">Alignement sm — SearchInput, Input, Select, Button</h2>
-        <p class="design-system__lead design-system__lead--tight">
-          En <code class="design-system__code-inline">size="sm"</code> / sans size (SearchInput), tous partagent
-          <code class="design-system__code-inline">--field-height-md</code> (36px) — ils s'alignent dans une même toolbar.
-        </p>
+        <h2 class="design-system__h2">{{ uiText("Alignement sm — SearchInput, Input, Select, Button") }}</h2>
+        <p class="design-system__lead design-system__lead--tight"> {{ uiText("En") }} <code class="design-system__code-inline">{{ uiText("size=\"sm\"") }}</code> {{ uiText("/ sans size (SearchInput), tous partagent") }} <code class="design-system__code-inline">{{ uiText("--field-height-md") }}</code> {{ uiText("(36px) — ils s'alignent dans une même toolbar.") }} </p>
         <div class="design-system__demo-row design-system__demo-row--align">
-          <SearchInput v-model="searchDemo" placeholder="SearchInput sm" style="width: 160px" />
-          <Input v-model="demoText" size="sm" placeholder="Input sm" style="width: 160px" />
-          <Select v-model="selectSingle" :options="selectOptions" size="sm" placeholder="Select sm" style="width: 160px" />
-          <Button size="sm">Button sm</Button>
+          <SearchInput v-model="searchDemo" :placeholder="uiText('SearchInput sm')" style="width: 160px" />
+          <Input v-model="demoText" size="sm" :placeholder="uiText('Input sm')" style="width: 160px" />
+          <Select v-model="selectSingle" :options="selectOptions" size="sm" :placeholder="uiText('Select sm')" style="width: 160px" />
+          <Button size="sm">{{ uiText("Button sm") }}</Button>
         </div>
       </section>
 
       <section v-else-if="selected === 'filter-bar'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">FilterBar</h1>
+          <h1 class="design-system__h1">{{ uiText("FilterBar") }}</h1>
           <p class="design-system__lead">
-            <code class="design-system__code-inline">src/components/FilterBar.vue</code> — barre de filtre avec
-            champ de recherche, sélecteur de catégorie et bouton d'action. Partagée entre la vue
-            <strong>Périodes</strong> et le détail frise. Props : <code class="design-system__code-inline">mode="periods" | "events"</code>,
-            <code class="design-system__code-inline">suggestions</code>,
-            <code class="design-system__code-inline">eventSuggestions</code> — autocomplétion en Teleport.
-            Tous les champs utilisent <code class="design-system__code-inline">--field-height-md</code> (36px),
-            bouton primaire aligné sur la même hauteur.
-          </p>
+            <code class="design-system__code-inline">{{ uiText("src/components/FilterBar.vue") }}</code> {{ uiText("— barre de filtre avec champ de recherche, sélecteur de catégorie et bouton d'action. Partagée entre la vue") }} <strong>{{ uiText("Périodes") }}</strong> {{ uiText("et le détail frise. Props :") }} <code class="design-system__code-inline">{{ uiText("mode=\"periods\" | \"events\"") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("suggestions") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("eventSuggestions") }}</code> {{ uiText("— autocomplétion en Teleport. Tous les champs utilisent") }} <code class="design-system__code-inline">{{ uiText("--field-height-md") }}</code> {{ uiText("(36px), bouton primaire aligné sur la même hauteur.") }} </p>
         </header>
 
-        <h2 class="design-system__h2">Mode périodes</h2>
-        <p class="design-system__lead design-system__lead--tight">
-          Au moins un caractère dans le champ : suggestion factice (sans appel API).
-        </p>
+        <h2 class="design-system__h2">{{ uiText("Mode périodes") }}</h2>
+        <p class="design-system__lead design-system__lead--tight"> {{ uiText("Au moins un caractère dans le champ : suggestion factice (sans appel API).") }} </p>
         <div class="design-system__subheader-demo">
           <FilterBar
             hide-title
@@ -513,9 +454,8 @@
           />
         </div>
 
-        <h2 class="design-system__h2">Mode événements</h2>
-        <p class="design-system__lead design-system__lead--tight">
-          Autocomplétion branchée sur <code class="design-system__code-inline">event-suggestions</code>.
+        <h2 class="design-system__h2">{{ uiText("Mode événements") }}</h2>
+        <p class="design-system__lead design-system__lead--tight"> {{ uiText("Autocomplétion branchée sur") }} <code class="design-system__code-inline">{{ uiText("event-suggestions") }}</code>.
         </p>
         <div class="design-system__subheader-demo">
           <FilterBar
@@ -533,48 +473,36 @@
 
       <section v-else-if="selected === 'confirm-modal'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">ConfirmModal</h1>
+          <h1 class="design-system__h1">{{ uiText("ConfirmModal") }}</h1>
           <p class="design-system__lead">
-            <code class="design-system__code-inline">src/components/base/ConfirmModal.vue</code> — confirmation via <code class="design-system__code-inline">useConfirm()</code>, avec file d’attente.
-            Voile <code class="design-system__code-inline">var(--overlay-scrim-strong)</code>, z-index
-            <code class="design-system__code-inline">var(--z-index-modal-nested)</code> au-dessus de la modale d'édition.
-          </p>
+            <code class="design-system__code-inline">{{ uiText("src/components/base/ConfirmModal.vue") }}</code> {{ uiText("— confirmation via") }} <code class="design-system__code-inline">{{ uiText("useConfirm()") }}</code>{{ uiText(", avec file d’attente. Voile") }} <code class="design-system__code-inline">{{ uiText("var(--overlay-scrim-strong)") }}</code>{{ uiText(", z-index") }} <code class="design-system__code-inline">{{ uiText("var(--z-index-modal-nested)") }}</code> {{ uiText("au-dessus de la modale d'édition.") }} </p>
         </header>
 
-        <Button type="button" @click="openConfirmDemo">Ouvrir la confirmation</Button>
+        <Button type="button" @click="openConfirmDemo">{{ uiText("Ouvrir la confirmation") }}</Button>
       </section>
 
       <section v-else-if="selected === 'finder'" class="design-system__section design-system__section--finder">
         <header class="design-system__header">
-          <h1 class="design-system__h1">Finder (colonnes)</h1>
-          <p class="design-system__lead">
-            Ligne d'item : <code class="design-system__code-inline">src/views/GraphView/FinderItem.vue</code>
-            — séparateur <strong>bordure basse</strong> sur la racine du composant ; props
-            <code class="design-system__code-inline">hide-row-action</code>,
-            <code class="design-system__code-inline">hide-chevron</code>,
-            <code class="design-system__code-inline">date-subtitle-override</code>,
-            <code class="design-system__code-inline">is-external-catalog</code>,
-            <code class="design-system__code-inline">draggable</code> ; slot
-            <code class="design-system__code-inline">#actions</code> (retirer / ajouter en frise). Gabarit colonnes : <code class="design-system__code-inline">finder-columns</code>,
-            <code class="design-system__code-inline">finder-column</code> dans
-            <code class="design-system__code-inline">finder-column-layout.css</code>. Ligne sélectionnée :
-            <code class="design-system__code-inline">interaction-selected / text-on-selected</code> ; barre gauche enfants :
-            <code class="design-system__code-inline">calc(var(--radius-md) / 2)</code>.
+          <h1 class="design-system__h1">{{ uiText("Finder (colonnes)") }}</h1>
+          <p class="design-system__lead"> {{ uiText("Ligne d'item :") }} <code class="design-system__code-inline">{{ uiText("src/views/GraphView/FinderItem.vue") }}</code> {{ uiText("— séparateur") }} <strong>{{ uiText("bordure basse") }}</strong> {{ uiText("sur la racine du composant ; props") }} <code class="design-system__code-inline">{{ uiText("hide-row-action") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("hide-chevron") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("date-subtitle-override") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("is-external-catalog") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("draggable") }}</code> {{ uiText("; slot") }} <code class="design-system__code-inline">{{ uiText("#actions") }}</code> {{ uiText("(retirer / ajouter en frise). Gabarit colonnes :") }} <code class="design-system__code-inline">{{ uiText("finder-columns") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("finder-column") }}</code> {{ uiText("dans") }} <code class="design-system__code-inline">{{ uiText("finder-column-layout.css") }}</code>{{ uiText(". Ligne sélectionnée :") }} <code class="design-system__code-inline">{{ uiText("interaction-selected / text-on-selected") }}</code> {{ uiText("; barre gauche enfants :") }} <code class="design-system__code-inline">{{ uiText("calc(var(--radius-md) / 2)") }}</code>.
           </p>
         </header>
 
-        <h2 class="design-system__h2">Lignes et deux colonnes</h2>
-        <p class="design-system__finder-hint">
-          Clic sur une ligne de gauche pour mettre à jour la colonne de droite (démo).
-        </p>
+        <h2 class="design-system__h2">{{ uiText("Lignes et deux colonnes") }}</h2>
+        <p class="design-system__finder-hint"> {{ uiText("Clic sur une ligne de gauche pour mettre à jour la colonne de droite (démo).") }} </p>
         <div class="finder-columns finder-columns--demo">
           <div class="finder-column">
             <div class="finder-column-header">
-              <h2>Périodes racines</h2>
+              <h2>{{ uiText("Périodes racines") }}</h2>
             </div>
             <div class="finder-column-content">
               <FinderItem
-                :label="finderLabels.meso"
+                :label="uiText(finderLabels.meso)"
                 :selected="finderDemoLeft === 'meso'"
                 :has-children="true"
                 item-id="ds-finder-meso"
@@ -583,7 +511,7 @@
                 @click="finderDemoLeft = 'meso'"
               />
               <FinderItem
-                :label="finderLabels.ceno"
+                :label="uiText(finderLabels.ceno)"
                 :selected="finderDemoLeft === 'ceno'"
                 :has-children="true"
                 item-id="ds-finder-ceno"
@@ -592,7 +520,7 @@
                 @click="finderDemoLeft = 'ceno'"
               />
               <FinderItem
-                :label="finderLabels.wd"
+                :label="uiText(finderLabels.wd)"
                 :selected="finderDemoLeft === 'wd'"
                 :has-children="true"
                 :wikidata-only="true"
@@ -603,12 +531,12 @@
           </div>
           <div class="finder-column">
             <div class="finder-column-header">
-              <h2>Sous-périodes</h2>
+              <h2>{{ uiText("Sous-périodes") }}</h2>
             </div>
             <div class="finder-column-content">
               <FinderItem
                 v-if="finderDemoLeft === 'meso'"
-                :label="finderLabels.jura"
+                :label="uiText(finderLabels.jura)"
                 :selected="true"
                 :has-children="false"
                 item-id="ds-finder-jura"
@@ -617,30 +545,28 @@
               />
               <FinderItem
                 v-else-if="finderDemoLeft === 'ceno'"
-                :label="finderLabels.paleo"
+                :label="uiText(finderLabels.paleo)"
                 :selected="true"
                 :has-children="false"
                 item-id="ds-finder-paleo"
                 start-date="-66000000"
                 end-date="-2303000"
               />
-              <div v-else class="finder-empty-column">Choisir « Mésozoïque » ou « Cénozoïque » à gauche.</div>
+              <div v-else class="finder-empty-column">{{ uiText("Choisir « Mésozoïque » ou « Cénozoïque » à gauche.") }}</div>
             </div>
           </div>
         </div>
 
-        <h2 class="design-system__h2">FinderItem — détail frise (slot, catalogue externe, événements)</h2>
-        <p class="design-system__finder-hint">
-          Même composant que dans le détail d’une frise : actions dans <code class="design-system__code-inline">#actions</code>, sans chevron pour la liste d'événements.
-        </p>
+        <h2 class="design-system__h2">{{ uiText("FinderItem — détail frise (slot, catalogue externe, événements)") }}</h2>
+        <p class="design-system__finder-hint"> {{ uiText("Même composant que dans le détail d’une frise : actions dans") }} <code class="design-system__code-inline">{{ uiText("#actions") }}</code>{{ uiText(", sans chevron pour la liste d'événements.") }} </p>
         <div class="finder-columns finder-columns--demo design-system__finder-story-demos">
           <div class="finder-column">
             <div class="finder-column-header">
-              <h2>Dans la frise</h2>
+              <h2>{{ uiText("Dans la frise") }}</h2>
             </div>
             <div class="finder-column-content">
               <FinderItem
-                :label="finderLabels.meso"
+                :label="uiText(finderLabels.meso)"
                 :selected="finderStoryDemo === 'in'"
                 :has-children="true"
                 item-id="ds-story-in"
@@ -651,13 +577,13 @@
                 @click="finderStoryDemo = 'in'"
               >
                 <template #actions>
-                  <button type="button" class="finder-item-remove" aria-label="Retirer (démo)" @click.stop>
+                  <button type="button" class="finder-item-remove" :aria-label="uiText('Retirer (démo)')" @click.stop>
                     <Icon icon="mdi:close" width="14" height="14" aria-hidden="true" />
                   </button>
                 </template>
               </FinderItem>
               <FinderItem
-                :label="finderLabels.catalog"
+                :label="uiText(finderLabels.catalog)"
                 :selected="finderStoryDemo === 'ext'"
                 :has-children="false"
                 item-id="ds-story-ext"
@@ -669,7 +595,7 @@
                 @click="finderStoryDemo = 'ext'"
               >
                 <template #actions>
-                  <button type="button" class="finder-item-add" aria-label="Ajouter (démo)" @click.stop>
+                  <button type="button" class="finder-item-add" :aria-label="uiText('Ajouter (démo)')" @click.stop>
                     <Icon icon="mdi:plus" width="14" height="14" aria-hidden="true" />
                   </button>
                 </template>
@@ -678,11 +604,11 @@
           </div>
           <div class="finder-column">
             <div class="finder-column-header">
-              <h2>Liste événements</h2>
+              <h2>{{ uiText("Liste événements") }}</h2>
             </div>
             <div class="finder-column-content events-finder-list">
               <FinderItem
-                :label="finderLabels.ev1"
+                :label="uiText(finderLabels.ev1)"
                 :selected="finderStoryDemo === 'ev1'"
                 :has-children="false"
                 item-id="ds-ev-1"
@@ -694,13 +620,13 @@
                 @click="finderStoryDemo = 'ev1'"
               >
                 <template #actions>
-                  <button type="button" class="finder-item-remove" aria-label="Retirer (démo)" @click.stop>
+                  <button type="button" class="finder-item-remove" :aria-label="uiText('Retirer (démo)')" @click.stop>
                     <Icon icon="mdi:close" width="14" height="14" aria-hidden="true" />
                   </button>
                 </template>
               </FinderItem>
               <FinderItem
-                :label="finderLabels.ev2"
+                :label="uiText(finderLabels.ev2)"
                 :selected="finderStoryDemo === 'ev2'"
                 :has-children="false"
                 item-id="ds-ev-2"
@@ -712,7 +638,7 @@
                 @click="finderStoryDemo = 'ev2'"
               >
                 <template #actions>
-                  <button type="button" class="finder-item-remove" aria-label="Retirer (démo)" @click.stop>
+                  <button type="button" class="finder-item-remove" :aria-label="uiText('Retirer (démo)')" @click.stop>
                     <Icon icon="mdi:close" width="14" height="14" aria-hidden="true" />
                   </button>
                 </template>
@@ -724,12 +650,11 @@
 
       <section v-else-if="selected === 'story-timeline'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">StoryTimeline</h1>
+          <h1 class="design-system__h1">{{ uiText("StoryTimeline") }}</h1>
           <p class="design-system__lead">
-            <code class="design-system__code-inline">src/components/StoryTimeline.vue</code> — frise compacte périodes + marqueurs d'événements pour le détail d'une frise. Émissions <code class="design-system__code-inline">select-period</code>,
-            <code class="design-system__code-inline">select-event</code>,
-            <code class="design-system__code-inline">deselect</code> ; tooltips en Teleport. La taille des losanges suit l’importance de l’événement dans la frise (majeur, normal, mineur).
-          </p>
+            <code class="design-system__code-inline">{{ uiText("src/components/StoryTimeline.vue") }}</code> {{ uiText("— frise compacte périodes + marqueurs d'événements pour le détail d'une frise. Émissions") }} <code class="design-system__code-inline">{{ uiText("select-period") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("select-event") }}</code>,
+            <code class="design-system__code-inline">{{ uiText("deselect") }}</code> {{ uiText("; tooltips en Teleport. La taille des losanges suit l’importance de l’événement dans la frise (majeur, normal, mineur).") }} </p>
         </header>
         <div class="design-system__story-timeline-wrap">
           <StoryTimeline
@@ -746,95 +671,75 @@
 
       <section v-else-if="selected === 'iconify'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">Iconify</h1>
-          <p class="design-system__lead">
-            Bibliothèque d'icônes unifiée via
-            <code class="design-system__code-inline">@iconify/vue</code>.
-            Plus de 200 000 icônes, chargées à la demande. Préfixe principal :
-            <code class="design-system__code-inline">mdi:</code> (Material Design Icons).
-            Usage : <code class="design-system__code-inline">&lt;Icon icon="mdi:nom-icone" /&gt;</code>.
-            Taille via props <code class="design-system__code-inline">width</code> /
-            <code class="design-system__code-inline">height</code> ou CSS. Toujours ajouter
-            <code class="design-system__code-inline">aria-hidden="true"</code> sur les icônes décoratives.
-          </p>
+          <h1 class="design-system__h1">{{ uiText("Iconify") }}</h1>
+          <p class="design-system__lead"> {{ uiText("Bibliothèque d'icônes unifiée via") }} <code class="design-system__code-inline">{{ uiText("@iconify/vue") }}</code>{{ uiText(". Plus de 200 000 icônes, chargées à la demande. Préfixe principal :") }} <code class="design-system__code-inline">{{ uiText("mdi:") }}</code> {{ uiText("(Material Design Icons). Usage :") }} <code class="design-system__code-inline">{{ uiText("<Icon icon=\"mdi:nom-icone\" />") }}</code>{{ uiText(". Taille via props") }} <code class="design-system__code-inline">{{ uiText("width") }}</code> /
+            <code class="design-system__code-inline">{{ uiText("height") }}</code> {{ uiText("ou CSS. Toujours ajouter") }} <code class="design-system__code-inline">{{ uiText("aria-hidden=\"true\"") }}</code> {{ uiText("sur les icônes décoratives.") }} </p>
         </header>
 
-        <h2 class="design-system__h2">Usage</h2>
-        <pre class="design-system__code-block">import { Icon } from '@iconify/vue';
+        <h2 class="design-system__h2">{{ uiText("Usage") }}</h2>
+        <pre class="design-system__code-block">{{ uiText("import { Icon } from '@iconify/vue'; <!-- Taille héritée du CSS (défaut 1em) --> <Icon icon=\"mdi:plus\" /> <!-- Taille explicite --> <Icon icon=\"mdi:chevron-right\" width=\"16\" height=\"16\" aria-hidden=\"true\" /> <!-- Dans un slot #icon de Button --> <Button><template #icon><Icon icon=\"mdi:delete-outline\" /></template>Supprimer</Button>") }}</pre>
 
-&lt;!-- Taille héritée du CSS (défaut 1em) --&gt;
-&lt;Icon icon="mdi:plus" /&gt;
-
-&lt;!-- Taille explicite --&gt;
-&lt;Icon icon="mdi:chevron-right" width="16" height="16" aria-hidden="true" /&gt;
-
-&lt;!-- Dans un slot #icon de Button --&gt;
-&lt;Button&gt;&lt;template #icon&gt;&lt;Icon icon="mdi:delete-outline" /&gt;&lt;/template&gt;Supprimer&lt;/Button&gt;</pre>
-
-        <h2 class="design-system__h2">Navigation</h2>
+        <h2 class="design-system__h2">{{ uiText("Navigation") }}</h2>
         <div class="design-system__icon-catalog">
-          <div class="design-system__icon-item"><Icon icon="mdi:timeline" width="24" height="24" /><span>mdi:timeline</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:chart-tree" width="24" height="24" /><span>mdi:chart-tree</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:calendar-clock" width="24" height="24" /><span>mdi:calendar-clock</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:book-open-page-variant" width="24" height="24" /><span>mdi:book-open-page-variant</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:palette-swatch" width="24" height="24" /><span>mdi:palette-swatch</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:chevron-right" width="24" height="24" /><span>mdi:chevron-right</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:chevron-left" width="24" height="24" /><span>mdi:chevron-left</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:chevron-down" width="24" height="24" /><span>mdi:chevron-down</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:timeline" width="24" height="24" /><span>{{ uiText("mdi:timeline") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:chart-tree" width="24" height="24" /><span>{{ uiText("mdi:chart-tree") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:calendar-clock" width="24" height="24" /><span>{{ uiText("mdi:calendar-clock") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:book-open-page-variant" width="24" height="24" /><span>{{ uiText("mdi:book-open-page-variant") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:palette-swatch" width="24" height="24" /><span>{{ uiText("mdi:palette-swatch") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:chevron-right" width="24" height="24" /><span>{{ uiText("mdi:chevron-right") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:chevron-left" width="24" height="24" /><span>{{ uiText("mdi:chevron-left") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:chevron-down" width="24" height="24" /><span>{{ uiText("mdi:chevron-down") }}</span></div>
         </div>
 
-        <h2 class="design-system__h2">Actions</h2>
+        <h2 class="design-system__h2">{{ uiText("Actions") }}</h2>
         <div class="design-system__icon-catalog">
-          <div class="design-system__icon-item"><Icon icon="mdi:plus" width="24" height="24" /><span>mdi:plus</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:pencil-outline" width="24" height="24" /><span>mdi:pencil-outline</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:delete-outline" width="24" height="24" /><span>mdi:delete-outline</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:download-outline" width="24" height="24" /><span>mdi:download-outline</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:close" width="24" height="24" /><span>mdi:close</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:dots-vertical" width="24" height="24" /><span>mdi:dots-vertical</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:database" width="24" height="24" /><span>mdi:database</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:magnify" width="24" height="24" /><span>mdi:magnify</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:plus" width="24" height="24" /><span>{{ uiText("mdi:plus") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:pencil-outline" width="24" height="24" /><span>{{ uiText("mdi:pencil-outline") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:delete-outline" width="24" height="24" /><span>{{ uiText("mdi:delete-outline") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:download-outline" width="24" height="24" /><span>{{ uiText("mdi:download-outline") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:close" width="24" height="24" /><span>{{ uiText("mdi:close") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:dots-vertical" width="24" height="24" /><span>{{ uiText("mdi:dots-vertical") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:database" width="24" height="24" /><span>{{ uiText("mdi:database") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:magnify" width="24" height="24" /><span>{{ uiText("mdi:magnify") }}</span></div>
         </div>
 
-        <h2 class="design-system__h2">États</h2>
+        <h2 class="design-system__h2">{{ uiText("États") }}</h2>
         <div class="design-system__icon-catalog">
-          <div class="design-system__icon-item"><Icon icon="mdi:alert-circle" width="24" height="24" /><span>mdi:alert-circle</span></div>
-          <div class="design-system__icon-item"><LoadingSpinner /><span>mdi:loading</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:check" width="24" height="24" /><span>mdi:check</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:information-outline" width="24" height="24" /><span>mdi:information-outline</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:alert-circle" width="24" height="24" /><span>{{ uiText("mdi:alert-circle") }}</span></div>
+          <div class="design-system__icon-item"><LoadingSpinner /><span>{{ uiText("mdi:loading") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:check" width="24" height="24" /><span>{{ uiText("mdi:check") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:information-outline" width="24" height="24" /><span>{{ uiText("mdi:information-outline") }}</span></div>
         </div>
 
-        <h2 class="design-system__h2">Composants UI</h2>
+        <h2 class="design-system__h2">{{ uiText("Composants UI") }}</h2>
         <div class="design-system__icon-catalog">
-          <div class="design-system__icon-item"><Icon icon="mdi:gesture-tap-button" width="24" height="24" /><span>mdi:gesture-tap-button</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:form-textbox" width="24" height="24" /><span>mdi:form-textbox</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:form-dropdown" width="24" height="24" /><span>mdi:form-dropdown</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:toggle-switch" width="24" height="24" /><span>mdi:toggle-switch</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:tab" width="24" height="24" /><span>mdi:tab</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:window-maximize" width="24" height="24" /><span>mdi:window-maximize</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:filter-variant" width="24" height="24" /><span>mdi:filter-variant</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:file-tree-outline" width="24" height="24" /><span>mdi:file-tree-outline</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:gesture-tap-button" width="24" height="24" /><span>{{ uiText("mdi:gesture-tap-button") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:form-textbox" width="24" height="24" /><span>{{ uiText("mdi:form-textbox") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:form-dropdown" width="24" height="24" /><span>{{ uiText("mdi:form-dropdown") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:toggle-switch" width="24" height="24" /><span>{{ uiText("mdi:toggle-switch") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:tab" width="24" height="24" /><span>{{ uiText("mdi:tab") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:window-maximize" width="24" height="24" /><span>{{ uiText("mdi:window-maximize") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:filter-variant" width="24" height="24" /><span>{{ uiText("mdi:filter-variant") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:file-tree-outline" width="24" height="24" /><span>{{ uiText("mdi:file-tree-outline") }}</span></div>
         </div>
 
-        <h2 class="design-system__h2">Thème</h2>
+        <h2 class="design-system__h2">{{ uiText("Thème") }}</h2>
         <div class="design-system__icon-catalog">
-          <div class="design-system__icon-item"><Icon icon="mdi:weather-sunny" width="24" height="24" /><span>mdi:weather-sunny</span></div>
-          <div class="design-system__icon-item"><Icon icon="mdi:weather-night" width="24" height="24" /><span>mdi:weather-night</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:weather-sunny" width="24" height="24" /><span>{{ uiText("mdi:weather-sunny") }}</span></div>
+          <div class="design-system__icon-item"><Icon icon="mdi:weather-night" width="24" height="24" /><span>{{ uiText("mdi:weather-night") }}</span></div>
         </div>
       </section>
 
       <section v-else-if="selected === 'global-feedback'" class="design-system__section">
         <header class="design-system__header">
-          <h1 class="design-system__h1">Toasts (global)</h1>
-          <p class="design-system__lead">
-            Le composant <code class="design-system__code-inline">Toast.vue</code> est monté dans
-            <code class="design-system__code-inline">UiFeedbackHost.vue</code> ; les vues utilisent
-            <code class="design-system__code-inline">useToast().show(message, type?, duration?)</code>.
+          <h1 class="design-system__h1">{{ uiText("Toasts (global)") }}</h1>
+          <p class="design-system__lead"> {{ uiText("Le composant") }} <code class="design-system__code-inline">{{ uiText("Toast.vue") }}</code> {{ uiText("est monté dans") }} <code class="design-system__code-inline">{{ uiText("UiFeedbackHost.vue") }}</code> {{ uiText("; les vues utilisent") }} <code class="design-system__code-inline">{{ uiText("useToast().show(message, type?, duration?)") }}</code>.
           </p>
         </header>
         <div class="design-system__demo-row design-system__demo-row--wrap">
-          <Button type="button" variant="secondary" @click="demoToast('info')">Toast info</Button>
-          <Button type="button" variant="secondary" @click="demoToast('success')">Toast succès</Button>
-          <Button type="button" variant="danger" @click="demoToast('error')">Toast erreur</Button>
+          <Button type="button" variant="secondary" @click="demoToast('info')">{{ uiText("Toast info") }}</Button>
+          <Button type="button" variant="secondary" @click="demoToast('success')">{{ uiText("Toast succès") }}</Button>
+          <Button type="button" variant="danger" @click="demoToast('error')">{{ uiText("Toast erreur") }}</Button>
         </div>
       </section>
     </div>
@@ -842,6 +747,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { ref, computed, watch } from 'vue';
 import { tokenSections } from './tokenCatalogue';
 import { documentTheme } from '@/composables/useDocumentTheme';
@@ -1010,7 +916,7 @@ const dsPeriodSuggestions = computed<ListPeriod[]>(() => {
   return [
     {
       id: 'ds-suggest-period-1',
-      label: { fr: `Suggestion pour « ${dsPhSearch.value.trim()} »`, en: 'Demo suggestion' },
+      label: { fr: uiFormat`Suggestion pour « ${dsPhSearch.value.trim()} »`, en: 'Demo suggestion' },
       startDate: '-541000000',
       endDate: '-485400000',
       categories: [],
@@ -1023,7 +929,7 @@ const dsEventSuggestions = computed<ListEvent[]>(() => {
   return [
     {
       id: 'ds-suggest-event-1',
-      label: { fr: `Événement « ${dsEvSearch.value.trim()} »`, en: 'Demo event' },
+      label: { fr: uiFormat`Événement « ${dsEvSearch.value.trim()} »`, en: 'Demo event' },
       date: '1999-12-31',
       categories: [],
     },

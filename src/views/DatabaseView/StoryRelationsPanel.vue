@@ -3,45 +3,45 @@
     <div class="story-relations__parent">
       <div class="story-relations__source-header">
         <div>
-          <span class="story-relations__caption">Frise parente</span>
-          <h4>{{ parentStory ? parentStory.title.fr || parentStory.title.en : treeRoot ? 'Racine de l’arbre des frises' : 'Aucune frise parente' }}</h4>
-          <p class="story-relations__description">{{ parentAnchorsLabel }}</p>
+          <span class="story-relations__caption">{{ uiText("Frise parente") }}</span>
+          <h4>{{ parentStory ? localizedText(parentStory.title) : treeRoot ? 'Racine de l’arbre des frises' : 'Aucune frise parente' }}</h4>
+          <p class="story-relations__description">{{ uiText(parentAnchorsLabel) }}</p>
         </div>
-        <Button v-if="auth.ownsStory(story)" variant="tertiary" size="sm" :disabled="busy || loading" @click="openParentPicker">{{ story.parentStoryId ? 'Changer de frise parente' : 'Choisir la frise parente' }}</Button>
+        <Button v-if="auth.ownsStory(story)" variant="tertiary" size="sm" :disabled="busy || loading" @click="openParentPicker">{{ uiText(story.parentStoryId ? 'Changer de frise parente' : 'Choisir la frise parente') }}</Button>
       </div>
     </div>
     <div class="story-relations__header">
       <div>
-        <h3 id="story-relations-title">Points d’entrée vers cette frise</h3>
-        <p class="story-relations__description">Cette frise peut être accessible depuis plusieurs périodes de différentes frises.</p>
+        <h3 id="story-relations-title">{{ uiText("Points d’entrée vers cette frise") }}</h3>
+        <p class="story-relations__description">{{ uiText("Cette frise peut être accessible depuis plusieurs périodes de différentes frises.") }}</p>
       </div>
-      <Button v-if="editable" variant="tertiary" size="sm" :disabled="busy || loading" @click="openPicker">Ajouter un point d’entrée</Button>
+      <Button v-if="editable" variant="tertiary" size="sm" :disabled="busy || loading" @click="openPicker">{{ uiText("Ajouter un point d’entrée") }}</Button>
     </div>
-    <p v-if="loading" role="status">Chargement des frises…</p>
-    <p v-if="loadError" role="alert" class="story-relations__error">{{ loadError }} <Button variant="tertiary" size="sm" type="button" @click="loadCandidates">Réessayer</Button></p>
+    <p v-if="loading" role="status">{{ uiText("Chargement des frises…") }}</p>
+    <p v-if="loadError" role="alert" class="story-relations__error">{{ uiText(loadError) }} <Button variant="tertiary" size="sm" type="button" @click="loadCandidates">{{ uiText("Réessayer") }}</Button></p>
     <div v-if="!parents.length" class="story-relations__empty">
-      <h4>Aucun point d’entrée</h4>
-      <p>Ajoutez une frise source et une période de rattachement pour y proposer cette frise.</p>
+      <h4>{{ uiText("Aucun point d’entrée") }}</h4>
+      <p>{{ uiText("Ajoutez une frise source et une période de rattachement pour y proposer cette frise.") }}</p>
     </div>
-    <ul v-else class="story-relations__list" aria-label="Frises sources">
+    <ul v-else class="story-relations__list" :aria-label="uiText('Frises sources')">
       <li v-for="parent in parents" :key="parent.id" class="story-relations__source">
         <div class="story-relations__source-header">
           <div>
-            <span class="story-relations__caption">Frise source</span>
-            <h4>{{ parent.title.fr || parent.title.en }}</h4>
+            <span class="story-relations__caption">{{ uiText("Frise source") }}</span>
+            <h4>{{ localizedText(parent.title) }}</h4>
           </div>
-          <Button variant="ghost" size="sm" :to="{ path: '/database', query: { story: parent.id } }">Ouvrir la frise</Button>
+          <Button variant="ghost" size="sm" :to="{ path: '/database', query: { story: parent.id } }">{{ uiText("Ouvrir la frise") }}</Button>
         </div>
-        <ul v-if="parent.anchors.length" class="story-relations__locations" aria-label="Points de rattachement">
+        <ul v-if="parent.anchors.length" class="story-relations__locations" :aria-label="uiText('Points de rattachement')">
           <li v-for="anchor in parent.anchors" :key="`${anchor.type}:${anchor.id}`" class="story-relations__location">
-            <div><span class="story-relations__caption">{{ anchor.type === 'period' ? 'Période' : 'Événement' }}</span><span>{{ anchor.label.fr || anchor.label.en || anchor.id }}</span></div>
+            <div><span class="story-relations__caption">{{ uiText(anchor.type === 'period' ? 'Période' : 'Événement') }}</span><span>{{ localizedText(anchor.label) || anchor.id }}</span></div>
             <Button v-if="editable && auth.canEditStory(parent)" variant="ghost" size="xs" :disabled="busy"
-              :aria-label="`Retirer le point d’entrée ${anchor.label.fr || anchor.id} depuis ${parent.title.fr}`" @click="emit('remove-parent', parent.id, { type: anchor.type, id: anchor.id })">Retirer</Button>
+              :aria-label="uiFormat`Retirer le point d’entrée ${localizedText(anchor.label) || anchor.id} depuis ${localizedText(parent.title)}`" @click="emit('remove-parent', parent.id, { type: anchor.type, id: anchor.id })">{{ uiText("Retirer") }}</Button>
           </li>
         </ul>
         <div v-if="hasStoryRootLocation(parent)" class="story-relations__location">
-          <span class="story-relations__description">Depuis la racine de cette frise</span>
-          <Button v-if="editable && auth.canEditStory(parent)" variant="ghost" size="xs" :disabled="busy" @click="emit('remove-parent', parent.id, null)">Retirer</Button>
+          <span class="story-relations__description">{{ uiText("Depuis la racine de cette frise") }}</span>
+          <Button v-if="editable && auth.canEditStory(parent)" variant="ghost" size="xs" :disabled="busy" @click="emit('remove-parent', parent.id, null)">{{ uiText("Retirer") }}</Button>
         </div>
       </li>
     </ul>
@@ -53,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+import { language, localizedText, uiFormat, uiText } from '@/i18n';
 import { hasStoryRootLocation } from '@/lib/storyRelationLocations';
 import { computed, ref, watch } from 'vue';
 import Button from '@/components/base/Button.vue';
@@ -69,7 +70,7 @@ const store = useDataStore();
 const editable = computed(() => auth.canEditStory(props.story));
 const parents = computed(() => props.story.parentStories ?? []);
 const candidates = computed(() => store.stories.filter(story => story.id !== props.story.id && auth.canEditStory(story))
-  .sort((a, b) => a.title.fr.localeCompare(b.title.fr, 'fr')));
+  .sort((a, b) => localizedText(a.title).localeCompare(localizedText(b.title), language.value)));
 const showPicker = ref(false);
 // ─── Frise parente (règle 1) : rattachement avec une ancre proposée d’après les dates de la frise ───
 const parentStory = computed(() => parents.value.find(parent => parent.id === props.story.parentStoryId)
@@ -78,7 +79,7 @@ const treeRoot = computed(() => !props.story.parentStoryId && isTreeRoot(props.s
 const parentAnchorsLabel = computed(() => {
   if (!props.story.parentStoryId) return treeRoot.value ? 'Seule la racine n’a pas de frise parente.' : 'Le rattachement est facultatif, quelle que soit la visibilité de la frise.';
   const anchors = parents.value.find(parent => parent.id === props.story.parentStoryId)?.anchors ?? [];
-  return anchors.length ? `Ancre : ${anchors.map(anchor => anchor.label.fr || anchor.label.en || anchor.id).join(', ')}` : 'Accès depuis la racine de la frise parente.';
+  return anchors.length ? uiFormat`Ancre : ${anchors.map(anchor => localizedText(anchor.label) || anchor.id).join(', ')}` : 'Accès depuis la racine de la frise parente.';
 });
 const subject = computed(() => contentRange(props.story.periods ?? [], props.story.events ?? [], Date.now()));
 /** Ni la frise ni ses descendantes : le rattachement créerait un cycle. */

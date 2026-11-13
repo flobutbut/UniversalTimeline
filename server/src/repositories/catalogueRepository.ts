@@ -23,8 +23,8 @@ export async function insertEvent(client: TransactionClient, data: EventWrite & 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
     `, [
-    id, wikidata_id || null, label.fr, label.en || label.fr,
-    description?.fr || null, description?.en || description?.fr || null, date, yearsBP,
+    id, wikidata_id || null, label.fr, label.en,
+    description?.fr || null, description?.en || null, date, yearsBP,
     wikipedia?.fr ?? null, wikipedia?.en ?? null,
   ])).rows[0];
 }
@@ -46,7 +46,7 @@ export async function updateEvent(client: TransactionClient, id: string, data: E
       WHERE id = $7
       RETURNING *
     `, [
-    label.fr, label.en || label.fr, description?.fr, description?.en || description?.fr,
+    label.fr, label.en, description?.fr, description?.en,
     wikidata_id, date, id, yearsBP, wikipedia !== undefined, wikipedia?.fr ?? null, wikipedia?.en ?? null,
   ])).rows[0];
 }
@@ -62,8 +62,8 @@ export async function insertPeriod(client: TransactionClient, data: PeriodWrite 
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *, NULL::varchar AS parent_id, false AS has_children
     `, [
-    id, wikidata_id, label.fr, label.en || label.fr, description?.fr,
-    description?.en || description?.fr, start_date, end_date, startBP, endBP,
+    id, wikidata_id, label.fr, label.en, description?.fr,
+    description?.en, start_date, end_date, startBP, endBP,
     wikipedia?.fr ?? null, wikipedia?.en ?? null,
   ])).rows[0];
 }
@@ -87,7 +87,7 @@ export async function updatePeriod(client: TransactionClient, id: string, data: 
       WHERE id = $10
       RETURNING target.*, NULL::varchar AS parent_id, false AS has_children
     `, [
-    label.fr, label.en || label.fr, description?.fr || null, description?.en || description?.fr || null,
+    label.fr, label.en, description?.fr || null, description?.en || null,
     start_date || null, end_date, wikidata_id, startBP, endBP, id,
     wikipedia !== undefined, wikipedia?.fr ?? null, wikipedia?.en ?? null,
   ])).rows[0];

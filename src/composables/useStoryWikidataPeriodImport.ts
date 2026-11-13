@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 import { ref, watch } from 'vue';
 import type { ListPeriod, Period, Story } from '@/types/database';
 import type { EditInitialData, EditFormSubmission } from '@/types/editForm';
@@ -110,7 +111,7 @@ export function useStoryWikidataPeriodImport(story: () => Story | null | undefin
       await associate(saved, storyId, isCurrent, parentId);
     } catch (cause) {
       if (isCurrent()) error.value = saved
-        ? `La période est enregistrée, mais son ajout à la frise a échoué. ${mutationErrorMessage(cause, 'Réessayez.')}`
+        ? uiFormat`La période est enregistrée, mais son ajout à la frise a échoué. ${mutationErrorMessage(cause, 'Réessayez.')}`
         : mutationErrorMessage(cause, 'Impossible d’enregistrer cette période.');
     } finally { if (isCurrent()) busy.value = false; }
   }

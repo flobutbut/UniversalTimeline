@@ -1,3 +1,4 @@
+import { language } from '@/i18n';
 import { createReadCache } from '@/lib/readCache';
 import { preferredWikipediaArticle, type WikipediaLanguage } from '@/lib/wikipedia';
 import type { WikipediaTitles } from '@/types/database';
@@ -37,7 +38,7 @@ export function readWikipediaThumbnail(data: unknown): WikipediaThumbnail | null
 }
 
 export function fetchWikipediaThumbnail(titles: Partial<WikipediaTitles> | null | undefined, options: { signal?: AbortSignal } = {}): Promise<WikipediaThumbnail | null> {
-  const article = preferredWikipediaArticle(titles);
+  const article = preferredWikipediaArticle(titles, language.value);
   if (!article) return Promise.resolve(null);
   const url = wikipediaThumbnailUrl(article.language, article.title);
   return cache.read(url, signal => readOperation(async active => {

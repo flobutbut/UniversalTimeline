@@ -47,7 +47,7 @@ export function useWikidataImport() {
     const transformed: WikidataImportPayload = {};
 
     if (typeof data.label === 'string') {
-      transformed.title = { fr: data.label, en: data.label };
+      transformed.title = { fr: data.label, en: '' };
     } else if (typeof data.label === 'object' && data.label !== null) {
       transformed.title = { fr: data.label.fr || '', en: data.label.en || '' };
     }

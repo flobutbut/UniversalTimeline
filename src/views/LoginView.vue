@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import { CURRENT_TERMS_VERSION, USERNAME_MAX, usernameError } from '@account-rules';
@@ -134,7 +135,7 @@ async function resendConfirmation() {
     const result = await authService.getClient()!.auth.resend({ type: 'signup', email: address, options: { emailRedirectTo: confirmRedirect() } });
     if (!alive) return;
     if (result.error) resendError.value = rateLimitError(result.error) ?? 'Envoi impossible. Réessayez dans quelques minutes.';
-    else resendMessage.value = `Un nouveau lien a été envoyé à ${address}.`;
+    else resendMessage.value = uiFormat`Un nouveau lien a été envoyé à ${address}.`;
   } catch { if (alive) resendError.value = 'Le service est indisponible. Réessayez dans un instant.'; }
   finally { if (alive) resending.value = false; }
 }
@@ -154,53 +155,52 @@ function switchMode() {
 <template>
   <section class="account-page">
     <div class="account-panel">
-      <h2 ref="heading" tabindex="-1">{{ sentTo ? 'Vérifiez votre boîte mail' : creating ? 'Créer un compte' : 'Se connecter' }}</h2>
+      <h2 ref="heading" tabindex="-1">{{ uiText(sentTo ? 'Vérifiez votre boîte mail' : creating ? 'Créer un compte' : 'Se connecter') }}</h2>
       <div v-if="sentTo" class="account-sent">
         <Icon icon="mdi:email-check-outline" width="40" height="40" class="account-sent__icon" aria-hidden="true" />
-        <p role="status">Votre compte est créé. Nous avons envoyé un lien de confirmation à <strong>{{ sentTo }}</strong>.</p>
+        <p role="status">{{ uiText("Votre compte est créé. Nous avons envoyé un lien de confirmation à") }} <strong>{{ sentTo }}</strong>.</p>
         <ol class="account-sent__steps">
-          <li>Ouvrez l’e-mail « Confirmez votre adresse e-mail — Universal Timeline ».</li>
-          <li>Cliquez sur « Confirmer mon adresse ».</li>
-          <li>Connectez-vous avec votre adresse et votre mot de passe.</li>
+          <li>{{ uiText("Ouvrez l’e-mail « Confirmez votre adresse e-mail — Universal Timeline ».") }}</li>
+          <li>{{ uiText("Cliquez sur « Confirmer mon adresse ».") }}</li>
+          <li>{{ uiText("Connectez-vous avec votre adresse et votre mot de passe.") }}</li>
         </ol>
-        <p class="account-sent__hint">Rien reçu après quelques minutes ? Regardez dans le dossier des indésirables, ou renvoyez l’e-mail.</p>
-        <p v-if="resendMessage" role="status">{{ resendMessage }}</p>
-        <p v-if="resendError" role="alert">{{ resendError }}</p>
-        <Button @click="goToSignIn">J’ai confirmé, me connecter</Button>
-        <Button variant="secondary" :disabled="resending" @click="resendConfirmation">{{ resending ? 'Envoi…' : 'Renvoyer l’e-mail' }}</Button>
-        <Button variant="ghost" @click="editAddress">Corriger l’adresse e-mail</Button>
+        <p class="account-sent__hint">{{ uiText("Rien reçu après quelques minutes ? Regardez dans le dossier des indésirables, ou renvoyez l’e-mail.") }}</p>
+        <p v-if="resendMessage" role="status">{{ uiText(resendMessage) }}</p>
+        <p v-if="resendError" role="alert">{{ uiText(resendError) }}</p>
+        <Button @click="goToSignIn">{{ uiText("J’ai confirmé, me connecter") }}</Button>
+        <Button variant="secondary" :disabled="resending" @click="resendConfirmation">{{ uiText(resending ? 'Envoi…' : 'Renvoyer l’e-mail') }}</Button>
+        <Button variant="ghost" @click="editAddress">{{ uiText("Corriger l’adresse e-mail") }}</Button>
       </div>
       <template v-else>
-      <p>La timeline et la recherche sont accessibles à tous. Connectez-vous pour gérer vos frises.</p>
-      <p v-if="auth.error" role="alert">{{ auth.error }} <Button size="sm" @click="auth.initialize">Réessayer</Button></p>
-      <p v-if="auth.enabled === false" role="status">La connexion utilisateur sera disponible après la mise en place des accès.</p>
+      <p>{{ uiText("La timeline et la recherche sont accessibles à tous. Connectez-vous pour gérer vos frises.") }}</p>
+      <p v-if="auth.error" role="alert">{{ uiText(auth.error) }} <Button size="sm" @click="auth.initialize">{{ uiText("Réessayer") }}</Button></p>
+      <p v-if="auth.enabled === false" role="status">{{ uiText("La connexion utilisateur sera disponible après la mise en place des accès.") }}</p>
       <form v-else @submit.prevent="submit" :aria-busy="busy">
-        <Input v-if="creating" id="account-username" v-model="username" label="Nom d’utilisateur" name="username" autocomplete="username" required
+        <Input v-if="creating" id="account-username" v-model="username" :label="uiText('Nom d’utilisateur')" name="username" autocomplete="username" required
           :maxlength="USERNAME_MAX" :disabled="busy" :error="availability.message.value"
           :hint="availability.hint.value || 'Unique, il signe vos frises. Lettres sans accent, chiffres, « _ », « . » ou « - ».'" />
-        <Input id="account-email" v-model="email" label="Adresse e-mail" type="email" name="email" autocomplete="email" required :disabled="busy" />
-        <Input label="Mot de passe" id="account-password" v-model="password" type="password" name="password" :autocomplete="creating ? 'new-password' : 'current-password'" :minlength="creating ? 8 : undefined" :aria-describedby="creating ? 'account-password-hint' : undefined" required :disabled="busy" />
-        <p v-if="creating" id="account-password-hint">Au moins 8 caractères. Utilisez un mot de passe unique ; les mots de passe trop faibles ou compromis sont refusés.</p>
+        <Input id="account-email" v-model="email" :label="uiText('Adresse e-mail')" type="email" name="email" autocomplete="email" required :disabled="busy" />
+        <Input :label="uiText('Mot de passe')" id="account-password" v-model="password" type="password" name="password" :autocomplete="creating ? 'new-password' : 'current-password'" :minlength="creating ? 8 : undefined" :aria-describedby="creating ? 'account-password-hint' : undefined" required :disabled="busy" />
+        <p v-if="creating" id="account-password-hint">{{ uiText("Au moins 8 caractères. Utilisez un mot de passe unique ; les mots de passe trop faibles ou compromis sont refusés.") }}</p>
         <label v-if="creating" class="account-terms">
           <input v-model="termsAccepted" type="checkbox" required :disabled="busy" />
-          <span>J’ai au moins 15 ans (ou l’accord d’un parent), j’accepte les <RouterLink :to="{ name: 'legal', params: { page: 'conditions' } }" target="_blank">conditions d’utilisation</RouterLink>
-            et j’ai lu la <RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }" target="_blank">politique de confidentialité</RouterLink>.</span>
+          <span>{{ uiText("J’ai au moins 15 ans (ou l’accord d’un parent), j’accepte les") }} <RouterLink :to="{ name: 'legal', params: { page: 'conditions' } }" target="_blank">{{ uiText("conditions d’utilisation") }}</RouterLink> {{ uiText("et j’ai lu la") }} <RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }" target="_blank">{{ uiText("politique de confidentialité") }}</RouterLink>.</span>
         </label>
-        <p v-if="error" role="alert">{{ error }}</p>
-        <Button v-if="unconfirmed" variant="secondary" size="sm" :disabled="resending || !email.trim()" @click="resendConfirmation">{{ resending ? 'Envoi…' : 'Renvoyer le lien de confirmation' }}</Button>
-        <p v-if="resendMessage" role="status">{{ resendMessage }}</p>
-        <p v-if="resendError" role="alert">{{ resendError }}</p>
-        <p v-if="message" role="status">{{ message }}</p>
-        <Button type="submit" :disabled="busy || !auth.ready || signupBlocked">{{ busy ? 'Veuillez patienter…' : creating ? 'Créer mon compte' : 'Se connecter' }}</Button>
-        <Button variant="ghost" :disabled="busy" @click="switchMode">{{ creating ? 'J’ai déjà un compte' : 'Créer un compte' }}</Button>
-        <RouterLink v-if="!creating" class="account-forgot" :to="{ name: 'password-reset', query: email.trim() ? { email: email.trim() } : {} }">Mot de passe oublié ?</RouterLink>
+        <p v-if="error" role="alert">{{ uiText(error) }}</p>
+        <Button v-if="unconfirmed" variant="secondary" size="sm" :disabled="resending || !email.trim()" @click="resendConfirmation">{{ uiText(resending ? 'Envoi…' : 'Renvoyer le lien de confirmation') }}</Button>
+        <p v-if="resendMessage" role="status">{{ uiText(resendMessage) }}</p>
+        <p v-if="resendError" role="alert">{{ uiText(resendError) }}</p>
+        <p v-if="message" role="status">{{ uiText(message) }}</p>
+        <Button type="submit" :disabled="busy || !auth.ready || signupBlocked">{{ uiText(busy ? 'Veuillez patienter…' : creating ? 'Créer mon compte' : 'Se connecter') }}</Button>
+        <Button variant="ghost" :disabled="busy" @click="switchMode">{{ uiText(creating ? 'J’ai déjà un compte' : 'Créer un compte') }}</Button>
+        <RouterLink v-if="!creating" class="account-forgot" :to="{ name: 'password-reset', query: email.trim() ? { email: email.trim() } : {} }">{{ uiText("Mot de passe oublié ?") }}</RouterLink>
       </form>
       </template>
-      <RouterLink to="/timeline">Revenir à la timeline</RouterLink>
-      <nav class="account-legal" aria-label="Informations légales">
-        <RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">Mentions légales</RouterLink>
-        <RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">Confidentialité</RouterLink>
-        <RouterLink :to="{ name: 'legal', params: { page: 'cookies' } }">Cookies</RouterLink>
+      <RouterLink to="/timeline">{{ uiText("Revenir à la timeline") }}</RouterLink>
+      <nav class="account-legal" :aria-label="uiText('Informations légales')">
+        <RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">{{ uiText("Mentions légales") }}</RouterLink>
+        <RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">{{ uiText("Confidentialité") }}</RouterLink>
+        <RouterLink :to="{ name: 'legal', params: { page: 'cookies' } }">{{ uiText("Cookies") }}</RouterLink>
       </nav>
     </div>
   </section>

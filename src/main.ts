@@ -11,6 +11,9 @@ import { installVisitCounting } from './lib/visitCounting'
 import { useDataStore } from './stores/useDataStore'
 import { installSeo } from './seo/installSeo'
 
+import { initializeLanguage } from '@/i18n'
+
+initializeLanguage()
 const app = createApp(App)
 app.use(createPinia())
 const consent = useConsentStore()

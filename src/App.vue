@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import Button from '@/components/base/Button.vue';
 import { RouterView } from 'vue-router'
 import Header from '@/components/Header.vue'
@@ -24,7 +25,7 @@ watch([() => auth.identityVersion, allowed], () => {
 
 <template>
   <div class="app" :class="{ 'app--landing': isLanding }">
-    <a class="skip-link" href="#main-content">Aller au contenu</a>
+    <a class="skip-link" href="#main-content">{{ uiText("Aller au contenu") }}</a>
     <Header
       v-if="!isLanding"
       :current-view="currentView"
@@ -32,9 +33,9 @@ watch([() => auth.identityVersion, allowed], () => {
       @change-view="navigate"
       @select-search="selectSearch"
     />
-    <div v-if="loading" class="navigation-status" role="status">Chargement de la page…</div>
+    <div v-if="loading" class="navigation-status" role="status">{{ uiText("Chargement de la page…") }}</div>
     <div v-if="error" class="navigation-status" role="alert">
-      {{ error }} <Button variant="tertiary" size="sm" type="button" @click="retry">Réessayer</Button>
+      {{ uiText(error) }} <Button variant="tertiary" size="sm" type="button" @click="retry">{{ uiText("Réessayer") }}</Button>
     </div>
     <main id="main-content" class="main-content" tabindex="-1" :aria-busy="loading">
       <RouterView v-if="allowed" v-slot="{ Component, route: activeRoute }">

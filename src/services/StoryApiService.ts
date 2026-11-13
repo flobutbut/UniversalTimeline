@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 import { apiClient } from './ApiClient';
 import type { EventImportance, Story, StorySummary, StorySuggestion, StoryAnchor, TagRef } from '../types/database';
 
@@ -92,12 +93,12 @@ export class StoryApiService {
     return result;
   }
 
-  async createFromWikidata(qid: string, title: string, items: WikidataTimelineItem[], isPublic = false, description?: string, acknowledgedStoryIds?: string[]): Promise<{ id: string; periodCount: number; eventCount: number }> {
+  async createFromWikidata(qid: string, title: string, items: WikidataTimelineItem[], isPublic = false, description?: string, acknowledgedStoryIds?: string[], texts?: WikidataTimelineItem['texts']): Promise<{ id: string; periodCount: number; eventCount: number }> {
     const result = await apiClient.post<{ id: string; periodCount: number; eventCount: number }>('/stories/from-wikidata', {
-      qid, title, isPublic, ...(description === undefined ? {} : { description }), ...(acknowledgedStoryIds?.length ? { acknowledgedStoryIds } : {}), items: items.map(item => {
+      qid, title, isPublic, ...(texts ? { texts } : {}), ...(description === undefined ? {} : { description }), ...(acknowledgedStoryIds?.length ? { acknowledgedStoryIds } : {}), items: items.map(item => {
         const { qid, type, title, description, startDate, endDate, id, origin, source, wikipedia } = item;
         // Un fait dérivé n'a pas d'article propre.
-        return { qid, type, title, description, startDate, endDate, ...(id ? { id, origin, source } : {}), ...(wikipedia && origin !== 'fact' ? { wikipedia } : {}), ...(type === 'period' ? { parentQid: effectiveWikidataParent(item, items) } : {}) };
+        return { qid, type, title, description, ...(item.texts ? { texts: item.texts } : {}), startDate, endDate, ...(id ? { id, origin, source } : {}), ...(wikipedia && origin !== 'fact' ? { wikipedia } : {}), ...(type === 'period' ? { parentQid: effectiveWikidataParent(item, items) } : {}) };
       }),
     });
     if (!result || !/^[1-9]\d*$/.test(result.id) || !Number.isInteger(result.periodCount) || !Number.isInteger(result.eventCount)) throw new Error('Réponse invalide après la création de la frise.');
@@ -119,7 +120,7 @@ export class StoryApiService {
   /** Frises lisibles contenant chaque période ou événement : id → storyIds. */
   async getMemberships(kind: 'period' | 'event', options?: { signal?: AbortSignal }): Promise<Map<string, string[]>> {
     const rows = await apiClient.get<StoryLinkDto[]>(`/${kind === 'period' ? 'periods' : 'events'}/story-links`, options);
-    const invalid = () => new Error(`Réponse invalide pour les frises des ${kind === 'period' ? 'périodes' : 'événements'}.`);
+    const invalid = () => new Error(uiFormat`Réponse invalide pour les frises des ${kind === 'period' ? 'périodes' : 'événements'}.`);
     if (!Array.isArray(rows)) throw invalid();
     const links = new Map<string, string[]>();
     for (const row of rows) {

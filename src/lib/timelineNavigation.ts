@@ -1,3 +1,4 @@
+import { localizedText } from '@/i18n';
 import { comparableYearsBeforePresent, compareYearsOldestFirst } from '@temporal';
 import type { ListEvent, ListPeriod, NavigationContext, StoryAnchor } from '@/types/database';
 import { storyChildrenOf } from './homeStoryPeriodNav';
@@ -83,6 +84,6 @@ export function contextPeriodNeighbors(context: NavigationContext, periodId: str
 
 export function periodPresentationTargets(context: NavigationContext, periodId: string): Array<TimelineTarget & { title: string }> {
   const views = context.presentations.filter(p => p.periodId === periodId);
-  return views.length ? views.map(view => ({ storyId: view.storyId, periodId, referencePeriodId: periodId, contextId: context.id, title: view.title.fr || view.title.en }))
-    : [{ storyId: context.id, periodId, contextId: context.id, title: context.title.fr || context.title.en }];
+  return views.length ? views.map(view => ({ storyId: view.storyId, periodId, referencePeriodId: periodId, contextId: context.id, title: localizedText(view.title) }))
+    : [{ storyId: context.id, periodId, contextId: context.id, title: localizedText(context.title) }];
 }

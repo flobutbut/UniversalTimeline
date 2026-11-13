@@ -1,26 +1,25 @@
 <template>
   <form class="email-change" aria-labelledby="email-change-title" @submit.prevent="submit">
-    <h3 id="email-change-title">Adresse e-mail</h3>
-    <p>Adresse actuelle : <strong>{{ email ?? '—' }}</strong></p>
-    <p v-if="pendingEmail" class="email-change__pending" role="status">
-      Changement en attente vers <strong>{{ pendingEmail }}</strong> : confirmez-le depuis le lien reçu par e-mail.
-    </p>
+    <h3 id="email-change-title">{{ uiText("Adresse e-mail") }}</h3>
+    <p>{{ uiText("Adresse actuelle :") }} <strong>{{ uiText(email ?? '—') }}</strong></p>
+    <p v-if="pendingEmail" class="email-change__pending" role="status"> {{ uiText("Changement en attente vers") }} <strong>{{ pendingEmail }}</strong> {{ uiText(": confirmez-le depuis le lien reçu par e-mail.") }} </p>
     <template v-if="editing">
-      <Input id="email-change-input" v-model="draft" label="Nouvelle adresse e-mail" type="email" name="email" autocomplete="email" required :disabled="busy"
+      <Input id="email-change-input" v-model="draft" :label="uiText('Nouvelle adresse e-mail')" type="email" name="email" autocomplete="email" required :disabled="busy"
         hint="Un lien de confirmation est envoyé à la nouvelle adresse, et selon la configuration aussi à l’adresse actuelle. L’adresse change une fois le lien confirmé." />
-      <p v-if="error" class="email-change__error" role="alert">{{ error }}</p>
+      <p v-if="error" class="email-change__error" role="alert">{{ uiText(error) }}</p>
       <div class="email-change__actions">
-        <Button type="button" variant="secondary" size="sm" :disabled="busy" @click="cancel">Annuler</Button>
-        <Button type="submit" size="sm" :disabled="busy || !draft.trim()">{{ busy ? 'Envoi…' : 'Envoyer le lien de confirmation' }}</Button>
+        <Button type="button" variant="secondary" size="sm" :disabled="busy" @click="cancel">{{ uiText("Annuler") }}</Button>
+        <Button type="submit" size="sm" :disabled="busy || !draft.trim()">{{ uiText(busy ? 'Envoi…' : 'Envoyer le lien de confirmation') }}</Button>
       </div>
     </template>
     <div v-else class="email-change__actions">
-      <Button type="button" variant="secondary" size="sm" :disabled="!email" @click="editing = true">Changer d’adresse</Button>
+      <Button type="button" variant="secondary" size="sm" :disabled="!email" @click="editing = true">{{ uiText("Changer d’adresse") }}</Button>
     </div>
   </form>
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { onBeforeUnmount, ref } from 'vue';
 import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';
@@ -47,7 +46,7 @@ async function submit() {
     const result = await client.auth.updateUser({ email: next }, { emailRedirectTo: `${window.location.origin}/profile` });
     if (!alive) return;
     if (result.error) { error.value = emailChangeError(result.error); return; }
-    toast.show(`Lien de confirmation envoyé à ${next}.`, 'success');
+    toast.show(uiFormat`Lien de confirmation envoyé à ${next}.`, 'success');
     cancel(); emit('requested');
   } catch { if (alive) error.value = 'Le service est indisponible. Réessayez dans un instant.'; }
   finally { if (alive) busy.value = false; }

@@ -1,3 +1,4 @@
+import { language, uiFormat } from '@/i18n';
 import { DateService } from '@/services/DateService';
 
 function formatBoundParsed(s: string): string {
@@ -14,9 +15,9 @@ export function formatTemporalBoundLabel(raw: string | undefined): string {
 export function formatPeriodDateRange(period: { startDate?: string; endDate?: string }): string {
   const start = period.startDate ? formatTemporalBoundLabel(period.startDate) : null;
   const end = period.endDate ? formatTemporalBoundLabel(period.endDate) : null;
-  if (start && end) return `de ${start} à ${end}`;
-  if (start) return `à partir de ${start}`;
-  if (end) return `jusqu'à ${end}`;
+  if (start && end) return uiFormat`de ${start} à ${end}`;
+  if (start) return uiFormat`à partir de ${start}`;
+  if (end) return uiFormat`jusqu'à ${end}`;
   return '';
 }
 
@@ -30,7 +31,7 @@ export function formatSearchResultDateBound(raw?: string): string {
 export function formatStoryListTemporalBound(raw: string | undefined): string | null {
   if (raw == null || String(raw).trim() === '') return null;
   const t = String(raw).trim();
-  if (t.toUpperCase() === 'TODAY' || t === 'NOW') return "aujourd'hui";
+  if (t.toUpperCase() === 'TODAY' || t === 'NOW') return language.value === 'en' ? 'today' : "aujourd'hui";
   return formatBoundParsed(t);
 }
 
@@ -42,9 +43,9 @@ export function formatStoryListDateRangeSublabel(s: {
   const a = formatStoryListTemporalBound(s.startDate);
   const b = formatStoryListTemporalBound(s.endDate);
   if (!a && !b) return '—';
-  if (a && b) return `de ${a} à ${b}`;
-  if (a) return `à partir de ${a}`;
-  return `jusqu'à ${b}`;
+  if (a && b) return uiFormat`de ${a} à ${b}`;
+  if (a) return uiFormat`à partir de ${a}`;
+  return uiFormat`jusqu'à ${b}`;
 }
 
 /** Libellé date d'un événement dans le panneau story (absence → tiret cadratin). */

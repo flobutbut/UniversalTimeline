@@ -1,27 +1,28 @@
 <template>
   <div class="story-tags-form">
-    <h3>Tags de la frise</h3>
+    <h3>{{ uiText("Tags de la frise") }}</h3>
     <template v-if="editable">
-      <p v-if="error" role="alert" class="story-tags-form__error">{{ error }}</p>
+      <p v-if="error" role="alert" class="story-tags-form__error">{{ uiText(error) }}</p>
       <div v-if="editState.tagsError" class="story-tags-form__error" role="alert">
-        {{ editState.tagsError }} <Button variant="tertiary" size="sm" type="button" :disabled="busy || editState.tagsLoading" @click="loadTags">Réessayer</Button>
+        {{ uiText(editState.tagsError) }} <Button variant="tertiary" size="sm" type="button" :disabled="busy || editState.tagsLoading" @click="loadTags">{{ uiText("Réessayer") }}</Button>
       </div>
-      <form class="story-tags-form__form" aria-label="Tags de la frise" @submit.prevent="save">
+      <form class="story-tags-form__form" :aria-label="uiText('Tags de la frise')" @submit.prevent="save">
         <TagPicker v-model="form.tags" :options="editState.tags" :loading="editState.tagsLoading" :disabled="busy || !!editState.tagsError" :error="validation.fields.tags || ''" />
         <div v-if="dirty" class="story-tags-form__actions">
-          <Button variant="secondary" size="sm" type="button" :disabled="busy" @click="cancel">Annuler</Button>
-          <Button variant="primary" size="sm" type="submit" :disabled="!canSubmit">Enregistrer</Button>
+          <Button variant="secondary" size="sm" type="button" :disabled="busy" @click="cancel">{{ uiText("Annuler") }}</Button>
+          <Button variant="primary" size="sm" type="submit" :disabled="!canSubmit">{{ uiText("Enregistrer") }}</Button>
         </div>
       </form>
     </template>
     <template v-else>
       <p v-if="story.tags?.length" class="story-tags-form__tags"><ThematicTags :tags="story.tags" /></p>
-      <p v-else class="story-tags-form__empty">Aucun tag associé à cette frise.</p>
+      <p v-else class="story-tags-form__empty">{{ uiText("Aucun tag associé à cette frise.") }}</p>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import Button from '@/components/base/Button.vue';
 import TagPicker from '@/components/TagPicker.vue';
 import ThematicTags from '@/components/ThematicTags.vue';

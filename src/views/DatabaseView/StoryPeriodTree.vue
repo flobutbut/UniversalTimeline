@@ -1,39 +1,40 @@
 <template>
   <div class="story-period-tree">
     <div class="story-period-tree__heading">
-      <div class="story-period-tree__heading-title"><h3>Périodes</h3><span>{{ periods.length }}</span></div>
+      <div class="story-period-tree__heading-title"><h3>{{ uiText("Périodes") }}</h3><span>{{ periods.length }}</span></div>
       <slot name="header-actions" />
     </div>
     <div class="story-period-tree__content">
-      <ul v-if="rows.length" ref="tree" role="tree" aria-label="Périodes de la frise" class="story-period-tree__list">
+      <ul v-if="rows.length" ref="tree" role="tree" :aria-label="uiText('Périodes de la frise')" class="story-period-tree__list">
         <li v-for="row in rows" :key="row.node.key" role="none">
           <div :ref="el => setRowElement(row.node.key, el)" role="treeitem" class="story-period-tree__row"
             :class="{ 'is-selected': selectedId === row.node.period.id, 'is-additional': !row.node.inStory }"
-            :data-period-id="row.node.period.id" :aria-label="label(row.node.period)"
+            :data-period-id="row.node.period.id" :aria-label="uiText(label(row.node.period))"
             :aria-level="row.level" :aria-posinset="row.index + 1" :aria-setsize="row.size"
             :aria-selected="selectedId === row.node.period.id" :aria-expanded="canExpand(row.node) ? isOpen(row.node) : undefined"
             :tabindex="focusKey === row.node.key ? 0 : -1" :style="{ '--tree-level': row.level - 1 }"
             @focus.self="focusKey = row.node.key" @click="emit('select', row.node.period.id)" @keydown.self="onKeydown($event, row)">
             <button v-if="canExpand(row.node)" type="button" class="story-period-tree__toggle" tabindex="-1"
-              :aria-label="`${isOpen(row.node) ? 'Replier' : 'Déplier'} ${label(row.node.period)}`" @click.stop="toggle(row.node)">
+              :aria-label="uiText(`${isOpen(row.node) ? 'Replier' : 'Déplier'} ${label(row.node.period)}`)" @click.stop="toggle(row.node)">
               <Icon :icon="isOpen(row.node) ? 'mdi:chevron-down' : 'mdi:chevron-right'" aria-hidden="true" />
             </button>
             <span v-else class="story-period-tree__toggle" aria-hidden="true"><span class="story-period-tree__leaf" /></span>
             <span class="story-period-tree__text">
-              <span class="story-period-tree__label">{{ label(row.node.period) }}</span>
-              <span class="story-period-tree__date">{{ formatPeriodDateRange(row.node.period) || 'Dates non déterminées' }}</span>
+              <span class="story-period-tree__label">{{ uiText(label(row.node.period)) }}</span>
+              <span class="story-period-tree__date">{{ uiText(formatPeriodDateRange(row.node.period) || 'Dates non déterminées') }}</span>
               <span v-if="!row.node.inStory" class="story-period-tree__additional">{{ row.node.period.id.startsWith('wikidata:') ? 'Wikidata · à importer' : 'Hors de cette frise' }}</span>
             </span>
             <slot name="actions" :period="row.node.period" :in-story="row.node.inStory" />
           </div>
         </li>
       </ul>
-      <p v-else class="story-period-tree__empty">{{ filtering ? 'Aucune période ne correspond aux filtres.' : 'Aucune période associée.' }}</p>
+      <p v-else class="story-period-tree__empty">{{ uiText(filtering ? 'Aucune période ne correspond aux filtres.' : 'Aucune période associée.') }}</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { language, localizedText, uiText } from '@/i18n';
 import { computed, nextTick, ref, watch, type ComponentPublicInstance } from 'vue';
 import { Icon } from '@iconify/vue';
 import type { ListPeriod } from '@/types/database';
@@ -55,7 +56,7 @@ const focusKey = ref<string>();
 const tree = ref<HTMLElement | null>(null);
 const elements = new Map<string, HTMLElement>();
 type Row = { node: StoryPeriodTreeNode; level: number; index: number; size: number; parentKey?: string };
-const label = (period: ListPeriod) => period.label.fr?.trim() || period.label.en?.trim() || 'Période sans titre';
+const label = (period: ListPeriod) => localizedText(period.label) || 'Période sans titre';
 const isOpen = (node: StoryPeriodTreeNode) => filtering.value ? !filterCollapsed.value.has(node.key) : expanded.value.has(node.key);
 const canExpand = (node: StoryPeriodTreeNode) => node.children.length > 0 || (!filtering.value && props.showAdditional
   && /^Q[1-9]\d*$/.test(node.period.wikidata_id ?? '') && !props.loadedBranchIds.includes(node.period.id));
@@ -108,7 +109,7 @@ function onKeydown(event: KeyboardEvent, row: Row) {
     if (canExpand(row.node) && isOpen(row.node)) toggle(row.node); else void focus(row.parentKey);
   } else if (key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
     const next = [...rows.value.slice(index + 1), ...rows.value.slice(0, index + 1)]
-      .find(item => label(item.node.period).toLocaleLowerCase('fr').startsWith(key.toLocaleLowerCase('fr')));
+      .find(item => label(item.node.period).toLocaleLowerCase(language.value).startsWith(key.toLocaleLowerCase(language.value)));
     void focus(next?.node.key);
   }
 }

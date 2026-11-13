@@ -3,7 +3,7 @@
     v-bind="$attrs"
     v-model:open="isOpen"
     class="period-select"
-    :label="label"
+    :label="uiText(label)"
     :error="error"
     :hint="hint"
     :required="required"
@@ -29,11 +29,11 @@
         :aria-invalid="!!error || undefined"
         :aria-describedby="[`${id}-value`, error ? `${id}-error` : '', hint ? `${id}-hint` : ''].filter(Boolean).join(' ')"
         aria-haspopup="dialog"
-        :aria-label="label || 'Choisir une période'"
+        :aria-label="uiText(label || 'Choisir une période')"
         @click="togglePanel"
       >
         <span class="base-select__value">
-          <span :id="`${id}-value`" class="base-select__selected-text period-select__summary">{{ summary }}</span>
+          <span :id="`${id}-value`" class="base-select__selected-text period-select__summary">{{ uiText(summary) }}</span>
         </span>
         <span class="base-select__indicators">
           <Icon icon="mdi:chevron-down" class="base-select__arrow" :class="{ 'base-select__arrow--open': isOpen }" :width="compact ? 18 : 20" :height="compact ? 18 : 20" aria-hidden="true" />
@@ -48,36 +48,37 @@
           v-model="search"
           type="search"
           class="base-select__search"
-          :placeholder="'Rechercher dans le catalogue…'"
-          aria-label="Rechercher une période"
+          :placeholder="uiText('Rechercher dans le catalogue…')"
+          :aria-label="uiText('Rechercher une période')"
         />
-        <Button variant="tertiary" size="sm" type="button" @click="clearSelection">Toutes les périodes</Button>
+        <Button variant="tertiary" size="sm" type="button" @click="clearSelection">{{ uiText("Toutes les périodes") }}</Button>
       </div>
       <button v-if="currentParentId" type="button" class="base-select__option period-select__back" @click="goBack">
         <Icon icon="mdi:chevron-left" width="16" height="16" aria-hidden="true" />
-        <span class="base-select__option-text">{{ currentParent?.label.fr ?? 'Sous-périodes' }}</span>
+        <span class="base-select__option-text">{{ localizedText(currentParent?.label) ?? 'Sous-périodes' }}</span>
       </button>
-      <div v-if="loading" role="status" class="base-select__no-results">Chargement…</div>
+      <div v-if="loading" role="status" class="base-select__no-results">{{ uiText("Chargement…") }}</div>
       <div v-else-if="loadError" role="alert" class="base-select__no-results">
-        {{ loadError }} <Button variant="tertiary" size="sm" type="button" @click="retry">Réessayer</Button>
+        {{ uiText(loadError) }} <Button variant="tertiary" size="sm" type="button" @click="retry">{{ uiText("Réessayer") }}</Button>
       </div>
-      <ul v-else-if="periods.length" class="base-select__options period-select__list" aria-label="Périodes disponibles">
+      <ul v-else-if="periods.length" class="base-select__options period-select__list" :aria-label="uiText('Périodes disponibles')">
         <li v-for="period in periods" :key="period.id" class="base-select__option" :class="{ 'base-select__option--selected': period.id === modelValue }">
           <button type="button" class="period-select__choose" :aria-pressed="period.id === modelValue" @click="selectPeriod(period.id)">
             <i class="base-select__option-check" :class="{ 'base-select__option-check--hidden': period.id !== modelValue }" aria-hidden="true">✓</i>
             <span class="base-select__option-text">{{ formatSelectListPeriodLine(period) }}</span>
           </button>
-          <button v-if="hasChildren(period)" type="button" class="period-select__drill" :aria-label="`Voir les sous-périodes de ${period.label.fr}`" @click="drillDown(period)">
+          <button v-if="hasChildren(period)" type="button" class="period-select__drill" :aria-label="uiFormat`Voir les sous-périodes de ${localizedText(period.label)}`" @click="drillDown(period)">
             <Icon icon="mdi:chevron-right" width="18" height="18" aria-hidden="true" />
           </button>
         </li>
       </ul>
-      <div v-else class="base-select__no-results">{{ search.trim() ? 'Aucun résultat' : currentParentId ? 'Aucune sous-période' : 'Aucune période' }}</div>
+      <div v-else class="base-select__no-results">{{ uiText(search.trim() ? 'Aucun résultat' : currentParentId ? 'Aucune sous-période' : 'Aucune période') }}</div>
     </template>
   </SelectShell>
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 defineOptions({ inheritAttrs: false });
 import { computed, nextTick, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';

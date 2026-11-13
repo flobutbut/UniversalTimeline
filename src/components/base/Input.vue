@@ -1,7 +1,7 @@
 <template>
   <div class="base-input" :class="[$attrs.class, { 'base-input--error': error, 'base-input--sm': size === 'sm', 'base-input--textarea-lg': textareaSize === 'lg' }]" :style="$attrs.style">
     <label v-if="label" :for="id" class="base-input__label">
-      {{ label }}<span v-if="required" class="base-input__required">*</span>
+      {{ uiText(label) }}<span v-if="required" class="base-input__required">*</span>
     </label>
     <component
       :is="type === 'textarea' ? 'textarea' : 'input'"
@@ -9,7 +9,7 @@
       :id="id"
       :type="type === 'textarea' ? undefined : type"
       :value="modelValue"
-      :placeholder="placeholder"
+      :placeholder="uiText(placeholder)"
       :disabled="disabled"
       :required="required"
       :aria-invalid="error ? 'true' : $attrs['aria-invalid']"
@@ -19,12 +19,13 @@
       @blur="$emit('blur', $event)"
       @focus="$emit('focus', $event)"
     />
-    <span v-if="error" :id="`${id}-error`" class="base-input__error">{{ error }}</span>
+    <span v-if="error" :id="`${id}-error`" class="base-input__error">{{ uiText(error) }}</span>
     <span v-if="hint" :id="`${id}-hint`" class="base-input__hint">{{ hint }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { useAttrs } from 'vue';
 import { generateDomUid } from '@/utils/generateDomUid';
 defineOptions({ inheritAttrs: false });

@@ -1,22 +1,22 @@
 <template>
   <div class="navigation-prototype">
     <div class="navigation-prototype__tools">
-      <strong>Prototype de navigation</strong>
-      <Select compact label="Cas à tester" :model-value="caseId" :options="caseOptions" @update:model-value="selectCase" />
-      <Button variant="ghost" size="sm" @click="reset(caseId)">Recommencer ce cas</Button>
-      <Button variant="tertiary" size="sm" :to="{ name: 'timeline', query: {story:currentStory.id,view:'overview'} }">Voir la frise actuelle</Button>
+      <strong>{{ uiText("Prototype de navigation") }}</strong>
+      <Select compact :label="uiText('Cas à tester')" :model-value="caseId" :options="caseOptions" @update:model-value="selectCase" />
+      <Button variant="ghost" size="sm" @click="reset(caseId)">{{ uiText("Recommencer ce cas") }}</Button>
+      <Button variant="tertiary" size="sm" :to="{ name: 'timeline', query: {story:currentStory.id,view:'overview'} }">{{ uiText("Voir la frise actuelle") }}</Button>
     </div>
     <p class="navigation-prototype__hint">{{ currentCase.hint }}</p>
     <div v-if="caseId === 'origines'" class="navigation-prototype__origins">
-      <Button variant="tertiary" size="sm" @click="enterClimate('earth')">Depuis Terre</Button>
-      <Button variant="tertiary" size="sm" @click="enterClimate('geology')">Depuis la racine de Géologie</Button>
+      <Button variant="tertiary" size="sm" @click="enterClimate('earth')">{{ uiText("Depuis Terre") }}</Button>
+      <Button variant="tertiary" size="sm" @click="enterClimate('geology')">{{ uiText("Depuis la racine de Géologie") }}</Button>
     </div>
     <div class="navigation-prototype__header">
       <div class="navigation-prototype__breadcrumbs">
-        <StoryBreadcrumb :items="storyBreadcrumb" label="Fil d’Ariane des frises" @navigate="returnToStory" />
+        <StoryBreadcrumb :items="storyBreadcrumb" :label="uiText('Fil d’Ariane des frises')" @navigate="returnToStory" />
         <StoryBreadcrumb :items="periodBreadcrumb" @navigate="index => openPeriod(currentStory.periods.find(p => p.id === periodBreadcrumb[index]?.id)!)" />
       </div>
-      <AssociatedStoriesBadge v-if="visibleRootStories.length" :story-id="currentStory.id" period-id="prototype-root" :period-label="currentStory.title.fr" :stories="visibleRootStories" @select="id => enterStory(id)" />
+      <AssociatedStoriesBadge v-if="visibleRootStories.length" :story-id="currentStory.id" period-id="prototype-root" :period-label="localizedText(currentStory.title)" :stories="visibleRootStories" @select="id => enterStory(id)" />
     </div>
     <div ref="viewport" class="navigation-prototype__viewport"
       :class="{ 'navigation-prototype__viewport--waiting': phase === 'waiting' }" :inert="phase !== 'idle' || undefined">
@@ -27,19 +27,20 @@
         <template v-if="contextBar" #overview-context>
           <PeriodCard variant="parent" :period="contextBar" :is-selected="false" @back="goBack">
             <template #title-actions>
-              <span class="navigation-prototype__context-label">{{ !returns.length ? 'Période de référence' : 'Retour' }}</span>
-              <AssociatedStoriesBadge :story-id="currentStory.id" :period-id="contextBar.id" :period-label="contextBar.label.fr" :stories="contextStories"
+              <span class="navigation-prototype__context-label">{{ uiText(!returns.length ? 'Période de référence' : 'Retour') }}</span>
+              <AssociatedStoriesBadge :story-id="currentStory.id" :period-id="contextBar.id" :period-label="localizedText(contextBar.label)" :stories="contextStories"
                 @select="id => enterStory(id, reference?.anchor ?? undefined)" />
             </template>
           </PeriodCard>
         </template>
       </PeriodGrid>
     </div>
-    <div class="navigation-prototype__footer">Copie locale des données du 4 novembre · les périodes de référence sont retirées des récits cibles · aucune écriture en base.</div>
+    <div class="navigation-prototype__footer">{{ uiText("Copie locale des données du 4 novembre · les périodes de référence sont retirées des récits cibles · aucune écriture en base.") }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiText } from '@/i18n';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Button from '@/components/base/Button.vue';

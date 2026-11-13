@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed } from 'vue';
 import { journeyChapters, journeyDuration, journeyTickLabel } from '@/lib/scrollJourney';
 
@@ -20,25 +21,25 @@ const zoom = computed(() => {
 
 <template>
   <div class="time-lens" :class="`lens-${chapter.color}`">
-    <div class="lens-meta"><span>DURÉE DANS LE CADRE</span><span>{{ zoom }} depuis le départ</span></div>
+    <div class="lens-meta"><span>{{ uiText("DURÉE DANS LE CADRE") }}</span><span>{{ zoom }} {{ uiText("depuis le départ") }}</span></div>
     <div class="lens-measure" aria-hidden="true"><span class="measure-value">{{ measurement.value }}</span><span class="measure-unit">{{ measurement.unit }}</span></div>
-    <span class="sr-only">Fenêtre visible : {{ measurement.value }} {{ measurement.unit }}.</span>
-    <svg class="lens-drawing" viewBox="0 0 720 330" role="img" :aria-label="`Frise linéaire : ${measurement.value} ${measurement.unit}, jusqu’au présent. ${next ? 'La zone encadrée montre la prochaine échelle.' : 'Le voyage atteint une seconde.'}`">
+    <span class="sr-only">{{ uiText("Fenêtre visible :") }} {{ measurement.value }} {{ measurement.unit }}.</span>
+    <svg class="lens-drawing" viewBox="0 0 720 330" role="img" :aria-label="uiText(uiFormat`Frise linéaire : ${measurement.value} ${measurement.unit}, jusqu’au présent. ${next ? 'La zone encadrée montre la prochaine échelle.' : 'Le voyage atteint une seconde.'}`)">
       <defs><clipPath id="journey-ruler-clip"><rect x="40" y="15" width="642" height="290" /></clipPath></defs>
       <g class="ruler-grid" aria-hidden="true">
         <line v-for="tick in ticks" :key="tick" :x1="40 + tick * 640" :x2="40 + tick * 640" y1="26" y2="204" />
         <line x1="40" x2="680" y1="146" y2="146" />
       </g>
       <g aria-hidden="true">
-        <text x="40" y="17" class="axis-heading">PASSÉ</text>
-        <text x="680" y="17" text-anchor="end" class="axis-heading">PRÉSENT</text>
+        <text x="40" y="17" class="axis-heading">{{ uiText("PASSÉ") }}</text>
+        <text x="680" y="17" text-anchor="end" class="axis-heading">{{ uiText("PRÉSENT") }}</text>
         <rect x="40" y="103" width="640" height="43" class="ruler-fill" />
         <line v-for="index in subdivisions" :key="index" :x1="40 + index * 16" :x2="40 + index * 16" y1="146" :y2="index % 5 === 0 ? 164 : 155" class="ruler-tick" />
         <g clip-path="url(#journey-ruler-clip)">
           <circle v-for="point in points" :key="point.id" :cx="40 + (1 - point.duration / duration) * 640" cy="124" :r="point.id === chapter.id ? 5 : 2.5" class="ruler-point" :class="{ 'ruler-point--active': point.id === chapter.id }" />
         </g>
         <line x1="680" x2="680" y1="64" y2="205" class="present-line" />
-        <text v-for="tick in ticks" :key="tick" :x="40 + tick * 640" y="190" :text-anchor="tick === 0 ? 'start' : tick === 1 ? 'end' : 'middle'" class="tick-label" :class="{ 'tick-label--intermediate': tick === .25 || tick === .75 }">{{ journeyTickLabel((1 - tick) * duration, duration) }}</text>
+        <text v-for="tick in ticks" :key="tick" :x="40 + tick * 640" y="190" :text-anchor="tick === 0 ? 'start' : tick === 1 ? 'end' : 'middle'" class="tick-label" :class="{ 'tick-label--intermediate': tick === .25 || tick === .75 }">{{ uiText(journeyTickLabel((1 - tick) * duration, duration)) }}</text>
       </g>
       <g v-if="next" aria-hidden="true">
         <rect :x="680 - nextWidth" y="96" :width="nextWidth" height="57" class="next-window" />
@@ -46,14 +47,14 @@ const zoom = computed(() => {
         <line x1="40" x2="680" y1="257" y2="257" class="next-ruler" />
         <line x1="40" x2="40" y1="250" y2="264" class="next-ruler" />
         <line x1="680" x2="680" y1="250" y2="264" class="next-ruler" />
-        <text x="40" y="294" class="next-caption">PROCHAIN CADRE</text>
-        <text x="680" y="294" text-anchor="end" class="next-name">{{ next.label }}</text>
+        <text x="40" y="294" class="next-caption">{{ uiText("PROCHAIN CADRE") }}</text>
+        <text x="680" y="294" text-anchor="end" class="next-name">{{ uiText(next.label) }}</text>
       </g>
       <g v-else aria-hidden="true">
-        <text x="360" y="264" text-anchor="middle" class="last-caption">Le même temps. Une autre perspective.</text>
+        <text x="360" y="264" text-anchor="middle" class="last-caption">{{ uiText("Le même temps. Une autre perspective.") }}</text>
       </g>
     </svg>
-    <div class="lens-footnote"><span>Axe linéaire · repères arrondis</span><span>{{ chapter.example ? 'Durée illustrative' : 'Le présent reste à droite' }}</span></div>
+    <div class="lens-footnote"><span>{{ uiText("Axe linéaire · repères arrondis") }}</span><span>{{ uiText(chapter.example ? 'Durée illustrative' : 'Le présent reste à droite') }}</span></div>
   </div>
 </template>
 

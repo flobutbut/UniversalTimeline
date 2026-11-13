@@ -1,33 +1,32 @@
 <template>
   <div class="catalogue-view">
-    <CatalogueToolbar v-model:search="filterSearch" placeholder="Rechercher une période…">
+    <CatalogueToolbar v-model:search="filterSearch" :placeholder="uiText('Rechercher une période…')">
       <template #filters>
         <CatalogueFilters context="periods" v-model:tags="tagIds" v-model:story-ids="filterStoryIds" v-model:time-range="timeRange"
           :tag-options="periodTagFilterOptions" :story-options="storyFilterOptions"
           :stories-loading="storyLinks.loading.value" :stories-error="storyLinks.error.value" @retry-stories="storyLinks.load" />
       </template>
-      <template #actions><Button variant="primary" size="sm" @click="openCreateModal">+ Ajouter une période</Button></template>
+      <template #actions><Button variant="primary" size="sm" @click="openCreateModal">{{ uiText("+ Ajouter une période") }}</Button></template>
     </CatalogueToolbar>
     <div v-if="targetLoading || targetError" class="finder-feedback" :role="targetError ? 'alert' : 'status'">
-      {{ targetError || 'Ouverture du résultat…' }}
-      <Button variant="tertiary" size="sm" v-if="targetError" type="button" @click="retryTarget">Réessayer</Button>
-      <Button variant="tertiary" size="sm" type="button" @click="cancelTarget">Annuler</Button>
+      {{ uiText(targetError || 'Ouverture du résultat…') }}
+      <Button variant="tertiary" size="sm" v-if="targetError" type="button" @click="retryTarget">{{ uiText("Réessayer") }}</Button>
+      <Button variant="tertiary" size="sm" type="button" @click="cancelTarget">{{ uiText("Annuler") }}</Button>
     </div>
     <div v-if="openingLoading || openingError" class="finder-feedback" :role="openingError ? 'alert' : 'status'">
-      {{ openingError || 'Chargement du formulaire…' }}
-      <Button variant="tertiary" size="sm" v-if="openingError" type="button" @click="retryOpening">Réessayer</Button>
-      <Button variant="tertiary" size="sm" type="button" @click="cancelOpening">Annuler</Button>
+      {{ uiText(openingError || 'Chargement du formulaire…') }}
+      <Button variant="tertiary" size="sm" v-if="openingError" type="button" @click="retryOpening">{{ uiText("Réessayer") }}</Button>
+      <Button variant="tertiary" size="sm" type="button" @click="cancelOpening">{{ uiText("Annuler") }}</Button>
     </div>
-    <p v-if="storyLinks.error.value" role="alert" class="links-error">
-      Frises des périodes indisponibles : {{ storyLinks.error.value }}
-      <Button variant="tertiary" size="sm" type="button" @click="storyLinks.load">Réessayer</Button>
+    <p v-if="storyLinks.error.value" role="alert" class="links-error"> {{ uiText("Frises des périodes indisponibles :") }} {{ uiText(storyLinks.error.value) }}
+      <Button variant="tertiary" size="sm" type="button" @click="storyLinks.load">{{ uiText("Réessayer") }}</Button>
     </p>
-    <CatalogueBulkBar :count="bulk.selected.value.length" :actions="bulk.actions" :stories="bulk.editableStories.value" :busy="bulk.busy.value" :message="bulk.message.value" :failures="bulk.failures.value" :uncertain="bulk.uncertain.value" @apply="bulk.run" @clear="bulk.selectedIds.value = []" @reload="bulk.reload" />
-    <CatalogueTable v-model:selected-ids="bulk.selectedIds.value" selectable :selection-disabled="bulk.busy.value || bulk.uncertain.value" :item-label="item => item.label.fr || item.label.en || item.id" label="Périodes" :columns="periodColumns" :items="visiblePeriods" empty-text="Aucune période trouvée"
+    <CatalogueBulkBar :count="bulk.selected.value.length" :actions="bulk.actions" :stories="bulk.editableStories.value" :busy="bulk.busy.value" :message="uiText(bulk.message.value)" :failures="bulk.failures.value" :uncertain="bulk.uncertain.value" @apply="bulk.run" @clear="bulk.selectedIds.value = []" @reload="bulk.reload" />
+    <CatalogueTable v-model:selected-ids="bulk.selectedIds.value" selectable :selection-disabled="bulk.busy.value || bulk.uncertain.value" :item-label="item => localizedText(item.label) || item.id" :label="uiText('Périodes')" :columns="periodColumns" :items="visiblePeriods" empty-text="Aucune période trouvée"
       :sort-column="sortColumn" :sort-dir="sortDir" :loading="loading || (!!filterStoryIds.length && storyLinks.loading.value)"
       :error="error || (filterStoryIds.length ? storyLinks.error.value : null)" @retry="retryTable" @sort="toggleSort($event as SortColumn)">
       <template #row="{ item }">
-        <span class="col-label" role="cell">{{ item.label.fr || item.label.en }}</span>
+        <span class="col-label" role="cell">{{ localizedText(item.label) }}</span>
         <span class="col-date" role="cell">{{ formatEventListDateForDisplay(item.startDate) }}</span>
         <span class="col-date" role="cell">{{ formatEventListDateForDisplay(item.endDate) }}</span>
         <span class="col-categories" role="cell"><ThematicTags :tags="item.tags ?? []" /></span>
@@ -35,12 +34,12 @@
           <span v-if="storyLinks.loading.value" class="col-stories__state">…</span>
           <span v-else-if="storyLinks.error.value" class="col-stories__state">—</span>
           <template v-else>
-            <Tag v-for="story in storiesOf(item.id)" :key="story.id" :to="{ path: '/timeline', query: { story: story.id } }"  :label="story.title" />
-            <span v-if="!storiesOf(item.id).length" class="col-stories__state">Aucune</span>
+            <Tag v-for="story in storiesOf(item.id)" :key="story.id" :to="{ path: '/timeline', query: { story: story.id } }"  :label="uiText(story.title)" />
+            <span v-if="!storiesOf(item.id).length" class="col-stories__state">{{ uiText("Aucune") }}</span>
           </template>
         </span>
         <span class="col-updated" role="cell">{{ formatListEventLastEditFr(item) }}</span>
-        <span class="col-actions" role="cell"><Button variant="tertiary" size="sm" :aria-label="`Modifier ${item.label.fr || item.label.en}`" @click="openEditModal(item.id)">Modifier</Button></span>
+        <span class="col-actions" role="cell"><Button variant="tertiary" size="sm" :aria-label="uiFormat`Modifier ${localizedText(item.label)}`" @click="openEditModal(item.id)">{{ uiText("Modifier") }}</Button></span>
       </template>
     </CatalogueTable>
     <EditModal
@@ -86,6 +85,7 @@
 </template>
 
 <script setup lang="ts">
+import { language, localizedText, uiFormat, uiText } from '@/i18n';
 import { computed, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import CatalogueTable from '@/components/catalogue/CatalogueTable.vue';
@@ -118,7 +118,7 @@ const store = useDataStore();
 const auth = useAuthStore();
 const { stories } = storeToRefs(store);
 const storyLinks = useStoryLinks('period');
-const storiesOf = (id: string) => storyLinks.storyIdsOf(id).map(storyId => ({ id: storyId, title: store.storyById(storyId)?.title.fr || `Frise ${storyId}` }));
+const storiesOf = (id: string) => storyLinks.storyIdsOf(id).map(storyId => ({ id: storyId, title: store.storyById(storyId)?.title.fr || uiFormat`Frise ${storyId}` }));
 type SortColumn = 'label' | 'start' | 'end' | 'categories' | 'stories' | 'updated';
 const sortColumn = ref<SortColumn>('label');
 const sortDir = ref<'asc' | 'desc'>('asc');
@@ -140,13 +140,13 @@ const error = ref<string | null>(null);
 const initialized = ref(false);
 const filterSearch = ref('');
 const { tagIds, storyIds: filterStoryIds, timeRange, state: filterState, reset: resetFilters } = useCatalogueFilterState();
-const storyFilterOptions = computed(() => stories.value.map(story => ({ value: story.id, label: story.title.fr || story.title.en || `Frise ${story.id}` }))
-    .sort((a, b) => a.label.localeCompare(b.label, 'fr')));
+const storyFilterOptions = computed(() => stories.value.map(story => ({ value: story.id, label: localizedText(story.title) || uiFormat`Frise ${story.id}` }))
+    .sort((a, b) => a.label.localeCompare(b.label, language.value)));
 const allPeriods = computed(() => store.periods.filter(p => !p.id.startsWith('wikidata:')));
 const visiblePeriods = computed(() => {
-  const q = filterSearch.value.trim().toLocaleLowerCase('fr');
+  const q = filterSearch.value.trim().toLocaleLowerCase(language.value);
   return allPeriods.value.filter(p => matchesCatalogueFilters(p, filterState.value, { storyIdsOf: item => storyLinks.storyIdsOf(item.id), overlaps: storyOverlapsRange })
-    && (!q || [p.label.fr, p.label.en, p.description?.fr, p.description?.en].some(v => v?.toLocaleLowerCase('fr').includes(q))))
+    && (!q || [localizedText(p.label), p.label.en, localizedText(p.description), p.description?.en].some(v => v?.toLocaleLowerCase(language.value).includes(q))))
     .sort((a, b) => {
       let comparison = 0;
       if (sortColumn.value === 'start' || sortColumn.value === 'end') {
@@ -154,10 +154,10 @@ const visiblePeriods = computed(() => {
         const ya = periodCoordinates(a)[key], yb = periodCoordinates(b)[key];
         if (ya === null || yb === null) return compareYearsOldestFirst(ya, yb);
         comparison = yb - ya;
-      } else if (sortColumn.value === 'categories') comparison = tagsSortKey(a).localeCompare(tagsSortKey(b), 'fr', { sensitivity: 'base' });
-      else if (sortColumn.value === 'stories') comparison = storyLinks.sortKeyOf(a.id).localeCompare(storyLinks.sortKeyOf(b.id), 'fr', { sensitivity: 'base' });
+      } else if (sortColumn.value === 'categories') comparison = tagsSortKey(a).localeCompare(tagsSortKey(b), language.value, { sensitivity: 'base' });
+      else if (sortColumn.value === 'stories') comparison = storyLinks.sortKeyOf(a.id).localeCompare(storyLinks.sortKeyOf(b.id), language.value, { sensitivity: 'base' });
       else if (sortColumn.value === 'updated') comparison = listEventUpdatedTimestampMs(a) - listEventUpdatedTimestampMs(b);
-      else comparison = (a.label.fr || a.label.en).localeCompare(b.label.fr || b.label.en, 'fr', { sensitivity: 'base' });
+      else comparison = (localizedText(a.label)).localeCompare(localizedText(b.label), language.value, { sensitivity: 'base' });
       return sortDir.value === 'asc' ? comparison : -comparison;
     });
 });

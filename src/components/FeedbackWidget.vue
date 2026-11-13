@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import Button from './base/Button.vue';
@@ -30,9 +31,7 @@ async function close() {
       <CookieConsent v-show="!open" />
       <FeedbackForm v-if="feedback.enabled && open" @close="close" />
       <Button v-if="feedback.enabled" v-show="!open" class="feedback-widget__trigger" aria-haspopup="dialog" :aria-expanded="open" @click="open = true">
-        <template #icon><Icon icon="mdi:message-text-outline" width="20" aria-hidden="true" /></template>
-        Donner mon avis
-      </Button>
+        <template #icon><Icon icon="mdi:message-text-outline" width="20" aria-hidden="true" /></template> {{ uiText("Donner mon avis") }} </Button>
     </div>
   </Teleport>
 </template>

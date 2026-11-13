@@ -49,7 +49,7 @@ export class EventApiService {
     const payload = {
       wikidata_id: formData.qid,
       label: { fr: formData.title.fr, en: formData.title.en },
-      description: { fr: formData.description?.fr ?? '', en: formData.description?.en ?? formData.description?.fr ?? '' },
+      description: { fr: formData.description?.fr ?? '', en: formData.description?.en ?? '' },
       date: formData.date,
       categories: formData.categories,
       tags: formData.tags,

@@ -1,55 +1,54 @@
 <template>
   <section class="admin-dashboard" aria-labelledby="admin-dashboard-title">
     <header class="admin-dashboard__header">
-      <h2 id="admin-dashboard-title">Tableau de bord</h2>
-      <p v-if="data" class="admin-dashboard__meta">Données du {{ formatAdminDate(data.generatedAt, true) }}, frises privées comprises.
-        <Button variant="tertiary" size="sm" :disabled="loading" @click="load">Actualiser</Button></p>
+      <h2 id="admin-dashboard-title">{{ uiText("Tableau de bord") }}</h2>
+      <p v-if="data" class="admin-dashboard__meta">{{ uiText("Données du") }} {{ formatAdminDate(data.generatedAt, true) }}{{ uiText(", frises privées comprises.") }} <Button variant="tertiary" size="sm" :disabled="loading" @click="load">{{ uiText("Actualiser") }}</Button></p>
     </header>
     <FeedbackState v-if="loading && !data" kind="loading" layout="inline" />
-    <FeedbackState v-else-if="error && !data" kind="error" layout="inline" :message="error" retryable @retry="load" />
+    <FeedbackState v-else-if="error && !data" kind="error" layout="inline" :message="uiText(error)" retryable @retry="load" />
     <template v-else-if="data">
       <section v-for="group in groups" :key="group.title" class="admin-dashboard__group" :aria-labelledby="`admin-group-${group.id}`">
-        <h3 :id="`admin-group-${group.id}`">{{ group.title }}</h3>
+        <h3 :id="`admin-group-${group.id}`">{{ uiText(group.title) }}</h3>
         <dl class="admin-dashboard__tiles">
           <div v-for="tile in group.tiles" :key="tile.label" class="admin-dashboard__tile">
-            <dt>{{ tile.label }}</dt>
+            <dt>{{ uiText(tile.label) }}</dt>
             <dd class="admin-dashboard__value">{{ formatCount(tile.value) }}</dd>
-            <dd v-if="tile.detail" class="admin-dashboard__detail">{{ tile.detail }}</dd>
+            <dd v-if="tile.detail" class="admin-dashboard__detail">{{ uiText(tile.detail) }}</dd>
           </div>
         </dl>
       </section>
 
       <div class="admin-dashboard__lists">
         <section class="admin-dashboard__card" aria-labelledby="admin-top-stories">
-          <h3 id="admin-top-stories">Frises les plus fournies</h3>
+          <h3 id="admin-top-stories">{{ uiText("Frises les plus fournies") }}</h3>
           <ol v-if="data.topStories.length" class="admin-dashboard__list">
             <li v-for="story in data.topStories" :key="story.id">
               <RouterLink v-if="story.isPublic" :to="storyTimelineLocation(String(story.id))">{{ story.title }}</RouterLink>
-              <span v-else>{{ story.title }} <Tag label="Privée" /></span>
-              <span class="admin-dashboard__muted">{{ story.author }} · {{ formatCount(story.periods) }} périodes · {{ formatCount(story.events) }} événements</span>
+              <span v-else>{{ story.title }} <Tag :label="uiText('Privée')" /></span>
+              <span class="admin-dashboard__muted">{{ story.author }} · {{ formatCount(story.periods) }} {{ uiText("périodes ·") }} {{ formatCount(story.events) }} {{ uiText("événements") }}</span>
             </li>
           </ol>
-          <p v-else class="admin-dashboard__muted">Aucune frise.</p>
+          <p v-else class="admin-dashboard__muted">{{ uiText("Aucune frise.") }}</p>
         </section>
         <section class="admin-dashboard__card" aria-labelledby="admin-recent-users">
-          <h3 id="admin-recent-users">Dernières inscriptions</h3>
+          <h3 id="admin-recent-users">{{ uiText("Dernières inscriptions") }}</h3>
           <ul v-if="data.recentUsers.length" class="admin-dashboard__list">
             <li v-for="user in data.recentUsers" :key="user.id">
-              <RouterLink :to="{ name: 'admin', query: { section: 'users', user: user.id } }">{{ user.username ?? 'Sans nom d’utilisateur' }}</RouterLink>
-              <span class="admin-dashboard__muted">{{ formatAdminDate(user.createdAt) }}{{ user.confirmed ? '' : ' · adresse non confirmée' }}</span>
+              <RouterLink :to="{ name: 'admin', query: { section: 'users', user: user.id } }">{{ uiText(user.username ?? 'Sans nom d’utilisateur') }}</RouterLink>
+              <span class="admin-dashboard__muted">{{ formatAdminDate(user.createdAt) }}{{ uiText(user.confirmed ? '' : ' · adresse non confirmée') }}</span>
             </li>
           </ul>
-          <p v-else class="admin-dashboard__muted">Aucun compte.</p>
+          <p v-else class="admin-dashboard__muted">{{ uiText("Aucun compte.") }}</p>
         </section>
         <section class="admin-dashboard__card" aria-labelledby="admin-recent-actions">
-          <h3 id="admin-recent-actions">Dernières actions d’administration</h3>
+          <h3 id="admin-recent-actions">{{ uiText("Dernières actions d’administration") }}</h3>
           <ul v-if="data.recentActions.length" class="admin-dashboard__list">
             <li v-for="action in data.recentActions" :key="`${action.targetId}-${action.createdAt}-${action.action}`">
-              <span>{{ adminActionLabels[action.action] }} : {{ action.targetUsername ?? 'compte sans nom' }}</span>
-              <span class="admin-dashboard__muted">{{ formatAdminDate(action.createdAt, true) }}{{ action.actorUsername ? ` · par ${action.actorUsername}` : '' }}</span>
+              <span>{{ adminActionLabels[action.action] }} : {{ uiText(action.targetUsername ?? 'compte sans nom') }}</span>
+              <span class="admin-dashboard__muted">{{ formatAdminDate(action.createdAt, true) }}{{ uiText(action.actorUsername ? ` · par ${action.actorUsername}` : '') }}</span>
             </li>
           </ul>
-          <p v-else class="admin-dashboard__muted">Aucune action enregistrée.</p>
+          <p v-else class="admin-dashboard__muted">{{ uiText("Aucune action enregistrée.") }}</p>
         </section>
       </div>
     </template>
@@ -57,6 +56,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import Button from '@/components/base/Button.vue';
@@ -83,22 +83,22 @@ const groups = computed<{ id: string; title: string; tiles: Tile[] }[]>(() => {
   const d = data.value; if (!d) return [];
   return [
     { id: 'users', title: 'Utilisateurs', tiles: [
-      { label: 'Comptes', value: d.users.total, detail: `${formatCount(d.users.confirmed)} confirmés` },
-      { label: 'Nouveaux sur 30 jours', value: d.users.new30d, detail: `${formatCount(d.users.new7d)} sur 7 jours` },
-      { label: 'Actifs sur 30 jours', value: d.users.active30d, detail: `${formatShare(d.users.active30d, d.users.total)} des comptes` },
-      { label: 'Créateurs de frises', value: d.users.creators, detail: `${formatShare(d.users.creators, d.users.total)} des comptes` },
+      { label: 'Comptes', value: d.users.total, detail: uiFormat`${formatCount(d.users.confirmed)} confirmés` },
+      { label: 'Nouveaux sur 30 jours', value: d.users.new30d, detail: uiFormat`${formatCount(d.users.new7d)} sur 7 jours` },
+      { label: 'Actifs sur 30 jours', value: d.users.active30d, detail: uiFormat`${formatShare(d.users.active30d, d.users.total)} des comptes` },
+      { label: 'Créateurs de frises', value: d.users.creators, detail: uiFormat`${formatShare(d.users.creators, d.users.total)} des comptes` },
       { label: 'Sans nom d’utilisateur', value: d.users.total - d.users.withProfile, detail: 'ne peuvent pas créer de frise' },
       { label: 'Administrateurs', value: d.users.admins, detail: `${formatCount(d.users.suspended)} compte(s) suspendu(s)` },
     ] },
     { id: 'stories', title: 'Frises', tiles: [
-      { label: 'Frises', value: d.stories.total, detail: `${formatCount(d.stories.public)} publiques · ${formatCount(d.stories.private)} privées` },
-      { label: 'Frises racines', value: d.stories.roots, detail: `${formatCount(d.stories.children)} sous-frises` },
-      { label: 'Créées sur 30 jours', value: d.stories.created30d, detail: `${formatCount(d.stories.updated30d)} modifiées sur 30 jours` },
+      { label: 'Frises', value: d.stories.total, detail: uiFormat`${formatCount(d.stories.public)} publiques · ${formatCount(d.stories.private)} privées` },
+      { label: 'Frises racines', value: d.stories.roots, detail: uiFormat`${formatCount(d.stories.children)} sous-frises` },
+      { label: 'Créées sur 30 jours', value: d.stories.created30d, detail: uiFormat`${formatCount(d.stories.updated30d)} modifiées sur 30 jours` },
       { label: 'Frises vides', value: d.stories.empty, detail: 'sans période ni événement' },
     ] },
     { id: 'catalogue', title: 'Catalogue partagé', tiles: [
-      { label: 'Périodes', value: d.catalogue.periods, detail: `${formatShare(d.catalogue.periodsWithQid, d.catalogue.periods)} liées à Wikidata` },
-      { label: 'Événements', value: d.catalogue.events, detail: `${formatShare(d.catalogue.eventsWithQid, d.catalogue.events)} liés à Wikidata` },
+      { label: 'Périodes', value: d.catalogue.periods, detail: uiFormat`${formatShare(d.catalogue.periodsWithQid, d.catalogue.periods)} liées à Wikidata` },
+      { label: 'Événements', value: d.catalogue.events, detail: uiFormat`${formatShare(d.catalogue.eventsWithQid, d.catalogue.events)} liés à Wikidata` },
       { label: 'Périodes inutilisées', value: d.catalogue.periodsUnused, detail: 'dans aucune frise' },
       { label: 'Événements inutilisés', value: d.catalogue.eventsUnused, detail: 'dans aucune frise' },
       { label: 'Catégories', value: d.catalogue.categories },

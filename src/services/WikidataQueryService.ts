@@ -182,8 +182,8 @@ export class WikidataQueryService {
       const hasSub = parseInt(binding.childCount?.value || '0', 10) > 0;
       const existing = byId.get(childId);
       if (!existing) {
-        const fr = lFr || lEn || childId;
-        const en = lEn || lFr || childId;
+        const fr = lFr;
+        const en = lEn;
         const startDate = bindingTime(binding, 'startDate');
         // Sans fin déclarée la période court encore ; une fin illisible reste inconnue.
         const endDate = bindingTime(binding, 'endDate') || (binding.endDate?.value ? '' : 'TODAY');
@@ -199,8 +199,6 @@ export class WikidataQueryService {
       } else {
         if (lFr) existing.label.fr = lFr;
         if (lEn) existing.label.en = lEn;
-        if (!existing.label.fr && (lEn || lFr)) existing.label.fr = lFr || lEn;
-        if (!existing.label.en && (lFr || lEn)) existing.label.en = lEn || lFr;
         existing.hasChildren = existing.hasChildren || hasSub;
         // Plusieurs valeurs de même rang : on garde l'intervalle le plus large.
         const bounds = existing.temporalData[0];
@@ -383,7 +381,7 @@ export class WikidataQueryService {
     eventId = normalizeWikidataId(eventId);
     const query = `
       SELECT DISTINCT
-        ?item ?itemLabel
+        ?item ?itemLabelFr ?itemLabelEn
         ?descriptionfr
         ?descriptionen
         ${EVENT_DATES.map(([, name]) => timeVars(name)).join(' ')}
@@ -391,10 +389,8 @@ export class WikidataQueryService {
       WHERE {
         VALUES ?item { wd:${eventId} }
 
-        SERVICE wikibase:label {
-          bd:serviceParam wikibase:language "${this.defaultLanguages.join(',')}".
-          ?item rdfs:label ?itemLabel.
-        }
+        OPTIONAL { ?item rdfs:label ?itemLabelFr. FILTER(LANG(?itemLabelFr) = "fr") }
+        OPTIONAL { ?item rdfs:label ?itemLabelEn. FILTER(LANG(?itemLabelEn) = "en") }
 
         OPTIONAL {
           ?item schema:description ?descriptionfr.
@@ -421,7 +417,7 @@ export class WikidataQueryService {
     const unreadDate = !eventDate && EVENT_DATES.some(([, name]) => binding[name]?.value);
 
     return {
-      label: binding.itemLabel?.value || '',
+      label: { fr: binding.itemLabelFr?.value || '', en: binding.itemLabelEn?.value || '' },
       description: {
         fr: binding['descriptionfr']?.value || binding['descriptionFr']?.value || '',
         en: binding['descriptionen']?.value || binding['descriptionEn']?.value || ''

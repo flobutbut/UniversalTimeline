@@ -1,18 +1,19 @@
 <template>
   <div class="anchored-story-row" :class="{ 'anchored-story-row--selected': explored }" :draggable="!!draggable && !disabled">
     <component :is="columnActions ? (explorable ? 'button' : 'div') : RouterLink" :to="columnActions ? undefined : { name: 'database', query: { story: story.id } }" :draggable="false" :type="explorable ? 'button' : undefined" :disabled="explorable ? disabled : undefined" :aria-expanded="explorable ? explored : undefined" class="anchored-story-row__link" @click="explorable && $emit('explore')">
-      <span class="anchored-story-row__title">{{ story.title.fr }}</span>
-      <span v-if="summary" class="anchored-story-row__meta">{{ formatStoryListDateRangeSublabel(summary) }}<span v-if="summary.previewPeriods"> · {{ summary.previewPeriods.length }} périodes</span><span v-if="summary.previewEvents"> · {{ summary.previewEvents.length }} événements</span></span>
+      <span class="anchored-story-row__title">{{ localizedText(story.title) }}</span>
+      <span v-if="summary" class="anchored-story-row__meta">{{ uiText(formatStoryListDateRangeSublabel(summary)) }}<span v-if="summary.previewPeriods"> · {{ uiText(summary.previewPeriods.length) }} {{ uiText("périodes") }}</span><span v-if="summary.previewEvents"> · {{ uiText(summary.previewEvents.length) }} {{ uiText("événements") }}</span></span>
     </component>
-    <StoryItemActionsMenu v-if="columnActions" :label="story.title.fr || story.title.en" :view-to="{ name: 'database', query: { story: story.id } }"
+    <StoryItemActionsMenu v-if="columnActions" :label="localizedText(story.title)" :view-to="{ name: 'database', query: { story: story.id } }"
       :movable="columnActions" :disabled="disabled" :read-only="readOnly" :display-as-period="displayAsPeriod" @move="$emit('move')" @display="$emit('display')" @remove="$emit('remove')" />
 
-    <button v-else-if="!readOnly" type="button" class="anchored-story-row__remove" :disabled="disabled" :aria-label="`Détacher ${story.title.fr}`" @click="$emit('remove')"><DesignIcon name="close" /></button>
-    <button v-if="explorable" type="button" class="anchored-story-row__explore" :aria-label="`Explorer ${story.title.fr || story.title.en} en lecture seule`"
+    <button v-else-if="!readOnly" type="button" class="anchored-story-row__remove" :disabled="disabled" :aria-label="uiFormat`Détacher ${localizedText(story.title)}`" @click="$emit('remove')"><DesignIcon name="close" /></button>
+    <button v-if="explorable" type="button" class="anchored-story-row__explore" :aria-label="uiFormat`Explorer ${localizedText(story.title)} en lecture seule`"
       :aria-expanded="explored" :disabled="disabled" @click.stop="$emit('explore')"><ChevronIcon :width="16" :height="16" /></button>
   </div>
 </template>
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import { RouterLink } from 'vue-router';
 import DesignIcon from '@/components/base/DesignIcon.vue';
 import ChevronIcon from '@/components/icons/ChevronIcon.vue';

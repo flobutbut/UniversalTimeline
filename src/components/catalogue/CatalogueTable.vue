@@ -1,22 +1,22 @@
 <template>
   <div class="catalogue-table-shell">
-    <div ref="container" class="table-wrap catalogue-table" :class="`catalogue-table--${density}`" role="region" :aria-label="`Tableau des ${label.toLocaleLowerCase('fr')}`" tabindex="0">
+    <div ref="container" class="table-wrap catalogue-table" :class="`catalogue-table--${density}`" role="region" :aria-label="uiText(uiFormat`Tableau des ${label.toLocaleLowerCase(language)}`)" tabindex="0">
       <FeedbackState v-if="loading" kind="loading" />
-      <FeedbackState v-else-if="error" kind="error" :message="error" retryable @retry="emit('retry')" />
-      <div v-else class="catalogue-table__columns" :style="gridStyle" role="table" :aria-label="label">
+      <FeedbackState v-else-if="error" kind="error" :message="uiText(error)" retryable @retry="emit('retry')" />
+      <div v-else class="catalogue-table__columns" :style="gridStyle" role="table" :aria-label="uiText(label)">
         <div class="table-header" role="row">
-          <div v-if="selectable" role="columnheader" aria-label="Sélection" class="catalogue-table__selection">
-            <input type="checkbox" aria-label="Tout sélectionner dans les lignes affichées" :checked="allSelected" :indeterminate.prop="someSelected && !allSelected" :disabled="selectionDisabled || !selectableIds.length" @change="selectAll" />
+          <div v-if="selectable" role="columnheader" :aria-label="uiText('Sélection')" class="catalogue-table__selection">
+            <input type="checkbox" :aria-label="uiText('Tout sélectionner dans les lignes affichées')" :checked="allSelected" :indeterminate.prop="someSelected && !allSelected" :disabled="selectionDisabled || !selectableIds.length" @change="selectAll" />
           </div>
           <div v-for="column in columns" :key="column.key" :data-column-key="column.key" class="th-cell" :class="{ 'th-cell--no-handle': !canResize(column) }"
             role="columnheader" :aria-sort="column.sortLabel && sortColumn === column.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined">
-            <button v-if="column.sortLabel" type="button" class="th-sortable" :aria-label="column.sortLabel" @click="emit('sort', column.key)">
-              <span class="th-title">{{ column.label }}</span>
+            <button v-if="column.sortLabel" type="button" class="th-sortable" :aria-label="uiText(column.sortLabel)" @click="emit('sort', column.key)">
+              <span class="th-title">{{ uiText(column.label) }}</span>
               <Icon class="sort-indicator" :icon="sortColumn === column.key ? (sortDir === 'asc' ? 'mdi:arrow-up' : 'mdi:arrow-down') : 'mdi:swap-vertical'" width="14" height="14" aria-hidden="true" />
             </button>
-            <template v-else>{{ column.label }}</template>
+            <template v-else>{{ uiText(column.label) }}</template>
             <div v-if="canResize(column)" class="resize-handle" role="separator" aria-orientation="vertical"
-              :aria-label="`Largeur de la colonne ${column.label}`" tabindex="0"
+              :aria-label="uiText(uiFormat`Largeur de la colonne ${column.label}`)" tabindex="0"
               :aria-valuenow="Math.round(widthOf(column))" :aria-valuemin="column.minWidth ?? 100" :aria-valuemax="column.maxWidth ?? 720"
               @keydown="resizeWithKeyboard(column, $event)" @mousedown.stop.prevent="startResize(column, $event)" @dblclick.stop="fitContent(column)" @click.stop />
           </div>
@@ -25,7 +25,7 @@
           <div v-if="!items.length" class="empty" role="row"><span role="cell" :aria-colspan="columns.length + (selectable ? 1 : 0)">{{ emptyText }}</span></div>
           <div v-for="item in items" :key="item.id" class="table-row" :class="{ selected: selectedId === item.id || selectedIds.includes(item.id) }" :data-item-id="item.id" role="row" :aria-selected="selectable ? selectedIds.includes(item.id) : undefined">
             <span v-if="selectable" role="cell" class="catalogue-table__selection">
-              <input type="checkbox" :aria-label="`Sélectionner ${itemLabel?.(item) ?? item.id}`" :checked="selectedIds.includes(item.id)" :disabled="selectionDisabled || !canSelect(item)" @change="toggleSelection(item.id)" @click.stop />
+              <input type="checkbox" :aria-label="uiText(uiFormat`Sélectionner ${itemLabel?.(item) ?? item.id}`)" :checked="selectedIds.includes(item.id)" :disabled="selectionDisabled || !canSelect(item)" @change="toggleSelection(item.id)" @click.stop />
             </span>
             <slot name="row" :item="item" />
           </div>
@@ -36,6 +36,7 @@
 </template>
 
 <script setup lang="ts" generic="T extends { id: string }">
+import { language, uiFormat, uiText } from '@/i18n';
 import { computed, onUnmounted, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import FeedbackState from '@/components/base/FeedbackState.vue';

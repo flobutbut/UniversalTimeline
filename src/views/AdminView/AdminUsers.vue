@@ -1,30 +1,30 @@
 <template>
   <section class="admin-users" aria-labelledby="admin-users-title">
     <header class="admin-users__header">
-      <h2 id="admin-users-title">Utilisateurs</h2>
-      <p v-if="users" class="admin-users__meta" role="status">{{ visible.length }} compte(s) affiché(s) sur {{ users.length }}</p>
+      <h2 id="admin-users-title">{{ uiText("Utilisateurs") }}</h2>
+      <p v-if="users" class="admin-users__meta" role="status">{{ visible.length }} {{ uiText("compte(s) affiché(s) sur") }} {{ users.length }}</p>
     </header>
     <div class="admin-users__filters">
-      <SearchInput v-model="query" placeholder="Rechercher un nom ou une adresse" class="admin-users__search" />
-      <Select v-model="filter" label="Afficher" :options="filterOptions" class="admin-users__filter" />
+      <SearchInput v-model="query" :placeholder="uiText('Rechercher un nom ou une adresse')" class="admin-users__search" />
+      <Select v-model="filter" :label="uiText('Afficher')" :options="filterOptions" class="admin-users__filter" />
     </div>
     <FeedbackState v-if="loading && !users" kind="loading" layout="inline" />
-    <FeedbackState v-else-if="error && !users" kind="error" layout="inline" :message="error" retryable @retry="load" />
+    <FeedbackState v-else-if="error && !users" kind="error" layout="inline" :message="uiText(error)" retryable @retry="load" />
     <template v-else-if="users">
-      <CatalogueBulkBar :count="bulk.selected.value.length" :actions="bulkActions" :busy="bulk.busy.value" :message="bulk.message.value" :failures="bulk.failures.value" :uncertain="bulk.uncertain.value" @apply="bulk.run" @clear="bulk.selectedIds.value = []" @reload="bulk.reload" />
-      <p class="admin-users__meta">Les administrateurs et votre propre compte sont exclus des actions groupées.</p>
-      <CatalogueTable v-model:selected-ids="bulk.selectedIds.value" label="Utilisateurs" :columns="columns" :items="visible" empty-text="Aucun compte ne correspond." selectable :can-select="canSelectUser" :item-label="user => user.username || user.email || user.id" :selection-disabled="bulk.busy.value || bulk.uncertain.value" :sort-column="sortColumn" :sort-dir="sortDir" @sort="toggleSort($event as SortColumn)">
+      <CatalogueBulkBar :count="bulk.selected.value.length" :actions="bulkActions" :busy="bulk.busy.value" :message="uiText(bulk.message.value)" :failures="bulk.failures.value" :uncertain="bulk.uncertain.value" @apply="bulk.run" @clear="bulk.selectedIds.value = []" @reload="bulk.reload" />
+      <p class="admin-users__meta">{{ uiText("Les administrateurs et votre propre compte sont exclus des actions groupées.") }}</p>
+      <CatalogueTable v-model:selected-ids="bulk.selectedIds.value" :label="uiText('Utilisateurs')" :columns="columns" :items="visible" empty-text="Aucun compte ne correspond." selectable :can-select="canSelectUser" :item-label="user => user.username || user.email || user.id" :selection-disabled="bulk.busy.value || bulk.uncertain.value" :sort-column="sortColumn" :sort-dir="sortDir" @sort="toggleSort($event as SortColumn)">
         <template #row="{ item: user }">
           <span role="cell">
             <RouterLink class="admin-users__identity" :to="{ name: 'admin', query: { section: 'users', user: user.id } }">
               <UserAvatar :username="user.username" :color="user.avatarColor ?? undefined" :icon="user.avatarIcon ?? undefined" size="sm" />
-              <span><span class="admin-users__name">{{ user.username ?? 'Sans nom d’utilisateur' }}</span><span class="admin-users__email">{{ user.email ?? '—' }}</span></span>
+              <span><span class="admin-users__name">{{ uiText(user.username ?? 'Sans nom d’utilisateur') }}</span><span class="admin-users__email">{{ uiText(user.email ?? '—') }}</span></span>
             </RouterLink>
           </span>
           <span role="cell">{{ formatAdminDate(user.createdAt) }}</span>
           <span role="cell">{{ formatAdminDate(user.lastSignInAt) }}</span>
-          <span role="cell">{{ user.stories }}<span v-if="user.stories" class="admin-users__muted"> ({{ user.publicStories }} publiques)</span></span>
-          <span role="cell" class="admin-users__tags"><Tag v-for="status in statuses(user)" :key="status" :label="status" :variant="status === 'Admin' ? 'accent' : 'neutral'" /></span>
+          <span role="cell">{{ user.stories }}<span v-if="user.stories" class="admin-users__muted"> ({{ user.publicStories }} {{ uiText("publiques)") }}</span></span>
+          <span role="cell" class="admin-users__tags"><Tag v-for="status in statuses(user)" :key="status" :label="uiText(status)" :variant="status === 'Admin' ? 'accent' : 'neutral'" /></span>
         </template>
       </CatalogueTable>
     </template>
@@ -32,6 +32,7 @@
 </template>
 
 <script setup lang="ts">
+import { language, uiText } from '@/i18n';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import CatalogueTable from '@/components/catalogue/CatalogueTable.vue';
@@ -95,17 +96,17 @@ const matchesFilter: Record<Filter, (user: AdminUser) => boolean> = {
   unconfirmed: user => !user.confirmed, suspended: user => user.suspended, 'no-profile': user => !user.username,
 };
 const visible = computed(() => {
-  const needle = query.value.trim().toLocaleLowerCase('fr');
+  const needle = query.value.trim().toLocaleLowerCase(language.value);
   const keep = matchesFilter[(filter.value as Filter) ?? 'all'] ?? matchesFilter.all;
   const rows = (users.value ?? []).filter(user => keep(user)
-    && (!needle || [user.username, user.email].some(value => value?.toLocaleLowerCase('fr').includes(needle))));
+    && (!needle || [user.username, user.email].some(value => value?.toLocaleLowerCase(language.value).includes(needle))));
   const column = sortColumn.value;
   if (!column) return rows;
   return rows.sort((a, b) => {
     const left = sortValue(a, column), right = sortValue(b, column);
     if (left === null || right === null) return left === right ? 0 : left === null ? 1 : -1;
     const comparison = typeof left === 'number' && typeof right === 'number'
-      ? left - right : String(left).localeCompare(String(right), 'fr', { sensitivity: 'base', numeric: true });
+      ? left - right : String(left).localeCompare(String(right), language.value, { sensitivity: 'base', numeric: true });
     return sortDir.value === 'asc' ? comparison : -comparison;
   });
 });

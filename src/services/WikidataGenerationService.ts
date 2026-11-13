@@ -1,5 +1,7 @@
+import { language } from '@/i18n';
+import type { GeneratedTexts } from '@/types/wikidataGeneration';
 import { collectWikidataGeneration } from './wikidataGenerationDiscovery';
-import { evaluate, defaultSettings, label, description, type Profile, type WikidataGenerationSettings, type WikidataGenerationCollection, type WikidataGenerationDate } from '@/lib/wikidataGenerationModel';
+import { evaluate, defaultSettings, type Profile, type WikidataGenerationSettings, type WikidataGenerationCollection, type WikidataGenerationDate } from '@/lib/wikidataGenerationModel';
 import { generatedSourceKey } from '../../server/src/shared/wikidataGeneration';
 import { mediaWiki, normalizeWikidataId, sparql, type WikidataEntity, type WikidataStatement, type WikidataReadOptions } from './wikidataTransport';
 import { WIKIDATA_MEDIAWIKI_API_URL } from '@/lib/wikidataMediaWikiConstants';
@@ -7,6 +9,20 @@ import { wikidataItemKey, type WikidataTimelineDraft, type WikidataTimelineItem 
 import { compareYearsOldestFirst, parseTemporal, periodDateErrors } from '@temporal';
 import { wikibaseTimeToTemporal, type WikibaseTime } from '@/lib/wikidataTime';
 import { wouldCreateWikidataCycle } from '@/lib/wikidataHierarchy';
+
+function entityTexts(entity?: WikidataEntity): GeneratedTexts {
+  return {
+    language: language.value,
+    titles: { fr: entity?.labels?.fr?.value ?? '', en: entity?.labels?.en?.value ?? '' },
+    descriptions: { fr: entity?.descriptions?.fr?.value ?? '', en: entity?.descriptions?.en?.value ?? '' },
+  };
+}
+
+function editableEntity(entity: WikidataEntity | undefined, qid: string) {
+  const texts = entityTexts(entity);
+  // Only expose the edition being edited. A missing title uses the stable Q-id in previews.
+  return { texts, title: texts.titles[texts.language] || qid, description: texts.descriptions[texts.language] };
+}
 
 const MAX_RELATED_ITEMS = 80;
 
@@ -64,8 +80,7 @@ function mapItem(qid: string, entity: WikidataEntity): WikidataTimelineItem | nu
   const finish = has('P582') ? end : dissolution;
   const ambiguous = date.ambiguous || (type === 'period' && finish.ambiguous);
   const item: WikidataTimelineItem = {
-    qid, type, title: entity.labels?.fr?.value || entity.labels?.en?.value || qid,
-    description: entity.descriptions?.fr?.value || entity.descriptions?.en?.value || '',
+    qid, type, ...editableEntity(entity, qid),
     startDate: date.date, endDate: type === 'period' ? finish.date : '', selected: false,
     warning: ambiguous ? 'Date ambiguë, trop imprécise ou calendrier non pris en charge : à vérifier sur Wikidata.' : undefined,
   };
@@ -76,7 +91,7 @@ function mapItem(qid: string, entity: WikidataEntity): WikidataTimelineItem | nu
 async function loadEntities(ids: string[], options: WikidataReadOptions): Promise<Map<string, WikidataEntity>> {
   const entities = new Map<string, WikidataEntity>();
   for (let i = 0; i < ids.length; i += 50) {
-    const params = new URLSearchParams({ action: 'wbgetentities', ids: ids.slice(i, i + 50).join('|'), props: 'labels|descriptions|claims', languages: 'fr|en', languagefallback: '1', format: 'json', origin: '*' });
+    const params = new URLSearchParams({ action: 'wbgetentities', ids: ids.slice(i, i + 50).join('|'), props: 'labels|descriptions|claims', languages: 'fr|en', format: 'json', origin: '*' });
     const data = await mediaWiki(`${WIKIDATA_MEDIAWIKI_API_URL}?${params}`, options);
     for (const [qid, entity] of Object.entries(data.entities ?? {})) entities.set(qid, entity);
   }
@@ -133,7 +148,7 @@ export async function generateLegacyWikidataTimeline(rawQid: string, options: Wi
   const warnings = ['Les éléments proposés proviennent des relations directes du sujet dans Wikidata. Cette sélection peut être incomplète ou contenir des éléments à écarter.'];
   if (rows.length > MAX_RELATED_ITEMS) warnings.push(`La recherche est limitée aux ${MAX_RELATED_ITEMS} premiers éléments liés. La frise ne sera pas exhaustive.`);
   if (isHuman(subject)) warnings.push('Les biographies ne sont pas encore transformées en événements de vie. Seuls les événements liés sont proposés.');
-  return { qid, title: subject.labels?.fr?.value || subject.labels?.en?.value || qid, description: subject.descriptions?.fr?.value || subject.descriptions?.en?.value || '', items, warnings };
+  return { qid, ...editableEntity(subject, qid), items, warnings };
 }
 
 
@@ -154,6 +169,7 @@ export function generationDraftFromCollection(collection: WikidataGenerationColl
     try { id = generatedSourceKey(candidate.qid, candidate.origin, source); }
     catch { id = candidate.id; }
     const item: WikidataTimelineItem = { id, qid: candidate.qid, origin: candidate.origin, source, type, title: candidate.title, description: candidate.description, startDate, endDate: type === 'period' ? endDate : '', selected: false, category: candidate.category, status: candidate.status, reasons: candidate.reasons, warning: [candidate.start?.issue, candidate.end?.issue].filter(Boolean).join(' ') || undefined };
+    if (candidate.origin === 'entity') Object.assign(item, editableEntity(collection.entities[candidate.qid], candidate.qid));
     item.selected = candidate.status === 'retained' && !wikidataTimelineItemError(item);
     return item;
   });
@@ -162,7 +178,7 @@ export function generationDraftFromCollection(collection: WikidataGenerationColl
   const warnings = [...(collection.notices ?? [])];
   if (collection.truncated) warnings.push('La collecte est limitée à 120 candidats classés ; cette frise ne sera pas exhaustive.');
   warnings.push('Les propositions sont extraites de déclarations Wikidata. Vérifiez leur pertinence et les dates avant d’enregistrer.');
-  return { qid: collection.qid, title: label(subject, collection.qid), description: description(subject), profile: collection.profile, settings: rules, items, warnings };
+  return { qid: collection.qid, ...editableEntity(subject, collection.qid), profile: collection.profile, settings: rules, items, warnings };
 }
 
 function generationDate(date: WikidataGenerationDate | null): string {

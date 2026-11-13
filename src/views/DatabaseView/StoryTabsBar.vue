@@ -1,12 +1,12 @@
 <template>
-  <nav class="story-tabs" aria-label="Frises ouvertes">
+  <nav class="story-tabs" :aria-label="uiText('Frises ouvertes')">
     <button
       type="button"
       class="story-tabs__home"
       :class="{ 'story-tabs__item--active': activeId === null }"
       :aria-current="activeId === null ? 'page' : undefined"
-      aria-label="Toutes les frises"
-      title="Toutes les frises"
+      :aria-label="uiText('Toutes les frises')"
+      :title="uiText('Toutes les frises')"
       @click="$emit('select', null)"
     >
       <DesignIcon name="account" />
@@ -27,19 +27,20 @@
       >
         <button
           type="button" class="story-tabs__open" draggable="true"
-          :title="`${tab.label} — Glisser pour réordonner (Alt + ← / →)`"
+          :title="uiText(uiFormat`${tab.label} — Glisser pour réordonner (Alt + ← / →)`)"
           :aria-current="tab.id === activeId ? 'page' : undefined"
           aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
           @dragstart="onDragStart($event, tab.id)" @dragend="endDrag"
           @keydown="onKeydown($event, tab.id)" @click="$emit('select', tab.id)"
-        >{{ tab.label }}</button>
-        <button type="button" class="story-tabs__close" :aria-label="`Fermer ${tab.label}`" @click="$emit('close', tab.id)"><DesignIcon name="tab-close" /></button>
+        >{{ uiText(tab.label) }}</button>
+        <button type="button" class="story-tabs__close" :aria-label="uiText(uiFormat`Fermer ${tab.label}`)" @click="$emit('close', tab.id)"><DesignIcon name="tab-close" /></button>
       </div>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { nextTick, onBeforeUnmount, ref } from 'vue';
 import DesignIcon from '@/components/base/DesignIcon.vue';
 

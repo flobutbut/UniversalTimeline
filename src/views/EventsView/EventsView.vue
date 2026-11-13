@@ -1,29 +1,28 @@
 <template>
   <div class="catalogue-view">
-    <CatalogueToolbar v-model:search="search" placeholder="Rechercher un événement…">
+    <CatalogueToolbar v-model:search="search" :placeholder="uiText('Rechercher un événement…')">
       <template #filters>
         <CatalogueFilters context="events" v-model:tags="tagIds" v-model:story-ids="selectedStoryIds" v-model:time-range="timeRange" v-model:period="periodFilter"
           :tag-options="tagSelectOptions" :story-options="storySelectOptions"
           :stories-loading="storyLinks.loading.value" :stories-error="storyLinks.error.value" @retry-stories="storyLinks.load" />
       </template>
-      <template #actions><Button variant="primary" size="sm" @click="openCreateModal">+ Ajouter un événement</Button></template>
+      <template #actions><Button variant="primary" size="sm" @click="openCreateModal">{{ uiText("+ Ajouter un événement") }}</Button></template>
     </CatalogueToolbar>
 
     <div v-if="targetLoading || targetError" :role="targetError ? 'alert' : 'status'">
-      {{ targetError || 'Ouverture du résultat…' }}
-      <Button variant="tertiary" size="sm" v-if="targetError" type="button" @click="retryTarget">Réessayer</Button>
-      <Button variant="tertiary" size="sm" type="button" @click="cancelTarget">Annuler</Button>
+      {{ uiText(targetError || 'Ouverture du résultat…') }}
+      <Button variant="tertiary" size="sm" v-if="targetError" type="button" @click="retryTarget">{{ uiText("Réessayer") }}</Button>
+      <Button variant="tertiary" size="sm" type="button" @click="cancelTarget">{{ uiText("Annuler") }}</Button>
     </div>
-    <p v-if="storyLinks.error.value" role="alert" class="links-error">
-      Frises des événements indisponibles : {{ storyLinks.error.value }}
-      <Button variant="tertiary" size="sm" type="button" @click="storyLinks.load">Réessayer</Button>
+    <p v-if="storyLinks.error.value" role="alert" class="links-error"> {{ uiText("Frises des événements indisponibles :") }} {{ uiText(storyLinks.error.value) }}
+      <Button variant="tertiary" size="sm" type="button" @click="storyLinks.load">{{ uiText("Réessayer") }}</Button>
     </p>
-    <CatalogueBulkBar :count="bulk.selected.value.length" :actions="bulk.actions" :stories="bulk.editableStories.value" :busy="bulk.busy.value" :message="bulk.message.value" :failures="bulk.failures.value" :uncertain="bulk.uncertain.value" @apply="bulk.run" @clear="bulk.selectedIds.value = []" @reload="bulk.reload" />
-    <CatalogueTable v-model:selected-ids="bulk.selectedIds.value" selectable :selection-disabled="bulk.busy.value || bulk.uncertain.value" :item-label="item => item.label.fr || item.label.en || item.id" label="Événements" :columns="eventColumns" :items="displayEvents"
+    <CatalogueBulkBar :count="bulk.selected.value.length" :actions="bulk.actions" :stories="bulk.editableStories.value" :busy="bulk.busy.value" :message="uiText(bulk.message.value)" :failures="bulk.failures.value" :uncertain="bulk.uncertain.value" @apply="bulk.run" @clear="bulk.selectedIds.value = []" @reload="bulk.reload" />
+    <CatalogueTable v-model:selected-ids="bulk.selectedIds.value" selectable :selection-disabled="bulk.busy.value || bulk.uncertain.value" :item-label="item => localizedText(item.label) || item.id" :label="uiText('Événements')" :columns="eventColumns" :items="displayEvents"
       empty-text="Aucun événement trouvé" :loading="loading || (!!selectedStoryIds.length && storyLinks.loading.value)" :error="loadError || (selectedStoryIds.length ? storyLinks.error.value : null)"
       :sort-column="sortColumn" :sort-dir="sortDir" @sort="toggleSort($event as SortColumn)" @retry="loadData(); storyLinks.load()">
       <template #row="{ item: event }">
-        <span class="col-label" role="cell">{{ event.label.fr }}</span>
+        <span class="col-label" role="cell">{{ localizedText(event.label) }}</span>
         <span class="col-date" role="cell">{{ formatEventListDateForDisplay(event.date) }}</span>
         <span class="col-categories" role="cell">
           <ThematicTags :tags="event.tags ?? []" />
@@ -32,13 +31,13 @@
           <span v-if="storyLinks.loading.value" class="col-stories__state">…</span>
           <span v-else-if="storyLinks.error.value" class="col-stories__state">—</span>
           <template v-else>
-            <Tag v-for="story in storiesOf(event.id)" :key="story.id" :to="{ path: '/timeline', query: { story: story.id } }" :label="story.title" />
-            <span v-if="!storiesOf(event.id).length" class="col-stories__state">Aucune</span>
+            <Tag v-for="story in storiesOf(event.id)" :key="story.id" :to="{ path: '/timeline', query: { story: story.id } }" :label="uiText(story.title)" />
+            <span v-if="!storiesOf(event.id).length" class="col-stories__state">{{ uiText("Aucune") }}</span>
           </template>
         </span>
         <span class="col-updated" role="cell">{{ formatListEventLastEditFr(event) }}</span>
         <span class="col-actions" role="cell">
-          <Button variant="tertiary" size="sm" :aria-label="`Modifier ${event.label.fr}`" @click="openEditModal(event)">Modifier</Button>
+          <Button variant="tertiary" size="sm" :aria-label="uiFormat`Modifier ${localizedText(event.label)}`" @click="openEditModal(event)">{{ uiText("Modifier") }}</Button>
         </span>
       </template>
     </CatalogueTable>
@@ -76,6 +75,7 @@
 </template>
 
 <script setup lang="ts">
+import { language, localizedText, uiFormat, uiText } from '@/i18n';
 import type { EditFormSubmission, EditInitialData } from '@/types/editForm';
 import { ref, computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -116,7 +116,7 @@ const auth = useAuthStore();
 const { events, stories } = storeToRefs(dataStore);
 const storyLinks = useStoryLinks('event');
 const storiesOf = (eventId: string) => storyLinks.storyIdsOf(eventId).map(id => ({
-  id, title: dataStore.storyById(id)?.title.fr || `Frise ${id}`,
+  id, title: dataStore.storyById(id)?.title.fr || uiFormat`Frise ${id}`,
 }));
 const loading = ref(false);
 const loadError = ref<string | null>(null);
@@ -152,16 +152,16 @@ const displayEvents = computed(() => {
   list.sort((a, b) => {
     let cmp = 0;
     if (col === 'label') {
-      cmp = (a.label.fr || '').localeCompare(b.label.fr || '', 'fr', { sensitivity: 'base' });
+      cmp = (localizedText(a.label) || '').localeCompare(localizedText(b.label) || '', language.value, { sensitivity: 'base' });
     } else if (col === 'date') {
       const ya = listEventYearsBP(a);
       const yb = listEventYearsBP(b);
       if (ya === null || yb === null) return compareYearsOldestFirst(ya, yb);
       cmp = yb - ya;
     } else if (col === 'categories') {
-      cmp = tagsSortKey(a).localeCompare(tagsSortKey(b), 'fr', { sensitivity: 'base' });
+      cmp = tagsSortKey(a).localeCompare(tagsSortKey(b), language.value, { sensitivity: 'base' });
     } else if (col === 'stories') {
-      cmp = storyLinks.sortKeyOf(a.id).localeCompare(storyLinks.sortKeyOf(b.id), 'fr', { sensitivity: 'base' });
+      cmp = storyLinks.sortKeyOf(a.id).localeCompare(storyLinks.sortKeyOf(b.id), language.value, { sensitivity: 'base' });
     } else if (col === 'updated') {
       cmp = listEventUpdatedTimestampMs(a) - listEventUpdatedTimestampMs(b);
     }
@@ -175,15 +175,15 @@ const displayEvents = computed(() => {
 const search = ref('');
 const { tagIds, storyIds: selectedStoryIds, timeRange, period: periodFilter, state: filterState } = useCatalogueFilterState();
 const tagSelectOptions = computed(() => tagFilterOptions(events.value));
-const storySelectOptions = computed(() => stories.value.map(story => ({ value: story.id, label: story.title.fr || story.title.en || `Frise ${story.id}` }))
-  .sort((a, b) => a.label.localeCompare(b.label, 'fr')));
+const storySelectOptions = computed(() => stories.value.map(story => ({ value: story.id, label: localizedText(story.title) || uiFormat`Frise ${story.id}` }))
+  .sort((a, b) => a.label.localeCompare(b.label, language.value)));
 
 const filteredEvents = computed(() => {
   const q = search.value.trim().toLowerCase();
 
   return events.value.filter(e => {
     // Filtre texte
-    if (q && !e.label.fr.toLowerCase().includes(q)) return false;
+    if (q && !localizedText(e.label).toLowerCase().includes(q)) return false;
     return matchesCatalogueFilters(e, filterState.value, {
       storyIdsOf: item => storyLinks.storyIdsOf(item.id),
       overlaps: (item, range) => {

@@ -1,3 +1,4 @@
+import { language, uiFormat } from '@/i18n';
 import { getCurrentScope, onScopeDispose, ref } from 'vue';
 import { StoryApiService } from '@/services/StoryApiService';
 import { useDataStore } from '@/stores/useDataStore';
@@ -35,8 +36,8 @@ export function useStoryLinks(kind: 'period' | 'event') {
 
   const storyIdsOf = (id: string) => links.value.get(id) ?? [];
   const sortKeyOf = (id: string) => storyIdsOf(id)
-    .map(storyId => { const title = dataStore.storyById(storyId)?.title; return title?.fr || title?.en || `Frise ${storyId}`; })
-    .sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' })).join('\u0000');
+    .map(storyId => { const title = dataStore.storyById(storyId)?.title; return title?.fr || title?.en || uiFormat`Frise ${storyId}`; })
+    .sort((a, b) => a.localeCompare(b, language.value, { sensitivity: 'base' })).join('\u0000');
 
   /** One transaction per change; a lost response is reported, never resent. */
   async function change(id: string, storyId: string, remove: boolean) {
@@ -52,7 +53,7 @@ export function useStoryLinks(kind: 'period' | 'event') {
       dataStore.invalidateStory(storyId);
       return true;
     } catch (cause) {
-      changeError.value = mutationErrorMessage(cause, `Impossible de modifier les frises de ${kind === 'period' ? 'cette période' : 'cet événement'}.`);
+      changeError.value = mutationErrorMessage(cause, uiFormat`Impossible de modifier les frises de ${kind === 'period' ? 'cette période' : 'cet événement'}.`);
       return false;
     } finally {
       pending.value = null;

@@ -13,10 +13,10 @@ export function buildNewEntityCoreFields(formData: NewEntityFormCore) {
   return {
     id: generateUUID(),
     wikidata_id: formData.qid || null,
-    label: { fr: formData.title.fr, en: formData.title.en || formData.title.fr },
+    label: { fr: formData.title.fr, en: formData.title.en || '' },
     description: {
       fr: formData.description?.fr || null,
-      en: formData.description?.en || formData.description?.fr || null,
+      en: formData.description?.en || null,
     },
     ...(formData.wikipedia ? { wikipedia: formData.wikipedia } : {}),
   };

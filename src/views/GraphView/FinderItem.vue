@@ -13,16 +13,16 @@
     @drop="emit('drop', itemId)"
     @click="emit('click')"
   >
-    <button ref="contentButton" type="button" class="finder-item-content" :aria-label="label.fr" :aria-current="selected ? 'true' : undefined" @click.stop="emit('click')">
+    <button ref="contentButton" type="button" class="finder-item-content" :aria-label="localizedText(label)" :aria-current="selected ? 'true' : undefined" @click.stop="emit('click')">
       <ItemSummary class="finder-item-text">
         <template #title><span
           class="finder-item-title"
           :class="{ 'finder-item-label-wikidata': wikidataOnly }"
         >
-          <slot>{{ label.fr }}</slot>
+          <slot>{{ localizedText(label) }}</slot>
         </span></template>
         <template #details><span class="finder-item-dates">
-          <span v-if="tags?.length" class="finder-item-category">{{ tags[0].label.fr }}</span>
+          <span v-if="tags?.length" class="finder-item-category">{{ localizedText(tags[0].label) }}</span>
           <span v-if="tags?.length" class="finder-item-date-sep"> · </span>
           {{ dateSubtitle }}
         </span></template>
@@ -40,9 +40,9 @@
         class="action-button row-action-button"
         type="button"
         @click.stop="onRowActionClick"
-        :aria-label="`${wikidataOnly ? 'Ajouter' : 'Modifier'} ${label.fr}`"
+        :aria-label="`${wikidataOnly ? 'Ajouter' : 'Modifier'} ${localizedText(label)}`"
       >
-        {{ wikidataOnly ? 'Ajouter' : 'Modifier' }}
+        {{ uiText(wikidataOnly ? 'Ajouter' : 'Modifier') }}
       </button>
       <div v-if="!hideChevron" class="finder-item-chevron">
         <ChevronIcon
@@ -57,6 +57,7 @@
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiText } from '@/i18n';
 /**
  * Ligne finder unique : tout passe par les props / le slot `#actions` (retirer, ajouter, etc.).
  * Ex. story — périodes : `hide-row-action`, slot actions, `is-external-catalog`, `hide-chevron` si pas de drilldown ;

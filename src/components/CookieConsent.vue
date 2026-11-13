@@ -1,33 +1,30 @@
 <template>
   <section v-if="consent.needsDecision || consent.preferencesOpen" class="cookie-consent" aria-labelledby="cookie-consent-title">
     <PopoverSurface padded class="cookie-consent__surface">
-      <h2 id="cookie-consent-title" class="cookie-consent__title">Cookies et mesure d’audience</h2>
-      <p class="cookie-consent__text">
-        Les cookies nécessaires (session de connexion, préférences d’affichage) sont toujours actifs.
-        Sans cookie, nous comptons les visites de façon anonyme, une visite à la fois. Avec votre accord, nous mesurons aussi
-        l’audience d’une visite à l’autre pour améliorer le site. Vous pouvez changer d’avis à tout moment depuis
-        <RouterLink :to="{ name: 'legal', params: { page: 'cookies' } }">la politique cookies</RouterLink>.
+      <h2 id="cookie-consent-title" class="cookie-consent__title">{{ uiText("Cookies et mesure d’audience") }}</h2>
+      <p class="cookie-consent__text"> {{ uiText("Les cookies nécessaires (session de connexion, préférences d’affichage) sont toujours actifs. Sans cookie, nous comptons les visites de façon anonyme, une visite à la fois. Avec votre accord, nous mesurons aussi l’audience d’une visite à l’autre pour améliorer le site. Vous pouvez changer d’avis à tout moment depuis") }} <RouterLink :to="{ name: 'legal', params: { page: 'cookies' } }">{{ uiText("la politique cookies") }}</RouterLink>.
       </p>
       <fieldset v-if="customizing" class="cookie-consent__choices">
-        <legend class="sr-only">Choix par finalité</legend>
-        <Switch :model-value="true" label="Nécessaires (toujours actifs)" disabled />
-        <Switch v-model="analytics" label="Mesure d’audience avec cookies" />
-        <Switch v-model="anonymous" label="Mesure anonyme sans cookie" :disabled="analytics" />
-        <p class="cookie-consent__note">{{ analytics ? 'Incluse dans la mesure d’audience que vous acceptez.' : 'Ne nécessite pas votre accord ; vous pouvez vous y opposer.' }}</p>
+        <legend class="sr-only">{{ uiText("Choix par finalité") }}</legend>
+        <Switch :model-value="true" :label="uiText('Nécessaires (toujours actifs)')" disabled />
+        <Switch v-model="analytics" :label="uiText('Mesure d’audience avec cookies')" />
+        <Switch v-model="anonymous" :label="uiText('Mesure anonyme sans cookie')" :disabled="analytics" />
+        <p class="cookie-consent__note">{{ uiText(analytics ? 'Incluse dans la mesure d’audience que vous acceptez.' : 'Ne nécessite pas votre accord ; vous pouvez vous y opposer.') }}</p>
       </fieldset>
       <div class="cookie-consent__actions">
-        <Button variant="secondary" size="sm" @click="consent.rejectAll">Tout refuser</Button>
-        <Button v-if="!customizing" variant="secondary" size="sm" @click="customizing = true">Personnaliser</Button>
-        <Button v-else variant="secondary" size="sm" @click="consent.save(analytics, analytics || anonymous)">Enregistrer mes choix</Button>
-        <Button variant="secondary" size="sm" @click="consent.acceptAll">Tout accepter</Button>
-        <Button v-if="!consent.needsDecision" variant="ghost" size="sm" @click="consent.closePreferences">Fermer</Button>
+        <Button variant="secondary" size="sm" @click="consent.rejectAll">{{ uiText("Tout refuser") }}</Button>
+        <Button v-if="!customizing" variant="secondary" size="sm" @click="customizing = true">{{ uiText("Personnaliser") }}</Button>
+        <Button v-else variant="secondary" size="sm" @click="consent.save(analytics, analytics || anonymous)">{{ uiText("Enregistrer mes choix") }}</Button>
+        <Button variant="secondary" size="sm" @click="consent.acceptAll">{{ uiText("Tout accepter") }}</Button>
+        <Button v-if="!consent.needsDecision" variant="ghost" size="sm" @click="consent.closePreferences">{{ uiText("Fermer") }}</Button>
       </div>
-      <p v-if="!consent.trackingConfigured" class="cookie-consent__note" role="status">Aucun traceur de mesure d’audience n’est actif pour le moment.</p>
+      <p v-if="!consent.trackingConfigured" class="cookie-consent__note" role="status">{{ uiText("Aucun traceur de mesure d’audience n’est actif pour le moment.") }}</p>
     </PopoverSurface>
   </section>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import Button from './base/Button.vue';

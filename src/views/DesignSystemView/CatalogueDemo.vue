@@ -1,19 +1,19 @@
 <template>
   <section class="catalogue-demo">
-    <h1>Catalogues et espace des frises</h1>
-    <p>Barre de recherche et filtres communs. Les tableaux exposent une densité compacte pour les données et confortable pour les frises.</p>
-    <h2>CatalogueToolbar · CatalogueFilters · CatalogueTable</h2>
-    <CatalogueToolbar v-model:search="search" placeholder="Rechercher dans la démonstration…">
+    <h1>{{ uiText("Catalogues et espace des frises") }}</h1>
+    <p>{{ uiText("Barre de recherche et filtres communs. Les tableaux exposent une densité compacte pour les données et confortable pour les frises.") }}</p>
+    <h2>{{ uiText("CatalogueToolbar · CatalogueFilters · CatalogueTable") }}</h2>
+    <CatalogueToolbar v-model:search="search" :placeholder="uiText('Rechercher dans la démonstration…')">
       <template #filters><CatalogueFilters context="events" v-model:tags="categories" v-model:story-ids="storyIds" v-model:time-range="range" :tag-options="categoryOptions" :story-options="storyOptions" /></template>
-      <template #actions><Button size="sm" @click="notice('Ajouter un événement')">Ajouter un événement</Button></template>
+      <template #actions><Button size="sm" @click="notice('Ajouter un événement')">{{ uiText("Ajouter un événement") }}</Button></template>
     </CatalogueToolbar>
     <Tabs v-model="density" :tabs="[{ value: 'compact', label: 'Compacte' }, { value: 'comfortable', label: 'Confortable' }]" />
     <div class="table-example">
-      <CatalogueTable label="Démonstration" :density="density" :columns="columns" :items="rows" empty-text="Aucun résultat" :sort-column="sort" :sort-dir="direction" @sort="sortRows">
-        <template #row="{ item }"><span class="col-label" role="cell">{{ item.label }}</span><span class="col-date" role="cell">{{ item.date }}</span><span class="col-categories" role="cell"><Tag :label="item.category" variant="accent" /></span></template>
+      <CatalogueTable :label="uiText('Démonstration')" :density="density" :columns="columns" :items="rows" empty-text="Aucun résultat" :sort-column="sort" :sort-dir="direction" @sort="sortRows">
+        <template #row="{ item }"><span class="col-label" role="cell">{{ uiText(item.label) }}</span><span class="col-date" role="cell">{{ item.date }}</span><span class="col-categories" role="cell"><Tag :label="uiText(item.category)" variant="accent" /></span></template>
       </CatalogueTable>
     </div>
-    <h2>StoryTabsBar · StoryGallery</h2>
+    <h2>{{ uiText("StoryTabsBar · StoryGallery") }}</h2>
     <Tabs v-model="galleryState" :tabs="[{ value: 'catalogue', label: 'Catalogue' }, { value: 'empty', label: 'Sans frise' }]" />
     <div class="gallery-example">
       <StoryTabsBar :tabs="tabs" :active-id="active" @select="active = $event" @close="closeTab" @reorder="reorderTab" />
@@ -22,6 +22,7 @@
   </section>
 </template>
 <script setup lang="ts">
+import { language, localizedText, uiFormat, uiText } from '@/i18n';
 import { computed, ref } from 'vue';
 import Button from '@/components/base/Button.vue';
 import Tabs from '@/components/base/Tabs.vue';
@@ -38,7 +39,7 @@ import type { StorySummary } from '@/types/database';
 import { storyOverlapsRange } from '@/lib/storyTimeFilter';
 import { useToast } from '@/composables/useToast';
 const toast = useToast();
-const notice = (label: string) => toast.show(`${label} — démonstration`, 'info');
+const notice = (label: string) => toast.show(uiFormat`${label} — démonstration`, 'info');
 const search = ref('');
 const categories = ref<string[]>([]);
 const storyIds = ref<string[]>([]);
@@ -52,7 +53,7 @@ const columns: CatalogueColumn[] = [{ key: 'label', label: 'Nom', sortLabel: 'Tr
 const rows = computed(() => [
   { id: 'earth', label: 'Formation de la Terre', date: '4,54 Ga', category: 'Géologie', categoryId: 'geology', storyId: 'demo-earth', yearsBP: 4.54e9 },
   { id: 'writing', label: 'Invention de l’écriture', date: '3 200 av. J.-C.', category: 'Histoire', categoryId: 'history', storyId: 'demo-history', yearsBP: 5200 },
-].filter(row => row.label.toLocaleLowerCase('fr').includes(search.value.toLocaleLowerCase('fr')) && (!categories.value.length || categories.value.includes(row.categoryId)) && (!storyIds.value.length || storyIds.value.includes(row.storyId)) && (!range.value || (row.yearsBP <= range.value.oldBP && row.yearsBP >= range.value.recentBP)))
+].filter(row => row.label.toLocaleLowerCase(language.value).includes(search.value.toLocaleLowerCase(language.value)) && (!categories.value.length || categories.value.includes(row.categoryId)) && (!storyIds.value.length || storyIds.value.includes(row.storyId)) && (!range.value || (row.yearsBP <= range.value.oldBP && row.yearsBP >= range.value.recentBP)))
   .sort((a, b) => a.label.localeCompare(b.label, 'fr') * (direction.value === 'asc' ? 1 : -1)));
 function sortRows(column: string) { sort.value = column; direction.value = direction.value === 'asc' ? 'desc' : 'asc'; }
 const galleryState = ref('catalogue');
@@ -66,13 +67,13 @@ const stories: StorySummary[] = [
   { id: 'demo-history', title: { fr: 'Les premières civilisations', en: '' }, categories: [{ id: 'history', label: { fr: 'Histoire', en: '' } }], author: 'Démonstration', isPublic: false, startDate: '-3200', endDate: '0476', previewPeriods: [], previewEvents: [] },
 ];
 const sampleStories = computed(() => galleryState.value === 'empty' ? [] : stories);
-const visibleStories = computed(() => sampleStories.value.filter(story => story.title.fr.toLocaleLowerCase('fr').includes(gallerySearch.value.toLocaleLowerCase('fr'))
+const visibleStories = computed(() => sampleStories.value.filter(story => localizedText(story.title).toLocaleLowerCase(language.value).includes(gallerySearch.value.toLocaleLowerCase(language.value))
   && (visibility.value === 'all' || story.isPublic === (visibility.value === 'public'))
   && (!galleryCategories.value.length || story.categories.some(category => galleryCategories.value.includes(category.id)))
   && [galleryRange.value, period.value?.range].every(value => !value || storyOverlapsRange(story, value))));
 const tabs = ref<{ id: string; label: string }[]>([]);
 const active = ref<string | null>(null);
-function openStory(story: StorySummary) { if (!tabs.value.some(tab => tab.id === story.id)) tabs.value.push({ id: story.id, label: story.title.fr }); active.value = story.id; }
+function openStory(story: StorySummary) { if (!tabs.value.some(tab => tab.id === story.id)) tabs.value.push({ id: story.id, label: localizedText(story.title) }); active.value = story.id; }
 function closeTab(id: string) { tabs.value = tabs.value.filter(tab => tab.id !== id); if (active.value === id) active.value = null; }
 function reorderTab(id: string, targetId: string, position: 'before' | 'after') {
   const tab = tabs.value.find(tab => tab.id === id);

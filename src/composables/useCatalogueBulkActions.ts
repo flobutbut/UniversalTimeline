@@ -1,3 +1,4 @@
+import { uiFormat } from '@/i18n';
 import { computed, onScopeDispose, ref } from 'vue';
 import { useConfirm } from './useConfirm';
 import { mutationErrorMessage } from '@/lib/mutationErrorMessage';
@@ -54,7 +55,7 @@ export function useCatalogueBulkActions<T extends { id: string }>(options: {
             : 'Suppression définitive du catalogue et retrait de toutes les frises qui utilisent ces événements.'
         : action === 'remove-story' ? 'Les fiches restent dans le catalogue. Les liens de cette frise seront retirés.' : '';
       const names = items.slice(0, 10).map(options.itemLabel).join(', ') + (items.length > 10 ? ` et ${items.length - 10} autre(s)` : '');
-      if (!await confirm(`${verb} ${items.length} élément(s)`, `${consequences}\n\nSélection : ${names}`) || disposed) return;
+      if (!await confirm(uiFormat`${verb} ${items.length} élément(s)`, `${consequences}\n\nSélection : ${names}`) || disposed) return;
       failures.value = []; message.value = '';
       const succeeded = new Set<string>();
       if (action === 'add-story' || action === 'remove-story') {
@@ -71,13 +72,13 @@ export function useCatalogueBulkActions<T extends { id: string }>(options: {
             failures.value.push({ id: item.id, label: options.itemLabel(item), message: mutationErrorMessage(error, 'Action refusée.') });
             if (isUncertain(error)) { uncertain.value = true; options.invalidate?.(); break; }
           }
-          message.value = `${succeeded.size} élément(s) traité(s) sur ${items.length}…`;
+          message.value = uiFormat`${succeeded.size} élément(s) traité(s) sur ${items.length}…`;
         }
       }
       selectedIds.value = selectedIds.value.filter(id => !succeeded.has(id));
       const failedCount = action === 'add-story' || action === 'remove-story' ? (failures.value.length ? items.length : 0) : failures.value.length;
       const pending = items.length - succeeded.size - failedCount;
-      message.value = `${succeeded.size} élément(s) traité(s) sur ${items.length}.${failures.value.length ? ` ${failures.value.length} échec(s).` : ''}${pending > 0 ? ` ${pending} non traité(s).` : ''}`;
+      message.value = uiFormat`${succeeded.size} élément(s) traité(s) sur ${items.length}.${failures.value.length ? ` ${failures.value.length} échec(s).` : ''}${pending > 0 ? ` ${pending} non traité(s).` : ''}`;
     } finally { busy.value = false; }
   }
   return { selectedIds, selected, busy, message, failures, uncertain, run, reload };

@@ -1,3 +1,4 @@
+import { localizedText } from '@/i18n';
 import { computed, onScopeDispose, ref, shallowRef, watch, type Ref } from 'vue';
 import type { useHomeNavigation } from '@/composables/useHomeNavigation';
 import { useDataStore } from '@/stores/useDataStore';
@@ -116,12 +117,12 @@ export function useTimelineComparisonLane(options: {
 
   const title = computed(() => {
     const summary = dataStore.stories.find(row => row.id === storyId.value);
-    return summary?.title.fr || summary?.title.en || story.value?.title.fr || story.value?.title.en || 'Frise';
+    return localizedText(summary?.title) || localizedText(story.value?.title) || 'Frise';
   });
   const storyCrumbs = computed(() => leads.value ? nav.storyBreadcrumb.value
     : storyId.value ? [{ id: `story:${storyId.value}`, title: title.value, kind: 'story' as const }] : []);
   const periodCrumbs = computed(() => leads.value ? nav.breadcrumb.value : ancestors.value.map(period => ({
-    id: `story:${storyId.value}/period:${period.id}`, title: period.label.fr || period.label.en || 'Période sans nom', kind: 'period' as const,
+    id: `story:${storyId.value}/period:${period.id}`, title: localizedText(period.label) || 'Période sans nom', kind: 'period' as const,
   })));
 
   // ─── En tête, les actions de la timeline ; en suiveuse, elles font mener cette frise ───

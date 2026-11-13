@@ -1,25 +1,26 @@
 <template>
   <fieldset class="tag-picker" :disabled="disabled || loading">
-    <legend class="tag-picker__legend">{{ label }} <span class="tag-picker__hint">{{ MAX_TAGS }} au maximum, le premier est le principal</span></legend>
-    <ol v-if="selected.length" class="tag-picker__selected" aria-label="Tags choisis">
+    <legend class="tag-picker__legend">{{ uiText(label) }} <span class="tag-picker__hint">{{ MAX_TAGS }} {{ uiText("au maximum, le premier est le principal") }}</span></legend>
+    <ol v-if="selected.length" class="tag-picker__selected" :aria-label="uiText('Tags choisis')">
       <li v-for="(tag, index) in selected" :key="tag.id" class="tag-picker__item">
-        <Tag :label="tagLabel(tag)" removable :variant="index === 0 ? 'accent' : 'neutral'" :disabled="disabled" @remove="toggle(tag.id)" />
-        <span v-if="index === 0" class="tag-picker__hint">Principal</span>
-        <button v-else type="button" class="tag-picker__make-primary" :disabled="disabled" :aria-label="`Définir ${tagLabel(tag)} comme tag principal`" @click="makePrimary(tag.id)">Rendre principal</button>
+        <Tag :label="uiText(tagLabel(tag))" removable :variant="index === 0 ? 'accent' : 'neutral'" :disabled="disabled" @remove="toggle(tag.id)" />
+        <span v-if="index === 0" class="tag-picker__hint">{{ uiText("Principal") }}</span>
+        <button v-else type="button" class="tag-picker__make-primary" :disabled="disabled" :aria-label="uiText(uiFormat`Définir ${tagLabel(tag)} comme tag principal`)" @click="makePrimary(tag.id)">{{ uiText("Rendre principal") }}</button>
       </li>
     </ol>
-    <p v-if="loading" class="tag-picker__hint" role="status">Chargement des tags…</p>
-    <div v-for="family in families" v-else :key="family.id" class="tag-picker__family" role="group" :aria-label="family.label">
-      <p class="tag-picker__family-label" aria-hidden="true">{{ family.label }}</p>
+    <p v-if="loading" class="tag-picker__hint" role="status">{{ uiText("Chargement des tags…") }}</p>
+    <div v-for="family in families" v-else :key="family.id" class="tag-picker__family" role="group" :aria-label="uiText(family.label)">
+      <p class="tag-picker__family-label" aria-hidden="true">{{ uiText(family.label) }}</p>
       <div class="tag-picker__options">
         <button v-for="tag in family.tags" :key="tag.id" type="button" class="tag-picker__option" :aria-pressed="modelValue.includes(tag.id)"
-          :disabled="disabled || (!modelValue.includes(tag.id) && modelValue.length >= MAX_TAGS)" :title="tag.description" @click="toggle(tag.id)">{{ tagLabel(tag) }}</button>
+          :disabled="disabled || (!modelValue.includes(tag.id) && modelValue.length >= MAX_TAGS)" :title="uiText(tag.description)" @click="toggle(tag.id)">{{ uiText(tagLabel(tag)) }}</button>
       </div>
     </div>
-    <p v-if="error" class="tag-picker__error" role="alert">{{ error }}</p>
+    <p v-if="error" class="tag-picker__error" role="alert">{{ uiText(error) }}</p>
   </fieldset>
 </template>
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed } from 'vue';
 import Tag from '@/components/base/Tag.vue';
 import { groupTagsByFamily, MAX_TAGS, tagLabel } from '@/lib/tags';

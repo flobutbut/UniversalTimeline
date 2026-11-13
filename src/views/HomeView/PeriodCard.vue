@@ -16,7 +16,7 @@
       },
     ]"
     :data-period-id="period.id"
-    :aria-description="parentLabel ? `Sous-période de ${parentLabel}` : undefined"
+    :aria-description="parentLabel ? uiFormat`Sous-période de ${parentLabel}` : undefined"
     :aria-disabled="loading || undefined"
     @click="handleClick"
     @keydown.enter.self.prevent="handleClick"
@@ -25,11 +25,11 @@
     <div ref="mainRef" class="main-container">
       <div ref="contentRef" class="card-content">
         <div class="period-header">
-          <h3 class="period-title" :aria-label="period.label.fr">
-            <button type="button" class="period-card__title-action" :disabled="loading" :aria-label="variant === 'parent' ? `Revenir depuis ${period.label.fr}` : period.label.fr"
-              :aria-describedby="typeof $attrs['aria-describedby'] === 'string' ? $attrs['aria-describedby'] : undefined" @click.stop="handleClick">{{ period.label.fr }}</button>
+          <h3 class="period-title" :lang="contentLanguage(period.label)" :aria-label="localizedText(period.label)">
+            <button type="button" class="period-card__title-action" :disabled="loading" :aria-label="variant === 'parent' ? uiFormat`Revenir depuis ${localizedText(period.label)}` : localizedText(period.label)"
+              :aria-describedby="typeof $attrs['aria-describedby'] === 'string' ? $attrs['aria-describedby'] : undefined" @click.stop="handleClick">{{ localizedText(period.label) }}</button>
           </h3>
-          <WikipediaLink :titles="period.wikipedia" :subject="period.label.fr || period.label.en" compact class="period-card__wikipedia" :class="{ 'period-card__wikipedia--hidden': !linkFits }" />
+          <WikipediaLink :titles="period.wikipedia" :subject="localizedText(period.label)" compact class="period-card__wikipedia" :class="{ 'period-card__wikipedia--hidden': !linkFits }" />
         </div>
         <div class="period-footer" v-if="period.startDate || period.endDate">
           <div class="period-info">{{ periodDateRange }}</div>
@@ -37,11 +37,11 @@
       </div>
       <!-- Actions mesurables même masquées : l'agrandissement réserve leur largeur complète. -->
       <div ref="actionsRef" class="period-card__actions" :class="{ 'period-card__actions--hidden': !actionsFit }">
-        <span v-if="variant === 'parent'" class="period-card__return" aria-hidden="true">Retour</span>
+        <span v-if="variant === 'parent'" class="period-card__return" aria-hidden="true">{{ uiText("Retour") }}</span>
         <slot name="title-actions" />
       </div>
       <Button v-if="variant === 'timeline' && period.hasChildren" class="period-card__drill" :class="{ 'period-card__drill--hidden': !drillFits }" variant="ghost" size="xs" icon-only
-        :disabled="loading" :aria-label="`Explorer les sous-périodes de ${period.label.fr}`" @click.stop="handleClick">
+        :disabled="loading" :aria-label="uiFormat`Explorer les sous-périodes de ${localizedText(period.label)}`" @click.stop="handleClick">
         <template #icon><Icon icon="mdi:arrow-right" aria-hidden="true" /></template>
       </Button>
     </div>
@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import { contentLanguage, localizedText, uiFormat, uiText } from '@/i18n';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
@@ -133,7 +134,7 @@ onMounted(() => {
   for (const el of [mainRef.value, actionsRef.value]) if (el) observer.observe(el);
 });
 onBeforeUnmount(() => observer?.disconnect());
-watch(() => [props.period.label.fr, periodDateRange.value, props.wrapContent, props.compact], measureActions, { flush: 'post' });
+watch(() => [localizedText(props.period.label), periodDateRange.value, props.wrapContent, props.compact], measureActions, { flush: 'post' });
 
 const handleClick = () => {
   if (props.loading) return;

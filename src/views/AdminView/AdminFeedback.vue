@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';
@@ -90,50 +91,50 @@ watch([filter, subjectFilter], () => { offset.value = 0; void load(); });
 <template>
   <section class="admin-feedback" aria-labelledby="admin-feedback-title">
     <header class="admin-feedback__header">
-      <div><h2 id="admin-feedback-title">Retours utilisateurs</h2><p>{{ total }} retour(s) {{ filters.subject || filters.status ? 'correspondant(s)' : 'reçu(s)' }}</p></div>
+      <div><h2 id="admin-feedback-title">{{ uiText("Retours utilisateurs") }}</h2><p>{{ total }} {{ uiText("retour(s)") }} {{ uiText(filters.subject || filters.status ? 'correspondant(s)' : 'reçu(s)') }}</p></div>
       <div class="admin-feedback__actions admin-feedback__header-actions">
-        <Switch variant="sm" label-first :model-value="feature.enabled" label="Activer les avis" :disabled="!feature.loaded || feature.saving" @update:model-value="feature.setEnabled" />
-        <Button variant="secondary" size="sm" :disabled="loading || !!saving" @click="load(); feature.refresh()">Actualiser</Button>
+        <Switch variant="sm" label-first :model-value="feature.enabled" :label="uiText('Activer les avis')" :disabled="!feature.loaded || feature.saving" @update:model-value="feature.setEnabled" />
+        <Button variant="secondary" size="sm" :disabled="loading || !!saving" @click="load(); feature.refresh()">{{ uiText("Actualiser") }}</Button>
       </div>
     </header>
-    <FeedbackState v-if="feature.error" kind="error" layout="inline" :message="feature.error" retryable @retry="feature.refresh" />
+    <FeedbackState v-if="feature.error" kind="error" layout="inline" :message="uiText(feature.error)" retryable @retry="feature.refresh" />
     <div class="admin-feedback__filters">
-      <Select v-model="filter" label="Statut" :searchable="false" :disabled="!!saving" :options="[{ value: 'all', label: 'Tous les statuts' }, ...feedbackStatuses]" />
-      <Select v-model="subjectFilter" label="Objet" :searchable="false" :disabled="!!saving" :options="[{ value: 'all', label: 'Tous les objets' }, ...feedbackSubjects]" />
-      <div class="admin-feedback__notifications" :aria-busy="notificationBusy" :title="notifications && !notifications.available ? 'Envoi des e-mails à configurer' : undefined">
-        <Switch variant="sm" :model-value="notifications?.enabled ?? false" :label="`Envoyer sur ${notifications?.email ?? '…'}`" :disabled="notificationBusy || !notifications || (!notifications.available && !notifications.enabled) || !notifications.email" @update:model-value="setNotifications" />
+      <Select v-model="filter" :label="uiText('Statut')" :searchable="false" :disabled="!!saving" :options="[{ value: 'all', label: 'Tous les statuts' }, ...feedbackStatuses]" />
+      <Select v-model="subjectFilter" :label="uiText('Objet')" :searchable="false" :disabled="!!saving" :options="[{ value: 'all', label: 'Tous les objets' }, ...feedbackSubjects]" />
+      <div class="admin-feedback__notifications" :aria-busy="notificationBusy" :title="uiText(notifications && !notifications.available ? 'Envoi des e-mails à configurer' : undefined)">
+        <Switch variant="sm" :model-value="notifications?.enabled ?? false" :label="uiText(uiFormat`Envoyer sur ${notifications?.email ?? '…'}`)" :disabled="notificationBusy || !notifications || (!notifications.available && !notifications.enabled) || !notifications.email" @update:model-value="setNotifications" />
       </div>
     </div>
-    <FeedbackState v-if="notificationError" kind="error" layout="inline" :message="notificationError"><template #actions><Button variant="ghost" size="xs" :disabled="notificationBusy" @click="loadNotifications">Réessayer</Button></template></FeedbackState>
+    <FeedbackState v-if="notificationError" kind="error" layout="inline" :message="uiText(notificationError)"><template #actions><Button variant="ghost" size="xs" :disabled="notificationBusy" @click="loadNotifications">{{ uiText("Réessayer") }}</Button></template></FeedbackState>
     <FeedbackState v-if="loading" kind="loading" layout="inline" />
-    <FeedbackState v-if="error" kind="error" layout="inline" :message="error" retryable @retry="load" />
-    <FeedbackState v-if="!loading && !error && !items.length" kind="empty" layout="inline" message="Aucun retour ne correspond aux filtres." />
+    <FeedbackState v-if="error" kind="error" layout="inline" :message="uiText(error)" retryable @retry="load" />
+    <FeedbackState v-if="!loading && !error && !items.length" kind="empty" layout="inline" :message="uiText('Aucun retour ne correspond aux filtres.')" />
     <article v-for="item in items" v-show="!loading" :key="item.id" class="admin-feedback__card">
-      <header class="admin-feedback__card-header"><h3>{{ subjectLabel(item.subject) }}</h3><Tag :label="statusLabel(item.status)" :variant="item.status === 'new' ? 'accent' : 'neutral'" /></header>
-      <p class="admin-feedback__muted">{{ formatAdminDate(item.createdAt) }} · {{ item.rating === null ? 'Sans note' : `${'★'.repeat(item.rating)}${'☆'.repeat(5 - item.rating)} (${item.rating}/5)` }}</p>
-      <p class="admin-feedback__message">{{ item.message }}</p>
+      <header class="admin-feedback__card-header"><h3>{{ uiText(subjectLabel(item.subject)) }}</h3><Tag :label="uiText(statusLabel(item.status))" :variant="item.status === 'new' ? 'accent' : 'neutral'" /></header>
+      <p class="admin-feedback__muted">{{ formatAdminDate(item.createdAt) }} · {{ uiText(item.rating === null ? 'Sans note' : `${'★'.repeat(item.rating)}${'☆'.repeat(5 - item.rating)} (${item.rating}/5)`) }}</p>
+      <p class="admin-feedback__message">{{ uiText(item.message) }}</p>
       <a class="admin-feedback__page" :href="item.pageUrl" target="_blank" rel="noopener noreferrer">{{ item.pageUrl }}</a>
-      <p class="admin-feedback__muted">{{ item.email || 'Aucun e-mail de suivi renseigné' }}</p>
+      <p class="admin-feedback__muted">{{ uiText(item.email || 'Aucun e-mail de suivi renseigné') }}</p>
       <div class="admin-feedback__actions">
-        <Button v-for="status in feedbackStatuses.filter(status => status.value !== item.status)" :key="status.value" variant="tertiary" size="sm" :disabled="!!saving || loading" @click="changeStatus(item, status.value)">Marquer « {{ status.label }} »</Button>
-        <Button v-if="item.email" size="sm" @click="compose(item)">Répondre</Button>
-        <Button variant="danger" size="sm" :disabled="!!saving || loading" @click="remove(item)">Supprimer</Button>
+        <Button v-for="status in feedbackStatuses.filter(status => status.value !== item.status)" :key="status.value" variant="tertiary" size="sm" :disabled="!!saving || loading" @click="changeStatus(item, status.value)">{{ uiText("Marquer «") }} {{ uiText(status.label) }} »</Button>
+        <Button v-if="item.email" size="sm" @click="compose(item)">{{ uiText("Répondre") }}</Button>
+        <Button variant="danger" size="sm" :disabled="!!saving || loading" @click="remove(item)">{{ uiText("Supprimer") }}</Button>
       </div>
     </article>
-    <nav v-if="total > 50" class="admin-feedback__actions" aria-label="Pages des retours">
-      <Button variant="secondary" size="sm" :disabled="loading || !!saving || offset === 0" @click="page(-50)">Précédent</Button>
-      <span>{{ offset + 1 }}–{{ Math.min(offset + 50, total) }} sur {{ total }}</span>
-      <Button variant="secondary" size="sm" :disabled="loading || !!saving || offset + 50 >= total" @click="page(50)">Suivant</Button>
+    <nav v-if="total > 50" class="admin-feedback__actions" :aria-label="uiText('Pages des retours')">
+      <Button variant="secondary" size="sm" :disabled="loading || !!saving || offset === 0" @click="page(-50)">{{ uiText("Précédent") }}</Button>
+      <span>{{ offset + 1 }}–{{ Math.min(offset + 50, total) }} {{ uiText("sur") }} {{ total }}</span>
+      <Button variant="secondary" size="sm" :disabled="loading || !!saving || offset + 50 >= total" @click="page(50)">{{ uiText("Suivant") }}</Button>
     </nav>
     <Teleport to="body">
-      <ModalShell v-if="reply" title="Répondre au retour" height="auto" @close="reply = null">
+      <ModalShell v-if="reply" :title="uiText('Répondre au retour')" height="auto" @close="reply = null">
         <div class="admin-feedback__reply">
-          <p>À : {{ reply.email }}</p>
-          <Input v-model="replySubject" label="Objet" />
-          <Input v-model="replyBody" label="Réponse" type="textarea" textarea-size="lg" />
-          <p class="admin-feedback__muted">Relisez et complétez le modèle. Le bouton ouvre votre messagerie ; vous y confirmez l’envoi.</p>
+          <p>{{ uiText("À :") }} {{ reply.email }}</p>
+          <Input v-model="replySubject" :label="uiText('Objet')" />
+          <Input v-model="replyBody" :label="uiText('Réponse')" type="textarea" textarea-size="lg" />
+          <p class="admin-feedback__muted">{{ uiText("Relisez et complétez le modèle. Le bouton ouvre votre messagerie ; vous y confirmez l’envoi.") }}</p>
         </div>
-        <template #footer-right><Button :to="mailto" :disabled="!replySubject.trim() || !replyBody.trim()">Ouvrir dans ma messagerie</Button></template>
+        <template #footer-right><Button :to="mailto" :disabled="!replySubject.trim() || !replyBody.trim()">{{ uiText("Ouvrir dans ma messagerie") }}</Button></template>
       </ModalShell>
     </Teleport>
   </section>

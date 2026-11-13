@@ -1,23 +1,24 @@
 <template>
   <div class="filter-values" @keydown="onKeydown">
     <input v-if="searchable ?? options.length > 7" v-model="search" class="filter-values__search" type="search"
-      :placeholder="searchPlaceholder" :aria-label="searchPlaceholder" />
-    <p v-if="loading" class="filter-values__state" role="status">Chargement…</p>
-    <p v-else-if="error" class="filter-values__state" role="alert">{{ error }} <Button variant="tertiary" size="sm" type="button" @click="$emit('retry')">Réessayer</Button></p>
-    <div v-else role="listbox" :aria-label="label" :aria-multiselectable="multiple || undefined" class="filter-values__list">
-      <div v-for="section in sections" :key="section.label" :role="section.label ? 'group' : undefined" :aria-label="section.label || undefined">
-        <p v-if="section.label" class="filter-values__group" aria-hidden="true">{{ section.label }}</p>
+      :placeholder="uiText(searchPlaceholder)" :aria-label="uiText(searchPlaceholder)" />
+    <p v-if="loading" class="filter-values__state" role="status">{{ uiText("Chargement…") }}</p>
+    <p v-else-if="error" class="filter-values__state" role="alert">{{ uiText(error) }} <Button variant="tertiary" size="sm" type="button" @click="$emit('retry')">{{ uiText("Réessayer") }}</Button></p>
+    <div v-else role="listbox" :aria-label="uiText(label)" :aria-multiselectable="multiple || undefined" class="filter-values__list">
+      <div v-for="section in sections" :key="section.label" :role="section.label ? 'group' : undefined" :aria-label="uiText(section.label || undefined)">
+        <p v-if="section.label" class="filter-values__group" aria-hidden="true">{{ uiText(section.label) }}</p>
         <button v-for="option in section.options" :key="option.value" type="button" role="option"
           :aria-selected="modelValue.includes(option.value)" class="filter-values__option" @click="pick(option.value)">
-          <span>{{ option.label }}</span><Icon v-if="modelValue.includes(option.value)" icon="mdi:check" width="17" />
+          <span>{{ uiText(option.label) }}</span><Icon v-if="modelValue.includes(option.value)" icon="mdi:check" width="17" />
         </button>
       </div>
-      <p v-if="!filteredOptions.length" class="filter-values__state" role="status">Aucun résultat</p>
+      <p v-if="!filteredOptions.length" class="filter-values__state" role="status">{{ uiText("Aucun résultat") }}</p>
     </div>
-    <button v-if="multiple && modelValue.length" type="button" class="filter-values__clear" @click="$emit('update:modelValue', [])">Tout effacer</button>
+    <button v-if="multiple && modelValue.length" type="button" class="filter-values__clear" @click="$emit('update:modelValue', [])">{{ uiText("Tout effacer") }}</button>
   </div>
 </template>
 <script setup lang="ts">
+import { language, uiText } from '@/i18n';
 import Button from '@/components/base/Button.vue';
 import { computed } from 'vue';
 import { Icon } from '@iconify/vue';
@@ -34,7 +35,7 @@ const props = withDefaults(defineProps<{
 }>(), { searchPlaceholder: 'Rechercher…', filterLocally: true });
 const emit = defineEmits<{ 'update:modelValue': [value: string[]]; done: []; retry: [] }>();
 const search = defineModel<string>('search', { default: '' });
-const filteredOptions = computed(() => props.options.filter(option => !props.filterLocally || option.label.toLocaleLowerCase('fr').includes(search.value.trim().toLocaleLowerCase('fr'))));
+const filteredOptions = computed(() => props.options.filter(option => !props.filterLocally || option.label.toLocaleLowerCase(language.value).includes(search.value.trim().toLocaleLowerCase(language.value))));
 /** Les options gardent leur ordre ; une option sans groupe reste dans une liste simple. */
 const sections = computed(() => {
   const groups = new Map<string, typeof filteredOptions.value>();

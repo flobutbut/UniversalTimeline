@@ -3,8 +3,8 @@
     :variant="variant"
     size="sm"
     iconOnly
-    :title="isDark ? 'Passer au thème clair' : 'Passer au thème sombre'"
-    :aria-label="isDark ? 'Passer au thème clair' : 'Passer au thème sombre'"
+    :title="uiText(isDark ? 'Passer au thème clair' : 'Passer au thème sombre')"
+    :aria-label="uiText(isDark ? 'Passer au thème clair' : 'Passer au thème sombre')"
     @click="toggleTheme"
   >
     <template #icon>
@@ -14,6 +14,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { computed, onMounted, onUnmounted } from 'vue';
 import Button from '@/components/base/Button.vue';
 import DesignIcon from '@/components/base/DesignIcon.vue';

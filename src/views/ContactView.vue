@@ -2,35 +2,34 @@
   <SidebarLayout menu-label="Informations légales" :items="legalMenu" active="contact">
     <article class="contact-view" aria-labelledby="contact-title">
       <header>
-        <h2 id="contact-title">Contact</h2>
-        <p class="contact-view__meta">Une question, un signalement ou une demande sur vos données : écrivez-nous, nous vous répondons par e-mail.</p>
+        <h2 id="contact-title">{{ uiText("Contact") }}</h2>
+        <p class="contact-view__meta">{{ uiText("Une question, un signalement ou une demande sur vos données : écrivez-nous, nous vous répondons par e-mail.") }}</p>
       </header>
       <section class="contact-view__address" aria-labelledby="contact-address-title">
-        <h3 id="contact-address-title">Adresse</h3>
+        <h3 id="contact-address-title">{{ uiText("Adresse") }}</h3>
         <p><a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a></p>
-        <div><Button variant="secondary" size="sm" @click="copyAddress">Copier l’adresse</Button></div>
+        <div><Button variant="secondary" size="sm" @click="copyAddress">{{ uiText("Copier l’adresse") }}</Button></div>
       </section>
       <section aria-labelledby="contact-topics-title">
-        <h3 id="contact-topics-title">Choisir le sujet</h3>
-        <p class="contact-view__meta">Chaque lien ouvre votre messagerie avec un objet et un modèle de message, à compléter avant l’envoi.</p>
+        <h3 id="contact-topics-title">{{ uiText("Choisir le sujet") }}</h3>
+        <p class="contact-view__meta">{{ uiText("Chaque lien ouvre votre messagerie avec un objet et un modèle de message, à compléter avant l’envoi.") }}</p>
         <ul class="contact-view__topics">
           <li v-for="topic in topics" :key="topic.subject" class="contact-view__topic">
-            <h4>{{ topic.title }}</h4>
-            <p>{{ topic.description }}</p>
-            <RouterLink v-if="topic.hint" :to="topic.hint.to">{{ topic.hint.label }}</RouterLink>
-            <a :href="mailto(topic)">Écrire : « {{ topic.subject }} »</a>
+            <h4>{{ uiText(topic.title) }}</h4>
+            <p>{{ uiText(topic.description) }}</p>
+            <RouterLink v-if="topic.hint" :to="topic.hint.to">{{ uiText(topic.hint.label) }}</RouterLink>
+            <a :href="mailto(topic)">{{ uiText("Écrire : «") }} {{ uiText(topic.subject) }} »</a>
           </li>
         </ul>
       </section>
-      <p class="contact-view__meta">
-        Nous n’utilisons votre adresse et votre message que pour vous répondre. Voir la
-        <RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">politique de confidentialité</RouterLink>.
+      <p class="contact-view__meta"> {{ uiText("Nous n’utilisons votre adresse et votre message que pour vous répondre. Voir la") }} <RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">{{ uiText("politique de confidentialité") }}</RouterLink>.
       </p>
     </article>
   </SidebarLayout>
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { RouterLink, type RouteLocationRaw } from 'vue-router';
 import Button from '@/components/base/Button.vue';
 import SidebarLayout from '@/components/base/SidebarLayout.vue';
@@ -57,7 +56,7 @@ const mailto = (topic: ContactTopic) =>
 const toast = useToast();
 async function copyAddress() {
   try { await navigator.clipboard.writeText(CONTACT_EMAIL); toast.show('Adresse copiée.', 'success'); }
-  catch { toast.show(`Copie impossible : sélectionnez l’adresse ${CONTACT_EMAIL}.`, 'error'); }
+  catch { toast.show(uiFormat`Copie impossible : sélectionnez l’adresse ${CONTACT_EMAIL}.`, 'error'); }
 }
 </script>
 

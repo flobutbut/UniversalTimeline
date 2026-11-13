@@ -28,7 +28,7 @@ export async function findPublicStoryMetadata(db: TransactionClient, id: string)
 export async function listPublicSitemapStories(db: TransactionClient) {
   return (await db.query<Pick<StoryRow, 'id'>>(`
     SELECT id FROM public.stories
-    WHERE is_public = true AND btrim(COALESCE(title_fr, title_en, '')) <> ''
+    WHERE is_public = true AND btrim(COALESCE(NULLIF(title_fr, ''), title_en, '')) <> ''
       AND btrim(COALESCE(NULLIF(description_fr, ''), description_en, '')) <> ''
     ORDER BY id
   `)).rows.map(row => String(row.id));
@@ -223,8 +223,8 @@ export async function insertStory(client: TransactionClient, data: StoryWrite & 
       ) VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
     `, [
-    title.fr, title.en || title.fr, description?.fr || null,
-    description?.en || description?.fr || null, author, isPublic ?? false,
+    title.fr, title.en, description?.fr || null,
+    description?.en || null, author, isPublic ?? false,
   ])).rows[0];
 }
 export async function updateStory(client: TransactionClient, id: string, data: StoryWrite) {
@@ -242,8 +242,8 @@ export async function updateStory(client: TransactionClient, id: string, data: S
       WHERE id = $7
       RETURNING *
     `, [
-    title.fr, title.en || title.fr, description?.fr || null,
-    description?.en || description?.fr || null, author, isPublic ?? null, id,
+    title.fr, title.en, description?.fr || null,
+    description?.en || null, author, isPublic ?? null, id,
   ])).rows[0];
 }
 export async function lockOwnedStory(client: TransactionClient, id: string, userId: string) {

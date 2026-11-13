@@ -1,3 +1,4 @@
+import { localizedText } from '@/i18n';
 import { ref, computed, watch, unref, type Ref } from 'vue';
 import { comparableYearsBeforePresent } from '@temporal';
 import { storeToRefs } from 'pinia';
@@ -60,7 +61,7 @@ export function useHomeNavigation(navigateTo?: ((target: TimelineTarget) => void
   const periodPath = computed(() => [...parentStack.value, ...(currentPeriod.value ? [currentPeriod.value] : [])]);
   const breadcrumb = computed(() => periodPath.value.map(period => ({
     id: `story:${currentStoryId.value}/period:${period.id}`,
-    title: period.label.fr || period.label.en || 'Période sans nom', kind: 'period' as const,
+    title: localizedText(period.label) || 'Période sans nom', kind: 'period' as const,
   })));
 
   function recordStoryVisit() {

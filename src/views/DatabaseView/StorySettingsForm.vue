@@ -1,37 +1,38 @@
 <template>
   <div class="story-settings-form">
-    <h3>Paramètres de la frise</h3>
+    <h3>{{ uiText("Paramètres de la frise") }}</h3>
     <template v-if="editable">
-      <p v-if="error" role="alert" class="story-settings-form__error">{{ error }}</p>
-      <p v-if="hiddenFieldErrors.length" role="alert" class="story-settings-form__error">{{ hiddenFieldErrors.join(' ') }}</p>
-      <form class="story-settings-form__form" aria-label="Paramètres de la frise" @submit.prevent="save">
+      <p v-if="error" role="alert" class="story-settings-form__error">{{ uiText(error) }}</p>
+      <p v-if="hiddenFieldErrors.length" role="alert" class="story-settings-form__error">{{ uiText(hiddenFieldErrors.join(' ')) }}</p>
+      <form class="story-settings-form__form" :aria-label="uiText('Paramètres de la frise')" @submit.prevent="save">
         <fieldset class="form-content" :disabled="busy">
           <div class="form-row">
             <div class="form-group">
-              <Input v-model="form.title.fr" label="Titre" placeholder="Titre en français" size="sm" :error="validation.fields['title.fr'] || ''" required />
+              <Input v-model="form.title[language]" :label="uiText('Titre')" :placeholder="language === 'fr' ? 'Titre en français' : 'Title in English'" size="sm" :error="validation.fields['title.' + language] || validation.fields['title.fr'] || ''" :required="!form.title[language === 'en' ? 'fr' : 'en']" />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <Input v-model="form.description.fr" label="Description" placeholder="Description en français" size="sm" :error="validation.fields['description.fr'] || ''" type="textarea" textarea-size="lg" />
+              <Input v-model="form.description[language]" :label="uiText('Description')" :placeholder="language === 'fr' ? 'Description en français' : 'Description in English'" size="sm" :error="validation.fields['description.fr'] || ''" type="textarea" textarea-size="lg" />
             </div>
           </div>
         </fieldset>
         <div v-if="dirty" class="story-settings-form__actions">
-          <Button variant="secondary" size="sm" type="button" :disabled="busy" @click="cancel">Annuler</Button>
-          <Button variant="primary" size="sm" type="submit" :disabled="!canSubmit">Enregistrer</Button>
+          <Button variant="secondary" size="sm" type="button" :disabled="busy" @click="cancel">{{ uiText("Annuler") }}</Button>
+          <Button variant="primary" size="sm" type="submit" :disabled="!canSubmit">{{ uiText("Enregistrer") }}</Button>
         </div>
       </form>
     </template>
     <dl v-else class="story-settings-form__readonly">
-      <dt>Titre</dt><dd>{{ story.title.fr || '—' }}</dd>
-      <dt>Description</dt><dd class="story-settings-form__text">{{ story.description?.fr || '—' }}</dd>
-      <dt>Visibilité</dt><dd>{{ story.isPublic ? 'Publique' : 'Privée' }}</dd>
+      <dt>{{ uiText("Titre") }}</dt><dd>{{ localizedText(story.title) || '—' }}</dd>
+      <dt>{{ uiText("Description") }}</dt><dd class="story-settings-form__text">{{ localizedText(story.description) || '—' }}</dd>
+      <dt>{{ uiText("Visibilité") }}</dt><dd>{{ uiText(story.isPublic ? 'Publique' : 'Privée') }}</dd>
     </dl>
   </div>
 </template>
 
 <script setup lang="ts">
+import { language, localizedText, uiText } from '@/i18n';
 import { computed } from 'vue';
 import Button from '@/components/base/Button.vue';
 import Input from '@/components/base/Input.vue';

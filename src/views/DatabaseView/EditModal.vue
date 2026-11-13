@@ -1,8 +1,8 @@
 <template>
-  <ModalShell :title="modalTitle" height="auto" :busy="loading" @close="closeModal">
-    <FeedbackState kind="error" layout="inline" v-if="error" role="alert" >{{ error }}</FeedbackState>
+  <ModalShell :title="uiText(modalTitle)" height="auto" :busy="loading" @close="closeModal">
+    <FeedbackState kind="error" layout="inline" v-if="error" role="alert" >{{ uiText(error) }}</FeedbackState>
     <FeedbackState kind="error" layout="inline" v-if="editState.tagsError"  role="alert">
-      {{ editState.tagsError }} <Button variant="tertiary" size="sm" type="button" :disabled="loading || editState.tagsLoading" @click="loadTags">Réessayer</Button>
+      {{ uiText(editState.tagsError) }} <Button variant="tertiary" size="sm" type="button" :disabled="loading || editState.tagsLoading" @click="loadTags">{{ uiText("Réessayer") }}</Button>
     </FeedbackState>
     <template
       v-if="mode === 'create' && !convertFrom && (type === 'period' || type === 'event')"
@@ -18,10 +18,10 @@
         <SearchInput
           ref="wikidataSearchInputRef"
           v-model="wikidataSearchQuery"
-          :placeholder="wikidataSearchPlaceholder"
+          :placeholder="uiText(wikidataSearchPlaceholder)"
           autocomplete="off"
           :disabled="loading || wikidataApplyLoading"
-          :aria-label="creationSearchLabel"
+          :aria-label="uiText(creationSearchLabel)"
           role="combobox"
           aria-autocomplete="list"
           :aria-expanded="wikidataOptionsVisible"
@@ -40,22 +40,22 @@
           @focusout="onWikidataSearchFocusOut"
         >
           <template v-if="creationSearchLoading">
-            <div class="edit-modal-wd-dd__status" role="status">Recherche en cours…</div>
+            <div class="edit-modal-wd-dd__status" role="status">{{ uiText("Recherche en cours…") }}</div>
           </template>
           <div v-if="keywordErrorVisible" class="edit-modal-wd-dd__status" role="alert">
-            {{ wikidataSearchError }}
-            <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retryWikidataSuggestions">Réessayer la recherche</Button>
+            {{ uiText(wikidataSearchError) }}
+            <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retryWikidataSuggestions">{{ uiText("Réessayer la recherche") }}</Button>
           </div>
           <div v-if="existingSearch.error.value" class="edit-modal-wd-dd__status" role="alert">
-            {{ existingSearch.error.value }} <button type="button" @mousedown.prevent @click="existingSearch.retry">{{ type === 'period' ? 'Réessayer les périodes existantes' : 'Réessayer les événements existants' }}</button>
+            {{ uiText(existingSearch.error.value) }} <button type="button" @mousedown.prevent @click="existingSearch.retry">{{ uiText(type === 'period' ? 'Réessayer les périodes existantes' : 'Réessayer les événements existants') }}</button>
           </div>
           <div v-if="meaningSearch.error.value" class="edit-modal-wd-dd__status" role="alert">
-            {{ meaningSearch.error.value }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="meaningSearch.retry">Réessayer la recherche par sens</Button>
+            {{ uiText(meaningSearch.error.value) }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="meaningSearch.retry">{{ uiText("Réessayer la recherche par sens") }}</Button>
           </div>
           <template v-if="!meaningSearch.error.value && !creationSearchLoading && !keywordErrorVisible && !existingSearch.error.value && !creationSearchHits.length">
-            <div class="edit-modal-wd-dd__status" role="status">Aucun résultat</div>
+            <div class="edit-modal-wd-dd__status" role="status">{{ uiText("Aucun résultat") }}</div>
           </template>
-          <div v-if="creationSearchHits.length" :id="wikidataListId" role="listbox" :aria-label="creationResultsLabel">
+          <div v-if="creationSearchHits.length" :id="wikidataListId" role="listbox" :aria-label="uiText(creationResultsLabel)">
             <button
               v-for="(h, index) in creationSearchHits"
               :key="`${h.source}:${h.id}`"
@@ -70,40 +70,40 @@
               @mousedown.prevent
               @click="onPickWikidataSearchHit(h)"
             >
-              <span class="edit-modal-wd-dd__title">{{ h.label }}</span>
+              <span class="edit-modal-wd-dd__title">{{ uiText(h.label) }}</span>
               <span class="edit-modal-wd-dd__id">{{ h.source === 'local' ? existingEntityLabel : `Wikidata${h.searchOrigin === 'semantic' ? ' · Recherche par sens' : ''} · ${h.id}` }}</span>
-              <span v-if="h.dateLabel" class="edit-modal-wd-dd__date">{{ h.dateLabel }}</span>
+              <span v-if="h.dateLabel" class="edit-modal-wd-dd__date">{{ uiText(h.dateLabel) }}</span>
               <span v-if="h.description" class="edit-modal-wd-dd__desc">{{ h.description }}</span>
             </button>
           </div>
-          <span class="sr-only" role="status">{{ wikidataOptionsVisible ? `${creationSearchHits.length} résultats. Utilisez les flèches puis Entrée pour choisir.` : '' }}</span>
+          <span class="sr-only" role="status">{{ uiText(wikidataOptionsVisible ? uiFormat`${creationSearchHits.length} résultats. Utilisez les flèches puis Entrée pour choisir.` : '') }}</span>
         </div>
       </div>
     </template>
 
     <FeedbackState kind="error" layout="inline" v-if="wikidataImportError"  role="alert">
-      {{ wikidataImportError }}
-      <Button variant="tertiary" size="sm" type="button" :disabled="loading || wikidataApplyLoading" @click="retryWikidataImport">Réessayer l’import</Button>
+      {{ uiText(wikidataImportError) }}
+      <Button variant="tertiary" size="sm" type="button" :disabled="loading || wikidataApplyLoading" @click="retryWikidataImport">{{ uiText("Réessayer l’import") }}</Button>
     </FeedbackState>
-    <p v-if="convertFrom" class="edit-modal__existing-notice">{{ conversionNotice }}</p>
-    <p v-if="existingQidNotice" class="edit-modal__existing-notice" role="status">{{ existingQidNotice }}</p>
-    <p v-if="wikidataApplyLoading" role="status">Chargement depuis Wikidata…</p>
+    <p v-if="convertFrom" class="edit-modal__existing-notice">{{ uiText(conversionNotice) }}</p>
+    <p v-if="existingQidNotice" class="edit-modal__existing-notice" role="status">{{ uiText(existingQidNotice) }}</p>
+    <p v-if="wikidataApplyLoading" role="status">{{ uiText("Chargement depuis Wikidata…") }}</p>
     <p v-else-if="wikidataNotice" role="status">
-      {{ wikidataNotice }}
-      <Button variant="tertiary" size="sm" v-if="wikidataRetryAvailable" type="button" :disabled="loading || wikidataApplyLoading" @click="retryWikidataImport">Réessayer les compléments</Button>
+      {{ uiText(wikidataNotice) }}
+      <Button variant="tertiary" size="sm" v-if="wikidataRetryAvailable" type="button" :disabled="loading || wikidataApplyLoading" @click="retryWikidataImport">{{ uiText("Réessayer les compléments") }}</Button>
     </p>
-    <FeedbackState v-if="editState.loading" kind="loading" message="Chargement des données…" />
+    <FeedbackState v-if="editState.loading" kind="loading" :message="uiText('Chargement des données…')" />
     <FeedbackState kind="error" layout="inline" v-else-if="editState.error" >
       <Icon icon="mdi:alert-circle" />
-      <span>{{ editState.error }}</span>
-      <Button variant="secondary" @click="closeModal">Fermer</Button>
+      <span>{{ uiText(editState.error) }}</span>
+      <Button variant="secondary" @click="closeModal">{{ uiText("Fermer") }}</Button>
     </FeedbackState>
     <div v-else-if="selectedExistingEntity" class="edit-modal__existing-entity">
-      <p>{{ existingEntityLabel }}</p>
-      <h3>{{ selectedExistingEntity.label }}</h3>
-      <p v-if="selectedExistingEntity.dateLabel" class="edit-modal__existing-date">{{ selectedExistingEntity.dateLabel }}</p>
+      <p>{{ uiText(existingEntityLabel) }}</p>
+      <h3>{{ uiText(selectedExistingEntity.label) }}</h3>
+      <p v-if="selectedExistingEntity.dateLabel" class="edit-modal__existing-date">{{ uiText(selectedExistingEntity.dateLabel) }}</p>
       <p v-if="selectedExistingEntity.description">{{ selectedExistingEntity.description }}</p>
-      <Button variant="tertiary" size="sm" :disabled="loading" @click="selectedExistingEntity = null">{{ type === 'period' ? 'Créer une nouvelle période' : 'Créer un nouvel événement' }}</Button>
+      <Button variant="tertiary" size="sm" :disabled="loading" @click="selectedExistingEntity = null">{{ uiText(type === 'period' ? 'Créer une nouvelle période' : 'Créer un nouvel événement') }}</Button>
     </div>
     <form v-else ref="formEl" @submit.prevent="handleSubmit" class="modal-form">
       <fieldset class="form-content" :disabled="loading">
@@ -112,13 +112,13 @@
             <Input
               v-if="!form.sourceKey?.startsWith('fact:')"
               v-model="form.qid"
-              label="Q-id Wikidata (facultatif)"
+              :label="uiText('Q-id Wikidata (facultatif)')"
               hint="Laissez vide pour créer manuellement."
-              placeholder="Q12345"
+              :placeholder="uiText('Q12345')"
               :error="editState.qidError || fieldError('qid')"
               @blur="touch('qid'); validateQid()"
             />
-            <p v-else class="generation-source-note">Fait daté issu d’une déclaration Wikidata. Son identité est conservée lors des modifications.</p>
+            <p v-else class="generation-source-note">{{ uiText("Fait daté issu d’une déclaration Wikidata. Son identité est conservée lors des modifications.") }}</p>
             <Button
               v-if="canOfferExisting && editState.qidExistsInBase && editState.existingItem"
               class="edit-modal__use-existing"
@@ -128,11 +128,11 @@
               :disabled="loading"
               @click="offerExisting(editState.existingItem)"
             >
-              {{ type === 'period' ? 'Utiliser la période existante' : 'Utiliser l’événement existant' }}
+              {{ uiText(type === 'period' ? 'Utiliser la période existante' : 'Utiliser l’événement existant') }}
             </Button>
           </div>
           <div class="form-group">
-            <Switch v-if="type === 'period'" v-model="form.nonThematic" label="Période non thématique (ère, règne, dynastie, régime)" label-first />
+            <Switch v-if="type === 'period'" v-model="form.nonThematic" :label="uiText('Période non thématique (ère, règne, dynastie, régime)')" label-first />
             <TagPicker v-if="!form.nonThematic" v-model="form.tags" :options="editState.tags" :loading="editState.tagsLoading" :disabled="loading" :error="fieldError('tags')" />
           </div>
         </div>
@@ -141,18 +141,18 @@
           <div class="form-group">
             <Input
               v-model="form.title.fr"
-              label="Titre (Français)"
-              placeholder="Titre en français"
+              :label="uiText('Titre (Français)')"
+              :placeholder="uiText('Titre en français')"
               :error="fieldError('title.fr')"
               @blur="touch('title.fr')"
-              required
+              :required="!form.title.en"
             />
           </div>
           <div class="form-group">
             <Input
               v-model="form.title.en"
-              label="Titre (Anglais)"
-              placeholder="Title in English"
+              :label="uiText('Titre (Anglais)')"
+              :placeholder="uiText('Title in English')"
               :error="fieldError('title.en')"
               @blur="touch('title.en')"
             />
@@ -163,8 +163,8 @@
           <div class="form-group">
             <Input
               v-model="form.description.fr"
-              label="Description (Français)"
-              placeholder="Description en français"
+              :label="uiText('Description (Français)')"
+              :placeholder="uiText('Description en français')"
               :error="fieldError('description.fr')"
               @blur="touch('description.fr')"
               type="textarea"
@@ -173,8 +173,8 @@
           <div class="form-group">
             <Input
               v-model="form.description.en"
-              label="Description (Anglais)"
-              placeholder="Description in English"
+              :label="uiText('Description (Anglais)')"
+              :placeholder="uiText('Description in English')"
               :error="fieldError('description.en')"
               @blur="touch('description.en')"
               type="textarea"
@@ -186,8 +186,8 @@
           <div class="form-group">
             <Input
               v-model="form.wikipedia.fr"
-              label="Article Wikipédia (Français)"
-              placeholder="Titre ou adresse fr.wikipedia.org"
+              :label="uiText('Article Wikipédia (Français)')"
+              :placeholder="uiText('Titre ou adresse fr.wikipedia.org')"
               hint="Rempli par l’import Wikidata ; vide si l’article n’existe pas."
               :error="fieldError('wikipedia.fr')"
               @blur="touch('wikipedia.fr')"
@@ -196,8 +196,8 @@
           <div class="form-group">
             <Input
               v-model="form.wikipedia.en"
-              label="Article Wikipédia (Anglais)"
-              placeholder="Titre ou adresse en.wikipedia.org"
+              :label="uiText('Article Wikipédia (Anglais)')"
+              :placeholder="uiText('Titre ou adresse en.wikipedia.org')"
               :error="fieldError('wikipedia.en')"
               @blur="touch('wikipedia.en')"
             />
@@ -209,8 +209,8 @@
             <DateInput
               v-model="form.startDate"
               :disabled="loading"
-              label="Date de début"
-              placeholder="G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32"
+              :label="uiText('Date de début')"
+              :placeholder="uiText('G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32')"
               required
               :error="fieldError('startDate')"
               @blur="touch('startDate')"
@@ -221,8 +221,8 @@
             <DateInput
               v-model="form.endDate"
               :disabled="loading"
-              label="Date de fin (vide = aujourd'hui)"
-              placeholder="G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32 · NOW"
+              :label="uiText('Date de fin (vide = aujourd\'hui)')"
+              :placeholder="uiText('G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32 · NOW')"
               :error="fieldError('endDate')"
               @blur="touch('endDate')"
             />
@@ -235,8 +235,8 @@
             <DateInput
               v-model="form.date"
               :disabled="loading"
-              label="Date"
-              placeholder="G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32"
+              :label="uiText('Date')"
+              :placeholder="uiText('G4.6 · M65 · K11.7 · A230 · 1944-06-06T14:32')"
               required
               :error="fieldError('date')"
               @blur="touch('date')"
@@ -249,8 +249,8 @@
           <div class="form-group">
             <Input
               v-model="form.location"
-              label="Temporal location"
-              placeholder="Ex: Europe, France, Paris..."
+              :label="uiText('Temporal location')"
+              :placeholder="uiText('Ex: Europe, France, Paris...')"
               disabled
               hint="Information issue de Wikidata, non enregistrée."
             />
@@ -261,8 +261,8 @@
           <div class="form-group full-width">
             <Input
               v-model="form.location"
-              label="Temporal location"
-              placeholder="Ex: Europe, France, Paris..."
+              :label="uiText('Temporal location')"
+              :placeholder="uiText('Ex: Europe, France, Paris...')"
               disabled
               hint="Information issue de Wikidata, non enregistrée."
             />
@@ -278,9 +278,9 @@
         <div class="form-row" v-if="type === 'story'">
           <div class="form-group">
             <div class="switch-group">
-              <Switch v-model="form.isPublic" label="Mode public" label-first />
+              <Switch v-model="form.isPublic" :label="uiText('Mode public')" label-first />
             </div>
-            <p v-if="isStoryCreation && !storyPlacement.parentStoryId" class="edit-modal__parent-hint" role="status">Cette frise n’aura aucun point d’entrée depuis une autre frise. Vous pourrez en ajouter dans l’onglet Propriétés après sa création.</p>
+            <p v-if="isStoryCreation && !storyPlacement.parentStoryId" class="edit-modal__parent-hint" role="status">{{ uiText("Cette frise n’aura aucun point d’entrée depuis une autre frise. Vous pourrez en ajouter dans l’onglet Propriétés après sa création.") }}</p>
           </div>
         </div>
 
@@ -302,9 +302,7 @@
         type="button"
         :disabled="loading || wikidataApplyLoading"
         @click="handleDelete"
-      >
-        Supprimer
-      </Button>
+      > {{ uiText("Supprimer") }} </Button>
       <Button
         v-if="!selectedExistingEntity && form.qid && type !== 'story'"
         variant="secondary"
@@ -312,12 +310,12 @@
         @click="handleFooterWikidataImport"
       >
         <template #icon><Icon icon="mdi:database" /></template>
-        <span v-if="wikidataImportLoading">Chargement...</span>
-        <span v-else>Remplir avec Wikidata</span>
+        <span v-if="wikidataImportLoading">{{ uiText("Chargement...") }}</span>
+        <span v-else>{{ uiText("Remplir avec Wikidata") }}</span>
       </Button>
       <span v-if="type === 'period' && !selectedExistingEntity && !convertFrom" class="children-count">
-        <template v-if="editState.directChildrenCount !== null">{{ editState.directChildrenCount }} sous-périodes</template>
-        <template v-else>{{ data?.hasChildren ? 'Contient des sous-périodes' : 'Nombre de sous-périodes inconnu' }}</template>
+        <template v-if="editState.directChildrenCount !== null">{{ editState.directChildrenCount }} {{ uiText("sous-périodes") }}</template>
+        <template v-else>{{ uiText(data?.hasChildren ? 'Contient des sous-périodes' : 'Nombre de sous-périodes inconnu') }}</template>
       </span>
     </template>
 
@@ -329,13 +327,14 @@
         :disabled="loading || wikidataApplyLoading || (isStoryCreation && !storyPlacement.complete) || (!selectedExistingEntity && (!editState.isValid || !!editState.qidError || editState.tagsLoading || !!editState.tagsError))"
         @click="handleSubmit"
       >
-        {{ selectedExistingEntity ? 'Ajouter à la frise' : mode === 'edit' ? 'Mettre à jour' : convertFrom ? 'Convertir' : 'Créer' }}
+        {{ uiText(selectedExistingEntity ? 'Ajouter à la frise' : mode === 'edit' ? 'Mettre à jour' : convertFrom ? 'Convertir' : 'Créer') }}
       </Button>
     </template>
   </ModalShell>
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import TagPicker from '@/components/TagPicker.vue';
 import FeedbackState from '@/components/base/FeedbackState.vue';
 import { watch, ref, reactive, computed, onMounted, onUnmounted } from 'vue';
@@ -449,7 +448,7 @@ const creationSearchHits = computed<CreationSearchHit[]>(() => {
   const locals = new Map([...existingSearch.results.value, ...semantic.flatMap(hit => hit.localMatch ? [hit.localMatch] : [])].filter(hit => hit.type === props.type).map(hit => [hit.id, hit]));
   const existingQids = new Set([...locals.values()].flatMap(hit => hit.wikidataId ? [hit.wikidataId] : []));
   const excluded = new Set((props.type === 'period' ? props.excludedPeriodIds : props.excludedEventIds) ?? []);
-  const local: CreationSearchHit[] = [...locals.values()].filter(hit => !excluded.has(hit.id)).map(hit => ({ id: hit.id, label: hit.label.fr || hit.label.en, description: hit.description, dateLabel: hit.dateLabel, startDate: hit.startDate || hit.date, endDate: hit.endDate, source: 'local', semanticRank: hit.wikidataId ? ranks.get(hit.wikidataId) : undefined }));
+  const local: CreationSearchHit[] = [...locals.values()].filter(hit => !excluded.has(hit.id)).map(hit => ({ id: hit.id, label: localizedText(hit.label), description: hit.description, dateLabel: hit.dateLabel, startDate: hit.startDate || hit.date, endDate: hit.endDate, source: 'local', semanticRank: hit.wikidataId ? ranks.get(hit.wikidataId) : undefined }));
   const remote = new Map([...wikidataSuggestHits.value, ...semantic].map(hit => [hit.id, hit]));
   const combined = [...local, ...[...remote.values()].filter(hit => !existingQids.has(hit.id)).map(hit => ({ ...hit, source: 'wikidata' as const, semanticRank: ranks.get(hit.id), dateLabel: searchHitDateLabel(hit) }))];
   return combined.map((hit, index) => ({ hit, index, score: creationSearchScore(wikidataSearchQuery.value, hit, props.searchBounds) }))
@@ -583,11 +582,11 @@ function offerExisting(item: EditInitialData) {
     existingQidNotice.value = props.type === 'period' ? 'Cette période est déjà dans la frise.' : 'Cet événement est déjà dans la frise.';
     return;
   }
-  const label = item.label?.fr || item.label?.en || id;
+  const label = localizedText(item.label) || id;
   const dateLabel = props.type === 'event'
     ? preview(item.date ?? '')
     : [preview(item.startDate ?? ''), preview(item.endDate ?? '')].filter(Boolean).join(' → ');
-  const description = item.description?.fr || item.description?.en || undefined;
+  const description = localizedText(item.description) || undefined;
   existingQidNotice.value = '';
   selectedExistingEntity.value = { id, label, description, dateLabel, source: 'local' };
   wikidataSearchQuery.value = '';

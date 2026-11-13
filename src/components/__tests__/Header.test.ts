@@ -44,6 +44,7 @@ it.each([
   expect(view.get('.header-account-actions').findAll('a').map(a => [a.text(), a.attributes('href')])).toEqual([
     ['Se connecter', '/login'], ['Créer un compte', '/login?mode=signup'],
   ]);
+  expect(view.get('.header-controls [role="combobox"]').attributes('aria-label')).toBe('Langue');
   expect(view.text()).not.toContain('Se déconnecter');
 });
 it.each(['/database', '/periods', '/graph', '/events', '/design-system'])('redirects an anonymous direct URL to login: %s', async path => {
@@ -67,14 +68,16 @@ it.each([false, true])('restores the appropriate workspace navigation for a veri
   const auth = await start({ account: { id: 'alice', isAdmin } });
   expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Exploration', 'Catalogue', 'Mes frises', ...(isAdmin ? ['Administration'] : [])]);
   expect(view.find('.header-account-actions').exists()).toBe(false);
-  const trigger = view.get('button[aria-haspopup="menu"]');
+  expect(view.find('.header-controls [role="combobox"]').exists()).toBe(false);
+  const trigger = view.get('button[aria-haspopup="dialog"]');
   expect(trigger.attributes('aria-label')).toBe('Compte : Mon compte'); expect(view.text()).not.toContain('Se déconnecter');
   await trigger.trigger('click'); await flushPromises();
   expect(trigger.attributes('aria-expanded')).toBe('true');
-  expect(view.findAll('[role="menuitem"]').map(item => item.text())).toEqual(['Profil', 'Données et confidentialité', 'Se déconnecter']);
-  expect(view.get('[role="menuitem"]').attributes('href')).toBe('/profile');
-  await view.get('[role="menu"]').trigger('keydown', { key: 'Escape' }); await flushPromises();
-  expect(view.find('[role="menu"]').exists()).toBe(false);
+  expect(view.findAll('.user-menu__item').map(item => item.text())).toEqual(['Profil', 'Données et confidentialité', 'Se déconnecter']);
+  expect(view.get('.user-menu__item').attributes('href')).toBe('/profile');
+  expect(view.find('[role="dialog"] [role="combobox"]').exists()).toBe(false);
+  await view.get('[role="dialog"]').trigger('keydown', { key: 'Escape' }); await flushPromises();
+  expect(view.find('[role="dialog"]').exists()).toBe(false);
   auth.account = null; await flushPromises();
   expect(view.get('.header-nav').findAll('a').map(a => a.text())).toEqual(['Exploration', 'Catalogue']);
   expect(view.find('.header-account-actions').exists()).toBe(true);

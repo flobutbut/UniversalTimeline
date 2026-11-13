@@ -3,8 +3,8 @@
     <SearchInput
       ref="searchRef"
       v-model="query"
-      placeholder="Rechercher une frise, un événement…"
-      aria-label="Rechercher une frise, un événement ou un sujet Wikidata"
+      :placeholder="uiText('Rechercher une frise, un événement…')"
+      :aria-label="uiText('Rechercher une frise, un événement ou un sujet Wikidata')"
       autocomplete="off"
       role="combobox"
       aria-autocomplete="list"
@@ -20,48 +20,49 @@
     />
 
     <component :is="page ? 'div' : PopoverSurface" v-if="dropdownVisible" class="gs__dropdown">
-      <div v-if="loading" class="gs__status" role="status">Recherche de frises…</div>
+      <div v-if="loading" class="gs__status" role="status">{{ uiText("Recherche de frises…") }}</div>
       <div v-else-if="error" class="gs__status" role="alert">
-        {{ error }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retrySource">Réessayer</Button>
+        {{ uiText(error) }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retrySource">{{ uiText("Réessayer") }}</Button>
       </div>
-      <div v-if="storyEvents.loading.value" class="gs__status" role="status">Recherche d’événements…</div>
+      <div v-if="storyEvents.loading.value" class="gs__status" role="status">{{ uiText("Recherche d’événements…") }}</div>
       <div v-else-if="storyEvents.error.value" class="gs__status" role="alert">
-        {{ storyEvents.error.value }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retryEvents">Réessayer</Button>
+        {{ uiText(storyEvents.error.value) }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retryEvents">{{ uiText("Réessayer") }}</Button>
       </div>
-      <div v-if="wikidata.loading.value" class="gs__status" role="status">Recherche Wikidata…</div>
+      <div v-if="wikidata.loading.value" class="gs__status" role="status">{{ uiText("Recherche Wikidata…") }}</div>
       <div v-if="wikidata.error.value" class="gs__status" role="alert">
-        {{ wikidata.error.value }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retryWikidata">Réessayer Wikidata</Button>
+        {{ uiText(wikidata.error.value) }} <Button variant="tertiary" size="sm" type="button" @mousedown.prevent @click="retryWikidata">{{ uiText("Réessayer Wikidata") }}</Button>
       </div>
-      <div v-if="hasResults" :id="listId" role="listbox" aria-label="Frises, événements et sujets Wikidata trouvés">
+      <div v-if="hasResults" :id="listId" role="listbox" :aria-label="uiText('Frises, événements et sujets Wikidata trouvés')">
         <template v-for="(hit, i) in allHits" :key="`${section(hit)}:${hit.id}`">
         <div v-if="i === 0 || section(hit) !== section(allHits[i - 1]!)" class="gs__section" aria-hidden="true">{{ SECTION_TITLES[section(hit)] }}</div>
         <button :id="optionId(i)" type="button" role="option" tabindex="-1" :aria-selected="cursor === i" class="gs__item" :class="{ 'gs__item--active': cursor === i }" @mousedown.prevent @click="selectHit(hit)">
           <Icon :icon="SECTION_ICONS[section(hit)]" class="gs__icon" aria-hidden="true" />
-          <ItemSummary v-if="isWikidata(hit)" class="gs__content" :title="hit.label" :description="hit.description">
-            <template #meta>Aperçu d’une frise depuis ce sujet</template>
+          <ItemSummary v-if="isWikidata(hit)" class="gs__content" :title="uiText(hit.label)" :description="uiText(hit.description)">
+            <template #meta>{{ uiText("Aperçu d’une frise depuis ce sujet") }}</template>
           </ItemSummary>
-          <ItemSummary v-else-if="isStoryEvent(hit)" class="gs__content" :title="hit.label.fr || hit.label.en" :description="hit.description.fr || hit.description.en">
-            <template #meta><span class="gs__match"><span v-if="hit.dateLabel" class="gs__event-date">{{ hit.dateLabel }}</span><span v-if="hit.dateLabel" aria-hidden="true">·</span><span class="gs__match-label">{{ hit.storyLabel.fr || hit.storyLabel.en }}</span></span></template>
+          <ItemSummary v-else-if="isStoryEvent(hit)" class="gs__content" :title="localizedText(hit.label)" :description="localizedText(hit.description)">
+            <template #meta><span class="gs__match"><span v-if="hit.dateLabel" class="gs__event-date">{{ uiText(hit.dateLabel) }}</span><span v-if="hit.dateLabel" aria-hidden="true">·</span><span class="gs__match-label">{{ localizedText(hit.storyLabel) }}</span></span></template>
           </ItemSummary>
-          <ItemSummary v-else class="gs__content" :title="hit.label.fr || hit.label.en" :description="hit.description.fr || hit.description.en">
+          <ItemSummary v-else class="gs__content" :title="localizedText(hit.label)" :description="localizedText(hit.description)">
             <template v-if="hit.match" #meta>
               <span class="gs__match" :class="`gs__match--${hit.match.type}`">
-                <span class="gs__match-type"><Icon :icon="hit.match.type === 'event' ? 'mdi:circle-small' : 'mdi:minus'" aria-hidden="true" />{{ hit.match.type === 'event' ? 'Événement' : 'Période' }}</span>
+                <span class="gs__match-type"><Icon :icon="hit.match.type === 'event' ? 'mdi:circle-small' : 'mdi:minus'" aria-hidden="true" />{{ uiText(hit.match.type === 'event' ? 'Événement' : 'Période') }}</span>
                 <span aria-hidden="true">·</span>
-                <span class="gs__match-label">{{ hit.match.label.fr || hit.match.label.en }}</span>
+                <span class="gs__match-label">{{ localizedText(hit.match.label) }}</span>
               </span>
             </template>
           </ItemSummary>
         </button>
         </template>
       </div>
-      <div v-if="!loading && !error && !storyEvents.loading.value && !storyEvents.error.value && !wikidata.loading.value && !wikidata.error.value && !hasResults" class="gs__status" role="status">Aucune frise, aucun événement ni sujet Wikidata trouvé. Essayez un autre mot-clé.</div>
-      <span class="sr-only" role="status">{{ hasResults ? `${allHits.length} résultats. Utilisez les flèches puis Entrée pour choisir.` : '' }}</span>
+      <div v-if="!loading && !error && !storyEvents.loading.value && !storyEvents.error.value && !wikidata.loading.value && !wikidata.error.value && !hasResults" class="gs__status" role="status">{{ uiText("Aucune frise, aucun événement ni sujet Wikidata trouvé. Essayez un autre mot-clé.") }}</div>
+      <span class="sr-only" role="status">{{ uiText(hasResults ? uiFormat`${allHits.length} résultats. Utilisez les flèches puis Entrée pour choisir.` : '') }}</span>
     </component>
   </div>
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import Button from '@/components/base/Button.vue';
 import PopoverSurface from '@/components/base/PopoverSurface.vue';
 import { ref, computed, onMounted, onScopeDispose } from 'vue';

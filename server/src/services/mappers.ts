@@ -1,7 +1,7 @@
 import type { CategoryJoinRow, CategoryRow, TagColumns, TagRow, PeriodRecord, PeriodListRow, EventRow, Numeric } from '../repositories/rows.js';
 
-export const localized = (fr: string, en: string | null) => ({ fr, en: en || fr });
-export const description = (fr: string | null, en: string | null) => fr ? localized(fr, en) : undefined;
+export const localized = (fr: string, en: string | null) => ({ fr, en: en || '' });
+export const description = (fr: string | null, en: string | null) => fr || en ? localized(fr || '', en) : undefined;
 export const numeric = (value: Numeric) => value != null ? Number(value) : null;
 const provenance = (row: import('../repositories/rows.js').SourceMetadata) => ({ ...(row.source_key ? { sourceKey: row.source_key } : {}), ...(row.wikidata_source ? { wikidataSource: row.wikidata_source } : {}) });
 /** Article titles when the query selected them; NULL means no article in that language. */
@@ -25,7 +25,7 @@ export function groupCategories<Row extends CategoryJoinRow & { id: string | num
     let entity = groups.get(row.id);
     if (!entity) { entity = { ...map(row), categories: [] }; groups.set(row.id, entity); }
     if (row.category_id) entity.categories.push({
-      id: row.category_id, label: { fr: row.category_label_fr, en: row.category_label_en || row.category_label_fr },
+      id: row.category_id, label: { fr: row.category_label_fr, en: row.category_label_en || '' },
     });
   }
   return [...groups.values()];

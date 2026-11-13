@@ -1,26 +1,26 @@
 <template>
   <div class="story-architecture">
     <p class="story-architecture__role">
-      <span class="story-architecture__badge">{{ role.label }}</span>
+      <span class="story-architecture__badge">{{ uiText(role.label) }}</span>
       <span v-if="!story.isPublic && role.draft" class="story-architecture__visibility">
-        <InfoTooltip label="Visibilité de cette frise"><template #trigger>Privé</template>Vous pouvez rendre cette frise publique dans les Propriétés, même sans frise parente.</InfoTooltip>
+        <InfoTooltip :label="uiText('Visibilité de cette frise')"><template #trigger>{{ uiText("Privé") }}</template>{{ uiText("Vous pouvez rendre cette frise publique dans les Propriétés, même sans frise parente.") }}</InfoTooltip>
       </span>
-      <span v-else class="story-architecture__badge story-architecture__badge--visibility">{{ story.isPublic ? 'Public' : 'Privé' }}</span>
+      <span v-else class="story-architecture__badge story-architecture__badge--visibility">{{ uiText(story.isPublic ? 'Public' : 'Privé') }}</span>
       <span class="story-architecture__description">{{ role.description }}</span>
     </p>
     <details v-if="editable && issueCount" class="story-architecture__review">
       <summary>
         <Icon icon="mdi:alert-outline" width="16" height="16" aria-hidden="true" />
         <span class="story-architecture__heading">
-          <span>{{ issueCount }} point{{ issueCount > 1 ? 's' : '' }} d’architecture à revoir</span>
-          <span class="story-architecture__hint">Ces signalements ne bloquent rien : ils suivent les règles du guide de création des frises.</span>
+          <span>{{ issueCount }} {{ uiText("point") }}{{ uiText(issueCount > 1 ? 's' : '') }} {{ uiText("d’architecture à revoir") }}</span>
+          <span class="story-architecture__hint">{{ uiText("Ces signalements ne bloquent rien : ils suivent les règles du guide de création des frises.") }}</span>
         </span>
       </summary>
       <ul>
-        <li v-for="warning in warnings" :key="`${warning.kind}:${warning.periodId ?? ''}:${warning.storyId ?? ''}`">{{ warning.message }}</li>
+        <li v-for="warning in warnings" :key="`${warning.kind}:${warning.periodId ?? ''}:${warning.storyId ?? ''}`">{{ uiText(warning.message) }}</li>
         <li v-for="candidate in promotions" :key="`promote:${candidate.periodId}`" class="story-architecture__promotion">
-          <span>« {{ periodLabel(candidate.periodId) }} » remplit les critères d’une sous-frise : {{ candidate.reasons.join(', ') }}.</span>
-          <Button v-if="canPromote" variant="tertiary" size="xs" :disabled="busy" @click="emit('promote', candidate.periodId)">Promouvoir en sous-frise</Button>
+          <span>« {{ uiText(periodLabel(candidate.periodId)) }} {{ uiText("» remplit les critères d’une sous-frise :") }} {{ uiText(candidate.reasons.join(', ')) }}.</span>
+          <Button v-if="canPromote" variant="tertiary" size="xs" :disabled="busy" @click="emit('promote', candidate.periodId)">{{ uiText("Promouvoir en sous-frise") }}</Button>
         </li>
       </ul>
     </details>
@@ -28,6 +28,7 @@
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiText } from '@/i18n';
 import { computed } from 'vue';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
@@ -43,7 +44,7 @@ const promotions = computed(() => promotionCandidates(props.story));
 const issueCount = computed(() => warnings.value.length + promotions.value.length);
 const periodLabel = (id: string) => {
   const period = props.story.periods.find(item => item.id === id);
-  return period?.label.fr || period?.label.en || id;
+  return localizedText(period?.label) || id;
 };
 </script>
 

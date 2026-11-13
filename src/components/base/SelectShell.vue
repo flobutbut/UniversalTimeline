@@ -11,7 +11,7 @@
     }"
   >
     <label v-if="label" :id="id ? `${id}-label` : undefined" :for="id" class="base-select__label">
-      {{ label }}
+      {{ uiText(label) }}
       <span v-if="required" class="base-select__required">*</span>
     </label>
 
@@ -26,7 +26,7 @@
           :class="[dropdownClass, { 'base-select__dropdown--unbounded': unboundedDropdown }]"
           :id="dropdownId"
           :role="dropdownRole ?? undefined"
-          :aria-label="dropdownLabel"
+          :aria-label="uiText(dropdownLabel)"
           :aria-multiselectable="dropdownRole === 'listbox' ? dropdownMultiple : undefined"
         >
           <slot name="dropdown" />
@@ -34,12 +34,13 @@
       </Transition>
     </div>
 
-    <span v-if="error" :id="id ? `${id}-error` : undefined" class="base-select__error">{{ error }}</span>
+    <span v-if="error" :id="id ? `${id}-error` : undefined" class="base-select__error">{{ uiText(error) }}</span>
     <span v-if="hint" :id="id ? `${id}-hint` : undefined" class="base-select__hint">{{ hint }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { elementRef } from '@/utils/elementRef';
 import PopoverSurface from '@/components/base/PopoverSurface.vue';
 import { onMounted, onUnmounted, ref } from 'vue';

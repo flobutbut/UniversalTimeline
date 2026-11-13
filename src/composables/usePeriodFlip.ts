@@ -6,6 +6,7 @@ export function usePeriodFlip(
   currentPeriodId: () => string | undefined,
   loading: () => boolean,
   parentElement: () => HTMLElement | null,
+  onFocusRestored?: () => void,
 ) {
   let pending: { id: string; rect: DOMRect; restoreFocus: boolean } | null = null;
   let animatingId: string | undefined;
@@ -45,6 +46,7 @@ export function usePeriodFlip(
     if (from.restoreFocus && document.activeElement === document.body) {
       const backControl = element.querySelector<HTMLElement>('.period-card__title-action') ?? element;
       backControl.focus({ preventScroll: true });
+      onFocusRestored?.();
     }
     pending = null;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;

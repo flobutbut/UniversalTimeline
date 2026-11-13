@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, onScopeDispose, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
@@ -116,92 +117,92 @@ function exportSelection() {
 <template>
   <div class="generation-lab">
     <header class="lab-heading">
-      <div><div class="lab-eyebrow"><span class="lab-dot" />ATELIER WIKIDATA <Tag label="Prototype" /></div><h1>Labo de génération</h1><p>Explorer, comparer, puis choisir les faits qui racontent une histoire.</p></div>
-      <Button variant="tertiary" size="sm" :to="{ name: 'wikidata-generation', query: { wikidata: currentQid } }">Génération actuelle <span aria-hidden="true">↗</span></Button>
+      <div><div class="lab-eyebrow"><span class="lab-dot" />{{ uiText("ATELIER WIKIDATA") }} <Tag :label="uiText('Prototype')" /></div><h1>{{ uiText("Labo de génération") }}</h1><p>{{ uiText("Explorer, comparer, puis choisir les faits qui racontent une histoire.") }}</p></div>
+      <Button variant="tertiary" size="sm" :to="{ name: 'wikidata-generation', query: { wikidata: currentQid } }">{{ uiText("Génération actuelle") }} <span aria-hidden="true">↗</span></Button>
     </header>
     <div class="lab-workspace">
-      <aside class="lab-sidebar" aria-label="Sujets et règles de génération">
+      <aside class="lab-sidebar" :aria-label="uiText('Sujets et règles de génération')">
         <section class="lab-sidebar-section">
-          <h2>Un sujet pour commencer</h2>
-          <nav class="lab-examples" aria-label="Exemples de génération">
+          <h2>{{ uiText("Un sujet pour commencer") }}</h2>
+          <nav class="lab-examples" :aria-label="uiText('Exemples de génération')">
             <button v-for="example in examples" :key="example.qid" type="button" class="lab-example" :class="{ 'lab-example--active': currentQid === example.qid }" :aria-current="currentQid === example.qid ? 'page' : undefined" @click="choose(example.qid, example.profile)">
               <span class="lab-example-icon"><Icon :icon="example.profile === 'person' ? 'mdi:palette-outline' : example.profile === 'space' ? 'mdi:rocket-launch-outline' : example.profile === 'geology' ? 'mdi:layers-triple-outline' : example.profile === 'art' ? 'mdi:brush-outline' : 'mdi:flag-outline'" /></span>
-              <span><strong>{{ example.label }}</strong><small>{{ example.hint }}</small></span><span v-if="currentQid === example.qid" class="lab-example-arrow" aria-hidden="true">→</span>
+              <span><strong>{{ uiText(example.label) }}</strong><small>{{ example.hint }}</small></span><span v-if="currentQid === example.qid" class="lab-example-arrow" aria-hidden="true">→</span>
             </button>
           </nav>
         </section>
         <section class="lab-sidebar-section lab-custom">
-          <h2>Tester un autre sujet</h2>
-          <form @submit.prevent="submitSubject"><Input v-model="query" label="Nom ou identifiant Wikidata" placeholder="Ex. Napoléon, Q517…" autocomplete="off" :error="subjectError" /><Button variant="tertiary" size="sm" type="submit" :disabled="!query.trim()">Ouvrir</Button></form>
-          <p v-if="search.loading.value" class="lab-meta" role="status">Recherche Wikidata…</p>
-          <p v-if="search.error.value" class="lab-search-error" role="alert">{{ search.error.value }}</p>
-          <ul v-if="query.length >= 2 && search.results.value.length" class="lab-search-results" aria-label="Sujets Wikidata trouvés"><li v-for="hit in search.results.value.slice(0, 5)" :key="hit.id"><button type="button" @click="choose(hit.id)">{{ hit.label }} <small>{{ hit.description || hit.id }}</small></button></li></ul>
+          <h2>{{ uiText("Tester un autre sujet") }}</h2>
+          <form @submit.prevent="submitSubject"><Input v-model="query" :label="uiText('Nom ou identifiant Wikidata')" :placeholder="uiText('Ex. Napoléon, Q517…')" autocomplete="off" :error="subjectError" /><Button variant="tertiary" size="sm" type="submit" :disabled="!query.trim()">{{ uiText("Ouvrir") }}</Button></form>
+          <p v-if="search.loading.value" class="lab-meta" role="status">{{ uiText("Recherche Wikidata…") }}</p>
+          <p v-if="search.error.value" class="lab-search-error" role="alert">{{ uiText(search.error.value) }}</p>
+          <ul v-if="query.length >= 2 && search.results.value.length" class="lab-search-results" :aria-label="uiText('Sujets Wikidata trouvés')"><li v-for="hit in search.results.value.slice(0, 5)" :key="hit.id"><button type="button" @click="choose(hit.id)">{{ uiText(hit.label) }} <small>{{ hit.description || hit.id }}</small></button></li></ul>
         </section>
         <section class="lab-sidebar-section lab-rules">
-          <h2>Règles de l’essai</h2>
-          <Select v-model="profile" label="Famille du sujet" :options="profiles" :searchable="false" :disabled="loading" />
+          <h2>{{ uiText("Règles de l’essai") }}</h2>
+          <Select v-model="profile" :label="uiText('Famille du sujet')" :options="profiles" :searchable="false" :disabled="loading" />
           <p class="lab-meta">{{ activeProfile.description }}</p>
-          <label><input v-model="settings.approximate" type="checkbox" />Conserver les dates approximatives</label>
-          <label><input v-model="settings.withinBounds" type="checkbox" />Vérifier les bornes du sujet</label>
-          <template v-if="profile === 'person'"><label><input v-model="settings.biography" type="checkbox" />Événements de vie</label><label><input v-model="settings.works" type="checkbox" />Œuvres majeures</label></template>
-          <Select v-model="settings.limit" label="Propositions maximum" :searchable="false" :options="[{value:20,label:'20 propositions'},{value:40,label:'40 propositions'},{value:80,label:'80 propositions'}]" />
+          <label><input v-model="settings.approximate" type="checkbox" />{{ uiText("Conserver les dates approximatives") }}</label>
+          <label><input v-model="settings.withinBounds" type="checkbox" />{{ uiText("Vérifier les bornes du sujet") }}</label>
+          <template v-if="profile === 'person'"><label><input v-model="settings.biography" type="checkbox" />{{ uiText("Événements de vie") }}</label><label><input v-model="settings.works" type="checkbox" />{{ uiText("Œuvres majeures") }}</label></template>
+          <Select v-model="settings.limit" :label="uiText('Propositions maximum')" :searchable="false" :options="[{value:20,label:'20 propositions'},{value:40,label:'40 propositions'},{value:80,label:'80 propositions'}]" />
         </section>
-        <p class="lab-sidebar-footer"><Icon icon="mdi:flask-outline" />Les essais restent dans ce labo.<br />Aucune frise n’est enregistrée.</p>
+        <p class="lab-sidebar-footer"><Icon icon="mdi:flask-outline" />{{ uiText("Les essais restent dans ce labo.") }}<br />{{ uiText("Aucune frise n’est enregistrée.") }}</p>
       </aside>
 
-      <section class="lab-content" aria-label="Résultat de la génération" :aria-busy="loading">
+      <section class="lab-content" :aria-label="uiText('Résultat de la génération')" :aria-busy="loading">
         <section class="lab-subject">
-          <div><span class="lab-kicker">{{ activeProfile.label }}</span><h2>{{ title }}</h2><p>{{ subtitle || 'Choisissez un sujet pour explorer les faits disponibles.' }}</p><a :href="`https://www.wikidata.org/wiki/${currentQid}`" target="_blank" rel="noopener noreferrer" class="lab-source-link">{{ currentQid }} · Voir la fiche Wikidata <span aria-hidden="true">↗</span></a></div>
-          <Button v-if="!loading" size="sm" @click="load(true)"><template #icon><Icon icon="mdi:refresh" /></template>Actualiser depuis Wikidata</Button><Button v-else variant="tertiary" size="sm" @click="cancel">Annuler la lecture</Button>
+          <div><span class="lab-kicker">{{ uiText(activeProfile.label) }}</span><h2>{{ title }}</h2><p>{{ uiText(subtitle || 'Choisissez un sujet pour explorer les faits disponibles.') }}</p><a :href="`https://www.wikidata.org/wiki/${currentQid}`" target="_blank" rel="noopener noreferrer" class="lab-source-link">{{ currentQid }} {{ uiText("· Voir la fiche Wikidata") }} <span aria-hidden="true">↗</span></a></div>
+          <Button v-if="!loading" size="sm" @click="load(true)"><template #icon><Icon icon="mdi:refresh" /></template>{{ uiText("Actualiser depuis Wikidata") }}</Button><Button v-else variant="tertiary" size="sm" @click="cancel">{{ uiText("Annuler la lecture") }}</Button>
         </section>
-        <div v-if="snapshot" class="lab-data-note"><span class="lab-dot" />{{ dataMode === 'snapshot' ? 'Copie de données publiques' : 'Lecture Wikidata en direct' }} · {{ dateFormat(snapshot.capturedAt) }}<span>Les règles sont appliquées à de vraies déclarations Wikidata.</span></div>
-        <FeedbackState v-if="loading" kind="loading" layout="inline" :message="progress" />
-        <FeedbackState v-if="error" kind="error" layout="inline" :message="error" retryable @retry="load(true)" />
+        <div v-if="snapshot" class="lab-data-note"><span class="lab-dot" />{{ uiText(dataMode === 'snapshot' ? 'Copie de données publiques' : 'Lecture Wikidata en direct') }} · {{ dateFormat(snapshot.capturedAt) }}<span>{{ uiText("Les règles sont appliquées à de vraies déclarations Wikidata.") }}</span></div>
+        <FeedbackState v-if="loading" kind="loading" layout="inline" :message="uiText(progress)" />
+        <FeedbackState v-if="error" kind="error" layout="inline" :message="uiText(error)" retryable @retry="load(true)" />
         <template v-if="snapshot">
           <div v-if="snapshot.truncated || modifiedProfile || snapshot.notices?.length" class="lab-notice" role="status">
-            <Icon icon="mdi:information-outline" /><div><p v-if="snapshot.truncated">Collecte limitée aux 120 premiers candidats classés. Cette frise ne prétend pas être exhaustive.</p><p v-if="modifiedProfile">Vous testez une autre famille sur la collecte existante. Actualisez Wikidata pour adapter aussi la recherche des candidats.</p><p v-for="notice in snapshot.notices" :key="notice">{{ notice }}</p></div>
+            <Icon icon="mdi:information-outline" /><div><p v-if="snapshot.truncated">{{ uiText("Collecte limitée aux 120 premiers candidats classés. Cette frise ne prétend pas être exhaustive.") }}</p><p v-if="modifiedProfile">{{ uiText("Vous testez une autre famille sur la collecte existante. Actualisez Wikidata pour adapter aussi la recherche des candidats.") }}</p><p v-for="notice in snapshot.notices" :key="notice">{{ uiText(notice) }}</p></div>
           </div>
-          <section class="lab-metrics" aria-label="Comparaison des résultats">
-            <div><span>Moteur actuel</span><strong>{{ snapshot.baseline ? baselineSelected.length : '—' }}</strong><small>éléments valides</small></div>
-            <div class="lab-metric-primary"><span>Approche par famille</span><strong>{{ retained.length }}</strong><small>propositions retenues</small></div>
-            <div><span>À vérifier</span><strong>{{ review.length }}</strong><small>dates ou contexte</small></div>
-            <div><span>Votre sélection</span><strong>{{ selected.length }}</strong><small>faits dans l’aperçu</small></div>
+          <section class="lab-metrics" :aria-label="uiText('Comparaison des résultats')">
+            <div><span>{{ uiText("Moteur actuel") }}</span><strong>{{ uiText(snapshot.baseline ? baselineSelected.length : '—') }}</strong><small>{{ uiText("éléments valides") }}</small></div>
+            <div class="lab-metric-primary"><span>{{ uiText("Approche par famille") }}</span><strong>{{ retained.length }}</strong><small>{{ uiText("propositions retenues") }}</small></div>
+            <div><span>{{ uiText("À vérifier") }}</span><strong>{{ review.length }}</strong><small>{{ uiText("dates ou contexte") }}</small></div>
+            <div><span>{{ uiText("Votre sélection") }}</span><strong>{{ selected.length }}</strong><small>{{ uiText("faits dans l’aperçu") }}</small></div>
           </section>
-          <nav class="lab-view-tabs" aria-label="Présentation des résultats">
-            <button type="button" :aria-pressed="tab === 'list'" @click="tab='list'"><Icon icon="mdi:format-list-bulleted" />Faits et sources</button>
-            <button type="button" :aria-pressed="tab === 'timeline'" @click="tab='timeline'"><Icon icon="mdi:timeline-outline" />Aperçu de la frise</button>
-            <button type="button" :aria-pressed="tab === 'comparison'" @click="tab='comparison'"><Icon icon="mdi:compare-horizontal" />Comparer les moteurs</button>
+          <nav class="lab-view-tabs" :aria-label="uiText('Présentation des résultats')">
+            <button type="button" :aria-pressed="tab === 'list'" @click="tab='list'"><Icon icon="mdi:format-list-bulleted" />{{ uiText("Faits et sources") }}</button>
+            <button type="button" :aria-pressed="tab === 'timeline'" @click="tab='timeline'"><Icon icon="mdi:timeline-outline" />{{ uiText("Aperçu de la frise") }}</button>
+            <button type="button" :aria-pressed="tab === 'comparison'" @click="tab='comparison'"><Icon icon="mdi:compare-horizontal" />{{ uiText("Comparer les moteurs") }}</button>
           </nav>
 
-          <section v-if="tab === 'comparison'" class="lab-comparison" aria-label="Comparaison des moteurs">
-            <article><span class="lab-kicker">Moteur actuel</span><h3>{{ baselineSelected.length }} éléments valides / {{ baselineItems.length }} proposés</h3><p>Relations directes, dates propres aux fiches, limite à 80 éléments liés.</p><p v-if="snapshot.baselineError" role="alert">{{ snapshot.baselineError }}</p><p v-if="!baselineItems.length">Aucun élément proposé. Les dates des personnes et des relations ne sont pas transformées en faits.</p><p v-if="snapshot.baselineTruncated" class="lab-caution">Résultat tronqué avant classement par pertinence.</p><ul><li v-for="item in baselineItems.slice(0, 12)" :key="item.qid"><strong>{{ item.title }}</strong><span>{{ formatSearchResultDateBound(item.startDate) || 'Date absente' }}<template v-if="item.endDate"> → {{ formatSearchResultDateBound(item.endDate) }}</template></span></li></ul><p v-if="baselineItems.length>12" class="lab-meta">12 premiers éléments sur {{ baselineItems.length }}.</p><Button variant="tertiary" size="sm" @click="tab='list';strategy='baseline'">Voir tous les résultats actuels</Button></article>
-            <article class="lab-comparison-new"><span class="lab-kicker">Approche par famille</span><h3>{{ retained.length }} proposés · {{ review.length }} à vérifier</h3><p>{{ activeProfile.description }}</p><ul><li v-for="item in retained.slice(0, 12)" :key="item.id"><strong>{{ item.title }}</strong><span>{{ item.start?.label }}<template v-if="item.end"> → {{ item.end.label }}</template></span></li></ul><p v-if="retained.length>12" class="lab-meta">12 premiers éléments sur {{ retained.length }}.</p><Button variant="secondary" size="sm" @click="tab='list';strategy='profile'">Examiner les propositions</Button></article>
+          <section v-if="tab === 'comparison'" class="lab-comparison" :aria-label="uiText('Comparaison des moteurs')">
+            <article><span class="lab-kicker">{{ uiText("Moteur actuel") }}</span><h3>{{ baselineSelected.length }} {{ uiText("éléments valides /") }} {{ baselineItems.length }} {{ uiText("proposés") }}</h3><p>{{ uiText("Relations directes, dates propres aux fiches, limite à 80 éléments liés.") }}</p><p v-if="snapshot.baselineError" role="alert">{{ uiText(snapshot.baselineError) }}</p><p v-if="!baselineItems.length">{{ uiText("Aucun élément proposé. Les dates des personnes et des relations ne sont pas transformées en faits.") }}</p><p v-if="snapshot.baselineTruncated" class="lab-caution">{{ uiText("Résultat tronqué avant classement par pertinence.") }}</p><ul><li v-for="item in baselineItems.slice(0, 12)" :key="item.qid"><strong>{{ item.title }}</strong><span>{{ uiText(formatSearchResultDateBound(item.startDate) || 'Date absente') }}<template v-if="item.endDate"> → {{ formatSearchResultDateBound(item.endDate) }}</template></span></li></ul><p v-if="baselineItems.length>12" class="lab-meta">{{ uiText("12 premiers éléments sur") }} {{ baselineItems.length }}.</p><Button variant="tertiary" size="sm" @click="tab='list';strategy='baseline'">{{ uiText("Voir tous les résultats actuels") }}</Button></article>
+            <article class="lab-comparison-new"><span class="lab-kicker">{{ uiText("Approche par famille") }}</span><h3>{{ retained.length }} {{ uiText("proposés ·") }} {{ review.length }} {{ uiText("à vérifier") }}</h3><p>{{ activeProfile.description }}</p><ul><li v-for="item in retained.slice(0, 12)" :key="item.id"><strong>{{ item.title }}</strong><span>{{ uiText(item.start?.label) }}<template v-if="item.end"> → {{ uiText(item.end.label) }}</template></span></li></ul><p v-if="retained.length>12" class="lab-meta">{{ uiText("12 premiers éléments sur") }} {{ retained.length }}.</p><Button variant="secondary" size="sm" @click="tab='list';strategy='profile'">{{ uiText("Examiner les propositions") }}</Button></article>
           </section>
 
-          <section v-else-if="tab === 'timeline'" class="lab-timeline" aria-label="Aperçu chronologique de votre sélection">
-            <div class="lab-section-heading"><div><h3>Une première lecture du temps</h3><p>{{ selected.length }} faits sélectionnés · les dates approximatives sont signalées par un tracé pointillé.</p></div><Button variant="tertiary" size="sm" :disabled="!selected.length" @click="exportSelection">Exporter la sélection</Button></div>
-            <p v-if="!selected.length" class="lab-empty">Sélectionnez des faits dans « Faits et sources » pour composer l’aperçu.</p>
-            <div v-else class="lab-timeline-chart"><div class="lab-timeline-axis"><span>{{ selected[0]?.start?.label }}</span><span>{{ timelineEnd?.end?.label || timelineEnd?.start?.label }}</span></div><div v-for="item in selected" :key="item.id" class="lab-timeline-row"><button type="button" class="lab-timeline-label" @click="focusItem(item)">{{ item.title }}<small>{{ item.start?.label }}<template v-if="item.end"> → {{ item.end.label }}</template></small></button><div class="lab-timeline-track"><button type="button" class="lab-timeline-mark" :class="{'lab-timeline-mark--period':item.type==='period' && item.end,'lab-timeline-mark--approximate':item.start?.approximate || item.end?.approximate}" :style="itemStyle(item)" :aria-label="`Voir la source : ${item.title}`" :title="`${item.title} · ${item.start?.label}`" @click="focusItem(item)" /></div></div></div>
-            <p class="lab-meta lab-preview-note">Placement indicatif des dates approximatives. Les intervalles ouverts restent à vérifier ; leurs fins ne sont pas prolongées jusqu’à aujourd’hui.</p>
+          <section v-else-if="tab === 'timeline'" class="lab-timeline" :aria-label="uiText('Aperçu chronologique de votre sélection')">
+            <div class="lab-section-heading"><div><h3>{{ uiText("Une première lecture du temps") }}</h3><p>{{ selected.length }} {{ uiText("faits sélectionnés · les dates approximatives sont signalées par un tracé pointillé.") }}</p></div><Button variant="tertiary" size="sm" :disabled="!selected.length" @click="exportSelection">{{ uiText("Exporter la sélection") }}</Button></div>
+            <p v-if="!selected.length" class="lab-empty">{{ uiText("Sélectionnez des faits dans « Faits et sources » pour composer l’aperçu.") }}</p>
+            <div v-else class="lab-timeline-chart"><div class="lab-timeline-axis"><span>{{ uiText(selected[0]?.start?.label) }}</span><span>{{ uiText(timelineEnd?.end?.label || timelineEnd?.start?.label) }}</span></div><div v-for="item in selected" :key="item.id" class="lab-timeline-row"><button type="button" class="lab-timeline-label" @click="focusItem(item)">{{ item.title }}<small>{{ uiText(item.start?.label) }}<template v-if="item.end"> → {{ uiText(item.end.label) }}</template></small></button><div class="lab-timeline-track"><button type="button" class="lab-timeline-mark" :class="{'lab-timeline-mark--period':item.type==='period' && item.end,'lab-timeline-mark--approximate':item.start?.approximate || item.end?.approximate}" :style="itemStyle(item)" :aria-label="uiText(uiFormat`Voir la source : ${item.title}`)" :title="uiText(`${item.title} · ${item.start?.label}`)" @click="focusItem(item)" /></div></div></div>
+            <p class="lab-meta lab-preview-note">{{ uiText("Placement indicatif des dates approximatives. Les intervalles ouverts restent à vérifier ; leurs fins ne sont pas prolongées jusqu’à aujourd’hui.") }}</p>
           </section>
 
-          <section v-else class="lab-results" aria-label="Faits proposés et sources">
-            <div class="lab-results-toolbar"><div class="lab-strategy"><button type="button" :aria-pressed="strategy==='profile'" @click="strategy='profile'">Par famille</button><button type="button" :aria-pressed="strategy==='baseline'" @click="strategy='baseline'">Moteur actuel</button></div><div v-if="strategy==='profile'" class="lab-selection-actions"><Button variant="ghost" size="xs" @click="selectAll(true)">Tout sélectionner</Button><Button variant="ghost" size="xs" @click="selectAll(false)">Tout retirer</Button></div></div>
+          <section v-else class="lab-results" :aria-label="uiText('Faits proposés et sources')">
+            <div class="lab-results-toolbar"><div class="lab-strategy"><button type="button" :aria-pressed="strategy==='profile'" @click="strategy='profile'">{{ uiText("Par famille") }}</button><button type="button" :aria-pressed="strategy==='baseline'" @click="strategy='baseline'">{{ uiText("Moteur actuel") }}</button></div><div v-if="strategy==='profile'" class="lab-selection-actions"><Button variant="ghost" size="xs" @click="selectAll(true)">{{ uiText("Tout sélectionner") }}</Button><Button variant="ghost" size="xs" @click="selectAll(false)">{{ uiText("Tout retirer") }}</Button></div></div>
             <template v-if="strategy === 'profile'">
-              <div class="lab-filters" aria-label="Filtrer les propositions"><button v-for="entry in counts" :key="entry.value" type="button" :aria-pressed="filter === entry.value" @click="filter=entry.value">{{ entry.label }} <span>{{ entry.count }}</span></button></div>
-              <p class="lab-result-hint">Ouvrez un fait pour connaître son origine et la raison de son classement.</p>
-              <p v-if="!visible.length" class="lab-empty">{{ filter==='review' ? 'Aucun fait à vérifier avec ces règles.' : filter==='excluded' ? 'Aucun fait écarté avec ces règles.' : 'Aucun fait dans cette vue. Essayez les autres filtres ou ajustez les règles.' }}</p>
+              <div class="lab-filters" :aria-label="uiText('Filtrer les propositions')"><button v-for="entry in counts" :key="entry.value" type="button" :aria-pressed="filter === entry.value" @click="filter=entry.value">{{ uiText(entry.label) }} <span>{{ entry.count }}</span></button></div>
+              <p class="lab-result-hint">{{ uiText("Ouvrez un fait pour connaître son origine et la raison de son classement.") }}</p>
+              <p v-if="!visible.length" class="lab-empty">{{ uiText(filter==='review' ? 'Aucun fait à vérifier avec ces règles.' : filter==='excluded' ? 'Aucun fait écarté avec ces règles.' : 'Aucun fait dans cette vue. Essayez les autres filtres ou ajustez les règles.') }}</p>
               <article v-for="item in visible" :key="item.id" class="lab-item" :class="{'lab-item--excluded':item.status==='excluded'}">
-                <label class="lab-item-check"><input type="checkbox" :checked="selectedIds.has(item.id)" :disabled="!selectable(item)" :aria-label="`Inclure ${item.title}`" @change="toggle(item,$event)" /></label>
+                <label class="lab-item-check"><input type="checkbox" :checked="selectedIds.has(item.id)" :disabled="!selectable(item)" :aria-label="uiText(`Inclure ${item.title}`)" @change="toggle(item,$event)" /></label>
                 <details :open="focusedItem===item.id" @toggle="focusedItem===item.id && !($event.target as HTMLDetailsElement).open ? focusedItem=null : undefined">
-                  <summary><div class="lab-item-date"><strong>{{ item.start?.label || 'Date absente' }}</strong><span v-if="item.type==='period'">→ {{ item.end?.label || 'fin inconnue' }}</span></div><div class="lab-item-main"><span class="lab-item-category">{{ item.category }}<span v-if="item.start?.approximate || item.end?.approximate"> · approximatif</span></span><h3>{{ item.title }}</h3><p v-if="item.description">{{ item.description }}</p></div><Tag :variant="statusVariant(item.status)" :label="statusLabel[item.status]" /><Icon icon="mdi:chevron-down" class="lab-item-chevron" /></summary>
-                  <div class="lab-item-evidence"><div><h4>Pourquoi ce fait ?</h4><ul><li v-for="reason in item.reasons" :key="reason">{{ reason }}</li></ul><p v-if="item.start?.issue">{{ item.start.issue }}</p><p v-if="item.end?.issue">{{ item.end.issue }}</p></div><div><h4>Déclaration d’origine</h4><a :href="sourceUrl(item)" target="_blank" rel="noopener noreferrer">{{ item.source.qid }} · {{ item.source.property }} {{ propertyLabels[item.source.property] || '' }} ↗</a><p>{{ item.origin==='fact' ? 'Fait construit depuis une déclaration du sujet.' : 'Dates lues sur la fiche de cet élément.' }}</p><p>{{ item.source.references }} référence{{ item.source.references===1 ? '' : 's' }} sur cette déclaration.</p><code v-if="item.start">{{ item.start.values.map(v=>`${v.time} · précision ${v.precision}`).join(' / ') }}</code><code v-if="item.end">Fin : {{ item.end.values.map(v=>`${v.time} · précision ${v.precision}`).join(' / ') }}</code></div></div>
+                  <summary><div class="lab-item-date"><strong>{{ uiText(item.start?.label || 'Date absente') }}</strong><span v-if="item.type==='period'">→ {{ uiText(item.end?.label || 'fin inconnue') }}</span></div><div class="lab-item-main"><span class="lab-item-category">{{ item.category }}<span v-if="item.start?.approximate || item.end?.approximate"> {{ uiText("· approximatif") }}</span></span><h3>{{ item.title }}</h3><p v-if="item.description">{{ item.description }}</p></div><Tag :variant="statusVariant(item.status)" :label="uiText(statusLabel[item.status])" /><Icon icon="mdi:chevron-down" class="lab-item-chevron" /></summary>
+                  <div class="lab-item-evidence"><div><h4>{{ uiText("Pourquoi ce fait ?") }}</h4><ul><li v-for="reason in item.reasons" :key="reason">{{ reason }}</li></ul><p v-if="item.start?.issue">{{ item.start.issue }}</p><p v-if="item.end?.issue">{{ item.end.issue }}</p></div><div><h4>{{ uiText("Déclaration d’origine") }}</h4><a :href="sourceUrl(item)" target="_blank" rel="noopener noreferrer">{{ item.source.qid }} · {{ item.source.property }} {{ uiText(propertyLabels[item.source.property] || '') }} ↗</a><p>{{ uiText(item.origin==='fact' ? 'Fait construit depuis une déclaration du sujet.' : 'Dates lues sur la fiche de cet élément.') }}</p><p>{{ item.source.references }} {{ uiText("référence") }}{{ uiText(item.source.references===1 ? '' : 's') }} {{ uiText("sur cette déclaration.") }}</p><code v-if="item.start">{{ uiText(item.start.values.map(v=>uiFormat`${v.time} · précision ${v.precision}`).join(' / ')) }}</code><code v-if="item.end">{{ uiText("Fin :") }} {{ uiText(item.end.values.map(v=>uiFormat`${v.time} · précision ${v.precision}`).join(' / ')) }}</code></div></div>
                 </details>
               </article>
             </template>
-            <template v-else><p class="lab-result-hint">Résultats du service actuel, avant toute réutilisation des éléments du catalogue.</p><p v-if="snapshot.baselineError" role="alert">{{ snapshot.baselineError }}</p><p v-if="!baselineItems.length" class="lab-empty">Le moteur actuel ne propose aucun élément pour ce sujet.</p><div v-for="item in baselineItems" :key="item.qid" class="lab-baseline-row"><div><strong>{{ item.title }}</strong><small>{{ item.type==='period' ? 'Période' : 'Événement' }} · {{ item.qid }}</small></div><span>{{ formatSearchResultDateBound(item.startDate) || 'Date absente' }}<template v-if="item.type==='period'"> → {{ formatSearchResultDateBound(item.endDate) || 'fin inconnue' }}</template></span><Tag :label="item.selected ? 'Valide' : 'À compléter'" :variant="item.selected ? 'neutral' : 'warning'" /></div></template>
+            <template v-else><p class="lab-result-hint">{{ uiText("Résultats du service actuel, avant toute réutilisation des éléments du catalogue.") }}</p><p v-if="snapshot.baselineError" role="alert">{{ uiText(snapshot.baselineError) }}</p><p v-if="!baselineItems.length" class="lab-empty">{{ uiText("Le moteur actuel ne propose aucun élément pour ce sujet.") }}</p><div v-for="item in baselineItems" :key="item.qid" class="lab-baseline-row"><div><strong>{{ item.title }}</strong><small>{{ uiText(item.type==='period' ? 'Période' : 'Événement') }} · {{ item.qid }}</small></div><span>{{ uiText(formatSearchResultDateBound(item.startDate) || 'Date absente') }}<template v-if="item.type==='period'"> → {{ uiText(formatSearchResultDateBound(item.endDate) || 'fin inconnue') }}</template></span><Tag :label="uiText(item.selected ? 'Valide' : 'À compléter')" :variant="item.selected ? 'neutral' : 'warning'" /></div></template>
           </section>
-          <footer class="lab-footer"><span>Un résultat daté n’est pas forcément un fait pertinent. Les propositions restent à relire.</span><Button variant="secondary" size="sm" :disabled="!selected.length" @click="exportSelection">Exporter {{ selected.length }} faits en JSON</Button></footer>
+          <footer class="lab-footer"><span>{{ uiText("Un résultat daté n’est pas forcément un fait pertinent. Les propositions restent à relire.") }}</span><Button variant="secondary" size="sm" :disabled="!selected.length" @click="exportSelection">{{ uiText("Exporter") }} {{ selected.length }} {{ uiText("faits en JSON") }}</Button></footer>
         </template>
       </section>
     </div>

@@ -57,6 +57,13 @@ export function useTimelinePeriodTooltip(
     if (!period.value) return;
     event.preventDefault(); event.stopPropagation(); dismiss();
   }
+  function collapseFromKeyboard(event: KeyboardEvent) {
+    const id = activeId.value;
+    if (!id) return;
+    event.preventDefault(); event.stopPropagation();
+    reset();
+    dismissedId.value = id;
+  }
   function reset() {
     cancelReveal(); stopTracking();
     hoveredId.value = null; focusedId.value = null; dismissedId.value = null; revealedId.value = null;
@@ -124,6 +131,6 @@ export function useTimelinePeriodTooltip(
   });
   return {
     activeId, period, tooltipId, tooltipElement, tooltipStyle,
-    enter, move, leave, focus, blur, dismiss, reset,
+    enter, move, leave, focus, blur, dismiss, collapseFromKeyboard, reset,
   };
 }

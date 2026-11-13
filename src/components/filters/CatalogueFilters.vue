@@ -2,19 +2,19 @@
   <FilterBuilder :types="types" :active-filters="activeFilters" @remove="remove" @add="type => { if (type === 'time') timeAdded = true; }">
     <template #chip-time="{ open, expanded }">
       <span class="date-filter__icon"><Icon icon="mdi:calendar-range-outline" width="15" /></span>
-      <button type="button" class="date-filter__bound" data-filter-type="time" aria-label="Modifier la date de début" aria-haspopup="dialog" :aria-expanded="expanded"
-        @click="open($event, '[aria-label=&quot;Début de la plage&quot;]')">{{ timeRange ? formatYearsBP(timeRange.oldBP) : 'Début' }}<Icon icon="mdi:chevron-down" width="13" /></button>
+      <button type="button" class="date-filter__bound" data-filter-type="time" :aria-label="uiText('Modifier la date de début')" aria-haspopup="dialog" :aria-expanded="expanded"
+        @click="open($event, '[aria-label=&quot;Début de la plage&quot;]')">{{ uiText(timeRange ? formatYearsBP(timeRange.oldBP) : 'Début') }}<Icon icon="mdi:chevron-down" width="13" /></button>
       <span class="date-filter__separator" aria-hidden="true">→</span>
-      <button type="button" class="date-filter__bound" data-filter-type="time" aria-label="Modifier la date de fin" aria-haspopup="dialog" :aria-expanded="expanded"
-        @click="open($event, '[aria-label=&quot;Fin de la plage&quot;]')">{{ timeRange ? formatYearsBP(timeRange.recentBP) : 'Fin' }}<Icon icon="mdi:chevron-down" width="13" /></button>
+      <button type="button" class="date-filter__bound" data-filter-type="time" :aria-label="uiText('Modifier la date de fin')" aria-haspopup="dialog" :aria-expanded="expanded"
+        @click="open($event, '[aria-label=&quot;Fin de la plage&quot;]')">{{ uiText(timeRange ? formatYearsBP(timeRange.recentBP) : 'Fin') }}<Icon icon="mdi:chevron-down" width="13" /></button>
     </template>
     <template #default="{ type, close }">
-      <FilterValueList v-if="type === 'visibility'" :model-value="[visibility]" :options="visibilityOptions" label="Visibilité"
+      <FilterValueList v-if="type === 'visibility'" :model-value="[visibility]" :options="visibilityOptions" :label="uiText('Visibilité')"
         @update:model-value="values => visibility = values[0] as 'all' | 'public' | 'private'" @done="close" />
-      <FilterValueList v-else-if="type === 'tags'" v-model="tags" :options="tagOptions" label="Tags"
-        multiple search-placeholder="Rechercher un tag…" />
-      <FilterValueList v-else-if="type === 'stories'" v-model="storyIds" :options="storyOptions" label="Frises" multiple
-        search-placeholder="Rechercher une frise…" :loading="storiesLoading" :error="storiesError" @retry="$emit('retryStories')" />
+      <FilterValueList v-else-if="type === 'tags'" v-model="tags" :options="tagOptions" :label="uiText('Tags')"
+        multiple :search-placeholder="uiText('Rechercher un tag…')" />
+      <FilterValueList v-else-if="type === 'stories'" v-model="storyIds" :options="storyOptions" :label="uiText('Frises')" multiple
+        :search-placeholder="uiText('Rechercher une frise…')" :loading="storiesLoading" :error="storiesError" @retry="$emit('retryStories')" />
       <PeriodFilterPicker v-else-if="type === 'period' && context !== 'periods'" :model-value="period?.id ?? null" :pending="periodPending" :selection-error="periodError"
         @update:model-value="choosePeriod" @retry="choosePeriod(requestedPeriodId)" />
       <TemporalRangeFilter v-else-if="type === 'time'" v-model="timeRange" />
@@ -22,6 +22,7 @@
   </FilterBuilder>
 </template>
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import { computed, ref } from 'vue';
 import { Icon } from '@iconify/vue';
 import PeriodFilterPicker from './PeriodFilterPicker.vue';
@@ -75,7 +76,7 @@ async function choosePeriod(id: string) {
     if (!isCurrent()) return;
     const range = rangeFromPeriod(selected);
     if (!range) { periodError.value = 'Les dates de cette période ne sont pas connues.'; return; }
-    period.value = { id, label: selected.label.fr || selected.label.en, range };
+    period.value = { id, label: localizedText(selected.label), range };
   } catch (cause) {
     if (isCurrent()) periodError.value = cause instanceof Error ? cause.message : 'Impossible de charger cette période.';
   } finally { if (isCurrent()) periodPending.value = false; }
@@ -83,8 +84,8 @@ async function choosePeriod(id: string) {
 const activeFilters = computed<ActiveFilter[]>(() => [
   ...(props.context === 'stories' && !props.hideVisibility && visibility.value !== 'all' ? [{ key: 'visibility', type: 'visibility', label: visibility.value === 'public' ? 'Frises publiques' : 'Frises privées' }] : []),
   ...tags.value.map(id => ({ key: `tag:${id}`, type: 'tags', label: props.tagOptions.find(option => option.value === id)?.label ?? id })),
-  ...storyIds.value.map(id => ({ key: `story:${id}`, type: 'stories', label: `Frise : ${props.storyOptions.find(option => option.value === id)?.label ?? id}` })),
-  ...(period.value && props.context !== 'periods' ? [{ key: 'period', type: 'period', label: `Période : ${period.value.label}` }] : []),
+  ...storyIds.value.map(id => ({ key: `story:${id}`, type: 'stories', label: uiFormat`Frise : ${props.storyOptions.find(option => option.value === id)?.label ?? id}` })),
+  ...(period.value && props.context !== 'periods' ? [{ key: 'period', type: 'period', label: uiFormat`Période : ${period.value.label}` }] : []),
   ...(timeAdded.value || timeRange.value ? [{ key: 'time', type: 'time', label: 'Dates' }] : []),
 ]);
 function remove(key: string) {

@@ -1,13 +1,14 @@
 <template>
   <span class="ui-tag" :class="[`ui-tag--${variant}`, `ui-tag--${size}`]">
-    <slot name="label"><component v-if="to" :is="router ? RouterLink : 'a'" v-bind="router ? { to } : { href: plainHref }" class="ui-tag__label ui-tag__link">{{ label }}</component>
-    <span v-else class="ui-tag__label">{{ label }}</span></slot>
-    <button v-if="removable" type="button" class="ui-tag__remove" :disabled="disabled" :aria-label="removeLabel || `Retirer ${label}`" @click.stop="$emit('remove')" @keydown.stop>
+    <slot name="label"><component v-if="to" :is="router ? RouterLink : 'a'" v-bind="router ? { to } : { href: plainHref }" class="ui-tag__label ui-tag__link">{{ uiText(label) }}</component>
+    <span v-else class="ui-tag__label">{{ uiText(label) }}</span></slot>
+    <button v-if="removable" type="button" class="ui-tag__remove" :disabled="disabled" :aria-label="uiText(removeLabel || uiFormat`Retirer ${label}`)" @click.stop="$emit('remove')" @keydown.stop>
       <DesignIcon name="tag-close" />
     </button>
   </span>
 </template>
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { RouterLink, type RouteLocationRaw } from 'vue-router';
 import { useLinkDestination } from '@/composables/useLinkDestination';
 import DesignIcon from './DesignIcon.vue';

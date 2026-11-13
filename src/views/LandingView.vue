@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import Button from '@/components/base/Button.vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import LandingTimeDemo from '@/components/LandingTimeDemo.vue';
+import LanguageSelect from '@/components/LanguageSelect.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import Tabs from '@/components/base/Tabs.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -55,97 +57,98 @@ const questions = [
   <div ref="page" class="landing-page">
     <header class="landing-header">
       <div class="landing-container header-inner">
-        <RouterLink to="/" class="landing-brand" aria-label="Universal Timeline — accueil">Universal Timeline</RouterLink>
-        <nav class="landing-nav" aria-label="Navigation principale">
-          <RouterLink to="/catalogue">Catalogue</RouterLink>
-          <a href="#experience">L’expérience</a>
-          <a href="#creer">Vos frises</a>
-          <a href="#questions">Questions</a>
+        <RouterLink to="/" class="landing-brand" :aria-label="uiText('Universal Timeline — accueil')">{{ uiText("Universal Timeline") }}</RouterLink>
+        <nav class="landing-nav" :aria-label="uiText('Navigation principale')">
+          <RouterLink to="/catalogue">{{ uiText("Catalogue") }}</RouterLink>
+          <a href="#experience">{{ uiText("L’expérience") }}</a>
+          <a href="#creer">{{ uiText("Vos frises") }}</a>
+          <a href="#questions">{{ uiText("Questions") }}</a>
         </nav>
         <div class="landing-account">
-          <RouterLink :to="canUseWorkspace(auth) ? '/timeline' : '/login'" data-attr="landing-cta-login">{{ canUseWorkspace(auth) ? 'Mon espace' : 'Se connecter' }}</RouterLink>
+          <RouterLink :to="canUseWorkspace(auth) ? '/timeline' : '/login'" data-attr="landing-cta-login">{{ uiText(canUseWorkspace(auth) ? 'Mon espace' : 'Se connecter') }}</RouterLink>
+          <LanguageSelect />
           <ThemeToggle />
         </div>
       </div>
     </header>
 
     <section id="experience" class="hero landing-container" aria-labelledby="hero-title">
-      <div class="section-index"><span>01</span> UNE QUESTION D’ÉCHELLE</div>
+      <div class="section-index"><span>01</span> {{ uiText("UNE QUESTION D’ÉCHELLE") }}</div>
       <div class="hero-heading">
         <div>
-          <h1 id="hero-title">13,8 milliards d’années.<br /><span>Et nous, tout au bout.</span></h1>
-          <p class="hero-description">L’Univers, la Terre, la vie, notre espèce.<br />Commencez par tout le temps disponible, puis explorez-le.</p>
+          <h1 id="hero-title">{{ uiText("13,8 milliards d’années.") }}<br /><span>{{ uiText("Et nous, tout au bout.") }}</span></h1>
+          <p class="hero-description">{{ uiText("L’Univers, la Terre, la vie, notre espèce.") }}<br />{{ uiText("Commencez par tout le temps disponible, puis explorez-le.") }}</p>
         </div>
         <div class="hero-actions">
-          <Button to="/timeline" class="action-link" data-attr="landing-cta-explore">Explorer les frises</Button>
+          <Button to="/timeline" class="action-link" data-attr="landing-cta-explore">{{ uiText("Explorer les frises") }}</Button>
         </div>
       </div>
       <LandingTimeDemo />
       <div class="experience-footer">
-        <span>Choisissez une échelle, puis examinez les repères.</span>
-        <span>Une introduction à Universal Timeline.</span>
+        <span>{{ uiText("Choisissez une échelle, puis examinez les repères.") }}</span>
+        <span>{{ uiText("Une introduction à Universal Timeline.") }}</span>
       </div>
     </section>
 
     <section id="comprendre" class="context-section landing-container" aria-labelledby="context-title">
       <div class="narrative-heading">
-        <div class="section-index"><span>02</span> CE QUE LES DATES NE DISENT PAS</div>
-        <h2 id="context-title">Une date se lit.<br />Une durée se regarde.</h2>
+        <div class="section-index"><span>02</span> {{ uiText("CE QUE LES DATES NE DISENT PAS") }}</div>
+        <h2 id="context-title">{{ uiText("Une date se lit.") }}<br />{{ uiText("Une durée se regarde.") }}</h2>
       </div>
       <div class="context-copy">
-        <p>Nous savons situer des événements. Nous imaginons moins bien ce qui les sépare. En les plaçant sur une même échelle, les distances deviennent visibles et les perspectives changent.</p>
-        <p>Universal Timeline permet de parcourir des frises, d’explorer leurs périodes et de découvrir les événements qui s’y rattachent. De l’Univers entier à l’histoire d’un sujet qui vous intéresse.</p>
+        <p>{{ uiText("Nous savons situer des événements. Nous imaginons moins bien ce qui les sépare. En les plaçant sur une même échelle, les distances deviennent visibles et les perspectives changent.") }}</p>
+        <p>{{ uiText("Universal Timeline permet de parcourir des frises, d’explorer leurs périodes et de découvrir les événements qui s’y rattachent. De l’Univers entier à l’histoire d’un sujet qui vous intéresse.") }}</p>
         <div class="data-note">
-          <span class="data-label">LE SAVOIR EN COMMUN</span>
-          <p>La plateforme est connectée à <a href="https://www.wikidata.org/wiki/Wikidata:Main_Page" target="_blank" rel="noopener noreferrer">Wikidata<span class="sr-only"> (nouvel onglet)</span></a>. Les données de référence proviennent de cette base collaborative ; ses données structurées sont ouvertes et librement réutilisables sous <a href="https://www.wikidata.org/wiki/Wikidata:Licensing" target="_blank" rel="noopener noreferrer">licence CC0<span class="sr-only"> (nouvel onglet)</span></a>.</p>
+          <span class="data-label">{{ uiText("LE SAVOIR EN COMMUN") }}</span>
+          <p>{{ uiText("La plateforme est connectée à") }} <a href="https://www.wikidata.org/wiki/Wikidata:Main_Page" target="_blank" rel="noopener noreferrer">{{ uiText("Wikidata") }}<span class="sr-only"> {{ uiText("(nouvel onglet)") }}</span></a>{{ uiText(". Les données de référence proviennent de cette base collaborative ; ses données structurées sont ouvertes et librement réutilisables sous") }} <a href="https://www.wikidata.org/wiki/Wikidata:Licensing" target="_blank" rel="noopener noreferrer">{{ uiText("licence CC0") }}<span class="sr-only"> {{ uiText("(nouvel onglet)") }}</span></a>.</p>
         </div>
       </div>
     </section>
 
     <section id="creer" class="create-section landing-container" aria-labelledby="create-title">
       <div class="create-copy">
-        <div class="section-index"><span>03</span> ET VOTRE HISTOIRE ?</div>
-        <h2 id="create-title">Changez de sujet.<br />Gardez la perspective.</h2>
-        <p>Un cours à préparer, une recherche à situer, une évolution à raconter. Réunissez des périodes et des événements pour composer vos propres frises.</p>
-        <p>Partagez-les pour enrichir les frises publiques, ou conservez-les dans votre espace privé, pour un usage personnel ou professionnel.</p>
+        <div class="section-index"><span>03</span> {{ uiText("ET VOTRE HISTOIRE ?") }}</div>
+        <h2 id="create-title">{{ uiText("Changez de sujet.") }}<br />{{ uiText("Gardez la perspective.") }}</h2>
+        <p>{{ uiText("Un cours à préparer, une recherche à situer, une évolution à raconter. Réunissez des périodes et des événements pour composer vos propres frises.") }}</p>
+        <p>{{ uiText("Partagez-les pour enrichir les frises publiques, ou conservez-les dans votre espace privé, pour un usage personnel ou professionnel.") }}</p>
         <div class="create-bottom">
-          <Button :to="accountTarget" class="action-link" data-attr="landing-cta-create">{{ canUseWorkspace(auth) ? 'Accéder à mes frises' : 'Créer ma première frise' }}</Button>
-          <span>Compte gratuit actuellement.</span>
+          <Button :to="accountTarget" class="action-link" data-attr="landing-cta-create">{{ uiText(canUseWorkspace(auth) ? 'Accéder à mes frises' : 'Créer ma première frise') }}</Button>
+          <span>{{ uiText("Compte gratuit actuellement.") }}</span>
         </div>
       </div>
       <div class="workspace-example">
-        <div class="example-header"><span>À CHAQUE SUJET, SA FRISE</span><span>Exemples d’usages</span></div>
+        <div class="example-header"><span>{{ uiText("À CHAQUE SUJET, SA FRISE") }}</span><span>{{ uiText("Exemples d’usages") }}</span></div>
         <!-- Visitors clicked these rows expecting to see an example, then left the sign-up form at once: each opens a public frise. -->
         <RouterLink v-for="example in usageExamples" :key="example.id" :to="{ path: '/timeline', query: { story: example.story.id } }" class="example-row" :data-attr="`landing-cta-example_${example.id}`">
           <span class="example-indicator" :class="`indicator-${example.id}`" />
-          <div><strong>{{ example.title }}</strong><p>{{ example.audience }} · Voir « {{ example.story.title }} »</p></div>
-          <span class="example-type">{{ example.type }}</span>
+          <div><strong>{{ uiText(example.title) }}</strong><p>{{ uiText(example.audience) }} {{ uiText("· Voir «") }} {{ uiText(example.story.title) }} »</p></div>
+          <span class="example-type">{{ uiText(example.type) }}</span>
           <Icon icon="mdi:arrow-right" class="example-arrow" aria-hidden="true" />
-          <span class="sr-only"> : ouvrir cet exemple</span>
+          <span class="sr-only"> {{ uiText(": ouvrir cet exemple") }}</span>
         </RouterLink>
         <div class="visibility-example">
-          <span>Votre frise, votre choix <small>Exemple de visibilité</small></span>
-          <Tabs v-model="visibility" :tabs="visibilityTabs" aria-label="Exemple du choix de visibilité d’une frise" />
+          <span>{{ uiText("Votre frise, votre choix") }} <small>{{ uiText("Exemple de visibilité") }}</small></span>
+          <Tabs v-model="visibility" :tabs="visibilityTabs" :aria-label="uiText('Exemple du choix de visibilité d’une frise')" />
         </div>
-        <p class="visibility-description" aria-live="polite">{{ visibility === 'public' ? 'Une frise publique rejoint les explorations accessibles à tous.' : 'Une frise privée reste dans votre espace, pour vos propres usages.' }}</p>
+        <p class="visibility-description" aria-live="polite">{{ uiText(visibility === 'public' ? 'Une frise publique rejoint les explorations accessibles à tous.' : 'Une frise privée reste dans votre espace, pour vos propres usages.') }}</p>
       </div>
     </section>
 
     <section id="questions" class="faq-section landing-container" aria-labelledby="faq-title">
-      <div><div class="section-index"><span>04</span> QUELQUES REPÈRES</div><h2 id="faq-title">Avant de continuer.</h2></div>
+      <div><div class="section-index"><span>04</span> {{ uiText("QUELQUES REPÈRES") }}</div><h2 id="faq-title">{{ uiText("Avant de continuer.") }}</h2></div>
       <div class="faq-list">
         <details v-for="question in questions" :key="question.title">
-          <summary>{{ question.title }}<span aria-hidden="true">+</span></summary>
-          <p>{{ question.answer }}</p>
+          <summary>{{ uiText(question.title) }}<span aria-hidden="true">+</span></summary>
+          <p>{{ uiText(question.answer) }}</p>
         </details>
       </div>
     </section>
 
     <footer class="landing-footer landing-container">
-      <RouterLink to="/" class="landing-brand">Universal Timeline</RouterLink>
-      <span>Le temps, une question d’échelle.</span>
-      <nav aria-label="Liens de pied de page"><RouterLink to="/timeline" data-attr="landing-cta-footer_explore">Explorer les frises</RouterLink><RouterLink :to="accountTarget" data-attr="landing-cta-footer_signup">{{ canUseWorkspace(auth) ? 'Mes frises' : 'Créer un compte' }}</RouterLink></nav>
-      <nav class="landing-legal" aria-label="Informations légales"><RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">Mentions légales</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">Confidentialité</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'cookies' } }">Cookies</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'conditions' } }">Conditions d’utilisation</RouterLink><RouterLink :to="{ name: 'contact' }">Contact</RouterLink></nav>
+      <RouterLink to="/" class="landing-brand">{{ uiText("Universal Timeline") }}</RouterLink>
+      <span>{{ uiText("Le temps, une question d’échelle.") }}</span>
+      <nav :aria-label="uiText('Liens de pied de page')"><RouterLink to="/timeline" data-attr="landing-cta-footer_explore">{{ uiText("Explorer les frises") }}</RouterLink><RouterLink :to="accountTarget" data-attr="landing-cta-footer_signup">{{ uiText(canUseWorkspace(auth) ? 'Mes frises' : 'Créer un compte') }}</RouterLink></nav>
+      <nav class="landing-legal" :aria-label="uiText('Informations légales')"><RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">{{ uiText("Mentions légales") }}</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">{{ uiText("Confidentialité") }}</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'cookies' } }">{{ uiText("Cookies") }}</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'conditions' } }">{{ uiText("Conditions d’utilisation") }}</RouterLink><RouterLink :to="{ name: 'contact' }">{{ uiText("Contact") }}</RouterLink></nav>
     </footer>
   </div>
 </template>

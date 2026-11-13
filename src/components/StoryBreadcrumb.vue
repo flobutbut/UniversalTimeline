@@ -1,10 +1,10 @@
 <template>
-  <nav v-if="items.length" ref="container" class="story-breadcrumb" :class="{ 'story-breadcrumb--compact': maxVisible != null }" :aria-label="label" :aria-busy="loading || undefined">
+  <nav v-if="items.length" ref="container" class="story-breadcrumb" :class="{ 'story-breadcrumb--compact': maxVisible != null }" :aria-label="uiText(label)" :aria-busy="loading || undefined">
     <ol class="story-breadcrumb__list">
       <li v-if="hiddenItems.length" class="story-breadcrumb__overflow">
         <SelectShell v-model:open="menuOpen" compact dropdown-class="story-breadcrumb__menu" dropdown-role="menu" :dropdown-id="menuId" :dropdown-label="overflowLabel" @escape="focusTrigger">
           <template #trigger>
-            <Button :ref="triggerElement" variant="ghost" size="xs" icon-only :disabled="loading" :aria-label="overflowLabel" :title="overflowLabel"
+            <Button :ref="triggerElement" variant="ghost" size="xs" icon-only :disabled="loading" :aria-label="uiText(overflowLabel)" :title="uiText(overflowLabel)"
               aria-haspopup="menu" :aria-expanded="menuOpen" :aria-controls="menuOpen ? menuId : undefined"
               @click="toggleMenu" @keydown.down.prevent="showMenu()" @keydown.up.prevent="showMenu(true)">
               <template #icon><Icon icon="mdi:dots-horizontal" width="18" height="18" aria-hidden="true" /></template>
@@ -26,7 +26,7 @@
           v-if="offset < visibleItems.length - 1"
           type="button"
           class="story-breadcrumb__item story-breadcrumb__item--link"
-          :title="item.title"
+          :title="uiText(item.title)"
           :disabled="loading"
           @click="navigate(hiddenItems.length + offset, $event)"
         ><StoryMarker v-if="item.kind === 'story'" />{{ item.title }}</button>
@@ -43,7 +43,7 @@
           type="button"
           class="story-breadcrumb__item story-breadcrumb__item--link story-breadcrumb__item--current"
           aria-current="location"
-          :title="item.title"
+          :title="uiText(item.title)"
           :disabled="loading"
           @click="navigate(hiddenItems.length + offset, $event)"
         ><StoryMarker v-if="item.kind === 'story'" />{{ item.title }}</button>
@@ -53,7 +53,7 @@
           class="story-breadcrumb__item story-breadcrumb__item--current"
           aria-current="location"
           tabindex="-1"
-          :title="item.title"
+          :title="uiText(item.title)"
         ><StoryMarker v-if="item.kind === 'story'" />{{ item.title }}</span>
       </li>
     </ol>
@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import { uiFormat, uiText } from '@/i18n';
 import { computed, h, nextTick, onDeactivated, onScopeDispose, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
@@ -102,7 +103,7 @@ const hiddenCount = computed(() => {
 });
 const hiddenItems = computed(() => props.items.slice(0, hiddenCount.value));
 const visibleItems = computed(() => props.items.slice(hiddenCount.value));
-const overflowLabel = computed(() => hiddenItems.value.length === 1 ? 'Afficher l’étape précédente' : `Afficher les ${hiddenItems.value.length} étapes précédentes`);
+const overflowLabel = computed(() => hiddenItems.value.length === 1 ? 'Afficher l’étape précédente' : uiFormat`Afficher les ${hiddenItems.value.length} étapes précédentes`);
 const menuOpen = ref(false);
 const trigger = ref<HTMLElement | null>(null);
 const triggerElement = elementRef(trigger);

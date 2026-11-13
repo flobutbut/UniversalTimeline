@@ -1,3 +1,4 @@
+import { localizedText } from '@/i18n';
 import { tagLabel } from '@/lib/tags';
 import { computed } from 'vue';
 import { useCatalogueBulkActions, type CatalogueBulkAction } from './useCatalogueBulkActions';
@@ -11,13 +12,13 @@ import type { ListPeriod, ListEvent } from '@/types/database';
 
 export function useEntityBulkActions(kind: 'period' | 'event', items: () => Array<ListPeriod | ListEvent>, links: ReturnType<typeof useStoryLinks>) {
   const store = useDataStore(); const auth = useAuthStore();
-  const editableStories = computed(() => store.stories.filter(auth.canEditStory).map(story => ({ value: story.id, label: story.title.fr || story.title.en || story.id })));
+  const editableStories = computed(() => store.stories.filter(auth.canEditStory).map(story => ({ value: story.id, label: localizedText(story.title) || story.id })));
   const actions: { value: CatalogueBulkAction; label: string }[] = [
     { value: 'add-story', label: 'Ajouter à une frise' }, { value: 'remove-story', label: 'Retirer d’une frise' },
     { value: 'export', label: 'Exporter en CSV' }, { value: 'delete', label: 'Supprimer du catalogue' },
   ];
   const bulk = useCatalogueBulkActions({
-    items, label: kind === 'period' ? 'Périodes' : 'Événements', itemLabel: item => item.label.fr || item.label.en || item.id,
+    items, label: kind === 'period' ? 'Périodes' : 'Événements', itemLabel: item => localizedText(item.label) || item.id,
     deleteItem: async item => {
       if (kind === 'period') store.removeDeletedPeriod(await PeriodApiService.getInstance().deletePeriod(item.id));
       else { await EventApiService.getInstance().deleteEvent(item.id); store.updateEvents(store.events.filter(event => event.id !== item.id)); }
@@ -34,10 +35,10 @@ export function useEntityBulkActions(kind: 'period' | 'event', items: () => Arra
       store.invalidateStory(storyId);
       await links.load();
     },
-    csvRow: item => ({ ID: item.id, Nom: item.label.fr || item.label.en,
+    csvRow: item => ({ ID: item.id, Nom: localizedText(item.label),
       ...('startDate' in item ? { Début: item.startDate, Fin: item.endDate } : { Date: item.date }),
       Tags: (item.tags ?? []).map(tagLabel).join(', '),
-      Catégories: item.categories.map(category => category.label.fr || category.label.en).join(', '),
+      Catégories: item.categories.map(category => localizedText(category.label)).join(', '),
       Frises: links.storyIdsOf(item.id).map(id => store.storyById(id)?.title.fr || id).join(', '),
     }),
   });

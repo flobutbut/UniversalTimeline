@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { language, uiText } from '@/i18n';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import Button from '@/components/base/Button.vue';
 import Tabs from '@/components/base/Tabs.vue';
@@ -51,22 +52,22 @@ onBeforeUnmount(() => {
 <template>
   <div class="time-demo">
     <div class="demo-toolbar">
-      <span class="toolbar-label">UNE MÊME LIGNE · CINQ ÉCHELLES</span>
-      <Tabs :model-value="mode" :tabs="scaleTabs" aria-label="Échelle de la frise" @update:model-value="changeScale" />
+      <span class="toolbar-label">{{ uiText("UNE MÊME LIGNE · CINQ ÉCHELLES") }}</span>
+      <Tabs :model-value="mode" :tabs="scaleTabs" :aria-label="uiText('Échelle de la frise')" @update:model-value="changeScale" />
     </div>
-    <figure class="time-figure" aria-label="Des durées représentées sur une échelle linéaire commune">
+    <figure class="time-figure" :aria-label="uiText('Des durées représentées sur une échelle linéaire commune')">
       <figcaption>
-        <span>{{ mode === 'universe' ? 'Du Big Bang à aujourd’hui : l’Univers entier' : mode === 'earth' ? 'De la formation de la Terre à aujourd’hui' : `Zoom : ${scale.label.toLocaleLowerCase('fr-FR')}` }}</span>
-        <span class="figure-unit">{{ mode === 'universe' || mode === 'earth' ? 'Ga = milliards d’années' : mode === 'dinosaurs' ? 'Ma = millions d’années' : 'Échelle linéaire' }}</span>
+        <span>{{ uiText(mode === 'universe' ? 'Du Big Bang à aujourd’hui : l’Univers entier' : mode === 'earth' ? 'De la formation de la Terre à aujourd’hui' : `Zoom : ${scale.label.toLocaleLowerCase(language)}`) }}</span>
+        <span class="figure-unit">{{ uiText(mode === 'universe' || mode === 'earth' ? 'Ga = milliards d’années' : mode === 'dinosaurs' ? 'Ma = millions d’années' : 'Échelle linéaire') }}</span>
       </figcaption>
       <div class="plot">
-        <div class="plot-label axis-label">LE TEMPS</div>
+        <div class="plot-label axis-label">{{ uiText("LE TEMPS") }}</div>
         <div ref="track" class="plot-axis">
-          <span v-for="(tick, index) in scale.ticks" :key="index" class="axis-tick" :class="{ 'axis-tick--first': index === 0, 'axis-tick--last': index === scale.ticks.length - 1 }" :style="{ left: `${(1 - tick.age / scale.span) * 100}%` }">{{ tick.label }}</span>
+          <span v-for="(tick, index) in scale.ticks" :key="index" class="axis-tick" :class="{ 'axis-tick--first': index === 0, 'axis-tick--last': index === scale.ticks.length - 1 }" :style="{ left: `${(1 - tick.age / scale.span) * 100}%` }">{{ uiText(tick.label) }}</span>
         </div>
         <template v-for="band in chartBands" :key="band.id">
-          <div class="plot-label" :class="`tone-${band.color}`">{{ band.label }}</div>
-          <div class="plot-lane" :class="`tone-${band.color}`" :aria-label="`${band.label} : ${band.dateLabel}`">
+          <div class="plot-label" :class="`tone-${band.color}`">{{ uiText(band.label) }}</div>
+          <div class="plot-lane" :class="`tone-${band.color}`" :aria-label="uiText(`${band.label} : ${band.dateLabel}`)">
             <span v-for="(tick, index) in scale.ticks" :key="index" class="lane-guide" :style="{ left: `${(1 - tick.age / scale.span) * 100}%` }" aria-hidden="true" />
             <div class="duration-band" :data-band="band.id" :style="{ left: `${band.left}%`, width: `${band.width}%` }" aria-hidden="true" />
             <span v-if="band.subpixel" class="subpixel-marker" :style="{ left: `min(${band.left}%, calc(100% - 1px))` }" aria-hidden="true" />
@@ -74,28 +75,28 @@ onBeforeUnmount(() => {
         </template>
       </div>
       <div class="plot-caption">
-        <span>Même échelle pour toutes les lignes. Dates approximatives.</span>
-        <span v-if="mode === 'universe' || mode === 'earth'" class="human-measure">Homo sapiens : {{ humanPercent }} % de la ligne<span v-if="humanPixels !== null"> · {{ humanPixels.toLocaleString('fr-FR', { maximumFractionDigits: 3 }) }} px sur cet écran</span></span>
+        <span>{{ uiText("Même échelle pour toutes les lignes. Dates approximatives.") }}</span>
+        <span v-if="mode === 'universe' || mode === 'earth'" class="human-measure">{{ uiText("Homo sapiens :") }} {{ humanPercent }} {{ uiText("% de la ligne") }}<span v-if="humanPixels !== null"> · {{ uiText(humanPixels.toLocaleString('fr-FR', { maximumFractionDigits: 3 })) }} {{ uiText("px sur cet écran") }}</span></span>
       </div>
-      <p class="marker-note">Les durées inférieures au pixel sont signalées par un trait de repérage de 1 px, sans agrandir la barre de durée.</p>
+      <p class="marker-note">{{ uiText("Les durées inférieures au pixel sont signalées par un trait de repérage de 1 px, sans agrandir la barre de durée.") }}</p>
     </figure>
     <div class="demo-insight">
       <div aria-live="polite" aria-atomic="true">
-        <h2>{{ scale.thought }}</h2>
-        <p>{{ scale.explanation }}</p>
+        <h2>{{ uiText(scale.thought) }}</h2>
+        <p>{{ uiText(scale.explanation) }}</p>
       </div>
-      <Button size="sm" @click="nextScale">{{ scale.nextLabel }}</Button>
+      <Button size="sm" @click="nextScale">{{ uiText(scale.nextLabel) }}</Button>
     </div>
-    <div class="landmark-list" role="group" aria-label="Examiner les repères historiques">
+    <div class="landmark-list" role="group" :aria-label="uiText('Examiner les repères historiques')">
       <button v-for="(landmark, index) in landmarks" :key="landmark.id" type="button" :aria-pressed="selected.id === landmark.id" @click="selectedId = landmark.id">
-        <span class="landmark-index">{{ String(index + 1).padStart(2, '0') }}</span>
-        <strong>{{ landmark.title }}</strong>
-        <span>{{ landmark.date }}</span>
+        <span class="landmark-index">{{ uiText(String(index + 1).padStart(2, '0')) }}</span>
+        <strong>{{ uiText(landmark.title) }}</strong>
+        <span>{{ uiText(landmark.date) }}</span>
       </button>
     </div>
     <div class="landmark-detail" aria-live="polite" aria-atomic="true">
-      <p><strong>{{ selected.title }}.</strong> {{ selected.description }}</p>
-      <a :href="selected.source" target="_blank" rel="noopener noreferrer">Source : {{ selected.sourceName }}<span class="sr-only"> (nouvel onglet)</span></a>
+      <p><strong>{{ uiText(selected.title) }}.</strong> {{ uiText(selected.description) }}</p>
+      <a :href="selected.source" target="_blank" rel="noopener noreferrer">{{ uiText("Source :") }} {{ selected.sourceName }}<span class="sr-only"> {{ uiText("(nouvel onglet)") }}</span></a>
     </div>
   </div>
 </template>

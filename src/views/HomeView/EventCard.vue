@@ -17,7 +17,7 @@
     @focusin="setFocused(true)"
     @focusout="setFocused(false)"
   >
-    <button :class="undated ? 'event-undated-trigger' : 'event-dot'" type="button" :aria-label="`Afficher l’événement ${displayLabel}`" :aria-pressed="isSelected" @click.stop="$emit('click', $event)">{{ undated ? displayLabel : '' }}</button>
+    <button :class="undated ? 'event-undated-trigger' : 'event-dot'" type="button" :aria-label="uiText(uiFormat`Afficher l’événement ${displayLabel}`)" :aria-pressed="isSelected" @click.stop="$emit('click', $event)">{{ uiText(undated ? displayLabel : '') }}</button>
 
     <!-- Ligne toujours ancrée sur le dot, indépendante du décalage du tooltip -->
     <div v-show="!minimized" class="event-vertical-line"></div>
@@ -25,25 +25,25 @@
     <!-- Bulle d'info décalée selon l'alignement -->
     <div ref="boxElement" class="event-info-box" :class="{ 'event-info-box--bounded': frameWidth && !undated }" :style="[tooltipBounds, liftStyle]" @click.stop="$emit('click', $event)">
       <WikipediaImage v-if="!undated || isSelected" :titles="event.wikipedia" :active="hovered || focused || isSelected" class="event-image" />
-      <button type="button" class="event-label" :aria-label="`${isSelected ? 'Libérer' : 'Figer'} l’infobulle de ${displayLabel}`" :aria-pressed="isSelected">{{ displayLabel }}</button>
+      <button type="button" class="event-label" :lang="contentLanguage(event.label)" :aria-label="uiText(uiFormat`${isSelected ? 'Libérer' : 'Figer'} l’infobulle de ${displayLabel}`)" :aria-pressed="isSelected">{{ displayLabel }}</button>
       <div class="event-date">{{ displayDate }}</div>
-      <div v-if="otherStoryCount" class="event-meta event-story-count">{{ otherStoryCount }} {{ otherStoryCount > 1 ? 'autres frises associées' : 'autre frise associée' }}</div>
+      <div v-if="otherStoryCount" class="event-meta event-story-count">{{ otherStoryCount }} {{ uiText(otherStoryCount > 1 ? 'autres frises associées' : 'autre frise associée') }}</div>
       <!-- Au survol, une courte description ; le texte complet à la sélection. -->
-      <p v-if="displayDescription" class="event-description" :class="{ 'event-description--clamped': !isSelected }">{{ displayDescription }}</p>
+      <p v-if="displayDescription" class="event-description" :lang="contentLanguage(event.description)" :class="{ 'event-description--clamped': !isSelected }">{{ displayDescription }}</p>
       <WikipediaLink :titles="event.wikipedia" :subject="displayLabel" display="text" class="event-wikipedia" />
-      <div v-if="suggestionsLoading" class="event-meta" role="status">Chargement des frises…</div>
+      <div v-if="suggestionsLoading" class="event-meta" role="status">{{ uiText("Chargement des frises…") }}</div>
       <div v-else-if="suggestionsError" class="event-meta event-meta--error" role="alert">
-        {{ suggestionsError }} <Button variant="tertiary" size="sm" type="button" @click.stop="$emit('retry-suggestions')">Réessayer</Button>
+        {{ uiText(suggestionsError) }} <Button variant="tertiary" size="sm" type="button" @click.stop="$emit('retry-suggestions')">{{ uiText("Réessayer") }}</Button>
       </div>
       <!-- Autres frises contenant l'événement : listées directement, rien s'il n'y en a pas -->
-      <section v-if="storySuggestions.length > 0" class="event-stories" aria-label="Autres frises associées à cet événement">
+      <section v-if="storySuggestions.length > 0" class="event-stories" :aria-label="uiText('Autres frises associées à cet événement')">
         <ul class="event-stories-list">
           <li v-for="s in storySuggestions" :key="s.id" class="event-story-row">
             <button class="event-story-item" type="button" @click.stop="$emit('story-select', s.id)">
-              {{ s.title?.fr || s.title?.en }}
+              {{ localizedText(s.title) }}
             </button>
             <Button v-if="comparison?.ids.has(s.id)" variant="ghost" size="xs" icon-only type="button" :disabled="comparison.disabled"
-              :aria-label="`Ajouter ${s.title?.fr || s.title?.en} sous cette frise`" title="Ajouter sous cette frise" @click.stop="$emit('story-compare', s.id)">
+              :aria-label="uiFormat`Ajouter ${localizedText(s.title)} sous cette frise`" :title="uiText('Ajouter sous cette frise')" @click.stop="$emit('story-compare', s.id)">
               <template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template>
             </Button>
           </li>
@@ -54,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import { contentLanguage, localizedText, uiFormat, uiText } from '@/i18n';
 import Button from '@/components/base/Button.vue';
 import WikipediaImage from '@/components/WikipediaImage.vue';
 import WikipediaLink from '@/components/WikipediaLink.vue';
@@ -157,12 +158,12 @@ const displayLabel = computed(() => {
   if (typeof raw === 'string') return raw.trim();
   if (raw && typeof raw === 'object' && ('fr' in raw || 'en' in raw)) {
     const o = raw as { fr?: string; en?: string };
-    return (o.fr || o.en || '').trim();
+    return localizedText(o);
   }
   return '';
 });
 
-const displayDescription = computed(() => (props.event.description?.fr || props.event.description?.en || '').trim());
+const displayDescription = computed(() => (localizedText(props.event.description) || '').trim());
 
 const displayDate = computed(() => {
   const d = props.event.date?.trim() || '';

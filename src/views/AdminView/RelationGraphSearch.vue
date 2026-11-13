@@ -1,23 +1,24 @@
 <template>
   <div ref="root" class="relation-search" @focusout="onFocusout">
-    <SearchInput ref="input" v-model="query" placeholder="Rechercher un objet" autocomplete="off"
+    <SearchInput ref="input" v-model="query" :placeholder="uiText('Rechercher un objet')" autocomplete="off"
       role="combobox" aria-autocomplete="list" :aria-expanded="visible" :aria-controls="visible?listId:undefined" :aria-activedescendant="activeId"
       @focus="show" @click="show" @keydown="onKeydown" />
     <PopoverSurface v-if="visible" class="relation-search__suggestions" :style="{maxHeight:`${popupHeight}px`}">
-      <p class="relation-search__status" role="status">{{ results.length }} résultat{{ results.length===1?'':'s' }}</p>
-      <div :id="listId" role="listbox" aria-label="Suggestions du réseau">
+      <p class="relation-search__status" role="status">{{ results.length }} {{ uiText("résultat") }}{{ uiText(results.length===1?'':'s') }}</p>
+      <div :id="listId" role="listbox" :aria-label="uiText('Suggestions du réseau')">
         <button v-for="(node,index) in results" :id="optionId(index)" :key="node.id" type="button" role="option" tabindex="-1"
-          :aria-selected="cursor===index" :title="node.title" class="relation-search__option" :class="{'relation-search__option--active':cursor===index}"
+          :aria-selected="cursor===index" :title="uiText(node.title)" class="relation-search__option" :class="{'relation-search__option--active':cursor===index}"
           @pointerdown.prevent @mousedown.prevent @mouseenter="cursor=index" @click="choose(node)">
-          <ItemSummary :title="node.title" :description="`${kindLabels[node.kind]} · ${node.subtitle}`" />
+          <ItemSummary :title="uiText(node.title)" :description="uiText(`${kindLabels[node.kind]} · ${node.subtitle}`)" />
         </button>
       </div>
-      <FeedbackState v-if="!results.length" kind="empty" layout="inline" message="Aucun objet ne correspond." />
+      <FeedbackState v-if="!results.length" kind="empty" layout="inline" :message="uiText('Aucun objet ne correspond.')" />
     </PopoverSurface>
   </div>
 </template>
 
 <script setup lang="ts">
+import { language, uiText } from '@/i18n';
 import {computed,nextTick,onMounted,onScopeDispose,ref,watch} from 'vue';
 import SearchInput from '@/components/base/SearchInput.vue';
 import PopoverSurface from '@/components/base/PopoverSurface.vue';
@@ -31,7 +32,7 @@ const emit=defineEmits<{select:[id:string]}>();
 const root=ref<HTMLElement>();const input=ref<InstanceType<typeof SearchInput>>();
 const query=ref('');const open=ref(false);const popupHeight=ref(320);
 const kindLabels={story:'Frise',period:'Période',event:'Événement'};
-const normalize=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').trim();
+const normalize=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase(language.value).trim();
 const results=computed(()=>{
   const needle=normalize(query.value);
   if(!needle)return [];

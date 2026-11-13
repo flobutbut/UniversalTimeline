@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Button from '@/components/base/Button.vue';
@@ -72,39 +73,39 @@ function restart() { phase.value = 'request'; error.value = ''; }
 <template>
   <section class="account-page">
     <div class="account-panel">
-      <h2>{{ phase === 'choose' ? 'Choisir un nouveau mot de passe' : 'Mot de passe oublié' }}</h2>
-      <p v-if="auth.enabled === false" role="status">La connexion utilisateur sera disponible après la mise en place des accès.</p>
+      <h2>{{ uiText(phase === 'choose' ? 'Choisir un nouveau mot de passe' : 'Mot de passe oublié') }}</h2>
+      <p v-if="auth.enabled === false" role="status">{{ uiText("La connexion utilisateur sera disponible après la mise en place des accès.") }}</p>
 
       <form v-else-if="phase === 'request'" :aria-busy="busy" @submit.prevent="requestLink">
-        <p>Indiquez l’adresse de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.</p>
-        <Input id="reset-email" v-model="email" label="Adresse e-mail" type="email" name="email" autocomplete="email" required :disabled="busy" />
-        <p v-if="error" role="alert">{{ error }}</p>
-        <Button type="submit" :disabled="busy || !email.trim()">{{ busy ? 'Envoi…' : 'Recevoir le lien' }}</Button>
+        <p>{{ uiText("Indiquez l’adresse de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.") }}</p>
+        <Input id="reset-email" v-model="email" :label="uiText('Adresse e-mail')" type="email" name="email" autocomplete="email" required :disabled="busy" />
+        <p v-if="error" role="alert">{{ uiText(error) }}</p>
+        <Button type="submit" :disabled="busy || !email.trim()">{{ uiText(busy ? 'Envoi…' : 'Recevoir le lien') }}</Button>
       </form>
 
       <div v-else-if="phase === 'sent'" class="account-step" role="status">
-        <p>Si un compte existe pour <strong>{{ email.trim() }}</strong>, un e-mail vient de lui être envoyé. Le lien est valable une seule fois et pendant une durée limitée.</p>
-        <p>Rien reçu après quelques minutes ? Vérifiez le dossier des indésirables, puis <Button variant="tertiary" size="sm" @click="restart">renvoyez un lien</Button>.</p>
+        <p>{{ uiText("Si un compte existe pour") }} <strong>{{ email.trim() }}</strong>{{ uiText(", un e-mail vient de lui être envoyé. Le lien est valable une seule fois et pendant une durée limitée.") }}</p>
+        <p>{{ uiText("Rien reçu après quelques minutes ? Vérifiez le dossier des indésirables, puis") }} <Button variant="tertiary" size="sm" @click="restart">{{ uiText("renvoyez un lien") }}</Button>.</p>
       </div>
 
-      <p v-else-if="phase === 'verifying'" role="status">Vérification du lien…</p>
+      <p v-else-if="phase === 'verifying'" role="status">{{ uiText("Vérification du lien…") }}</p>
 
       <div v-else-if="phase === 'invalid'" class="account-step">
-        <p role="alert">Ce lien n’est plus valable : il a déjà servi ou a expiré.</p>
-        <Button @click="restart">Demander un nouveau lien</Button>
+        <p role="alert">{{ uiText("Ce lien n’est plus valable : il a déjà servi ou a expiré.") }}</p>
+        <Button @click="restart">{{ uiText("Demander un nouveau lien") }}</Button>
       </div>
 
       <form v-else :aria-busy="busy" @submit.prevent="choosePassword">
-        <Input id="reset-password" v-model="password" label="Nouveau mot de passe" type="password" name="new-password" autocomplete="new-password"
+        <Input id="reset-password" v-model="password" :label="uiText('Nouveau mot de passe')" type="password" name="new-password" autocomplete="new-password"
           :minlength="8" aria-describedby="reset-password-hint" required :disabled="busy" />
-        <p id="reset-password-hint">Au moins 8 caractères. Utilisez un mot de passe unique ; les mots de passe trop faibles ou compromis sont refusés.</p>
-        <Input id="reset-password-confirmation" v-model="confirmation" label="Confirmer le mot de passe" type="password" name="new-password-confirmation"
+        <p id="reset-password-hint">{{ uiText("Au moins 8 caractères. Utilisez un mot de passe unique ; les mots de passe trop faibles ou compromis sont refusés.") }}</p>
+        <Input id="reset-password-confirmation" v-model="confirmation" :label="uiText('Confirmer le mot de passe')" type="password" name="new-password-confirmation"
           autocomplete="new-password" :minlength="8" required :disabled="busy" />
-        <p v-if="error" role="alert">{{ error }}</p>
-        <Button type="submit" :disabled="busy || !password || !confirmation">{{ busy ? 'Enregistrement…' : 'Enregistrer le mot de passe' }}</Button>
+        <p v-if="error" role="alert">{{ uiText(error) }}</p>
+        <Button type="submit" :disabled="busy || !password || !confirmation">{{ uiText(busy ? 'Enregistrement…' : 'Enregistrer le mot de passe') }}</Button>
       </form>
 
-      <RouterLink :to="{ name: 'login' }">Revenir à la connexion</RouterLink>
+      <RouterLink :to="{ name: 'login' }">{{ uiText("Revenir à la connexion") }}</RouterLink>
     </div>
   </section>
 </template>

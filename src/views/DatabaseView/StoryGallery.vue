@@ -1,22 +1,22 @@
 <template>
-  <section class="story-gallery" aria-label="Toutes les frises">
+  <section class="story-gallery" :aria-label="uiText('Toutes les frises')">
     <div class="story-gallery__header">
-      <CatalogueToolbar v-model:search="search" placeholder="Rechercher une frise…">
+      <CatalogueToolbar v-model:search="search" :placeholder="uiText('Rechercher une frise…')">
         <template #filters><StoryFilters v-model="visibility" v-model:time-range="timeRange" v-model:period="period" v-model:tags="tags" :tag-options="tagOptions" /></template>
         <template #actions>
-          <div class="story-gallery__views" role="group" aria-label="Affichage des frises">
-            <Button variant="tertiary" size="sm" icon-only :pressed="view === 'cards'" aria-label="Afficher en cartes" @click="setView('cards')"><template #icon><Icon icon="mdi:view-grid" width="18" height="18" /></template></Button>
-            <Button variant="tertiary" size="sm" icon-only :pressed="view === 'list'" aria-label="Afficher en liste" @click="setView('list')"><template #icon><DesignIcon name="list" /></template></Button>
+          <div class="story-gallery__views" role="group" :aria-label="uiText('Affichage des frises')">
+            <Button variant="tertiary" size="sm" icon-only :pressed="view === 'cards'" :aria-label="uiText('Afficher en cartes')" @click="setView('cards')"><template #icon><Icon icon="mdi:view-grid" width="18" height="18" /></template></Button>
+            <Button variant="tertiary" size="sm" icon-only :pressed="view === 'list'" :aria-label="uiText('Afficher en liste')" @click="setView('list')"><template #icon><DesignIcon name="list" /></template></Button>
           </div>
-          <Button v-if="canCreate" size="sm" @click="$emit('create')"><template #icon><DesignIcon name="plus" /></template>Créer une frise</Button>
-          <Button v-else size="sm" variant="secondary" :to="{ name: 'profile' }">Choisir un nom d’utilisateur</Button>
-          <Button size="sm" variant="secondary" to="/generate">Depuis Wikidata</Button>
+          <Button v-if="canCreate" size="sm" @click="$emit('create')"><template #icon><DesignIcon name="plus" /></template>{{ uiText("Créer une frise") }}</Button>
+          <Button v-else size="sm" variant="secondary" :to="{ name: 'profile' }">{{ uiText("Choisir un nom d’utilisateur") }}</Button>
+          <Button size="sm" variant="secondary" to="/generate">{{ uiText("Depuis Wikidata") }}</Button>
         </template>
       </CatalogueToolbar>
     </div>
-    <p v-if="!canCreate" role="status" class="story-gallery__notice">Choisissez un nom d’utilisateur dans votre profil : il signe vos frises et il est nécessaire pour en créer.</p>
-    <p v-if="error" role="alert" class="story-gallery__notice">{{ error }}</p>
-    <ul v-if="stories.length && view === 'cards'" class="story-gallery__grid" aria-label="Frises">
+    <p v-if="!canCreate" role="status" class="story-gallery__notice">{{ uiText("Choisissez un nom d’utilisateur dans votre profil : il signe vos frises et il est nécessaire pour en créer.") }}</p>
+    <p v-if="error" role="alert" class="story-gallery__notice">{{ uiText(error) }}</p>
+    <ul v-if="stories.length && view === 'cards'" class="story-gallery__grid" :aria-label="uiText('Frises')">
       <li v-for="story in stories" :key="story.id" class="story-card">
         <div class="story-card__preview" aria-hidden="true"><StoryTimeline :periods="story.previewPeriods" :events="story.previewEvents" compact /></div>
         <div class="story-card__text">
@@ -26,7 +26,7 @@
         </div>
       </li>
     </ul>
-    <CatalogueTable v-else-if="stories.length" class="story-gallery__table" label="Frises" density="comfortable" :columns="columns" :items="stories" empty-text="Aucune frise">
+    <CatalogueTable v-else-if="stories.length" class="story-gallery__table" :label="uiText('Frises')" density="comfortable" :columns="columns" :items="stories" empty-text="Aucune frise">
       <template #row="{ item: story }">
         <span class="col-label" role="cell">
           <button type="button" class="catalogue-label-button catalogue-label-button--row" @click="$emit('open', story)">{{ titleOf(story) }}</button>
@@ -37,16 +37,17 @@
         <span class="col-date" role="cell">{{ formatRecordDate(story.createdAt) }}</span>
       </template>
     </CatalogueTable>
-    <FeedbackState v-else :title="isFirstStory ? 'Votre première frise commence ici' : undefined">
+    <FeedbackState v-else :title="uiText(isFirstStory ? 'Votre première frise commence ici' : undefined)">
       <template v-if="isFirstStory" #icon><Icon icon="mdi:timeline-plus-outline" width="32" height="32" /></template>
-      <template v-if="isFirstStory">Aucune frise pour le moment. Explorez une époque, racontez une histoire ou retracez un parcours en réunissant périodes et événements.</template>
-      <template v-else>Aucune frise ne correspond à votre recherche.</template>
-      <template v-if="canCreate" #actions><Button size="sm" @click="$emit('create')"><template #icon><DesignIcon name="plus" /></template>{{ isFirstStory ? 'Créer ma première frise' : 'Créer une frise' }}</Button></template>
+      <template v-if="isFirstStory">{{ uiText("Aucune frise pour le moment. Explorez une époque, racontez une histoire ou retracez un parcours en réunissant périodes et événements.") }}</template>
+      <template v-else>{{ uiText("Aucune frise ne correspond à votre recherche.") }}</template>
+      <template v-if="canCreate" #actions><Button size="sm" @click="$emit('create')"><template #icon><DesignIcon name="plus" /></template>{{ uiText(isFirstStory ? 'Créer ma première frise' : 'Créer une frise') }}</Button></template>
     </FeedbackState>
   </section>
 </template>
 
 <script setup lang="ts">
+import { localizedText, uiText } from '@/i18n';
 import { computed, ref } from 'vue';
 import { Icon } from '@iconify/vue';
 import Button from '@/components/base/Button.vue';
@@ -92,7 +93,7 @@ const columns: CatalogueColumn[] = [
 
 const isFirstStory = computed(() => props.totalStories === 0);
 
-function titleOf(story: StorySummary) { return story.title.fr || story.title.en || 'Sans titre'; }
+function titleOf(story: StorySummary) { return localizedText(story.title) || 'Sans titre'; }
 function countsOf(story: StorySummary) {
   const periods = story.previewPeriods?.length ?? 0;
   const events = story.previewEvents?.length ?? 0;

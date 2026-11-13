@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { localizedText, uiFormat, uiText } from '@/i18n';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import Button from '@/components/base/Button.vue';
+import LanguageSelect from '@/components/LanguageSelect.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import ScrollTimeLens from '@/components/ScrollTimeLens.vue';
 import { useScrollJourney } from '@/composables/useScrollJourney';
@@ -43,72 +45,73 @@ onBeforeUnmount(() => { alive = false; });
 </script>
 
 <template>
-  <div ref="root" class="scroll-landing" :class="{ 'scroll-landing--reduced': reducedMotion }" tabindex="0" aria-label="Voyage du temps cosmique à une seconde" @scroll.passive="schedule">
+  <div ref="root" class="scroll-landing" :class="{ 'scroll-landing--reduced': reducedMotion }" tabindex="0" :aria-label="uiText('Voyage du temps cosmique à une seconde')" @scroll.passive="schedule">
     <header class="journey-header">
-      <RouterLink to="/" class="journey-brand">Universal Timeline</RouterLink>
-      <span class="concept-label">CONCEPT 02 / DU COSMOS À L’INSTANT</span>
-      <nav aria-label="Navigation du concept">
-        <RouterLink to="/">Version précédente</RouterLink>
-        <a href="#lecture" @click="transcriptOpen = true">Lecture directe</a>
-        <RouterLink to="/catalogue">Catalogue</RouterLink>
-        <ThemeToggle />
+      <RouterLink to="/" class="journey-brand">{{ uiText("Universal Timeline") }}</RouterLink>
+      <span class="concept-label">{{ uiText("CONCEPT 02 / DU COSMOS À L’INSTANT") }}</span>
+      <nav :aria-label="uiText('Navigation du concept')">
+        <RouterLink to="/">{{ uiText("Version précédente") }}</RouterLink>
+        <a href="#lecture" @click="transcriptOpen = true">{{ uiText("Lecture directe") }}</a>
+        <RouterLink to="/catalogue">{{ uiText("Catalogue") }}</RouterLink>
+        <LanguageSelect />
+          <ThemeToggle />
       </nav>
     </header>
 
-    <h1 class="sr-only">Du cosmos à l’instant : un voyage dans les échelles du temps</h1>
+    <h1 class="sr-only">{{ uiText("Du cosmos à l’instant : un voyage dans les échelles du temps") }}</h1>
     <div ref="runway" class="journey-runway" :style="{ '--chapter-count': journeyChapters.length }">
       <div ref="stage" class="journey-stage" :data-chapter="chapter.id">
-        <div class="journey-topline"><span>UN SEUL TEMPS. PLUSIEURS PROFONDEURS.</span><span>{{ String(frame.index + 1).padStart(2, '0') }} / {{ journeyChapters.length }}</span></div>
+        <div class="journey-topline"><span>{{ uiText("UN SEUL TEMPS. PLUSIEURS PROFONDEURS.") }}</span><span>{{ uiText(String(frame.index + 1).padStart(2, '0')) }} / {{ journeyChapters.length }}</span></div>
         <div class="stage-body">
           <div class="chapter-copy">
-            <p class="chapter-kicker">{{ chapter.label }}</p>
-            <h2>{{ chapter.title }}</h2>
-            <p class="chapter-description">{{ chapter.description }}</p>
-            <p class="chapter-date">{{ chapter.date }}</p>
-            <a v-if="chapter.source" :href="chapter.source.url" target="_blank" rel="noopener noreferrer" class="chapter-source">Source : {{ chapter.source.name }}<span class="sr-only"> (nouvel onglet)</span></a>
+            <p class="chapter-kicker">{{ uiText(chapter.label) }}</p>
+            <h2>{{ uiText(chapter.title) }}</h2>
+            <p class="chapter-description">{{ uiText(chapter.description) }}</p>
+            <p class="chapter-date">{{ uiText(chapter.date) }}</p>
+            <a v-if="chapter.source" :href="chapter.source.url" target="_blank" rel="noopener noreferrer" class="chapter-source">{{ uiText("Source :") }} {{ chapter.source.name }}<span class="sr-only"> {{ uiText("(nouvel onglet)") }}</span></a>
             <div class="chapter-action">
-              <Button v-if="relatedStory" :to="storyTimelineLocation(relatedStory.id)" class="journey-action" data-attr="landing-cta-journey_story" :aria-label="`Explorer la frise ${relatedStory.title.fr || relatedStory.title.en}`">Explorer cette frise</Button>
-              <Button v-else-if="chapter.example" :to="accountTarget" class="journey-action" data-attr="landing-cta-journey_create">Raconter ma propre histoire</Button>
-              <Button v-else to="/timeline" class="journey-action" data-attr="landing-cta-journey_explore">Explorer les frises</Button>
-              <span v-if="relatedStory" class="related-title">{{ relatedStory.title.fr || relatedStory.title.en }}</span>
-              <span v-else-if="chapter.example" class="related-title">Frises publiques ou privées, à votre échelle.</span>
+              <Button v-if="relatedStory" :to="storyTimelineLocation(relatedStory.id)" class="journey-action" data-attr="landing-cta-journey_story" :aria-label="uiFormat`Explorer la frise ${localizedText(relatedStory.title)}`">{{ uiText("Explorer cette frise") }}</Button>
+              <Button v-else-if="chapter.example" :to="accountTarget" class="journey-action" data-attr="landing-cta-journey_create">{{ uiText("Raconter ma propre histoire") }}</Button>
+              <Button v-else to="/timeline" class="journey-action" data-attr="landing-cta-journey_explore">{{ uiText("Explorer les frises") }}</Button>
+              <span v-if="relatedStory" class="related-title">{{ localizedText(relatedStory.title) }}</span>
+              <span v-else-if="chapter.example" class="related-title">{{ uiText("Frises publiques ou privées, à votre échelle.") }}</span>
             </div>
           </div>
           <ScrollTimeLens :duration="frame.duration" :chapter-index="frame.index" />
         </div>
         <div class="stage-navigation">
-          <span class="scroll-invitation">{{ frame.index === journeyChapters.length - 1 ? 'Vous êtes arrivé à une seconde.' : 'Faites défiler pour vous rapprocher.' }}</span>
+          <span class="scroll-invitation">{{ uiText(frame.index === journeyChapters.length - 1 ? 'Vous êtes arrivé à une seconde.' : 'Faites défiler pour vous rapprocher.') }}</span>
           <div class="stage-controls">
-            <Button size="sm" variant="tertiary" :disabled="frame.index === 0" @click="goToStep(frame.index - 1)">Précédent</Button>
-            <Button v-if="frame.index < journeyChapters.length - 1" size="sm" variant="tertiary" @click="goToStep(frame.index + 1)">Suivant</Button>
-            <a v-else href="#votre-histoire" class="finish-link">Et votre histoire ?</a>
+            <Button size="sm" variant="tertiary" :disabled="frame.index === 0" @click="goToStep(frame.index - 1)">{{ uiText("Précédent") }}</Button>
+            <Button v-if="frame.index < journeyChapters.length - 1" size="sm" variant="tertiary" @click="goToStep(frame.index + 1)">{{ uiText("Suivant") }}</Button>
+            <a v-else href="#votre-histoire" class="finish-link">{{ uiText("Et votre histoire ?") }}</a>
           </div>
         </div>
-        <nav class="chapter-navigation" aria-label="Étapes du voyage">
-          <button v-for="(item, index) in journeyChapters" :key="item.id" type="button" :aria-label="`Étape ${index + 1} : ${item.label}`" :aria-current="frame.index === index ? 'step' : undefined" :title="item.label" @click="goToStep(index)"><span>{{ String(index + 1).padStart(2, '0') }}</span></button>
+        <nav class="chapter-navigation" :aria-label="uiText('Étapes du voyage')">
+          <button v-for="(item, index) in journeyChapters" :key="item.id" type="button" :aria-label="uiText(uiFormat`Étape ${index + 1} : ${item.label}`)" :aria-current="frame.index === index ? 'step' : undefined" :title="uiText(item.label)" @click="goToStep(index)"><span>{{ uiText(String(index + 1).padStart(2, '0')) }}</span></button>
         </nav>
         <div class="journey-progress" aria-hidden="true"><span :style="{ transform: `scaleX(${frame.progress})` }" /></div>
-        <span class="sr-only" role="status" aria-live="polite">Étape {{ frame.index + 1 }} sur {{ journeyChapters.length }} : {{ chapter.label }}.</span>
+        <span class="sr-only" role="status" aria-live="polite">{{ uiText("Étape") }} {{ frame.index + 1 }} {{ uiText("sur") }} {{ journeyChapters.length }} : {{ uiText(chapter.label) }}.</span>
       </div>
     </div>
 
     <section id="votre-histoire" class="journey-outro" aria-labelledby="outro-title">
-      <span class="outro-kicker">DE L’IMMENSE AU FAMILIER</span>
-      <h2 id="outro-title">À quelle échelle<br />commence votre histoire ?</h2>
-      <p>Une époque, une recherche, une vie, un événement. Universal Timeline donne une place aux histoires qui vous intéressent. Explorez les frises publiques ou composez les vôtres, publiques ou privées.</p>
-      <div class="outro-actions"><Button to="/timeline" class="journey-action" data-attr="landing-cta-journey_outro">Explorer les frises</Button><RouterLink :to="accountTarget" class="outro-secondary" data-attr="landing-cta-journey_outro_create">{{ canUseWorkspace(auth) ? 'Mes frises' : 'Créer ma première frise' }}</RouterLink></div>
-      <span class="outro-note">Exploration sans compte. Aucun abonnement payant actuellement.</span>
-      <div class="journey-data">Connecté à <a href="https://www.wikidata.org" target="_blank" rel="noopener noreferrer">Wikidata<span class="sr-only"> (nouvel onglet)</span></a> · données structurées ouvertes sous CC0.</div>
+      <span class="outro-kicker">{{ uiText("DE L’IMMENSE AU FAMILIER") }}</span>
+      <h2 id="outro-title">{{ uiText("À quelle échelle") }}<br />{{ uiText("commence votre histoire ?") }}</h2>
+      <p>{{ uiText("Une époque, une recherche, une vie, un événement. Universal Timeline donne une place aux histoires qui vous intéressent. Explorez les frises publiques ou composez les vôtres, publiques ou privées.") }}</p>
+      <div class="outro-actions"><Button to="/timeline" class="journey-action" data-attr="landing-cta-journey_outro">{{ uiText("Explorer les frises") }}</Button><RouterLink :to="accountTarget" class="outro-secondary" data-attr="landing-cta-journey_outro_create">{{ uiText(canUseWorkspace(auth) ? 'Mes frises' : 'Créer ma première frise') }}</RouterLink></div>
+      <span class="outro-note">{{ uiText("Exploration sans compte. Aucun abonnement payant actuellement.") }}</span>
+      <div class="journey-data">{{ uiText("Connecté à") }} <a href="https://www.wikidata.org" target="_blank" rel="noopener noreferrer">{{ uiText("Wikidata") }}<span class="sr-only"> {{ uiText("(nouvel onglet)") }}</span></a> {{ uiText("· données structurées ouvertes sous CC0.") }}</div>
     </section>
 
     <details id="lecture" class="journey-transcript" :open="transcriptOpen" @toggle="transcriptOpen = ($event.target as HTMLDetailsElement).open">
-      <summary>Lire les {{ journeyChapters.length }} étapes sans animation</summary>
-      <p class="transcript-note">Les repères sont arrondis et sourcés. Cette expérience est une illustration indépendante des données du catalogue. Les dernières étapes sont des durées choisies pour l’exemple, pas des événements historiques. L’axe de chaque cadre est linéaire ; le déplacement entre les cadres suit une progression logarithmique. Une année est approximée par 365,25 jours pour ces comparaisons.</p>
+      <summary>{{ uiText("Lire les") }} {{ journeyChapters.length }} {{ uiText("étapes sans animation") }}</summary>
+      <p class="transcript-note">{{ uiText("Les repères sont arrondis et sourcés. Cette expérience est une illustration indépendante des données du catalogue. Les dernières étapes sont des durées choisies pour l’exemple, pas des événements historiques. L’axe de chaque cadre est linéaire ; le déplacement entre les cadres suit une progression logarithmique. Une année est approximée par 365,25 jours pour ces comparaisons.") }}</p>
       <ol>
-        <li v-for="item in journeyChapters" :key="item.id"><h3>{{ item.label }}</h3><p>{{ item.date }}</p><p>{{ item.description }}</p><a v-if="item.source" :href="item.source.url" target="_blank" rel="noopener noreferrer">Source : {{ item.source.name }}<span class="sr-only"> (nouvel onglet)</span></a></li>
+        <li v-for="item in journeyChapters" :key="item.id"><h3>{{ uiText(item.label) }}</h3><p>{{ uiText(item.date) }}</p><p>{{ uiText(item.description) }}</p><a v-if="item.source" :href="item.source.url" target="_blank" rel="noopener noreferrer">{{ uiText("Source :") }} {{ item.source.name }}<span class="sr-only"> {{ uiText("(nouvel onglet)") }}</span></a></li>
       </ol>
     </details>
-    <footer class="journey-footer"><RouterLink to="/">Revoir le premier concept</RouterLink><a href="#lecture" @click="transcriptOpen = true">Repères et sources</a><RouterLink to="/timeline" data-attr="landing-cta-journey_footer">Entrer dans l’application</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">Mentions légales</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">Confidentialité</RouterLink><RouterLink :to="{ name: 'contact' }">Contact</RouterLink></footer>
+    <footer class="journey-footer"><RouterLink to="/">{{ uiText("Revoir le premier concept") }}</RouterLink><a href="#lecture" @click="transcriptOpen = true">{{ uiText("Repères et sources") }}</a><RouterLink to="/timeline" data-attr="landing-cta-journey_footer">{{ uiText("Entrer dans l’application") }}</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'mentions-legales' } }">{{ uiText("Mentions légales") }}</RouterLink><RouterLink :to="{ name: 'legal', params: { page: 'confidentialite' } }">{{ uiText("Confidentialité") }}</RouterLink><RouterLink :to="{ name: 'contact' }">{{ uiText("Contact") }}</RouterLink></footer>
   </div>
 </template>
 

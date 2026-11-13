@@ -1,24 +1,25 @@
 <template>
   <div class="timeline-map-canvas" :class="{'timeline-map-canvas--expanded':expanded,'timeline-map-canvas--temporal':temporal}">
-    <div class="timeline-map-canvas__toolbar" role="group" aria-label="Commandes de la carte">
-      <Button variant="tertiary" size="sm" icon-only aria-label="Dézoomer" :disabled="zoomLevel<=MIN_ZOOM" @click="scale(1/1.3)"><template #icon><Icon icon="mdi:minus" width="18" height="18" aria-hidden="true" /></template></Button>
-      <output class="timeline-map-canvas__zoom" aria-label="Niveau de zoom">{{ zoomLabel }}</output>
-      <Button variant="tertiary" size="sm" icon-only aria-label="Zoomer" :disabled="zoomLevel>=MAX_ZOOM" @click="scale(1.3)"><template #icon><Icon icon="mdi:plus" width="18" height="18" aria-hidden="true" /></template></Button>
-      <Button variant="tertiary" size="sm" @click="fit">Tout voir</Button>
+    <div class="timeline-map-canvas__toolbar" role="group" :aria-label="uiText('Commandes de la carte')">
+      <Button variant="tertiary" size="sm" icon-only :aria-label="uiText('Dézoomer')" :disabled="zoomLevel<=MIN_ZOOM" @click="scale(1/1.3)"><template #icon><Icon icon="mdi:minus" width="18" height="18" aria-hidden="true" /></template></Button>
+      <output class="timeline-map-canvas__zoom" :aria-label="uiText('Niveau de zoom')">{{ uiText(zoomLabel) }}</output>
+      <Button variant="tertiary" size="sm" icon-only :aria-label="uiText('Zoomer')" :disabled="zoomLevel>=MAX_ZOOM" @click="scale(1.3)"><template #icon><Icon icon="mdi:plus" width="18" height="18" aria-hidden="true" /></template></Button>
+      <Button variant="tertiary" size="sm" @click="fit">{{ uiText("Tout voir") }}</Button>
       <slot name="tools" />
-      <Button class="timeline-map-canvas__expand" variant="tertiary" size="sm" icon-only data-timeline-expand :aria-label="expanded?'Réduire la carte':'Agrandir la carte'" :title="expanded?'Réduire la carte':'Agrandir la carte'" @click="emit('toggleExpand')"><template #icon><Icon :icon="expanded?'mdi:fullscreen-exit':'mdi:fullscreen'" width="18" height="18" aria-hidden="true" /></template></Button>
+      <Button class="timeline-map-canvas__expand" variant="tertiary" size="sm" icon-only data-timeline-expand :aria-label="uiText(expanded?'Réduire la carte':'Agrandir la carte')" :title="uiText(expanded?'Réduire la carte':'Agrandir la carte')" @click="emit('toggleExpand')"><template #icon><Icon :icon="expanded?'mdi:fullscreen-exit':'mdi:fullscreen'" width="18" height="18" aria-hidden="true" /></template></Button>
     </div>
     <div class="timeline-map-canvas__plot">
       <div class="timeline-map-canvas__search"><slot name="search" /></div>
-      <div ref="viewport" class="timeline-map-canvas__viewport" tabindex="0" role="region" aria-label="Canevas de toutes les frises" :aria-describedby="helpId" @keydown="onKeydown">
+      <div ref="viewport" class="timeline-map-canvas__viewport" tabindex="0" role="region" :aria-label="uiText('Canevas de toutes les frises')" :aria-describedby="helpId" @keydown="onKeydown">
         <div ref="scene" class="timeline-map-canvas__scene" @focusin="revealFocus"><slot /></div>
       </div>
     </div>
-    <p :id="helpId" class="sr-only">Molette ou pincement pour zoomer. Glisser le fond ou utiliser les flèches pour se déplacer. + et − pour zoomer. Début pour tout voir.</p>
+    <p :id="helpId" class="sr-only">{{ uiText("Molette ou pincement pour zoomer. Glisser le fond ou utiliser les flèches pour se déplacer. + et − pour zoomer. Début pour tout voir.") }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
+import { uiText } from "@/i18n";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue';
 import { Icon } from '@iconify/vue';
 import { select, zoom, zoomIdentity, zoomTransform, type ZoomBehavior, type ZoomTransform } from 'd3';
