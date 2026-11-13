@@ -3,7 +3,6 @@ import { localizedText, uiFormat, uiText } from '@/i18n';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import Button from '@/components/base/Button.vue';
-import LanguageSelect from '@/components/LanguageSelect.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import ScrollTimeLens from '@/components/ScrollTimeLens.vue';
 import { useScrollJourney } from '@/composables/useScrollJourney';
@@ -53,8 +52,7 @@ onBeforeUnmount(() => { alive = false; });
         <RouterLink to="/">{{ uiText("Version précédente") }}</RouterLink>
         <a href="#lecture" @click="transcriptOpen = true">{{ uiText("Lecture directe") }}</a>
         <RouterLink to="/catalogue">{{ uiText("Catalogue") }}</RouterLink>
-        <LanguageSelect />
-          <ThemeToggle />
+        <ThemeToggle />
       </nav>
     </header>
 

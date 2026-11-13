@@ -38,6 +38,7 @@ it('turns each usage example into a measured link towards a public frise', async
 
 it('keeps the examples on public frises and the creation link on the account path', async () => {
   await start(false);
+  expect(view.get('header').find('[role="combobox"]').exists()).toBe(false);
   expect(view.get('[data-attr="landing-cta-create"]').attributes('href')).toBe('/login?mode=signup&redirect=/database');
   view.unmount(); router.options.history.destroy(); disposePinia(pinia);
   await start(true);

@@ -5,7 +5,6 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import LandingTimeDemo from '@/components/LandingTimeDemo.vue';
-import LanguageSelect from '@/components/LanguageSelect.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import Tabs from '@/components/base/Tabs.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -56,7 +55,7 @@ const questions = [
 <template>
   <div ref="page" class="landing-page">
     <header class="landing-header">
-      <div class="landing-container header-inner">
+      <div class="header-inner">
         <RouterLink to="/" class="landing-brand" :aria-label="uiText('Universal Timeline — accueil')">{{ uiText("Universal Timeline") }}</RouterLink>
         <nav class="landing-nav" :aria-label="uiText('Navigation principale')">
           <RouterLink to="/catalogue">{{ uiText("Catalogue") }}</RouterLink>
@@ -66,7 +65,6 @@ const questions = [
         </nav>
         <div class="landing-account">
           <RouterLink :to="canUseWorkspace(auth) ? '/timeline' : '/login'" data-attr="landing-cta-login">{{ uiText(canUseWorkspace(auth) ? 'Mon espace' : 'Se connecter') }}</RouterLink>
-          <LanguageSelect />
           <ThemeToggle />
         </div>
       </div>
@@ -168,7 +166,7 @@ const questions = [
 .landing-page section[id] { scroll-margin-top: var(--spacing-xl); }
 .landing-container { width: min(1200px, calc(100% - var(--spacing-2xl) * 2)); margin-inline: auto; }
 .landing-header { background: var(--color-surface-default); border-bottom: 1px solid var(--color-border-default); }
-.header-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xl); min-height: 68px; }
+.header-inner { padding-inline: var(--spacing-lg); display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-xl); min-height: 68px; }
 .landing-brand { font-family: var(--font-family-heading); font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); white-space: nowrap; }
 .landing-nav,.landing-account { display: flex; gap: var(--spacing-xl); align-items: center; font-size: var(--font-size-sm); }
 .landing-nav a,.landing-account>a { color: var(--color-text-secondary); }.landing-nav a:hover,.landing-account>a:hover { color: var(--color-text-link); }
