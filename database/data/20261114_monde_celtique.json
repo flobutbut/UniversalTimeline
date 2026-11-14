@@ -1,0 +1,325 @@
+{
+  "reference_time": "2026-11-14T12:00:00Z",
+  "story": {
+    "before": {
+      "title_fr": "Le monde Celtique",
+      "title_en": "Le monde Celtique",
+      "description_fr": null,
+      "description_en": null,
+      "parent_story_id": null
+    },
+    "after": {
+      "title_fr": "Le monde celtique",
+      "title_en": "The Celtic world",
+      "description_fr": "Des champs d’urnes aux royaumes du haut Moyen Âge : l’essor des Celtes en Europe, leurs expéditions jusqu’à Rome et Delphes, la conquête romaine, puis le monde gaélique et breton chrétien.",
+      "description_en": "From the Urnfield culture to the early medieval kingdoms: the rise of the Celts across Europe, their expeditions to Rome and Delphi, the Roman conquest, then the Christian Gaelic and Brittonic world.",
+      "parent_story_id": null
+    }
+  },
+  "periodDates": [
+    {
+      "id": "ce77a30d-1a24-4bd7-8a44-c814b843abc8",
+      "before": [
+        "-1349",
+        "-0799"
+      ],
+      "beforeBp": [
+        3375.79884238928,
+        2825.80842486704
+      ],
+      "after": [
+        "1350 BCE",
+        "800 BCE"
+      ]
+    },
+    {
+      "id": "9c0cb584-999b-4099-a3f1-e1b48bae4ba0",
+      "before": [
+        "-0279",
+        "-0278"
+      ],
+      "beforeBp": [
+        2305.81937823364,
+        2304.82006269634
+      ],
+      "after": [
+        "279 BCE",
+        "278 BCE"
+      ]
+    }
+  ],
+  "eventDates": [
+    {
+      "id": "390747a8-8d55-477e-a9fc-294060fe1ff4",
+      "before": "-0117",
+      "beforeBp": 2143.82349127396,
+      "after": "118 BCE"
+    },
+    {
+      "id": "673a1e79-e7a7-429c-b9bc-008a905414f2",
+      "before": "-0224",
+      "beforeBp": 2250.82143715828,
+      "after": "225 BCE"
+    },
+    {
+      "id": "fd7dee80-a205-4eb2-867d-ba4faef3986d",
+      "before": "-0389",
+      "beforeBp": 2415.81801412842,
+      "after": "390 BCE"
+    },
+    {
+      "id": "3652c3a2-54c2-47bb-8773-1748645f5cb5",
+      "before": "-0516",
+      "beforeBp": 2542.81596338064,
+      "after": "517 BCE"
+    }
+  ],
+  "newPeriods": [
+    {
+      "key": "hma",
+      "label": [
+        "Haut Moyen Âge celtique",
+        "Early medieval Celtic world"
+      ],
+      "description": [
+        "Après le départ de Rome, Irlande, Écosse, pays de Galles et Bretagne forment un monde celtique chrétien, centré sur ses monastères.",
+        "After Rome’s departure, Ireland, Scotland, Wales and Brittany form a Christian Celtic world centred on its monasteries."
+      ],
+      "q": null,
+      "wiki": [
+        null,
+        null
+      ],
+      "start": "0400",
+      "end": "0800",
+      "tags": [],
+      "nonThematic": true,
+      "parent": null,
+      "id": "c5dfcbf0-5771-4a54-a674-530e68412196"
+    },
+    {
+      "key": "celtiberes",
+      "label": [
+        "Guerres celtibères",
+        "Celtiberian Wars"
+      ],
+      "description": [
+        "Les Celtibères du centre de l’Hispanie résistent à la conquête romaine.",
+        "The Celtiberians of central Hispania resist the Roman conquest."
+      ],
+      "q": "Q2446231",
+      "wiki": [
+        null,
+        "Celtiberian Wars"
+      ],
+      "start": "181 BCE",
+      "end": "151 BCE",
+      "tags": [
+        "conflits"
+      ],
+      "nonThematic": false,
+      "parent": "80b51412-4ff5-4f15-8c53-99047fe52681",
+      "id": "5327c07d-c273-4403-a3ef-d43d89fd268d"
+    }
+  ],
+  "newEvents": [
+    {
+      "key": "vix",
+      "label": [
+        "Tombe de Vix",
+        "Vix Grave"
+      ],
+      "description": [
+        "Vers 500 av. J.-C., une princesse celte est inhumée en Bourgogne avec un char et un cratère grec en bronze de 1,64 m.",
+        "Around 500 BC, a Celtic princess is buried in Burgundy with a cart and a 1.64 m Greek bronze krater."
+      ],
+      "q": "Q1483632",
+      "wiki": [
+        "Tombe de Vix",
+        "Vix Grave"
+      ],
+      "date": "500 BCE",
+      "tags": [
+        "arts-culture-loisirs",
+        "peuplement-societe"
+      ],
+      "id": "59c3471e-cd45-4af8-be01-7f2a6110b9e6"
+    },
+    {
+      "key": "numance",
+      "label": [
+        "Siège de Numance",
+        "Siege of Numantia"
+      ],
+      "description": [
+        "Après des mois de blocus par Scipion Émilien, la cité celtibère de Numance tombe : la résistance de l’Hispanie centrale prend fin.",
+        "After months of blockade by Scipio Aemilianus, the Celtiberian city of Numantia falls, ending resistance in central Hispania."
+      ],
+      "q": "Q815183",
+      "wiki": [
+        "Siège de Numance",
+        "Siege of Numantia"
+      ],
+      "date": "133 BCE",
+      "tags": [
+        "conflits"
+      ],
+      "id": "6b3524ea-cd7c-4c12-bffb-4fe67d06e5d1"
+    },
+    {
+      "key": "mona",
+      "label": [
+        "Massacre des druides de Mona",
+        "Destruction of the druids of Mona"
+      ],
+      "description": [
+        "Les légions de Suetonius Paulinus prennent l’île de Mona (Anglesey), sanctuaire des druides, et détruisent ses bois sacrés.",
+        "The legions of Suetonius Paulinus take the island of Mona (Anglesey), the druids’ sanctuary, and destroy its sacred groves."
+      ],
+      "q": null,
+      "wiki": [
+        null,
+        null
+      ],
+      "date": "0060",
+      "tags": [
+        "religions-spiritualites",
+        "conflits"
+      ],
+      "id": "d0720059-a850-4b41-8567-6024dc300b24"
+    },
+    {
+      "key": "iona",
+      "label": [
+        "Fondation d’Iona par Columba",
+        "Columba founds Iona"
+      ],
+      "description": [
+        "Le moine irlandais Columba fonde sur l’île d’Iona un monastère qui évangélise les Pictes et rayonne sur l’Écosse et la Northumbrie.",
+        "The Irish monk Columba founds a monastery on Iona that converts the Picts and spreads its influence over Scotland and Northumbria."
+      ],
+      "q": "Q198409",
+      "wiki": [
+        "Abbaye d'Iona",
+        "Iona Abbey"
+      ],
+      "date": "0563",
+      "tags": [
+        "religions-spiritualites"
+      ],
+      "id": "8ade76aa-0192-402f-acbb-8a9b0e7081ff"
+    },
+    {
+      "key": "kells",
+      "label": [
+        "Livre de Kells",
+        "Book of Kells"
+      ],
+      "description": [
+        "Vers 800, des moines d’Iona enluminent ce livre des Évangiles, chef-d’œuvre de l’art insulaire.",
+        "Around 800, monks of Iona illuminate this Gospel book, a masterpiece of Insular art."
+      ],
+      "q": "Q204221",
+      "wiki": [
+        "Livre de Kells",
+        "Book of Kells"
+      ],
+      "date": "0800",
+      "tags": [
+        "arts-culture-loisirs",
+        "religions-spiritualites"
+      ],
+      "id": "0618479e-4bf3-41f5-a098-00e10618509c"
+    }
+  ],
+  "parents": [
+    [
+      "9c0cb584-999b-4099-a3f1-e1b48bae4ba0",
+      null,
+      "80b51412-4ff5-4f15-8c53-99047fe52681"
+    ],
+    [
+      "06454d26-49e3-4e67-9c5d-43f71efdb07b",
+      null,
+      "80b51412-4ff5-4f15-8c53-99047fe52681"
+    ],
+    [
+      "871b6cbf-af81-4da4-a992-13a5cb10d694",
+      null,
+      "c5dfcbf0-5771-4a54-a674-530e68412196"
+    ],
+    [
+      "c653e13b-be85-45b6-af45-353f8089df6c",
+      null,
+      "c5dfcbf0-5771-4a54-a674-530e68412196"
+    ]
+  ],
+  "entries": [
+    [
+      21,
+      87,
+      "period",
+      "80b51412-4ff5-4f15-8c53-99047fe52681"
+    ],
+    [
+      10,
+      87,
+      null,
+      null
+    ],
+    [
+      51,
+      87,
+      "period",
+      "697065a6-a932-4198-b99b-bed72fe8eb99"
+    ],
+    [
+      53,
+      87,
+      "period",
+      "fef88ee8-062c-4067-87ba-d3b9daf42346"
+    ],
+    [
+      45,
+      87,
+      "period",
+      "06454d26-49e3-4e67-9c5d-43f71efdb07b"
+    ],
+    [
+      87,
+      51,
+      "period",
+      "7e53786a-e942-49ce-b519-bbf8a616f6a0"
+    ],
+    [
+      87,
+      53,
+      "period",
+      "fef88ee8-062c-4067-87ba-d3b9daf42346"
+    ],
+    [
+      87,
+      45,
+      "period",
+      "06454d26-49e3-4e67-9c5d-43f71efdb07b"
+    ],
+    [
+      87,
+      65,
+      "event",
+      "bf2684a2-7df4-4f13-a062-36b3e38a5045"
+    ],
+    [
+      87,
+      21,
+      "period",
+      "1322e5b2-1cce-4ceb-af43-96b34912ed6e"
+    ]
+  ],
+  "removed": [
+    "697065a6-a932-4198-b99b-bed72fe8eb99"
+  ],
+  "added": [
+    "210a9912-6d85-4826-9b56-941ce6409aa2"
+  ]
+}

@@ -49,6 +49,8 @@ Le lot `data/20261109_tags_lot4_frises.sql` pose 54 liens de tags sur 35 frises 
 
 ## Corrections du catalogue
 
+Le lot `data/20261114_monde_celtique.sql`, appliqué le 14 novembre 2026, corrige et complète la frise 87 d’un autre compte : 2 périodes et 5 événements nouveaux, 7 dates normalisées dont une corrigée, 10 accès. [Compte rendu](../audits/2026-11-14-monde-celtique.md) ; retour arrière validé uniquement sur PostgreSQL 17 local jetable. Lot propre à l’état audité, à ne pas rejouer.
+
 Le lot `data/20261113_guerre_secession.sql`, appliqué le 13 novembre 2026, crée la frise Guerre de Sécession (86) : 7 périodes et 26 événements nouveaux, 1 période et 8 événements réutilisés, 5 accès. [Compte rendu](../audits/2026-11-13-guerre-secession.md) ; contenu et générateur dans `data/20261113_guerre_secession_source/` ; retour arrière validé uniquement sur PostgreSQL 17 local jetable. Lot propre à l’état audité, à ne pas rejouer.
 
 Le lot `data/20261113_orphelins.sql`, appliqué le 13 novembre 2026, supprime 24 périodes et 41 événements présents sur aucune frise et référencés nulle part : anciennes périodes chapeau remplacées par des frises, doublons, et 39 escarmouches de la guerre d’Indépendance issues d’un ancien import Wikidata. Les lignes, tags et catégories sont conservés dans `data/20261113_orphelins_sauvegarde.json`. Lot propre à cet état de la base, à ne pas rejouer.
