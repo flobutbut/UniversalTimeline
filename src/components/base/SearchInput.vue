@@ -52,8 +52,8 @@ defineExpose({
   gap: var(--spacing-sm);
   height: var(--field-height-md);
   padding: 0 var(--spacing-sm);
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-app);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
   transition: border-color var(--transition-fast);
   overflow: hidden;
@@ -114,5 +114,5 @@ defineExpose({
 
 
 .search-input-wrap__field { line-height: var(--line-height-small); }
-.search-input-wrap:has(input:disabled) { background: var(--color-interactive-disabled); opacity: .5; }
+.search-input-wrap:has(input:disabled) { border-color: var(--color-border-default); opacity: .5; }
 </style>

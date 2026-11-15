@@ -533,7 +533,7 @@ onActivated(() => {
 .home-view__frise { flex: 1 0 auto; min-height: 240px; display: flex; flex-direction: column; position: relative; background: var(--timeline-panel-background, var(--color-bg-app)); }
 .home-view__viewport .home-view__frise--collapsed { flex: 0 0 auto; min-height: 0; }
 .home-view__frise--active {
-  --timeline-panel-background: color-mix(in srgb, var(--color-accent-default) 12%, var(--color-bg-app));
+  --timeline-panel-background: var(--color-bg-sunken);
 }
 .home-view__frise:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 @media (max-width: 768px) {

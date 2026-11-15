@@ -175,7 +175,7 @@ const handleClick = () => {
 
 .main-container {
   position: relative;
-  background: var(--color-bg-raised);
+  background: var(--color-bg-surface);
   border: none;
   border-radius: var(--radius-sm);
   padding: var(--spacing-xs) var(--spacing-sm);
@@ -364,7 +364,7 @@ const handleClick = () => {
 .loading-overlay {
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--color-bg-raised) 88%, transparent);
+  background: color-mix(in srgb, var(--color-bg-surface) 88%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;

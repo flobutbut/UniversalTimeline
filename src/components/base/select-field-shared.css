@@ -11,9 +11,9 @@
   /* Hauteur portée par le token, comme Input et Button : pas de padding vertical qui s'ajouterait à l'interligne. */
   min-height: var(--field-height-lg);
   padding: 0 var(--spacing-lg);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
-  background-color: var(--color-bg-surface);
+  background-color: var(--color-bg-app);
   cursor: pointer;
   transition: all var(--transition-fast);
   outline: none;
@@ -25,7 +25,7 @@
 
 .base-select__trigger:focus-visible,
 .base-select__trigger:has(:focus-visible) {
-  border-color: var(--color-accent-default);
+  border-color: var(--color-border-focus);
   box-shadow: 0 0 0 2px var(--color-interactive-selected);
 }
 
@@ -41,7 +41,7 @@
 }
 
 .base-select__trigger--disabled {
-  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
+  border-color: var(--color-border-default);
   cursor: not-allowed;
   opacity: 0.7;
 }
@@ -133,6 +133,6 @@
 
 /* Anneau optionnel quand le panneau est ouvert (sans focus). */
 .base-select--trigger-open-ring.base-select--open:not(.base-select--error) .base-select__trigger {
-  border-color: var(--color-accent-default);
+  border-color: var(--color-border-focus);
   box-shadow: 0 0 0 2px var(--color-interactive-selected);
 }
