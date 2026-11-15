@@ -141,12 +141,12 @@ defineExpose({ frame, fit, preserveView });
 </script>
 
 <style scoped>
-.timeline-map-canvas {min-width:0;display:flex;flex-direction:column;border:1px solid var(--color-border-default);border-radius:var(--radius-lg);background:var(--color-surface-default);overflow:hidden;}
+.timeline-map-canvas {min-width:0;display:flex;flex-direction:column;border:1px solid var(--color-border-default);border-radius:var(--radius-lg);background:var(--color-bg-surface);overflow:hidden;}
 .timeline-map-canvas__toolbar {display:flex;align-items:center;flex-wrap:wrap;gap:var(--spacing-sm);padding:var(--spacing-sm);border-bottom:1px solid var(--color-border-default);flex-shrink:0;}
 .timeline-map-canvas__zoom {min-width:48px;text-align:center;color:var(--color-text-secondary);font:var(--type-meta);font-variant-numeric:tabular-nums;}
 .timeline-map-canvas__expand {margin-inline-start:auto;}
 .timeline-map-canvas__plot {position:relative;height:clamp(420px,calc(100dvh - 290px),900px);isolation:isolate;min-height:0;}
-.timeline-map-canvas__viewport {position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab;background-color:var(--color-surface-subtle);background-image:radial-gradient(var(--color-border-default) 1px,transparent 1px);background-size:20px 20px;}
+.timeline-map-canvas__viewport {position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab;background-color:var(--color-bg-sunken);background-image:radial-gradient(var(--color-border-default) 1px,transparent 1px);background-size:20px 20px;}
 .timeline-map-canvas__viewport:active {cursor:grabbing;}
 .timeline-map-canvas__viewport:focus-visible {outline:2px solid var(--color-border-focus);outline-offset:-2px;}
 .timeline-map-canvas__scene {--canvas-zoom:1;--canvas-offset-x:0px;position:absolute;top:0;left:0;display:flex;align-items:flex-start;gap:64px;width:max-content;transform-origin:0 0;padding:16px;}

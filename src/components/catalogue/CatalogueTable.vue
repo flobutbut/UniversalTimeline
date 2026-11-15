@@ -133,11 +133,11 @@ onUnmounted(stopResize);
 <style scoped>
 .catalogue-table-shell { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; gap: var(--spacing-sm); }
 .catalogue-table__selection { display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
-.catalogue-table__selection input { width: 16px; height: 16px; accent-color: var(--color-primary); cursor: pointer; }
+.catalogue-table__selection input { width: 16px; height: 16px; accent-color: var(--color-accent-default); cursor: pointer; }
 .table-wrap {
   flex: 1;
   min-height: 0;
-  background: var(--color-surface-subtle);
+  background: var(--color-bg-sunken);
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
@@ -172,7 +172,7 @@ onUnmounted(stopResize);
   color: var(--color-text-secondary);
   border-bottom: 1px solid var(--color-border-default);
   flex-shrink: 0;
-  background: var(--color-background-default);
+  background: var(--color-bg-app);
   user-select: none;
 }
 
@@ -228,7 +228,7 @@ onUnmounted(stopResize);
 }
 
 .resize-handle:hover {
-  background: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  background: color-mix(in srgb, var(--color-accent-default) 35%, transparent);
 }
 
 .table-body {
@@ -239,7 +239,7 @@ onUnmounted(stopResize);
 }
 
 .table-row {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-subtle);
   position: relative;
   min-height: var(--list-row-height-compact);
   font: var(--type-compact);
@@ -251,11 +251,11 @@ onUnmounted(stopResize);
 }
 
 .table-row:hover {
-  background: var(--color-interaction-hover);
-  box-shadow: inset 4px 0 0 var(--color-primary);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
+  box-shadow: inset 4px 0 0 var(--color-accent-default);
 }
 
-.table-row.selected { background: var(--color-interaction-selected); color: var(--color-text-on-selected); }
+.table-row.selected { background: var(--color-interactive-selected); color: var(--color-text-on-selected); }
 .catalogue-table--comfortable .table-row { min-height: var(--list-row-height-comfortable); font: var(--type-body); }
 .table-row > :deep([role="cell"]) { min-width: 0; }
 :deep(.col-label) {

@@ -28,9 +28,9 @@ const hasSelectedStory = computed(() => props.stories?.some(story => story.value
 const actionLabels: Record<CatalogueBulkAction, string> = { 'add-story': 'Ajouter à la frise', 'remove-story': 'Retirer de la frise', export: 'Exporter', delete: 'Supprimer', suspend: 'Suspendre', reactivate: 'Réactiver' };
 </script>
 <style scoped>
-.catalogue-bulk { flex-shrink: 0; padding: var(--spacing-md); background: var(--color-surface-subtle); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); }
+.catalogue-bulk { flex-shrink: 0; padding: var(--spacing-md); background: var(--color-bg-sunken); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); }
 .catalogue-bulk__controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); }
 .catalogue-bulk__controls > .base-select { flex: 1 1 200px; min-width: 0; max-width: 320px; }
 .catalogue-bulk p, .catalogue-bulk__failures { margin: var(--spacing-sm) 0 0; font-size: var(--font-size-sm); }
-.catalogue-bulk__failures { max-height: 160px; overflow: auto; padding-left: var(--spacing-lg); color: var(--color-status-error-foreground); }
+.catalogue-bulk__failures { max-height: 160px; overflow: auto; padding-left: var(--spacing-lg); color: var(--color-feedback-error-fg); }
 </style>

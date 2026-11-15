@@ -650,7 +650,7 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
   overflow-wrap: anywhere;
   padding: var(--spacing-sm) var(--spacing-md);
   color: var(--color-text-primary);
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-lg);
@@ -689,7 +689,7 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
   overflow-x: hidden;
   overflow-y: auto;
   container-type: size;
-  background-color: var(--color-background-default);
+  background-color: var(--color-bg-app);
 }
 
 .timeline-container {
@@ -729,7 +729,7 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
 .timeline-line {
   height: calc(var(--spacing-xs) / 2);
   width: 100%;
-  background: var(--color-border-dark);
+  background: var(--color-border-strong);
   position: relative;
   z-index: var(--z-index-period-row-band);
   margin: calc(var(--spacing-xs) / 2) 0;
@@ -748,7 +748,7 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
 
 /* La hauteur naturelle est une variante explicite de l’exploration ; ne pas
    changer le défilement des autres usages de cette grille partagée. */
-.period-grid--natural-height { height: auto; overflow: visible; container-type: normal; background: var(--timeline-panel-background, var(--color-background-default)); }
+.period-grid--natural-height { height: auto; overflow: visible; container-type: normal; background: var(--timeline-panel-background, var(--color-bg-app)); }
 .period-grid--natural-height .period-row { overflow-clip-margin: var(--spacing-md); }
 .period-grid--natural-height .timeline-container { min-height: 0; }
 .period-grid--natural-height .events-container { min-height: var(--timeline-caption-height); }

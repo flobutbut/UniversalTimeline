@@ -47,9 +47,9 @@ function makePrimary(id: string) { emit('update:modelValue', [id, ...props.model
 .tag-picker__family-label { margin: 0; color: var(--color-text-secondary); font-size: var(--font-size-xs); }
 .tag-picker__options { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
 .tag-picker__option { min-height: 28px; padding: 2px var(--spacing-sm); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: transparent; color: var(--color-text-primary); font: inherit; font-size: var(--font-size-sm); cursor: pointer; }
-.tag-picker__option:hover:not(:disabled) { background: var(--color-interaction-hover); }
-.tag-picker__option[aria-pressed="true"] { background: var(--color-interaction-selected); border-color: transparent; color: var(--color-text-on-selected); }
+.tag-picker__option:hover:not(:disabled) { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
+.tag-picker__option[aria-pressed="true"] { background: var(--color-interactive-selected); border-color: transparent; color: var(--color-text-on-selected); }
 .tag-picker__option:disabled { opacity: .5; cursor: not-allowed; }
 .tag-picker__option:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
-.tag-picker__error { margin: 0; color: var(--color-status-error-foreground); font-size: var(--font-size-sm); }
+.tag-picker__error { margin: 0; color: var(--color-feedback-error-fg); font-size: var(--font-size-sm); }
 </style>

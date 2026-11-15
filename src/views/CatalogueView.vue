@@ -169,7 +169,7 @@ onBeforeUnmount(() => {
 .catalogue-page__content { max-width: 1440px; margin-inline: auto; padding-inline: var(--spacing-lg); box-sizing: border-box; }
 .catalogue-page__intro { padding-block: var(--spacing-xl); }
 .catalogue-page__filters { position: sticky; top: 0; z-index: var(--z-index-sticky); padding-block: var(--spacing-md); background: transparent; border-bottom: 1px solid transparent; }
-.catalogue-page__filters.is-pinned { background: var(--color-surface-default); border-bottom-color: var(--color-border-default); }
+.catalogue-page__filters.is-pinned { background: var(--color-bg-surface); border-bottom-color: var(--color-border-default); }
 .catalogue-page__intro h1 { margin: 0; font-size: var(--font-size-2xl); font-weight: var(--font-weight-semibold); }
 .catalogue-page__intro p { margin: 0; color: var(--color-text-secondary); font: var(--type-body); }
 .catalogue-page__count { margin: var(--spacing-lg) 0; font-size: var(--font-size-sm); color: var(--color-text-secondary); }

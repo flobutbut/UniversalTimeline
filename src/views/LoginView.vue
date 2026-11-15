@@ -208,7 +208,7 @@ function switchMode() {
 
 <style scoped>
 .account-page { overflow: auto; padding: var(--spacing-lg); box-sizing: border-box; }
-.account-panel { max-width: 28rem; margin: 2rem auto; padding: var(--spacing-lg); background: var(--color-surface-default); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); }
+.account-panel { max-width: 28rem; margin: 2rem auto; padding: var(--spacing-lg); background: var(--color-bg-surface); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); }
 h2 { margin-top: 0; }
 form { display: flex; flex-direction: column; gap: var(--spacing-sm); margin: var(--spacing-lg) 0; }
 .account-terms { display: flex; align-items: flex-start; gap: var(--spacing-sm); font-size: var(--font-size-sm); }

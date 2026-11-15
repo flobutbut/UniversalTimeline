@@ -58,11 +58,11 @@ watch([() => auth.identityVersion, allowed], () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background-color: var(--color-background-default);
+  background-color: var(--color-bg-app);
   color: var(--color-text-primary);
 }
 
-.skip-link { position: fixed; top: var(--spacing-sm); left: var(--spacing-sm); transform: translateY(-200%); z-index: var(--z-index-search-layer); background: var(--color-surface-default); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); }
+.skip-link { position: fixed; top: var(--spacing-sm); left: var(--spacing-sm); transform: translateY(-200%); z-index: var(--z-index-search-layer); background: var(--color-bg-surface); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); }
 .skip-link:focus { transform: none; }
 
 .navigation-status {
@@ -78,7 +78,7 @@ watch([() => auth.identityVersion, allowed], () => {
   flex-direction: column;
   gap: var(--spacing-md);
   overflow: hidden;
-  background-color: var(--color-background-default);
+  background-color: var(--color-bg-app);
   min-height: 0;
   height: 100%;
 }
@@ -88,6 +88,6 @@ watch([() => auth.identityVersion, allowed], () => {
   min-height: 0;
 }
 
-.app--landing .main-content { background: var(--color-background-default); }
+.app--landing .main-content { background: var(--color-bg-app); }
 
 </style>

@@ -129,14 +129,14 @@ onScopeDispose(removeListeners);
 .story-item-actions__menu {
   position: fixed; z-index: 1100; width: max-content; min-width: 176px; max-width: calc(100vw - 16px); box-sizing: border-box;
   padding: var(--spacing-xs); border: 1px solid var(--color-border-default); border-radius: var(--radius-md);
-  background: var(--color-surface-default); box-shadow: var(--shadow-lg);
+  background: var(--color-bg-surface); box-shadow: var(--shadow-lg);
 }
 .story-item-actions__menu :is(button, a) {
   display: flex; align-items: center; gap: var(--spacing-sm); width: 100%; padding: var(--spacing-sm);
   border: 0; border-radius: var(--radius-sm); background: transparent;
   color: var(--color-text-primary); font: inherit; font-size: var(--font-size-sm); text-align: left; cursor: pointer; text-decoration: none;
 }
-.story-item-actions__menu :is(button, a):hover, .story-item-actions__menu :is(button, a):focus-visible { background: var(--color-interaction-hover); }
+.story-item-actions__menu :is(button, a):hover, .story-item-actions__menu :is(button, a):focus-visible { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
 .story-item-actions__menu :is(button, a):focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
-.story-item-actions__menu .story-item-actions__delete { color: var(--color-status-error-foreground); }
+.story-item-actions__menu .story-item-actions__delete { color: var(--color-feedback-error-fg); }
 </style>

@@ -47,7 +47,7 @@ function save() {
 .story-tags-form { display: flex; flex-direction: column; gap: var(--spacing-md); max-width: 960px; }
 .story-tags-form h3 { font-size: var(--font-size-lg); }
 .story-tags-form__form { display: flex; flex-direction: column; gap: var(--spacing-lg); }
-.story-tags-form__error { color: var(--color-status-error-foreground); }
+.story-tags-form__error { color: var(--color-feedback-error-fg); }
 .story-tags-form__empty { margin-bottom: 0; color: var(--color-text-secondary); }
 .story-tags-form__actions { display: flex; justify-content: flex-end; gap: var(--spacing-sm); }
 .story-tags-form__tags { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin: 0; }

@@ -99,7 +99,7 @@ function remove(key: string) {
 <style scoped>
 .date-filter__icon { display: inline-flex; padding-left: var(--spacing-sm); }
 .date-filter__bound { display: inline-flex; align-items: center; gap: var(--spacing-xs); padding: 7px var(--spacing-sm); border: 0; background: transparent; color: inherit; font: inherit; white-space: nowrap; cursor: pointer; }
-.date-filter__bound:hover { background: var(--color-interaction-hover); }
+.date-filter__bound:hover { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
 .date-filter__bound:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 .date-filter__separator { color: var(--color-text-secondary); }
 </style>

@@ -273,7 +273,7 @@
         <header class="design-system__header">
           <h1 class="design-system__h1">{{ uiText("Tabs") }}</h1>
           <p class="design-system__lead">
-            <code class="design-system__code-inline">{{ uiText("src/components/base/Tabs.vue") }}</code> {{ uiText("— trois variantes :") }} <code class="design-system__code-inline">{{ uiText("pill") }}</code> {{ uiText("(défaut, fond actif),") }} <code class="design-system__code-inline">{{ uiText("underline") }}</code> {{ uiText("(bordure basse, header de section),") }} <code class="design-system__code-inline">{{ uiText("vertical") }}</code> {{ uiText("(colonne Finder). Chaque entrée accepte") }} <code class="design-system__code-inline">{{ uiText("sublabel") }}</code> {{ uiText("et") }} <code class="design-system__code-inline">{{ uiText("count") }}</code>{{ uiText(". Badge de compteur :") }} <code class="design-system__code-inline">{{ uiText("border-radius: var(--radius-pill)") }}</code> {{ uiText("; onglet vertical actif : couple") }} <code class="design-system__code-inline">{{ uiText("--color-interaction-selected") }}</code> / <code class="design-system__code-inline">{{ uiText("--color-text-on-selected") }}</code>.
+            <code class="design-system__code-inline">{{ uiText("src/components/base/Tabs.vue") }}</code> {{ uiText("— trois variantes :") }} <code class="design-system__code-inline">{{ uiText("pill") }}</code> {{ uiText("(défaut, fond actif),") }} <code class="design-system__code-inline">{{ uiText("underline") }}</code> {{ uiText("(bordure basse, header de section),") }} <code class="design-system__code-inline">{{ uiText("vertical") }}</code> {{ uiText("(colonne Finder). Chaque entrée accepte") }} <code class="design-system__code-inline">{{ uiText("sublabel") }}</code> {{ uiText("et") }} <code class="design-system__code-inline">{{ uiText("count") }}</code>{{ uiText(". Badge de compteur :") }} <code class="design-system__code-inline">{{ uiText("border-radius: var(--radius-pill)") }}</code> {{ uiText("; onglet vertical actif : couple") }} <code class="design-system__code-inline">{{ uiText("--color-interactive-selected") }}</code> / <code class="design-system__code-inline">{{ uiText("--color-text-on-selected") }}</code>.
           </p>
         </header>
 
@@ -353,7 +353,7 @@
         <header class="design-system__header">
           <h1 class="design-system__h1">{{ uiText("ModalShell") }}</h1>
           <p class="design-system__lead">
-            <code class="design-system__code-inline">{{ uiText("src/components/base/ModalShell.vue") }}</code> {{ uiText("— fenêtre modale avec titre, corps et pied de page. Fond voile") }} <code class="design-system__code-inline">{{ uiText("var(--overlay-scrim)") }}</code>{{ uiText(", empilement") }} <code class="design-system__code-inline">{{ uiText("var(--z-index-modal)") }}</code>{{ uiText(", largeur modale en") }} <code class="design-system__code-inline">{{ uiText("calc") }}</code> {{ uiText("depuis") }} <code class="design-system__code-inline">{{ uiText("--spacing-xs") }}</code>.
+            <code class="design-system__code-inline">{{ uiText("src/components/base/ModalShell.vue") }}</code> {{ uiText("— fenêtre modale avec titre, corps et pied de page. Fond voile") }} <code class="design-system__code-inline">{{ uiText("var(--color-bg-scrim)") }}</code>{{ uiText(", empilement") }} <code class="design-system__code-inline">{{ uiText("var(--z-index-modal)") }}</code>{{ uiText(", largeur modale en") }} <code class="design-system__code-inline">{{ uiText("calc") }}</code> {{ uiText("depuis") }} <code class="design-system__code-inline">{{ uiText("--spacing-xs") }}</code>.
           </p>
         </header>
 
@@ -475,7 +475,7 @@
         <header class="design-system__header">
           <h1 class="design-system__h1">{{ uiText("ConfirmModal") }}</h1>
           <p class="design-system__lead">
-            <code class="design-system__code-inline">{{ uiText("src/components/base/ConfirmModal.vue") }}</code> {{ uiText("— confirmation via") }} <code class="design-system__code-inline">{{ uiText("useConfirm()") }}</code>{{ uiText(", avec file d’attente. Voile") }} <code class="design-system__code-inline">{{ uiText("var(--overlay-scrim-strong)") }}</code>{{ uiText(", z-index") }} <code class="design-system__code-inline">{{ uiText("var(--z-index-modal-nested)") }}</code> {{ uiText("au-dessus de la modale d'édition.") }} </p>
+            <code class="design-system__code-inline">{{ uiText("src/components/base/ConfirmModal.vue") }}</code> {{ uiText("— confirmation via") }} <code class="design-system__code-inline">{{ uiText("useConfirm()") }}</code>{{ uiText(", avec file d’attente. Voile") }} <code class="design-system__code-inline">{{ uiText("var(--color-bg-scrim)") }}</code>{{ uiText(", z-index") }} <code class="design-system__code-inline">{{ uiText("var(--z-index-modal-nested)") }}</code> {{ uiText("au-dessus de la modale d'édition.") }} </p>
         </header>
 
         <Button type="button" @click="openConfirmDemo">{{ uiText("Ouvrir la confirmation") }}</Button>
@@ -1022,14 +1022,14 @@ const tokenComputed = (name: string): string => {
   flex: 1;
   width: 100%;
   overflow: hidden;
-  background: var(--color-background-default);
+  background: var(--color-bg-app);
 }
 
 .design-system__aside {
   flex-shrink: 0;
   width: calc(var(--spacing-xs) * 55);
   border-right: 1px solid var(--color-border-default);
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
   overflow-y: auto;
 }
 
@@ -1066,7 +1066,7 @@ const tokenComputed = (name: string): string => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
   max-width: calc(var(--spacing-xs) * 105);
   margin-bottom: 0;
 }
@@ -1119,7 +1119,7 @@ const tokenComputed = (name: string): string => {
   margin: 0 0 var(--spacing-sm);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-heading);
+  color: var(--color-text-primary);
   font-family: var(--font-family-base);
 }
 
@@ -1154,7 +1154,7 @@ const tokenComputed = (name: string): string => {
   font-size: 0.92em;
   padding: 0.15em 0.4em;
   border-radius: var(--radius-sm);
-  background: var(--color-surface-subtle);
+  background: var(--color-bg-sunken);
   color: var(--color-text-primary);
 }
 
@@ -1170,10 +1170,10 @@ const tokenComputed = (name: string): string => {
   list-style: none;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
 }
 
 .design-system__token-row {
@@ -1182,7 +1182,7 @@ const tokenComputed = (name: string): string => {
   gap: var(--spacing-md);
   align-items: center;
   padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-subtle);
   font-size: var(--font-size-sm);
 }
 
@@ -1256,7 +1256,7 @@ const tokenComputed = (name: string): string => {
   align-items: center;
   gap: var(--spacing-md);
   padding: var(--spacing-sm) 0;
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .design-system__variant-row:last-child {
@@ -1319,7 +1319,7 @@ const tokenComputed = (name: string): string => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
 }
 
 .design-system__finder-story-demos {
@@ -1330,9 +1330,9 @@ const tokenComputed = (name: string): string => {
   max-width: calc(var(--spacing-xs) * 140);
   min-height: calc(var(--spacing-xl) * 5);
   padding: var(--spacing-md);
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
 }
 
 .design-system__demo-row--align-start {
@@ -1362,7 +1362,7 @@ const tokenComputed = (name: string): string => {
   align-items: center;
   justify-content: center;
   padding: var(--spacing-sm);
-  background: var(--color-primary);
+  background: var(--color-accent-default);
   border-radius: var(--radius-sm);
 }
 
@@ -1396,7 +1396,7 @@ const tokenComputed = (name: string): string => {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
   line-height: 1.6;
-  background: var(--color-interaction-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   padding: var(--spacing-md) var(--spacing-lg);
@@ -1417,8 +1417,8 @@ const tokenComputed = (name: string): string => {
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-surface-default);
-  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
   font-size: var(--font-size-xs);
   font-family: var(--font-family-mono);

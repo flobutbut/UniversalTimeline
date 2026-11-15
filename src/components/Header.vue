@@ -137,8 +137,8 @@ function changeView(event: MouseEvent, view: NavigationView) {
   min-height: 71px;
   display: flex;
   align-items: center;
-  background-color: var(--color-surface-default);
-  border-bottom: 1px solid var(--color-border-default);
+  background-color: var(--color-bg-app);
+  border-bottom: 1px solid var(--color-border-subtle);
   padding: var(--spacing-md) 0;
   width: 100%;
   position: sticky;
@@ -216,9 +216,9 @@ function changeView(event: MouseEvent, view: NavigationView) {
 
 .header-nav-wrap { flex-shrink: 0; }
 .header-nav-wrap--collapsed { position: absolute; width: 0; height: 0; overflow: hidden; visibility: hidden; }
-.header-nav { display: flex; width: max-content; flex-wrap: nowrap; gap: var(--spacing-xs); padding: var(--spacing-xs); background: var(--color-background-default); border-radius: var(--radius-lg); }
+.header-nav { display: flex; width: max-content; flex-wrap: nowrap; gap: var(--spacing-xs); padding: var(--spacing-xs); background: var(--color-bg-surface); border-radius: var(--radius-lg); }
 .header-nav-link { display: inline-flex; align-items: center; gap: var(--spacing-xs); padding: 6px var(--spacing-md); border-radius: var(--radius-md); font-size: var(--font-size-sm); font-weight: var(--font-weight-normal); line-height: var(--line-height-small); color: var(--color-text-secondary); white-space: nowrap; }
-.header-nav-link:hover, .header-nav-link.tab-button--active { background: var(--color-surface-default); color: var(--color-text-link); }
+.header-nav-link:hover, .header-nav-link.tab-button--active { background: var(--color-bg-app); color: var(--color-text-link); }
 
 .header-nav-select { width: 140px; flex-shrink: 0; }
 .header-nav-select :deep(.base-select__dropdown) { left: auto; min-width: 180px; }

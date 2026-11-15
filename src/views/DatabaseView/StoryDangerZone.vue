@@ -35,8 +35,8 @@ const emit = defineEmits<{
 </script>
 
 <style scoped>
-.story-danger-zone { max-width: 960px; border: 1px solid var(--color-status-error-foreground); border-radius: var(--radius-md); }
-.story-danger-zone h4 { margin: 0; padding: var(--spacing-lg); font-size: var(--font-size-base); color: var(--color-status-error-foreground); border-bottom: 1px solid var(--color-border-default); }
+.story-danger-zone { max-width: 960px; border: 1px solid var(--color-feedback-error-fg); border-radius: var(--radius-md); }
+.story-danger-zone h4 { margin: 0; padding: var(--spacing-lg); font-size: var(--font-size-base); color: var(--color-feedback-error-fg); border-bottom: 1px solid var(--color-border-default); }
 .story-danger-zone__row { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-md); padding: var(--spacing-lg); }
 .story-danger-zone__row + .story-danger-zone__row { border-top: 1px solid var(--color-border-default); }
 .story-danger-zone__label { margin-bottom: 0; font-weight: var(--font-weight-semibold); }

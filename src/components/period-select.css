@@ -21,7 +21,7 @@
   box-sizing: border-box;
 }
 .period-select__back {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-subtle);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
 }
@@ -64,6 +64,6 @@
   cursor: pointer;
 }
 .period-select__drill:hover {
-  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  background: color-mix(in srgb, var(--color-accent-default) 12%, transparent);
   color: var(--color-text-link);
 }

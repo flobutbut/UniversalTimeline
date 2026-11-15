@@ -507,7 +507,7 @@ onActivated(() => {
 /* Sujet des événements : un select discret, aligné à droite avec les actions de la frise. */
 .home-view__subject { width: auto; min-width: 0; }
 .home-view__subject :deep(.base-select__trigger) { min-height: 0; padding: var(--spacing-xs) var(--spacing-sm); border: 0; background: transparent; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
-.home-view__subject :deep(.base-select__trigger:hover) { background: var(--color-interaction-hover); }
+.home-view__subject :deep(.base-select__trigger:hover) { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
 .home-view__subject :deep(.base-select__value) { font: inherit; }
 .home-view__subject :deep(.base-select__dropdown) { left: auto; right: 0; width: max-content; min-width: 100%; max-width: min(320px, 85vw); }
 .home-view__header-actions { grid-column: 3; grid-row: 1; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: var(--spacing-xs); margin-block: var(--spacing-sm) var(--spacing-xs); }
@@ -526,14 +526,14 @@ onActivated(() => {
   overflow: auto;
   display: flex;
   flex-direction: column;
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
 }
 .home-view__stack { flex: 1 0 auto; min-height: 100%; position: relative; display: flex; flex-direction: column; gap: var(--spacing-xs); }
-.home-view__viewport:not(.home-view__viewport--comparing) .home-view__header { position: sticky; top: 0; z-index: var(--z-index-sticky); background: var(--color-background-default); }
-.home-view__frise { flex: 1 0 auto; min-height: 240px; display: flex; flex-direction: column; position: relative; background: var(--timeline-panel-background, var(--color-background-default)); }
+.home-view__viewport:not(.home-view__viewport--comparing) .home-view__header { position: sticky; top: 0; z-index: var(--z-index-sticky); background: var(--color-bg-app); }
+.home-view__frise { flex: 1 0 auto; min-height: 240px; display: flex; flex-direction: column; position: relative; background: var(--timeline-panel-background, var(--color-bg-app)); }
 .home-view__viewport .home-view__frise--collapsed { flex: 0 0 auto; min-height: 0; }
 .home-view__frise--active {
-  --timeline-panel-background: color-mix(in srgb, var(--color-primary) 12%, var(--color-background-default));
+  --timeline-panel-background: color-mix(in srgb, var(--color-accent-default) 12%, var(--color-bg-app));
 }
 .home-view__frise:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 @media (max-width: 768px) {
@@ -549,7 +549,7 @@ onActivated(() => {
 .home-view__add { position: absolute; inset-inline: 0; bottom: var(--spacing-md); display: flex; justify-content: center; padding-inline: var(--spacing-md); pointer-events: none; z-index: var(--z-index-timeline-item); }
 /* Le sélecteur actif et sa liste retrouvent la couche des menus. */
 .home-view__add--picking { z-index: var(--z-index-dropdown); }
-.home-view__add-surface { display: flex; align-items: center; gap: var(--spacing-sm); max-width: 100%; padding: var(--spacing-xs); border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-surface-raised); box-shadow: var(--shadow-lg); pointer-events: auto; }
+.home-view__add-surface { display: flex; align-items: center; gap: var(--spacing-sm); max-width: 100%; padding: var(--spacing-xs); border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-raised); box-shadow: var(--shadow-lg); pointer-events: auto; }
 .home-view__story-picker { width: min(360px, 60vw); min-width: 0; }
 .home-view__links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
 /* Traits discrets ; celui de l’événement survolé ressort. */

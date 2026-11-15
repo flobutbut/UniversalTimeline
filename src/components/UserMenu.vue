@@ -117,7 +117,7 @@ onScopeDispose(() => document.removeEventListener('pointerdown', outside, true))
   border: 0; border-radius: var(--radius-sm); background: transparent;
   color: var(--color-text-primary); font: inherit; font-size: var(--font-size-sm); text-align: left; text-decoration: none; cursor: pointer;
 }
-.user-menu__item:hover, .user-menu__item:focus-visible { background: var(--color-interaction-hover); }
+.user-menu__item:hover, .user-menu__item:focus-visible { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
 .user-menu__item:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 .user-menu__item:disabled { cursor: default; opacity: 0.6; }
 </style>

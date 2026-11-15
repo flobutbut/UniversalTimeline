@@ -67,7 +67,7 @@ const zoom = computed(() => {
 .measure-value { font-family: var(--font-family-heading); font-size: clamp(60px, 8.5vw, 128px); line-height: 1.05; letter-spacing: -.06em; color: var(--color-text-primary); font-variant-numeric: tabular-nums; }
 .measure-unit { font-family: var(--font-family-heading); font-size: clamp(18px, 2.3vw, 30px); color: var(--color-text-link); margin-top: var(--spacing-sm); }
 .lens-drawing { display: block; width: 100%; overflow: visible; }
-.ruler-grid { stroke: var(--color-border-light); stroke-width: 1; }
+.ruler-grid { stroke: var(--color-border-subtle); stroke-width: 1; }
 .axis-heading,.next-caption { fill: var(--color-text-secondary); font-family: var(--font-family-base); font-size: 12px; letter-spacing: 1.5px; }
 .ruler-fill { fill: color-mix(in srgb, var(--lens-accent) 10%, transparent); }
 .ruler-tick { stroke: var(--color-text-secondary); stroke-width: 1; }

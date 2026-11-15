@@ -194,7 +194,7 @@ const displayDate = computed(() => {
   overflow: hidden;
 }
 .event-card.event-card--undated { position: relative; top: auto; height: auto; width: auto; pointer-events: auto; margin-top: var(--spacing-sm); }
-.event-undated-trigger { border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-surface-default); color: var(--color-text-primary); padding: var(--spacing-xs) var(--spacing-sm); cursor: pointer; }
+.event-undated-trigger { border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-bg-surface); color: var(--color-text-primary); padding: var(--spacing-xs) var(--spacing-sm); cursor: pointer; }
 .event-card--undated .event-vertical-line { display: none; }
 .event-card.event-card--undated .event-info-box { position: static; transform: none; display: none; opacity: 1; visibility: visible; pointer-events: auto; max-width: 100%; }
 .event-card--undated.is-selected .event-info-box { display: block; }
@@ -231,8 +231,8 @@ const displayDate = computed(() => {
   padding: 0;
   width: calc(var(--font-size-base) - var(--spacing-xs) / 2);
   height: calc(var(--font-size-base) - var(--spacing-xs) / 2);
-  background-color: var(--color-text-heading);
-  border: 1.5px solid var(--color-surface-default);
+  background-color: var(--color-text-primary);
+  border: 1.5px solid var(--color-bg-surface);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   pointer-events: auto;
@@ -247,15 +247,15 @@ const displayDate = computed(() => {
 .is-selected .event-dot {
   padding: 0;
   border: 0;
-  background-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
+  background-color: var(--color-accent-default);
+  box-shadow: 0 0 0 3px var(--color-interactive-selected);
   transform: translate(-50%, -50%) scale(1.3);
 }
 
 .is-tag-active .event-dot {
   padding: 0;
   border: 0;
-  background-color: var(--color-primary);
+  background-color: var(--color-accent-default);
 }
 
 .event-vertical-line {
@@ -264,7 +264,7 @@ const displayDate = computed(() => {
   left: calc(var(--spacing-xs) / -4);
   width: calc(var(--spacing-xs) / 2);
   height: var(--spacing-2xl);
-  background-color: var(--color-primary);
+  background-color: var(--color-accent-default);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -292,7 +292,7 @@ const displayDate = computed(() => {
   transition: opacity var(--transition-normal), visibility var(--transition-normal), translate var(--transition-normal),
     background-color var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
   z-index: var(--z-index-tooltip);
-  background-color: var(--color-surface-default);
+  background-color: var(--color-bg-surface);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   /* Marges et typographie de PeriodCard, identiques dans tous les états. */
@@ -449,7 +449,7 @@ const displayDate = computed(() => {
 }
 
 .event-meta--error {
-  color: var(--color-status-error-foreground);
+  color: var(--color-feedback-error-fg);
 }
 
 .event-meta button {
@@ -507,7 +507,7 @@ const displayDate = computed(() => {
 
 .event-story-item:hover,
 .event-story-item:focus-visible {
-  background-color: var(--color-interaction-hover);
-  color: var(--color-primary-dark);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
+  color: var(--color-accent-hover);
 }
 </style>

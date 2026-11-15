@@ -56,11 +56,11 @@ async function submit() {
 <style scoped>
 .email-change {
   display: flex; flex-direction: column; gap: var(--spacing-md); margin: 0; padding: var(--spacing-lg);
-  border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-bg-surface);
 }
 .email-change h3 { margin: 0; font-size: var(--font-size-base); }
 .email-change p { margin: 0; max-width: 72ch; overflow-wrap: anywhere; }
-.email-change__pending { padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); background: var(--color-status-warning-background); }
-.email-change__error { color: var(--color-status-error-foreground); }
+.email-change__pending { padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); background: var(--color-feedback-warning-bg); }
+.email-change__error { color: var(--color-feedback-error-fg); }
 .email-change__actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); justify-content: flex-end; }
 </style>

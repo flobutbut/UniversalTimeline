@@ -138,5 +138,5 @@ onMounted(load);
 .admin-timelines__position {position:absolute;}
 .admin-timelines__position > :deep(.timeline-map-card) {width:100%;}
 .admin-timelines__undated {position:absolute;left:var(--canvas-offset-x, 0px);white-space:nowrap;font:var(--type-meta);color:var(--color-text-secondary);}
-.admin-timelines--expanded {position:fixed;inset:0;z-index:var(--z-index-modal);height:100dvh;box-sizing:border-box;padding:var(--spacing-md);overflow:auto;background:var(--color-background-default);color:var(--color-text-primary);}
+.admin-timelines--expanded {position:fixed;inset:0;z-index:var(--z-index-modal);height:100dvh;box-sizing:border-box;padding:var(--spacing-md);overflow:auto;background:var(--color-bg-app);color:var(--color-text-primary);}
 </style>

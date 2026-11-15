@@ -62,15 +62,15 @@ function luminance(hex) {
 }
 function contrast(a, b) { const values = [luminance(a), luminance(b)].sort((x, y) => x - y); return (values[1] + .05) / (values[0] + .05); }
 const pairs = [
-  ...['primary', 'secondary', 'link'].flatMap(role => ['default', 'raised', 'subtle'].map(surface => [`--color-text-${role}`, `--color-surface-${surface}`, 4.5])),
-  ...['default', 'hover', 'pressed'].map(state => ['--color-text-on-accent', `--color-action-primary-${state}`, 4.5]),
-  ...['default', 'hover'].map(state => ['--color-text-on-accent', `--color-action-danger-${state}`, 4.5]),
-  ['--color-text-on-selected', '--color-interaction-selected', 4.5],
-  ...['period', 'period-root'].map(period => ['--color-text-on-period', `--color-data-${period}`, 4.5]),
-  ...['success', 'warning', 'error'].map(status => [`--color-status-${status}-foreground`, `--color-status-${status}-background`, 4.5]),
-  ['--color-wikidata-label-on-selected', '--color-interaction-selected', 4.5],
+  ...['primary', 'secondary', 'link'].flatMap(role => ['app', 'surface', 'raised', 'sunken'].map(surface => [`--color-text-${role}`, `--color-bg-${surface}`, 4.5])),
+  ...['default', 'hover', 'pressed'].map(state => ['--color-text-on-accent', `--color-accent-${state}`, 4.5]),
+  ...['default', 'hover'].map(state => ['--color-text-on-accent', `--color-danger-${state}`, 4.5]),
+  ['--color-text-on-selected', '--color-interactive-selected', 4.5],
+  ...['period', 'period-root'].map(period => ['--color-text-on-data', `--color-data-${period}`, 4.5]),
+  ...['success', 'warning', 'error', 'info'].map(status => [`--color-feedback-${status}-fg`, `--color-feedback-${status}-bg`, 4.5]),
+  ['--color-wikidata-label-on-selected', '--color-interactive-selected', 4.5],
   ['--color-switch-thumb', '--color-switch-track-off', 3],
-  ['--color-switch-thumb', '--color-primary', 3],
+  ['--color-switch-thumb', '--color-accent-default', 3],
   ...['blue', 'green', 'amber', 'red', 'violet', 'pink', 'teal', 'slate'].map(color => ['--color-avatar-foreground', `--color-avatar-${color}`, 4.5]),
 ];
 let minimum = Infinity;

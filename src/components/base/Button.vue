@@ -74,14 +74,14 @@ defineEmits<{
 .base-button--wrap .base-button__text { white-space:normal; overflow-wrap:anywhere; }
 .base-button--sm.base-button--wrap { height:auto; }
 .base-button__leading { display: inline-flex; align-items: center; justify-content: center; line-height: 0; }
-.base-button--primary { background: var(--color-action-primary-default); border-color: var(--color-action-primary-default); color: var(--color-text-on-accent); }
-.base-button--primary:hover:not(:disabled) { background: var(--color-action-primary-hover); border-color: var(--color-action-primary-hover); }
+.base-button--primary { background: var(--color-accent-default); border-color: var(--color-accent-default); color: var(--color-text-on-accent); }
+.base-button--primary:hover:not(:disabled) { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
 .base-button--secondary { background: transparent; border-color: var(--color-border-focus); color: var(--color-text-link); }
 .base-button--tertiary { background: transparent; border-color: var(--color-border-default); color: var(--color-text-primary); }
 .base-button--ghost { background: transparent; color: var(--color-text-secondary); }
-.base-button--secondary:hover:not(:disabled), .base-button--tertiary:hover:not(:disabled), .base-button--ghost:hover:not(:disabled) { background: var(--color-interaction-hover); }
-.base-button--danger { background: var(--color-action-danger-default); border-color: var(--color-action-danger-default); color: var(--color-text-on-accent); }
-.base-button--danger:hover:not(:disabled) { background: var(--color-action-danger-hover); border-color: var(--color-action-danger-hover); }
+.base-button--secondary:hover:not(:disabled), .base-button--tertiary:hover:not(:disabled), .base-button--ghost:hover:not(:disabled) { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
+.base-button--danger { background: var(--color-danger-default); border-color: var(--color-danger-default); color: var(--color-text-on-accent); }
+.base-button--danger:hover:not(:disabled) { background: var(--color-danger-hover); border-color: var(--color-danger-hover); }
 .base-button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 .base-button--sm { min-height: var(--field-height-md); height: var(--field-height-md); font-size: var(--font-size-sm); }
 .base-button--xs { min-height: var(--control-height-xs); height: var(--control-height-xs); padding: var(--spacing-xs); font-size: var(--font-size-sm); }
@@ -89,8 +89,8 @@ defineEmits<{
 .base-button--icon-only { padding: 0; width: var(--field-height-lg); min-width: var(--field-height-lg); }
 .base-button--sm.base-button--icon-only { width: var(--field-height-md); min-width: var(--field-height-md); }
 .base-button--xs.base-button--icon-only { width: var(--control-height-xs); min-width: var(--control-height-xs); }
-.base-button--toggled { background: var(--color-interaction-selected); border-color: var(--color-border-focus); color: var(--color-text-on-selected); }
-.base-button--primary.base-button--toggled { background: var(--color-action-primary-pressed); border-color: var(--color-action-primary-pressed); color: var(--color-text-on-accent); }
-.base-button--danger.base-button--toggled { background: var(--color-status-error-background); border-color: var(--color-status-error-foreground); color: var(--color-status-error-foreground); }
-.base-button:disabled { background: var(--color-interaction-disabled); border-color: var(--color-border-default); color: var(--color-text-disabled); opacity: .5; cursor: not-allowed; }
+.base-button--toggled { background: var(--color-interactive-selected); border-color: var(--color-border-focus); color: var(--color-text-on-selected); }
+.base-button--primary.base-button--toggled { background: var(--color-accent-pressed); border-color: var(--color-accent-pressed); color: var(--color-text-on-accent); }
+.base-button--danger.base-button--toggled { background: var(--color-feedback-error-bg); border-color: var(--color-feedback-error-fg); color: var(--color-feedback-error-fg); }
+.base-button:disabled { background: var(--color-interactive-disabled); border-color: var(--color-border-default); color: var(--color-text-disabled); opacity: .5; cursor: not-allowed; }
 </style>

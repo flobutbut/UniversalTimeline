@@ -319,8 +319,8 @@ onUnmounted(() => {
   gap: var(--spacing-sm);
   flex-shrink: 0;
   padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-surface-default);
-  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-bg-app);
+  border-bottom: 1px solid var(--color-border-subtle);
   box-sizing: border-box;
   min-width: 0;
 }
@@ -413,8 +413,8 @@ onUnmounted(() => {
   width: 100%;
   padding: var(--spacing-xs) var(--spacing-md);
   border: none;
-  border-bottom: 1px solid var(--color-border-light);
-  background: var(--color-surface-default);
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-surface);
   cursor: pointer;
   text-align: left;
   font: inherit;
@@ -429,7 +429,7 @@ onUnmounted(() => {
 .filter-bar-dd__choose { display: flex; flex: 1; min-width: 0; align-items: center; gap: var(--spacing-sm); text-align: left; min-height: 32px; }
 
 .filter-bar-dd__item:hover {
-  background: var(--color-interaction-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
 }
 
 .filter-bar-dd__label {
@@ -455,7 +455,7 @@ onUnmounted(() => {
   flex-shrink: 0;
   font-size: var(--font-size-xs);
   padding: 2px var(--spacing-xs);
-  border: 1px solid var(--color-primary);
+  border: 1px solid var(--color-accent-default);
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-text-link);
@@ -463,6 +463,6 @@ onUnmounted(() => {
 }
 
 .filter-bar-dd__action:hover {
-  background: var(--color-primary-light);
+  background: var(--color-interactive-selected);
 }
 </style>

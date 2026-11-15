@@ -56,7 +56,7 @@ const selectedHere=computed(()=>props.selected && (props.selected.kind==='story'
 .timeline-map-card--end-title .timeline-map-card__title {margin-left:100%;transform:translateX(-100%);}
 .timeline-map-card__title:hover,.timeline-map-card--selected .timeline-map-card__title {color:var(--color-text-link);}
 .timeline-map-card__title:focus-visible {outline:2px solid var(--color-border-focus);outline-offset:2px;}
-.timeline-map-card__preview {padding-block:var(--spacing-xs);background:var(--color-surface-default);border-radius:var(--radius-sm);outline:1px solid var(--color-border-light);outline-offset:-1px;}
+.timeline-map-card__preview {padding-block:var(--spacing-xs);background:var(--color-bg-surface);border-radius:var(--radius-sm);outline:1px solid var(--color-border-subtle);outline-offset:-1px;}
 .timeline-map-card__empty {display:block;color:var(--color-text-secondary);font:var(--type-meta);}
-.timeline-map-card__empty--error {color:var(--color-status-error-foreground);}
+.timeline-map-card__empty--error {color:var(--color-feedback-error-fg);}
 </style>

@@ -42,6 +42,6 @@ const document = computed(() => legalDocuments[page.value]);
 .legal-view li + li { margin-top: var(--spacing-xs); }
 .legal-view__meta { color: var(--color-text-secondary); }
 /* Contenu à fournir par l’éditeur : bien visible, jamais présenté comme définitif. */
-.legal-view__todo { padding: var(--spacing-sm) var(--spacing-md); border-left: 3px solid var(--color-status-warning-foreground); background: var(--color-status-warning-background); color: var(--color-text-secondary); font-style: italic; }
+.legal-view__todo { padding: var(--spacing-sm) var(--spacing-md); border-left: 3px solid var(--color-feedback-warning-fg); background: var(--color-feedback-warning-bg); color: var(--color-text-secondary); font-style: italic; }
 .legal-view__actions { display: flex; }
 </style>

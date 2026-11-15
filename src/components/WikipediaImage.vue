@@ -48,7 +48,7 @@ onScopeDispose(stop);
   min-width: 200px;
   overflow: hidden;
   border-radius: var(--radius-sm);
-  background: var(--color-surface-subtle);
+  background: var(--color-bg-sunken);
   margin-bottom: var(--spacing-sm);
 }
 .wikipedia-image img {

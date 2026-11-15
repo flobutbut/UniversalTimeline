@@ -154,7 +154,7 @@ onBeforeUnmount(()=>{simulation?.stop();resize?.disconnect();selectionResize?.di
 </script>
 
 <style scoped>
-.relation-canvas { min-width:0; background:var(--color-surface-default); border:1px solid var(--color-border-default); border-radius:var(--radius-lg); overflow:hidden; }
+.relation-canvas { min-width:0; background:var(--color-bg-surface); border:1px solid var(--color-border-default); border-radius:var(--radius-lg); overflow:hidden; }
 .relation-canvas__tools { display:flex; flex-wrap:wrap; align-items:center; gap:var(--spacing-sm); padding:var(--spacing-sm); border-bottom:1px solid var(--color-border-default); }
 .relation-canvas__plot { position:relative; height:clamp(360px,calc(100dvh - 370px),820px); min-width:0; isolation:isolate; }
 .relation-canvas__search {position:absolute;top:var(--spacing-md);left:var(--spacing-md);width:248px;max-width:calc(100% - var(--spacing-md) * 2);z-index:var(--z-index-dropdown);}

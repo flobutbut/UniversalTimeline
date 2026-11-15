@@ -116,23 +116,23 @@ onScopeDispose(() => { close(false); window.removeEventListener('resize', positi
 
 <style scoped>
 .associated-stories { display: inline-flex; flex-shrink: 0; align-self: center; max-width: 100%; min-width: 0; overflow: hidden; }
-.associated-stories__badge { display: inline-flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); min-width: 0; max-width: 100%; min-height: var(--field-height-sm); padding: 0 var(--spacing-sm); border: 1px solid transparent; border-radius: var(--radius-md); background: var(--color-action-primary-default); color: var(--color-text-on-accent); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); line-height: var(--line-height-small); white-space: nowrap; font-variant-numeric: tabular-nums; cursor: pointer; transition: background-color var(--transition-fast); }
+.associated-stories__badge { display: inline-flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); min-width: 0; max-width: 100%; min-height: var(--field-height-sm); padding: 0 var(--spacing-sm); border: 1px solid transparent; border-radius: var(--radius-md); background: var(--color-accent-default); color: var(--color-text-on-accent); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); line-height: var(--line-height-small); white-space: nowrap; font-variant-numeric: tabular-nums; cursor: pointer; transition: background-color var(--transition-fast); }
 .associated-stories__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .associated-stories__arrow { transition: transform var(--transition-fast); }
 .associated-stories__arrow--open { transform: rotate(180deg); }
 .associated-stories__badge:focus-visible { outline-offset: -3px; }
-.associated-stories__badge:hover, .associated-stories__badge[aria-expanded="true"] { background: var(--color-action-primary-hover); }
+.associated-stories__badge:hover, .associated-stories__badge[aria-expanded="true"] { background: var(--color-accent-hover); }
 .associated-stories__badge:disabled { opacity: .5; cursor: default; }
 .associated-stories__badge:focus-visible, .associated-stories__panel button:focus-visible { outline: 2px solid var(--color-border-focus); }
 .associated-stories__panel button:focus-visible { outline-offset: 2px; }
 .associated-stories__backdrop { position: fixed; inset: 0; z-index: var(--z-index-dropdown, 100); }
-.associated-stories__panel { position: fixed; z-index: calc(var(--z-index-dropdown, 100) + 1); max-height: calc(100dvh - 24px); overflow-y: auto; background: var(--color-surface-default); }
+.associated-stories__panel { position: fixed; z-index: calc(var(--z-index-dropdown, 100) + 1); max-height: calc(100dvh - 24px); overflow-y: auto; background: var(--color-bg-surface); }
 .associated-stories__item { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); width: 100%; padding: 10px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-primary); text-align: left; cursor: pointer; }
 .associated-stories__row { display: flex; align-items: center; gap: var(--spacing-xs); }
 .associated-stories__row .associated-stories__item { flex: 1; min-width: 0; }
 .associated-stories__badge--title { min-height: 0; padding: 0; background: transparent; color: var(--color-text-primary); font: inherit; font-weight: var(--font-weight-semibold); white-space: normal; text-align: left; }
 .associated-stories__badge--title:hover, .associated-stories__badge--title[aria-expanded="true"] { background: transparent; }
-.associated-stories__item:hover { background: var(--color-interaction-hover); }
+.associated-stories__item:hover { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
 .associated-stories__item strong { display: block; font-size: var(--font-size-base); font-weight: var(--font-weight-medium); overflow-wrap: anywhere; }
 .associated-stories__item small { display: block; margin-top: var(--spacing-xs); color: var(--color-text-secondary); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
 .associated-stories__status { margin: 0; padding: 10px; font-size: var(--font-size-sm); color: var(--color-text-secondary); }

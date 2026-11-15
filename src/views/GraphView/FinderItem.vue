@@ -152,9 +152,9 @@ function onRowActionClick() {
   height: auto;
   display: flex;
   align-items: center;
-  background: var(--color-surface-default);
+  background: var(--color-bg-app);
   border: none;
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-subtle);
   width: 100%;
   box-sizing: border-box;
 }
@@ -245,7 +245,7 @@ function onRowActionClick() {
 }
 
 .action-button:hover {
-  color: var(--color-primary-dark);
+  color: var(--color-accent-hover);
 }
 
 .row-action-button {
@@ -271,14 +271,14 @@ function onRowActionClick() {
 }
 
 .finder-item:hover {
-  background: var(--color-interaction-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
 }
 
 .finder-item.selected {
   border: none;
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-subtle);
   box-shadow: none;
-  background: var(--color-interaction-selected);
+  background: var(--color-interactive-selected);
   color: var(--color-text-on-selected);
 }
 
@@ -295,7 +295,7 @@ function onRowActionClick() {
 
 /* Anneau clavier seulement si non sélectionné */
 .finder-item:focus-visible:not(.selected) {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-accent-default);
   outline-offset: 2px;
 }
 
@@ -305,7 +305,7 @@ function onRowActionClick() {
 
 /* Barre gauche : enregistrement en base (enfants côté API / BDD). */
 .finder-item-has-children {
-  border-left: calc(var(--radius-md) / 2) solid var(--color-primary);
+  border-left: calc(var(--radius-md) / 2) solid var(--color-accent-default);
 }
 
 /* Hiérarchie connue uniquement via Wikidata (pas encore de ligne PostgreSQL). */

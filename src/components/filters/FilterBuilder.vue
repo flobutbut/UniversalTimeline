@@ -161,7 +161,7 @@ onUnmounted(() => {
 .filter-chip__edit { min-width: 0; }
 .filter-chip__edit span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .filter-chip__edit svg { flex-shrink: 0; }
-.filter-chip button:hover { background: var(--color-interaction-hover); }
+.filter-chip button:hover { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
 .filter-chip button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 .filter-builder__panel { position: fixed; z-index: var(--z-index-dropdown); box-sizing: border-box; overflow-y: auto; }
 .filter-builder__panel--cascade { display: flex; }
@@ -172,10 +172,10 @@ onUnmounted(() => {
 .filter-builder__type { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px; border: 0; border-radius: var(--radius-sm); color: var(--color-text-primary); background: transparent; font: inherit; font-size: var(--font-size-sm); text-align: left; cursor: pointer; }
 .filter-builder__type:disabled { opacity: 0.4; cursor: default; }
 .filter-builder__type span { flex: 1; }
-.filter-builder__type--active, .filter-builder__type:hover:not(:disabled), .filter-builder__type:focus-visible { background: var(--color-interaction-hover); outline: none; }
+.filter-builder__type--active, .filter-builder__type:hover:not(:disabled), .filter-builder__type:focus-visible { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); outline: none; }
 .filter-builder__heading { display: flex; align-items: center; gap: 6px; padding: 2px 0 var(--spacing-sm); border-bottom: 1px solid var(--color-border-default); color: var(--color-text-primary); font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); }
 .filter-builder__heading button { display: inline-flex; padding: 5px; border: 0; background: transparent; color: inherit; border-radius: var(--radius-sm); cursor: pointer; }
-.filter-builder__heading button:hover { background: var(--color-interaction-hover); }
+.filter-builder__heading button:hover { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
 .filter-builder__heading span { flex: 1; }
 .filter-builder__editor { padding: 6px 0; }
 .filter-builder__editor:has(.temporal-range__time) { padding: var(--spacing-md) var(--spacing-sm); }

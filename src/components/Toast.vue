@@ -30,15 +30,15 @@ defineProps<{ notification: Notification | null }>();
 }
 
 .toast.info {
-  background-color: var(--color-primary);
+  background-color: var(--color-accent-default);
 }
 
 .toast.success {
-  background-color: var(--color-status-success-foreground);
+  background-color: var(--color-feedback-success-fg);
 }
 
 .toast.error {
-  background-color: var(--color-status-error-foreground);
+  background-color: var(--color-feedback-error-fg);
 }
 
 .toast-enter-active,

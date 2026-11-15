@@ -87,5 +87,5 @@ onMounted(load);
 .admin-relations__header,.admin-relations__filters {display:flex;flex-wrap:wrap;align-items:center;gap:var(--spacing-sm);flex-shrink:0;}
 .admin-relations__header {justify-content:space-between;}
 .admin-relations__muted {color:var(--color-text-secondary);font:var(--type-compact);}
-.admin-relations--expanded {position:fixed;inset:0;z-index:var(--z-index-modal);height:100dvh;box-sizing:border-box;padding:var(--spacing-md);gap:var(--spacing-sm);overflow:auto;background:var(--color-background-default);color:var(--color-text-primary);}
+.admin-relations--expanded {position:fixed;inset:0;z-index:var(--z-index-modal);height:100dvh;box-sizing:border-box;padding:var(--spacing-md);gap:var(--spacing-sm);overflow:auto;background:var(--color-bg-app);color:var(--color-text-primary);}
 </style>

@@ -59,13 +59,13 @@ function onKeydown(event: KeyboardEvent) {
 </script>
 <style scoped>
 .filter-values { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; }
-.filter-values__search { box-sizing: border-box; width: 100%; min-width: 0; margin-bottom: var(--spacing-xs); padding: var(--spacing-sm); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-surface-default); color: var(--color-text-primary); font: inherit; font-size: var(--font-size-sm); }
+.filter-values__search { box-sizing: border-box; width: 100%; min-width: 0; margin-bottom: var(--spacing-xs); padding: var(--spacing-sm); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-bg-surface); color: var(--color-text-primary); font: inherit; font-size: var(--font-size-sm); }
 .filter-values__list { max-height: 300px; overflow-y: auto; }
 .filter-values__option { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); width: 100%; padding: 10px var(--spacing-sm); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-primary); font: inherit; font-size: var(--font-size-sm); text-align: left; cursor: pointer; }
 .filter-values__group { margin: var(--spacing-xs) 0 0; padding: var(--spacing-xs) var(--spacing-sm); color: var(--color-text-secondary); font-size: var(--font-size-xs); }
 .filter-values__option span { min-width: 0; overflow-wrap: anywhere; }
 .filter-values__option svg { flex-shrink: 0; color: var(--color-text-link); }
-.filter-values__option:hover, .filter-values__option:focus-visible { background: var(--color-interaction-hover); outline: none; }
+.filter-values__option:hover, .filter-values__option:focus-visible { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); outline: none; }
 .filter-values__state { margin: 0; padding: var(--spacing-md) var(--spacing-sm); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
 .filter-values__clear { padding: var(--spacing-sm); border: 0; border-top: 1px solid var(--color-border-default); background: transparent; color: var(--color-text-secondary); font: inherit; font-size: var(--font-size-xs); text-align: left; cursor: pointer; }
 .filter-values__clear:hover { color: var(--color-text-primary); }
