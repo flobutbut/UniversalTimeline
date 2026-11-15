@@ -112,7 +112,7 @@ function restart() { phase.value = 'request'; error.value = ''; }
 
 <style scoped>
 .account-page { overflow: auto; padding: var(--spacing-lg); box-sizing: border-box; }
-.account-panel { max-width: 28rem; margin: 2rem auto; padding: var(--spacing-lg); background: var(--color-surface-default); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); }
+.account-panel { max-width: 28rem; margin: 2rem auto; padding: var(--spacing-lg); background: var(--color-bg-surface); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); }
 h2 { margin-top: 0; }
 form, .account-step { display: flex; flex-direction: column; gap: var(--spacing-sm); margin: var(--spacing-lg) 0; }
 form p, .account-step p { margin: 0; }

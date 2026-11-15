@@ -233,7 +233,7 @@ watch([() => props.items, () => props.loading], async () => {
 .story-breadcrumb__current-control { display: inline-flex; align-items: center; }
 
 .story-breadcrumb__item--current:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-accent-default);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }

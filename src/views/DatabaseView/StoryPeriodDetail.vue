@@ -96,7 +96,7 @@ const hasMetadata = computed(() => !!(wikidataId.value || recordDate(props.perio
 
 <style scoped>
 .story-period-detail { display: flex; flex-direction: column; gap: var(--spacing-xl); padding: var(--spacing-xl); }
-.story-period-detail__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--spacing-sm) var(--spacing-lg); padding-bottom: var(--spacing-lg); border-bottom: 1px solid var(--color-border-default); }
+.story-period-detail__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--spacing-sm) var(--spacing-lg); padding-bottom: var(--spacing-lg); border-bottom: 1px solid var(--color-border-subtle); }
 .story-period-detail__heading { flex: 1 1 200px; min-width: 0; }
 .story-period-detail h3 { margin: 0; color: var(--color-text-primary); font-size: var(--font-size-2xl); line-height: var(--line-height-loose); overflow-wrap: anywhere; }
 .story-period-detail__dates { margin: 0; color: var(--color-text-secondary); font: var(--type-body); }
@@ -115,26 +115,26 @@ const hasMetadata = computed(() => !!(wikidataId.value || recordDate(props.perio
 .story-period-detail__categories :deep(.ui-tag__label) { white-space: normal; overflow-wrap: anywhere; }
 .story-period-detail__reference { display: inline-flex; align-items: center; gap: var(--spacing-sm); color: var(--color-text-link); font: var(--type-body); text-decoration: none; }
 .story-period-detail__reference:hover { text-decoration: underline; }
-.story-period-detail__record { display: flex; flex-direction: column; gap: var(--spacing-md) var(--spacing-xl); margin: 0; padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border-default); font: var(--type-meta); color: var(--color-text-secondary); }
+.story-period-detail__record { display: flex; flex-direction: column; gap: var(--spacing-md) var(--spacing-xl); margin: 0; padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border-subtle); font: var(--type-meta); color: var(--color-text-secondary); }
 .story-period-detail__record dt { margin-bottom: var(--spacing-xs); }.story-period-detail__record dd { margin: 0; }
-.story-period-detail__context { padding-top: var(--spacing-xl); border-top: 1px solid var(--color-border-default); }
+.story-period-detail__context { padding-top: var(--spacing-xl); border-top: 1px solid var(--color-border-subtle); }
 .story-period-detail__context section { align-items: stretch; }.story-period-detail__context .base-button { align-self: flex-start; }
 .story-period-detail__children { display: grid; gap: var(--spacing-sm); list-style: none; padding: 0; margin: 0; }
-.story-period-detail__children button { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); width: 100%; min-height: var(--field-height-md); padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-surface-raised); color: var(--color-text-link); font: var(--type-compact); text-align: left; cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast); }
-.story-period-detail__children button:hover, .story-period-detail__children button:focus-visible { background: var(--color-surface-raised-hover); border-color: var(--color-border-focus); }
+.story-period-detail__children button { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); width: 100%; min-height: var(--field-height-md); padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-bg-raised); color: var(--color-text-link); font: var(--type-compact); text-align: left; cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast); }
+.story-period-detail__children button:hover, .story-period-detail__children button:focus-visible { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); border-color: var(--color-border-focus); }
 .story-period-detail__children button span { min-width: 0; overflow-wrap: anywhere; }.story-period-detail__children svg { flex-shrink: 0; }
-.story-period-detail__stories { border-top: 1px solid var(--color-border-default); padding-top: var(--spacing-lg); }
+.story-period-detail__stories { border-top: 1px solid var(--color-border-subtle); padding-top: var(--spacing-lg); }
 .story-period-detail__placeholder { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-sm); padding: var(--spacing-2xl); text-align: center; color: var(--color-text-secondary); font: var(--type-body); }
 .story-period-detail__placeholder > svg { font-size: var(--font-size-3xl); }.story-period-detail__placeholder p { margin: 0; }.story-period-detail__placeholder > span { font: var(--type-meta); }
 .story-period-detail a:focus-visible, .story-period-detail__children button:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 3px; }
-.story-period-detail__metadata { display: flex; flex-direction: column; align-self: start; gap: var(--spacing-xl); min-width: 0; padding-top: var(--spacing-xl); border-top: 1px solid var(--color-border-default); color: var(--color-text-secondary); font: var(--type-meta); }
+.story-period-detail__metadata { display: flex; flex-direction: column; align-self: start; gap: var(--spacing-xl); min-width: 0; padding-top: var(--spacing-xl); border-top: 1px solid var(--color-border-subtle); color: var(--color-text-secondary); font: var(--type-meta); }
 .story-period-detail__metadata h4 { color: var(--color-text-secondary); font: var(--type-label); }
 .story-period-detail__metadata .story-period-detail__reference { font: var(--type-meta); }
 .story-period-detail__metadata .story-period-detail__record { border: 0; padding: 0; }
 .story-period-detail__context :deep(.anchored-story-row:hover), .story-period-detail__context :deep(.anchored-story-row:focus-within) { outline: 1px solid var(--color-border-focus); outline-offset: -1px; }
 @container (min-width: 720px) {
   .story-period-detail__layout--with-metadata { grid-template-columns: minmax(0, 1fr) 200px; gap: var(--spacing-2xl); }
-  .story-period-detail__metadata { padding: 0 0 0 var(--spacing-xl); border-top: 0; border-left: 1px solid var(--color-border-default); }
+  .story-period-detail__metadata { padding: 0 0 0 var(--spacing-xl); border-top: 0; border-left: 1px solid var(--color-border-subtle); }
 }
 @media (max-width: 600px) { .story-period-detail { padding: var(--spacing-lg); } }
 </style>

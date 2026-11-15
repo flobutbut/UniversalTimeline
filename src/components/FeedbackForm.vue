@@ -86,7 +86,7 @@ async function saveEmail() {
 
 <style scoped>
 .feedback-form { width: min(380px, calc(100vw - 2 * var(--spacing-lg))); max-height: calc(100dvh - 2 * var(--spacing-lg)); overflow-y: auto; font: var(--type-body); }
-.feedback-form__header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-sm); padding: var(--spacing-lg); border-bottom: 1px solid var(--color-border-light); }
+.feedback-form__header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-sm); padding: var(--spacing-lg); border-bottom: 1px solid var(--color-border-subtle); }
 .feedback-form h2 { margin: 0; font: var(--type-panel-title); }
 .feedback-form__header p { margin: var(--spacing-xs) 0 0; color: var(--color-text-secondary); font: var(--type-meta); }
 .feedback-form__body { display: flex; flex-direction: column; gap: var(--spacing-md); padding: var(--spacing-lg); }
@@ -97,7 +97,7 @@ async function saveEmail() {
 .feedback-form__stars label { position: relative; display: flex; align-items: center; justify-content: center; width: var(--field-height-lg); height: var(--field-height-lg); cursor: pointer; color: var(--color-text-secondary); border-radius: var(--radius-sm); }
 .feedback-form__stars input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .feedback-form__stars label:focus-within { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
-.feedback-form__stars .feedback-form__star--selected { color: var(--color-status-warning-foreground); }
+.feedback-form__stars .feedback-form__star--selected { color: var(--color-feedback-warning-fg); }
 .feedback-form__hint, .feedback-form__privacy { color: var(--color-text-secondary); font: var(--type-meta); }
 .feedback-form__privacy { padding: 0 var(--spacing-lg) var(--spacing-lg); }
 </style>

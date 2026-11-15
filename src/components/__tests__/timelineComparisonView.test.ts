@@ -154,10 +154,12 @@ it('minimizes every frise while keeping its periods, events, grid instance and c
   expect(sectionFor('1').getComponent(PeriodGrid).props('currentPeriod')?.id).toBe('bourbons');
 });
 
-it('places the add control outside the scrollable stack so it overlays the available timeline height', async () => {
+it('places the add control as the last section of the stack, after every timeline', async () => {
   await open('/timeline?story=1&compare=2');
-  expect(view.get('.home-view__add').element.parentElement).toBe(view.get('.home-view').element);
-  expect(view.get('.home-view__stack').find('.home-view__add').exists()).toBe(false);
+  const add = view.get('.home-view__add').element;
+  expect(add.parentElement).toBe(view.get('.home-view__stack').element);
+  const sections = [...view.get('.home-view__stack').element.querySelectorAll(':scope > section')];
+  expect(sections.at(-1)).toBe(add);
 });
 
 it('restores the single view and its extension preference after removing the last comparison', async () => {

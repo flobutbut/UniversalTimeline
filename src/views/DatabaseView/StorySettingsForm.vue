@@ -70,7 +70,7 @@ function save() {
 .story-settings-form { display: flex; flex-direction: column; gap: var(--spacing-md); max-width: 960px; }
 .story-settings-form h3 { font-size: var(--font-size-lg); }
 .story-settings-form__form { display: flex; flex-direction: column; gap: var(--spacing-lg); }
-.story-settings-form__error { color: var(--color-status-error-foreground); }
+.story-settings-form__error { color: var(--color-feedback-error-fg); }
 .form-content { border: 0; padding: 0; margin: 0; min-width: 0; display: flex; flex-direction: column; gap: var(--spacing-md); }
 .form-row { display: flex; gap: var(--spacing-md); width: 100%; }
 .form-group { flex: 1; min-width: 0; }

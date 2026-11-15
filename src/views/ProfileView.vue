@@ -226,10 +226,10 @@ onMounted(async () => {
 .profile-view { display: flex; flex-direction: column; gap: var(--spacing-lg); }
 .profile-view h2 { margin: 0; font-size: var(--font-size-xl); }
 .profile-view h3 { margin: 0; font-size: var(--font-size-base); }
-.profile-view__notice { margin: 0; padding: var(--spacing-md); border-radius: var(--radius-md); background: var(--color-status-warning-background); color: var(--color-text-primary); }
+.profile-view__notice { margin: 0; padding: var(--spacing-md); border-radius: var(--radius-md); background: var(--color-feedback-warning-bg); color: var(--color-text-primary); }
 .profile-view__card {
   display: flex; flex-direction: column; gap: var(--spacing-md); margin: 0; padding: var(--spacing-lg);
-  border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-bg-surface);
 }
 .profile-view__card p { margin: 0; max-width: 72ch; }
 .profile-view__identity { display: flex; align-items: flex-start; gap: var(--spacing-lg); }
@@ -241,13 +241,13 @@ onMounted(async () => {
 .profile-view__swatch:has(input:checked), .profile-view__icon-choice:has(input:checked) { border-color: var(--color-text-link); }
 .profile-view__swatch:has(input:focus-visible), .profile-view__icon-choice:has(input:focus-visible) { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
 .profile-view__actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--spacing-sm); }
-.profile-view__error { color: var(--color-status-error-foreground); }
+.profile-view__error { color: var(--color-feedback-error-fg); }
 .profile-view__facts { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: var(--spacing-sm) var(--spacing-lg); }
 .profile-view__facts dt { color: var(--color-text-secondary); }
 .profile-view__facts dd { margin: 0; overflow-wrap: anywhere; }
 .profile-view__links { margin: 0; padding-left: var(--spacing-lg); }
-.profile-view__danger { border-color: var(--color-status-error-foreground); }
-.profile-view__danger h3 { color: var(--color-status-error-foreground); }
+.profile-view__danger { border-color: var(--color-feedback-error-fg); }
+.profile-view__danger h3 { color: var(--color-feedback-error-fg); }
 @media (max-width: 720px) {
   .profile-view__identity { flex-direction: column; }
   .profile-view__facts { grid-template-columns: minmax(0, 1fr); gap: var(--spacing-xs); }

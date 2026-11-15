@@ -72,7 +72,7 @@ async function copyAddress() {
 .contact-view__topics { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--spacing-md); margin: 0; padding: 0; list-style: none; }
 .contact-view__topic {
   display: flex; flex-direction: column; gap: var(--spacing-sm); padding: var(--spacing-lg);
-  border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-bg-surface);
 }
 .contact-view__topic p { margin: 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
 .contact-view__topic a { font-size: var(--font-size-sm); overflow-wrap: anywhere; }

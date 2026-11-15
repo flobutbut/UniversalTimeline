@@ -177,8 +177,8 @@ function clear() {
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: var(--color-background-default);
-  border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-bg-app);
+  border-bottom: 1px solid var(--color-border-subtle);
   position: sticky;
   top: 0;
 }
@@ -190,14 +190,14 @@ function clear() {
   width: 100%;
   padding: calc(var(--spacing-sm) - 1px) var(--spacing-md);
   border: none;
-  border-bottom: 1px solid var(--color-border-light);
-  background: var(--color-surface-default);
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-surface);
   cursor: pointer;
   text-align: left;
   transition: background var(--transition-fast);
 }
 .gs__item:last-child { border-bottom: none; }
-.gs__item--active, .gs__item:hover { background: var(--color-interaction-hover); }
+.gs__item--active, .gs__item:hover { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
 
 .gs__icon { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 1px; color: var(--color-text-link); }
 .gs__content { flex: 1; min-width: 0; }

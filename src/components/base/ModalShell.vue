@@ -58,7 +58,7 @@ const handleOverlayClick = (e: MouseEvent) => {
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: var(--overlay-scrim);
+  background: var(--color-bg-scrim);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -69,7 +69,7 @@ const handleOverlayClick = (e: MouseEvent) => {
 
 .modal-content {
   position: relative;
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
   color: var(--color-text-primary);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl) var(--spacing-2xl);

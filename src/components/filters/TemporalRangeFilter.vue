@@ -70,8 +70,8 @@ function clearTime() { emit('update:modelValue', null); }
 .temporal-range__range .temporal-range__slider:focus-visible { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; outline: none; }
 .temporal-range__slider::-webkit-slider-runnable-track { background: transparent; border: 0; }
 .temporal-range__slider::-moz-range-track { background: transparent; border: 0; }
-.temporal-range__slider::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--color-surface-raised); border: 2px solid var(--color-text-link); cursor: grab; }
-.temporal-range__slider::-moz-range-thumb { pointer-events: auto; width: 14px; height: 14px; border-radius: 50%; background: var(--color-surface-raised); border: 2px solid var(--color-text-link); cursor: grab; }
+.temporal-range__slider::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--color-bg-raised); border: 2px solid var(--color-text-link); cursor: grab; }
+.temporal-range__slider::-moz-range-thumb { pointer-events: auto; width: 14px; height: 14px; border-radius: 50%; background: var(--color-bg-raised); border: 2px solid var(--color-text-link); cursor: grab; }
 /* The focus ring moves to the handle being driven. */
 .temporal-range__slider:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--color-border-focus); }
 .temporal-range__slider:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--color-border-focus); }
@@ -80,5 +80,5 @@ function clearTime() { emit('update:modelValue', null); }
 .temporal-range__scale span:first-child { transform: none; }
 .temporal-range__scale span:last-child { transform: translateX(-100%); }
 .temporal-range__summary { margin: 0; font-size: var(--font-size-sm); color: var(--color-text-primary); }
-.temporal-range__error { margin: 0; font-size: var(--font-size-sm); color: var(--color-status-error-foreground); }
+.temporal-range__error { margin: 0; font-size: var(--font-size-sm); color: var(--color-feedback-error-fg); }
 </style>

@@ -141,11 +141,11 @@ watch(() => props.story, () => {
 .story-relations__list, .story-relations__locations { margin: 0; padding: 0; list-style: none; }
 .story-relations__list { display: flex; flex-direction: column; gap: var(--spacing-md); }
 .story-relations__source, .story-relations__parent { border: 1px solid var(--color-border-default); border-radius: var(--radius-md); overflow: hidden; }
-.story-relations__source-header { padding: var(--spacing-md); background: var(--color-background-default); }
+.story-relations__source-header { padding: var(--spacing-md); background: var(--color-bg-app); }
 .story-relations__location { padding: var(--spacing-sm) var(--spacing-md); border-top: 1px solid var(--color-border-default); font-size: var(--font-size-sm); }
 .story-relations__location > div { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
 .story-relations__caption { display: block; font-size: var(--font-size-xs); color: var(--color-text-secondary); }
-.story-relations__error { color: var(--color-status-error-foreground); }
+.story-relations__error { color: var(--color-feedback-error-fg); }
 .story-relations__parent .story-relations__description { margin-top: var(--spacing-xs); }
 @media (max-width: 640px) { .story-relations__header { align-items: flex-start; flex-direction: column; } .story-relations__source-header { align-items: flex-start; } }
 </style>

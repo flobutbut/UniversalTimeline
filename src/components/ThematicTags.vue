@@ -13,5 +13,5 @@ defineProps<{ tags: readonly TagRef[] }>();
 <style scoped>
 .thematic-tags { display: contents; }
 /* Seul le tag principal porte la couleur du domaine. */
-.thematic-tags .thematic-tags__primary { background: color-mix(in srgb, var(--tag-color) 20%, var(--color-surface-default)); border-color: var(--tag-color); color: var(--color-text-primary); }
+.thematic-tags .thematic-tags__primary { background: color-mix(in srgb, var(--tag-color) 20%, var(--color-bg-surface)); border-color: var(--tag-color); color: var(--color-text-primary); }
 </style>

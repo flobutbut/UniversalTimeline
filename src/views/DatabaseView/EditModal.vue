@@ -686,7 +686,7 @@ onUnmounted(() => {
 
 .form-group input,
 .form-group textarea {
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
@@ -699,7 +699,7 @@ onUnmounted(() => {
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent-default);
 }
 
 .form-group textarea {
@@ -795,7 +795,7 @@ onUnmounted(() => {
   right: 0;
   width: max(100%, min(320px, calc(100vw - 48px)));
   z-index: var(--z-index-search-layer);
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xl);
@@ -819,8 +819,8 @@ onUnmounted(() => {
   width: 100%;
   padding: var(--spacing-sm) var(--spacing-md);
   border: none;
-  border-bottom: 1px solid var(--color-border-light);
-  background: var(--color-surface-default);
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-surface);
   cursor: pointer;
   text-align: left;
   font: inherit;
@@ -832,10 +832,10 @@ onUnmounted(() => {
   border-bottom: none;
 }
 
-.edit-modal-wd-dd__item--active { background: var(--color-interaction-hover); outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.edit-modal-wd-dd__item--active { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); outline: 2px solid var(--color-accent-default); outline-offset: -2px; }
 
 .edit-modal-wd-dd__item:hover:not(:disabled) {
-  background: var(--color-interaction-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
 }
 
 .edit-modal-wd-dd__item:disabled {

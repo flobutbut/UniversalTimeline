@@ -59,14 +59,14 @@ defineEmits<{
 <style scoped>
 .base-input { display: flex; flex-direction: column; gap: var(--spacing-xs); width: 100%; min-width: 0; }
 .base-input__label { display: flex; align-items: center; gap: var(--spacing-xs); font: var(--type-label); color: var(--color-text-primary); }
-.base-input__required, .base-input__error { color: var(--color-status-error-foreground); }
-.base-input__field { box-sizing: border-box; width: 100%; min-width: 0; min-height: var(--field-height-lg); padding: var(--spacing-md); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); font: var(--type-compact); color: var(--color-text-primary); background: var(--color-surface-default); transition: border-color var(--transition-fast), box-shadow var(--transition-fast); }
+.base-input__required, .base-input__error { color: var(--color-feedback-error-fg); }
+.base-input__field { box-sizing: border-box; width: 100%; min-width: 0; min-height: var(--field-height-lg); padding: var(--spacing-md); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); font: var(--type-compact); color: var(--color-text-primary); background: var(--color-bg-app); transition: border-color var(--transition-fast), box-shadow var(--transition-fast); }
 .base-input__field::placeholder { color: var(--color-text-secondary); opacity: 1; }
 .base-input__field:focus { outline: none; border-color: var(--color-border-focus); box-shadow: inset 0 0 0 1px var(--color-border-focus); }
 .base-input--sm .base-input__field { min-height: var(--field-height-md); padding: var(--spacing-xs) var(--spacing-sm); }
-.base-input__field:disabled { background: var(--color-interaction-disabled); cursor: not-allowed; opacity: .5; }
-.base-input--error .base-input__field { border-color: var(--color-status-error-foreground); }
-.base-input--error .base-input__field:focus { box-shadow: inset 0 0 0 1px var(--color-status-error-foreground); }
+.base-input__field:disabled { border-color: var(--color-border-default); cursor: not-allowed; opacity: .5; }
+.base-input--error .base-input__field { border-color: var(--color-feedback-error-fg); }
+.base-input--error .base-input__field:focus { box-shadow: inset 0 0 0 1px var(--color-feedback-error-fg); }
 .base-input__error, .base-input__hint { font: var(--type-meta); }
 .base-input__hint { color: var(--color-text-secondary); }
 textarea.base-input__field { display: block; min-height: var(--textarea-height-default); resize: vertical; white-space: pre-wrap; overflow-wrap: anywhere; }

@@ -20,5 +20,5 @@ const periodId = ref(props.currentRootId);
 </script>
 <style scoped>
 .root-period-hint { color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: var(--line-height-body); margin-bottom: var(--spacing-lg); }
-.root-period-error { color: var(--color-status-error-foreground); font-size: var(--font-size-sm); }
+.root-period-error { color: var(--color-feedback-error-fg); font-size: var(--font-size-sm); }
 </style>

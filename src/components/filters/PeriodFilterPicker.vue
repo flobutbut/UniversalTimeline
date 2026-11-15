@@ -21,5 +21,5 @@ function choose(id: string) { if (id) rememberSelection(id); emit('update:modelV
 onMounted(initialize);
 </script>
 <style scoped>
-.period-filter-error { margin: 0; padding: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--color-status-error-foreground); white-space: normal; }
+.period-filter-error { margin: 0; padding: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--color-feedback-error-fg); white-space: normal; }
 </style>

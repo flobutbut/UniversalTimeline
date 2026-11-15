@@ -6,7 +6,7 @@
   padding: var(--spacing-md);
   box-sizing: border-box;
   gap: var(--spacing-md);
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
 }
 
-.links-error { margin: 0; font-size: var(--font-size-sm); color: var(--color-status-error-foreground); }
+.links-error { margin: 0; font-size: var(--font-size-sm); color: var(--color-feedback-error-fg); }

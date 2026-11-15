@@ -305,7 +305,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.database-view { display: flex; flex-direction: column; height: 100%; min-height: 0; background: var(--color-background-default); }
+.database-view { display: flex; flex-direction: column; height: 100%; min-height: 0; background: var(--color-bg-app); }
 .database-view__content { flex: 1; min-height: 0; }
 .database-story-detail-wrap { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
 </style>

@@ -47,11 +47,11 @@ onScopeDispose(() => observer?.disconnect());
 </script>
 
 <style scoped>
-.public-story-card { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-surface-raised); transition: border-color var(--transition-fast); }
+.public-story-card { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-raised); transition: border-color var(--transition-fast); }
 .public-story-card:hover { border-color: var(--color-border-strong); }
 .public-story-card:has(.public-story-card__open:focus-visible) { outline: 2px solid var(--color-border-focus); outline-offset: 3px; }
-.public-story-card__cover { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--color-surface-subtle); }
-.public-story-card__fallback { display: flex; flex-direction: column; justify-content: center; height: 100%; padding: var(--spacing-lg); box-sizing: border-box; color: var(--color-text-secondary); --story-timeline-background: var(--color-surface-subtle); }
+.public-story-card__cover { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--color-bg-sunken); }
+.public-story-card__fallback { display: flex; flex-direction: column; justify-content: center; height: 100%; padding: var(--spacing-lg); box-sizing: border-box; color: var(--color-text-secondary); --story-timeline-background: var(--color-bg-sunken); }
 .public-story-card__fallback > svg { align-self: center; }
 .public-story-card__cover :deep(.wikipedia-image) { position: absolute; inset: 0; width: 100%; height: 100%; min-width: 0; margin: 0; border-radius: 0; }
 .public-story-card__cover :deep(.wikipedia-image:not(.is-loaded)) { visibility: hidden; }

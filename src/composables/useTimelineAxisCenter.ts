@@ -5,6 +5,8 @@ export function useTimelineAxisCenter(options: {
   viewport(): HTMLElement | null;
   grid: Ref<HTMLElement | null>;
   axis: Ref<HTMLElement | null>;
+  /** Contenu à garder visible sous la grille dans le viewport (ex. la section d’ajout). */
+  reserveBelow?(): HTMLElement | null;
   ready(): boolean;
   resetOn: WatchSource[];
 }) {
@@ -20,11 +22,13 @@ export function useTimelineAxisCenter(options: {
     const hostBox = viewport.getBoundingClientRect(), gridBox = grid.getBoundingClientRect();
     const gridStyle = getComputedStyle(grid), axisStyle = getComputedStyle(axis);
     const halfAxis = axis.getBoundingClientRect().height / 2;
+    const below = options.reserveBelow?.();
+    const reserve = below ? Math.max(0, below.getBoundingClientRect().bottom - gridBox.bottom) : 0;
     const number = (value: string) => parseFloat(value) || 0;
     const gridOffset = gridBox.top - hostBox.top - viewport.clientTop + viewport.scrollTop;
     const next = {
       '--timeline-before-axis': `${Math.max(0, viewport.clientHeight / 2 - gridOffset - number(gridStyle.paddingTop) - number(axisStyle.marginTop) - halfAxis)}px`,
-      '--timeline-after-axis': `${Math.max(0, viewport.clientHeight / 2 - halfAxis - number(axisStyle.marginBottom) - number(gridStyle.paddingBottom))}px`,
+      '--timeline-after-axis': `${Math.max(0, viewport.clientHeight / 2 - halfAxis - number(axisStyle.marginBottom) - number(gridStyle.paddingBottom) - reserve)}px`,
     };
     if (JSON.stringify(next) !== JSON.stringify(style.value)) style.value = next;
     await nextTick();
@@ -47,6 +51,8 @@ export function useTimelineAxisCenter(options: {
       observer = new ResizeObserver(schedule);
       observer.observe(viewport);
       if (grid) observer.observe(grid);
+      const below = options.reserveBelow?.();
+      if (below) observer.observe(below);
     }
     schedule();
   }, { immediate: true, flush: 'post' });

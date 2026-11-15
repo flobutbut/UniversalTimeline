@@ -81,9 +81,9 @@ onScopeDispose(()=>{
 .relation-search {position:relative;min-width:0;}
 .relation-search__suggestions {position:absolute;top:calc(100% + var(--spacing-xs));left:0;right:0;max-height:min(320px,40dvh);overflow-y:auto;z-index:var(--z-index-dropdown);}
 .relation-search__status {margin:0;padding:var(--spacing-sm) var(--spacing-md);color:var(--color-text-secondary);font:var(--type-meta);}
-.relation-search__option {display:flex;width:100%;min-width:0;padding:var(--spacing-md);border:0;border-bottom:1px solid var(--color-border-light);background:transparent;color:var(--color-text-primary);font:var(--type-compact);text-align:left;cursor:pointer;}
+.relation-search__option {display:flex;width:100%;min-width:0;padding:var(--spacing-md);border:0;border-bottom:1px solid var(--color-border-subtle);background:transparent;color:var(--color-text-primary);font:var(--type-compact);text-align:left;cursor:pointer;}
 .relation-search__option > * {min-width:0;}
 .relation-search__option:last-child {border-bottom:0;}
-.relation-search__option:hover {background:var(--color-interaction-hover);}
-.relation-search__option--active,.relation-search__option--active:hover {background:var(--color-interaction-selected);color:var(--color-text-on-selected);}
+.relation-search__option:hover {background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));}
+.relation-search__option--active,.relation-search__option--active:hover {background:var(--color-interactive-selected);color:var(--color-text-on-selected);}
 </style>

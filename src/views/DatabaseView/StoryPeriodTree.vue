@@ -136,19 +136,19 @@ watch([() => props.search, () => props.tagId], () => { filterCollapsed.value = n
 </script>
 
 <style scoped>
-.story-period-tree { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--color-surface-default); }
-.story-period-tree__heading { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); border-bottom: 1px solid var(--color-border-default); }
+.story-period-tree { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--color-bg-app); }
+.story-period-tree__heading { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); border-bottom: 1px solid var(--color-border-subtle); }
 .story-period-tree__heading-title { display: flex; flex: 1; align-items: center; gap: var(--spacing-sm); }
 .story-period-tree__heading h3 { margin: 0; font: var(--type-label); color: var(--color-text-primary); }
 .story-period-tree__heading-title > span { color: var(--color-text-secondary); font: var(--type-meta); }
 .story-period-tree__list { list-style: none; padding: var(--spacing-sm) 0; margin: 0; }
 .story-period-tree__row { display: flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) calc(var(--spacing-sm) + var(--tree-level) * 18px); color: var(--color-text-primary); min-height: 52px; cursor: pointer; border-radius: var(--radius-sm); }
-.story-period-tree__row:hover { background: var(--color-interaction-hover); }
-.story-period-tree__row.is-selected { background: var(--color-interaction-selected); color: var(--color-text-on-selected); }
+.story-period-tree__row:hover { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
+.story-period-tree__row.is-selected { background: var(--color-interactive-selected); color: var(--color-text-on-selected); }
 .story-period-tree__row:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
 .story-period-tree__toggle { flex: 0 0 24px; display: inline-flex; justify-content: center; align-items: center; width: 24px; height: var(--field-height-md); padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: inherit; font-size: var(--font-size-xl); }
 button.story-period-tree__toggle { cursor: pointer; }
-button.story-period-tree__toggle:hover { background: var(--color-interaction-hover); }
+button.story-period-tree__toggle:hover { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
 button.story-period-tree__toggle:focus-visible { outline: 2px solid var(--color-border-focus); }
 .story-period-tree__leaf { width: 4px; height: 4px; background: var(--color-border-strong); border-radius: 50%; }
 .story-period-tree__text { display: flex; flex: 1; flex-direction: column; min-width: 100px; font: var(--type-body); }

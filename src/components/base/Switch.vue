@@ -95,7 +95,7 @@ const switchId = useId();
 }
 
 .switch--checked .switch__track {
-  background-color: var(--color-primary);
+  background-color: var(--color-accent-default);
 }
 
 .switch--checked .switch__thumb {
@@ -110,7 +110,7 @@ const switchId = useId();
 }
 
 .switch__button:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-accent-default);
   outline-offset: 3px;
   border-radius: var(--radius-pill);
 }

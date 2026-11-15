@@ -139,7 +139,7 @@ defineExpose({
 }
 
 .base-select__required {
-  color: var(--color-status-error-foreground);
+  color: var(--color-feedback-error-fg);
 }
 
 .base-select__wrapper {
@@ -191,7 +191,7 @@ defineExpose({
 
 .base-select__error {
   font-size: var(--font-size-sm);
-  color: var(--color-status-error-foreground);
+  color: var(--color-feedback-error-fg);
 }
 
 .base-select__hint {

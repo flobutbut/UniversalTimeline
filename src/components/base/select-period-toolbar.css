@@ -24,7 +24,7 @@
   right: 0;
   z-index: var(--z-index-dropdown);
   margin-top: var(--spacing-xs);
-  background-color: var(--color-surface-default);
+  background-color: var(--color-bg-surface);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
@@ -42,7 +42,7 @@
 
 .select--period-toolbar .base-select__search-wrapper {
   padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .select--period-toolbar .base-select__search-wrapper--toolbar {
@@ -63,15 +63,15 @@
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  background-color: var(--color-surface-default);
+  background-color: var(--color-bg-surface);
   color: var(--color-text-primary);
   box-sizing: border-box;
 }
 
 .select--period-toolbar .base-select__search:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-light);
+  border-color: var(--color-accent-default);
+  box-shadow: 0 0 0 2px var(--color-interactive-selected);
 }
 
 .select--period-toolbar.base-select--sm .base-select__search-wrapper {
@@ -110,22 +110,22 @@
 }
 
 .select--period-toolbar .base-select__option:hover {
-  background-color: var(--color-interaction-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
 }
 
 .select--period-toolbar .base-select__option--highlighted {
-  background-color: var(--color-interaction-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
   color: var(--color-text-primary);
 }
 
 .select--period-toolbar .base-select__option--selected {
-  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  background: color-mix(in srgb, var(--color-accent-default) 14%, transparent);
   color: var(--color-text-link);
   font-weight: var(--font-weight-medium);
 }
 
 .select--period-toolbar .base-select__option--selected:hover {
-  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  background: color-mix(in srgb, var(--color-accent-default) 20%, transparent);
 }
 
 .select--period-toolbar .base-select__option-text {
@@ -165,7 +165,7 @@
 }
 
 .select--period-toolbar .base-select__option-chevron-next:hover {
-  background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  background-color: color-mix(in srgb, var(--color-accent-default) 12%, transparent);
   color: var(--color-text-link);
 }
 
@@ -174,7 +174,7 @@
 }
 
 .select--period-toolbar .select-period__level-item {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-subtle);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
 }
@@ -186,7 +186,7 @@
 }
 
 .select--period-toolbar .select-period__level-item:hover {
-  background-color: var(--color-interaction-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
 }
 
 .select--period-toolbar .base-select__no-results {
@@ -201,7 +201,7 @@
 }
 
 .select--period-toolbar .base-select__options::-webkit-scrollbar-track {
-  background: var(--color-interaction-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
   border-radius: var(--radius-sm);
 }
 
@@ -211,5 +211,5 @@
 }
 
 .select--period-toolbar .base-select__options::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-dark);
+  background: var(--color-border-strong);
 }

@@ -206,6 +206,8 @@ const props = withDefaults(defineProps<{
   minimized?: boolean;
   /** Vue seule : cadrer la ligne de temps au milieu de ce viewport, indépendamment des cartes. */
   axisViewport?: HTMLElement | null;
+  /** Vue seule : section à garder dans le viewport sous la grille. */
+  axisReserveBelow?: HTMLElement | null;
   /** Masque la borne « Fin : … » : une frise qui suit l’échelle d’une autre n’a pas de fin de vue à annoncer. */
   hideEndBound?: boolean;
   /** Agrandissement survolé dans une autre frise sur la même échelle (voir `getFocus`). */
@@ -263,9 +265,9 @@ const timelineLineRef = ref<HTMLElement | null>(null);
 const undatedPeriodsRef = ref<HTMLElement | null>(null);
 const eventsSurfaceRef = ref<HTMLElement | null>(null);
 const axisCenterStyle = useTimelineAxisCenter({
-  viewport: () => props.axisViewport ?? null, grid: gridRoot, axis: timelineLineRef, ready: () => active.value && !props.loading,
+  viewport: () => props.axisViewport ?? null, grid: gridRoot, axis: timelineLineRef, reserveBelow: () => props.axisReserveBelow ?? null, ready: () => active.value && !props.loading,
   resetOn: [() => props.currentStoryId, () => props.currentPeriod, () => props.periods, () => props.linkedPeriods,
-    () => props.childPeriods, () => props.childLinkedPeriods, () => props.showChildren, () => props.events, () => props.overviewPeriod],
+    () => props.childPeriods, () => props.childLinkedPeriods, () => props.showChildren, () => props.events, () => props.overviewPeriod, () => props.axisReserveBelow],
 });
 defineExpose({
   getSlideLayers: () => [periodSurfaceRef.value, timelineLineRef.value, undatedPeriodsRef.value, eventsSurfaceRef.value]
@@ -650,7 +652,7 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
   overflow-wrap: anywhere;
   padding: var(--spacing-sm) var(--spacing-md);
   color: var(--color-text-primary);
-  background: var(--color-surface-default);
+  background: var(--color-bg-surface);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-lg);
@@ -689,7 +691,7 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
   overflow-x: hidden;
   overflow-y: auto;
   container-type: size;
-  background-color: var(--color-background-default);
+  background-color: var(--color-bg-app);
 }
 
 .timeline-container {
@@ -729,7 +731,7 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
 .timeline-line {
   height: calc(var(--spacing-xs) / 2);
   width: 100%;
-  background: var(--color-border-dark);
+  background: var(--color-border-strong);
   position: relative;
   z-index: var(--z-index-period-row-band);
   margin: calc(var(--spacing-xs) / 2) 0;
@@ -748,7 +750,7 @@ const navigatePeriod = (direction: 'previous' | 'next') => {
 
 /* La hauteur naturelle est une variante explicite de l’exploration ; ne pas
    changer le défilement des autres usages de cette grille partagée. */
-.period-grid--natural-height { height: auto; overflow: visible; container-type: normal; background: var(--timeline-panel-background, var(--color-background-default)); }
+.period-grid--natural-height { height: auto; overflow: visible; container-type: normal; background: var(--timeline-panel-background, var(--color-bg-app)); }
 .period-grid--natural-height .period-row { overflow-clip-margin: var(--spacing-md); }
 .period-grid--natural-height .timeline-container { min-height: 0; }
 .period-grid--natural-height .events-container { min-height: var(--timeline-caption-height); }

@@ -124,14 +124,14 @@ const groups = computed<{ id: string; title: string; tiles: Tile[] }[]>(() => {
 .admin-dashboard__tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--spacing-md); margin: 0; }
 .admin-dashboard__tile {
   display: flex; flex-direction: column; gap: var(--spacing-xs); padding: var(--spacing-md) var(--spacing-lg);
-  border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-bg-surface);
 }
 .admin-dashboard__tile dt { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
 .admin-dashboard__tile dd { margin: 0; }
 .admin-dashboard__value { color: var(--color-text-primary); font-size: var(--font-size-2xl); font-weight: var(--font-weight-semibold); font-variant-numeric: tabular-nums; }
 .admin-dashboard__detail, .admin-dashboard__muted { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
 .admin-dashboard__lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-md); }
-.admin-dashboard__card { padding: var(--spacing-lg); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-surface-default); }
+.admin-dashboard__card { padding: var(--spacing-lg); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-bg-surface); }
 .admin-dashboard__list { display: flex; flex-direction: column; gap: var(--spacing-sm); margin: 0; padding-left: var(--spacing-lg); }
 .admin-dashboard__list li { display: flex; flex-direction: column; gap: 2px; overflow-wrap: anywhere; }
 ul.admin-dashboard__list { padding-left: 0; list-style: none; }

@@ -53,5 +53,5 @@ function submit() {
 .story-from-period__heading { margin: 0; color: var(--color-text-secondary); }
 .story-from-period__summary ul { margin: 0; padding-left: var(--spacing-lg); color: var(--color-text-primary); }
 .story-from-period__hint { margin: var(--spacing-xs) 0 0; color: var(--color-text-secondary); }
-.story-from-period__error { margin: 0; color: var(--color-status-error-foreground); font-size: var(--font-size-sm); }
+.story-from-period__error { margin: 0; color: var(--color-feedback-error-fg); font-size: var(--font-size-sm); }
 </style>

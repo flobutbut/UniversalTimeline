@@ -31,8 +31,8 @@ defineProps<{ menuLabel: string; items: SidebarItem[]; active: string }>();
   display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-md); color: var(--color-text-secondary); font-size: var(--font-size-sm); text-decoration: none;
 }
-.sidebar-layout__link:hover { background: var(--color-interaction-hover); color: var(--color-text-primary); }
-.sidebar-layout__link--active { background: var(--color-surface-default); color: var(--color-text-link); font-weight: var(--font-weight-semibold); }
+.sidebar-layout__link:hover { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); color: var(--color-text-primary); }
+.sidebar-layout__link--active { background: var(--color-bg-surface); color: var(--color-text-link); font-weight: var(--font-weight-semibold); }
 .sidebar-layout__main { display: flex; flex-direction: column; gap: var(--spacing-lg); min-width: 0; max-width: 720px; }
 @media (max-width: 720px) {
   .sidebar-layout { grid-template-columns: minmax(0, 1fr); gap: var(--spacing-lg); padding: var(--spacing-lg) var(--spacing-md); }

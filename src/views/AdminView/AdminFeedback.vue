@@ -149,7 +149,7 @@ watch([filter, subjectFilter], () => { offset.value = 0; void load(); });
 .admin-feedback__header p, .admin-feedback__muted { color: var(--color-text-secondary); font: var(--type-meta); }
 .admin-feedback__filters { display: flex; align-items: flex-end; flex-wrap: wrap; gap: var(--spacing-md); }
 .admin-feedback__filters > :deep(.base-select) { flex: 1 1 180px; min-width: 0; }
-.admin-feedback__card { display: flex; flex-direction: column; gap: var(--spacing-md); padding: var(--spacing-lg); border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-surface-default); }
+.admin-feedback__card { display: flex; flex-direction: column; gap: var(--spacing-md); padding: var(--spacing-lg); border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-surface); }
 .admin-feedback__message { white-space: pre-wrap; overflow-wrap: anywhere; }
 .admin-feedback__page { overflow-wrap: anywhere; font: var(--type-meta); }
 .admin-feedback__actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-sm); }

@@ -11,25 +11,25 @@
   /* Hauteur portée par le token, comme Input et Button : pas de padding vertical qui s'ajouterait à l'interligne. */
   min-height: var(--field-height-lg);
   padding: 0 var(--spacing-lg);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
-  background-color: var(--color-surface-default);
+  background-color: var(--color-bg-app);
   cursor: pointer;
   transition: all var(--transition-fast);
   outline: none;
 }
 
 .base-select__trigger:hover:not(.base-select__trigger--disabled) {
-  border-color: var(--color-border-dark);
+  border-color: var(--color-border-strong);
 }
 
 .base-select__trigger:focus-visible,
 .base-select__trigger:has(:focus-visible) {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-light);
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 2px var(--color-interactive-selected);
 }
 
-.base-select__trigger:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.base-select__trigger:focus-visible { outline: 2px solid var(--color-accent-default); outline-offset: 2px; }
 
 .base-select--sm .base-select__trigger {
   min-height: var(--field-height-md);
@@ -41,7 +41,7 @@
 }
 
 .base-select__trigger--disabled {
-  background-color: var(--color-interaction-hover);
+  border-color: var(--color-border-default);
   cursor: not-allowed;
   opacity: 0.7;
 }
@@ -123,16 +123,16 @@
 }
 
 .base-select--error .base-select__trigger {
-  border-color: var(--color-status-error-foreground);
+  border-color: var(--color-feedback-error-fg);
 }
 
 .base-select--error .base-select__trigger:focus-visible,
 .base-select--error .base-select__trigger:has(:focus-visible) {
-  box-shadow: 0 0 0 2px var(--color-status-error-background);
+  box-shadow: 0 0 0 2px var(--color-feedback-error-bg);
 }
 
 /* Anneau optionnel quand le panneau est ouvert (sans focus). */
 .base-select--trigger-open-ring.base-select--open:not(.base-select--error) .base-select__trigger {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-light);
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 2px var(--color-interactive-selected);
 }

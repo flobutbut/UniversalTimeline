@@ -25,9 +25,9 @@ defineProps<{ story: ChildStorySummary; summary?: StorySummary; disabled?: boole
 defineEmits<{ remove: []; move: []; display: []; explore: [] }>();
 </script>
 <style scoped>
-.anchored-story-row { display: flex; align-items: center; padding: var(--spacing-sm) var(--spacing-md); background: var(--color-surface-default); color: var(--color-status-success-foreground); border-bottom: 1px solid var(--color-border-light); }
-.anchored-story-row:hover { background: var(--color-interaction-hover); }
-.anchored-story-row--selected, .anchored-story-row--selected:hover { background: var(--color-interaction-selected); }
+.anchored-story-row { display: flex; align-items: center; padding: var(--spacing-sm) var(--spacing-md); background: var(--color-bg-surface); color: var(--color-feedback-success-fg); border-bottom: 1px solid var(--color-border-subtle); }
+.anchored-story-row:hover { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); }
+.anchored-story-row--selected, .anchored-story-row--selected:hover { background: var(--color-interactive-selected); }
 .anchored-story-row__link { padding: 0; border: 0; background: none; text-align: left; font: inherit; cursor: pointer; display: flex; flex: 1; min-width: 0; flex-direction: column; color: inherit; line-height: var(--line-height-small); }
 .anchored-story-row__title { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .anchored-story-row__meta { font-size: var(--font-size-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -1,7 +1,7 @@
 /* Présentation commune des listes et recherches de SelectShell. */
 .base-select__search-wrapper {
   padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .base-select__search {
@@ -10,17 +10,17 @@
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-sm);
-  background-color: var(--color-surface-default);
+  background-color: var(--color-bg-surface);
   color: var(--color-text-primary);
 }
 
 .base-select__search:focus {
   outline: none;
   border-color: var(--color-text-on-selected);
-  box-shadow: 0 0 0 2px var(--color-primary-light);
+  box-shadow: 0 0 0 2px var(--color-interactive-selected);
 }
 
-.base-select__search:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.base-select__search:focus-visible { outline: 2px solid var(--color-accent-default); outline-offset: -2px; }
 
 .base-select--compact .base-select__option {
   padding: var(--spacing-sm) var(--spacing-md);
@@ -58,7 +58,7 @@
 }
 
 .base-select__option:hover {
-  background-color: var(--color-interaction-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
 }
 
 .base-select__option--disabled {
@@ -67,18 +67,18 @@
 }
 
 .base-select__option--highlighted {
-  background-color: var(--color-interaction-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
   color: var(--color-text-primary);
 }
 
 .base-select__option--selected {
-  background: var(--color-interaction-selected);
+  background: var(--color-interactive-selected);
   color: var(--color-text-on-selected);
   font-weight: var(--font-weight-medium);
 }
 
 .base-select__option--selected:hover {
-  background: var(--color-interaction-selected);
+  background: var(--color-interactive-selected);
 }
 
 .base-select__option-text {
@@ -109,7 +109,7 @@
 }
 
 .base-select__options::-webkit-scrollbar-track {
-  background: var(--color-interaction-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
   border-radius: var(--radius-sm);
 }
 
@@ -119,5 +119,5 @@
 }
 
 .base-select__options::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-dark);
+  background: var(--color-border-strong);
 }

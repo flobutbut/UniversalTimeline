@@ -175,7 +175,7 @@ const handleClick = () => {
 
 .main-container {
   position: relative;
-  background: var(--color-surface-raised);
+  background: var(--color-bg-surface);
   border: none;
   border-radius: var(--radius-sm);
   padding: var(--spacing-xs) var(--spacing-sm);
@@ -268,7 +268,7 @@ const handleClick = () => {
 }
 
 .period-card--timeline:hover .main-container {
-  background: var(--color-surface-raised-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
   box-shadow: var(--shadow-md);
 }
 
@@ -279,7 +279,7 @@ const handleClick = () => {
 .period-card--parent:hover .main-container,
 .period-card--parent:focus-within .main-container {
   transform: translateY(-2px);
-  background: var(--color-surface-raised-hover);
+  background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover));
   box-shadow: var(--shadow-md);
 }
 @media (prefers-reduced-motion: reduce) {
@@ -288,7 +288,7 @@ const handleClick = () => {
 }
 
 .period-card.selected .main-container {
-  background: var(--color-interaction-selected);
+  background: var(--color-interactive-selected);
   box-shadow: var(--shadow-md);
   color: var(--color-text-on-selected);
 }
@@ -364,7 +364,7 @@ const handleClick = () => {
 .loading-overlay {
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--color-surface-raised) 88%, transparent);
+  background: color-mix(in srgb, var(--color-bg-surface) 88%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -389,5 +389,5 @@ const handleClick = () => {
 .period-card--compact :deep(.associated-stories__badge) { min-height: var(--line-height-body); padding: 0 var(--spacing-xs) 0 var(--spacing-sm); gap: var(--spacing-xs); border-radius: var(--radius-sm); }
 .period-card--compact :deep(.associated-stories__arrow) { width: 14px; height: 14px; }
 .period-card--compact .period-card__actions { gap: var(--spacing-xs); }
-.period-card--child .main-container { border-left: 2px solid var(--color-border-dark); padding-left: var(--spacing-lg); }
+.period-card--child .main-container { border-left: 2px solid var(--color-border-strong); padding-left: var(--spacing-lg); }
 </style>

@@ -75,5 +75,5 @@ watch([suggestedId, parent, loading, loadError], () => {
 .story-placement { display: flex; flex-direction: column; gap: var(--spacing-sm); }
 .story-placement__dates { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--spacing-sm); }
 .story-placement__hint { margin: 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
-.story-placement__error { margin: 0; color: var(--color-status-error-foreground); font-size: var(--font-size-sm); }
+.story-placement__error { margin: 0; color: var(--color-feedback-error-fg); font-size: var(--font-size-sm); }
 </style>

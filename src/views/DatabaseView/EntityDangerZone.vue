@@ -14,8 +14,8 @@ defineProps<{ description: string; busy?: boolean }>();
 const emit = defineEmits<{ remove: [] }>();
 </script>
 <style scoped>
-.entity-danger-zone.entity-danger-zone { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-sm); padding: var(--spacing-lg); border: 1px solid var(--color-status-error-foreground); border-radius: var(--radius-md); }
+.entity-danger-zone.entity-danger-zone { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-sm); padding: var(--spacing-lg); border: 1px solid var(--color-feedback-error-fg); border-radius: var(--radius-md); }
 .entity-danger-zone__heading { display: flex; flex-direction: column; gap: 0; }
-.entity-danger-zone .entity-danger-zone__title { margin: 0; padding: 0; color: var(--color-status-error-foreground); font: var(--type-label); }
+.entity-danger-zone .entity-danger-zone__title { margin: 0; padding: 0; color: var(--color-feedback-error-fg); font: var(--type-label); }
 .entity-danger-zone .entity-danger-zone__description { margin: 0; padding: 0; color: var(--color-text-secondary); font: var(--type-meta); }
 </style>

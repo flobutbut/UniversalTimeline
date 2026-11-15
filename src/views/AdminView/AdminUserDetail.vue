@@ -170,11 +170,11 @@ function sendReset() {
 .admin-user__header > div { display: flex; flex-direction: column; gap: var(--spacing-xs); min-width: 0; overflow-wrap: anywhere; }
 .admin-user__header p { margin: 0; }
 .admin-user__muted { color: var(--color-text-secondary); font-size: var(--font-size-sm); margin: 0; }
-.admin-user__error { margin: 0; color: var(--color-status-error-foreground); }
+.admin-user__error { margin: 0; color: var(--color-feedback-error-fg); }
 .admin-user__tags, .admin-user__story-title { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); }
 .admin-user__card {
   display: flex; flex-direction: column; gap: var(--spacing-md); margin: 0; padding: var(--spacing-lg);
-  border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-surface-default);
+  border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-bg-surface);
 }
 .admin-user__facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--spacing-sm) var(--spacing-lg); }
 .admin-user__facts dt { color: var(--color-text-secondary); }

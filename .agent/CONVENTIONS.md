@@ -74,7 +74,7 @@ Règle : tous les composants d'une même barre (toolbar, FilterBar) utilisent le
 ## Design system
 
 - Un vocabulaire unique : `--color-text-primary`, `--color-text-secondary`, `--color-text-heading`, `--color-text-link`, `--color-text-on-accent` et `--color-text-on-selected`. Les anciens alias de texte et de surfaces ont été migrés et retirés.
-- Sélection : toujours le couple `--color-interaction-selected` / `--color-text-on-selected`, y compris dates, actions et chevrons.
+- Sélection : toujours le couple `--color-interactive-selected` / `--color-text-on-selected`, y compris dates, actions et chevrons.
 - `--color-data-*` est réservé aux visualisations ; le texte utilise un rôle de texte contrasté.
 - Surfaces : `background-default` pour l'application, `surface-default` pour chrome/champs, `surface-raised` pour cartes et popovers, `surface-subtle` pour les regroupements.
 - Typographie : privilégier les styles complets `--type-body`, `--type-compact`, `--type-label`, `--type-meta`, `--type-micro`, `--type-panel-title`, `--type-action`. Une seule définition globale du corps. Les grandes tailles fluides des compositions éditoriales et la géométrie des visualisations restent des exceptions explicites.

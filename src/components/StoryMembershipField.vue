@@ -81,7 +81,7 @@ function add() {
 }
 .story-membership__title { margin: 0; font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
 .story-membership__hint { margin: 0; font-size: var(--font-size-xs); color: var(--color-text-secondary); }
-.story-membership__error { margin: 0; font-size: var(--font-size-xs); color: var(--color-status-error-foreground); }
+.story-membership__error { margin: 0; font-size: var(--font-size-xs); color: var(--color-feedback-error-fg); }
 .story-membership__list { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); margin: 0; padding: 0; list-style: none; }
 
 

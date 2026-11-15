@@ -60,6 +60,6 @@ function submit() {
 
 <style scoped>
 .parent-picker__hint { color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: var(--line-height-body); }
-.parent-picker__error { color: var(--color-status-error-foreground); }
+.parent-picker__error { color: var(--color-feedback-error-fg); }
 .parent-picker__error button { margin-left: var(--spacing-sm); }
 </style>

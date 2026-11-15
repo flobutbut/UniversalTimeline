@@ -64,7 +64,7 @@ Les détails des événements conservent le comportement CSS existant de `EventC
 
 ## Correction visuelle réalisée
 
-Le conteneur `.home-view__viewport` utilise désormais `--color-surface-default` en permanence. Chaque frise conserve `--color-background-default`, plus clair en mode sombre ; la frise sélectionnée reçoit la teinte bleue de `--timeline-panel-background`, également utilisée par sa grille. L’espace entre frises utilise `--spacing-xs` (4 px), laissant apparaître le fond du conteneur. Le token spécifique `--color-timeline-separator`, qui imposait le même noir dans les deux thèmes, est supprimé.
+Le conteneur `.home-view__viewport` utilise désormais `--color-bg-surface` en permanence. Chaque frise conserve `--color-background-default`, plus clair en mode sombre ; la frise sélectionnée reçoit la teinte bleue de `--timeline-panel-background`, également utilisée par sa grille. L’espace entre frises utilise `--spacing-xs` (4 px), laissant apparaître le fond du conteneur. Le token spécifique `--color-timeline-separator`, qui imposait le même noir dans les deux thèmes, est supprimé.
 
 Les tests de comparaison couvrent trois frises, l’ajout successif, le repli de la meneuse et de tous les panneaux, le déplacement de la principale, les retours navigateur, les doublons et les erreurs de lecture. Des tests dédiés vérifient les liens entre événements et la conservation des filtres lors d’un transfert de l’échelle. `yarn verify:design` contrôle les références CSS et les 62 couples de contraste du design system.
 
