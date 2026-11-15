@@ -206,6 +206,8 @@ const props = withDefaults(defineProps<{
   minimized?: boolean;
   /** Vue seule : cadrer la ligne de temps au milieu de ce viewport, indépendamment des cartes. */
   axisViewport?: HTMLElement | null;
+  /** Vue seule : section à garder dans le viewport sous la grille. */
+  axisReserveBelow?: HTMLElement | null;
   /** Masque la borne « Fin : … » : une frise qui suit l’échelle d’une autre n’a pas de fin de vue à annoncer. */
   hideEndBound?: boolean;
   /** Agrandissement survolé dans une autre frise sur la même échelle (voir `getFocus`). */
@@ -263,9 +265,9 @@ const timelineLineRef = ref<HTMLElement | null>(null);
 const undatedPeriodsRef = ref<HTMLElement | null>(null);
 const eventsSurfaceRef = ref<HTMLElement | null>(null);
 const axisCenterStyle = useTimelineAxisCenter({
-  viewport: () => props.axisViewport ?? null, grid: gridRoot, axis: timelineLineRef, ready: () => active.value && !props.loading,
+  viewport: () => props.axisViewport ?? null, grid: gridRoot, axis: timelineLineRef, reserveBelow: () => props.axisReserveBelow ?? null, ready: () => active.value && !props.loading,
   resetOn: [() => props.currentStoryId, () => props.currentPeriod, () => props.periods, () => props.linkedPeriods,
-    () => props.childPeriods, () => props.childLinkedPeriods, () => props.showChildren, () => props.events, () => props.overviewPeriod],
+    () => props.childPeriods, () => props.childLinkedPeriods, () => props.showChildren, () => props.events, () => props.overviewPeriod, () => props.axisReserveBelow],
 });
 defineExpose({
   getSlideLayers: () => [periodSurfaceRef.value, timelineLineRef.value, undatedPeriodsRef.value, eventsSurfaceRef.value]

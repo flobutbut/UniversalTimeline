@@ -68,7 +68,7 @@
               :disabled="lane.loading.value" @update:model-value="value => typeof value === 'string' && selectContext(lane, value)" />
             <PeriodGrid v-if="!(lane === primaryLane && routeError) && !lane.error.value"
               :ref="el => workspace.setGrid(lane.key, el)" :key="lane.grid.value.currentStoryId" class="home-view__timeline" v-bind="lane.grid.value"
-              :show-children="!comparing && showPeriodChildren" :compact="comparing" :minimized="comparing && lane.collapsed.value" :axis-viewport="!comparing ? timelineViewport : null" :external-focus="sharedFocus"
+              :show-children="!comparing && showPeriodChildren" :compact="comparing" :minimized="comparing && lane.collapsed.value" :axis-viewport="!comparing ? timelineViewport : null" :axis-reserve-below="!comparing ? timelineAdd : null" :external-focus="sharedFocus"
               :load-story-details="dataStore.ensureStoryLoaded" period-tooltips natural-height
               @period-click="lane.actions.periodClick" @event-click="event => lane === primaryLane ? onEventClick(event) : lane.nav.handleEventClick(event)"
               @go-back="lane.actions.goBack" @navigate-period="lane.actions.navigatePeriod" @story-select="lane.actions.storySelect" :comparison="storyComparison" @story-compare="id => addComparedStory(id, lane)">
@@ -88,21 +88,20 @@
         <FeedbackState v-if="!panels.length" :kind="emptyLoading ? 'loading' : emptyError ? 'error' : 'empty'"
           :message="uiText(emptyLoading ? 'Chargement des frises…' : emptyError || 'Aucune frise affichée. Ajoutez une frise pour commencer.')"
           :retryable="!!emptyError" @retry="loadEmptyCatalogue" />
+        <section v-if="!routeError" ref="timelineAdd" class="home-view__add" :aria-label="uiText('Ajouter une frise')">
+          <button v-if="!pickingStory" type="button" class="home-view__add-trigger" :disabled="loading || slidePhase !== 'idle' || !comparisonOptions.length" @click="pickingStory = true">
+            <Icon icon="mdi:plus" aria-hidden="true" />{{ uiText("Ajouter une frise") }}
+          </button>
+          <template v-else>
+            <Select class="home-view__story-picker" compact :disabled="loading || slidePhase !== 'idle'" :model-value="null" :placeholder="uiText('Choisir la frise à comparer')" :options="comparisonOptions"
+              dropdown-class="base-select__dropdown--above" @update:model-value="value => typeof value === 'string' && addComparedStory(value)" />
+            <Button variant="ghost" size="sm" @click="pickingStory = false">{{ uiText("Annuler") }}</Button>
+          </template>
+        </section>
         <svg v-if="comparing && slidePhase === 'idle'" class="home-view__links" aria-hidden="true">
           <line v-for="link in comparisonLinkLines" :key="link.key" :class="{ 'is-active': link.id === activeComparisonEventId }"
             :x1="link.x" :x2="link.x" :y1="link.y1" :y2="link.y2" />
         </svg>
-      </div>
-    </div>
-    <div v-if="!routeError" ref="timelineAdd" class="home-view__add" :class="{ 'home-view__add--picking': pickingStory }">
-      <div class="home-view__add-surface">
-        <Button v-if="!pickingStory" variant="secondary" size="sm" :disabled="loading || slidePhase !== 'idle' || !comparisonOptions.length" @click="pickingStory = true">
-          <template #icon><Icon icon="mdi:plus" aria-hidden="true" /></template>{{ uiText("Ajouter une frise") }} </Button>
-        <template v-else>
-          <Select class="home-view__story-picker" compact :disabled="loading || slidePhase !== 'idle'" :model-value="null" :placeholder="uiText('Choisir la frise à comparer')" :options="comparisonOptions"
-            dropdown-class="base-select__dropdown--above" @update:model-value="value => typeof value === 'string' && addComparedStory(value)" />
-          <Button variant="ghost" size="sm" @click="pickingStory = false">{{ uiText("Annuler") }}</Button>
-        </template>
       </div>
     </div>
     <span class="sr-only" role="status" aria-live="polite">{{ panelAnnouncement }}</span>
@@ -545,11 +544,14 @@ onActivated(() => {
 .home-view__panel-content { display: flex; flex-direction: column; flex: 1 0 auto; }
 .home-view__error { padding: var(--spacing-sm) var(--spacing-md); }
 .home-view__timeline { flex: 1 0 auto; height: auto; }
-/* Au-dessus des légendes au repos, sous les détails actifs ; les menus restent dans leur couche globale. */
-.home-view__add { position: absolute; inset-inline: 0; bottom: var(--spacing-md); display: flex; justify-content: center; padding-inline: var(--spacing-md); pointer-events: none; z-index: var(--z-index-timeline-item); }
-/* Le sélecteur actif et sa liste retrouvent la couche des menus. */
-.home-view__add--picking { z-index: var(--z-index-dropdown); }
-.home-view__add-surface { display: flex; align-items: center; gap: var(--spacing-sm); max-width: 100%; padding: var(--spacing-xs); border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-raised); box-shadow: var(--shadow-lg); pointer-events: auto; }
+/* Dernière section de la pile : même fond que les frises, dans le flux. */
+.home-view__add { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; gap: var(--spacing-sm); min-height: var(--field-height-lg); padding: var(--spacing-sm) var(--spacing-md); background: var(--color-bg-app); }
+/* La section entière est le bouton : seul le sélecteur, une fois ouvert, reprend une mise en page de formulaire. */
+.home-view__add:has(> .home-view__add-trigger) { padding: 0; }
+.home-view__add-trigger { flex: 1; align-self: stretch; display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); min-height: var(--field-height-lg); border: 0; background: transparent; color: var(--color-text-secondary); font: var(--type-action); cursor: pointer; transition: color var(--transition-fast); }
+.home-view__add-trigger:hover:not(:disabled) { background-image: linear-gradient(var(--color-interactive-hover), var(--color-interactive-hover)); color: var(--color-text-primary); }
+.home-view__add-trigger:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: -2px; }
+.home-view__add-trigger:disabled { color: var(--color-text-disabled); cursor: not-allowed; }
 .home-view__story-picker { width: min(360px, 60vw); min-width: 0; }
 .home-view__links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
 /* Traits discrets ; celui de l’événement survolé ressort. */
