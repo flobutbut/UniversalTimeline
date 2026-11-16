@@ -88,6 +88,7 @@
         <FeedbackState v-if="!panels.length" :kind="emptyLoading ? 'loading' : emptyError ? 'error' : 'empty'"
           :message="uiText(emptyLoading ? 'Chargement des frises…' : emptyError || 'Aucune frise affichée. Ajoutez une frise pour commencer.')"
           :retryable="!!emptyError" @retry="loadEmptyCatalogue" />
+        <div v-if="comparing" class="home-view__stack-fill" aria-hidden="true" />
         <section v-if="!routeError" ref="timelineAdd" class="home-view__add" :aria-label="uiText('Ajouter une frise')">
           <button v-if="!pickingStory" type="button" class="home-view__add-trigger" :disabled="loading || slidePhase !== 'idle' || !comparisonOptions.length" @click="pickingStory = true">
             <Icon icon="mdi:plus" aria-hidden="true" />{{ uiText("Ajouter une frise") }}
@@ -312,6 +313,8 @@ async function movePanel(panel: ComparisonPanel, direction: number) {
   const index = panels.value.indexOf(panel) + direction;
   if (!workspace.move(panel.key, index)) return;
   slide.cancel();
+  // Placée volontairement en tête, la frise devient la référence de la fenêtre, au niveau qu’elle montrait.
+  if (index === 0 && !panel.leads.value) panel.leadAt(panel.ancestors.value[panel.ancestors.value.length - 1]);
   replaceComparison();
   panelAnnouncement.value = uiFormat`${panel.title.value} déplacée en position ${index + 1} sur ${panels.value.length}.`;
   await nextTick();
@@ -531,6 +534,10 @@ onActivated(() => {
 .home-view__viewport:not(.home-view__viewport--comparing) .home-view__header { position: sticky; top: 0; z-index: var(--z-index-sticky); background: var(--color-bg-app); }
 .home-view__frise { flex: 1 0 auto; min-height: 240px; display: flex; flex-direction: column; position: relative; background: var(--timeline-panel-background, var(--color-bg-app)); }
 .home-view__viewport .home-view__frise--collapsed { flex: 0 0 auto; min-height: 0; }
+/* Comparaison : chaque frise garde sa hauteur naturelle ; la place restante reste sous la pile, pas au-dessus des axes. */
+.home-view__viewport--comparing .home-view__frise { flex: 0 0 auto; }
+/* La place restante prend le fond des frises, entre la dernière frise et l’ajout. */
+.home-view__stack-fill { flex: 1 0 0; background: var(--color-bg-app); }
 .home-view__frise--active {
   --timeline-panel-background: var(--color-bg-sunken);
 }
