@@ -229,6 +229,19 @@ it('cancels a drag without changing the order and supports the mobile move butto
   expect(router.currentRoute.value.query.compare).toEqual(['3', '2']);
 });
 
+it('makes a frise intentionally moved to the top the reference of the common frame, without moving on period clicks', async () => {
+  await open('/timeline?story=1&compare=2&compare=3');
+  await view.get('[aria-label="Monter Frise 3"]').trigger('click'); await settle();
+  expect(sectionFor('1').attributes('data-leading')).toBe('true');
+  await view.get('[aria-label="Monter Frise 3"]').trigger('click'); await settle();
+  expect(storyOrder()).toEqual(['3', '1', '2']);
+  expect(sectionFor('3').attributes('data-leading')).toBe('true');
+  expect(sectionFor('1').getComponent(PeriodGrid).props('scaleFrame')).toEqual(sectionFor('3').getComponent(PeriodGrid).vm.getScaleFrame());
+  await sectionFor('1').get('[data-period-id]').trigger('click'); await settle();
+  expect(storyOrder()).toEqual(['3', '1', '2']);
+  expect(sectionFor('1').attributes('data-leading')).toBe('true');
+});
+
 it('lets the third frise lead in place, keeps that navigation on collapse, and restores the primary on removal', async () => {
   await open('/timeline?story=1&compare=2&compare=3');
   await sectionFor('3').get('[data-period-id="modern"]').trigger('click'); await settle();
